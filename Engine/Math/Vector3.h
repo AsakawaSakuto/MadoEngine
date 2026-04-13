@@ -74,7 +74,7 @@ struct Vector3 {
     /// @param a ベクトル
     /// @param b ベクトル
     /// @return ベクトルaとbの内積
-    static constexpr float Dot(const Vector3& a, const Vector3& b) noexcept {
+    constexpr float Dot(const Vector3& a, const Vector3& b) noexcept {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
 
@@ -82,7 +82,7 @@ struct Vector3 {
     /// @param a ベクトル
     /// @param b ベクトル
     /// @return ベクトルaとbの外積
-    static constexpr Vector3 Cross(const Vector3& a, const Vector3& b) noexcept {
+    constexpr Vector3 Cross(const Vector3& a, const Vector3& b) noexcept {
         return {
             a.y * b.z - a.z * b.y,
             a.z * b.x - a.x * b.z,

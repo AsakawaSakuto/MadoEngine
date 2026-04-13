@@ -62,11 +62,11 @@ struct Vector2 {
 	/// @param a ベクトル
 	/// @param b ベクトル
 	/// @return ベクトルaとbの内積
-    static constexpr float Dot(const Vector2& a, const Vector2& b) noexcept { return a.x * b.x + a.y * b.y; }
+    constexpr float Dot(const Vector2& a, const Vector2& b) noexcept { return a.x * b.x + a.y * b.y; }
 
 	/// @brief ベクトルaとbの外積を返す
 	/// @param a ベクトル
 	/// @param b ベクトル
 	/// @return ベクトルaとbの外積
-    static constexpr float Cross(const Vector2& a, const Vector2& b) noexcept { return a.x * b.y - a.y * b.x; }
+    constexpr float Cross(const Vector2& a, const Vector2& b) noexcept { return a.x * b.y - a.y * b.x; }
 };

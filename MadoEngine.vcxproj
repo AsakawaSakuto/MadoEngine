@@ -83,9 +83,14 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
+    <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\MathHeaders.h" />
+    <ClInclude Include="Engine\Math\Function\MathFunction.h" />
+    <ClInclude Include="Engine\Math\Function\MatrixFunction.h" />
     <ClInclude Include="Engine\Math\Matrix2x2.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
