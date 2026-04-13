@@ -121,4 +121,35 @@ namespace Math {
         return Multiply(v2, dot / v2SqLength);
     }
 
+    // 線形補間
+    Vector2 Lerp(const Vector2& v1, const Vector2& v2, float t) {
+        return Add(Multiply(v1, 1.0f - t), Multiply(v2, t));
+    }
+    Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t) {
+        return Add(Multiply(v1, 1.0f - t), Multiply(v2, t));
+    }
+    Vector4 Lerp(const Vector4& v1, const Vector4& v2, float t) {
+        return Add(Multiply(v1, 1.0f - t), Multiply(v2, t));
+    }
+
+    // 球面線形補間
+    Vector2 Slerp(const Vector2& v1, const Vector2& v2, float t) {
+        const float dot = std::clamp(Dot(v1, v2), -1.0f, 1.0f);
+        const float theta = std::acos(dot) * t;
+        const Vector2 relative = Normalize(Subtract(v2, Multiply(v1, dot)));
+        return Add(Multiply(v1, std::cos(theta)), Multiply(relative, std::sin(theta)));
+    }
+    Vector3 Slerp(const Vector3& v1, const Vector3& v2, float t) {
+        const float dot = std::clamp(Dot(v1, v2), -1.0f, 1.0f);
+        const float theta = std::acos(dot) * t;
+        const Vector3 relative = Normalize(Subtract(v2, Multiply(v1, dot)));
+        return Add(Multiply(v1, std::cos(theta)), Multiply(relative, std::sin(theta)));
+    }
+    Vector4 Slerp(const Vector4& v1, const Vector4& v2, float t) {
+        const float dot = std::clamp(Dot(v1, v2), -1.0f, 1.0f);
+        const float theta = std::acos(dot) * t;
+        const Vector4 relative = Normalize(Subtract(v2, Multiply(v1, dot)));
+        return Add(Multiply(v1, std::cos(theta)), Multiply(relative, std::sin(theta)));
+    }
+
 }

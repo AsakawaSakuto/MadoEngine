@@ -85,6 +85,8 @@
   <ItemGroup>
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
+    <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
+    <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -94,9 +96,13 @@
     <ClInclude Include="Engine\Math\Matrix2x2.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
+    <ClInclude Include="Engine\Math\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\Math\Vector4.h" />
+    <ClInclude Include="Engine\Utility\Easing\EaseType.h" />
+    <ClInclude Include="Engine\Utility\Easing\Easing.h" />
+    <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

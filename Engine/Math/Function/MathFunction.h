@@ -51,4 +51,14 @@ namespace Math {
 	Vector3 Project(const Vector3& v1, const Vector3& v2);
 	Vector4 Project(const Vector4& v1, const Vector4& v2);
 
+	// 線形補間
+	Vector2 Lerp(const Vector2& v1, const Vector2& v2, float t);
+	Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
+	Vector4 Lerp(const Vector4& v1, const Vector4& v2, float t);
+
+	// 球面線形補間
+	Vector2 Slerp(const Vector2& v1, const Vector2& v2, float t);
+	Vector3 Slerp(const Vector3& v1, const Vector3& v2, float t);
+	Vector4 Slerp(const Vector4& v1, const Vector4& v2, float t);
+
 }
