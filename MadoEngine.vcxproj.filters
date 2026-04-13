@@ -62,7 +62,7 @@
     <ClInclude Include="Engine\Math\Function\MathFunction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Math\Transform.h">
+    <ClInclude Include="Engine\Utility\Transform.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h">
@@ -72,6 +72,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Easing\EaseType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\UtilityHeaders.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

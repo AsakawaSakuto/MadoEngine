@@ -96,7 +96,8 @@
     <ClInclude Include="Engine\Math\Matrix2x2.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
-    <ClInclude Include="Engine\Math\Transform.h" />
+    <ClInclude Include="Engine\UtilityHeaders.h" />
+    <ClInclude Include="Engine\Utility\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\Math\Vector4.h" />
