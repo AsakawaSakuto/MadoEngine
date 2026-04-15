@@ -84,20 +84,28 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Input\Device\Controller.cpp" />
+    <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
+    <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
+    <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Utility\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Input\Device\Controller.h" />
+    <ClInclude Include="Engine\Input\Device\Keybord.h" />
+    <ClInclude Include="Engine\Input\InputManager.h" />
     <ClInclude Include="Engine\MathHeaders.h" />
     <ClInclude Include="Engine\Math\Function\MathFunction.h" />
     <ClInclude Include="Engine\Math\Function\MatrixFunction.h" />
     <ClInclude Include="Engine\Math\Matrix2x2.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
+    <ClInclude Include="Engine\Render\Screen\WindowsAPI.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
     <ClInclude Include="Engine\Utility\Collider\Collider.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h" />
