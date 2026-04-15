@@ -62,7 +62,8 @@ private:
 /// 
 /// アプリケーション全体で共有されるスレッドローカルなRandomインスタンスを使用した
 /// 簡易的な乱数生成機能を提供する。各スレッドごとに独立した乱数列を生成する。
-namespace MyRand {
+namespace Rand {
+
     /// @brief スレッドローカルなRandomインスタンスを取得
     /// 
     /// 各スレッドごとに独立したRandomインスタンスを返す。
@@ -91,7 +92,7 @@ namespace MyRand {
     /// @param min 乱数の最小値（この値を含む）
     /// @param max 乱数の最大値（この値を含む）
     /// @return int 生成された乱数値 [min, max]
-    inline int Int(int min, int max) {
+    inline int GetInt(int min, int max) {
         return GetInstance().Int(min, max);
     }
 
@@ -102,7 +103,7 @@ namespace MyRand {
     /// @param min 乱数の最小値（この値を含む）
     /// @param max 乱数の最大値（この値を含まない）
     /// @return float 生成された乱数値 [min, max)
-    inline float Float(float min, float max) {
+    inline float GetFloat(float min, float max) {
         return GetInstance().Float(min, max);
     }
 }
