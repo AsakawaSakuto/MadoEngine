@@ -54,6 +54,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Application;C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Engine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -85,6 +86,7 @@
   <ItemGroup>
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
+    <ClCompile Include="Engine\Utility\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -97,6 +99,16 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
+    <ClInclude Include="Engine\Utility\Collider\Collider.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\Circle.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\Line.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\OBB.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\OvalSphere.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\Plane.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
+    <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="Engine\Utility\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
