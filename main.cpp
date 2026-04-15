@@ -10,6 +10,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
     desc.title = "MadoEngine";
     desc.width = 1280;
     desc.height = 720;
+    desc.iconPath = "Assets/.EngineResource/icon.png";
 
     windowsAPI.Initialize(desc, hInstance);
 
