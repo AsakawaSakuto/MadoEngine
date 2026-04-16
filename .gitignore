@@ -16,3 +16,4 @@
 
 *.obj
 !resources/**/*.obj
+/Assets/.EngineResource/Log/2026-04-16_02 
