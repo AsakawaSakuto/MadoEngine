@@ -5,6 +5,8 @@
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
+    Logger::Initialize();
+
     MadoEngine::WindowsAPI windowsAPI;
 
     MadoEngine::WindowsAPI::WindowDesc desc;
@@ -24,6 +26,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
     while (windowsAPI.ProcessMessage()) {
         // ゲームの処理
     }
+
+    Logger::Finalize();
 
     return 0;
 }
