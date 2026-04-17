@@ -6,7 +6,7 @@ on:
    - master
 
 env:
- SOLUTION_FILE_PATH: project/MadoEngine.sln
+ SOLUTION_FILE_PATH: Project/MadoEngine.sln
  CONFIGURATION: Debug
 
 jobs:
