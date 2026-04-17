@@ -49,8 +49,14 @@ namespace {
     std::wstring Utf8ToWide(const std::string& utf8Str) {
         if (utf8Str.empty()) return L"";
         int size = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0);
-        std::wstring wideStr(size - 1, L'\0');
+        // std::wstring のコンストラクタは終端文字を自動で考慮するため、size そのままでOK
+        std::wstring wideStr(size, L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, &wideStr[0], size);
+
+        // 末尾に余計なヌル文字が入るのを防ぐためにリサイズ
+        if (!wideStr.empty() && wideStr.back() == L'\0') {
+            wideStr.pop_back();
+        }
         return wideStr;
     }
 
