@@ -6,7 +6,7 @@ on:
    - main
 
 env:
- SOLUTION_FILE_PATH: project/CG2.sln
+ SOLUTION_FILE_PATH: project/MadoEngine.sln
  CONFIGURATION: Debug
 
 jobs:
