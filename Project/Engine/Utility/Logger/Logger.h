@@ -37,5 +37,4 @@ namespace Logger {
 
 	/// @brief デバッグレベルのログを出力する関数
 	void Debug(const std::string& message, const std::source_location& location = std::source_location::current());
-
 }
