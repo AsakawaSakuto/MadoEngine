@@ -3,7 +3,7 @@ name: ReleaseBuild
 on:
  push:
   branches:
-   - main
+   - master
 
 env:
  SOLUTION_FILE_PATH: project/MadoEngine.sln
