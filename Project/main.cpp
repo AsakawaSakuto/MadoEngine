@@ -2,38 +2,44 @@
 #include "Engine/Render/Screen/WindowsAPI.h"
 #include "Engine/Core/DxDevice/DxDevice.h"
 #include "Engine/UtilityHeaders.h"
+#include "Engine/Audio/MyAudio.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
-    Logger::Initialize();
+	Logger::Initialize();
 
-    MadoEngine::WindowsAPI windowsAPI;
+	MadoEngine::WindowsAPI windowsAPI;
 
-    MadoEngine::WindowsAPI::WindowDesc desc;
-    desc.title = "MadoEngine";
-    desc.width = 1280;
-    desc.height = 720;
-    desc.iconPath = "Assets/.EngineResource/icon.png";
+	MadoEngine::WindowsAPI::WindowDesc desc;
+	desc.title = "MadoEngine";
+	desc.width = 1280;
+	desc.height = 720;
+	desc.iconPath = "Assets/.EngineResource/icon.png";
 
-    windowsAPI.Initialize(desc, hInstance);
+	windowsAPI.Initialize(desc, hInstance);
 
 	// ログのテスト
-    Logger::Info("情報メッセージ");
-    Logger::Warning("警告メッセージ");
-    Logger::Error("エラーメッセージ");
-    Logger::Debug("デバッグメッセージ");
+	Logger::Info("情報メッセージ");
+	Logger::Warning("警告メッセージ");
+	Logger::Error("エラーメッセージ");
+	Logger::Debug("デバッグメッセージ");
 
-    // DxDeviceの初期化
-    MadoEngine::DxDevice dxDevice;
-    dxDevice.Initialize();
+	// DxDeviceの初期化
+	MadoEngine::DxDevice dxDevice;
+	dxDevice.Initialize();
 
-    // メインループ
-    while (windowsAPI.ProcessMessage()) {
-        // ゲームの処理
-    }
+	// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
+	Audio::Initialize();
 
-    Logger::Finalize();
+	// メインループ
+	while (windowsAPI.ProcessMessage()) {
+		// ゲームの処理
+		Audio::Update();
+	}
 
-    return 0;
+	Audio::Finalize();
+	Logger::Finalize();
+
+	return 0;
 }
