@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Math/Vector3.h"
+#include "Math/Vector3.h"
 
 struct AABB {
 	Vector3 center = { 0.0f, 0.0f, 0.0f }; // 中心点

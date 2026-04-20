@@ -1,7 +1,7 @@
 #pragma once
-#include "../../../Math/Vector3.h"
-#include "../../../Math/Matrix4x4.h"
-#include "../../../Math/Function/MatrixFunction.h"
+#include "Math/Vector3.h"
+#include "Math/Matrix4x4.h"
+#include "Math/Function/MatrixFunction.h"
 
 // 楕円球体
 struct OvalSphere {

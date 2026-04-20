@@ -1,7 +1,7 @@
 #pragma once
-#include "../../../Math/Vector3.h"
-#include "../../../Math/Matrix4x4.h"
-#include "../../../Math/Function/MatrixFunction.h"
+#include "Math/Vector3.h"
+#include "Math/Matrix4x4.h"
+#include "Math/Function/MatrixFunction.h"
 
 struct OBB {
 	Vector3 center = { 0.0f, 0.0f, 0.0f }; // ワールド中心

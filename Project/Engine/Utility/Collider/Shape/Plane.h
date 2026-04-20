@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Math/Vector3.h"
+#include "Math/Vector3.h"
 
 // 平面を表す構造体
 struct Plane {

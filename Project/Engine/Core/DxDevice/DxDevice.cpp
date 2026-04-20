@@ -1,5 +1,5 @@
 #include "DxDevice.h"
-#include "../../Utility/Logger/Logger.h"
+#include "Utility/Logger/Logger.h"
 
 #include <cassert>
 #include <format>

@@ -6,9 +6,9 @@
 
 #include "EaseType.h"
 
-#include "../../Math/Vector2.h"
-#include "../../Math/Vector3.h"
-#include "../../Math/Vector4.h"
+#include "Math/Vector2.h"
+#include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 /// <summary>
 /// 汎用イージング関数群 float, Vector2, Vector3, Vector4 対応

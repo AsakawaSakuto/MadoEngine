@@ -77,7 +77,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Application;C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Application;C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Engine;$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Engine;$(ProjectDir)Application</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -97,6 +97,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>;$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Engine;$(ProjectDir)Application</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,6 +116,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>;$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Engine;$(ProjectDir)Application</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
