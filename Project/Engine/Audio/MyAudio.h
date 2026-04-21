@@ -6,16 +6,6 @@
 /// AudioManagerへの簡潔なアクセスを提供
 namespace Audio {
 
-	/// @brief 初期化（Assets/Audio内の全ファイルを自動ロード）
-	inline void Initialize() {
-		MadoEngine::AudioManager::GetInstance()->Initialize();
-	}
-
-	/// @brief 終了処理（全音声を停止して解放）
-	inline void Finalize() {
-		MadoEngine::AudioManager::GetInstance()->Finalize();
-	}
-
 	/// @brief 音声を再生
 	/// @param key ファイル名（拡張子なし）。例: "fire", "titleBGM"
 	/// @param loop ループ再生するか（デフォルト: false）
@@ -65,10 +55,5 @@ namespace Audio {
 	/// @return 読み込み済みならtrue
 	inline bool IsLoaded(const std::string& key) {
 		return MadoEngine::AudioManager::GetInstance()->IsLoaded(key);
-	}
-
-	/// @brief 毎フレーム更新（終了したインスタンスのクリーンアップ）
-	inline void Update() {
-		MadoEngine::AudioManager::GetInstance()->Update();
 	}
 }

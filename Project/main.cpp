@@ -3,6 +3,10 @@
 #include "Engine/Core/DxDevice/DxDevice.h"
 #include "Engine/UtilityHeaders.h"
 #include "Engine/Audio/MyAudio.h"
+#include "Engine/Audio/AudioManager.h"
+#include "Engine/Input/Device/Keybord.h"
+#include "Engine/Input/Device/Mouse.h"
+#include "Engine/Input/Device/GamePad.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -30,15 +34,27 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 	dxDevice.Initialize();
 
 	// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
-	Audio::Initialize();
+	MadoEngine::AudioManager::GetInstance()->Initialize();
+
+	MadoEngine::Keybord keybord;
+	MadoEngine::Mouse mouse;
+	MadoEngine::GamePad gamePad;
 
 	// メインループ
 	while (windowsAPI.ProcessMessage()) {
 		// ゲームの処理
-		Audio::Update();
+		MadoEngine::AudioManager::GetInstance()->Update();
+
+		keybord.Update();
+		mouse.Update(windowsAPI.GetHWnd());
+		gamePad.Update();
+
+		if (keybord.IsTrigger(DIK_SPACE) || mouse.IsTrigger(MOUSE_LEFT) || gamePad.IsTrigger(GAMEPAD_A)) {
+			Audio::Play("jump", false);
+		}
 	}
 
-	Audio::Finalize();
+	MadoEngine::AudioManager::GetInstance()->Finalize();
 	Logger::Finalize();
 
 	return 0;

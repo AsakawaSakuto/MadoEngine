@@ -1,5 +1,4 @@
 #include "AudioManager.h"
-#include "AudioManager.h"
 #include "Utility/Logger/Logger.h"
 #include <cassert>
 #include <algorithm>
@@ -47,8 +46,10 @@ namespace MadoEngine {
 	}
 
 	std::string AudioManager::MakeKey(const std::filesystem::path& filePath) const {
-		// ファイル名から拡張子を除いたものをキーとする
-		return filePath.stem().string();
+		// ファイル名から拡張子を除いて小文字に変換したものをキーとする
+		std::string key = filePath.stem().string();
+		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		return key;
 	}
 
 	void AudioManager::Finalize() {
@@ -77,22 +78,30 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::Play(const std::string& key, bool loop) {
-		auto it = audioMap_.find(key);
+		// キーを小文字に変換して検索
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+
+		auto it = audioMap_.find(lowerKey);
 		if (it == audioMap_.end()) {
 			Logger::Error("AudioManager : 音声の再生に失敗しました - キーが見つかりません: " + key);
 			assert(false && "Audio not loaded");
 			return;
 		}
 
-		float volume = volumeMap_[key] * masterVolume_;
-		Logger::Debug("AudioManager : 音声を再生します - キー: " + key + ", ループ: " + (loop ? "有効" : "無効") + ", 音量: " + std::to_string(volume));
+		float volume = volumeMap_[lowerKey] * masterVolume_;
+		Logger::Debug("AudioManager : 音声を再生します - キー: " + lowerKey + ", ループ: " + (loop ? "有効" : "無効") + ", 音量: " + std::to_string(volume));
 		it->second->PlayAudio(volume, loop);
 	}
 
 	void AudioManager::Stop(const std::string& key) {
-		auto it = audioMap_.find(key);
+		// キーを小文字に変換して検索
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+
+		auto it = audioMap_.find(lowerKey);
 		if (it != audioMap_.end() && it->second) {
-			Logger::Debug("AudioManager : 音声を停止します - キー: " + key);
+			Logger::Debug("AudioManager : 音声を停止します - キー: " + lowerKey);
 			it->second->StopAll();
 		} else {
 			Logger::Warning("AudioManager : 音声の停止に失敗しました - キーが見つかりません: " + key);
@@ -123,12 +132,16 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::SetVolume(const std::string& key, float volume) {
-		auto it = volumeMap_.find(key);
+		// キーを小文字に変換して検索
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+
+		auto it = volumeMap_.find(lowerKey);
 		if (it != volumeMap_.end()) {
-			Logger::Debug("AudioManager : " + key + " の音量を " + std::to_string(volume) + " に設定しました");
+			Logger::Debug("AudioManager : " + lowerKey + " の音量を " + std::to_string(volume) + " に設定しました");
 			it->second = volume;
 			// 即座に反映
-			auto audioIt = audioMap_.find(key);
+			auto audioIt = audioMap_.find(lowerKey);
 			if (audioIt != audioMap_.end() && audioIt->second) {
 				audioIt->second->SetVolume(volume * masterVolume_);
 			}
@@ -138,7 +151,11 @@ namespace MadoEngine {
 	}
 
 	float AudioManager::GetVolume(const std::string& key) const {
-		auto it = volumeMap_.find(key);
+		// キーを小文字に変換して検索
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+
+		auto it = volumeMap_.find(lowerKey);
 		if (it != volumeMap_.end()) {
 			return it->second;
 		}
@@ -146,7 +163,10 @@ namespace MadoEngine {
 	}
 
 	bool AudioManager::IsLoaded(const std::string& key) const {
-		return audioMap_.find(key) != audioMap_.end();
+		// キーを小文字に変換して検索
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		return audioMap_.find(lowerKey) != audioMap_.end();
 	}
 
 	std::vector<std::string> AudioManager::GetAllKeys() const {

@@ -1,7 +1,6 @@
 #include "WindowsAPI.h"
-#include "WindowsAPI.h"
 #include <gdiplus.h>
-#include "../../Utility/Logger/Logger.h"
+#include "Utility/Logger/Logger.h"
 #pragma comment(lib, "gdiplus.lib")
 
 namespace MadoEngine {
