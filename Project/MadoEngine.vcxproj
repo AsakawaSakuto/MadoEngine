@@ -131,7 +131,6 @@
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
-    <ClCompile Include="Engine\Input\Device\Controller.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -151,7 +150,6 @@
     <ClInclude Include="Engine\Audio\Data\AudioData.h" />
     <ClInclude Include="Engine\Audio\MyAudio.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
-    <ClInclude Include="Engine\Input\Device\Controller.h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
     <ClInclude Include="Engine\Input\Device\Keybord.h" />
     <ClInclude Include="Engine\Input\Device\Mouse.h" />

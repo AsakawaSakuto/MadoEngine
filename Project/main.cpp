@@ -7,6 +7,9 @@
 #include "Engine/Input/Device/Keybord.h"
 #include "Engine/Input/Device/Mouse.h"
 #include "Engine/Input/Device/GamePad.h"
+#include "Engine/Input/InputManager.h"
+#include "Engine/Input/MyInput.h"
+
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -36,25 +39,26 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 	// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 	MadoEngine::AudioManager::GetInstance()->Initialize();
 
-	MadoEngine::Keybord keybord;
-	MadoEngine::Mouse mouse;
-	MadoEngine::GamePad gamePad;
+	MadoEngine::InputManager::GetInstance()->Initialize();
+
+	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_A, MOUSE_LEFT);
 
 	// メインループ
 	while (windowsAPI.ProcessMessage()) {
 		// ゲームの処理
 		MadoEngine::AudioManager::GetInstance()->Update();
 
-		keybord.Update();
-		mouse.Update(windowsAPI.GetHWnd());
-		gamePad.Update();
+		MadoEngine::InputManager::GetInstance()->Update(windowsAPI.GetHWnd());
 
-		if (keybord.IsTrigger(DIK_SPACE) || mouse.IsTrigger(MOUSE_LEFT) || gamePad.IsTrigger(GAMEPAD_A)) {
+		if (Input::Trigger("jump")) {
 			Audio::Play("jump", false);
 		}
 	}
 
 	MadoEngine::AudioManager::GetInstance()->Finalize();
+
+	MadoEngine::InputManager::GetInstance()->Finalize();
+
 	Logger::Finalize();
 
 	return 0;
