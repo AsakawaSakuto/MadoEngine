@@ -22,9 +22,9 @@ namespace MadoEngine
 			previousState_[i] = currentState_[i];
 		}
 
-		currentState_[MOUSE_LEFT] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
-		currentState_[MOUSE_RIGHT] = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
-		currentState_[MOUSE_MIDDLE] = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0;
+		currentState_[0] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;  // MOUSE_LEFT
+		currentState_[1] = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;  // MOUSE_RIGHT
+		currentState_[2] = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0;  // MOUSE_MIDDLE
 
 		previousPosition_ = currentPosition_;
 
@@ -43,29 +43,35 @@ namespace MadoEngine
 
 	bool Mouse::IsPress(int button) const
 	{
-		if (button < 0 || button >= BUTTON_COUNT)
+		// マクロ値(0x10000-0x10002)を内部インデックス(0-2)に変換
+		int index = button - 0x10000;
+		if (index < 0 || index >= BUTTON_COUNT)
 		{
 			return false;
 		}
-		return currentState_[button];
+		return currentState_[index];
 	}
 
 	bool Mouse::IsTrigger(int button) const
 	{
-		if (button < 0 || button >= BUTTON_COUNT)
+		// マクロ値(0x10000-0x10002)を内部インデックス(0-2)に変換
+		int index = button - 0x10000;
+		if (index < 0 || index >= BUTTON_COUNT)
 		{
 			return false;
 		}
-		return currentState_[button] && !previousState_[button];
+		return currentState_[index] && !previousState_[index];
 	}
 
 	bool Mouse::IsRelease(int button) const
 	{
-		if (button < 0 || button >= BUTTON_COUNT)
+		// マクロ値(0x10000-0x10002)を内部インデックス(0-2)に変換
+		int index = button - 0x10000;
+		if (index < 0 || index >= BUTTON_COUNT)
 		{
 			return false;
 		}
-		return !currentState_[button] && previousState_[button];
+		return !currentState_[index] && previousState_[index];
 	}
 
 	Vector2 Mouse::GetPosition() const

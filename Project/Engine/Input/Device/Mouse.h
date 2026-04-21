@@ -2,10 +2,12 @@
 #include <Windows.h>
 #include "Math/Vector2.h"
 
-// Mouse Button Definitions
-#define MOUSE_LEFT      0
-#define MOUSE_RIGHT     1
-#define MOUSE_MIDDLE    2
+// 左クリック
+#define MOUSE_L 0x10000
+// 右クリック
+#define MOUSE_R 0x10001
+// 中クリック
+#define MOUSE_M 0x10002
 
 namespace MadoEngine
 {

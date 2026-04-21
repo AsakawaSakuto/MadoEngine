@@ -41,7 +41,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 
 	MadoEngine::InputManager::GetInstance()->Initialize();
 
-	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_A, MOUSE_LEFT);
+	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_ZR, GAMEPAD_ZL, GAMEPAD_L, GAMEPAD_R);
 
 	// メインループ
 	while (windowsAPI.ProcessMessage()) {

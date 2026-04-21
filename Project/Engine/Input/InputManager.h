@@ -86,19 +86,27 @@ namespace MadoEngine
 		std::vector<int> mouseKeys;
 
 		// キーコードを範囲で判定して分類
+		// マウスマクロ: MOUSE_LEFT(0x10000), MOUSE_RIGHT(0x10001), MOUSE_MIDDLE(0x10002)
+		// ゲームパッドマクロ: 0x0001-0x8000 (ビットフラグ)
+		// キーボードマクロ: DIK_* (0x01-0xD3)
+
 		for (int key : keyList)
 		{
-			if (key >= 0x01 && key <= 0xD3) // DIK_XXX range
+			// マウス: 0x10000-0x10002
+			if (key >= 0x10000 && key <= 0x10002)
 			{
-				keybordKeys.push_back(key);
+				mouseKeys.push_back(key);
 			}
-			else if (key >= 0x0001 && key <= 0x8000) // GAMEPAD_XXX range
+			// ゲームパッドのビットフラグ: 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080, 0x0100, 0x0200, 0x1000, 0x2000, 0x4000, 0x8000
+			// 2のべき乗かつ0x0001-0x8000の範囲ならゲームパッド
+			else if (key >= 0x0001 && key <= 0x8000 && (key & (key - 1)) == 0)
 			{
 				gamePadKeys.push_back(key);
 			}
-			else if (key >= 0 && key <= 2) // MOUSE_XXX range (0-2)
+			// キーボード: DIK_* (0x01-0xD3)
+			else if (key >= 0x01 && key <= 0xD3)
 			{
-				mouseKeys.push_back(key);
+				keybordKeys.push_back(key);
 			}
 		}
 
