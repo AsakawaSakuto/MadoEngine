@@ -3,7 +3,7 @@
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 
-namespace MadoEngine {
+namespace MadoEngine::Core {
 
     class DxDevice {
     public:
@@ -17,5 +17,4 @@ namespace MadoEngine {
         Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_;
         Microsoft::WRL::ComPtr<ID3D12Device> device_;
     };
-
 }

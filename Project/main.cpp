@@ -5,6 +5,7 @@
 #include "Engine/Input/InputManager.h"
 #include "Engine/UtilityHeaders.h"
 #include "Engine/Core/DeltaTime/DeltaTime.h"
+#include "Engine/Core/Command/command.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -29,8 +30,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 	Logger::Debug("デバッグメッセージ");
 
 	// DxDeviceの初期化
-	MadoEngine::DxDevice dxDevice;
+	MadoEngine::Core::DxDevice dxDevice;
 	dxDevice.Initialize();
+
+	MadoEngine::Core::CommandManager commandManager;
+	commandManager.Initialize(&dxDevice);
 
 	// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 	MadoEngine::AudioManager::GetInstance()->Initialize();
