@@ -3,7 +3,7 @@
 #include <functional>
 #include <string>
 
-namespace MadoEngine {
+namespace MadoEngine::Screen {
 
 	class WindowsAPI {
 

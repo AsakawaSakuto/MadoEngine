@@ -6,35 +6,36 @@
 #include "Engine/UtilityHeaders.h"
 #include "Engine/Core/DeltaTime/DeltaTime.h"
 #include "Engine/Core/Command/command.h"
+#include "Engine/Render/Screen/SwapChain.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	Logger::Initialize();
 
-	MadoEngine::WindowsAPI windowsAPI;
+	MadoEngine::Screen::WindowsAPI windowsAPI;
 	MadoEngine::DeltaTime deltaTime;
 
-	MadoEngine::WindowsAPI::WindowDesc desc;
+	MadoEngine::Screen::WindowsAPI::WindowDesc desc;
 	desc.title = "MadoEngine";
 	desc.width = 1280;
 	desc.height = 720;
 	desc.iconPath = "Assets/.EngineResource/icon.png";
 
+	// ウィンドウの初期化
 	windowsAPI.Initialize(desc, hInstance);
-
-	// ログのテスト
-	Logger::Info("情報メッセージ");
-	Logger::Warning("警告メッセージ");
-	Logger::Error("エラーメッセージ");
-	Logger::Debug("デバッグメッセージ");
 
 	// DxDeviceの初期化
 	MadoEngine::Core::DxDevice dxDevice;
 	dxDevice.Initialize();
 
+	// CommandManagerの初期化
 	MadoEngine::Core::CommandManager commandManager;
 	commandManager.Initialize(&dxDevice);
+
+	// SwapChainの初期化
+	MadoEngine::Screen::SwapChain swapChain;
+	swapChain.Initialize(&dxDevice, &commandManager, windowsAPI.GetHWnd(), desc.width, desc.height);
 
 	// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 	MadoEngine::AudioManager::GetInstance()->Initialize();

@@ -3,7 +3,7 @@
 #include "Utility/Logger/Logger.h"
 #pragma comment(lib, "gdiplus.lib")
 
-namespace MadoEngine {
+namespace MadoEngine::Screen {
 
 	// ウィンドウプロシージャ
 	LRESULT CALLBACK WindowsAPI::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
