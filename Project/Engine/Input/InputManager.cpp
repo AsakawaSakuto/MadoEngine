@@ -23,11 +23,11 @@ namespace MadoEngine
 		inputActions_.clear();
 	}
 
-	void InputManager::Update(HWND hwnd)
+	void InputManager::Update(HWND hwnd, float deltaTime)
 	{
 		keybord_->Update();
 		mouse_->Update(hwnd);
-		gamePad_->Update();
+		gamePad_->Update(deltaTime);
 	}
 
 	void InputManager::SetInput(

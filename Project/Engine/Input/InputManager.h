@@ -21,7 +21,7 @@ namespace MadoEngine
 
 		~InputManager() = default;
 
-		void Update(HWND hwnd);
+		void Update(HWND hwnd, float deltaTime = 1.0f / 60.0f);
 
 		// 入力アクションに複数のキー/ボタンを登録
 		// 例: SetInput("Jump", {DIK_SPACE, DIK_Z}, {GAMEPAD_A}, {MOUSE_LEFT});

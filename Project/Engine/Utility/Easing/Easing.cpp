@@ -1,7 +1,7 @@
 #include "Easing.h"
 #include <numbers>
 
-namespace MyEasing {
+namespace Easing {
 
 	float Apply(float t, EaseType type) {
 		// tを0.0～1.0の範囲にClamp

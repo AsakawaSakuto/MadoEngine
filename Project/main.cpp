@@ -1,15 +1,10 @@
 #include <Windows.h>
 #include "Engine/Render/Screen/WindowsAPI.h"
 #include "Engine/Core/DxDevice/DxDevice.h"
-#include "Engine/UtilityHeaders.h"
-#include "Engine/Audio/MyAudio.h"
 #include "Engine/Audio/AudioManager.h"
-#include "Engine/Input/Device/Keybord.h"
-#include "Engine/Input/Device/Mouse.h"
-#include "Engine/Input/Device/GamePad.h"
 #include "Engine/Input/InputManager.h"
-#include "Engine/Input/MyInput.h"
-
+#include "Engine/UtilityHeaders.h"
+#include "Engine/Core/DeltaTime/DeltaTime.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -17,6 +12,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 	Logger::Initialize();
 
 	MadoEngine::WindowsAPI windowsAPI;
+	MadoEngine::DeltaTime deltaTime;
 
 	MadoEngine::WindowsAPI::WindowDesc desc;
 	desc.title = "MadoEngine";
@@ -41,17 +37,22 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 
 	MadoEngine::InputManager::GetInstance()->Initialize();
 
-	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_ZR, GAMEPAD_ZL, GAMEPAD_L, GAMEPAD_R);
+	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_STICK_R, GAMEPAD_STICK_L, GAMEPAD_L, GAMEPAD_R);
 
 	// メインループ
 	while (windowsAPI.ProcessMessage()) {
+		// デルタタイムを計算
+		deltaTime.Update();
+		float dt = static_cast<float>(deltaTime.GetDeltaTime());
+
 		// ゲームの処理
 		MadoEngine::AudioManager::GetInstance()->Update();
 
-		MadoEngine::InputManager::GetInstance()->Update(windowsAPI.GetHWnd());
+		MadoEngine::InputManager::GetInstance()->Update(windowsAPI.GetHWnd(), dt);
 
 		if (Input::Trigger("jump")) {
-			Audio::Play("jump", false);
+			Input::GetGamePad()->SetVibration(1.0f, 1.0f, 2.f, EaseType::None);
+			Audio::Play("jump");
 		}
 	}
 
