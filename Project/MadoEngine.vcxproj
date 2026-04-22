@@ -130,6 +130,7 @@
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
+    <ClCompile Include="Engine\Core\Command\command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
+    <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
@@ -153,6 +155,7 @@
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
     <ClInclude Include="Engine\Audio\Data\AudioData.h" />
     <ClInclude Include="Engine\Audio\MyAudio.h" />
+    <ClInclude Include="Engine\Core\Command\command.h" />
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
@@ -168,6 +171,7 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
+    <ClInclude Include="Engine\Render\Screen\SwapChain.h" />
     <ClInclude Include="Engine\Render\Screen\WindowsAPI.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
     <ClInclude Include="Engine\Utility\Camera\Camera.h" />
