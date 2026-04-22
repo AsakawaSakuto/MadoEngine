@@ -67,6 +67,7 @@ namespace MadoEngine
 		std::unique_ptr<GamePad> gamePad_;
 
 		std::unordered_map<std::string, InputAction> inputActions_;
+		mutable std::unordered_map<std::string, bool> pressLoggedFlags_; // Pressログ出力済みフラグ
 
 		bool CheckAnyPress(const InputAction& action) const;
 		bool CheckAnyTrigger(const InputAction& action) const;
@@ -74,6 +75,8 @@ namespace MadoEngine
 
 		// 文字列を小文字に変換するヘルパー関数
 		std::string ToLower(const std::string& str) const;
+
+		bool useLogger_ = true; // ロガーを使用するかどうかのフラグ
 	};
 
 	// テンプレート実装

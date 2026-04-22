@@ -37,7 +37,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 
 	MadoEngine::InputManager::GetInstance()->Initialize();
 
-	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_STICK_R, GAMEPAD_STICK_L, GAMEPAD_L, GAMEPAD_R);
+	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_STICK_R, GAMEPAD_STICK_L, GAMEPAD_L, GAMEPAD_R, GAMEPAD_A);
 
 	// メインループ
 	while (windowsAPI.ProcessMessage()) {
@@ -51,9 +51,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 		MadoEngine::InputManager::GetInstance()->Update(windowsAPI.GetHWnd(), dt);
 
 		if (Input::Trigger("jump")) {
-			Input::GetGamePad()->SetVibration(1.0f, 1.0f, 2.f, EaseType::None);
-			Audio::Play("jump");
+			//Input::GetGamePad()->SetVibration(1.0f, 1.0f, 2.f, EaseType::None);
+			//Audio::Play("jump");
 		}
+
+		if (Input::Press("jump")) {}
+
+		if (Input::Release("jump")) {}
 	}
 
 	MadoEngine::AudioManager::GetInstance()->Finalize();

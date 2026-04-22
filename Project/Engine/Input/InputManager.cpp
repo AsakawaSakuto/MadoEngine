@@ -1,4 +1,5 @@
 #include "InputManager.h"
+#include "Utility/Logger/Logger.h"
 
 namespace MadoEngine
 {
@@ -43,18 +44,40 @@ namespace MadoEngine
 
 		// アクション名を小文字に変換して保存
 		inputActions_[ToLower(actionName)] = action;
+
+		if (useLogger_)
+		{
+			Logger::Info("Actionが登録されました [" + actionName + "]");
+		}
 	}
 
 	bool InputManager::IsPress(const std::string& actionName) const
 	{
 		// 小文字に変換して検索
-		auto it = inputActions_.find(ToLower(actionName));
+		std::string lowerActionName = ToLower(actionName);
+		auto it = inputActions_.find(lowerActionName);
 		if (it == inputActions_.end())
 		{
 			return false;
 		}
 
-		return CheckAnyPress(it->second);
+		bool result = CheckAnyPress(it->second);
+
+		if (useLogger_) {
+			// Pressが押されているとき
+			if (result) {
+				// まだログ出力していない場合のみ出力
+				if (pressLoggedFlags_[lowerActionName] == false) {
+					Logger::Info(" Actionが実行されました [Press]   : " + actionName);
+					pressLoggedFlags_[lowerActionName] = true;
+				}
+			} else {
+				// 押されていないときはフラグをリセット
+				pressLoggedFlags_[lowerActionName] = false;
+			}
+		}
+
+		return result;
 	}
 
 	bool InputManager::IsTrigger(const std::string& actionName) const
@@ -66,7 +89,12 @@ namespace MadoEngine
 			return false;
 		}
 
-		return CheckAnyTrigger(it->second);
+		bool result = CheckAnyTrigger(it->second);
+		if (result && useLogger_)
+		{
+			Logger::Info(" Actionが実行されました [Trigger] : " + actionName);
+		}
+		return result;
 	}
 
 	bool InputManager::IsRelease(const std::string& actionName) const
@@ -78,7 +106,12 @@ namespace MadoEngine
 			return false;
 		}
 
-		return CheckAnyRelease(it->second);
+		bool result = CheckAnyRelease(it->second);
+		if (result && useLogger_)
+		{
+			Logger::Info("Actionが実行されました [Release] : " + actionName);
+		}
+		return result;
 	}
 
 	bool InputManager::CheckAnyPress(const InputAction& action) const
