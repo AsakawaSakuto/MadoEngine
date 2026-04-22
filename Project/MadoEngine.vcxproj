@@ -138,6 +138,7 @@
     <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
+    <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
@@ -162,9 +163,11 @@
     <ClInclude Include="Engine\MathHeaders.h" />
     <ClInclude Include="Engine\Math\Function\MathFunction.h" />
     <ClInclude Include="Engine\Math\Function\MatrixFunction.h" />
+    <ClInclude Include="Engine\Math\Function\QuaternionFunction.h" />
     <ClInclude Include="Engine\Math\Matrix2x2.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
+    <ClInclude Include="Engine\Math\Quaternion.h" />
     <ClInclude Include="Engine\Render\Screen\WindowsAPI.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
     <ClInclude Include="Engine\Utility\Camera\Camera.h" />
