@@ -133,6 +133,10 @@
     <ClCompile Include="Engine\Core\Command\command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
+    <ClCompile Include="Engine\Core\View\DSVManager.cpp" />
+    <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
+    <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
+    <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -158,6 +162,10 @@
     <ClInclude Include="Engine\Core\Command\command.h" />
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
+    <ClInclude Include="Engine\Core\View\DSVManager.h" />
+    <ClInclude Include="Engine\Core\View\RTVManager.h" />
+    <ClInclude Include="Engine\Core\View\SRVManager.h" />
+    <ClInclude Include="Engine\Core\View\ViewFunction.h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
     <ClInclude Include="Engine\Input\Device\Keybord.h" />
     <ClInclude Include="Engine\Input\Device\Mouse.h" />
