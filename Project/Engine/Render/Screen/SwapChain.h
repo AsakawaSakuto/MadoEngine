@@ -3,6 +3,7 @@
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 #include <cstdint>
+#include <vector>
 
 namespace MadoEngine::Core {
 	class DxDevice;
@@ -38,11 +39,19 @@ namespace MadoEngine::Screen {
 		/// @return IDXGISwapChain4のポインタ
 		IDXGISwapChain4* GetSwapChain() const { return swapChain_.Get(); }
 
-		/// @brief バッファ数を取得
-		/// @return バッファ数
-		uint32_t GetBufferCount() const { return bufferCount_; }
+			/// @brief バッファ数を取得
+			/// @return バッファ数
+			uint32_t GetBufferCount() const { return bufferCount_; }
 
-	private:
+			/// @brief 指定されたバックバッファリソースを取得
+			/// @param index バッファインデックス
+			/// @return バックバッファリソースのポインタ
+			ID3D12Resource* GetBackBuffer(uint32_t index) const;
+
+			/// @brief 画面をスワップする（Present）
+			void Present();
+
+		private:
 		/// @brief SwapChainの生成
 		void CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height);
 
@@ -50,6 +59,7 @@ namespace MadoEngine::Screen {
 		Core::CommandManager* commandManager_ = nullptr;
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 		uint32_t bufferCount_ = 2;
 	};
 }

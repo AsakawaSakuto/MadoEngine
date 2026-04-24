@@ -26,7 +26,7 @@ namespace MadoEngine::Core {
                 int size = WideCharToMultiByte(CP_UTF8, 0, wideDesc.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 std::string desc(size - 1, '\0');
                 WideCharToMultiByte(CP_UTF8, 0, wideDesc.c_str(), -1, &desc[0], size, nullptr, nullptr);
-                Logger::Output(std::format("使用しているアダプタ : {}", desc), Logger::Level::Info);
+                Logger::Output(std::format("使用しているアダプタ : {}", desc), Logger::Level::Engine);
                 break;
             }
             useAdapter_.Reset();
@@ -41,12 +41,12 @@ namespace MadoEngine::Core {
         for (size_t i = 0; i < _countof(featureLevels); ++i) {
             hr = D3D12CreateDevice(useAdapter_.Get(), featureLevels[i], IID_PPV_ARGS(&device_));
             if (SUCCEEDED(hr)) {
-                Logger::Output(std::format("使用している FeatureLevel : {}", featureLevelStrings[i]), Logger::Level::Info);
+                Logger::Output(std::format("使用している FeatureLevel : {}", featureLevelStrings[i]), Logger::Level::Engine);
                 break;
             }
         }
         assert(device_.Get() != nullptr);
-        Logger::Output("D3D12Deviceの生成が完了しました", Logger::Level::Info);
+        Logger::Output("D3D12Deviceの生成が完了しました", Logger::Level::Engine);
     }
 
 }

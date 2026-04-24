@@ -14,7 +14,7 @@ namespace MadoEngine::Screen {
 		// ウィンドウが閉じられたときの処理
 		switch (msg) {
 		case WM_DESTROY:
-			Logger::Output("ウィンドウの閉じるボタンが押されました", Logger::Level::Info);
+			Logger::Output("ウィンドウの閉じるボタンが押されました", Logger::Level::Engine);
 			if (api) {
 				api->isPushCloseBottom_ = true;
 			}
@@ -32,11 +32,11 @@ namespace MadoEngine::Screen {
 		// アイコンをファイルから読み込む
 		HICON WindowsAPI::LoadIconFromFile(const std::string& filePath) {
 			if (filePath.empty()) {
-				Logger::Output("アイコンファイルが指定されていません。デフォルトアイコンを使用します", Logger::Level::Info);
+				Logger::Output("アイコンファイルが指定されていません。デフォルトアイコンを使用します", Logger::Level::Engine);
 				return LoadIcon(nullptr, IDI_APPLICATION);
 			}
 
-			Logger::Output("アイコンファイルを読み込んでいます: " + filePath, Logger::Level::Info	);
+			Logger::Output("アイコンファイルを読み込んでいます: " + filePath, Logger::Level::Engine	);
 
 			std::wstring wPath(filePath.begin(), filePath.end());
 
@@ -61,7 +61,7 @@ namespace MadoEngine::Screen {
 			Gdiplus::GdiplusShutdown(gdiplusToken);
 
 			if (hIcon) {
-				Logger::Output("アイコンの読み込みに成功しました", Logger::Level::Info);
+				Logger::Output("アイコンの読み込みに成功しました", Logger::Level::Engine);
 			} else {
 				Logger::Output("ビットマップからHICONの取得に失敗しました。デフォルトアイコンを使用します", Logger::Level::Warning);
 			}
@@ -72,9 +72,9 @@ namespace MadoEngine::Screen {
 		// ウィンドウを初期化する
 		void WindowsAPI::Initialize(WindowDesc& desc, HINSTANCE hInstance) {
 
-		Logger::Output("WindowsAPIを初期化しています", Logger::Level::Info);
-		Logger::Output("ウィンドウタイトル: " + desc.title, Logger::Level::Info);
-		Logger::Output("ウィンドウサイズ: " + std::to_string(desc.width) + "x" + std::to_string(desc.height), Logger::Level::Info);
+		Logger::Output("WindowsAPIを初期化しています", Logger::Level::Engine);
+		Logger::Output("ウィンドウタイトル: " + desc.title, Logger::Level::Engine);
+		Logger::Output("ウィンドウサイズ: " + std::to_string(desc.width) + "x" + std::to_string(desc.height), Logger::Level::Engine);
 
 		desc_ = desc;
 
@@ -87,12 +87,22 @@ namespace MadoEngine::Screen {
 		hIcon_ = LoadIconFromFile(desc_.iconPath);
 		wndClass_.hIcon = hIcon_;
 
-		Logger::Output("ウィンドウクラスを登録しています", Logger::Level::Info);
+		Logger::Output("ウィンドウクラスを登録しています", Logger::Level::Engine);
 
 		RegisterClass(&wndClass_);
 
+		// ウィンドウスタイルの設定（サイズ変更可否に基づく）
+		DWORD windowStyle = WS_OVERLAPPEDWINDOW;
+		if (!desc_.isResizable) {
+			// サイズ変更不可の場合、WS_THICKFRAMEとWS_MAXIMIZEBOXを除外
+			windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+			Logger::Output("ウィンドウサイズ変更を無効化しました", Logger::Level::Engine);
+		} else {
+			Logger::Output("ウィンドウサイズ変更を有効化しました", Logger::Level::Engine);
+		}
+
 		RECT wrc = { 0, 0, desc_.width, desc_.height };
-		AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
+		AdjustWindowRect(&wrc, windowStyle, false);
 
 		std::wstring wTitle(desc_.title.begin(), desc_.title.end());
 
@@ -100,7 +110,7 @@ namespace MadoEngine::Screen {
 		hWnd_ = CreateWindow(
 			wndClass_.lpszClassName,
 			wTitle.c_str(),
-			WS_OVERLAPPEDWINDOW,
+			windowStyle,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
 			wrc.right - wrc.left,
@@ -113,14 +123,14 @@ namespace MadoEngine::Screen {
 		SetWindowLongPtr(hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 		if (hWnd_) {
-			Logger::Output("ウィンドウの作成に成功しました", Logger::Level::Info);
+			Logger::Output("ウィンドウの作成に成功しました", Logger::Level::Engine);
 		} else {
 			Logger::Output("ウィンドウの作成に失敗しました", Logger::Level::Error);
 		}
 
 		ShowWindow(hWnd_, SW_SHOW);
 
-		Logger::Output("WindowsAPIの初期化が完了しました", Logger::Level::Info);
+		Logger::Output("WindowsAPIの初期化が完了しました", Logger::Level::Engine);
 	}
 
 	// メッセージを処理する。アプリを継続する場合はtrue、終了する場合はfalseを返す
@@ -130,7 +140,7 @@ namespace MadoEngine::Screen {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			if (msg.message == WM_QUIT) {
-				Logger::Output("WM_QUITメッセージを受信しました。アプリケーションを終了します", Logger::Level::Info);
+				Logger::Output("WM_QUITメッセージを受信しました。アプリケーションを終了します", Logger::Level::Engine);
 				return false;
 			}
 		}

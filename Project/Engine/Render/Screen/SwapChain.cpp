@@ -25,11 +25,30 @@ namespace MadoEngine::Screen {
 		bufferCount_ = bufferCount;
 
 		CreateSwapChain(hwnd, width, height);
+
+		// バックバッファリソースを取得
+		backBuffers_.resize(bufferCount_);
+		for (uint32_t i = 0; i < bufferCount_; ++i) {
+			HRESULT hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
+			assert(SUCCEEDED(hr));
+			Logger::Output("バックバッファ " + std::to_string(i) + " を取得しました", Logger::Level::Engine);
+		}
 	}
 
 	uint32_t SwapChain::GetCurrentBackBufferIndex() const {
 		assert(swapChain_ != nullptr);
 		return swapChain_->GetCurrentBackBufferIndex();
+	}
+
+	ID3D12Resource* SwapChain::GetBackBuffer(uint32_t index) const {
+		assert(index < bufferCount_);
+		return backBuffers_[index].Get();
+	}
+
+	void SwapChain::Present() {
+		// 画面のスワップを行う（垂直同期を待つ）
+		HRESULT hr = swapChain_->Present(1, 0);
+		assert(SUCCEEDED(hr));
 	}
 
 	void SwapChain::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height) {
@@ -61,6 +80,6 @@ namespace MadoEngine::Screen {
 		hr = swapChain1.As(&swapChain_);
 		assert(SUCCEEDED(hr));
 
-		Logger::Output("SwapChainの作成に成功しました", Logger::Level::Info);
+		Logger::Output("SwapChainの作成に成功しました", Logger::Level::Engine);
 	}
 }

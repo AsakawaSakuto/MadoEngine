@@ -30,7 +30,7 @@ namespace MadoEngine::Core {
 			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
 		);
 
-		Logger::Output("SRVManagerの初期化が完了しました。最大デスクリプタ数: " + std::to_string(maxDescriptors_), Logger::Level::Info);
+		Logger::Output("SRVManagerの初期化が完了しました。最大デスクリプタ数: " + std::to_string(maxDescriptors_), Logger::Level::Engine);
 	}
 
 	uint32_t SRVManager::Allocate() {
@@ -40,12 +40,12 @@ namespace MadoEngine::Core {
 		if (!freeIndices_.empty()) {
 			index = freeIndices_.front();
 			freeIndices_.pop();
-			Logger::Output("SRVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+			Logger::Output("SRVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		} else {
 			// 新しいインデックスを割り当て
 			assert(nextIndex_ < maxDescriptors_ && "SRVデスクリプタヒープの容量を超えました");
 			index = nextIndex_++;
-			Logger::Output("新しいSRVデスクリプタを割り当てました。インデックス: " + std::to_string(index), Logger::Level::Info);
+			Logger::Output("新しいSRVデスクリプタを割り当てました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		}
 
 		// 割り当て状態を記録
@@ -59,7 +59,7 @@ namespace MadoEngine::Core {
 
 		allocated_[index] = false;
 		freeIndices_.push(index);
-		Logger::Output("SRVデスクリプタを解放しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+		Logger::Output("SRVデスクリプタを解放しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE SRVManager::GetCPUHandle(uint32_t index) const {
@@ -112,7 +112,7 @@ namespace MadoEngine::Core {
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCPUHandle(index);
 		device_->GetDevice()->CreateShaderResourceView(resource, &srvDesc, cpuHandle);
 
-		Logger::Output("Shader Resource Viewの作成が完了しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+		Logger::Output("Shader Resource Viewの作成が完了しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 	}
 
 	void SRVManager::CreateStructuredBufferSRV(
@@ -139,6 +139,6 @@ namespace MadoEngine::Core {
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCPUHandle(index);
 		device_->GetDevice()->CreateShaderResourceView(resource, &srvDesc, cpuHandle);
 
-		Logger::Output("構造化バッファSRVの作成が完了しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+		Logger::Output("構造化バッファSRVの作成が完了しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 	}
 }

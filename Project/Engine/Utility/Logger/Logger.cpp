@@ -13,12 +13,13 @@ namespace {
     // std::stringを返すことでメモリ安全性を確保
     std::string LevelToString(Logger::Level level) {
         switch (level) {
-        case Logger::Level::Info:    return " --- [INFO] --- ";
-        case Logger::Level::Warning: return " --- [WARNING] --- ";
-        case Logger::Level::Error:   return " --- [ERROR] --- ";
-        case Logger::Level::Debug:   return " --- [DEBUG] --- ";
+        case Logger::Level::Engine:      return " --- [ENGINE] --- ";
 		case Logger::Level::Application: return " --- [APPLICATION] --- ";
-        default:                     return " --- [UNKNOWN] --- ";
+        case Logger::Level::Assets:      return " --- [ASSETS] --- ";
+        case Logger::Level::Warning:     return " --- [WARNING] --- ";
+        case Logger::Level::Error:       return " --- [ERROR] --- ";
+        case Logger::Level::Debug:       return " --- [DEBUG] --- ";
+        default:                         return " --- [UNKNOWN] --- ";
         }
     }
 

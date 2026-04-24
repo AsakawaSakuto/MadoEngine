@@ -16,6 +16,7 @@ namespace MadoEngine::Screen {
 			std::string iconPath = "";            // アイコンファイルのパス (空の場合はデフォルトアイコン)
 			int width = 1280;                     // ウィンドウの幅
 			int height = 720;                     // ウィンドウの高さ
+			bool isResizable = true;              // ウィンドウサイズを変更可能にするかどうか
 			std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> wndProc; // ウィンドウプロシージャのコールバック関数
 		};
 

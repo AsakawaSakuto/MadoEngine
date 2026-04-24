@@ -10,7 +10,7 @@ ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTO
     HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
     assert(SUCCEEDED(hr));
 
-	Logger::Output("DescriptorHeapの生成が完了しました", Logger::Level::Info);
+	Logger::Output("DescriptorHeapの生成が完了しました", Logger::Level::Engine);
 
     return descriptorHeap;
 }
@@ -20,7 +20,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descrip
     D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
     handleCPU.ptr += (descriptorSize * index);
 
-    Logger::Output("CPU DescriptorHandleの取得が完了しました", Logger::Level::Info);
+    //Logger::Output("CPU DescriptorHandleの取得が完了しました", Logger::Level::Info);
 
     return handleCPU;
 }
@@ -30,7 +30,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
     D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     handleGPU.ptr += (descriptorSize * index);
 
-    Logger::Output("GPU DescriptorHandleの取得が完了しました", Logger::Level::Info);
+    //Logger::Output("GPU DescriptorHandleの取得が完了しました", Logger::Level::Info);
 
     return handleGPU;
 }

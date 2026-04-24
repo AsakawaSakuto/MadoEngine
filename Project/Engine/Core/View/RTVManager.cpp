@@ -30,7 +30,7 @@ namespace MadoEngine::Core {
 			D3D12_DESCRIPTOR_HEAP_TYPE_RTV
 		);
 
-		Logger::Output("RTVManagerの初期化が完了しました。最大デスクリプタ数: " + std::to_string(maxDescriptors_), Logger::Level::Info);
+		Logger::Output("RTVManagerの初期化が完了しました。最大デスクリプタ数: " + std::to_string(maxDescriptors_), Logger::Level::Engine);
 	}
 
 	uint32_t RTVManager::Allocate() {
@@ -40,12 +40,12 @@ namespace MadoEngine::Core {
 		if (!freeIndices_.empty()) {
 			index = freeIndices_.front();
 			freeIndices_.pop();
-			Logger::Output("RTVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+			Logger::Output("RTVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		} else {
 			// 新しいインデックスを割り当て
 			assert(nextIndex_ < maxDescriptors_ && "RTVデスクリプタヒープの容量を超えました");
 			index = nextIndex_++;
-			Logger::Output("新しいRTVデスクリプタを割り当てました。インデックス: " + std::to_string(index), Logger::Level::Info);
+			Logger::Output("新しいRTVデスクリプタを割り当てました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		}
 
 		// 割り当て状態を記録
@@ -59,7 +59,7 @@ namespace MadoEngine::Core {
 
 		allocated_[index] = false;
 		freeIndices_.push(index);
-		Logger::Output("RTVデスクリプタを解放しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+		Logger::Output("RTVデスクリプタを解放しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVManager::GetCPUHandle(uint32_t index) const {
@@ -105,6 +105,6 @@ namespace MadoEngine::Core {
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCPUHandle(index);
 		device_->GetDevice()->CreateRenderTargetView(resource, &rtvDesc, cpuHandle);
 
-		Logger::Output("Render Target Viewの作成が完了しました。インデックス: " + std::to_string(index), Logger::Level::Info);
+		Logger::Output("Render Target Viewの作成が完了しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 	}
 }
