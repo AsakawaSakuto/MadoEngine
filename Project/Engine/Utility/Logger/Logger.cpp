@@ -17,6 +17,7 @@ namespace {
         case Logger::Level::Warning: return " --- [WARNING] --- ";
         case Logger::Level::Error:   return " --- [ERROR] --- ";
         case Logger::Level::Debug:   return " --- [DEBUG] --- ";
+		case Logger::Level::Application: return " --- [APPLICATION] --- ";
         default:                     return " --- [UNKNOWN] --- ";
         }
     }
@@ -186,21 +187,5 @@ namespace Logger {
         // 3. ワイド版の関数で出力
         OutputDebugStringW(wideStr.c_str());
 #endif
-    }
-
-    void Info(const std::string& message, const std::source_location& location) {
-        Output(message, Level::Info, location);
-    }
-
-    void Warning(const std::string& message, const std::source_location& location) {
-        Output(message, Level::Warning, location);
-    }
-
-    void Error(const std::string& message, const std::source_location& location) {
-        Output(message, Level::Error, location);
-    }
-
-    void Debug(const std::string& message, const std::source_location& location) {
-        Output(message, Level::Debug, location);
     }
 }

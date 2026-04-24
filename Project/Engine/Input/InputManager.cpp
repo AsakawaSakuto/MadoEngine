@@ -47,7 +47,7 @@ namespace MadoEngine
 
 		if (useLogger_)
 		{
-			Logger::Info("Actionが登録されました [" + actionName + "]");
+			Logger::Output("Actionが登録されました [" + actionName + "]", Logger::Level::Info);
 		}
 	}
 
@@ -68,7 +68,7 @@ namespace MadoEngine
 			if (result) {
 				// まだログ出力していない場合のみ出力
 				if (pressLoggedFlags_[lowerActionName] == false) {
-					Logger::Info(" Actionが実行されました [Press]   : " + actionName);
+					Logger::Output(" Actionが実行されました [Press]   : " + actionName, Logger::Level::Info);
 					pressLoggedFlags_[lowerActionName] = true;
 				}
 			} else {
@@ -92,7 +92,7 @@ namespace MadoEngine
 		bool result = CheckAnyTrigger(it->second);
 		if (result && useLogger_)
 		{
-			Logger::Info(" Actionが実行されました [Trigger] : " + actionName);
+			Logger::Output(" Actionが実行されました [Trigger] : " + actionName, Logger::Level::Info);
 		}
 		return result;
 	}
@@ -109,7 +109,7 @@ namespace MadoEngine
 		bool result = CheckAnyRelease(it->second);
 		if (result && useLogger_)
 		{
-			Logger::Info("Actionが実行されました [Release] : " + actionName);
+			Logger::Output("Actionが実行されました [Release] : " + actionName, Logger::Level::Info);
 		}
 		return result;
 	}

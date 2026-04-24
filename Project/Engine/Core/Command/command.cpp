@@ -14,7 +14,7 @@ namespace MadoEngine::Core {
         CreateCommandList();
         CreateFence();
 
-        Logger::Info("CommandManagerの初期化が完了しました");
+        Logger::Output("CommandManagerの初期化が完了しました", Logger::Level::Info);
     }
 
     void CommandManager::BeginFrame() {
@@ -54,7 +54,7 @@ namespace MadoEngine::Core {
 
         HRESULT hr = device_->GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue_));
         assert(SUCCEEDED(hr));
-        Logger::Info("CommandQueueの生成が完了しました");
+        Logger::Output("CommandQueueの生成が完了しました", Logger::Level::Info);
     }
 
     void CommandManager::CreateCommandAllocator() {
@@ -63,7 +63,7 @@ namespace MadoEngine::Core {
             IID_PPV_ARGS(&commandAllocator_)
         );
         assert(SUCCEEDED(hr));
-        Logger::Info("CommandAllocatorの生成が完了しました");
+        Logger::Output("CommandAllocatorの生成が完了しました", Logger::Level::Info);
     }
 
     void CommandManager::CreateCommandList() {
@@ -76,7 +76,7 @@ namespace MadoEngine::Core {
         );
         assert(SUCCEEDED(hr));
 
-        Logger::Info("CommandListの生成が完了しました");
+        Logger::Output("CommandListの生成が完了しました", Logger::Level::Info);
 
         // コマンドリストは初期状態で開いているので閉じる
         commandList_->Close();
@@ -90,11 +90,11 @@ namespace MadoEngine::Core {
         );
         assert(SUCCEEDED(hr));
 
-        Logger::Info("Fenceの生成が完了しました");
+        Logger::Output("Fenceの生成が完了しました", Logger::Level::Info);
 
         fenceEvent_ = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         assert(fenceEvent_ != nullptr);
-        Logger::Info("FenceEventの生成が完了しました");
+        Logger::Output("FenceEventの生成が完了しました", Logger::Level::Info);
     }
 
 }

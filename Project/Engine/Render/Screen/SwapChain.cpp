@@ -61,6 +61,6 @@ namespace MadoEngine::Screen {
 		hr = swapChain1.As(&swapChain_);
 		assert(SUCCEEDED(hr));
 
-		Logger::Info("SwapChainの作成に成功しました");
+		Logger::Output("SwapChainの作成に成功しました", Logger::Level::Info);
 	}
 }

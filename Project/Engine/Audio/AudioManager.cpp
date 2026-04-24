@@ -11,7 +11,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::Initialize() {
-		Logger::Info("AudioManager : 初期化を開始しました");
+		Logger::Output("AudioManager : 初期化を開始しました",Logger::Level::Info);
 
 		// マップのクリア
 		audioMap_.clear();
@@ -20,14 +20,14 @@ namespace MadoEngine {
 		// Assets/Audio ディレクトリ内の全音声ファイルを自動ロード
 		std::filesystem::path audioDir(kAudioDirectory);
 		if (std::filesystem::exists(audioDir) && std::filesystem::is_directory(audioDir)) {
-			Logger::Info("AudioManager : " + std::string(kAudioDirectory) + " から音声ファイルを読み込んでいます");
+			Logger::Output("AudioManager : " + std::string(kAudioDirectory) + " から音声ファイルを読み込んでいます", Logger::Level::Info);
 			LoadDirectory(audioDir);
-			Logger::Info("AudioManager : " + std::to_string(audioMap_.size()) + " 個の音声ファイルを読み込みました");
+			Logger::Output("AudioManager : " + std::to_string(audioMap_.size()) + " 個の音声ファイルを読み込みました", Logger::Level::Info);
 		} else {
-			Logger::Warning("AudioManager : 音声ディレクトリが見つかりません: " + std::string(kAudioDirectory));
+			Logger::Output("AudioManager : 音声ディレクトリが見つかりません: " + std::string(kAudioDirectory), Logger::Level::Warning);
 		}
 
-		Logger::Info("AudioManager : 初期化が完了しました");
+		Logger::Output("AudioManager : 初期化が完了しました", Logger::Level::Info);
 	}
 
 	void AudioManager::LoadDirectory(const std::filesystem::path& directory) {
@@ -39,7 +39,7 @@ namespace MadoEngine {
 			std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
 			if (ext == ".wav" || ext == ".mp3") {
-				Logger::Debug("AudioManager : ファイルを読み込んでいます: " + entry.path().string());
+				Logger::Output("AudioManager : ファイルを読み込んでいます: " + entry.path().string(), Logger::Level::Debug);
 				Load(entry.path().string(), 1.0f);
 			}
 		}
@@ -53,11 +53,11 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::Finalize() {
-		Logger::Info("AudioManager : 終了処理を開始しました");
+		Logger::Output("AudioManager : 終了処理を開始しました", Logger::Level::Info);
 		StopAll();
 		audioMap_.clear();
 		volumeMap_.clear();
-		Logger::Info("AudioManager : 終了処理が完了しました");
+		Logger::Output("AudioManager : 終了処理が完了しました", Logger::Level::Info);
 	}
 
 	void AudioManager::Load(const std::string& filePath, float volume) {
@@ -66,7 +66,7 @@ namespace MadoEngine {
 
 		// 既に読み込み済みならスキップ
 		if (audioMap_.find(key) != audioMap_.end()) {
-			Logger::Warning("AudioManager : 既に読み込み済みのため、スキップします: " + key);
+			Logger::Output("AudioManager : 既に読み込み済みのため、スキップします: " + key, Logger::Level::Warning);
 			return;
 		}
 
@@ -74,7 +74,7 @@ namespace MadoEngine {
 		audio->Initialize(filePath);
 		audioMap_[key] = std::move(audio);
 		volumeMap_[key] = volume;
-		Logger::Debug("AudioManager : 音声を読み込みました - キー: " + key + ", パス: " + filePath);
+		Logger::Output("AudioManager : 音声を読み込みました - キー: " + key + ", パス: " + filePath, Logger::Level::Debug);
 	}
 
 	void AudioManager::Play(const std::string& key, bool loop) {
@@ -84,13 +84,13 @@ namespace MadoEngine {
 
 		auto it = audioMap_.find(lowerKey);
 		if (it == audioMap_.end()) {
-			Logger::Error("AudioManager : 音声の再生に失敗しました - キーが見つかりません: " + key);
+			Logger::Output("AudioManager : 音声の再生に失敗しました - キーが見つかりません: " + key, Logger::Level::Error);
 			assert(false && "Audio not loaded");
 			return;
 		}
 
 		float volume = volumeMap_[lowerKey] * masterVolume_;
-		Logger::Debug("AudioManager : 音声を再生します - キー: " + lowerKey + ", ループ: " + (loop ? "有効" : "無効") + ", 音量: " + std::to_string(volume));
+		Logger::Output("AudioManager : 音声を再生します - キー: " + lowerKey + ", ループ: " + (loop ? "有効" : "無効") + ", 音量: " + std::to_string(volume), Logger::Level::Debug	);
 		it->second->PlayAudio(volume, loop);
 	}
 
@@ -101,15 +101,15 @@ namespace MadoEngine {
 
 		auto it = audioMap_.find(lowerKey);
 		if (it != audioMap_.end() && it->second) {
-			Logger::Debug("AudioManager : 音声を停止します - キー: " + lowerKey);
+			Logger::Output("AudioManager : 音声を停止します - キー: " + lowerKey, Logger::Level::Debug);
 			it->second->StopAll();
 		} else {
-			Logger::Warning("AudioManager : 音声の停止に失敗しました - キーが見つかりません: " + key);
+			Logger::Output("AudioManager : 音声の停止に失敗しました - キーが見つかりません: " + key, Logger::Level::Warning);
 		}
 	}
 
 	void AudioManager::StopAll() {
-		Logger::Debug("AudioManager : 全ての音声を停止します");
+		Logger::Output("AudioManager : 全ての音声を停止します", Logger::Level::Debug);
 		for (auto& [key, audio] : audioMap_) {
 			if (audio) {
 				audio->StopAll();
@@ -127,7 +127,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::SetMasterVolume(float volume) {
-		Logger::Debug("AudioManager : マスターボリュームを " + std::to_string(volume) + " に設定しました");
+		Logger::Output("AudioManager : マスターボリュームを " + std::to_string(volume) + " に設定しました", Logger::Level::Debug);
 		masterVolume_ = volume;
 	}
 
@@ -138,7 +138,7 @@ namespace MadoEngine {
 
 		auto it = volumeMap_.find(lowerKey);
 		if (it != volumeMap_.end()) {
-			Logger::Debug("AudioManager : " + lowerKey + " の音量を " + std::to_string(volume) + " に設定しました");
+			Logger::Output("AudioManager : " + lowerKey + " の音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Debug);
 			it->second = volume;
 			// 即座に反映
 			auto audioIt = audioMap_.find(lowerKey);
@@ -146,7 +146,7 @@ namespace MadoEngine {
 				audioIt->second->SetVolume(volume * masterVolume_);
 			}
 		} else {
-			Logger::Warning("AudioManager	: 音量の設定に失敗しました - キーが見つかりません: " + key);
+			Logger::Output("AudioManager	: 音量の設定に失敗しました - キーが見つかりません: " + key, Logger::Level::Warning);
 		}
 	}
 

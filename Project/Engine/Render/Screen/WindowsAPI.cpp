@@ -14,7 +14,7 @@ namespace MadoEngine::Screen {
 		// ウィンドウが閉じられたときの処理
 		switch (msg) {
 		case WM_DESTROY:
-			Logger::Info("ウィンドウの閉じるボタンが押されました");
+			Logger::Output("ウィンドウの閉じるボタンが押されました", Logger::Level::Info);
 			if (api) {
 				api->isPushCloseBottom_ = true;
 			}
@@ -32,11 +32,11 @@ namespace MadoEngine::Screen {
 		// アイコンをファイルから読み込む
 		HICON WindowsAPI::LoadIconFromFile(const std::string& filePath) {
 			if (filePath.empty()) {
-				Logger::Info("アイコンファイルが指定されていません。デフォルトアイコンを使用します");
+				Logger::Output("アイコンファイルが指定されていません。デフォルトアイコンを使用します", Logger::Level::Info);
 				return LoadIcon(nullptr, IDI_APPLICATION);
 			}
 
-			Logger::Info("アイコンファイルを読み込んでいます: " + filePath);
+			Logger::Output("アイコンファイルを読み込んでいます: " + filePath, Logger::Level::Info	);
 
 			std::wstring wPath(filePath.begin(), filePath.end());
 
@@ -47,7 +47,7 @@ namespace MadoEngine::Screen {
 			Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromFile(wPath.c_str());
 			if (!bitmap || bitmap->GetLastStatus() != Gdiplus::Ok) {
 
-				Logger::Warning("アイコンファイルの読み込みに失敗しました: " + filePath + "。デフォルトアイコンを使用します");
+				Logger::Output("アイコンファイルの読み込みに失敗しました: " + filePath + "。デフォルトアイコンを使用します", Logger::Level::Warning);
 
 				if (bitmap) delete bitmap;
 				Gdiplus::GdiplusShutdown(gdiplusToken);
@@ -61,9 +61,9 @@ namespace MadoEngine::Screen {
 			Gdiplus::GdiplusShutdown(gdiplusToken);
 
 			if (hIcon) {
-				Logger::Info("アイコンの読み込みに成功しました");
+				Logger::Output("アイコンの読み込みに成功しました", Logger::Level::Info);
 			} else {
-				Logger::Warning("ビットマップからHICONの取得に失敗しました。デフォルトアイコンを使用します");
+				Logger::Output("ビットマップからHICONの取得に失敗しました。デフォルトアイコンを使用します", Logger::Level::Warning);
 			}
 
 			return hIcon ? hIcon : LoadIcon(nullptr, IDI_APPLICATION);
@@ -72,9 +72,9 @@ namespace MadoEngine::Screen {
 		// ウィンドウを初期化する
 		void WindowsAPI::Initialize(WindowDesc& desc, HINSTANCE hInstance) {
 
-		Logger::Info("WindowsAPIを初期化しています");
-		Logger::Info("ウィンドウタイトル: " + desc.title);
-		Logger::Info("ウィンドウサイズ: " + std::to_string(desc.width) + "x" + std::to_string(desc.height));
+		Logger::Output("WindowsAPIを初期化しています", Logger::Level::Info);
+		Logger::Output("ウィンドウタイトル: " + desc.title, Logger::Level::Info);
+		Logger::Output("ウィンドウサイズ: " + std::to_string(desc.width) + "x" + std::to_string(desc.height), Logger::Level::Info);
 
 		desc_ = desc;
 
@@ -87,7 +87,7 @@ namespace MadoEngine::Screen {
 		hIcon_ = LoadIconFromFile(desc_.iconPath);
 		wndClass_.hIcon = hIcon_;
 
-		Logger::Info("ウィンドウクラスを登録しています");
+		Logger::Output("ウィンドウクラスを登録しています", Logger::Level::Info);
 
 		RegisterClass(&wndClass_);
 
@@ -113,14 +113,14 @@ namespace MadoEngine::Screen {
 		SetWindowLongPtr(hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 		if (hWnd_) {
-			Logger::Info("ウィンドウの作成に成功しました");
+			Logger::Output("ウィンドウの作成に成功しました", Logger::Level::Info);
 		} else {
-			Logger::Error("ウィンドウの作成に失敗しました");
+			Logger::Output("ウィンドウの作成に失敗しました", Logger::Level::Error);
 		}
 
 		ShowWindow(hWnd_, SW_SHOW);
 
-		Logger::Info("WindowsAPIの初期化が完了しました");
+		Logger::Output("WindowsAPIの初期化が完了しました", Logger::Level::Info);
 	}
 
 	// メッセージを処理する。アプリを継続する場合はtrue、終了する場合はfalseを返す
@@ -130,7 +130,7 @@ namespace MadoEngine::Screen {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			if (msg.message == WM_QUIT) {
-				Logger::Info("WM_QUITメッセージを受信しました。アプリケーションを終了します");
+				Logger::Output("WM_QUITメッセージを受信しました。アプリケーションを終了します", Logger::Level::Info);
 				return false;
 			}
 		}
