@@ -1,14 +1,9 @@
 #include <Windows.h>
 #include <vector>
-#include "Engine/Render/Screen/WindowsAPI.h"
-#include "Engine/Core/DxDevice/DxDevice.h"
-#include "Engine/Audio/AudioManager.h"
-#include "Engine/Input/InputManager.h"
+#include "Engine/CoreHeaders.h"
+#include "Engine/RenderHeaders.h"
 #include "Engine/UtilityHeaders.h"
-#include "Engine/Core/DeltaTime/DeltaTime.h"
-#include "Engine/Core/Command/command.h"
-#include "Engine/Render/Screen/SwapChain.h"
-#include "Engine/Core/View/RTVManager.h"
+#include "Engine/MathHeaders.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {

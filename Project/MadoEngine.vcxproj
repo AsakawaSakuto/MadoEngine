@@ -130,16 +130,22 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Core\Terminal.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Title.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
-    <ClCompile Include="Engine\Core\Command\command.cpp" />
+    <ClCompile Include="Engine\Core\Command\Command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
     <ClCompile Include="Engine\Core\View\DSVManager.cpp" />
     <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
+    <ClCompile Include="Engine\.Execution\Execution.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -148,8 +154,10 @@
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
-    <ClCompile Include="Engine\Render\Object\RenderObject.cpp" />
+    <ClCompile Include="Engine\Render\Object\RenderObject2d.cpp" />
+    <ClCompile Include="Engine\Render\Object\RenderObject3d.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
@@ -161,17 +169,25 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Core\Terminal.h" />
+    <ClInclude Include="Application\SceneManager\IScene.h" />
+    <ClInclude Include="Application\SceneManager\SceneManager.h" />
+    <ClInclude Include="Application\SceneManager\Scene\Game.h" />
+    <ClInclude Include="Application\SceneManager\Scene\Result.h" />
+    <ClInclude Include="Application\SceneManager\Scene\Title.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
     <ClInclude Include="Engine\Audio\Data\AudioData.h" />
     <ClInclude Include="Engine\Audio\MyAudio.h" />
-    <ClInclude Include="Engine\Core\Command\command.h" />
+    <ClInclude Include="Engine\CoreHeaders.h" />
+    <ClInclude Include="Engine\Core\Command\Command.h" />
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
     <ClInclude Include="Engine\Core\View\DSVManager.h" />
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />
     <ClInclude Include="Engine\Core\View\ViewFunction.h" />
+    <ClInclude Include="Engine\.Execution\Execution..h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
     <ClInclude Include="Engine\Input\Device\Keybord.h" />
     <ClInclude Include="Engine\Input\Device\Mouse.h" />
@@ -185,9 +201,12 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
+    <ClInclude Include="Engine\RenderHeaders.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Line\Line.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
-    <ClInclude Include="Engine\Render\Object\RenderObject.h" />
+    <ClInclude Include="Engine\Render\Object\RenderObject2d.h" />
+    <ClInclude Include="Engine\Render\Object\RenderObject3d.h" />
     <ClInclude Include="Engine\Render\Screen\SwapChain.h" />
     <ClInclude Include="Engine\Render\Screen\WindowsAPI.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
