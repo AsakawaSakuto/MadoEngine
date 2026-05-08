@@ -108,7 +108,7 @@
 
 #pragma endregion
 
-namespace MadoEngine
+namespace MadoEngine::InputDevice
 {
 	class Keybord
 	{

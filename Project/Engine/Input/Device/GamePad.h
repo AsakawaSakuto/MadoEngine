@@ -29,7 +29,7 @@ struct VibrationDesc {
 	EaseType easeType; // 振動の強さを時間で補間するイージングタイプ
 };
 
-namespace MadoEngine
+namespace MadoEngine::InputDevice
 {
 	class GamePad
 	{

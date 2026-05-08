@@ -9,7 +9,7 @@
 // 中クリック
 #define MOUSE_M 0x10002
 
-namespace MadoEngine
+namespace MadoEngine::InputDevice
 {
 	class Mouse
 	{

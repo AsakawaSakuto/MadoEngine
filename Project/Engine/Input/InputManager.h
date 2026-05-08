@@ -47,9 +47,9 @@ namespace MadoEngine
 		inline bool Release(const std::string& actionName) const { return IsRelease(actionName); }
 
 		// デバイスへの直接アクセス
-		Keybord* GetKeybord() { return keybord_.get(); }
-		Mouse* GetMouse() { return mouse_.get(); }
-		GamePad* GetGamePad() { return gamePad_.get(); }
+		MadoEngine::InputDevice::Keybord* GetKeybord() { return keybord_.get(); }
+		MadoEngine::InputDevice::Mouse* GetMouse() { return mouse_.get(); }
+		MadoEngine::InputDevice::GamePad* GetGamePad() { return gamePad_.get(); }
 
 	private:
 		InputManager() = default;
@@ -62,9 +62,9 @@ namespace MadoEngine
 			std::vector<int> mouseButtons;
 		};
 
-		std::unique_ptr<Keybord> keybord_;
-		std::unique_ptr<Mouse> mouse_;
-		std::unique_ptr<GamePad> gamePad_;
+		std::unique_ptr<MadoEngine::InputDevice::Keybord> keybord_;
+		std::unique_ptr<MadoEngine::InputDevice::Mouse> mouse_;
+		std::unique_ptr<MadoEngine::InputDevice::GamePad> gamePad_;
 
 		std::unordered_map<std::string, InputAction> inputActions_;
 		mutable std::unordered_map<std::string, bool> pressLoggedFlags_; // Pressログ出力済みフラグ
