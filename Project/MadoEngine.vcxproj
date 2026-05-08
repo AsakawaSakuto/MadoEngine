@@ -141,6 +141,7 @@
     <ClCompile Include="Engine\Core\Command\Command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
+    <ClCompile Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\Core\View\DSVManager.cpp" />
     <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Engine\Core\Command\Command.h" />
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
+    <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Core\View\DSVManager.h" />
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />

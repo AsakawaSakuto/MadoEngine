@@ -6,3 +6,4 @@
 #include "Core/View/RTVManager.h"
 #include "Core/View/DSVManager.h"
 #include "Core/DeltaTime/DeltaTime.h"
+#include "Core/LeakChecker/D3DResourceLeakChecker.h"
