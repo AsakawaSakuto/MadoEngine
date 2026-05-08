@@ -69,6 +69,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 
 		MadoEngine::InputManager::GetInstance()->Update(windowsAPI.GetHWnd(), dt);
 
+		// フルスクリーン切り替え（ALT+EnterまたはF11キー）
+		auto* keyboard = MadoEngine::InputManager::GetInstance()->GetKeybord();
+		if (keyboard) {
+			// ALT+Enterでフルスクリーン切り替え
+			bool altPressed = keyboard->IsPress(DIK_LMENU) || keyboard->IsPress(DIK_RMENU);
+			bool enterTriggered = keyboard->IsTrigger(DIK_RETURN);
+
+			// F11キーでフルスクリーン切り替え
+			bool f11Triggered = keyboard->IsTrigger(DIK_F11);
+
+			if ((altPressed && enterTriggered) || f11Triggered) {
+				windowsAPI.ToggleFullscreen();
+			}
+		}
+
 		if (Input::Trigger("jump")) {}
 
 		if (Input::Press("jump")) {}

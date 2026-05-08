@@ -20,6 +20,59 @@ namespace MadoEngine::Screen {
 			}
 			PostQuitMessage(0);
 			return 0;
+
+		case WM_SIZING:
+			// ウィンドウのリサイズ時にアスペクト比を維持
+			if (api && api->desc_.isResizable && !api->isFullscreen_ && api->aspectRatio_ > 0.0f) {
+				RECT* rect = reinterpret_cast<RECT*>(lparam);
+				int width = rect->right - rect->left;
+				int height = rect->bottom - rect->top;
+
+				// クライアント領域のサイズを取得するため、ウィンドウ枠のサイズを計算
+				RECT clientRect = {};
+				RECT windowRect = {};
+				GetClientRect(hwnd, &clientRect);
+				GetWindowRect(hwnd, &windowRect);
+				int frameWidth = (windowRect.right - windowRect.left) - (clientRect.right - clientRect.left);
+				int frameHeight = (windowRect.bottom - windowRect.top) - (clientRect.bottom - clientRect.top);
+
+				// クライアント領域のサイズ
+				int clientWidth = width - frameWidth;
+				int clientHeight = height - frameHeight;
+
+				// リサイズの方向に応じてアスペクト比を維持
+				switch (wparam) {
+				case WMSZ_LEFT:
+				case WMSZ_RIGHT:
+					// 幅ベースで高さを調整
+					clientHeight = static_cast<int>(clientWidth / api->aspectRatio_);
+					rect->bottom = rect->top + clientHeight + frameHeight;
+					break;
+
+				case WMSZ_TOP:
+				case WMSZ_BOTTOM:
+					// 高さベースで幅を調整
+					clientWidth = static_cast<int>(clientHeight * api->aspectRatio_);
+					rect->right = rect->left + clientWidth + frameWidth;
+					break;
+
+				case WMSZ_TOPLEFT:
+				case WMSZ_TOPRIGHT:
+				case WMSZ_BOTTOMLEFT:
+				case WMSZ_BOTTOMRIGHT:
+					// 角のドラッグの場合、幅ベースで高さを調整
+					clientHeight = static_cast<int>(clientWidth / api->aspectRatio_);
+					if (wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT) {
+						rect->top = rect->bottom - clientHeight - frameHeight;
+					} else {
+						rect->bottom = rect->top + clientHeight + frameHeight;
+					}
+					break;
+				}
+
+				return TRUE;
+			}
+			break;
 		}
 
 		if (api && api->desc_.wndProc) {
@@ -77,6 +130,12 @@ namespace MadoEngine::Screen {
 		Logger::Output("ウィンドウサイズ: " + std::to_string(desc.width) + "x" + std::to_string(desc.height), Logger::Level::Engine);
 
 		desc_ = desc;
+
+		// アスペクト比を計算して保存（リサイズ時に使用）
+		if (desc_.height > 0) {
+			aspectRatio_ = static_cast<float>(desc_.width) / static_cast<float>(desc_.height);
+			Logger::Output("アスペクト比: " + std::to_string(aspectRatio_), Logger::Level::Engine);
+		}
 
 		wndClass_ = {};
 		wndClass_.lpfnWndProc = WindowProc;
@@ -145,5 +204,64 @@ namespace MadoEngine::Screen {
 			}
 		}
 		return true;
+	}
+
+	// フルスクリーンモードを切り替える
+	void WindowsAPI::ToggleFullscreen() {
+		if (!desc_.isResizable) {
+			Logger::Output("ウィンドウサイズ変更が無効のため、フルスクリーンに切り替えられません", Logger::Level::Warning);
+			return;
+		}
+
+		if (isFullscreen_) {
+			// フルスクリーンからウィンドウモードに戻す
+			Logger::Output("ウィンドウモードに切り替えています", Logger::Level::Engine);
+
+			// ウィンドウスタイルを元に戻す
+			SetWindowLong(hWnd_, GWL_STYLE, windowedStyle_);
+
+			// ウィンドウの位置とサイズを復元
+			SetWindowPos(
+				hWnd_,
+				HWND_NOTOPMOST,
+				windowedRect_.left,
+				windowedRect_.top,
+				windowedRect_.right - windowedRect_.left,
+				windowedRect_.bottom - windowedRect_.top,
+				SWP_FRAMECHANGED | SWP_SHOWWINDOW
+			);
+
+			isFullscreen_ = false;
+			Logger::Output("ウィンドウモードに切り替えました", Logger::Level::Engine);
+		} else {
+			// ウィンドウモードからフルスクリーンにする
+			Logger::Output("フルスクリーンモードに切り替えています", Logger::Level::Engine);
+
+			// 現在のウィンドウスタイルと位置を保存
+			windowedStyle_ = GetWindowLong(hWnd_, GWL_STYLE);
+			GetWindowRect(hWnd_, &windowedRect_);
+
+			// フルスクリーン用のウィンドウスタイルに変更（枠なし）
+			SetWindowLong(hWnd_, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+
+			// モニターのサイズを取得
+			HMONITOR hMonitor = MonitorFromWindow(hWnd_, MONITOR_DEFAULTTOPRIMARY);
+			MONITORINFO monitorInfo = { sizeof(MONITORINFO) };
+			GetMonitorInfo(hMonitor, &monitorInfo);
+
+			// ウィンドウをモニター全体に広げる
+			SetWindowPos(
+				hWnd_,
+				HWND_TOPMOST,
+				monitorInfo.rcMonitor.left,
+				monitorInfo.rcMonitor.top,
+				monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left,
+				monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+				SWP_FRAMECHANGED | SWP_SHOWWINDOW
+			);
+
+			isFullscreen_ = true;
+			Logger::Output("フルスクリーンモードに切り替えました", Logger::Level::Engine);
+		}
 	}
 }

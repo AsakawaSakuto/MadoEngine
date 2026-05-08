@@ -147,8 +147,8 @@
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
-    <ClCompile Include="Engine\Render\Object\2d\Sprite.cpp" />
-    <ClCompile Include="Engine\Render\Object\3d\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\RenderObject.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
@@ -185,8 +185,8 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
-    <ClInclude Include="Engine\Render\Object\2d\Sprite.h" />
-    <ClInclude Include="Engine\Render\Object\3d\Model.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject.h" />
     <ClInclude Include="Engine\Render\Screen\SwapChain.h" />
     <ClInclude Include="Engine\Render\Screen\WindowsAPI.h" />

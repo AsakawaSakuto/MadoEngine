@@ -28,11 +28,20 @@ namespace MadoEngine::Screen {
 		/// @brief メッセージを処理する。アプリを継続する場合はtrue、終了する場合はfalseを返す
 		bool ProcessMessage();
 
+		/// @brief ウィンドウのサイズを取得する
 		std::pair<int, int> GetWindowSize() const { return { desc_.width, desc_.height }; }
+
+		/// @brief ウィンドウハンドルを取得する
 		HWND GetHWnd() const { return hWnd_; }
 
-		bool IsFullscreen() const { return isFullscreen_; }
+		/// @brief 右上の×ボタンが押されたかどうかを取得する
 		bool IsPushCloseButton() const { return isPushCloseBottom_; }
+
+		/// @brief フルスクリーンモードかどうかを取得する
+		bool IsFullscreen() const { return isFullscreen_; }
+
+		/// @brief フルスクリーンモードを切り替える
+		void ToggleFullscreen();
 
 	private:
 
@@ -52,6 +61,12 @@ namespace MadoEngine::Screen {
 		bool isFullscreen_ = false;              // フルスクリーンモードにするかどうか
 		bool isPushCloseBottom_ = false;         // 右上の×ボタンが押されたかどうか
 
-	};
+		// ウィンドウモード時の情報を保存（フルスクリーンから戻るために使用）
+		RECT windowedRect_ = {};                 // ウィンドウモード時の位置とサイズ
+		DWORD windowedStyle_ = 0;                // ウィンドウモード時のスタイル
 
+		// アスペクト比の維持
+		float aspectRatio_ = 0.0f;               // 初期ウィンドウのアスペクト比（幅/高さ）
+
+	};
 }
