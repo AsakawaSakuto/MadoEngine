@@ -317,10 +317,10 @@
     <ClInclude Include="Application\Core\Terminal.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\.Execution\Execution..h">
+    <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h">
+    <ClInclude Include="Engine\.Execution\Execution.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

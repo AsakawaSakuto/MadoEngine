@@ -176,6 +176,7 @@
     <ClInclude Include="Application\SceneManager\Scene\Game.h" />
     <ClInclude Include="Application\SceneManager\Scene\Result.h" />
     <ClInclude Include="Application\SceneManager\Scene\Title.h" />
+    <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
     <ClInclude Include="Engine\Audio\Data\AudioData.h" />
@@ -189,7 +190,6 @@
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />
     <ClInclude Include="Engine\Core\View\ViewFunction.h" />
-    <ClInclude Include="Engine\.Execution\Execution..h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
     <ClInclude Include="Engine\Input\Device\Keybord.h" />
     <ClInclude Include="Engine\Input\Device\Mouse.h" />
