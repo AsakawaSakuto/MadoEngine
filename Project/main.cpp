@@ -1,16 +1,18 @@
 #include <Windows.h>
 #include <vector>
+#include <memory>
 #include "Engine/CoreHeaders.h"
 #include "Engine/RenderHeaders.h"
 #include "Engine/UtilityHeaders.h"
 #include "Engine/MathHeaders.h"
+#include "Application/SceneManager/SceneManager.h"
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	Logger::Initialize();
 
-	D3DResourceLeakChecker leakChecker;
+	//D3DResourceLeakChecker leakChecker;
 
 	MadoEngine::Screen::WindowsAPI windowsAPI;
 	MadoEngine::DeltaTime deltaTime;
@@ -53,6 +55,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 
 	MadoEngine::InputManager::GetInstance()->Initialize();
 
+	// スペースキーでシーン遷移用の入力アクションを登録
+	Input::SetInputKeys("NextScene", DIK_SPACE);
 	Input::SetInputKeys("Jump", DIK_SPACE, GAMEPAD_STICK_R, GAMEPAD_STICK_L, GAMEPAD_L, GAMEPAD_R, GAMEPAD_A);
 
 	// メインループ
@@ -80,12 +84,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR, _In
 				windowsAPI.ToggleFullscreen();
 			}
 		}
-
-		if (Input::Trigger("jump")) {}
-
-		if (Input::Press("jump")) {}
-
-		if (Input::Release("jump")) {}
 
 		// ===== 画面クリア処理 =====
 

@@ -50,19 +50,19 @@ namespace Input {
 
 	/// @brief キーボードへ直接アクセス
 	/// @return Keybordインスタンスへのポインタ
-	inline MadoEngine::Keybord* GetKeybord() {
+	inline MadoEngine::InputDevice::Keybord* GetKeybord() {
 		return MadoEngine::InputManager::GetInstance()->GetKeybord();
 	}
 
 	/// @brief マウスへ直接アクセス
 	/// @return Mouseインスタンスへのポインタ
-	inline MadoEngine::Mouse* GetMouse() {
+	inline MadoEngine::InputDevice::Mouse* GetMouse() {
 		return MadoEngine::InputManager::GetInstance()->GetMouse();
 	}
 
 	/// @brief ゲームパッドへ直接アクセス
 	/// @return GamePadインスタンスへのポインタ
-	inline MadoEngine::GamePad* GetGamePad() {
+	inline MadoEngine::InputDevice::GamePad* GetGamePad() {
 		return MadoEngine::InputManager::GetInstance()->GetGamePad();
 	}
 }

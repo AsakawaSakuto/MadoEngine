@@ -1,6 +1,6 @@
 #include "Keybord.h"
 
-namespace MadoEngine
+namespace MadoEngine::InputDevice
 {
 	Keybord::Keybord()
 		: currentState_{}

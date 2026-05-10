@@ -11,9 +11,9 @@ namespace MadoEngine
 
 	void InputManager::Initialize()
 	{
-		keybord_ = std::make_unique<Keybord>();
-		mouse_ = std::make_unique<Mouse>();
-		gamePad_ = std::make_unique<GamePad>();
+		keybord_ = std::make_unique<MadoEngine::InputDevice::Keybord>();
+		mouse_ = std::make_unique<MadoEngine::InputDevice::Mouse>();
+		gamePad_ = std::make_unique<MadoEngine::InputDevice::GamePad>();
 	}
 
 	void InputManager::Finalize()

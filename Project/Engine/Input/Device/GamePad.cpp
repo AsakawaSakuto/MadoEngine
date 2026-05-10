@@ -1,7 +1,7 @@
 #include "GamePad.h"
 #include <cmath>
 
-namespace MadoEngine
+namespace MadoEngine::InputDevice
 {
 	GamePad::GamePad(int playerIndex)
 		: playerIndex_(playerIndex)

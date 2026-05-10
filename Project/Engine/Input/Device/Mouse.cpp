@@ -1,6 +1,6 @@
 #include "Mouse.h"
 
-namespace MadoEngine
+namespace MadoEngine::InputDevice
 {
 	Mouse::Mouse()
 		: currentState_{}
