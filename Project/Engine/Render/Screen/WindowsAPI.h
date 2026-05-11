@@ -40,10 +40,13 @@ namespace MadoEngine::Screen {
 		/// @brief フルスクリーンモードかどうかを取得する
 		bool IsFullscreen() const { return isFullscreen_; }
 
-		/// @brief フルスクリーンモードを切り替える
-		void ToggleFullscreen();
+			/// @brief フルスクリーンモードを切り替える
+			void ToggleFullscreen();
 
-	private:
+			/// @brief 入力処理（フルスクリーン切り替えなど）
+			void ProcessInput();
+
+		private:
 
 		/// @brief ウィンドウプロシージャ
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);

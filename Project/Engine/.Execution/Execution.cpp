@@ -39,32 +39,6 @@ namespace MadoEngine
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance()->Initialize();
 		MadoEngine::InputManager::GetInstance()->Initialize();
-	}
-
-	void Execution::Update() {
-		// デルタタイムを計算
-		deltaTime_->Update();
-		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
-
-		// ゲームの処理
-		MadoEngine::AudioManager::GetInstance()->Update();
-
-		MadoEngine::InputManager::GetInstance()->Update(windowsAPI_->GetHWnd(), dt);
-
-		// フルスクリーン切り替え（ALT+EnterまたはF11キー）
-		auto* keyboard = MadoEngine::InputManager::GetInstance()->GetKeybord();
-		if (keyboard) {
-			// ALT+Enterでフルスクリーン切り替え
-			bool altPressed = keyboard->IsPress(DIK_LMENU) || keyboard->IsPress(DIK_RMENU);
-			bool enterTriggered = keyboard->IsTrigger(DIK_RETURN);
-
-			// F11キーでフルスクリーン切り替え
-			bool f11Triggered = keyboard->IsTrigger(DIK_F11);
-
-			if ((altPressed && enterTriggered) || f11Triggered) {
-				windowsAPI_->ToggleFullscreen();
-			}
-		}
 
 		// バックバッファ用のRTVを作成
 		backBufferRTVIndices_.resize(swapChain_->GetBufferCount());
@@ -72,6 +46,21 @@ namespace MadoEngine
 			backBufferRTVIndices_[i] = rtvManager_->Allocate();
 			rtvManager_->CreateRenderTargetView(swapChain_->GetBackBuffer(i), backBufferRTVIndices_[i]);
 		}
+	}
+
+	void Execution::Update() {
+		// デルタタイムを計算
+		deltaTime_->Update();
+		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
+
+		// AudioManagerの更新（終了した音声のクリーンアップなど）
+		MadoEngine::AudioManager::GetInstance()->Update();
+
+		// InputManagerの更新（キーボード、マウス、ゲームパッドの状態を更新）
+		MadoEngine::InputManager::GetInstance()->Update(windowsAPI_->GetHWnd(), dt);
+
+		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
+		windowsAPI_->ProcessInput();
 	}
 
 	void Execution::PreDraw()

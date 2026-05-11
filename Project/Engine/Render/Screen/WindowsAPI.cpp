@@ -1,6 +1,7 @@
 #include "WindowsAPI.h"
 #include <gdiplus.h>
 #include "Utility/Logger/Logger.h"
+#include "Input/InputManager.h"
 #pragma comment(lib, "gdiplus.lib")
 
 namespace MadoEngine::Screen {
@@ -262,6 +263,23 @@ namespace MadoEngine::Screen {
 
 			isFullscreen_ = true;
 			Logger::Output("フルスクリーンモードに切り替えました", Logger::Level::Engine);
+		}
+	}
+
+	// 入力処理（フルスクリーン切り替えなど）
+	void WindowsAPI::ProcessInput() {
+		auto* keyboard = MadoEngine::InputManager::GetInstance()->GetKeybord();
+		if (keyboard) {
+			// ALT+Enterでフルスクリーン切り替え
+			bool altPressed = keyboard->IsPress(DIK_LMENU) || keyboard->IsPress(DIK_RMENU);
+			bool enterTriggered = keyboard->IsTrigger(DIK_RETURN);
+
+			// F11キーでフルスクリーン切り替え
+			bool f11Triggered = keyboard->IsTrigger(DIK_F11);
+
+			if ((altPressed && enterTriggered) || f11Triggered) {
+				ToggleFullscreen();
+			}
 		}
 	}
 }
