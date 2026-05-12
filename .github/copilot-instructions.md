@@ -18,6 +18,12 @@ void 関数() {
 }
 ↑の様な改行スタイルにする。
 
+.hファイルのインクルードについて
+$(ProjectDir)Engine
+$(ProjectDir)Application
+$(ProjectDir)Externals
+が追加のインクルードディレクトリにあるので #include ”../../” などは使わず #include "Core/DxDevice/DxDevice.h" の用に書くこと
+
 2. アプリの概要
 プロジェクト内容: DirectX 12 を利用した自作の描画ゲームエンジン。
 
