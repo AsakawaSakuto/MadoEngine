@@ -80,12 +80,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Application;C:\Users\k024g\OneDriveデスクトップ\MadoEngine\Engine;$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Engine;$(ProjectDir)Application</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Debug;$(ProjectDir)Externals\DirectXTex\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -100,11 +102,13 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>;$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Engine;$(ProjectDir)Application</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Release;$(ProjectDir)Externals\DirectXTex\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
@@ -119,11 +123,13 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>;$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Engine;$(ProjectDir)Application</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Release;$(ProjectDir)Externals\DirectXTex\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -142,6 +148,7 @@
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
     <ClCompile Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.cpp" />
+    <ClCompile Include="Engine\Core\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Engine\Core\View\DSVManager.cpp" />
     <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
@@ -186,6 +193,7 @@
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h" />
+    <ClInclude Include="Engine\Core\TextureManager\TextureManager.h" />
     <ClInclude Include="Engine\Core\View\DSVManager.h" />
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />
@@ -225,6 +233,7 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
     <ClInclude Include="Engine\Utility\Logger\Logger.h" />
+    <ClInclude Include="Engine\Utility\Material.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="Engine\Utility\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />

@@ -97,6 +97,9 @@ namespace MadoEngine {
 		// マスターボリューム
 		float masterVolume_ = 0.5f;
 
+		float bgmVolume_ = 0.5f;
+		float seVolume_ = 0.5f;
+
 		// 音声ファイルの基準ディレクトリ
 		static constexpr const char* kAudioDirectory = "Assets/Audio";
 	};

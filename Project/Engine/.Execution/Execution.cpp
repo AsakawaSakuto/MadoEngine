@@ -4,6 +4,8 @@ namespace MadoEngine
 {
 	void Execution::Initialize(HINSTANCE hInstance){
 
+		CoInitializeEx(0, COINIT_MULTITHREADED);
+
 		Logger::Initialize();
 
 		// ウィンドウの設定
@@ -39,6 +41,7 @@ namespace MadoEngine
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance()->Initialize();
 		MadoEngine::InputManager::GetInstance()->Initialize();
+		MadoEngine::TextureManager::GetInstance()->Initialize(dxDevice_.get()->GetDevice());
 
 		// バックバッファ用のRTVを作成
 		backBufferRTVIndices_.resize(swapChain_->GetBufferCount());
@@ -115,7 +118,10 @@ namespace MadoEngine
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance()->Finalize();
 		MadoEngine::InputManager::GetInstance()->Finalize();
+		MadoEngine::TextureManager::GetInstance()->Finalize();
 		Logger::Finalize();
+
+		CoUninitialize();
 	}
 
 	bool Execution::IsRunning() {
