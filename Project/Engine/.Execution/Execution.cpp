@@ -43,6 +43,12 @@ namespace MadoEngine
 		dsvManager_ = std::make_unique<MadoEngine::Core::DSVManager>();
 		dsvManager_->Initialize(dxDevice_.get());
 		
+		// ShaderManagerの初期化（Assets/Shader 内の全HLSLをコンパイル・キャッシュ）
+		MadoEngine::ShaderManager::GetInstance()->Initialize();
+
+		// RootSignatureManagerの初期化
+		MadoEngine::RootSignatureManager::GetInstance()->Initialize(dxDevice_.get());
+
 		// PSOFactoryの初期化
 		psoFactory_ = std::make_unique<MadoEngine::Render::PSOFactory>();
 		psoFactory_->Initialize(dxDevice_.get());
@@ -54,9 +60,13 @@ namespace MadoEngine
 		// DeltaTimeの初期化
 		deltaTime_ = std::make_unique<MadoEngine::DeltaTime>();
 
+		// InputManagerの初期化
+		MadoEngine::InputManager::GetInstance()->Initialize();
+
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance()->Initialize();
-		MadoEngine::InputManager::GetInstance()->Initialize();
+
+		// TextureManagerの初期化（Assets/Texture内の全.pngを自動ロード）
 		MadoEngine::TextureManager::GetInstance()->Initialize(dxDevice_.get()->GetDevice());
 
 		// バックバッファ用のRTVを作成
@@ -136,6 +146,8 @@ namespace MadoEngine
 		MadoEngine::InputManager::GetInstance()->Finalize();
 		MadoEngine::TextureManager::GetInstance()->Finalize();
 		psoRegistry_->Finalize();
+		MadoEngine::ShaderManager::GetInstance()->Finalize();
+		MadoEngine::RootSignatureManager::GetInstance()->Finalize();
 		Logger::Finalize();
 
 		CoUninitialize();

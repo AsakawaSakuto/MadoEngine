@@ -138,9 +138,6 @@
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Shader\ShaderCompiler.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -148,6 +145,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Shader\ShaderManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Shader\RootSignatureManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -350,9 +353,6 @@
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Shader\ShaderCompiler.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSODesc.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -366,6 +366,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSORegistry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Shader\ShaderManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Shader\RootSignatureManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

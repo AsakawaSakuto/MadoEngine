@@ -164,7 +164,7 @@
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
-    <ClCompile Include="Engine\Shader\ShaderCompiler.cpp" />
+    <ClCompile Include="Engine\Shader\RootSignatureManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
@@ -173,6 +173,7 @@
     <ClCompile Include="Engine\Render\Object\RenderObject3d.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
+    <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
     <ClCompile Include="Engine\Utility\Collider\Collider.cpp" />
@@ -221,7 +222,7 @@
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />
     <ClInclude Include="Engine\Render\PSO\PSORegistry.h" />
     <ClInclude Include="Engine\Render\PSO\ShaderReflector.h" />
-    <ClInclude Include="Engine\Shader\ShaderCompiler.h" />
+    <ClInclude Include="Engine\Shader\RootSignatureManager.h" />
     <ClInclude Include="Engine\RenderHeaders.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h" />
@@ -231,6 +232,7 @@
     <ClInclude Include="Engine\Render\Object\RenderObject3d.h" />
     <ClInclude Include="Engine\Render\Screen\SwapChain.h" />
     <ClInclude Include="Engine\Render\Screen\WindowsAPI.h" />
+    <ClInclude Include="Engine\Shader\ShaderManager.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
     <ClInclude Include="Engine\Utility\Camera\Camera.h" />
     <ClInclude Include="Engine\Utility\Camera\DebugCamera.h" />

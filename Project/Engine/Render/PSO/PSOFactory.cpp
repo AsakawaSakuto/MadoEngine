@@ -1,6 +1,8 @@
 #include "Render/PSO/PSOFactory.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Utility/Logger/Logger.h"
+#include "Shader/ShaderManager.h"
+#include "Shader/RootSignatureManager.h"
 #include <cassert>
 
 namespace MadoEngine::Render {
@@ -85,9 +87,9 @@ namespace MadoEngine::Render {
 		psoDesc.SampleDesc.Count = 1;
 
 		// TODO: ShaderManagerから取得する
-		// psoDesc.VS = ShaderManager::Get(desc.vsKey);
-		// psoDesc.PS = ShaderManager::Get(desc.psKey);
-		// psoDesc.pRootSignature = RootSignatureManager::Get(desc.rootSigKey);
+		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance()->Get(desc.vsKey);
+		psoDesc.PS             = MadoEngine::ShaderManager::GetInstance()->Get(desc.psKey);
+		psoDesc.pRootSignature = MadoEngine::RootSignatureManager::GetInstance()->Get(desc.rootSigKey);
 
 		return psoDesc;
 	}

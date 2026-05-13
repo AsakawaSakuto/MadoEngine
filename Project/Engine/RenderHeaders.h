@@ -11,3 +11,5 @@
 #include "Render/PSO/PSOFactory.h"
 #include "Render/PSO/PSORegistry.h"
 #include "Render/PSO/ShaderReflector.h"
+#include "Shader/ShaderManager.h"
+#include "Shader/RootSignatureManager.h"
