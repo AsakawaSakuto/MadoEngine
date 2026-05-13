@@ -39,10 +39,19 @@ namespace MadoEngine
 		MadoEngine::Screen::WindowsAPI::WindowDesc winDesc_;
 
 		std::unique_ptr<MadoEngine::DeltaTime> deltaTime_;
+
 		std::unique_ptr<MadoEngine::Core::DxDevice> dxDevice_;
+
 		std::unique_ptr<MadoEngine::Core::CommandManager> commandManager_;
+
 		std::unique_ptr<MadoEngine::Screen::SwapChain> swapChain_;
+
 		std::unique_ptr<MadoEngine::Core::RTVManager> rtvManager_;
+		std::unique_ptr<MadoEngine::Core::SRVManager> srvManager_;
+		std::unique_ptr<MadoEngine::Core::DSVManager> dsvManager_;
+
+		std::unique_ptr<MadoEngine::Render::PSOFactory> psoFactory_;
+		std::unique_ptr<MadoEngine::Render::PSORegistry> psoRegistry_;
 
 		std::vector<uint32_t> backBufferRTVIndices_;
 		uint32_t currentBackBufferIndex_;

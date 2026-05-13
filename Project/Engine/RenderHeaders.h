@@ -6,3 +6,8 @@
 #include "Render/Object/2d/Sprite/Sprite.h"
 #include "Render/Object/3d/Model/Model.h"
 #include "Render/Object/3d/Line/Line.h"
+#include "Render/PSO/PSODesc.h"
+#include "Render/PSO/PSODescHash.h"
+#include "Render/PSO/PSOFactory.h"
+#include "Render/PSO/PSORegistry.h"
+#include "Render/PSO/ShaderReflector.h"

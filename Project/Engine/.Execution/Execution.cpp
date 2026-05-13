@@ -34,7 +34,23 @@ namespace MadoEngine
 		// RTVManagerの初期化
 		rtvManager_ = std::make_unique<MadoEngine::Core::RTVManager>();
 		rtvManager_->Initialize(dxDevice_.get());
+
+		// SRVManagerの初期化
+		srvManager_ = std::make_unique<MadoEngine::Core::SRVManager>();
+		srvManager_->Initialize(dxDevice_.get());
+
+		// DSVManagerの初期化
+		dsvManager_ = std::make_unique<MadoEngine::Core::DSVManager>();
+		dsvManager_->Initialize(dxDevice_.get());
 		
+		// PSOFactoryの初期化
+		psoFactory_ = std::make_unique<MadoEngine::Render::PSOFactory>();
+		psoFactory_->Initialize(dxDevice_.get());
+
+		// PSORegistryの初期化
+		psoRegistry_ = std::make_unique<MadoEngine::Render::PSORegistry>();
+		psoRegistry_->Initialize(dxDevice_.get(), psoFactory_.get());
+
 		// DeltaTimeの初期化
 		deltaTime_ = std::make_unique<MadoEngine::DeltaTime>();
 
@@ -119,6 +135,7 @@ namespace MadoEngine
 		MadoEngine::AudioManager::GetInstance()->Finalize();
 		MadoEngine::InputManager::GetInstance()->Finalize();
 		MadoEngine::TextureManager::GetInstance()->Finalize();
+		psoRegistry_->Finalize();
 		Logger::Finalize();
 
 		CoUninitialize();
