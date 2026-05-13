@@ -145,9 +145,11 @@ namespace MadoEngine
 		MadoEngine::AudioManager::GetInstance()->Finalize();
 		MadoEngine::InputManager::GetInstance()->Finalize();
 		MadoEngine::TextureManager::GetInstance()->Finalize();
-		psoRegistry_->Finalize();
 		MadoEngine::ShaderManager::GetInstance()->Finalize();
 		MadoEngine::RootSignatureManager::GetInstance()->Finalize();
+
+		psoRegistry_->Finalize();
+
 		Logger::Finalize();
 
 		CoUninitialize();
