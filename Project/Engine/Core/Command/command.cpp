@@ -31,8 +31,6 @@ namespace MadoEngine::Core {
 
         ID3D12CommandList* commandLists[] = { commandList_.Get() };
         commandQueue_->ExecuteCommandLists(1, commandLists);
-
-        WaitForGPU();
     }
 
     void CommandManager::WaitForGPU() {

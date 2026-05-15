@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <vector>
 #include <memory>
+#include <d3d12.h>
+#include <wrl/client.h>
 #include "CoreHeaders.h"
 #include "RenderHeaders.h"
 #include "UtilityHeaders.h"
@@ -55,5 +57,12 @@ namespace MadoEngine
 
 		std::vector<uint32_t> backBufferRTVIndices_;
 		uint32_t currentBackBufferIndex_;
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
+		uint32_t depthDSVIndex_ = UINT32_MAX;
+
+
+		D3D12_VIEWPORT viewport_{}; // ビューポート矩形
+		D3D12_RECT scissorRect_{};  // シザー矩形
 	};
 }
