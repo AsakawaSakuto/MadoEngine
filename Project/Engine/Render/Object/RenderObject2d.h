@@ -1,7 +1,11 @@
 #pragma once
+#include <string>
 #include "Math/Vector2.h"
 #include "Math/Vector4.h"
 #include "Utility/Transform.h"
+#include "Core/DxDevice/DxDevice.h"
+#include "Core/Command/Command.h"
+#include "Core/TextureManager/TextureManager.h"
 
 /// @brief 2D描画オブジェクトの基底クラス
 class RenderObject2d {

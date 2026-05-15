@@ -61,7 +61,6 @@ namespace MadoEngine
 		Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 		uint32_t depthDSVIndex_ = UINT32_MAX;
 
-
 		D3D12_VIEWPORT viewport_{}; // ビューポート矩形
 		D3D12_RECT scissorRect_{};  // シザー矩形
 	};

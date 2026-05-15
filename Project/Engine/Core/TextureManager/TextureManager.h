@@ -3,9 +3,19 @@
 #include <wrl/client.h>
 #include <string>
 #include <unordered_map>
+#include <cstdint>
 #include "DirectXTex/DirectXTex.h"
+#include "Math/Vector2.h"
 
 namespace MadoEngine {
+
+    /// @brief テクスチャ1件分の情報
+    struct TextureEntry {
+        Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+        uint32_t index  = 0; // 登録順インデックス
+        uint32_t width  = 0;
+        uint32_t height = 0;
+    };
 
     /// @brief テクスチャの読み込みと管理を行うシングルトンクラス
     class TextureManager {
@@ -28,6 +38,16 @@ namespace MadoEngine {
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @return テクスチャリソースの ComPtr（見つからない場合は nullptr）
         Microsoft::WRL::ComPtr<ID3D12Resource> GetTexture(const std::string& fileName) const;
+
+        /// @brief テクスチャのピクセルサイズを取得する
+        /// @param fileName キーとなるファイル名（拡張子なし）
+        /// @return ピクセル単位の幅・高さ（見つからない場合は {0,0}）
+        Vector2 GetPixelSize(const std::string& fileName) const;
+
+        /// @brief テクスチャの登録順インデックスを取得する
+        /// @param fileName キーとなるファイル名（拡張子なし）
+        /// @return テクスチャインデックス（見つからない場合は UINT32_MAX）
+        uint32_t GetTextureIndex(const std::string& fileName) const;
 
         /// @brief 全テクスチャリソースを解放する
         void Finalize();
@@ -63,7 +83,8 @@ namespace MadoEngine {
         static std::wstring ConvertString(const std::string& str);
 
         ID3D12Device* device_ = nullptr;
-        std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12Resource>> textures_;
+        std::unordered_map<std::string, TextureEntry> textures_;
+        uint32_t nextIndex_ = 0; // 次に割り当てるインデックス
     };
 
 } // namespace MadoEngine::Core

@@ -52,7 +52,12 @@ namespace MadoEngine {
 
             UploadTextureData(resource.Get(), mipImage);
 
-            textures_[key] = std::move(resource);
+            TextureEntry entry;
+            entry.resource = std::move(resource);
+            entry.index    = nextIndex_++;
+            entry.width    = static_cast<uint32_t>(mipImage.GetMetadata().width);
+            entry.height   = static_cast<uint32_t>(mipImage.GetMetadata().height);
+            textures_[key] = std::move(entry);
             loadCount++;
 
             Logger::Output("テクスチャの読み込み完了 : " + key, Logger::Level::Assets);
@@ -69,11 +74,30 @@ namespace MadoEngine {
             Logger::Output("テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
             return nullptr;
         }
-        return it->second;
+        return it->second.resource;
+    }
+
+    Vector2 TextureManager::GetPixelSize(const std::string& fileName) const {
+        auto it = textures_.find(fileName);
+        if (it == textures_.end()) {
+            Logger::Output("[TextureManager] PixelSize の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
+            return { 0.0f, 0.0f };
+        }
+        return { static_cast<float>(it->second.width), static_cast<float>(it->second.height) };
+    }
+
+    uint32_t TextureManager::GetTextureIndex(const std::string& fileName) const {
+        auto it = textures_.find(fileName);
+        if (it == textures_.end()) {
+            Logger::Output("[TextureManager] TextureIndex の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
+            return UINT32_MAX;
+        }
+        return it->second.index;
     }
 
     void TextureManager::Finalize() {
         textures_.clear();
+        nextIndex_ = 0;
         device_ = nullptr;
         Logger::Output("TextureManager を終了しました。", Logger::Level::Engine);
     }
