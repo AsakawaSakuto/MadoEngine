@@ -181,6 +181,7 @@
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Project\Engine\Core\Resource\DxResourceHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Core\Terminal.h" />
@@ -256,6 +257,7 @@
     <ClInclude Include="Engine\Utility\Easing\EaseType.h" />
     <ClInclude Include="Engine\Utility\Easing\Easing.h" />
     <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h" />
+    <ClInclude Include="Project\Engine\Core\Resource\DxResourceHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
