@@ -142,7 +142,7 @@ namespace MadoEngine
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
 
-		testSprite_.SetRotation(testSprite_.GetRotation() + dt); // 毎フレーム回転させる
+		//testSprite_.SetRotation(testSprite_.GetRotation() + dt); // 毎フレーム回転させる
 		testSprite_.SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 		testSprite_.Update();
 	}
