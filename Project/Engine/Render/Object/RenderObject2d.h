@@ -6,6 +6,9 @@
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/TextureManager/TextureManager.h"
+#include "Utility/ResourceHelper/ResourceHelper.h"
+#include "Render/PSO/PSODesc.h"
+#include "Render/PSO/PSORegistry.h"
 
 /// @brief 2D描画オブジェクトの基底クラス
 class RenderObject2d {
@@ -17,7 +20,7 @@ public:
 	virtual ~RenderObject2d() = default;
 
 	/// @brief 初期化処理（派生クラスでオーバーライド）
-	virtual void Initialize() = 0;
+	virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) = 0;
 
 	/// @brief 更新処理（派生クラスでオーバーライド）
 	virtual void Update() = 0;
@@ -83,4 +86,42 @@ protected:
 	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
 	Vector4 color_;         // 色（RGBA）
 	bool isVisible_;        // 表示フラグ
+
+	uint32_t textureIndex_ = 0;
+	Vector2 size_ = {};
+	std::string textureName_;
+
+	MadoEngine::Render::PSODesc psoDesc_;           // PSO記述子
+	MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr; // PSOレジストリ（外部からセット）
+
+public:
+	/// @brief PSORegistryを設定する
+	/// @param registry PSORegistryポインタ
+	void SetPSORegistry(MadoEngine::Render::PSORegistry* registry) { psoRegistry_ = registry; }
+
+	/// @brief スクリーンサイズを設定する（正射影行列の計算に使用）
+	/// @param width スクリーン幅（ピクセル）
+	/// @param height スクリーン高さ（ピクセル）
+	void SetScreenSize(float width, float height) { screenWidth_ = width; screenHeight_ = height; }
+
+protected:
+
+	// デバイス
+	Microsoft::WRL::ComPtr<ID3D12Device> device_;
+
+	// コマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_;
+
+	// リソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> transformationResource_;
+
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_ = {};
+	D3D12_INDEX_BUFFER_VIEW indexBufferView_ = {};
+
+	// スクリーンサイズ（正射影行列計算用）
+	float screenWidth_  = 1280.0f;
+	float screenHeight_ = 720.0f;
 };

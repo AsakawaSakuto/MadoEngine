@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -180,8 +180,8 @@
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
+    <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Project\Engine\Core\Resource\DxResourceHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Core\Terminal.h" />
@@ -218,6 +218,7 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h" />
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />
@@ -250,6 +251,7 @@
     <ClInclude Include="Engine\Utility\Logger\Logger.h" />
     <ClInclude Include="Engine\Utility\Material.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
+    <ClInclude Include="Engine\Utility\ResourceHelper\ResourceHelper.h" />
     <ClInclude Include="Engine\Utility\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
@@ -257,7 +259,7 @@
     <ClInclude Include="Engine\Utility\Easing\EaseType.h" />
     <ClInclude Include="Engine\Utility\Easing\Easing.h" />
     <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h" />
-    <ClInclude Include="Project\Engine\Core\Resource\DxResourceHelper.h" />
+    <ClInclude Include="Project\Engine\Core\Resource\DxResourcesHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

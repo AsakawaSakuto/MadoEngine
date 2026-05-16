@@ -67,7 +67,7 @@ namespace MadoEngine
 		MadoEngine::AudioManager::GetInstance()->Initialize();
 
 		// TextureManagerの初期化（Assets/Texture内の全.pngを自動ロード）
-		MadoEngine::TextureManager::GetInstance()->Initialize(dxDevice_.get()->GetDevice());
+		MadoEngine::TextureManager::GetInstance()->Initialize(dxDevice_.get()->GetDevice(), srvManager_.get());
 
 		// バックバッファ用のRTVを作成
 		backBufferRTVIndices_.resize(swapChain_->GetBufferCount());
@@ -123,6 +123,9 @@ namespace MadoEngine
 		scissorRect_.right = windowsAPI_->GetWindowSize().first;
 		scissorRect_.top = 0;
 		scissorRect_.bottom = windowsAPI_->GetWindowSize().second;
+
+		testSprite_.Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), "uvChecker");
+		testSprite_.SetPSORegistry(psoRegistry_.get());
 	}
 
 	void Execution::Update() {
@@ -138,6 +141,10 @@ namespace MadoEngine
 
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
+
+		testSprite_.SetRotation(testSprite_.GetRotation() + dt); // 毎フレーム回転させる
+		testSprite_.SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
+		testSprite_.Update();
 	}
 
 	void Execution::PreDraw()
@@ -217,5 +224,10 @@ namespace MadoEngine
 
 	bool Execution::IsRunning() {
 		return windowsAPI_->ProcessMessage();
+	}
+
+	void Execution::TestDraw() {
+		testSprite_.Update();
+		testSprite_.Draw();
 	}
 }

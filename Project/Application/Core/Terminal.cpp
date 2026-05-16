@@ -18,6 +18,8 @@ void Terminal::Run() {
 
 		execution_->PreDraw();
 
+		execution_->TestDraw();
+
 		sceneManager_->Draw();
 
 		execution_->PostDraw();

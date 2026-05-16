@@ -32,7 +32,8 @@ namespace MadoEngine
 
 		/// @brief ゲームループを継続するかどうかを取得
 		bool IsRunning();
-
+		
+		void TestDraw();
 	private:
 
 		//D3DResourceLeakChecker leakChecker;
@@ -63,5 +64,7 @@ namespace MadoEngine
 
 		D3D12_VIEWPORT viewport_{}; // ビューポート矩形
 		D3D12_RECT scissorRect_{};  // シザー矩形
+
+		Sprite testSprite_;
 	};
 }

@@ -1,384 +1,291 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
+    <Filter Include="�w�b�_�[ �t�@�C��">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Math\Function\MathFunction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Utility\Easing\Easing.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Utility\Collider\Collider.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Input\InputManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Input\Device\Keybord.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Utility\Logger\Logger.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Audio\Data\Audio.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Audio\Data\AudioData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Audio\AudioManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Input\Device\Mouse.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Input\Device\GamePad.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Utility\Camera\Camera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Screen\SwapChain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\Command\command.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\View\SRVManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\View\RTVManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\View\DSVManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\View\ViewFunction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Object\RenderObject2d.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Object\RenderObject3d.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\SceneManager\SceneManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\SceneManager\Scene\Title.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\SceneManager\Scene\Game.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\SceneManager\Scene\Result.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Core\Terminal.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\.Execution\Execution.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Core\TextureManager\TextureManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Shader\ShaderManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Shader\RootSignatureManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Project\Engine\Core\Resource\DxResourceHelper.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
+    <ClCompile Include="Application\Core\Terminal.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Title.cpp" />
+    <ClCompile Include="Engine\Audio\AudioManager.cpp" />
+    <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
+    <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
+    <ClCompile Include="Engine\Core\Command\Command.cpp" />
+    <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
+    <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
+    <ClCompile Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.cpp" />
+    <ClCompile Include="Engine\Core\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="Engine\Core\View\DSVManager.cpp" />
+    <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
+    <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
+    <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
+    <ClCompile Include="Engine\.Execution\Execution.cpp" />
+    <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
+    <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
+    <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
+    <ClCompile Include="Engine\Input\InputManager.cpp" />
+    <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
+    <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
+    <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
+    <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
+    <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
+    <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
+    <ClCompile Include="Engine\Shader\RootSignatureManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\RenderObject2d.cpp" />
+    <ClCompile Include="Engine\Render\Object\RenderObject3d.cpp" />
+    <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
+    <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
+    <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
+    <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
+    <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
+    <ClCompile Include="Engine\Utility\Collider\Collider.cpp" />
+    <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
+    <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
+    <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Project\Engine\Core\Resource\DxResourcesHelper.cpp" />
+    <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Vector3.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Vector4.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Matrix4x4.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Matrix2x2.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Matrix3x3.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\MathHeaders.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Function\MatrixFunction.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Function\MathFunction.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Transform.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Easing\Easing.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Easing\EaseType.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\UtilityHeaders.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Collider.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Circle.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Line.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\OBB.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\OvalSphere.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Plane.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Random.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Screen\WindowsAPI.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input\InputManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input\Device\Keybord.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Logger\Logger.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\Data\Audio.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\Data\AudioData.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\AudioManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\MyAudio.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input\Device\Mouse.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input\Device\GamePad.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input\MyInput.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Camera\Camera.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Camera\DebugCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Camera\Frustum.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Quaternion.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Function\QuaternionFunction.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Screen\SwapChain.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Command\command.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\View\SRVManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\View\RTVManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\View\DSVManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\View\ViewFunction.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\CoreHeaders.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\RenderHeaders.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\RenderObject2d.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\RenderObject3d.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\SceneManager\SceneManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\SceneManager\Scene\Title.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\SceneManager\Scene\Game.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\SceneManager\Scene\Result.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\SceneManager\IScene.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\Core\Terminal.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\.Execution\Execution.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Material.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\TextureManager\TextureManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSODesc.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PSO\ShaderReflector.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSORegistry.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Shader\ShaderManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Shader\RootSignatureManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Project\Engine\Core\Resource\DxResourceHelper.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Project\Engine\Core\Resource\DxResourcesHelper.h">
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h">
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\ResourceHelper\ResourceHelper.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

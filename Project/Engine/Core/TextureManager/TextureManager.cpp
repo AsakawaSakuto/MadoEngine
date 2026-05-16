@@ -10,9 +10,11 @@ namespace MadoEngine {
         return &instance;
     }
 
-    void TextureManager::Initialize(ID3D12Device* device) {
+    void TextureManager::Initialize(ID3D12Device* device, MadoEngine::Core::SRVManager* srvManager) {
         assert(device);
+        assert(srvManager);
         device_ = device;
+        srvManager_ = srvManager;
 
         Logger::Output("TextureManager の初期化を開始します。", Logger::Level::Engine);
 
@@ -52,9 +54,13 @@ namespace MadoEngine {
 
             UploadTextureData(resource.Get(), mipImage);
 
+            // SRVデスクリプタを確保してShader Resource Viewを作成
+            uint32_t srvIndex = srvManager_->Allocate();
+            srvManager_->CreateShaderResourceView(resource.Get(), srvIndex);
+
             TextureEntry entry;
             entry.resource = std::move(resource);
-            entry.index    = nextIndex_++;
+            entry.index    = srvIndex;
             entry.width    = static_cast<uint32_t>(mipImage.GetMetadata().width);
             entry.height   = static_cast<uint32_t>(mipImage.GetMetadata().height);
             textures_[key] = std::move(entry);
@@ -93,6 +99,10 @@ namespace MadoEngine {
             return UINT32_MAX;
         }
         return it->second.index;
+    }
+
+    D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureIndex) {
+        return srvManager_->GetGPUHandle(textureIndex);
     }
 
     void TextureManager::Finalize() {

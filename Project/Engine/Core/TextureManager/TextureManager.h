@@ -6,6 +6,7 @@
 #include <cstdint>
 #include "DirectXTex/DirectXTex.h"
 #include "Math/Vector2.h"
+#include "Core/View/SRVManager.h"
 
 namespace MadoEngine {
 
@@ -32,7 +33,8 @@ namespace MadoEngine {
 
         /// @brief 初期化。"Assets/Texture" 内の全 .png を自動ロードする
         /// @param device Direct3D 12 デバイスポインタ
-        void Initialize(ID3D12Device* device);
+        /// @param srvManager SRVManagerのポインタ
+        void Initialize(ID3D12Device* device, MadoEngine::Core::SRVManager* srvManager);
 
         /// @brief ファイル名をキーにテクスチャリソースを取得する
         /// @param fileName キーとなるファイル名（拡張子なし）
@@ -48,6 +50,11 @@ namespace MadoEngine {
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @return テクスチャインデックス（見つからない場合は UINT32_MAX）
         uint32_t GetTextureIndex(const std::string& fileName) const;
+
+		/// @brief テクスチャインデックスからSRVハンドルを取得する
+        /// @param textureIndex テクスチャインデックス
+        /// @return GPU用のSRVハンドル
+        D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(uint32_t textureIndex);
 
         /// @brief 全テクスチャリソースを解放する
         void Finalize();
@@ -83,6 +90,7 @@ namespace MadoEngine {
         static std::wstring ConvertString(const std::string& str);
 
         ID3D12Device* device_ = nullptr;
+        MadoEngine::Core::SRVManager* srvManager_ = nullptr;
         std::unordered_map<std::string, TextureEntry> textures_;
         uint32_t nextIndex_ = 0; // 次に割り当てるインデックス
     };
