@@ -43,8 +43,6 @@
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
-    <ClCompile Include="Engine\Render\Object\RenderObject2d.cpp" />
-    <ClCompile Include="Engine\Render\Object\RenderObject3d.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
@@ -55,7 +53,6 @@
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Project\Engine\Core\Resource\DxResourcesHelper.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -285,6 +282,9 @@
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\ResourceHelper\ResourceHelper.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

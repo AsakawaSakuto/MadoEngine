@@ -13,9 +13,7 @@
 /// @brief 2D描画オブジェクトの基底クラス
 class RenderObject2d {
 public:
-	/// @brief コンストラクタ
-	RenderObject2d();
-
+	
 	/// @brief デストラクタ
 	virtual ~RenderObject2d() = default;
 
@@ -87,8 +85,8 @@ protected:
 	std::string objectName_; // オブジェクト名
 
 	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
-	Vector4 color_;         // 色（RGBA）
-	bool isVisible_;        // 表示フラグ
+	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f}; // 色（RGBA）
+	bool isVisible_ = true;                 // 表示フラグ
 
 	uint32_t textureIndex_ = 0;
 	Vector2 size_ = {};
