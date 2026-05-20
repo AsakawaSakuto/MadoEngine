@@ -217,6 +217,7 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteSharedGeometry.h" />

@@ -76,7 +76,7 @@ namespace MadoEngine
 			backBufferRTVIndices_[i] = rtvManager_->Allocate();
 			rtvManager_->CreateRenderTargetView(swapChain_->GetBackBuffer(i), backBufferRTVIndices_[i]);
 		}
-
+		
 		// デプスバッファリソースの生成
 		D3D12_RESOURCE_DESC depthDesc{};
 		depthDesc.Width            = winDesc_.width;
@@ -127,8 +127,8 @@ namespace MadoEngine
 
 		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 
-		testSprite_ = MadoEngine::SpriteManager::GetInstance()->Create("TestSprite", "uvChecker");
-		testSprite2_ = MadoEngine::SpriteManager::GetInstance()->Create("TestSprite2", "uvChecker");
+		testSprite_ = MySprite::Create("testSprite", "uvChecker");
+		testSprite2_ = MySprite::Create("testSprite2", "uvChecker");
 
 		testSprite2_->SetPosition({ 640.0f, 360.0f });
 	}

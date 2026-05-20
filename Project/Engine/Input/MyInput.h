@@ -3,7 +3,7 @@
 
 /// @brief 入力管理の簡易ラッパー名前空間
 /// InputManagerへの簡潔なアクセスを提供
-namespace Input {
+namespace MyInput {
 
 	/// @brief 入力アクションに複数のキー/ボタンを登録
 	/// @param actionName アクション名（例: "Jump"）

@@ -4,7 +4,7 @@
 
 /// @brief オーディオ管理の簡易ラッパー名前空間
 /// AudioManagerへの簡潔なアクセスを提供
-namespace Audio {
+namespace MyAudio {
 
 	/// @brief 音声を再生
 	/// @param key ファイル名（拡張子なし）。例: "fire", "titleBGM"
