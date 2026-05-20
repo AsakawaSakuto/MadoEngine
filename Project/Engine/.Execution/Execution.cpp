@@ -125,12 +125,10 @@ namespace MadoEngine
 		scissorRect_.top = 0;
 		scissorRect_.bottom = windowsAPI_->GetWindowSize().second;
 
-		testSprite_ = std::make_unique<Sprite>("TestSprite");
-		testSprite_->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), "uvChecker");
-		testSprite_->SetPSORegistry(psoRegistry_.get());
-		testSprite2_ = std::make_unique<Sprite>("TestSprite2");
-		testSprite2_->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), "uvChecker");
-		testSprite2_->SetPSORegistry(psoRegistry_.get());
+		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+
+		testSprite_ = MadoEngine::SpriteManager::GetInstance()->Create("TestSprite", "uvChecker");
+		testSprite2_ = MadoEngine::SpriteManager::GetInstance()->Create("TestSprite2", "uvChecker");
 
 		testSprite2_->SetPosition({ 640.0f, 360.0f });
 	}
@@ -149,10 +147,7 @@ namespace MadoEngine
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
 
-		testSprite_->SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
-		testSprite_->Update();
-		testSprite2_->SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
-		testSprite2_->Update();
+		MadoEngine::SpriteManager::GetInstance()->UpdateAll();
 	}
 
 	void Execution::PreDraw()
@@ -222,6 +217,7 @@ namespace MadoEngine
 		MadoEngine::TextureManager::GetInstance()->Finalize();
 		MadoEngine::ShaderManager::GetInstance()->Finalize();
 		MadoEngine::RootSignatureManager::GetInstance()->Finalize();
+		MadoEngine::SpriteManager::GetInstance()->Finalize();
 
 		psoRegistry_->Finalize();
 
@@ -235,7 +231,6 @@ namespace MadoEngine
 	}
 
 	void Execution::TestDraw() {
-		testSprite_->Draw();
-		testSprite2_->Draw();
+		MadoEngine::SpriteManager::GetInstance()->DrawAll();
 	}
 }

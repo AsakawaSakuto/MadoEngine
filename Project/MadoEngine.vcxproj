@@ -161,6 +161,7 @@
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
@@ -217,6 +218,8 @@
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteSharedGeometry.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h" />
