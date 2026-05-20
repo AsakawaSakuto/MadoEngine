@@ -9,7 +9,7 @@ DebugCamera::DebugCamera() {
 }
 
 void DebugCamera::Update() {
-	auto* mouse = Input::GetMouse();
+	auto* mouse = MyInput::GetMouse();
 	if (!mouse) {
 		Camera::Update();
 		return;

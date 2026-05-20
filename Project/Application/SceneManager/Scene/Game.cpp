@@ -20,7 +20,7 @@ void Game::Initialize()
 void Game::Update()
 {
 	// スペースキーが押されたらリザルトシーンに遷移
-	if (Input::GetKeybord()->IsTrigger(DIK_SPACE))
+	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE))
 	{
 		Logger::Output("スペースキーが押されました - Resultシーンへ遷移", Logger::Level::Application);
 		if (sceneManager_)
