@@ -1,41 +1,28 @@
 #include "Title.h"
-#include "SceneManager/SceneManager.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
-Title::Title()
-	: sceneManager_(nullptr)
-{
-}
+Title::Title() {}
 
-Title::~Title()
-{
-}
+Title::~Title() {}
 
-void Title::Initialize()
-{
+void Title::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
 }
 
-void Title::Update()
-{
+std::string Title::Update() {
 	// スペースキーが押されたらゲームシーンに遷移
-	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE))
-	{
+	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
 		Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
-		if (sceneManager_)
-		{
-			sceneManager_->ChangeScene("Game");
-		}
+		return "Game";
 	}
+	return "Title";
 }
 
-void Title::Draw()
-{
+void Title::Finalize() {
+	Logger::Output("タイトルシーンの終了処理を実行しました", Logger::Level::Application);
+}
+
+void Title::Draw() {
 	// タイトルシーンの描画処理
-}
-
-void Title::SetSceneManager(SceneManager* sceneManager)
-{
-	sceneManager_ = sceneManager;
 }

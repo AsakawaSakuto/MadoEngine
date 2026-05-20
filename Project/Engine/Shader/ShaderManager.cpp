@@ -25,7 +25,7 @@ namespace MadoEngine {
 		if (!fs::exists(kCacheDir)) {
 			fs::create_directories(kCacheDir);
 			Logger::Output(
-				std::format("[ShaderManager] キャッシュディレクトリを作成しました : {}", kCacheDir),
+				std::format("キャッシュディレクトリを作成しました : {}", kCacheDir),
 				Logger::Level::Assets
 			);
 		}
@@ -66,7 +66,7 @@ namespace MadoEngine {
 			if (!fs::exists(csoPath)) {
 				// .cso が存在しない → コンパイル必要
 				Logger::Output(
-					std::format("[ShaderManager] CSOが存在しないためコンパイルします : {}", key),
+					std::format("CSOが存在しないためコンパイルします : {}", key),
 					Logger::Level::Assets
 				);
 				needCompile = true;
@@ -76,7 +76,7 @@ namespace MadoEngine {
 				const auto csoTime  = fs::last_write_time(csoPath);
 				if (hlslTime > csoTime) {
 					Logger::Output(
-						std::format("[ShaderManager] HLSLが更新されているため再コンパイルします : {}", key),
+						std::format("HLSLが更新されているため再コンパイルします : {}", key),
 						Logger::Level::Assets
 					);
 					needCompile = true;
@@ -87,7 +87,7 @@ namespace MadoEngine {
 				blob = CompileAndSave(hlslPath, csoPath, profile);
 				if (!blob) {
 					Logger::Output(
-						std::format("[ShaderManager] コンパイルに失敗しました : {}", key),
+						std::format("コンパイルに失敗しました : {}", key),
 						Logger::Level::Error
 					);
 					continue;
@@ -97,7 +97,7 @@ namespace MadoEngine {
 				blob = LoadCso(csoPath.wstring());
 				if (!blob) {
 					Logger::Output(
-						std::format("[ShaderManager] CSOのBlob生成に失敗しました : {}", key),
+						std::format("CSOのBlob生成に失敗しました : {}", key),
 						Logger::Level::Error
 					);
 					continue;
@@ -106,13 +106,13 @@ namespace MadoEngine {
 
 			shaderMap_[key] = std::move(blob);
 			Logger::Output(
-				std::format("[ShaderManager] シェーダーを登録しました : {}", key),
+				std::format("シェーダーを登録しました : {}", key),
 				Logger::Level::Assets
 			);
 		}
 
 		Logger::Output(
-			std::format("[ShaderManager] 初期化完了。登録シェーダー数 : {}", shaderMap_.size()),
+			std::format("初期化完了。登録シェーダー数 : {}", shaderMap_.size()),
 			Logger::Level::Engine
 		);
 	}
@@ -121,7 +121,7 @@ namespace MadoEngine {
 		const auto it = shaderMap_.find(key);
 		if (it == shaderMap_.end()) {
 			Logger::Output(
-				std::format("[ShaderManager] シェーダーキーが見つかりません : {}", key),
+				std::format("シェーダーキーが見つかりません : {}", key),
 				Logger::Level::Warning
 			);
 			return { nullptr, 0 };
@@ -134,7 +134,7 @@ namespace MadoEngine {
 
 	void ShaderManager::Finalize() {
 		shaderMap_.clear();
-		Logger::Output("[ShaderManager] 終了しました", Logger::Level::Engine);
+		Logger::Output("ShaderManager 終了しました", Logger::Level::Engine);
 	}
 
 	Microsoft::WRL::ComPtr<IDxcBlob> ShaderManager::CompileAndSave(
@@ -149,7 +149,7 @@ namespace MadoEngine {
 		std::ofstream ofs(csoPath, std::ios::binary);
 		if (!ofs) {
 			Logger::Output(
-				std::format("[ShaderManager] CSOファイルの書き込みに失敗しました : {}", csoPath.string()),
+				std::format("CSOファイルの書き込みに失敗しました : {}", csoPath.string()),
 				Logger::Level::Error
 			);
 			return blob; // blob は返す（メモリ上は有効）
@@ -159,7 +159,7 @@ namespace MadoEngine {
 			static_cast<std::streamsize>(blob->GetBufferSize())
 		);
 		Logger::Output(
-			std::format("[ShaderManager] CSOを保存しました : {}", csoPath.string()),
+			std::format("CSOを保存しました : {}", csoPath.string()),
 			Logger::Level::Assets
 		);
 		return blob;
@@ -187,15 +187,15 @@ namespace MadoEngine {
 	void ShaderManager::InitializeDxc() {
 		HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
 		assert(SUCCEEDED(hr));
-		Logger::Output("[ShaderManager] DxcUtils の生成が完了しました", Logger::Level::Engine);
+		Logger::Output("DxcUtils の生成が完了しました", Logger::Level::Engine);
 
 		hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
 		assert(SUCCEEDED(hr));
-		Logger::Output("[ShaderManager] DxcCompiler の生成が完了しました", Logger::Level::Engine);
+		Logger::Output("DxcCompiler の生成が完了しました", Logger::Level::Engine);
 
 		hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 		assert(SUCCEEDED(hr));
-		Logger::Output("[ShaderManager] DXC の初期化が完了しました", Logger::Level::Engine);
+		Logger::Output("DXC の初期化が完了しました", Logger::Level::Engine);
 	}
 
 	Microsoft::WRL::ComPtr<IDxcBlob> ShaderManager::Compile(
@@ -211,7 +211,7 @@ namespace MadoEngine {
 		};
 
 		Logger::Output(
-			std::format("[ShaderManager] コンパイルを開始します : {}", toStr(filePath)),
+			std::format("コンパイルを開始します : {}", toStr(filePath)),
 			Logger::Level::Assets
 		);
 
@@ -219,7 +219,7 @@ namespace MadoEngine {
 		HRESULT hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 		if (FAILED(hr)) {
 			Logger::Output(
-				std::format("[ShaderManager] シェーダーファイルの読み込みに失敗しました : {}", toStr(filePath)),
+				std::format("シェーダーファイルの読み込みに失敗しました : {}", toStr(filePath)),
 				Logger::Level::Error
 			);
 			assert(false);
@@ -254,7 +254,7 @@ namespace MadoEngine {
 		result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
 		if (errors && errors->GetStringLength() > 0) {
 			Logger::Output(
-				std::format("[ShaderManager] コンパイルエラー : {}", errors->GetStringPointer()),
+				std::format("コンパイルエラー : {}", errors->GetStringPointer()),
 				Logger::Level::Error
 			);
 			assert(false);
@@ -265,7 +265,7 @@ namespace MadoEngine {
 		result->GetStatus(&status);
 		if (FAILED(status)) {
 			Logger::Output(
-				std::format("[ShaderManager] コンパイルに失敗しました : {}", toStr(filePath)),
+				std::format("コンパイルに失敗しました : {}", toStr(filePath)),
 				Logger::Level::Error
 			);
 			assert(false);
@@ -277,7 +277,7 @@ namespace MadoEngine {
 		assert(shaderBlob);
 
 		Logger::Output(
-			std::format("[ShaderManager] コンパイルが完了しました : {}", toStr(filePath)),
+			std::format("コンパイルが完了しました : {}", toStr(filePath)),
 			Logger::Level::Assets
 		);
 		return shaderBlob;
@@ -294,7 +294,7 @@ namespace MadoEngine {
 				return str;
 			};
 			Logger::Output(
-				std::format("[ShaderManager] CSOファイルの読み込みに失敗しました : {}", toStr(csoPath)),
+				std::format("CSOファイルの読み込みに失敗しました : {}", toStr(csoPath)),
 				Logger::Level::Error
 			);
 			return nullptr;

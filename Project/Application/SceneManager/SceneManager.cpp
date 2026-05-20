@@ -1,66 +1,58 @@
 #include "SceneManager.h"
 #include "IScene.h"
-#include "Scene/Title.h"
-#include "Scene/Game.h"
-#include "Scene/Result.h"
 #include "Utility/Logger/Logger.h"
+#include <cassert>
 
 SceneManager::SceneManager()
 	: currentScene_(nullptr)
-	, nextScene_(nullptr)
 	, currentSceneName_("") {}
 
 SceneManager::~SceneManager() {}
 
-void SceneManager::Initialize() {
-	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
+void SceneManager::RegisterScene(const std::string& sceneName, CreatorFunc creator) {
+	creators_[sceneName] = std::move(creator);
+	Logger::Output("シーンを登録しました: " + sceneName, Logger::Level::Debug);
+}
 
-	// 最初のシーンをTitleに設定
-	ChangeScene("Title");
+void SceneManager::Initialize(const std::string& initialScene) {
+	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
+	ChangeScene(initialScene);
 }
 
 void SceneManager::Update() {
-	// シーン遷移がある場合は実行
-	if (nextScene_) {
-		currentScene_.reset();
-		currentScene_ = std::move(nextScene_);
-		currentScene_->Initialize();
-		Logger::Output("シーン遷移: " + currentSceneName_, Logger::Level::Application);
-	}
+	MadoEngine::SpriteManager::GetInstance()->UpdateAll();
 
-	// 現在のシーンを更新
 	if (currentScene_) {
-		currentScene_->Update();
+		std::string next = currentScene_->Update();
+		if (!next.empty() && next != currentSceneName_) {
+			ChangeScene(next);
+		}
 	}
 }
 
 void SceneManager::Draw() {
-	// 現在のシーンを描画
+	MadoEngine::SpriteManager::GetInstance()->DrawAll();
+
 	if (currentScene_) {
 		currentScene_->Draw();
 	}
 }
 
 void SceneManager::ChangeScene(const std::string& sceneName) {
-	nextScene_ = CreateScene(sceneName);
-	currentSceneName_ = sceneName;
-}
-
-std::unique_ptr<IScene> SceneManager::CreateScene(const std::string& sceneName) {
-	if (sceneName == "Title") {
-		auto scene = std::make_unique<Title>();
-		scene->SetSceneManager(this);
-		return scene;
-	} else if (sceneName == "Game") {
-		auto scene = std::make_unique<Game>();
-		scene->SetSceneManager(this);
-		return scene;
-	} else if (sceneName == "Result") {
-		auto scene = std::make_unique<Result>();
-		scene->SetSceneManager(this);
-		return scene;
+	auto it = creators_.find(sceneName);
+	if (it == creators_.end()) {
+		Logger::Output("指定されたシーンは登録されていません: " + sceneName, Logger::Level::Error);
+		assert(false && "未登録のシーン名が指定されました。SceneManager::RegisterScene()で事前登録してください。");
+		return;
 	}
 
-	Logger::Output("不明なシーン名: " + sceneName, Logger::Level::Warning);
-	return nullptr;
+	if (currentScene_) {
+		currentScene_->Finalize();
+		Logger::Output("旧シーンの終了処理を実行しました: " + currentSceneName_, Logger::Level::Application);
+	}
+
+	currentScene_ = it->second();
+	currentSceneName_ = sceneName;
+	currentScene_->Initialize();
+	Logger::Output("シーン遷移を完了しました: " + currentSceneName_, Logger::Level::Application);
 }

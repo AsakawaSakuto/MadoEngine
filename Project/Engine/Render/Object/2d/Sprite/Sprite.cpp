@@ -86,7 +86,7 @@ void Sprite::InitializeCommonResources(const std::string& textureName) {
 	psoDesc_.dsvFormat = DXGI_FORMAT_D32_FLOAT;
 	psoDesc_.blendMode = MadoEngine::Render::BlendMode::Normal;
 
-	Logger::Output("[Sprite] " + objectName_ + "の初期化が完了しました", Logger::Level::Application);
+	Logger::Output(objectName_ + "の初期化が完了しました", Logger::Level::Application);
 }
 
 void Sprite::Update() {

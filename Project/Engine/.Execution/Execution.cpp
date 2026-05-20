@@ -126,11 +126,6 @@ namespace MadoEngine
 		scissorRect_.bottom = windowsAPI_->GetWindowSize().second;
 
 		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
-
-		testSprite_ = MySprite::Create("testSprite", "uvChecker");
-		testSprite2_ = MySprite::Create("testSprite2", "uvChecker");
-
-		testSprite2_->SetPosition({ 640.0f, 360.0f });
 	}
 
 	void Execution::Update() {
@@ -146,8 +141,6 @@ namespace MadoEngine
 
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
-
-		MadoEngine::SpriteManager::GetInstance()->UpdateAll();
 	}
 
 	void Execution::PreDraw()
@@ -228,9 +221,5 @@ namespace MadoEngine
 
 	bool Execution::IsRunning() {
 		return windowsAPI_->ProcessMessage();
-	}
-
-	void Execution::TestDraw() {
-		MadoEngine::SpriteManager::GetInstance()->DrawAll();
 	}
 }

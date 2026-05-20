@@ -140,6 +140,7 @@
     <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\Test.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Title.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="Application\SceneManager\SceneManager.h" />
     <ClInclude Include="Application\SceneManager\Scene\Game.h" />
     <ClInclude Include="Application\SceneManager\Scene\Result.h" />
+    <ClInclude Include="Application\SceneManager\Scene\Test.h" />
     <ClInclude Include="Application\SceneManager\Scene\Title.h" />
     <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
@@ -262,6 +264,7 @@
     <ClInclude Include="Engine\Utility\Easing\EaseType.h" />
     <ClInclude Include="Engine\Utility\Easing\Easing.h" />
     <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h" />
+    <ClInclude Include="Project\Application\SceneManager\SceneType.h" />
     <ClInclude Include="Project\Engine\Core\Resource\DxResourcesHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

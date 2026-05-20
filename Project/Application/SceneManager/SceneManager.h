@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
+#include <functional>
 #include <string>
+#include <unordered_map>
 
 class IScene;
 
@@ -9,14 +11,23 @@ class IScene;
 class SceneManager
 {
 public:
+	/// @brief シーン生成関数の型エイリアス
+	using CreatorFunc = std::function<std::unique_ptr<IScene>()>;
+
 	/// @brief コンストラクタ
 	SceneManager();
 
 	/// @brief デストラクタ
 	~SceneManager();
 
+	/// @brief シーンを登録する
+	/// @param sceneName シーン名文字列（例: "Title", "Game"）
+	/// @param creator シーン生成関数
+	void RegisterScene(const std::string& sceneName, CreatorFunc creator);
+
 	/// @brief シーンマネージャーの初期化
-	void Initialize();
+	/// @param initialScene 最初に起動するシーン名文字列
+	void Initialize(const std::string& initialScene);
 
 	/// @brief 現在のシーンを更新
 	void Update();
@@ -24,17 +35,12 @@ public:
 	/// @brief 現在のシーンを描画
 	void Draw();
 
+private:
 	/// @brief 次のシーンに遷移
-	/// @param sceneName 遷移先のシーン名（"Title", "Game", "Result"）
+	/// @param sceneName 遷移先のシーン名文字列
 	void ChangeScene(const std::string& sceneName);
 
-private:
-	/// @brief シーン名から対応するシーンのインスタンスを生成
-	/// @param sceneName シーン名
-	/// @return 生成されたシーンのユニークポインタ
-	std::unique_ptr<IScene> CreateScene(const std::string& sceneName);
-
-	std::unique_ptr<IScene> currentScene_;  // 現在のシーン
-	std::unique_ptr<IScene> nextScene_;     // 次のシーン
-	std::string currentSceneName_;          // 現在のシーン名
+	std::unordered_map<std::string, CreatorFunc> creators_;  // 登録済みシーン生成関数マップ
+	std::unique_ptr<IScene> currentScene_;                   // 現在のシーン
+	std::string currentSceneName_;                           // 現在のシーン名
 };

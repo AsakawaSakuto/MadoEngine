@@ -20,18 +20,18 @@ void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* 
 
 	sharedGeometry_.Initialize(device_);
 
-	Logger::Output("[SpriteManager] 初期化が完了しました（共有ジオメトリバッファ生成済み）", Logger::Level::Engine);
+	Logger::Output("初期化が完了しました（共有ジオメトリバッファ生成済み）", Logger::Level::Engine);
 }
 
 void SpriteManager::Finalize() {
 	sprites_.clear();
 	sharedGeometry_.Finalize();
-	Logger::Output("[SpriteManager] 全リソースを解放しました", Logger::Level::Engine);
+	Logger::Output("全リソースを解放しました", Logger::Level::Engine);
 }
 
 Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName) {
 	if (sprites_.contains(name)) {
-		Logger::Output("[SpriteManager] 同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
+		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
 		return sprites_.at(name).get();
 	}
 
@@ -42,14 +42,14 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 	Sprite* ptr = sprite.get();
 	sprites_.emplace(name, std::move(sprite));
 
-	Logger::Output("[SpriteManager] Spriteを生成しました : " + name, Logger::Level::Application);
+	Logger::Output("Spriteを生成しました : " + name, Logger::Level::Application);
 	return ptr;
 }
 
 Sprite* SpriteManager::Get(const std::string& name) const {
 	auto it = sprites_.find(name);
 	if (it == sprites_.end()) {
-		Logger::Output("[SpriteManager] Spriteが見つかりません : " + name, Logger::Level::Warning);
+		Logger::Output("Spriteが見つかりません : " + name, Logger::Level::Warning);
 		return nullptr;
 	}
 	return it->second.get();
@@ -57,7 +57,7 @@ Sprite* SpriteManager::Get(const std::string& name) const {
 
 void SpriteManager::Destroy(const std::string& name) {
 	if (sprites_.erase(name) > 0) {
-		Logger::Output("[SpriteManager] Spriteを破棄しました : " + name, Logger::Level::Application);
+		Logger::Output("Spriteを破棄しました : " + name, Logger::Level::Application);
 	}
 }
 
