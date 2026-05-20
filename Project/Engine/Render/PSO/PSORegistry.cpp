@@ -213,6 +213,7 @@ namespace MadoEngine::Render {
 		if (pipelineLibrary_) {
 			std::wstring key = MakeLibraryKey(desc);
 			pipelineLibrary_->StorePipeline(key.c_str(), pso.Get());
+			Logger::Output("[PSORegistry] PipelineLibraryにPSOを登録します", Logger::Level::Assets);
 		}
 
 		isDirty_ = true;

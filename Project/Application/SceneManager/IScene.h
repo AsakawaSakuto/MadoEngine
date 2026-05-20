@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 /// @brief シーンの基底インターフェース
 /// @details 各シーン(Title, Game, Resultなど)はこのインターフェースを実装する
@@ -16,4 +17,7 @@ public:
 
 	/// @brief シーンの描画処理
 	virtual void Draw() = 0;
+
+protected:
+	std::string sceneName_; // シーン名
 };

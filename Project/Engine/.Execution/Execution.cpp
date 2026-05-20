@@ -46,8 +46,9 @@ namespace MadoEngine
 		// ShaderManagerの初期化（Assets/Shader 内の全HLSLをコンパイル・キャッシュ）
 		MadoEngine::ShaderManager::GetInstance()->Initialize();
 
-		// RootSignatureManagerの初期化
+		// RootSignatureManagerの初期化 デフォルトのRootSignatureを生成・登録
 		MadoEngine::RootSignatureManager::GetInstance()->Initialize(dxDevice_.get());
+		MadoEngine::RootSignatureManager::GetInstance()->Make();
 
 		// PSOFactoryの初期化
 		psoFactory_ = std::make_unique<MadoEngine::Render::PSOFactory>();
@@ -124,8 +125,14 @@ namespace MadoEngine
 		scissorRect_.top = 0;
 		scissorRect_.bottom = windowsAPI_->GetWindowSize().second;
 
-		testSprite_.Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), "uvChecker");
-		testSprite_.SetPSORegistry(psoRegistry_.get());
+		testSprite_ = std::make_unique<Sprite>("TestSprite");
+		testSprite_->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), "uvChecker");
+		testSprite_->SetPSORegistry(psoRegistry_.get());
+		testSprite2_ = std::make_unique<Sprite>("TestSprite2");
+		testSprite2_->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), "uvChecker");
+		testSprite2_->SetPSORegistry(psoRegistry_.get());
+
+		testSprite2_->SetPosition({ 640.0f, 360.0f });
 	}
 
 	void Execution::Update() {
@@ -142,9 +149,10 @@ namespace MadoEngine
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
 
-		//testSprite_.SetRotation(testSprite_.GetRotation() + dt); // 毎フレーム回転させる
-		testSprite_.SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
-		testSprite_.Update();
+		testSprite_->SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
+		testSprite_->Update();
+		testSprite2_->SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
+		testSprite2_->Update();
 	}
 
 	void Execution::PreDraw()
@@ -227,7 +235,7 @@ namespace MadoEngine
 	}
 
 	void Execution::TestDraw() {
-		testSprite_.Update();
-		testSprite_.Draw();
+		testSprite_->Draw();
+		testSprite2_->Draw();
 	}
 }

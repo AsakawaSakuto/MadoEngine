@@ -42,6 +42,9 @@ namespace MadoEngine {
 		/// @return ID3D12RootSignature ポインタ（見つからない場合は nullptr）
 		ID3D12RootSignature* Get(const std::string& key) const;
 
+		/// @brief RootSignatureを生成して登録する（例: "Sprite.RootSig"）
+		void Make();
+
 		/// @brief 全RootSignatureを解放する
 		void Finalize();
 

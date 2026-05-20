@@ -4,6 +4,8 @@
 class Sprite : public RenderObject2d {
 public:
 
+	Sprite(std::string ObjectName);
+
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) override;
 
 	void Update() override;

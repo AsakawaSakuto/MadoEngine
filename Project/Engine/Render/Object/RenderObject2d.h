@@ -83,6 +83,9 @@ public:
 	bool IsVisible() const { return isVisible_; }
 
 protected:
+
+	std::string objectName_; // オブジェクト名
+
 	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
 	Vector4 color_;         // 色（RGBA）
 	bool isVisible_;        // 表示フラグ

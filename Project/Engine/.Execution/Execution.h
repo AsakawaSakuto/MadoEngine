@@ -65,6 +65,7 @@ namespace MadoEngine
 		D3D12_VIEWPORT viewport_{}; // ビューポート矩形
 		D3D12_RECT scissorRect_{};  // シザー矩形
 
-		Sprite testSprite_;
+		std::unique_ptr<Sprite> testSprite_;
+		std::unique_ptr<Sprite> testSprite2_;
 	};
 }
