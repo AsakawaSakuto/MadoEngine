@@ -29,7 +29,7 @@ void SpriteManager::Finalize() {
 	Logger::Output("全リソースを解放しました", Logger::Level::Engine);
 }
 
-Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName) {
+Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName, const std::string& sceneName) {
 	if (sprites_.contains(name)) {
 		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
 		return sprites_.at(name).get();
@@ -38,11 +38,12 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 	auto sprite = std::make_unique<Sprite>(name);
 	sprite->Initialize(device_, commandList_, textureName, sharedGeometry_);
 	sprite->SetPSORegistry(psoRegistry_);
+	sprite->SetSceneName(sceneName);
 
 	Sprite* ptr = sprite.get();
 	sprites_.emplace(name, std::move(sprite));
 
-	Logger::Output("Spriteを生成しました : " + name, Logger::Level::Application);
+	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneName.empty() ? "全シーン" : sceneName), Logger::Level::Application);
 	return ptr;
 }
 
@@ -67,11 +68,13 @@ void SpriteManager::UpdateAll() {
 	}
 }
 
-void SpriteManager::DrawAll() {
+void SpriteManager::DrawAll(const std::string& currentSceneName) {
 	for (auto& [name, sprite] : sprites_) {
-		if (sprite->IsVisible()) {
-			sprite->Draw();
-		}
+		const std::string& sceneName = sprite->GetSceneName();
+		// シーン名が空文字（全シーン共通）または現在のシーンと一致する場合のみ描画
+		if (!sprite->IsVisible()) { continue; }
+		if (!sceneName.empty() && sceneName != currentSceneName) { continue; }
+		sprite->Draw();
 	}
 }
 

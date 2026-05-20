@@ -34,8 +34,9 @@ public:
 	/// @brief Spriteを生成して管理下に登録する
 	/// @param name Spriteの識別名
 	/// @param textureName 使用するテクスチャ名
+	/// @param sceneName 描画を許可するシーン名（空文字の場合は全シーンで描画）
 	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
-	Sprite* Create(const std::string& name, const std::string& textureName);
+	Sprite* Create(const std::string& name, const std::string& textureName, const std::string& sceneName);
 
 	/// @brief 識別名でSpriteを取得する
 	/// @param name Spriteの識別名
@@ -49,8 +50,9 @@ public:
 	/// @brief 管理下の全Spriteを更新する
 	void UpdateAll();
 
-	/// @brief 管理下の全Spriteを描画する（IsVisible() == false のものはスキップ）
-	void DrawAll();
+	/// @brief 管理下の全Spriteを描画する（IsVisible() == false またはシーン名不一致はスキップ）
+	/// @param currentSceneName 現在実行中のシーン名
+	void DrawAll(const std::string& currentSceneName);
 
 private:
 

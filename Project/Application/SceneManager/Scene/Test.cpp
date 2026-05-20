@@ -12,8 +12,8 @@ Test::~Test() {}
 void Test::Initialize() {
 	Logger::Output("テストシーンを初期化しました", Logger::Level::Application);
 
-	testSprite_ = MySprite::Create("testSprite", "uvChecker");
-	testSprite2_ = MySprite::Create("testSprite2", "uvChecker");
+	testSprite_ = MySprite::Create("testSprite", "uvChecker", "Test");
+	testSprite2_ = MySprite::Create("testSprite2", "uvChecker", "Test");
 	testSprite2_->SetPosition({ 100.0f, 100.0f });
 }
 

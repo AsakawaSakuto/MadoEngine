@@ -31,7 +31,7 @@ void SceneManager::Update() {
 }
 
 void SceneManager::Draw() {
-	MadoEngine::SpriteManager::GetInstance()->DrawAll();
+	MadoEngine::SpriteManager::GetInstance()->DrawAll(currentSceneName_);
 
 	if (currentScene_) {
 		currentScene_->Draw();

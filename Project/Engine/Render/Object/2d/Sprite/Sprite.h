@@ -38,4 +38,16 @@ private:
 
 	Vector2     anchorPoint_ = { 0.0f, 0.0f };
 	AnchorPoint anchorType_ = AnchorPoint::TopLeft;
+
+	// 描画対象シーン名（空文字は全シーンで描画）
+	std::string sceneName_;
+
+public:
+	/// @brief 描画対象シーン名をセットする
+	/// @param sceneName 描画を許可するシーン名
+	void SetSceneName(const std::string& sceneName) { sceneName_ = sceneName; }
+
+	/// @brief 描画対象シーン名を取得する
+	/// @return 登録されているシーン名
+	const std::string& GetSceneName() const { return sceneName_; }
 };
