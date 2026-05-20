@@ -3,8 +3,7 @@
 #include "Utility/Logger/Logger.h"
 
 Test::Test()
-	: testSprite_(nullptr)
-	, testSprite2_(nullptr)
+	
 {}
 
 Test::~Test() {}
@@ -12,9 +11,10 @@ Test::~Test() {}
 void Test::Initialize() {
 	Logger::Output("テストシーンを初期化しました", Logger::Level::Application);
 
-	testSprite_ = MySprite::Create("testSprite", "uvChecker", "Test");
-	testSprite2_ = MySprite::Create("testSprite2", "uvChecker", "Test");
-	testSprite2_->SetPosition({ 100.0f, 100.0f });
+	for (int i = 0; i < sprites_.size(); ++i) {
+		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", "Test");
+		sprites_[i]->SetPosition({ 32.0f * i, 32.0f * i });
+	}
 }
 
 std::string Test::Update() {

@@ -1,5 +1,6 @@
 #include "SpriteManager.h"
 #include "Utility/Logger/Logger.h"
+#include "Shader/RootSignatureManager.h"
 #include <cassert>
 
 namespace MadoEngine {
@@ -69,11 +70,29 @@ void SpriteManager::UpdateAll() {
 }
 
 void SpriteManager::DrawAll(const std::string& currentSceneName) {
+	if (sprites_.empty()) { return; }
+
+	// 全スプライト共通のステートをループ外で1回だけ設定する
+	bool isStateSet = false;
+
 	for (auto& [name, sprite] : sprites_) {
 		const std::string& sceneName = sprite->GetSceneName();
 		// シーン名が空文字（全シーン共通）または現在のシーンと一致する場合のみ描画
 		if (!sprite->IsVisible()) { continue; }
 		if (!sceneName.empty() && sceneName != currentSceneName) { continue; }
+
+		// 最初の有効なスプライトのタイミングで共通ステートを1回だけ設定
+		if (!isStateSet) {
+			commandList_->SetGraphicsRootSignature(
+				MadoEngine::RootSignatureManager::GetInstance()->Get(sprite->GetRootSigKey()));
+			commandList_->SetPipelineState(psoRegistry_->Get(sprite->GetPSODesc()));
+			commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList_->IASetVertexBuffers(0, 1, &sharedGeometry_.vbv);
+			commandList_->IASetIndexBuffer(&sharedGeometry_.ibv);
+			isStateSet = true;
+		}
+
+		// 各スプライト固有の描画（CBV/SRVバインドとドローコール）
 		sprite->Draw();
 	}
 }

@@ -26,6 +26,5 @@ public:
 	void Draw() override;
 
 private:
-	Sprite* testSprite_;
-	Sprite* testSprite2_;
+	std::array<Sprite* ,10> sprites_;
 };

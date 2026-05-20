@@ -100,6 +100,14 @@ public:
 	/// @param registry PSORegistryポインタ
 	void SetPSORegistry(MadoEngine::Render::PSORegistry* registry) { psoRegistry_ = registry; }
 
+	/// @brief PSO記述子を取得する
+	/// @return PSO記述子への定数参照
+	const MadoEngine::Render::PSODesc& GetPSODesc() const { return psoDesc_; }
+
+	/// @brief ルートシグネチャキーを取得する
+	/// @return ルートシグネチャキー文字列への定数参照
+	const std::string& GetRootSigKey() const { return psoDesc_.rootSigKey; }
+
 	/// @brief スクリーンサイズを設定する（正射影行列の計算に使用）
 	/// @param width スクリーン幅（ピクセル）
 	/// @param height スクリーン高さ（ピクセル）

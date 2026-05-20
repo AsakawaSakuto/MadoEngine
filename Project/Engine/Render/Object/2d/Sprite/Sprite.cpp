@@ -122,12 +122,7 @@ void Sprite::Update() {
 }
 
 void Sprite::Draw() {
-	commandList_->SetGraphicsRootSignature(MadoEngine::RootSignatureManager::GetInstance()->Get(psoDesc_.rootSigKey));
-	commandList_->SetPipelineState(psoRegistry_->Get(psoDesc_));
-	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	commandList_->IASetVertexBuffers(0, 1, activeVBV_);
-	commandList_->IASetIndexBuffer(activeIBV_);
+	// RootSignature・PSO・VBV・IBVはSpriteManagerがループ外で1回だけ設定済み
 
 	// b0: Material, b1: Transform, t0: Texture
 	commandList_->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
