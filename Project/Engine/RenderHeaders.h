@@ -15,3 +15,5 @@
 #include "Render/PSO/ShaderReflector.h"
 #include "Shader/ShaderManager.h"
 #include "Shader/RootSignatureManager.h"
+#include "Render/Screen/RenderTexture.h"
+#include "Render/Screen/ViewportScissor.h"

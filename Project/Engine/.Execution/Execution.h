@@ -7,9 +7,6 @@
 #include "CoreHeaders.h"
 #include "RenderHeaders.h"
 #include "UtilityHeaders.h"
-#include "Render/Screen/RenderTexture.h"
-#include "Core/DepthStencilBuffer/DepthStencilBuffer.h"
-#include "Render/Screen/ViewportScissor.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #include "Render/ImGui/ImGuiManager.h"

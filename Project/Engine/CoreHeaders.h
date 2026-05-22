@@ -8,3 +8,4 @@
 #include "Core/DeltaTime/DeltaTime.h"
 #include "Core/TextureManager/TextureManager.h"
 #include "Core/LeakChecker/D3DResourceLeakChecker.h"
+#include "Core/DepthStencilBuffer/DepthStencilBuffer.h"

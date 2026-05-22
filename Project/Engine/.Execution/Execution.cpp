@@ -113,21 +113,21 @@ namespace MadoEngine
 		imguiManager_->Begin();
 #endif // USE_IMGUI
 
-		// 2. CommandListを開く（記録開始）
+		// CommandListを開く（記録開始）
 		commandManager_->BeginFrame();
 
-		// 4. SRV用DescriptorHeapをセット（テクスチャ参照に必須）
+		// SRV用DescriptorHeapをセット（テクスチャ参照に必須）
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
 
 #ifdef USE_IMGUI
 		// USE_IMGUI時: オフスクリーンRTへ描画する
-		// 3. オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
+		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
 		offscreenRT_->BeginRender(commandManager_->GetCommandList(), dsvHandle);
 		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 #else
-		// 3. バックバッファをレンダーターゲットに遷移し、RTV/DSVをセット・クリア
+		// バックバッファをレンダーターゲットに遷移し、RTV/DSVをセット・クリア
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
 		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), &dsvHandle, clearColor);
@@ -140,14 +140,14 @@ namespace MadoEngine
 	void Execution::PostDraw()
 	{
 #ifdef USE_IMGUI
-		// 1. オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
+		// オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
 		offscreenRT_->EndRender(commandManager_->GetCommandList());
 
-		// 2. バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
+		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 
-		// 3. エディタレイアウト（DockSpace + Game View）を描画
+		// エディタレイアウト（DockSpace + Game View）を描画
 		imguiManager_->DrawEditorLayout(offscreenRT_->GetSRVGPUHandle());
 
 		// デモウィンドウ（動作確認用、不要になったら削除してください）
@@ -160,13 +160,13 @@ namespace MadoEngine
 		// バックバッファ: RENDER_TARGET → PRESENT に遷移
 		swapChain_->EndRender(commandManager_->GetCommandList());
 
-		// 7. CommandListを閉じてGPUに送信
+		// CommandListを閉じてGPUに送信
 		commandManager_->EndFrame();
 
-		// 8. 画面のスワップ（BackBufferとFrontBufferを入れ替える）
+		// 画面のスワップ（BackBufferとFrontBufferを入れ替える）
 		swapChain_->Present();
 
-		// 9. GPU処理完了を待機
+		// GPU処理完了を待機
 		commandManager_->WaitForGPU();
 	}
 
