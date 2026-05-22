@@ -24,4 +24,7 @@ public:
 
 	/// @brief 描画処理
 	void Draw() override;
+
+	/// @brief ImGui描画処理
+	void DrawImGui() override;
 };

@@ -38,6 +38,12 @@ void SceneManager::Draw() {
 	}
 }
 
+void SceneManager::DrawImGui() {
+	if (currentScene_) {
+		currentScene_->DrawImGui();
+	}
+}
+
 void SceneManager::ChangeScene(const std::string& sceneName) {
 	auto it = creators_.find(sceneName);
 	if (it == creators_.end()) {

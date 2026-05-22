@@ -5,6 +5,7 @@
 #include "Core/View/SRVManager.h"
 #include "Utility/Logger/Logger.h"
 #include <cassert>
+#include<filesystem>
 
 namespace MadoEngine {
 
@@ -42,6 +43,10 @@ namespace MadoEngine {
 
 		ImGui_ImplWin32_Init(hwnd);
 
+		// ドッキング機能を有効化
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 		ImGui_ImplDX12_InitInfo initInfo;
 		initInfo.Device = device->GetDevice();
 		initInfo.CommandQueue = commandManager->GetCommandQueue();
@@ -53,6 +58,26 @@ namespace MadoEngine {
 		initInfo.SrvDescriptorFreeFn = &ImGuiManager::SrvFreeCallback;
 		initInfo.UserData = this;
 		ImGui_ImplDX12_Init(&initInfo);
+
+		// 日本語フォントの設定
+		const char* fontPath = "C:/Windows/Fonts/YuGothB.ttc";
+
+		if (std::filesystem::exists(fontPath)) {
+			ImFontConfig config;
+			config.SizePixels = 14.0f;
+
+			ImFont* font = io.Fonts->AddFontFromFileTTF(
+				fontPath,
+				config.SizePixels,
+				&config,
+				io.Fonts->GetGlyphRangesJapanese());
+
+			if (font) {
+				io.FontDefault = font;
+				io.FontGlobalScale = 1.0f;
+				io.Fonts->Build();
+			}
+		}
 
 		Logger::Output("[Engine] ImGuiManager: 初期化完了", Logger::Level::Engine);
 	}

@@ -35,6 +35,8 @@ public:
 	/// @brief 現在のシーンを描画
 	void Draw();
 
+	/// @brief 現在のシーンのImGui描画
+	void DrawImGui();
 private:
 	/// @brief 次のシーンに遷移
 	/// @param sceneName 遷移先のシーン名文字列

@@ -155,6 +155,7 @@
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
     <ClCompile Include="Engine\.Execution\Execution.cpp" />
+    <ClCompile Include="Engine\Debug\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />
     <ClInclude Include="Engine\Core\View\ViewFunction.h" />
+    <ClInclude Include="Engine\Debug\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="Engine\ImGuiHeaders.h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
     <ClInclude Include="Engine\Input\Device\Keybord.h" />

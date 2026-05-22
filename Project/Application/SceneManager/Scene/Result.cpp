@@ -19,10 +19,14 @@ std::string Result::Update() {
 	return "Result";
 }
 
-void Result::Finalize() {
-	Logger::Output("リザルトシーンの終了処理を実行しました", Logger::Level::Application);
-}
-
 void Result::Draw() {
 	// リザルトシーンの描画処理
+}
+
+void Result::DrawImGui() {
+	// リザルトシーンのImGui描画処理
+}
+
+void Result::Finalize() {
+	Logger::Output("リザルトシーンの終了処理を実行しました", Logger::Level::Application);
 }

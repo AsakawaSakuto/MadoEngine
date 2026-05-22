@@ -19,10 +19,14 @@ std::string Title::Update() {
 	return "Title";
 }
 
-void Title::Finalize() {
-	Logger::Output("タイトルシーンの終了処理を実行しました", Logger::Level::Application);
-}
-
 void Title::Draw() {
 	// タイトルシーンの描画処理
+}
+
+void Title::DrawImGui() {
+	// タイトルシーンのImGui描画処理
+}
+
+void Title::Finalize() {
+	Logger::Output("タイトルシーンの終了処理を実行しました", Logger::Level::Application);
 }

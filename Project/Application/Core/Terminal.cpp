@@ -24,6 +24,8 @@ void Terminal::Run() {
 
 		sceneManager_->Draw();
 
+		sceneManager_->DrawImGui();
+
 		execution_->PostDraw();
 	}
 

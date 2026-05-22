@@ -19,10 +19,14 @@ std::string Game::Update() {
 	return "Game";
 }
 
-void Game::Finalize() {
-	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
-}
-
 void Game::Draw() {
 	// ゲームシーンの描画処理
+}
+
+void Game::DrawImGui() {
+	// ゲームシーンのImGui描画処理
+}
+
+void Game::Finalize() {
+	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
 }

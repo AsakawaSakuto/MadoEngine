@@ -24,13 +24,26 @@ std::string Test::Update() {
 		Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
 		return "Game";
 	}
+
 	return "Test";
+}
+
+void Test::Draw() {
+	
+}
+
+void Test::DrawImGui() {
+	// テストシーンの描画処理
+
+	ImGui::Begin("test");
+
+	ImGui::DragFloat2("pos", &testPos_.x, 0.1f);
+
+	ImGui::End();
+
+	sprites_[0]->SetPosition(testPos_);
 }
 
 void Test::Finalize() {
 	Logger::Output("テストシーンの終了処理を実行しました", Logger::Level::Application);
-}
-
-void Test::Draw() {
-	// テストシーンの描画処理
 }

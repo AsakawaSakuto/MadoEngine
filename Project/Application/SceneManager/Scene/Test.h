@@ -25,6 +25,9 @@ public:
 	/// @brief 描画処理
 	void Draw() override;
 
+	/// @brief ImGui描画処理
+	void DrawImGui() override;
 private:
 	std::array<Sprite* ,10> sprites_;
+	Vector2 testPos_ = { 0.0f, 0.0f };
 };
