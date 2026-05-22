@@ -89,6 +89,39 @@ namespace MadoEngine {
 		ImGuizmo::BeginFrame();
 	}
 
+	void ImGuiManager::DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV) {
+		// 全画面 DockSpace ウィンドウの設定
+		ImGuiWindowFlags dockFlags =
+			ImGuiWindowFlags_NoDocking |
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoBackground;
+
+		ImGuiViewport* vp = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(vp->Pos);
+		ImGui::SetNextWindowSize(vp->Size);
+		ImGui::SetNextWindowViewport(vp->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpaceWindow", nullptr, dockFlags);
+		ImGui::PopStyleVar(3);
+		ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::End();
+
+		// Game View ウィンドウにオフスクリーンテクスチャを表示
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Game View");
+		ImVec2 viewSize = ImGui::GetContentRegionAvail();
+		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), viewSize);
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
 	void ImGuiManager::End(ID3D12GraphicsCommandList* commandList) {
 		assert(commandList);
 		ImGui::Render();

@@ -35,6 +35,10 @@ namespace MadoEngine {
 		/// @param commandList 描画コマンドを積むコマンドリスト
 		void End(ID3D12GraphicsCommandList* commandList);
 
+		/// @brief エディタ用レイアウト（DockSpace + Game View）を描画する
+		/// @param gameViewSRV ゲーム画面オフスクリーンテクスチャのSRV GPUハンドル
+		void DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV);
+
 		/// @brief ImGuiを終了し全リソースを解放する
 		void Finalize();
 

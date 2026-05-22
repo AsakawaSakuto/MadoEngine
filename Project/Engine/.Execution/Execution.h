@@ -7,6 +7,9 @@
 #include "CoreHeaders.h"
 #include "RenderHeaders.h"
 #include "UtilityHeaders.h"
+#include "Render/Screen/RenderTexture.h"
+#include "Core/DepthStencilBuffer/DepthStencilBuffer.h"
+#include "Render/Screen/ViewportScissor.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #include "Render/ImGui/ImGuiManager.h"
@@ -58,20 +61,13 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::PSOFactory> psoFactory_;
 		std::unique_ptr<MadoEngine::Render::PSORegistry> psoRegistry_;
 
-		std::vector<uint32_t> backBufferRTVIndices_;
-		uint32_t currentBackBufferIndex_;
+		std::unique_ptr<MadoEngine::Core::DepthStencilBuffer> depthStencilBuffer_;
 
-		Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
-		uint32_t depthDSVIndex_ = UINT32_MAX;
-
-		D3D12_VIEWPORT viewport_{}; // ビューポート矩形
-		D3D12_RECT scissorRect_{};  // シザー矩形
+		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
-		Microsoft::WRL::ComPtr<ID3D12Resource> offscreenRT_;
-		uint32_t offscreenRTVIndex_ = UINT32_MAX;
-		uint32_t offscreenSRVIndex_ = UINT32_MAX;
+		std::unique_ptr<MadoEngine::Render::RenderTexture> offscreenRT_;
 #endif
 	};
 }

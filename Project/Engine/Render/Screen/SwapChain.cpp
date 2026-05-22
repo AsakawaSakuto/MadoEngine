@@ -1,6 +1,7 @@
 #include "SwapChain.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/command.h"
+#include "Core/View/RTVManager.h"
 #include "Utility/Logger/Logger.h"
 #include <cassert>
 
@@ -12,7 +13,8 @@ namespace MadoEngine::Screen {
 		HWND hwnd,
 		uint32_t width,
 		uint32_t height,
-		uint32_t bufferCount
+		uint32_t bufferCount,
+		Core::RTVManager* rtvManager
 	) {
 		assert(device != nullptr);
 		assert(commandManager != nullptr);
@@ -23,6 +25,7 @@ namespace MadoEngine::Screen {
 		device_ = device;
 		commandManager_ = commandManager;
 		bufferCount_ = bufferCount;
+		rtvManager_ = rtvManager;
 
 		CreateSwapChain(hwnd, width, height);
 
@@ -32,6 +35,16 @@ namespace MadoEngine::Screen {
 			HRESULT hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
 			assert(SUCCEEDED(hr));
 			Logger::Output("バックバッファ " + std::to_string(i) + " を取得しました", Logger::Level::Engine);
+		}
+
+		// RTVの確保と生成
+		if (rtvManager_ != nullptr) {
+			backBufferRTVIndices_.resize(bufferCount_);
+			for (uint32_t i = 0; i < bufferCount_; ++i) {
+				backBufferRTVIndices_[i] = rtvManager_->Allocate();
+				rtvManager_->CreateRenderTargetView(backBuffers_[i].Get(), backBufferRTVIndices_[i]);
+			}
+			Logger::Output("バックバッファ用RTVの生成が完了しました", Logger::Level::Engine);
 		}
 	}
 
@@ -43,6 +56,46 @@ namespace MadoEngine::Screen {
 	ID3D12Resource* SwapChain::GetBackBuffer(uint32_t index) const {
 		assert(index < bufferCount_);
 		return backBuffers_[index].Get();
+	}
+
+	void SwapChain::BeginRender(ID3D12GraphicsCommandList* commandList, const D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle, const float clearColor[4]) {
+		assert(commandList != nullptr);
+		assert(rtvManager_ != nullptr);
+
+		uint32_t index = GetCurrentBackBufferIndex();
+
+		// PRESENT → RENDER_TARGET へ遷移
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource   = backBuffers_[index].Get();
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandList->ResourceBarrier(1, &barrier);
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvManager_->GetCPUHandle(backBufferRTVIndices_[index]);
+		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, dsvHandle);
+
+		if (clearColor != nullptr) {
+			commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		}
+	}
+
+	void SwapChain::EndRender(ID3D12GraphicsCommandList* commandList) {
+		assert(commandList != nullptr);
+
+		uint32_t index = GetCurrentBackBufferIndex();
+
+		// RENDER_TARGET → PRESENT へ遷移
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource   = backBuffers_[index].Get();
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandList->ResourceBarrier(1, &barrier);
 	}
 
 	void SwapChain::Present() {

@@ -65,7 +65,9 @@
     <ClCompile Include="Externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Externals\imgui\ImGuizmo.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
-    <ClCompile Include="Engine\Debug\ImGuiManager\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
+    <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
+    <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -347,7 +349,13 @@
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Debug\ImGuiManager\ImGuiManager.h">
+    <ClInclude Include="Engine\Render\Screen\RenderTexture.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Screen\ViewportScissor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

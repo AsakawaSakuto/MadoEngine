@@ -147,6 +147,7 @@
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
     <ClCompile Include="Engine\Core\Command\Command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
+    <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
     <ClCompile Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\Core\TextureManager\TextureManager.cpp" />
@@ -155,7 +156,6 @@
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
     <ClCompile Include="Engine\.Execution\Execution.cpp" />
-    <ClCompile Include="Engine\Debug\ImGuiManager\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -168,6 +168,8 @@
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
+    <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
+    <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
     <ClCompile Include="Engine\Shader\RootSignatureManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
@@ -225,6 +227,7 @@
     <ClInclude Include="Engine\CoreHeaders.h" />
     <ClInclude Include="Engine\Core\Command\Command.h" />
     <ClInclude Include="Engine\Core\DeltaTime\DeltaTime.h" />
+    <ClInclude Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Core\TextureManager\TextureManager.h" />
@@ -232,7 +235,6 @@
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />
     <ClInclude Include="Engine\Core\View\ViewFunction.h" />
-    <ClInclude Include="Engine\Debug\ImGuiManager\ImGuiManager.h" />
     <ClInclude Include="Engine\ImGuiHeaders.h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
     <ClInclude Include="Engine\Input\Device\Keybord.h" />
@@ -258,6 +260,8 @@
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />
     <ClInclude Include="Engine\Render\PSO\PSORegistry.h" />
     <ClInclude Include="Engine\Render\PSO\ShaderReflector.h" />
+    <ClInclude Include="Engine\Render\Screen\RenderTexture.h" />
+    <ClInclude Include="Engine\Render\Screen\ViewportScissor.h" />
     <ClInclude Include="Engine\Shader\RootSignatureManager.h" />
     <ClInclude Include="Engine\RenderHeaders.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
