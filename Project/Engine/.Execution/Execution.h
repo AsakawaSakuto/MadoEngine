@@ -7,7 +7,10 @@
 #include "CoreHeaders.h"
 #include "RenderHeaders.h"
 #include "UtilityHeaders.h"
-#include "MathHeaders.h"
+#ifdef USE_IMGUI
+#include "ImGuiHeaders.h"
+#include "Render/ImGui/ImGuiManager.h"
+#endif
 
 namespace MadoEngine
 {
@@ -64,5 +67,8 @@ namespace MadoEngine
 		D3D12_VIEWPORT viewport_{}; // ビューポート矩形
 		D3D12_RECT scissorRect_{};  // シザー矩形
 
+#ifdef USE_IMGUI
+		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
+#endif
 	};
 }

@@ -4,10 +4,22 @@
 #include "Input/InputManager.h"
 #pragma comment(lib, "gdiplus.lib")
 
+#ifdef USE_IMGUI
+// imgui_impl_win32.cpp が定義するウィンドウメッセージハンドラの前方宣言
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
+
 namespace MadoEngine::Screen {
 
 	// ウィンドウプロシージャ
 	LRESULT CALLBACK WindowsAPI::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+
+#ifdef USE_IMGUI
+		// ImGuiにメッセージを転送し、ImGuiが処理した場合はここで終了する
+		if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+			return true;
+		}
+#endif // USE_IMGUI
 
 		// ウィンドウプロシージャ内でWindowsAPIインスタンスにアクセスするための方法
 		WindowsAPI* api = reinterpret_cast<WindowsAPI*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));

@@ -15,6 +15,7 @@ void Test::Initialize() {
 		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", "Test");
 		sprites_[i]->SetPosition({ 32.0f * i, 32.0f * i });
 	}
+
 }
 
 std::string Test::Update() {

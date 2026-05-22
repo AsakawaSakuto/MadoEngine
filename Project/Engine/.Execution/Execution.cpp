@@ -126,6 +126,12 @@ namespace MadoEngine
 		scissorRect_.bottom = windowsAPI_->GetWindowSize().second;
 
 		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+
+#ifdef USE_IMGUI
+		// ImGuiManagerの初期化
+		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
+		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_.get(), windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
+#endif // USE_IMGUI
 	}
 
 	void Execution::Update() {
@@ -145,6 +151,16 @@ namespace MadoEngine
 
 	void Execution::PreDraw()
 	{
+#ifdef USE_IMGUI
+		// ImGuiフレーム開始
+		imguiManager_->Begin();
+
+		ImGui::Begin("Debug Window");
+		ImGui::Text("Hello, ImGui!");
+		ImGui::End();
+
+#endif // USE_IMGUI
+
 		// 1. BackBufferを決定する
 		currentBackBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 
@@ -181,6 +197,16 @@ namespace MadoEngine
 
 	void Execution::PostDraw()
 	{
+#ifdef USE_IMGUI
+		// ※ ここでシーン側から ImGui::XXX() ウィジェット呼び出しが来る想定
+		// 動作確認用デモウィンドウ（不要になったら削除してください）
+		ImGui::ShowDemoWindow();
+
+		// ImGui描画コマンドをコマンドリストに積む
+		// ResourceBarrier で PRESENT に遷移させる前に必ず呼ぶこと
+		imguiManager_->End(commandManager_->GetCommandList());
+#endif // USE_IMGUI
+
 		// 6. BackBufferをPresent状態に遷移
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -215,6 +241,10 @@ namespace MadoEngine
 		psoRegistry_->Finalize();
 
 		Logger::Finalize();
+
+#ifdef USE_IMGUI
+		imguiManager_->Finalize();
+#endif // USE_IMGUI
 
 		CoUninitialize();
 	}
