@@ -15,7 +15,6 @@ void Test::Initialize() {
 		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", "Test");
 		sprites_[i]->SetPosition({ 32.0f * i, 32.0f * i });
 	}
-
 }
 
 std::string Test::Update() {
@@ -34,7 +33,7 @@ void Test::Draw() {
 
 void Test::DrawImGui() {
 	// テストシーンの描画処理
-
+#ifdef USE_IMGUI
 	ImGui::Begin("test");
 
 	ImGui::DragFloat2("pos", &testPos_.x, 0.1f);
@@ -42,6 +41,7 @@ void Test::DrawImGui() {
 	ImGui::End();
 
 	sprites_[0]->SetPosition(testPos_);
+#endif // USE_IMGUI
 }
 
 void Test::Finalize() {

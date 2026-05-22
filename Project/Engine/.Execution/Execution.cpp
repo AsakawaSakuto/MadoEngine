@@ -131,6 +131,45 @@ namespace MadoEngine
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_.get(), windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
+
+		// オフスクリーンレンダーターゲットの生成（ゲーム描画をImGui内に表示するため）
+		D3D12_RESOURCE_DESC rtDesc{};
+		rtDesc.Width            = winDesc_.width;
+		rtDesc.Height           = winDesc_.height;
+		rtDesc.MipLevels        = 1;
+		rtDesc.DepthOrArraySize = 1;
+		rtDesc.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+		rtDesc.SampleDesc.Count = 1;
+		rtDesc.Dimension        = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		rtDesc.Flags            = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+		D3D12_HEAP_PROPERTIES rtHeapProps{};
+		rtHeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+		D3D12_CLEAR_VALUE rtClearValue{};
+		rtClearValue.Format   = DXGI_FORMAT_R8G8B8A8_UNORM;
+		rtClearValue.Color[0] = 0.1f;
+		rtClearValue.Color[1] = 0.25f;
+		rtClearValue.Color[2] = 0.5f;
+		rtClearValue.Color[3] = 1.0f;
+
+		hr = dxDevice_->GetDevice()->CreateCommittedResource(
+			&rtHeapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&rtDesc,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			&rtClearValue,
+			IID_PPV_ARGS(&offscreenRT_)
+		);
+		assert(SUCCEEDED(hr));
+		Logger::Output("[Engine] オフスクリーンレンダーターゲットの生成が完了しました", Logger::Level::Engine);
+
+		offscreenRTVIndex_ = rtvManager_->Allocate();
+		rtvManager_->CreateRenderTargetView(offscreenRT_.Get(), offscreenRTVIndex_);
+
+		offscreenSRVIndex_ = srvManager_->Allocate();
+		srvManager_->CreateShaderResourceView(offscreenRT_.Get(), offscreenSRVIndex_, DXGI_FORMAT_R8G8B8A8_UNORM);
+		Logger::Output("[Engine] オフスクリーンSRVの生成が完了しました", Logger::Level::Engine);
 #endif // USE_IMGUI
 	}
 
@@ -154,11 +193,6 @@ namespace MadoEngine
 #ifdef USE_IMGUI
 		// ImGuiフレーム開始
 		imguiManager_->Begin();
-
-		ImGui::Begin("Debug Window");
-		ImGui::Text("Hello, ImGui!");
-		ImGui::End();
-
 #endif // USE_IMGUI
 
 		// 1. BackBufferを決定する
@@ -167,19 +201,41 @@ namespace MadoEngine
 		// 2. CommandListを開く（記録開始）
 		commandManager_->BeginFrame();
 
-		// 3. BackBufferをRenderTarget状態に遷移
-		D3D12_RESOURCE_BARRIER barrier{};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = swapChain_->GetBackBuffer(currentBackBufferIndex_);
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		commandManager_->GetCommandList()->ResourceBarrier(1, &barrier);
-
 		// 4. SRV用DescriptorHeapをセット（テクスチャ参照に必須）
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
+
+#ifdef USE_IMGUI
+		// USE_IMGUI時: オフスクリーンRTへ描画する
+		// 3. オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET に遷移
+		D3D12_RESOURCE_BARRIER rtBarrier{};
+		rtBarrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		rtBarrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		rtBarrier.Transition.pResource   = offscreenRT_.Get();
+		rtBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		rtBarrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		rtBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandManager_->GetCommandList()->ResourceBarrier(1, &rtBarrier);
+
+		// 5. オフスクリーンRTVとDSVを設定
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvManager_->GetCPUHandle(offscreenRTVIndex_);
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvManager_->GetCPUHandle(depthDSVIndex_);
+		commandManager_->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+
+		// 6. オフスクリーンRTのクリア
+		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
+		commandManager_->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+#else
+		// 3. BackBufferをRenderTarget状態に遷移
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource   = swapChain_->GetBackBuffer(currentBackBufferIndex_);
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandManager_->GetCommandList()->ResourceBarrier(1, &barrier);
 
 		// 5. RTVとDSVを設定
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvManager_->GetCPUHandle(backBufferRTVIndices_[currentBackBufferIndex_]);
@@ -187,9 +243,10 @@ namespace MadoEngine
 		commandManager_->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
 		// 6. 画面のクリアを行う
-		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // RGBA
+		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
 		commandManager_->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+#endif // USE_IMGUI
 
 		commandManager_->GetCommandList()->RSSetViewports(1, &viewport_);
 		commandManager_->GetCommandList()->RSSetScissorRects(1, &scissorRect_);
@@ -198,30 +255,97 @@ namespace MadoEngine
 	void Execution::PostDraw()
 	{
 #ifdef USE_IMGUI
-		// ※ ここでシーン側から ImGui::XXX() ウィジェット呼び出しが来る想定
-		// 動作確認用デモウィンドウ（不要になったら削除してください）
+		// 1. オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
+		D3D12_RESOURCE_BARRIER srvBarrier{};
+		srvBarrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		srvBarrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		srvBarrier.Transition.pResource   = offscreenRT_.Get();
+		srvBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		srvBarrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		srvBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandManager_->GetCommandList()->ResourceBarrier(1, &srvBarrier);
+
+		// 2. バックバッファ: PRESENT → RENDER_TARGET に遷移
+		D3D12_RESOURCE_BARRIER bbBarrier{};
+		bbBarrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		bbBarrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		bbBarrier.Transition.pResource   = swapChain_->GetBackBuffer(currentBackBufferIndex_);
+		bbBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		bbBarrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		bbBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandManager_->GetCommandList()->ResourceBarrier(1, &bbBarrier);
+
+		// 3. バックバッファをRTVに設定（ImGui描画先）
+		D3D12_CPU_DESCRIPTOR_HANDLE bbRtvHandle = rtvManager_->GetCPUHandle(backBufferRTVIndices_[currentBackBufferIndex_]);
+		commandManager_->GetCommandList()->OMSetRenderTargets(1, &bbRtvHandle, FALSE, nullptr);
+
+		// 4. バックバッファをクリア（ImGuiの背景色）
+		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
+		commandManager_->GetCommandList()->ClearRenderTargetView(bbRtvHandle, bbClearColor, 0, nullptr);
+
+		// 5. ImGui DockSpaceを全画面に展開
+		ImGuiWindowFlags dockFlags =
+			ImGuiWindowFlags_NoDocking |
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoBackground;
+
+		ImGuiViewport* vp = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(vp->Pos);
+		ImGui::SetNextWindowSize(vp->Size);
+		ImGui::SetNextWindowViewport(vp->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpaceWindow", nullptr, dockFlags);
+		ImGui::PopStyleVar(3);
+		ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::End();
+
+		// 6. GameViewウィンドウにオフスクリーンRTをImGui::Imageで表示
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Game View");
+		ImVec2 viewSize = ImGui::GetContentRegionAvail();
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = srvManager_->GetGPUHandle(offscreenSRVIndex_);
+		ImGui::Image(static_cast<ImTextureID>(srvHandle.ptr), viewSize);
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		// デモウィンドウ（動作確認用、不要になったら削除してください）
 		ImGui::ShowDemoWindow();
 
 		// ImGui描画コマンドをコマンドリストに積む
-		// ResourceBarrier で PRESENT に遷移させる前に必ず呼ぶこと
 		imguiManager_->End(commandManager_->GetCommandList());
-#endif // USE_IMGUI
 
+		// 7. バックバッファ: RENDER_TARGET → PRESENT に遷移
+		D3D12_RESOURCE_BARRIER presentBarrier{};
+		presentBarrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		presentBarrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		presentBarrier.Transition.pResource   = swapChain_->GetBackBuffer(currentBackBufferIndex_);
+		presentBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		presentBarrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_PRESENT;
+		presentBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandManager_->GetCommandList()->ResourceBarrier(1, &presentBarrier);
+#else
 		// 6. BackBufferをPresent状態に遷移
 		D3D12_RESOURCE_BARRIER barrier{};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = swapChain_->GetBackBuffer(currentBackBufferIndex_);
+		barrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource   = swapChain_->GetBackBuffer(currentBackBufferIndex_);
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_PRESENT;
 		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		commandManager_->GetCommandList()->ResourceBarrier(1, &barrier);
+#endif // USE_IMGUI
 
 		// 7. CommandListを閉じてGPUに送信
 		commandManager_->EndFrame();
 
 		// 8. 画面のスワップ（BackBufferとFrontBufferを入れ替える）
-		// PresentをWaitForGPUより先に呼ぶことで、GPU処理と並行してPresent処理を行う
 		swapChain_->Present();
 
 		// 9. GPU処理完了を待機

@@ -69,6 +69,9 @@ namespace MadoEngine
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> offscreenRT_;
+		uint32_t offscreenRTVIndex_ = UINT32_MAX;
+		uint32_t offscreenSRVIndex_ = UINT32_MAX;
 #endif
 	};
 }
