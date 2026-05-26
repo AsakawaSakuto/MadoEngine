@@ -138,11 +138,11 @@
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\Object\Player\Player.cpp" />
-    <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Test.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Title.cpp" />
+    <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -176,7 +176,7 @@
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
-    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\StaticModel.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
@@ -215,13 +215,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\.Core\Terminal.h" />
+    <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\Object\Player\Player.h" />
-    <ClInclude Include="Application\SceneManager\IScene.h" />
-    <ClInclude Include="Application\SceneManager\SceneManager.h" />
-    <ClInclude Include="Application\SceneManager\Scene\Game.h" />
-    <ClInclude Include="Application\SceneManager\Scene\Result.h" />
-    <ClInclude Include="Application\SceneManager\Scene\Test.h" />
-    <ClInclude Include="Application\SceneManager\Scene\Title.h" />
+    <ClInclude Include="Application\.SceneManager\IScene.h" />
+    <ClInclude Include="Application\.SceneManager\SceneManager.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\Game.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\Result.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
@@ -272,7 +273,7 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h" />
-    <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\StaticModel.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject2d.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject3d.h" />
     <ClInclude Include="Engine\Render\Screen\SwapChain.h" />

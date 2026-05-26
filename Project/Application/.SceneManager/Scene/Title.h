@@ -1,22 +1,22 @@
 #pragma once
-#include "SceneManager/IScene.h"
+#include ".SceneManager/IScene.h"
 
-/// @brief リザルトシーン
-/// @details ゲームの結果を表示し、スペースキーでタイトルシーンに遷移
-class Result : public IScene
+/// @brief タイトルシーン
+/// @details ゲームのタイトル画面を表示し、スペースキーでゲームシーンに遷移
+class Title : public IScene
 {
 public:
 	/// @brief コンストラクタ
-	Result();
+	Title();
 
 	/// @brief デストラクタ
-	~Result() override;
+	~Title() override;
 
 	/// @brief 初期化処理
 	void Initialize() override;
 
 	/// @brief 更新処理
-	/// @return 次に遷移するシーン名（遷移しない場合は "Result"）
+	/// @return 次に遷移するシーン名（遷移しない場合は "Title"）
 	std::string Update() override;
 
 	/// @brief 終了処理

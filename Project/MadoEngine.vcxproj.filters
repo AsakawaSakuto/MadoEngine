@@ -11,10 +11,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
-    <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Title.cpp" />
+    <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -42,7 +42,7 @@
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
-    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\StaticModel.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
@@ -54,7 +54,7 @@
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
-    <ClCompile Include="Application\SceneManager\Scene\Test.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Externals\imgui\imgui.cpp" />
     <ClCompile Include="Externals\imgui\imgui_demo.cpp" />
@@ -228,7 +228,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\Object\3d\Model\Model.h">
+    <ClInclude Include="Engine\Render\Object\3d\Model\StaticModel.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\RenderObject2d.h">
@@ -237,19 +237,19 @@
     <ClInclude Include="Engine\Render\Object\RenderObject3d.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\SceneManager\SceneManager.h">
+    <ClInclude Include="Application\.SceneManager\SceneManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\SceneManager\Scene\Title.h">
+    <ClInclude Include="Application\.SceneManager\Scene\Title.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\SceneManager\Scene\Game.h">
+    <ClInclude Include="Application\.SceneManager\Scene\Game.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\SceneManager\Scene\Result.h">
+    <ClInclude Include="Application\.SceneManager\Scene\Result.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\SceneManager\IScene.h">
+    <ClInclude Include="Application\.SceneManager\IScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\.Core\Terminal.h">
@@ -303,7 +303,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\SceneManager\Scene\Test.h">
+    <ClInclude Include="Application\.SceneManager\Scene\Test.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h">
@@ -370,6 +370,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\Object\Player\Player.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\.SceneManager\CommonData.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

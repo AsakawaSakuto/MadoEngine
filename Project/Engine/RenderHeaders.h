@@ -6,7 +6,7 @@
 #include "Render/Object/2d/Sprite/Sprite.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
 #include "Render/Object/2d/Sprite/MySprite.h"
-#include "Render/Object/3d/Model/Model.h"
+#include "Render/Object/3d/Model/StaticModel.h"
 #include "Render/Object/3d/Line/Line.h"
 #include "Render/Object/3d/Line/DebugLineManager.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"

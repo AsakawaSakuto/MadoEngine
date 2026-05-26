@@ -6,7 +6,7 @@
 class Sprite : public RenderObject2d {
 public:
 
-	Sprite(std::string objectName);
+	Sprite(std::string objectName = "default");
 
 	/// @brief 単独使用時の初期化（自前でジオメトリバッファを生成する）
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) override;

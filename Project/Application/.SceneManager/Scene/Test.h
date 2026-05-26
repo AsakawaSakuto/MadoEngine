@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneManager/IScene.h"
+#include ".SceneManager/IScene.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -34,4 +34,6 @@ private:
 	DebugCamera debugCamera_;
 
 	AABB testAABB_ = { { -1.0f, 0.0f, -1.0f }, { 1.0f, 2.0f, 1.0f } };
+
+	std::unique_ptr<Sprite> sprite_;
 };

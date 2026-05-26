@@ -18,6 +18,9 @@ void Test::Initialize() {
 	}
 
 	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
+
+	sprite_ = std::make_unique<Sprite>("a");
+	//sprite_->Initialize(MadoEngine::Render::RenderManager::GetInstance()->GetDevice(), MadoEngine::Render::RenderManager::GetInstance()->GetCommandList(), "uvChecker");
 }
 
 std::string Test::Update() {

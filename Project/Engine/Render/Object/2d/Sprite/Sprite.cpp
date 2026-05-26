@@ -7,9 +7,7 @@ Sprite::Sprite(std::string objectName) {
 	objectName_ = objectName;
 }
 
-// ----------------------------------------
 // 単独使用時: 自前でユニットクワッドVB・IBを生成する
-// ----------------------------------------
 void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) {
 
 	device_ = device;
@@ -48,9 +46,7 @@ void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 	InitializeCommonResources(textureName);
 }
 
-// ----------------------------------------
 // SpriteManager経由: 共有ジオメトリバッファを参照する
-// ----------------------------------------
 void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName, const SpriteSharedGeometry& sharedGeo) {
 
 	device_ = device;
@@ -66,9 +62,7 @@ void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 	InitializeCommonResources(textureName);
 }
 
-// ----------------------------------------
 // マテリアル・変換行列・PSOの共通初期化
-// ----------------------------------------
 void Sprite::InitializeCommonResources(const std::string& textureName) {
 
 	materialData_ = CreateMappedBuffer<SpriteMaterial>(device_.Get(), materialResource_);

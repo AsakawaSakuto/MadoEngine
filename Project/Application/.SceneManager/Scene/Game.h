@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneManager/IScene.h"
+#include ".SceneManager/IScene.h"
 
 /// @brief ゲームシーン
 /// @details メインゲームのプレイ画面を管理し、スペースキーでリザルトシーンに遷移
