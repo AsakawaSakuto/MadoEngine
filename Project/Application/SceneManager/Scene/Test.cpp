@@ -29,6 +29,7 @@ std::string Test::Update() {
 
 	debugCamera_.Update();
 
+	MyDebugLine::AddShape(testAABB_, { 1.0f, 0.0f, 0.0f, 1.0f });
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 
 	return "Test";
@@ -50,6 +51,8 @@ void Test::DrawImGui() {
 	sprites_[0]->SetPosition(testPos_);
 
 	debugCamera_.DrawImGui();
+
+	testAABB_.DrawImGui();
 #endif // USE_IMGUI
 }
 

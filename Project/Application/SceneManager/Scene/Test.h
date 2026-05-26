@@ -32,4 +32,6 @@ private:
 	Vector2 testPos_ = { 0.0f, 0.0f };
 
 	DebugCamera debugCamera_;
+
+	AABB testAABB_ = { { -1.0f, 0.0f, -1.0f }, { 1.0f, 2.0f, 1.0f } };
 };

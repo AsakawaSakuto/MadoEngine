@@ -136,7 +136,8 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application\Core\Terminal.cpp" />
+    <ClCompile Include="Application\.Core\Terminal.cpp" />
+    <ClCompile Include="Application\Object\Player\Player.cpp" />
     <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
@@ -213,7 +214,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\Core\Terminal.h" />
+    <ClInclude Include="Application\.Core\Terminal.h" />
+    <ClInclude Include="Application\Object\Player\Player.h" />
     <ClInclude Include="Application\SceneManager\IScene.h" />
     <ClInclude Include="Application\SceneManager\SceneManager.h" />
     <ClInclude Include="Application\SceneManager\Scene\Game.h" />

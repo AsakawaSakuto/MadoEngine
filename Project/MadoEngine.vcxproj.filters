@@ -10,7 +10,7 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application\Core\Terminal.cpp" />
+    <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\SceneManager\Scene\Result.cpp" />
@@ -69,6 +69,7 @@
     <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
+    <ClCompile Include="Application\Object\Player\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -251,7 +252,7 @@
     <ClInclude Include="Application\SceneManager\IScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Core\Terminal.h">
+    <ClInclude Include="Application\.Core\Terminal.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h">
@@ -366,6 +367,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Object\Player\Player.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>
