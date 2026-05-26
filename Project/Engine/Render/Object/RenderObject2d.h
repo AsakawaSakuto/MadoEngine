@@ -80,22 +80,6 @@ public:
 	/// @return true:表示、false:非表示
 	bool IsVisible() const { return isVisible_; }
 
-protected:
-
-	std::string objectName_; // オブジェクト名
-
-	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
-	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f}; // 色（RGBA）
-	bool isVisible_ = true;                 // 表示フラグ
-
-	uint32_t textureIndex_ = 0;
-	Vector2 size_ = {};
-	std::string textureName_;
-
-	MadoEngine::Render::PSODesc psoDesc_;           // PSO記述子
-	MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr; // PSOレジストリ（外部からセット）
-
-public:
 	/// @brief PSORegistryを設定する
 	/// @param registry PSORegistryポインタ
 	void SetPSORegistry(MadoEngine::Render::PSORegistry* registry) { psoRegistry_ = registry; }
@@ -114,6 +98,19 @@ public:
 	void SetScreenSize(float width, float height) { screenWidth_ = width; screenHeight_ = height; }
 
 protected:
+
+	std::string objectName_; // オブジェクト名
+
+	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
+	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f}; // 色（RGBA）
+	bool isVisible_ = true;                 // 表示フラグ
+
+	uint32_t textureIndex_ = 0;
+	Vector2 size_ = {};
+	std::string textureName_;
+
+	MadoEngine::Render::PSODesc psoDesc_;           // PSO記述子
+	MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr; // PSOレジストリ（外部からセット）
 
 	// デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device> device_;

@@ -8,6 +8,8 @@
 #include "Render/Object/2d/Sprite/MySprite.h"
 #include "Render/Object/3d/Model/Model.h"
 #include "Render/Object/3d/Line/Line.h"
+#include "Render/Object/3d/Line/DebugLineManager.h"
+#include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/PSO/PSODesc.h"
 #include "Render/PSO/PSODescHash.h"
 #include "Render/PSO/PSOFactory.h"

@@ -8,6 +8,7 @@ namespace MadoEngine::InputDevice
 		, currentPosition_{ 0.0f, 0.0f }
 		, previousPosition_{ 0.0f, 0.0f }
 		, wheelDelta_(0.0f)
+		, currentWheelDelta_(0.0f)
 	{
 	}
 
@@ -38,6 +39,7 @@ namespace MadoEngine::InputDevice
 			}
 		}
 
+		currentWheelDelta_ = wheelDelta_;
 		wheelDelta_ = 0.0f;
 	}
 
@@ -90,6 +92,11 @@ namespace MadoEngine::InputDevice
 
 	float Mouse::GetWheelDelta() const
 	{
-		return wheelDelta_;
+		return currentWheelDelta_;
+	}
+
+	void Mouse::AddWheelDelta(float delta)
+	{
+		wheelDelta_ += delta;
 	}
 }

@@ -17,6 +17,7 @@ namespace MadoEngine::Screen {
 			int width = 1280;                     // ウィンドウの幅
 			int height = 720;                     // ウィンドウの高さ
 			bool isResizable = true;              // ウィンドウサイズを変更可能にするかどうか
+			bool isShowMouseCursor = true;        // マウスカーソルを表示するかどうか
 			std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> wndProc; // ウィンドウプロシージャのコールバック関数
 		};
 
@@ -40,11 +41,11 @@ namespace MadoEngine::Screen {
 		/// @brief フルスクリーンモードかどうかを取得する
 		bool IsFullscreen() const { return isFullscreen_; }
 
-			/// @brief フルスクリーンモードを切り替える
-			void ToggleFullscreen();
+		/// @brief フルスクリーンモードを切り替える
+		void ToggleFullscreen();
 
-			/// @brief 入力処理（フルスクリーン切り替えなど）
-			void ProcessInput();
+		/// @brief 入力処理（フルスクリーン切り替えなど）
+		void ProcessInput();
 
 		private:
 

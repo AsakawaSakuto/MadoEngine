@@ -83,16 +83,6 @@ public:
 	/// @return true:表示、false:非表示
 	bool IsVisible() const { return isVisible_; }
 
-	// ===== カメラ関連 =====
-
-	/// @brief カメラを設定する
-	/// @param camera カメラ
-	void SetCamera(const Camera& camera) { camera_ = camera; }
-
-	/// @brief カメラを取得する
-	/// @return カメラ
-	Camera GetCamera() const { return camera_; }
-
 	// ===== PSO関連 =====
 
 	/// @brief PSORegistryを設定する
@@ -105,8 +95,6 @@ protected:
 	Transform3D transform_; // トランスフォーム（座標、スケール、回転）
 	Vector4 color_;         // 色（RGBA）
 	bool isVisible_;        // 表示フラグ
-
-	Camera camera_ = {}; // カメラ（外部からセット）
 
 	std::string textureName_;
 	uint32_t textureIndex_ = 0;

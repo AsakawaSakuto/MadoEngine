@@ -26,6 +26,7 @@ namespace MadoEngine::InputDevice
 		Vector2 GetPosition() const;
 		Vector2 GetDelta() const;
 		float GetWheelDelta() const;
+		void AddWheelDelta(float delta);
 
 	private:
 		static constexpr int BUTTON_COUNT = 3;
@@ -35,5 +36,6 @@ namespace MadoEngine::InputDevice
 		Vector2 currentPosition_;
 		Vector2 previousPosition_;
 		float wheelDelta_;
+		float currentWheelDelta_;
 	};
 }

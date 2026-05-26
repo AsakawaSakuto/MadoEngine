@@ -14,7 +14,10 @@ void Test::Initialize() {
 	for (int i = 0; i < sprites_.size(); ++i) {
 		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", "Test");
 		sprites_[i]->SetPosition({ 32.0f * i, 32.0f * i });
+		sprites_[i]->SetVisible(false);
 	}
+
+	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
 }
 
 std::string Test::Update() {
@@ -24,11 +27,15 @@ std::string Test::Update() {
 		return "Game";
 	}
 
+	debugCamera_.Update();
+
+	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
+
 	return "Test";
 }
 
 void Test::Draw() {
-	
+	MyDebugLine::Draw(debugCamera_);
 }
 
 void Test::DrawImGui() {
@@ -41,6 +48,8 @@ void Test::DrawImGui() {
 	ImGui::End();
 
 	sprites_[0]->SetPosition(testPos_);
+
+	debugCamera_.DrawImGui();
 #endif // USE_IMGUI
 }
 

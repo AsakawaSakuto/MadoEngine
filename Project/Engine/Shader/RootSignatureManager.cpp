@@ -100,9 +100,9 @@ namespace MadoEngine {
 	}
 
 	void RootSignatureManager::Make() {
-	
+
 		// RootSignatureの登録（未登録の場合のみ実行される）
-	    // b0: SpriteMaterial (VS/PS共通), b1: SpriteTransformationMatrix (VS), t0: Texture (PS), s0: Sampler
+		// b0: SpriteMaterial (VS/PS共通), b1: SpriteTransformationMatrix (VS), t0: Texture (PS), s0: Sampler
 		{
 			D3D12_DESCRIPTOR_RANGE srvRange{};
 			srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -151,6 +151,25 @@ namespace MadoEngine {
 			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 			MadoEngine::RootSignatureManager::GetInstance()->Register("Sprite.RootSig", rootSigDesc);
+		}
+
+		// Line3d 用 RootSignature
+		// b0: LineTransform (viewProjection) VS のみ
+		{
+			D3D12_ROOT_PARAMETER rootParam{};
+			rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParam.Descriptor.ShaderRegister = 0; // b0
+			rootParam.Descriptor.RegisterSpace = 0;
+			rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = 1;
+			rootSigDesc.pParameters = &rootParam;
+			rootSigDesc.NumStaticSamplers = 0;
+			rootSigDesc.pStaticSamplers = nullptr;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance()->Register("Line3d.RootSig", rootSigDesc);
 		}
 
 	}

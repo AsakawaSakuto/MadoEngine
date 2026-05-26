@@ -30,4 +30,6 @@ public:
 private:
 	std::array<Sprite* ,10> sprites_;
 	Vector2 testPos_ = { 0.0f, 0.0f };
+
+	DebugCamera debugCamera_;
 };

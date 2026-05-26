@@ -13,7 +13,8 @@ namespace MadoEngine
 		winDesc_.width = 1280;
 		winDesc_.height = 720;
 		winDesc_.iconPath = "Assets/.EngineResource/icon.png";
-		winDesc_.isResizable = true;
+		winDesc_.isResizable = false;
+		winDesc_.isShowMouseCursor = true;
 
 		// ウィンドウの初期化
 		windowsAPI_ = std::make_unique<MadoEngine::Screen::WindowsAPI>();
@@ -80,6 +81,8 @@ namespace MadoEngine
 
 		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 
+		DebugLineManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 10000);
+		DebugLineManager::GetInstance()->SetPSORegistry(psoRegistry_.get());
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();

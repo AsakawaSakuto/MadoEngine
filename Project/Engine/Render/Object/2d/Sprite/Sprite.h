@@ -18,9 +18,19 @@ public:
 	/// @param sharedGeo SpriteManagerが所有する共有ジオメトリバッファ
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName, const SpriteSharedGeometry& sharedGeo);
 
+	/// @brief 更新
 	void Update() override;
-
+	
+	/// @brief 描画
 	void Draw() override;
+
+	/// @brief 描画対象シーン名をセットする
+	/// @param sceneName 描画を許可するシーン名
+	void SetSceneName(const std::string& sceneName) { sceneName_ = sceneName; }
+
+	/// @brief 描画対象シーン名を取得する
+	/// @return 登録されているシーン名
+	const std::string& GetSceneName() const { return sceneName_; }
 
 private:
 
@@ -41,13 +51,4 @@ private:
 
 	// 描画対象シーン名（空文字は全シーンで描画）
 	std::string sceneName_;
-
-public:
-	/// @brief 描画対象シーン名をセットする
-	/// @param sceneName 描画を許可するシーン名
-	void SetSceneName(const std::string& sceneName) { sceneName_ = sceneName; }
-
-	/// @brief 描画対象シーン名を取得する
-	/// @return 登録されているシーン名
-	const std::string& GetSceneName() const { return sceneName_; }
 };

@@ -19,10 +19,12 @@ public:
 	/// @param sensitivity パン感度（デフォルト: 0.01f）
 	void SetPanSensitivity(float sensitivity) { panSensitivity_ = sensitivity; }
 
-	/// @brief ズーム感度を設定する
-	/// @param sensitivity ズーム感度（デフォルト: 1.0f）
-	void SetZoomSensitivity(float sensitivity) { zoomSensitivity_ = sensitivity; }
+	/// @brief ドリー感度を設定する
+	/// @param sensitivity ドリー感度（デフォルト: 1.0f）
+	void SetDollySensitivity(float sensitivity) { dollySensitivity_ = sensitivity; }
 
+	/// @brief ImGui描画処理
+	void DrawImGui();
 private:
 	// ターゲット（注視点）
 	Vector3 target_ = { 0.0f, 0.0f, 0.0f };
@@ -34,9 +36,9 @@ private:
 	float yaw_ = 0.0f;   // Y軸周りの回転
 	float pitch_ = 0.3f; // X軸周りの回転
 
-	float rotateSensitivity_ = 0.005f;
-	float panSensitivity_ = 0.01f;
-	float zoomSensitivity_ = 1.0f;
+	float rotateSensitivity_ = 0.0025f; // 回転感度
+	float panSensitivity_ = 0.0025f;    // パン感度
+	float dollySensitivity_ = 1.0f;     // ドリー感度
 
 	/// @brief 球面座標からカメラ位置・回転を計算してベースクラスへ反映する
 	void ApplySphericalCoord();

@@ -34,6 +34,16 @@ namespace MadoEngine::Screen {
 			PostQuitMessage(0);
 			return 0;
 
+		case WM_MOUSEWHEEL:
+		{
+			auto* mouse = MadoEngine::InputManager::GetInstance()->GetMouse();
+			if (mouse) {
+				float delta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wparam)) / WHEEL_DELTA;
+				mouse->AddWheelDelta(delta);
+			}
+			return 0;
+		}
+
 		case WM_SIZING:
 			// ウィンドウのリサイズ時にアスペクト比を維持
 			if (api && api->desc_.isResizable && !api->isFullscreen_ && api->aspectRatio_ > 0.0f) {
@@ -143,6 +153,12 @@ namespace MadoEngine::Screen {
 		Logger::Output("ウィンドウサイズ: " + std::to_string(desc.width) + "x" + std::to_string(desc.height), Logger::Level::Engine);
 
 		desc_ = desc;
+
+		if (desc.isShowMouseCursor) {
+			ShowCursor(TRUE);
+		} else {
+			ShowCursor(FALSE);
+		}
 
 		// アスペクト比を計算して保存（リサイズ時に使用）
 		if (desc_.height > 0) {

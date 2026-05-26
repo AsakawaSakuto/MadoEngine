@@ -68,6 +68,7 @@
     <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
     <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -356,6 +357,15 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Screen\ViewportScissor.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\Collider\Shape.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Line\DebugLineManager.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>
