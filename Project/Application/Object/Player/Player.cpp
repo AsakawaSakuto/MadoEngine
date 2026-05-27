@@ -9,7 +9,7 @@ void Player::Initialize() {
 	s.radius = 1.0f;
 	hitbox_ = s;
 
-	ColliderManager::GetInstance()->RegisterCollider("PlayerSphere", "Sphere", &hitbox_, &position_, nullptr);
+	MyCollider::RegisterCollider("PlayerSphere", "Sphere", &hitbox_, &position_, nullptr);
 }
 
 void Player::Update() {
@@ -52,7 +52,7 @@ void Player::Update() {
 	}
 
 	Vector4 color;
-	if (ColliderManager::GetInstance()->IsHitTags("Player", "AABB")) {
+	if (MyCollider::IsHitTags("Player", "AABB")) {
 		color = { 0.0f,1.0f,0.0f,1.0f };
 	} else {
 		color = { 1.0f,1.0f,0.0f,1.0f };

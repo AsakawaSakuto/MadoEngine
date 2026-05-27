@@ -285,6 +285,7 @@
     <ClInclude Include="Engine\Utility\Camera\Frustum.h" />
     <ClInclude Include="Engine\Utility\Collider\ColliderManager.h" />
     <ClInclude Include="Engine\Utility\Collider\CollisionFunction.h" />
+    <ClInclude Include="Engine\Utility\Collider\MyCollider.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Circle.h" />

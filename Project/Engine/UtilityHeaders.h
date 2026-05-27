@@ -9,3 +9,4 @@
 #include "Utility/Camera/Camera.h"
 #include "Utility/Camera/DebugCamera.h"
 #include "Utility/Collider/ColliderManager.h"
+#include "Utility/Collider/MyCollider.h"
