@@ -43,9 +43,14 @@ namespace MadoEngine {
 
 		ImGui_ImplWin32_Init(hwnd);
 
-		// ドッキング機能を有効化
+		// ドッキング機能・マルチビューポート（ウィンドウ外ドラッグ）を有効化
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		// ドッキング自由度の向上
+		io.ConfigDockingWithShift        = false; // Shiftキーなしで任意の場所にドッキング可能
+		io.ConfigDockingAlwaysTabBar     = true;  // ドックノードに常にタブバーを表示
+		io.ConfigWindowsMoveFromTitleBarOnly = false; // タイトルバー以外の領域からもウィンドウを移動可能
 
 		ImGui_ImplDX12_InitInfo initInfo;
 		initInfo.Device = device->GetDevice();
@@ -110,14 +115,28 @@ namespace MadoEngine {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpaceWindow", nullptr, dockFlags);
 		ImGui::PopStyleVar(3);
-		ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 		ImGui::End();
 
-		// Game View ウィンドウにオフスクリーンテクスチャを表示
+		// Game View ウィンドウにオフスクリーンテクスチャを表示（16:9 固定）
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Game View");
-		ImVec2 viewSize = ImGui::GetContentRegionAvail();
-		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), viewSize);
+		ImVec2 avail = ImGui::GetContentRegionAvail();
+		constexpr float kAspect = 16.0f / 9.0f;
+		ImVec2 imageSize;
+		if (avail.x / avail.y > kAspect) {
+			// 横が余る → 高さ基準
+			imageSize.y = avail.y;
+			imageSize.x = avail.y * kAspect;
+		} else {
+			// 縦が余る → 幅基準
+			imageSize.x = avail.x;
+			imageSize.y = avail.x / kAspect;
+		}
+		// 余白をセンタリング
+		ImVec2 offset((avail.x - imageSize.x) * 0.5f, (avail.y - imageSize.y) * 0.5f);
+		ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + offset.x, ImGui::GetCursorPosY() + offset.y));
+		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), imageSize);
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
@@ -126,6 +145,13 @@ namespace MadoEngine {
 		assert(commandList);
 		ImGui::Render();
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+
+		// マルチビューポート: EXE外のウィンドウを更新・描画
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault(nullptr, commandList);
+		}
 	}
 
 	void ImGuiManager::Finalize() {

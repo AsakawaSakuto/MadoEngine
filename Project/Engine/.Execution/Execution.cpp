@@ -147,7 +147,7 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 	}
 
-	void Execution::PostDraw()
+	void Execution::BeginImGuiLayout()
 	{
 #ifdef USE_IMGUI
 		// オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
@@ -158,11 +158,17 @@ namespace MadoEngine
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 
 		// エディタレイアウト（DockSpace + Game View）を描画
+		// ※必ずシーンの DrawImGui() より前に呼ぶこと（DockSpaceを先に生成する必要があるため）
 		imguiManager_->DrawEditorLayout(offscreenRT_->GetSRVGPUHandle());
 
 		// デモウィンドウ（動作確認用、不要になったら削除してください）
 		ImGui::ShowDemoWindow();
+#endif // USE_IMGUI
+	}
 
+	void Execution::PostDraw()
+	{
+#ifdef USE_IMGUI
 		// ImGui描画コマンドをコマンドリストに積む
 		imguiManager_->End(commandManager_->GetCommandList());
 #endif // USE_IMGUI

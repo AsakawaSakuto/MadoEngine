@@ -24,6 +24,9 @@ void Terminal::Run() {
 
 		sceneManager_->Draw();
 
+		// DockSpaceを先に生成してから、シーンのImGuiウィンドウを作成する
+		execution_->BeginImGuiLayout();
+
 		sceneManager_->DrawImGui();
 
 		execution_->PostDraw();

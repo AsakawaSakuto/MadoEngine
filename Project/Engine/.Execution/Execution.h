@@ -27,7 +27,11 @@ namespace MadoEngine
 		/// @brief 描画前処理
 		void PreDraw();
 
-		/// @brief 描画後処理
+		/// @brief ImGuiレイアウト開始（DockSpace・GameView生成）
+		/// @brief シーンの DrawImGui() より前に呼ぶこと
+		void BeginImGuiLayout();
+
+		/// @brief 描画後処理（ImGui確定・Present）
 		void PostDraw();
 
 		/// @brief 終了処理
