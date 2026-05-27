@@ -48,7 +48,7 @@
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
-    <ClCompile Include="Engine\Utility\Collider\Collider.cpp" />
+    <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
@@ -114,7 +114,7 @@
     <ClInclude Include="Engine\UtilityHeaders.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Utility\Collider\Collider.h">
+    <ClInclude Include="Engine\Utility\Collider\ColliderManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h">
@@ -373,6 +373,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\.SceneManager\CommonData.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\Collider\CollisionFunction.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

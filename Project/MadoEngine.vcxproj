@@ -182,7 +182,7 @@
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Utility\Camera\Camera.cpp" />
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
-    <ClCompile Include="Engine\Utility\Collider\Collider.cpp" />
+    <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
@@ -283,7 +283,8 @@
     <ClInclude Include="Engine\Utility\Camera\Camera.h" />
     <ClInclude Include="Engine\Utility\Camera\DebugCamera.h" />
     <ClInclude Include="Engine\Utility\Camera\Frustum.h" />
-    <ClInclude Include="Engine\Utility\Collider\Collider.h" />
+    <ClInclude Include="Engine\Utility\Collider\ColliderManager.h" />
+    <ClInclude Include="Engine\Utility\Collider\CollisionFunction.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Circle.h" />

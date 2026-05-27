@@ -8,3 +8,4 @@
 #include "Utility/Logger/Logger.h"
 #include "Utility/Camera/Camera.h"
 #include "Utility/Camera/DebugCamera.h"
+#include "Utility/Collider/ColliderManager.h"

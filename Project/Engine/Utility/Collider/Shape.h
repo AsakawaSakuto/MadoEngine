@@ -9,9 +9,7 @@
 #include "Utility/Collider/Shape/Line.h"
 #include "Utility/Collider/Shape/Circle.h"
 
-/// <summary>
-/// デバッグ描画用の形状を統一的に扱うための variant型定義
-/// </summary>
+/// @brief 複数の当たり判定形状をまとめるための型
 using Shape = std::variant<
     AABB,
     OBB,

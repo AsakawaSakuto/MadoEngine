@@ -22,6 +22,8 @@ void SceneManager::Initialize(const std::string& initialScene) {
 void SceneManager::Update() {
 	MadoEngine::SpriteManager::GetInstance()->UpdateAll();
 
+	ColliderManager::GetInstance()->Update();
+
 	if (currentScene_) {
 		std::string next = currentScene_->Update();
 		if (!next.empty() && next != currentSceneName_) {

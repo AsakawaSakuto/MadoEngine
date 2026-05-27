@@ -64,6 +64,13 @@ namespace MadoEngine
 
 		// InputManagerの初期化
 		MadoEngine::InputManager::GetInstance()->Initialize();
+		MyInput::SetInput("Up", { DIK_UP,DIK_W }, { GAMEPAD_UP });
+		MyInput::SetInput("Down", { DIK_DOWN,DIK_S }, { GAMEPAD_DOWN });
+		MyInput::SetInput("Left", { DIK_LEFT,DIK_A }, { GAMEPAD_LEFT });
+		MyInput::SetInput("Right", { DIK_RIGHT,DIK_D }, { GAMEPAD_RIGHT });
+		MyInput::SetInput("Q", { DIK_Q }, { });
+		MyInput::SetInput("E", { DIK_E }, { });
+		MyInput::SetInput("Jump", { DIK_SPACE,DIK_Z }, { GAMEPAD_A });
 
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance()->Initialize();
