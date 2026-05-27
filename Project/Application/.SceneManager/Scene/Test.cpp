@@ -33,24 +33,32 @@ void Test::Initialize() {
 	s2.radius = 1.0f;
 	testShape2_ = s2;
 
+	Plane p;
+	p.normal = { 0.0f, 1.0f, 0.5f };
+	p.size = 10.0f;
+	plane_ = p;
+
 	// マネージャーへの登録（Shapeのアドレスと、独立したマスター座標のアドレスを渡す）
 	ColliderManager::GetInstance()->RegisterCollider("TestSphere", "Sphere", &testShape1_, &testPos1_);
 	ColliderManager::GetInstance()->RegisterCollider("TestSphere2", "Sphere", &testShape2_, &testPos2_);
+	ColliderManager::GetInstance()->RegisterCollider("TestPlane", "Plane", &plane_, &testPos3_);
 
 	ColliderManager::GetInstance()->RegisterCollisionPair("Sphere", "Sphere", true);
+	ColliderManager::GetInstance()->RegisterCollisionPair("Sphere", "Plane", true);
 }
 
 std::string Test::Update() {
 	// スペースキーが押されたらゲームシーンに遷移
-	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
-		Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
-		return "Game";
-	}
+	//if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
+	//	Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
+	//	return "Game";
+	//}
 
 	debugCamera_.Update();
 
 	MyDebugLine::AddShape(std::get<Sphere>(testShape1_), { 0.0f, 0.0f, 1.0f, 1.0f });
 	MyDebugLine::AddShape(std::get<Sphere>(testShape2_), { 0.0f, 1.0f, 0.0f, 1.0f });
+	MyDebugLine::AddShape(std::get<Plane>(plane_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 
 	player_->Update();
@@ -75,8 +83,6 @@ void Test::DrawImGui() {
 
 	debugCamera_.DrawImGui();
 
-	std::get<Sphere>(testShape1_).DrawImGui("TestSphere");
-	std::get<Sphere>(testShape2_).DrawImGui("TestSphere2");
 #endif // USE_IMGUI
 }
 

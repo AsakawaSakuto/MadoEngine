@@ -1,7 +1,9 @@
 #include "Player.h"
 
 void Player::Initialize() {
-	position_ = { 0.0f, 0.0f, 0.0f };
+	position_   = { 0.0f, 0.0f, 0.0f };
+	velocityY_  = 0.0f;
+	isGrounded_ = true;
 
 	Sphere s;
 	s.radius = 1.0f;
@@ -29,6 +31,24 @@ void Player::Update() {
 	}
 	if (MyInput::Press("Q")) {
 		position_.y += 1.0f * 1.0f / 60.0f;
+	}
+	// ジャンプ
+	if (MyInput::Trigger("Jump") && isGrounded_) {
+		velocityY_  = kJumpPower_;
+		isGrounded_ = false;
+	}
+
+	// 重力・垂直移動
+	if (!isGrounded_) {
+		velocityY_   += kGravity_ * (1.0f / 60.0f);
+		position_.y  += velocityY_ * (1.0f / 60.0f);
+
+		// 着地判定
+		if (position_.y <= kGroundY_) {
+			position_.y = kGroundY_;
+			velocityY_  = 0.0f;
+			isGrounded_ = true;
+		}
 	}
 
 	Vector4 color;

@@ -61,7 +61,9 @@ bool ColliderManager::CheckVariantCollision(const Shape& shapeA, const Shape& sh
 void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     if (!a.pShape || !b.pShape || !a.pPosition || !b.pPosition) return;
 
-    // ★ pShape をデリファレンスして判定
+    // ==========================================
+    // 1. Sphere vs Sphere (互いに半分ずつ押し戻す)
+    // ==========================================
     if (std::holds_alternative<Sphere>(*(a.pShape)) && std::holds_alternative<Sphere>(*(b.pShape))) {
         auto& sphereA = std::get<Sphere>(*(a.pShape));
         auto& sphereB = std::get<Sphere>(*(b.pShape));
@@ -76,14 +78,125 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
 
             Vector3 pushDir = { diff.x / distance, diff.y / distance, diff.z / distance };
 
-            *(a.pPosition) = { a.pPosition->x + pushDir.x * (penetration * 0.5f),
-                               a.pPosition->y + pushDir.y * (penetration * 0.5f),
-                               a.pPosition->z + pushDir.z * (penetration * 0.5f) };
-
-            *(b.pPosition) = { b.pPosition->x - pushDir.x * (penetration * 0.5f),
-                               b.pPosition->y - pushDir.y * (penetration * 0.5f),
-                               b.pPosition->z - pushDir.z * (penetration * 0.5f) };
+            // 互いに 0.5 ずつ押し戻す
+            *(a.pPosition) = *(a.pPosition) + pushDir * (penetration * 0.5f);
+            *(b.pPosition) = *(b.pPosition) - pushDir * (penetration * 0.5f);
         }
+        return;
+    }
+
+    // ==========================================
+    // 2. AABB vs AABB (互いに半分ずつ押し戻す)
+    // ==========================================
+    if (std::holds_alternative<AABB>(*(a.pShape)) && std::holds_alternative<AABB>(*(b.pShape))) {
+        auto& aabbA = std::get<AABB>(*(a.pShape));
+        auto& aabbB = std::get<AABB>(*(b.pShape));
+
+        Vector3 aMin = aabbA.GetMinWorld();
+        Vector3 aMax = aabbA.GetMaxWorld();
+        Vector3 bMin = aabbB.GetMinWorld();
+        Vector3 bMax = aabbB.GetMaxWorld();
+
+        // 各軸のめり込み量を計算
+        float overlapX = std::min(aMax.x, bMax.x) - std::max(aMin.x, bMin.x);
+        float overlapY = std::min(aMax.y, bMax.y) - std::max(aMin.y, bMin.y);
+        float overlapZ = std::min(aMax.z, bMax.z) - std::max(aMin.z, bMin.z);
+
+        // すべての軸でめり込んでいる場合のみ押し戻す（CheckCollisionを通っているので基本true）
+        if (overlapX > 0 && overlapY > 0 && overlapZ > 0) {
+            // 一番めり込みが浅い軸（最小移動ベクトル）を特定して押し戻す
+            Vector3 pushVec = { 0,0,0 };
+            if (overlapX < overlapY && overlapX < overlapZ) {
+                pushVec.x = (a.pPosition->x < b.pPosition->x) ? -overlapX : overlapX;
+            } else if (overlapY < overlapX && overlapY < overlapZ) {
+                pushVec.y = (a.pPosition->y < b.pPosition->y) ? -overlapY : overlapY;
+            } else {
+                pushVec.z = (a.pPosition->z < b.pPosition->z) ? -overlapZ : overlapZ;
+            }
+
+            *(a.pPosition) = *(a.pPosition) + pushVec * 0.5f;
+            *(b.pPosition) = *(b.pPosition) - pushVec * 0.5f;
+        }
+        return;
+    }
+
+    // ==========================================
+    // 3. Sphere vs AABB (SphereとAABBの押し戻し)
+    // ==========================================
+    bool isASphere = std::holds_alternative<Sphere>(*(a.pShape));
+    bool isBAABB = std::holds_alternative<AABB>(*(b.pShape));
+    bool isAAABB = std::holds_alternative<AABB>(*(a.pShape));
+    bool isBSphere = std::holds_alternative<Sphere>(*(b.pShape));
+
+    if ((isASphere && isBAABB) || (isAAABB && isBSphere)) {
+        ColliderInfo& sphereInfo = isASphere ? a : b;
+        ColliderInfo& aabbInfo = isASphere ? b : a;
+
+        auto& sphere = std::get<Sphere>(*(sphereInfo.pShape));
+        auto& aabb = std::get<AABB>(*(aabbInfo.pShape));
+
+        Vector3 aabbMin = aabb.GetMinWorld();
+        Vector3 aabbMax = aabb.GetMaxWorld();
+
+        // AABB上の、Sphereの中心に一番近い点（ClosestPoint）を求める
+        Vector3 closestPoint = {
+            std::clamp(sphereInfo.pPosition->x, aabbMin.x, aabbMax.x),
+            std::clamp(sphereInfo.pPosition->y, aabbMin.y, aabbMax.y),
+            std::clamp(sphereInfo.pPosition->z, aabbMin.z, aabbMax.z)
+        };
+
+        Vector3 diff = *(sphereInfo.pPosition) - closestPoint;
+        float distSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+
+        // 中心がAABBの中に入り込んでしまっている（激しいめり込み）場合の特殊処理
+        if (distSq == 0.0f) {
+            // ここでは簡易的にY軸上へ押し上げる処理を入れるなど工夫が必要
+            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + Vector3{ 0, sphere.radius, 0 };
+            return;
+        }
+
+        if (distSq < sphere.radius * sphere.radius) {
+            float distance = std::sqrt(distSq);
+            float penetration = sphere.radius - distance;
+            Vector3 pushDir = { diff.x / distance, diff.y / distance, diff.z / distance };
+
+            // 半分ずつ押し戻す
+            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushDir * (penetration * 0.5f);
+            *(aabbInfo.pPosition) = *(aabbInfo.pPosition) - pushDir * (penetration * 0.5f);
+        }
+        return;
+    }
+
+    // ==========================================
+    // 4. Sphere vs Plane (Planeは静止物として扱い、Sphereを100%押し戻す)
+    // ==========================================
+    bool isBPlane = std::holds_alternative<Plane>(*(b.pShape));
+    bool isAPlane = std::holds_alternative<Plane>(*(a.pShape));
+
+    if ((isASphere && isBPlane) || (isAPlane && isBSphere)) {
+        ColliderInfo& sphereInfo = isASphere ? a : b;
+        ColliderInfo& planeInfo = isASphere ? b : a;
+
+        auto& sphere = std::get<Sphere>(*(sphereInfo.pShape));
+        auto& plane = std::get<Plane>(*(planeInfo.pShape));
+
+        // 平面の法線を正規化
+        Vector3 normal = { plane.normal.x, plane.normal.y, plane.normal.z }; // 正規化済みと仮定
+
+        // 平面から球の中心までの距離
+        Vector3 toSphere = *(sphereInfo.pPosition) - plane.center;
+        float distToPlane = toSphere.x * normal.x + toSphere.y * normal.y + toSphere.z * normal.z;
+
+        // 球の半径より近ければめり込んでいる
+        if (std::abs(distToPlane) < sphere.radius) {
+            float penetration = sphere.radius - std::abs(distToPlane);
+
+            // 法線方向（またはその逆）にSphereだけを100%押し戻す
+            float sign = (distToPlane < 0.0f) ? -1.0f : 1.0f;
+            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + normal * (penetration * sign);
+            // ※ planeInfo.pPosition はいじらない（Planeは質量無限大の壁や床という扱い）
+        }
+        return;
     }
 }
 

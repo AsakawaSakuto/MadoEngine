@@ -36,9 +36,11 @@ private:
 
 	Shape testShape1_;
 	Shape testShape2_;
+	Shape plane_;
 
 	Vector3 testPos1_ = { -2.0f, 2.0f, 0.0f };
 	Vector3 testPos2_ = { 2.0f, 2.0f, 0.0f };
+	Vector3 testPos3_ = { 0.0f, 0.0f, 0.0f };
 
 	std::unique_ptr<Sprite> sprite_;
 	std::unique_ptr<Player> player_;
