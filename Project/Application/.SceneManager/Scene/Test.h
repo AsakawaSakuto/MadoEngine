@@ -17,8 +17,8 @@ public:
 	void Initialize() override;
 
 	/// @brief 更新処理
-	/// @return 次に遷移するシーン名（遷移しない場合は "Test"）
-	std::string Update() override;
+	/// @return 次に遷移するシーンの種類
+	SceneType Update() override;
 
 	/// @brief 終了処理
 	void Finalize() override;
@@ -33,6 +33,7 @@ private:
 	Vector2 testPos_ = { 0.0f, 0.0f };
 
 	DebugCamera debugCamera_;
+	TPS_Camera tpsCamera_;
 
 	Shape testShape1_;
 	Shape testShape2_;

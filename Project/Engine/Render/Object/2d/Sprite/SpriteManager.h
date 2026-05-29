@@ -1,6 +1,7 @@
 #pragma once
 #include "Sprite.h"
 #include "SpriteSharedGeometry.h"
+#include ".SceneManager/SceneType.h"
 #include <unordered_map>
 #include <memory>
 #include <string>
@@ -34,9 +35,9 @@ public:
 	/// @brief Spriteを生成して管理下に登録する
 	/// @param name Spriteの識別名
 	/// @param textureName 使用するテクスチャ名
-	/// @param sceneName 描画を許可するシーン名（空文字の場合は全シーンで描画）
+	/// @param sceneType 描画を許可するシーンの種類（SceneType::None の場合は全シーンで描画）
 	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
-	Sprite* Create(const std::string& name, const std::string& textureName, const std::string& sceneName);
+	Sprite* Create(const std::string& name, const std::string& textureName, SceneType sceneType = SceneType::None);
 
 	/// @brief 識別名でSpriteを取得する
 	/// @param name Spriteの識別名
@@ -50,9 +51,9 @@ public:
 	/// @brief 管理下の全Spriteを更新する
 	void UpdateAll();
 
-	/// @brief 管理下の全Spriteを描画する（IsVisible() == false またはシーン名不一致はスキップ）
-	/// @param currentSceneName 現在実行中のシーン名
-	void DrawAll(const std::string& currentSceneName);
+	/// @brief 管理下の全Spriteを描画する（IsVisible() == false またはシーン不一致はスキップ）
+	/// @param currentSceneType 現在実行中のシーンの種類
+	void DrawAll(SceneType currentSceneType);
 
 private:
 

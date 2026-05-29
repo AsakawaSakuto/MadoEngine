@@ -8,16 +8,32 @@ public:
 
 	void Initialize();
 
-	void Update();
+	void Update(float deltaTime);
+
+	Vector3 GetPosition() const { return position_; }
+
+	/// @brief 移動の基準となるカメラをセットする
+	/// @param camera カメラへのポインタ
+	void SetCamera(Camera* camera) { camera_ = camera; }
 
 private:
-	static constexpr float kGravity_    = -9.8f;  // 重力加速度
-	static constexpr float kJumpPower_  = 4.0f;   // ジャンプ初速
-	static constexpr float kGroundY_    = 0.0f;   // 地面のY座標
 
-	Vector3 position_  = { 0.0f, 0.0f, 0.0f };
-	float   velocityY_ = 0.0f;   // 垂直方向の速度
-	bool    isGrounded_ = true;  // 接地フラグ
+	void Move(float deltaTime);
 
+	void Jump(float deltaTime);
+
+private:
+
+	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
 	Shape hitbox_;
+
+	Camera* camera_ = nullptr;
+
+	float velocityY_  = 0.0f;
+	bool  isGrounded_ = false;
+
+	static constexpr float kMoveSpeed  = 5.0f;
+	static constexpr float kJumpPower  = 8.0f;
+	static constexpr float kGravity    = 20.0f;
+	static constexpr float kGroundY    = 0.0f;
 };

@@ -2,6 +2,7 @@
 #include "SpriteData.h"
 #include "SpriteSharedGeometry.h"
 #include "Render/Object/RenderObject2d.h"
+#include ".SceneManager/SceneType.h"
 
 class Sprite : public RenderObject2d {
 public:
@@ -24,13 +25,13 @@ public:
 	/// @brief 描画
 	void Draw() override;
 
-	/// @brief 描画対象シーン名をセットする
-	/// @param sceneName 描画を許可するシーン名
-	void SetSceneName(const std::string& sceneName) { sceneName_ = sceneName; }
+	/// @brief 描画対象シーンをセットする
+	/// @param sceneType 描画を許可するシーンの種類（SceneType::None の場合は全シーンで描画）
+	void SetSceneType(SceneType sceneType) { sceneType_ = sceneType; }
 
-	/// @brief 描画対象シーン名を取得する
-	/// @return 登録されているシーン名
-	const std::string& GetSceneName() const { return sceneName_; }
+	/// @brief 描画対象シーンを取得する
+	/// @return 登録されているシーンの種類
+	SceneType GetSceneType() const { return sceneType_; }
 
 private:
 
@@ -49,6 +50,6 @@ private:
 	Vector2     anchorPoint_ = { 0.0f, 0.0f };
 	AnchorPoint anchorType_ = AnchorPoint::TopLeft;
 
-	// 描画対象シーン名（空文字は全シーンで描画）
-	std::string sceneName_;
+	// 描画対象シーン（SceneType::None は全シーンで描画）
+	SceneType sceneType_ = SceneType::None;
 };

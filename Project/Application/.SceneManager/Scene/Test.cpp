@@ -12,7 +12,7 @@ void Test::Initialize() {
 	Logger::Output("テストシーンを初期化しました", Logger::Level::Application);
 
 	for (int i = 0; i < sprites_.size(); ++i) {
-		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", "Test");
+		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", SceneType::Test);
 		sprites_[i]->SetPosition({ 32.0f * i, 32.0f * i });
 		sprites_[i]->SetVisible(false);
 	}
@@ -23,6 +23,7 @@ void Test::Initialize() {
 
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
+	player_->SetCamera(&tpsCamera_);
 
 	AABB s1;
 	s1.min = { -0.5f, -0.5f, -0.5f };
@@ -49,27 +50,32 @@ void Test::Initialize() {
 	MyCollider::RegisterCollisionPair("Sphere", "Plane", true);
 }
 
-std::string Test::Update() {
+SceneType Test::Update() {
 	// スペースキーが押されたらゲームシーンに遷移
-	//if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
-	//	Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
-	//	return "Game";
-	//}
+	/*if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
+		Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
+		return SceneType::Game;
+	}*/
 
-	debugCamera_.Update();
+	//debugCamera_.Update();
+
+	auto deltaTime = 1.0f / 60.0f;
+
+	tpsCamera_.SetTargetPosition(player_->GetPosition());
+	tpsCamera_.Update(deltaTime);
+
+	player_->Update(deltaTime);
 
 	MyDebugLine::AddShape(std::get<AABB>(testShape1_), { 0.0f, 0.0f, 1.0f, 1.0f });
 	MyDebugLine::AddShape(std::get<AABB>(testShape2_), { 0.0f, 1.0f, 0.0f, 1.0f });
 	MyDebugLine::AddShape(std::get<Plane>(plane_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 
-	player_->Update();
-
-	return "Test";
+	return SceneType::Test;
 }
 
 void Test::Draw() {
-	MyDebugLine::Draw(debugCamera_);
+	MyDebugLine::Draw(tpsCamera_);
 }
 
 void Test::DrawImGui() {
@@ -88,6 +94,8 @@ void Test::DrawImGui() {
 	ImGui::DragFloat3("pos3", &testPos3_.x, 0.1f);
 
 	ImGui::End();
+
+	tpsCamera_.DrawImGui();
 
 	sprites_[0]->SetPosition(testPos_);
 

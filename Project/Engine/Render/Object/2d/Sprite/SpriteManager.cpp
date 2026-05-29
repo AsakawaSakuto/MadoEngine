@@ -30,7 +30,7 @@ void SpriteManager::Finalize() {
 	Logger::Output("全リソースを解放しました", Logger::Level::Engine);
 }
 
-Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName, const std::string& sceneName) {
+Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName, SceneType sceneType) {
 	if (sprites_.contains(name)) {
 		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
 		return sprites_.at(name).get();
@@ -39,12 +39,12 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 	auto sprite = std::make_unique<Sprite>(name);
 	sprite->Initialize(device_, commandList_, textureName, sharedGeometry_);
 	sprite->SetPSORegistry(psoRegistry_);
-	sprite->SetSceneName(sceneName);
+	sprite->SetSceneType(sceneType);
 
 	Sprite* ptr = sprite.get();
 	sprites_.emplace(name, std::move(sprite));
 
-	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneName.empty() ? "全シーン" : sceneName), Logger::Level::Application);
+	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneType == SceneType::None ? "全シーン" : SceneTypeToString(sceneType)), Logger::Level::Application);
 	return ptr;
 }
 
@@ -69,17 +69,17 @@ void SpriteManager::UpdateAll() {
 	}
 }
 
-void SpriteManager::DrawAll(const std::string& currentSceneName) {
+void SpriteManager::DrawAll(SceneType currentSceneType) {
 	if (sprites_.empty()) { return; }
 
 	// 全スプライト共通のステートをループ外で1回だけ設定する
 	bool isStateSet = false;
 
 	for (auto& [name, sprite] : sprites_) {
-		const std::string& sceneName = sprite->GetSceneName();
-		// シーン名が空文字（全シーン共通）または現在のシーンと一致する場合のみ描画
+		SceneType spriteScene = sprite->GetSceneType();
+		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
 		if (!sprite->IsVisible()) { continue; }
-		if (!sceneName.empty() && sceneName != currentSceneName) { continue; }
+		if (spriteScene != SceneType::None && spriteScene != currentSceneType) { continue; }
 
 		// 最初の有効なスプライトのタイミングで共通ステートを1回だけ設定
 		if (!isStateSet) {

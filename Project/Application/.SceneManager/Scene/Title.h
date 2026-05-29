@@ -16,8 +16,8 @@ public:
 	void Initialize() override;
 
 	/// @brief 更新処理
-	/// @return 次に遷移するシーン名（遷移しない場合は "Title"）
-	std::string Update() override;
+	/// @return 次に遷移するシーンの種類
+	SceneType Update() override;
 
 	/// @brief 終了処理
 	void Finalize() override;

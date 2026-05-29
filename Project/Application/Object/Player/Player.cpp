@@ -2,54 +2,19 @@
 
 void Player::Initialize() {
 	position_   = { 0.0f, 0.0f, 0.0f };
-	velocityY_  = 0.0f;
-	isGrounded_ = true;
 
-	Sphere s;
-	s.radius = 1.0f;
+	AABB s;
+	s.min = { -0.5f, 0.0f, -0.5f };
+	s.max = { 0.5f, 2.0f, 0.5f };
 	hitbox_ = s;
 
 	MyCollider::RegisterCollider("PlayerSphere", "Sphere", &hitbox_, &position_, nullptr);
 }
 
-void Player::Update() {
+void Player::Update(float deltaTime) {
 	
-	if (MyInput::Press("UP")) {
-		position_.z += 1.0f * 1.0f / 60.0f;
-	}
-	if (MyInput::Press("DOWN")) {
-		position_.z -= 1.0f * 1.0f / 60.0f;
-	}
-	if (MyInput::Press("LEFT")) {
-		position_.x -= 1.0f * 1.0f / 60.0f;
-	}
-	if (MyInput::Press("RIGHT")) {
-		position_.x += 1.0f * 1.0f / 60.0f;
-	}
-	if (MyInput::Press("E")) {
-		position_.y -= 1.0f * 1.0f / 60.0f;
-	}
-	if (MyInput::Press("Q")) {
-		position_.y += 1.0f * 1.0f / 60.0f;
-	}
-	// ジャンプ
-	if (MyInput::Trigger("Jump") && isGrounded_) {
-		velocityY_  = kJumpPower_;
-		isGrounded_ = false;
-	}
-
-	// 重力・垂直移動
-	if (!isGrounded_) {
-		velocityY_   += kGravity_ * (1.0f / 60.0f);
-		position_.y  += velocityY_ * (1.0f / 60.0f);
-
-		// 着地判定
-		if (position_.y <= kGroundY_) {
-			position_.y = kGroundY_;
-			velocityY_  = 0.0f;
-			isGrounded_ = true;
-		}
-	}
+	Move(deltaTime);
+	Jump(deltaTime);
 
 	Vector4 color;
 	if (MyCollider::IsHitTags("Player", "AABB")) {
@@ -58,6 +23,59 @@ void Player::Update() {
 		color = { 1.0f,1.0f,0.0f,1.0f };
 	}
 
-	std::get<Sphere>(hitbox_).center = position_;
-	MyDebugLine::AddShape(std::get<Sphere>(hitbox_), color);
+	MyDebugLine::AddShape(std::get<AABB>(hitbox_), color);
+}
+
+void Player::Move(float deltaTime) {
+	if (!camera_) {
+		return;
+	}
+
+	const Vector2 stick = MyInput::GetGamePad()->GetLeftStick();
+	if (std::abs(stick.x) < 1e-5f && std::abs(stick.y) < 1e-5f) {
+		return;
+	}
+
+	// カメラのY軸回転（ヨー）からXZ平面上の前方・右方ベクトルを算出
+	const float yaw = camera_->GetRotation().y;
+	const Vector3 forward = { std::sin(yaw),  0.0f, std::cos(yaw) };
+	const Vector3 right   = { std::cos(yaw),  0.0f, -std::sin(yaw) };
+
+	// 左スティックの入力をカメラ基準のXZ方向に変換
+	Vector3 moveDir = {
+		forward.x * stick.y + right.x * stick.x,
+		0.0f,
+		forward.z * stick.y + right.z * stick.x
+	};
+
+	position_.x += moveDir.x * kMoveSpeed * deltaTime;
+	position_.y += moveDir.y * kMoveSpeed * deltaTime;
+	position_.z += moveDir.z * kMoveSpeed * deltaTime;
+}
+
+void Player::Jump(float deltaTime) {
+	// ジャンプ入力（Aボタン）：接地中のみ受け付ける
+	if (isGrounded_ && MyInput::Trigger("Jump")) {
+		velocityY_  = kJumpPower;
+		isGrounded_ = false;
+		Logger::Output("ジャンプ開始", Logger::Level::Application);
+	}
+
+	// 重力を加算
+	if (!isGrounded_) {
+		velocityY_ -= kGravity * deltaTime;
+	}
+
+	// Y座標に速度を反映
+	position_.y += velocityY_ * deltaTime;
+
+	// 地面着地判定
+	if (position_.y <= kGroundY) {
+		position_.y = kGroundY;
+		velocityY_  = 0.0f;
+		if (!isGrounded_) {
+			isGrounded_ = true;
+			Logger::Output("着地", Logger::Level::Application);
+		}
+	}
 }
