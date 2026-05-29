@@ -20,6 +20,12 @@ void Player::Update(float deltaTime) {
 	Move(deltaTime);
 	Jump(deltaTime);
 
+	if (MyCollider::IsHitTags(CollisionTag::Player, CollisionTag::Sphere)) {
+		isGrounded_ = true;
+	} else {
+		isGrounded_ = false;
+	}
+
 	Vector4 color = { 1.0f,1.0f,0.0f,1.0f };
 	MyDebugLine::AddShape(std::get<Sphere>(hitbox_), color);
 }
@@ -52,11 +58,17 @@ void Player::Move(float deltaTime) {
 }
 
 void Player::Jump(float deltaTime) {
-	// ジャンプ入力（Aボタン）：接地中のみ受け付ける
-	if (isGrounded_ && MyInput::Trigger("Jump")) {
+	// 着地時にジャンプ回数をリセット
+	if (isGrounded_) {
+		jumpCount_ = kJumpCount;
+	}
+
+	// ジャンプ入力（Aボタン）：残りジャンプ回数があれば受け付ける
+	if (jumpCount_ > 0 && MyInput::Trigger("Jump")) {
 		velocityY_  = kJumpPower;
 		isGrounded_ = false;
-		Logger::Output("ジャンプ開始", Logger::Level::Application);
+		jumpCount_--;
+		Logger::Output("ジャンプ開始 残り回数: " + std::to_string(jumpCount_), Logger::Level::Application);
 	}
 
 	// 重力を加算
@@ -73,6 +85,7 @@ void Player::Jump(float deltaTime) {
 		velocityY_  = 0.0f;
 		if (!isGrounded_) {
 			isGrounded_ = true;
+			jumpCount_  = kJumpCount;
 			Logger::Output("着地", Logger::Level::Application);
 		}
 	}

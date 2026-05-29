@@ -36,4 +36,6 @@ private:
 	static constexpr float kJumpPower  = 8.0f;
 	static constexpr float kGravity    = 20.0f;
 	static constexpr float kGroundY    = 0.0f;
+	static constexpr int   kJumpCount  = 10;    // ジャンプ可能回数
+	int jumpCount_ = 0;                        // 残りジャンプ回数
 };

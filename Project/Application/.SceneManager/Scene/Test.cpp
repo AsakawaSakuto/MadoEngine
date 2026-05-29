@@ -32,8 +32,8 @@ void Test::Initialize() {
 
 	// 2つ目のSphere
 	AABB s2;
-	s2.min = { -0.5f, -0.5f, -0.5f };
-	s2.max = { 0.5f, 0.5f, 0.5f };
+	s2.min = { -2.5f, 0.0f, -2.5f };
+	s2.max = { 2.5f, 5.0f, 2.5f };
 	testShape2_ = s2;
 
 	Plane p;
