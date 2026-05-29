@@ -59,19 +59,18 @@ void Test::Initialize() {
 	p.normal = { 0.0f, 1.0f, 0.5f };
 	p.size = 5.0f;
 	plane_ = p;
-	planePos_ = { 0.0f, 2.5f, -5.0f };
+	planePos_ = { 0.0f, 1.15f, -4.7f };
 
 	// マネージャーへの登録（Shapeのアドレスと、独立したマスター座標のアドレスを渡す）
-	MyCollider::RegisterCollider("TestSphere",  CollisionTag::AABB,   &shape1_, &shapePos1_, 2.0f);
-	MyCollider::RegisterCollider("TestSphere2", CollisionTag::AABB,   &shape2_, &shapePos2_, 2.0f);
-	MyCollider::RegisterCollider("TestSphere3", CollisionTag::AABB,   &shape3_, &shapePos3_, 2.0f);
-	MyCollider::RegisterCollider("TestSphere4", CollisionTag::AABB,   &shape4_, &shapePos4_, 2.0f);
-	MyCollider::RegisterCollider("TestSphere5", CollisionTag::AABB,   &shape5_, &shapePos5_, 2.0f);
+	MyCollider::RegisterCollider("TestSphere",  CollisionTag::AABB,   &shape1_, &shapePos1_, 1.0f);
+	MyCollider::RegisterCollider("TestSphere2", CollisionTag::AABB,   &shape2_, &shapePos2_, 1.0f);
+	MyCollider::RegisterCollider("TestSphere3", CollisionTag::AABB,   &shape3_, &shapePos3_, 1.0f);
+	MyCollider::RegisterCollider("TestSphere4", CollisionTag::AABB,   &shape4_, &shapePos4_, 1.0f);
+	MyCollider::RegisterCollider("TestSphere5", CollisionTag::AABB,   &shape5_, &shapePos5_, 1.0f);
 	MyCollider::RegisterCollider("TestPlane",   CollisionTag::Plane,  &plane_,  &planePos_,  1.0f);
 
-	MyCollider::RegisterCollisionPair(CollisionTag::AABB, CollisionTag::AABB, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::Player, CollisionTag::AABB, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::Player, CollisionTag::Plane, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerAABB, CollisionTag::AABB, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::Plane, true);
 }
 
 SceneType Test::Update() {

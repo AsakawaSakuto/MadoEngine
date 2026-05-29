@@ -115,14 +115,17 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
 
         // すべての軸でめり込んでいる場合のみ押し戻す（CheckCollisionを通っているので基本true）
         if (overlapX > 0 && overlapY > 0 && overlapZ > 0) {
+            // 境界ぴったりスナップによる再めり込みを防ぐための微小オフセット
+            static constexpr float kSkinWidth = 0.001f;
+
             // 一番めり込みが浅い軸（最小移動ベクトル）を特定して押し戻す
             Vector3 pushVec = { 0,0,0 };
             if (overlapX < overlapY && overlapX < overlapZ) {
-                pushVec.x = (a.pPosition->x < b.pPosition->x) ? -overlapX : overlapX;
+                pushVec.x = (a.pPosition->x < b.pPosition->x) ? -(overlapX + kSkinWidth) : (overlapX + kSkinWidth);
             } else if (overlapY < overlapX && overlapY < overlapZ) {
-                pushVec.y = (a.pPosition->y < b.pPosition->y) ? -overlapY : overlapY;
+                pushVec.y = (a.pPosition->y < b.pPosition->y) ? -(overlapY + kSkinWidth) : (overlapY + kSkinWidth);
             } else {
-                pushVec.z = (a.pPosition->z < b.pPosition->z) ? -overlapZ : overlapZ;
+                pushVec.z = (a.pPosition->z < b.pPosition->z) ? -(overlapZ + kSkinWidth) : (overlapZ + kSkinWidth);
             }
 
             *(a.pPosition) = *(a.pPosition) + pushVec * factorA;
@@ -213,6 +216,44 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         }
         return;
     }
+}
+
+bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targetTag) {
+    auto it = m_colliders.find(name);
+    if (it == m_colliders.end()) return false;
+
+    const ColliderInfo& playerInfo = it->second;
+    if (!playerInfo.pShape || !playerInfo.pPosition) return false;
+    if (!std::holds_alternative<AABB>(*(playerInfo.pShape))) return false;
+
+    auto& playerAABB = std::get<AABB>(*(playerInfo.pShape));
+    Vector3 aMin = playerAABB.GetMinWorld();
+    Vector3 aMax = playerAABB.GetMaxWorld();
+
+    for (const auto& [otherName, otherInfo] : m_colliders) {
+        if (otherName == name) continue;
+        if (otherInfo.tag != targetTag) continue;
+        if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+        if (!std::holds_alternative<AABB>(*(otherInfo.pShape))) continue;
+
+        auto& boxAABB = std::get<AABB>(*(otherInfo.pShape));
+        Vector3 bMin = boxAABB.GetMinWorld();
+        Vector3 bMax = boxAABB.GetMaxWorld();
+
+        float overlapX = std::min(aMax.x, bMax.x) - std::max(aMin.x, bMin.x);
+        float overlapY = std::min(aMax.y, bMax.y) - std::max(aMin.y, bMin.y);
+        float overlapZ = std::min(aMax.z, bMax.z) - std::max(aMin.z, bMin.z);
+
+        if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f) continue;
+
+        // Y軸が最小のめり込み量 かつ プレイヤーの中心が対象の中心より上 = 床面接触
+        if (overlapY <= overlapX && overlapY <= overlapZ) {
+            if (playerInfo.pPosition->y >= otherInfo.pPosition->y) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nameB) {

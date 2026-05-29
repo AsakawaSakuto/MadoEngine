@@ -25,7 +25,8 @@ private:
 private:
 
 	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
-	Shape hitbox_;
+	Shape hitAABB_;
+	Shape hitSphere_;
 
 	Camera* camera_ = nullptr;
 

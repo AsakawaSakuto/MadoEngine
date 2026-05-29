@@ -64,6 +64,12 @@ public:
 	/// @param tagB タグB
 	bool IsHitTags(CollisionTag tagA, CollisionTag tagB);
 
+	/// @brief 指定した個体が、対象タグのAABBの上面に乗っているかを判定する
+	/// @param name 個体の識別名
+	/// @param targetTag 床として扱うタグ
+	/// @return 床面に接触していればtrue
+	bool IsGroundContact(const std::string& name, CollisionTag targetTag);
+
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();
 

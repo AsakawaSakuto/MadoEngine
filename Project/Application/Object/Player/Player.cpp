@@ -3,16 +3,17 @@
 void Player::Initialize() {
 	position_   = { 0.0f, 0.0f, 0.0f };
 
-	AABB s;
-	s.min = { -0.5f, 0.0f, -0.5f };
-	s.max = { 0.5f, 2.0f, 0.5f };
-	hitbox_ = s;
+	AABB aabb;
+	aabb.min = { -0.5f, 0.0f, -0.5f };
+	aabb.max = { 0.5f, 2.0f, 0.5f };
+	hitAABB_ = aabb;
 
-	/*Sphere s;
+	Sphere s;
 	s.radius = 0.5f;
-	hitbox_ = s;*/
+	hitSphere_ = s;
 
-	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::Player, &hitbox_, &position_, 0.0f);
+	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &hitSphere_, &position_, 0.0f);
+	MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
 }
 
 void Player::Update(float deltaTime) {
@@ -20,24 +21,24 @@ void Player::Update(float deltaTime) {
 	Move(deltaTime);
 	Jump(deltaTime);
 
-	// このフレームで何か（床や壁）に当たっているかをチェック
-	bool isColliding = MyCollider::IsHitTags(CollisionTag::Player, CollisionTag::AABB);
+	// 床面接触（Y軸が最小解決軸）かどうかを判定する
+	bool isGroundContact = MyCollider::IsGroundContact("PlayerAABB", CollisionTag::AABB);
 
-	// 落下中に何かに当たったら、かつ、（ColliderManager）によって「上に押し戻される」であろう状態の時だけ接地とする
-	if (isColliding && velocityY_ < 0.0f) {
-		// 落下をストップさせる
-		velocityY_ = 0.0f;
+	if (isGroundContact) {
+		// AABBの上面に乗っている → 接地
+		if (velocityY_ < 0.0f) {
+			velocityY_ = 0.0f;
+		}
 		isGrounded_ = true;
-	} else if (!isColliding) {
-		// 何にも当たっていないなら確実に空中
+	} else {
+		// 床面接触なし（側面のみ接触 or 空中）→ 空中扱いにして重力を継続させる
 		isGrounded_ = false;
 	}
-	// ※壁に張り付いているだけの時は velocityY_ がマイナス（落下中）なので一瞬止まりますが、
-	// 　次のフレームでColliderManagerが横に押し戻すため、急上昇や引っかかりは起きません。
 
 	// デバッグ表示
 	Vector4 color = { 1.0f,1.0f,0.0f,1.0f };
-	MyDebugLine::AddShape(std::get<AABB>(hitbox_), color);
+	MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
+	MyDebugLine::AddShape(std::get<Sphere>(hitSphere_), color);
 }
 
 void Player::Move(float deltaTime) {

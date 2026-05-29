@@ -4,7 +4,8 @@
 
 /// @brief 衝突タグの列挙型
 enum class CollisionTag {
-	Player,
+	PlayerAABB,
+	PlayerSphere,
 	Enemy,
 	Stage,
 
@@ -20,9 +21,13 @@ enum class CollisionTag {
 /// @return タグ名の文字列
 inline std::string CollisionTagToString(CollisionTag tag) {
 	switch (tag) {
-	case CollisionTag::Player: return "Player";
+	case CollisionTag::PlayerAABB: return "PlayerAABB";
+	case CollisionTag::PlayerSphere: return "PlayerSphere";
 	case CollisionTag::Enemy:  return "Enemy";
 	case CollisionTag::Stage:  return "Stage";
+	case CollisionTag::Plane:  return "Plane";
+	case CollisionTag::Sphere:  return "Sphere";
+	case CollisionTag::AABB:  return "AABB";
 	default:                   return "Unknown";
 	}
 }

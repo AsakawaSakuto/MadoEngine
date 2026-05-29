@@ -54,4 +54,12 @@ namespace MyCollider {
 		return ColliderManager::GetInstance()->IsHitTags(tagA, tagB);
 	}
 
+	/// @brief 指定した個体が、対象タグのAABB上面に乗っているかを判定する
+	/// @param name 個体の識別名
+	/// @param targetTag 床として扱うタグ
+	/// @return 床面に接触していればtrue
+	inline bool IsGroundContact(const std::string& name, CollisionTag targetTag) {
+		return ColliderManager::GetInstance()->IsGroundContact(name, targetTag);
+	}
+
 };
