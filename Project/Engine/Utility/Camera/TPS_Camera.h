@@ -115,7 +115,7 @@ private:
 
 	// Pitch角クランプ範囲
 	float minPitch_ = -1.2f;
-	float maxPitch_ =  1.2f;
+	float maxPitch_ =  0.5f;
 
 	// 入力感度
 	float mouseSensitivity_   = 0.003f; // マウス感度

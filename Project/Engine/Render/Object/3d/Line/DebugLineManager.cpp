@@ -45,14 +45,14 @@ void DebugLineManager::AddGrid(float size, int divisions, const Vector4& color) 
 }
 
 void DebugLineManager::Draw(Camera& camera) {
-#ifdef USE_IMGUI
+
 	// 描画
 	if (isDrawing_) {
 		line_->Draw(camera);
 	} else {
 		
 	}
-#endif // USE_IMGUI
+
 }
 
 void DebugLineManager::SetPSORegistry(MadoEngine::Render::PSORegistry* psoRegistry) {

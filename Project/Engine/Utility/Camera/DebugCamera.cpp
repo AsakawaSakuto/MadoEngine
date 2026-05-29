@@ -94,6 +94,7 @@ void DebugCamera::ApplySphericalCoord() {
 }
 
 void DebugCamera::DrawImGui() {
+#ifdef USE_IMGUI
 	ImGui::Begin("Debug Camera");
 	ImGui::DragFloat3("Target", &target_.x, 0.1f, -100.0f, 100.0f);
 	ImGui::DragFloat("Distance", &distance_, 0.1f, 1.0f, 100.0f);
@@ -101,4 +102,5 @@ void DebugCamera::DrawImGui() {
 	ImGui::DragFloat("パン感度", &panSensitivity_, 0.01f);
 	ImGui::DragFloat("ドリー感度", &dollySensitivity_, 0.01f);
 	ImGui::End();
+#endif
 }

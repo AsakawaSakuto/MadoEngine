@@ -33,6 +33,7 @@ private:
 	bool  isGrounded_ = false;
 
 	static constexpr float kMoveSpeed  = 5.0f;
+	static constexpr float kDashSpeed  = 10.0f;
 	static constexpr float kJumpPower  = 8.0f;
 	static constexpr float kGravity    = 20.0f;
 	static constexpr float kGroundY    = 0.0f;

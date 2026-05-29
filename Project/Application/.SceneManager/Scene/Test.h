@@ -35,13 +35,19 @@ private:
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 
-	Shape testShape1_;
-	Shape testShape2_;
+	Shape shape1_;
+	Shape shape2_;
+	Shape shape3_;
+	Shape shape4_;
+	Shape shape5_;
 	Shape plane_;
 
-	Vector3 testPos1_ = { -2.0f, 2.0f, 0.0f };
-	Vector3 testPos2_ = { 2.0f, 2.0f, 0.0f };
-	Vector3 testPos3_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 shapePos1_ = { -2.0f, 2.0f, 0.0f };
+	Vector3 shapePos2_ = { 2.0f, 2.0f, 0.0f };
+	Vector3 shapePos3_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 shapePos4_ = { -2.0f, 2.0f, 0.0f };
+	Vector3 shapePos5_ = { 2.0f, 2.0f, 0.0f };
+	Vector3 planePos_ = { 0.0f, 0.0f, 0.0f };
 
 	std::unique_ptr<Sprite> sprite_;
 	std::unique_ptr<Player> player_;

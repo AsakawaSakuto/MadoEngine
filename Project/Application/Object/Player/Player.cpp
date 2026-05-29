@@ -3,31 +3,41 @@
 void Player::Initialize() {
 	position_   = { 0.0f, 0.0f, 0.0f };
 
-	/*AABB s;
+	AABB s;
 	s.min = { -0.5f, 0.0f, -0.5f };
 	s.max = { 0.5f, 2.0f, 0.5f };
-	hitbox_ = s;*/
-
-	Sphere s;
-	s.radius = 0.5f;
 	hitbox_ = s;
 
-	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::Player, &hitbox_, &position_, 0.5f);
+	/*Sphere s;
+	s.radius = 0.5f;
+	hitbox_ = s;*/
+
+	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::Player, &hitbox_, &position_, 0.0f);
 }
 
 void Player::Update(float deltaTime) {
-	
+	// 先に入力移動と、重力による落下処理を行う
 	Move(deltaTime);
 	Jump(deltaTime);
 
-	if (MyCollider::IsHitTags(CollisionTag::Player, CollisionTag::Sphere)) {
+	// このフレームで何か（床や壁）に当たっているかをチェック
+	bool isColliding = MyCollider::IsHitTags(CollisionTag::Player, CollisionTag::AABB);
+
+	// 落下中に何かに当たったら、かつ、（ColliderManager）によって「上に押し戻される」であろう状態の時だけ接地とする
+	if (isColliding && velocityY_ < 0.0f) {
+		// 落下をストップさせる
+		velocityY_ = 0.0f;
 		isGrounded_ = true;
-	} else {
+	} else if (!isColliding) {
+		// 何にも当たっていないなら確実に空中
 		isGrounded_ = false;
 	}
+	// ※壁に張り付いているだけの時は velocityY_ がマイナス（落下中）なので一瞬止まりますが、
+	// 　次のフレームでColliderManagerが横に押し戻すため、急上昇や引っかかりは起きません。
 
+	// デバッグ表示
 	Vector4 color = { 1.0f,1.0f,0.0f,1.0f };
-	MyDebugLine::AddShape(std::get<Sphere>(hitbox_), color);
+	MyDebugLine::AddShape(std::get<AABB>(hitbox_), color);
 }
 
 void Player::Move(float deltaTime) {
@@ -52,9 +62,10 @@ void Player::Move(float deltaTime) {
 		forward.z * stick.y + right.z * stick.x
 	};
 
-	position_.x += moveDir.x * kMoveSpeed * deltaTime;
-	position_.y += moveDir.y * kMoveSpeed * deltaTime;
-	position_.z += moveDir.z * kMoveSpeed * deltaTime;
+	const float speed = MyInput::Press("Dash") ? kDashSpeed : kMoveSpeed;
+	position_.x += moveDir.x * speed * deltaTime;
+	position_.y += moveDir.y * speed * deltaTime;
+	position_.z += moveDir.z * speed * deltaTime;
 }
 
 void Player::Jump(float deltaTime) {

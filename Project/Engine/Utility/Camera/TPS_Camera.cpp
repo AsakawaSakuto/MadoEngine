@@ -119,6 +119,9 @@ void TPS_Camera::SetFollowStrength(float strength) {
 }
 
 void TPS_Camera::DrawImGui() {
+
+#ifdef USE_IMGUI
+
 	ImGui::Begin("TPS Camera");
 
 	ImGui::Text("Target: (%.2f, %.2f, %.2f)", targetPosition_.x, targetPosition_.y, targetPosition_.z);
@@ -147,4 +150,6 @@ void TPS_Camera::DrawImGui() {
 	ImGui::DragFloat("Mouse Sensitivity", &mouseSensitivity_,  0.0001f, 0.0001f, 0.05f);
 	ImGui::DragFloat("Pad Sensitivity",   &gamePadSensitivity_,0.1f,   0.1f,    10.0f);
 	ImGui::End();
+
+#endif
 }
