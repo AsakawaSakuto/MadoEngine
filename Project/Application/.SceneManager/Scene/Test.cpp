@@ -42,12 +42,13 @@ void Test::Initialize() {
 	plane_ = p;
 
 	// マネージャーへの登録（Shapeのアドレスと、独立したマスター座標のアドレスを渡す）
-	MyCollider::RegisterCollider("TestSphere", "Sphere", &testShape1_, &testPos1_);
-	MyCollider::RegisterCollider("TestSphere2", "Sphere", &testShape2_, &testPos2_);
-	MyCollider::RegisterCollider("TestPlane", "Plane", &plane_, &testPos3_);
+	MyCollider::RegisterCollider("TestSphere", CollisionTag::Sphere, &testShape1_, &testPos1_, 0.0f);
+	MyCollider::RegisterCollider("TestSphere2", CollisionTag::Sphere, &testShape2_, &testPos2_, 1.0f);
+	MyCollider::RegisterCollider("TestPlane", CollisionTag::Plane, &plane_, &testPos3_, 1.0f);
 
-	MyCollider::RegisterCollisionPair("Sphere", "Sphere", true);
-	MyCollider::RegisterCollisionPair("Sphere", "Plane", true);
+	MyCollider::RegisterCollisionPair(CollisionTag::Sphere, CollisionTag::Sphere, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::Player, CollisionTag::Sphere, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::Player, CollisionTag::Plane, true);
 }
 
 SceneType Test::Update() {

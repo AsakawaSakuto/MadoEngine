@@ -3,12 +3,16 @@
 void Player::Initialize() {
 	position_   = { 0.0f, 0.0f, 0.0f };
 
-	AABB s;
+	/*AABB s;
 	s.min = { -0.5f, 0.0f, -0.5f };
 	s.max = { 0.5f, 2.0f, 0.5f };
+	hitbox_ = s;*/
+
+	Sphere s;
+	s.radius = 0.5f;
 	hitbox_ = s;
 
-	MyCollider::RegisterCollider("PlayerSphere", "Sphere", &hitbox_, &position_, nullptr);
+	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::Player, &hitbox_, &position_, 0.5f);
 }
 
 void Player::Update(float deltaTime) {
@@ -16,14 +20,8 @@ void Player::Update(float deltaTime) {
 	Move(deltaTime);
 	Jump(deltaTime);
 
-	Vector4 color;
-	if (MyCollider::IsHitTags("Player", "AABB")) {
-		color = { 0.0f,1.0f,0.0f,1.0f };
-	} else {
-		color = { 1.0f,1.0f,0.0f,1.0f };
-	}
-
-	MyDebugLine::AddShape(std::get<AABB>(hitbox_), color);
+	Vector4 color = { 1.0f,1.0f,0.0f,1.0f };
+	MyDebugLine::AddShape(std::get<Sphere>(hitbox_), color);
 }
 
 void Player::Move(float deltaTime) {

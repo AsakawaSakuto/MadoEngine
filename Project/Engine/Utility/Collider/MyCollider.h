@@ -7,12 +7,13 @@ namespace MyCollider {
 
 	/// @brief コライダーを登録する
 	/// @param name 識別名（例: "Enemy_0001"）
-	/// @param tag グループ（例: "Enemy"）
+	/// @param tag グループ（例: CollisionTag::Enemy）
 	/// @param pShape 形状データ（AABB, OBB, Sphere, OvalSphere, Plane, Segment, Lineのいずれか）
 	/// @param pPos アクターの現在座標へのポインタ（Shape内のcenterを自動更新するために必要）
 	/// @param callback 衝突時のコールバック関数（省略可）
-	inline void RegisterCollider(const std::string& name, const std::string& tag, Shape* pShape, Vector3* pPos, CollisionCallback callback = nullptr) {
-		ColliderManager::GetInstance()->RegisterCollider(name, tag, pShape, pPos, callback);
+	/// @param weight 押し戻しの重み（省略可、デフォルトは0.5f）
+	inline void RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight = 0.5f, CollisionCallback callback = nullptr) {
+		ColliderManager::GetInstance()->RegisterCollider(name, tag, pShape, pPos, weight, callback);
 	}
 
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）
@@ -21,11 +22,11 @@ namespace MyCollider {
 		ColliderManager::GetInstance()->RemoveCollider(name);
 	}
 
-	/// @brief 衝突ルールを登録する（初期化時に呼ぶ。「Enemy」vs「Enemy」も可能）
+	/// @brief 衝突ルールを登録する（初期化時に呼ぶ。Enemy vs Enemy も可能）
 	/// @param tagA グループA
 	/// @param tagB グループB
 	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする。デフォルトはfalse）
-	inline void RegisterCollisionPair(const std::string& tagA, const std::string& tagB, bool enableResolve = false) {
+	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve = false) {
 		ColliderManager::GetInstance()->RegisterCollisionPair(tagA, tagB, enableResolve);
 	}
 
@@ -41,7 +42,7 @@ namespace MyCollider {
 	/// @param name 個体の識別名
 	/// @param targetTag 対象のタグ
 	/// @return 衝突していればtrue
-	inline bool IsHitWithTag(const std::string& name, const std::string& targetTag) {
+	inline bool IsHitWithTag(const std::string& name, CollisionTag targetTag) {
 		return ColliderManager::GetInstance()->IsHitWithTag(name, targetTag);
 	}
 
@@ -49,7 +50,7 @@ namespace MyCollider {
 	/// @param tagA タグA
 	/// @param tagB タグB
 	/// @return 衝突していればtrue
-	inline bool IsHitTags(const std::string& tagA, const std::string& tagB) {
+	inline bool IsHitTags(CollisionTag tagA, CollisionTag tagB) {
 		return ColliderManager::GetInstance()->IsHitTags(tagA, tagB);
 	}
 

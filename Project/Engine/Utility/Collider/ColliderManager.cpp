@@ -17,9 +17,9 @@ static Shape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
 }
 
 // ★ 引数を Shape* に変更
-void ColliderManager::RegisterCollider(const std::string& name, const std::string& tag, Shape* pShape, Vector3* pPos, CollisionCallback callback) {
-    m_colliders[name] = { name, tag, pShape, pPos, callback };
-    Logger::Output("コライダー登録 : " + name + " (タグ : " + tag + ")", Logger::Level::Application);
+void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight, CollisionCallback callback    ) {
+    m_colliders[name] = { name, tag, pShape, pPos, callback, weight };
+    Logger::Output("コライダー登録 : " + name + " (タグ : " + CollisionTagToString(tag) + ")", Logger::Level::Application);
 }
 
 void ColliderManager::RemoveCollider(const std::string& name) {
@@ -31,10 +31,10 @@ void ColliderManager::RemoveCollider(const std::string& name) {
     }
 }
 
-void ColliderManager::RegisterCollisionPair(const std::string& tagA, const std::string& tagB, bool enableResolve) {
+void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve) {
     m_matrix[tagA][tagB] = { true, enableResolve };
     m_matrix[tagB][tagA] = { true, enableResolve };
-    Logger::Output("衝突ペア登録 : " + tagA + " <-> " + tagB + " (押し出し : " + (enableResolve ? "有効" : "無効") + ")", Logger::Level::Application);
+    Logger::Output("衝突ペア登録 : " + CollisionTagToString(tagA) + " <-> " + CollisionTagToString(tagB) + " (押し出し : " + (enableResolve ? "有効" : "無効") + ")", Logger::Level::Application);
 }
 
 void ColliderManager::SyncPositions() {
@@ -61,8 +61,19 @@ bool ColliderManager::CheckVariantCollision(const Shape& shapeA, const Shape& sh
 void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     if (!a.pShape || !b.pShape || !a.pPosition || !b.pPosition) return;
 
+    // weight から mobility を計算し、押し戻し比率を決定する
+    float mobilityA = 1.0f - std::clamp(a.weight, 0.0f, 1.0f);
+    float mobilityB = 1.0f - std::clamp(b.weight, 0.0f, 1.0f);
+    float totalMobility = mobilityA + mobilityB;
+
+    // 双方 weight=1.0（完全固定）の場合は何もしない
+    if (totalMobility <= 0.0f) return;
+
+    float factorA = mobilityA / totalMobility;
+    float factorB = mobilityB / totalMobility;
+
     // ==========================================
-    // 1. Sphere vs Sphere (互いに半分ずつ押し戻す)
+    // 1. Sphere vs Sphere
     // ==========================================
     if (std::holds_alternative<Sphere>(*(a.pShape)) && std::holds_alternative<Sphere>(*(b.pShape))) {
         auto& sphereA = std::get<Sphere>(*(a.pShape));
@@ -78,9 +89,9 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
 
             Vector3 pushDir = { diff.x / distance, diff.y / distance, diff.z / distance };
 
-            // 互いに 0.5 ずつ押し戻す
-            *(a.pPosition) = *(a.pPosition) + pushDir * (penetration * 0.5f);
-            *(b.pPosition) = *(b.pPosition) - pushDir * (penetration * 0.5f);
+            // weight に応じた比率で押し戻す
+            *(a.pPosition) = *(a.pPosition) + pushDir * (penetration * factorA);
+            *(b.pPosition) = *(b.pPosition) - pushDir * (penetration * factorB);
         }
         return;
     }
@@ -114,8 +125,8 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
                 pushVec.z = (a.pPosition->z < b.pPosition->z) ? -overlapZ : overlapZ;
             }
 
-            *(a.pPosition) = *(a.pPosition) + pushVec * 0.5f;
-            *(b.pPosition) = *(b.pPosition) - pushVec * 0.5f;
+            *(a.pPosition) = *(a.pPosition) + pushVec * factorA;
+            *(b.pPosition) = *(b.pPosition) - pushVec * factorB;
         }
         return;
     }
@@ -160,9 +171,11 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
             float penetration = sphere.radius - distance;
             Vector3 pushDir = { diff.x / distance, diff.y / distance, diff.z / distance };
 
-            // 半分ずつ押し戻す
-            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushDir * (penetration * 0.5f);
-            *(aabbInfo.pPosition) = *(aabbInfo.pPosition) - pushDir * (penetration * 0.5f);
+            // weight に応じた比率で押し戻す（sphereInfo/aabbInfo が a/b のどちらかに対応）
+            float factorSphere = isASphere ? factorA : factorB;
+            float factorAabb   = isASphere ? factorB : factorA;
+            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushDir * (penetration * factorSphere);
+            *(aabbInfo.pPosition)   = *(aabbInfo.pPosition)   - pushDir * (penetration * factorAabb);
         }
         return;
     }
@@ -190,11 +203,13 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         // 球の半径より近ければめり込んでいる
         if (std::abs(distToPlane) < sphere.radius) {
             float penetration = sphere.radius - std::abs(distToPlane);
-
-            // 法線方向（またはその逆）にSphereだけを100%押し戻す
             float sign = (distToPlane < 0.0f) ? -1.0f : 1.0f;
-            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + normal * (penetration * sign);
-            // ※ planeInfo.pPosition はいじらない（Planeは質量無限大の壁や床という扱い）
+
+            // weight に応じた比率で押し戻す
+            float factorSphere = isASphere ? factorA : factorB;
+            float factorPlane  = isASphere ? factorB : factorA;
+            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + normal * (penetration * sign * factorSphere);
+            *(planeInfo.pPosition)  = *(planeInfo.pPosition)  - normal * (penetration * sign * factorPlane);
         }
         return;
     }
@@ -209,7 +224,7 @@ bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nam
     return CheckVariantCollision(shapeA, shapeB);
 }
 
-bool ColliderManager::IsHitWithTag(const std::string& name, const std::string& targetTag) {
+bool ColliderManager::IsHitWithTag(const std::string& name, CollisionTag targetTag) {
     if (m_colliders.find(name) == m_colliders.end()) {
         return false;
     }
@@ -226,7 +241,7 @@ bool ColliderManager::IsHitWithTag(const std::string& name, const std::string& t
     return false;
 }
 
-bool ColliderManager::IsHitTags(const std::string& tagA, const std::string& tagB) {
+bool ColliderManager::IsHitTags(CollisionTag tagA, CollisionTag tagB) {
     if (tagA == tagB) {
         for (auto itA = m_colliders.begin(); itA != m_colliders.end(); ++itA) {
             if (itA->second.tag != tagA) continue;

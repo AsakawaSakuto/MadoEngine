@@ -288,6 +288,7 @@
     <ClInclude Include="Engine\Utility\Camera\TPS_Camera.h" />
     <ClInclude Include="Engine\Utility\Collider\ColliderManager.h" />
     <ClInclude Include="Engine\Utility\Collider\CollisionFunction.h" />
+    <ClInclude Include="Engine\Utility\Collider\CollisionTag.h" />
     <ClInclude Include="Engine\Utility\Collider\MyCollider.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h" />
