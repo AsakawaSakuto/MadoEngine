@@ -50,12 +50,10 @@ SceneType Test::Update(float dt) {
 
 	//debugCamera_.Update();
 
-	auto deltaTime = 1.0f / 60.0f;
-
 	tpsCamera_.SetTargetPosition(player_->GetPosition());
-	tpsCamera_.Update(deltaTime);
+	tpsCamera_.Update(dt);
 
-	player_->Update(deltaTime);
+	player_->Update(dt);
 
 	MyDebugLine::AddShape(std::get<Plane>(plane_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
