@@ -89,7 +89,7 @@ namespace MadoEngine
 
 		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 
-		DebugLineManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 10000);
+		DebugLineManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
 		DebugLineManager::GetInstance()->SetPSORegistry(psoRegistry_.get());
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
@@ -164,6 +164,12 @@ namespace MadoEngine
 
 		// デモウィンドウ（動作確認用、不要になったら削除してください）
 		ImGui::ShowDemoWindow();
+
+		// エンジン情報ウィンドウ（FPS表示）
+		ImGui::Begin("Engine Info");
+		ImGui::Text("FPS: %.1f", deltaTime_->GetFPS());
+		ImGui::Text("DeltaTime: %.4f ms", deltaTime_->GetDeltaTime() * 1000.0);
+		ImGui::End();
 #endif // USE_IMGUI
 	}
 

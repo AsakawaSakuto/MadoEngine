@@ -19,13 +19,13 @@ void SceneManager::Initialize(SceneType initialScene) {
 	ChangeScene(initialScene);
 }
 
-void SceneManager::Update() {
+void SceneManager::Update(float dt) {
 	MadoEngine::SpriteManager::GetInstance()->UpdateAll();
 
 	ColliderManager::GetInstance()->Update();
 
 	if (currentScene_) {
-		SceneType next = currentScene_->Update();
+		SceneType next = currentScene_->Update(dt);
 		if (next != currentSceneType_) {
 			ChangeScene(next);
 		}

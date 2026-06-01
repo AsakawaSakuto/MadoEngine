@@ -12,6 +12,7 @@ enum class CollisionTag {
 	Plane,
 	Sphere,
 	AABB,
+	MapBlock,
 
 	Count
 };
@@ -27,8 +28,9 @@ inline std::string CollisionTagToString(CollisionTag tag) {
 	case CollisionTag::Stage:  return "Stage";
 	case CollisionTag::Plane:  return "Plane";
 	case CollisionTag::Sphere:  return "Sphere";
-	case CollisionTag::AABB:  return "AABB";
-	default:                   return "Unknown";
+	case CollisionTag::AABB:     return "AABB";
+	case CollisionTag::MapBlock: return "MapBlock";
+	default:                     return "Unknown";
 	}
 }
 

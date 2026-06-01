@@ -40,6 +40,7 @@ namespace MadoEngine
 		/// @brief ゲームループを継続するかどうかを取得
 		bool IsRunning();
 
+		float GetDeltaTime() const { return static_cast<float>(deltaTime_->GetDeltaTime()); }
 	private:
 
 		//D3DResourceLeakChecker leakChecker;

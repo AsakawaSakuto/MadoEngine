@@ -1,7 +1,7 @@
 #include "Player.h"
 
 void Player::Initialize() {
-	position_   = { 0.0f, 0.0f, 0.0f };
+	position_   = { -10.0f, 0.0f, -10.0f };
 
 	AABB aabb;
 	aabb.min = { -0.5f, 0.0f, -0.5f };
@@ -13,7 +13,7 @@ void Player::Initialize() {
 	hitSphere_ = s;
 
 	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &hitSphere_, &position_, 0.0f);
-	MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
+	//MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
 }
 
 void Player::Update(float deltaTime) {
@@ -22,7 +22,7 @@ void Player::Update(float deltaTime) {
 	Jump(deltaTime);
 
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する
-	bool isGroundContact = MyCollider::IsGroundContact("PlayerAABB", CollisionTag::AABB);
+	bool isGroundContact = MyCollider::IsGroundContact("PlayerSphere", CollisionTag::MapBlock);
 
 	if (isGroundContact) {
 		// AABBの上面に乗っている → 接地

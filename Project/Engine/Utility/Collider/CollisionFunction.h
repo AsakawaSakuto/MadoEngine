@@ -73,6 +73,27 @@ namespace Collision
         return IsHit(b, a);
     }
 
+    /// @brief Vector3 座標がAABBの最上面に乗っているかを判定する
+    /// @param point 判定対象の座標
+    /// @param box   対象のAABB
+    /// @param tolerance Y方向の許容誤差（デフォルト: 0.01f）
+    /// @return 最上面に乗っていれば true
+    inline bool IsOnTopSurface(const Vector3& point, const AABB& box, float tolerance = 0.01f)
+    {
+        Vector3 worldMin = box.GetMinWorld();
+        Vector3 worldMax = box.GetMaxWorld();
+
+        // XZ方向がAABBの範囲内かチェック
+        bool inRangeXZ =
+            point.x >= worldMin.x && point.x <= worldMax.x &&
+            point.z >= worldMin.z && point.z <= worldMax.z;
+
+        // Y座標がAABBの最上面に一致しているかチェック（許容誤差込み）
+        bool onTopY = std::abs(point.y - worldMax.y) <= tolerance;
+
+        return inRangeXZ && onTopY;
+    }
+
     /// <summary>
     /// 分離軸定理(SAT)のためのヘルパー関数
     /// </summary>

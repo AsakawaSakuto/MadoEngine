@@ -16,8 +16,9 @@ public:
 	void Initialize() override;
 
 	/// @brief 更新処理
+	/// @param dt デルタタイム
 	/// @return 次に遷移するシーンの種類
-	SceneType Update() override;
+	SceneType Update(float dt) override;
 
 	/// @brief 終了処理
 	void Finalize() override;

@@ -30,7 +30,7 @@ public:
 	void Initialize(SceneType initialScene);
 
 	/// @brief 現在のシーンを更新
-	void Update();
+	void Update(float dt);
 
 	/// @brief 現在のシーンを描画
 	void Draw();

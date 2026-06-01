@@ -1,6 +1,7 @@
 #pragma once
 #include ".SceneManager/IScene.h"
 #include "Object/Player/Player.h"
+#include "Object/Map/Map.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -17,8 +18,9 @@ public:
 	void Initialize() override;
 
 	/// @brief 更新処理
+	/// @param dt デルタタイム
 	/// @return 次に遷移するシーンの種類
-	SceneType Update() override;
+	SceneType Update(float dt) override;
 
 	/// @brief 終了処理
 	void Finalize() override;
@@ -35,20 +37,12 @@ private:
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 
-	Shape shape1_;
-	Shape shape2_;
-	Shape shape3_;
-	Shape shape4_;
-	Shape shape5_;
 	Shape plane_;
 
-	Vector3 shapePos1_ = { -2.0f, 2.0f, 0.0f };
-	Vector3 shapePos2_ = { 2.0f, 2.0f, 0.0f };
-	Vector3 shapePos3_ = { 0.0f, 0.0f, 0.0f };
-	Vector3 shapePos4_ = { -2.0f, 2.0f, 0.0f };
-	Vector3 shapePos5_ = { 2.0f, 2.0f, 0.0f };
 	Vector3 planePos_ = { 0.0f, 0.0f, 0.0f };
 
 	std::unique_ptr<Sprite> sprite_;
 	std::unique_ptr<Player> player_;
+
+	std::unique_ptr<Map> map_;
 };

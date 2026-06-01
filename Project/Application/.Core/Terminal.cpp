@@ -18,7 +18,7 @@ void Terminal::Run() {
 
 		execution_->Update();
 
-		sceneManager_->Update();
+		sceneManager_->Update(execution_->GetDeltaTime());
 
 		execution_->PreDraw();
 

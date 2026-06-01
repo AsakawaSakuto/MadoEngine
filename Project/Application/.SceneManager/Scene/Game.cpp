@@ -10,7 +10,7 @@ void Game::Initialize() {
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 }
 
-SceneType Game::Update() {
+SceneType Game::Update(float dt) {
 	// スペースキーが押されたらリザルトシーンに遷移
 	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
 		Logger::Output("スペースキーが押されました - Resultシーンへ遷移", Logger::Level::Application);

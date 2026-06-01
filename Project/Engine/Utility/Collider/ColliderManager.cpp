@@ -19,7 +19,9 @@ static Shape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
 // ★ 引数を Shape* に変更
 void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight, CollisionCallback callback    ) {
     m_colliders[name] = { name, tag, pShape, pPos, callback, weight };
+#ifdef _DEBUG
     Logger::Output("コライダー登録 : " + name + " (タグ : " + CollisionTagToString(tag) + ")", Logger::Level::Application);
+#endif
 }
 
 void ColliderManager::RemoveCollider(const std::string& name) {
@@ -224,35 +226,81 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
 
     const ColliderInfo& playerInfo = it->second;
     if (!playerInfo.pShape || !playerInfo.pPosition) return false;
-    if (!std::holds_alternative<AABB>(*(playerInfo.pShape))) return false;
 
-    auto& playerAABB = std::get<AABB>(*(playerInfo.pShape));
-    Vector3 aMin = playerAABB.GetMinWorld();
-    Vector3 aMax = playerAABB.GetMaxWorld();
+    // ==========================================
+    // 1. プレイヤーが AABB の場合の接地判定（既存コード）
+    // ==========================================
+    if (std::holds_alternative<AABB>(*(playerInfo.pShape))) {
+        auto& playerAABB = std::get<AABB>(*(playerInfo.pShape));
+        Vector3 aMin = playerAABB.GetMinWorld();
+        Vector3 aMax = playerAABB.GetMaxWorld();
 
-    for (const auto& [otherName, otherInfo] : m_colliders) {
-        if (otherName == name) continue;
-        if (otherInfo.tag != targetTag) continue;
-        if (!otherInfo.pShape || !otherInfo.pPosition) continue;
-        if (!std::holds_alternative<AABB>(*(otherInfo.pShape))) continue;
+        for (const auto& [otherName, otherInfo] : m_colliders) {
+            if (otherName == name) continue;
+            if (otherInfo.tag != targetTag) continue;
+            if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+            if (!std::holds_alternative<AABB>(*(otherInfo.pShape))) continue;
 
-        auto& boxAABB = std::get<AABB>(*(otherInfo.pShape));
-        Vector3 bMin = boxAABB.GetMinWorld();
-        Vector3 bMax = boxAABB.GetMaxWorld();
+            auto& boxAABB = std::get<AABB>(*(otherInfo.pShape));
+            Vector3 bMin = boxAABB.GetMinWorld();
+            Vector3 bMax = boxAABB.GetMaxWorld();
 
-        float overlapX = std::min(aMax.x, bMax.x) - std::max(aMin.x, bMin.x);
-        float overlapY = std::min(aMax.y, bMax.y) - std::max(aMin.y, bMin.y);
-        float overlapZ = std::min(aMax.z, bMax.z) - std::max(aMin.z, bMin.z);
+            float overlapX = std::min(aMax.x, bMax.x) - std::max(aMin.x, bMin.x);
+            float overlapY = std::min(aMax.y, bMax.y) - std::max(aMin.y, bMin.y);
+            float overlapZ = std::min(aMax.z, bMax.z) - std::max(aMin.z, bMin.z);
 
-        if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f) continue;
+            if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f) continue;
 
-        // Y軸が最小のめり込み量 かつ プレイヤーの中心が対象の中心より上 = 床面接触
-        if (overlapY <= overlapX && overlapY <= overlapZ) {
-            if (playerInfo.pPosition->y >= otherInfo.pPosition->y) {
-                return true;
+            if (overlapY <= overlapX && overlapY <= overlapZ) {
+                if (playerInfo.pPosition->y >= otherInfo.pPosition->y) {
+                    return true;
+                }
             }
         }
     }
+    // ==========================================
+    // 2. プレイヤーが Sphere の場合の接地判定（ここを追加）
+    // ==========================================
+    else if (std::holds_alternative<Sphere>(*(playerInfo.pShape))) {
+        auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
+
+        for (const auto& [otherName, otherInfo] : m_colliders) {
+            if (otherName == name) continue;
+            if (otherInfo.tag != targetTag) continue;
+            if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+            // 対象がAABB(MapBlock等)の場合のみ判定
+            if (!std::holds_alternative<AABB>(*(otherInfo.pShape))) continue;
+
+            auto& boxAABB = std::get<AABB>(*(otherInfo.pShape));
+            Vector3 bMin = boxAABB.GetMinWorld();
+            Vector3 bMax = boxAABB.GetMaxWorld();
+
+            // Sphereの中心から、AABB上面へのXZ平面上での最短距離を求める
+            float closestX = std::clamp(playerInfo.pPosition->x, bMin.x, bMax.x);
+            float closestZ = std::clamp(playerInfo.pPosition->z, bMin.z, bMax.z);
+
+            float dx = playerInfo.pPosition->x - closestX;
+            float dz = playerInfo.pPosition->z - closestZ;
+            float distSqXZ = dx * dx + dz * dz;
+
+            // XZ平面上でAABBに乗っている（はみ出しの半径内含む）か
+            if (distSqXZ <= sphere.radius * sphere.radius) {
+                // 壁張り付きを防止するため、球の中心がAABBの上面(あるいは極めてその近く)より上にあること
+                if (playerInfo.pPosition->y >= bMax.y - 0.05f) {
+
+                    // 球の最下端座標を計算
+                    float bottomY = playerInfo.pPosition->y - sphere.radius;
+
+                    // 最下端がAABB上面付近に接触・めり込んでいる場合を接地とする
+                    // （押し出し誤差等を吸収するために +0.05f の猶予を持たせる）
+                    if (bottomY <= bMax.y + 0.05f) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
     return false;
 }
 
@@ -319,21 +367,53 @@ bool ColliderManager::IsHitTags(CollisionTag tagA, CollisionTag tagB) {
 void ColliderManager::Update() {
     SyncPositions();
 
-    for (auto itA = m_colliders.begin(); itA != m_colliders.end(); ++itA) {
-        for (auto itB = std::next(itA); itB != m_colliders.end(); ++itB) {
-            ColliderInfo& a = itA->second;
-            ColliderInfo& b = itB->second;
+    // タグ別にコライダーをグループ化
+    std::unordered_map<CollisionTag, std::vector<ColliderInfo*>> groups;
+    for (auto& [name, info] : m_colliders) {
+        groups[info.tag].push_back(&info);
+    }
 
-            if (!m_matrix[a.tag][b.tag].isRegistered) continue;
-            if (!a.pShape || !b.pShape) continue; // ★ Nullチェック
+    // 登録されたペアのみをチェック（O(N²)全探索を回避）
+    for (auto& [tagA, pairsMap] : m_matrix) {
+        for (auto& [tagB, rule] : pairsMap) {
+            if (!rule.isRegistered) continue;
+            // 重複チェックを避けるため tagA <= tagB のみ処理
+            if (static_cast<int>(tagA) > static_cast<int>(tagB)) continue;
 
-            // ★ デリファレンスして判定
-            if (CheckVariantCollision(*(a.pShape), *(b.pShape))) {
-                if (a.onHit) a.onHit(b.tag, b.actorName);
-                if (b.onHit) b.onHit(a.tag, a.actorName);
+            auto itA = groups.find(tagA);
+            auto itB = groups.find(tagB);
+            if (itA == groups.end() || itB == groups.end()) continue;
 
-                if (m_matrix[a.tag][b.tag].enableResolve) {
-                    ResolveOverlap(a, b);
+            auto& listA = itA->second;
+            auto& listB = itB->second;
+
+            if (tagA == tagB) {
+                // 同タグ間（例: Enemy vs Enemy）
+                for (size_t i = 0; i < listA.size(); ++i) {
+                    for (size_t j = i + 1; j < listA.size(); ++j) {
+                        ColliderInfo& a = *listA[i];
+                        ColliderInfo& b = *listA[j];
+                        if (!a.pShape || !b.pShape) continue;
+                        if (CheckVariantCollision(*(a.pShape), *(b.pShape))) {
+                            if (a.onHit) a.onHit(b.tag, b.actorName);
+                            if (b.onHit) b.onHit(a.tag, a.actorName);
+                            if (rule.enableResolve) ResolveOverlap(a, b);
+                        }
+                    }
+                }
+            } else {
+                // 異タグ間（例: PlayerAABB vs MapBlock）
+                for (auto* pA : listA) {
+                    for (auto* pB : listB) {
+                        ColliderInfo& a = *pA;
+                        ColliderInfo& b = *pB;
+                        if (!a.pShape || !b.pShape) continue;
+                        if (CheckVariantCollision(*(a.pShape), *(b.pShape))) {
+                            if (a.onHit) a.onHit(b.tag, b.actorName);
+                            if (b.onHit) b.onHit(a.tag, a.actorName);
+                            if (rule.enableResolve) ResolveOverlap(a, b);
+                        }
+                    }
                 }
             }
         }

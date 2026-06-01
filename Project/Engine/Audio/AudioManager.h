@@ -99,6 +99,7 @@ namespace MadoEngine {
 
 		float bgmVolume_ = 0.5f;
 		float seVolume_ = 0.5f;
+		float voiceVolume_ = 0.5f;
 
 		// 音声ファイルの基準ディレクトリ
 		static constexpr const char* kAudioDirectory = "Assets/Audio";

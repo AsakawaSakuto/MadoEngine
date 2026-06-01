@@ -19,7 +19,7 @@ public:
 
 	/// @brief シーンの更新処理
 	/// @return 次に遷移するシーンの種類
-	virtual SceneType Update() = 0;
+	virtual SceneType Update(float dt) = 0;
 
 	/// @brief シーンの描画処理
 	virtual void Draw() = 0;
