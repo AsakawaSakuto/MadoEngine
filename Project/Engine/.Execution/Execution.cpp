@@ -170,6 +170,8 @@ namespace MadoEngine
 		ImGui::Text("FPS: %.1f", deltaTime_->GetFPS());
 		ImGui::Text("DeltaTime: %.4f ms", deltaTime_->GetDeltaTime() * 1000.0);
 		ImGui::End();
+
+		DrawAudioManagerUI();
 #endif // USE_IMGUI
 	}
 

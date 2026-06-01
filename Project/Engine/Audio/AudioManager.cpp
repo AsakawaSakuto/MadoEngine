@@ -39,8 +39,9 @@ namespace MadoEngine {
 			std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
 			if (ext == ".wav" || ext == ".mp3") {
-				Logger::Output("AudioManager : ファイルを読み込んでいます: " + entry.path().string(), Logger::Level::Assets);
-				Load(entry.path().string(), 1.0f);
+				AudioType type = DetermineTypeFromPath(entry.path());
+				Logger::Output("AudioManager : ファイルを読み込んでいます: " + entry.path().string() + " [" + AudioTypeToString(type) + "]", Logger::Level::Assets);
+				Load(entry.path().string(), type, 1.0f);
 			}
 		}
 	}
@@ -60,7 +61,7 @@ namespace MadoEngine {
 		Logger::Output("AudioManager : 終了処理が完了しました", Logger::Level::Engine);
 	}
 
-	void AudioManager::Load(const std::string& filePath, float volume) {
+	void AudioManager::Load(const std::string& filePath, AudioType type, float volume) {
 		std::filesystem::path path(filePath);
 		std::string key = MakeKey(path);
 
@@ -74,7 +75,8 @@ namespace MadoEngine {
 		audio->Initialize(filePath);
 		audioMap_[key] = std::move(audio);
 		volumeMap_[key] = volume;
-		Logger::Output("AudioManager : 音声を読み込みました - キー: " + key + ", パス: " + filePath, Logger::Level::Assets);
+		typeMap_[key] = type;
+		Logger::Output("AudioManager : 音声を読み込みました - キー: " + key + ", タイプ: " + AudioTypeToString(type) + ", パス: " + filePath, Logger::Level::Assets);
 	}
 
 	void AudioManager::Play(const std::string& key, bool loop) {
@@ -89,7 +91,17 @@ namespace MadoEngine {
 			return;
 		}
 
-		float volume = volumeMap_[lowerKey] * masterVolume_;
+		float typeVolume = 1.0f;
+		auto typeIt = typeMap_.find(lowerKey);
+		if (typeIt != typeMap_.end()) {
+			switch (typeIt->second) {
+			case AudioType::BGM:   typeVolume = bgmVolume_;   break;
+			case AudioType::SE:    typeVolume = seVolume_;    break;
+			case AudioType::Voice: typeVolume = voiceVolume_; break;
+			default: break;
+			}
+		}
+		float volume = volumeMap_[lowerKey] * masterVolume_ * typeVolume;
 		Logger::Output("AudioManager : 音声を再生します - キー: " + lowerKey + ", ループ: " + (loop ? "有効" : "無効") + ", 音量: " + std::to_string(volume), Logger::Level::Application);
 		it->second->PlayAudio(volume, loop);
 	}
@@ -120,7 +132,17 @@ namespace MadoEngine {
 	void AudioManager::Update() {
 		for (auto& [key, audio] : audioMap_) {
 			if (audio) {
-				audio->SetVolume(volumeMap_[key] * masterVolume_);
+				float typeVolume = 1.0f;
+				auto typeIt = typeMap_.find(key);
+				if (typeIt != typeMap_.end()) {
+					switch (typeIt->second) {
+					case AudioType::BGM:   typeVolume = bgmVolume_;   break;
+					case AudioType::SE:    typeVolume = seVolume_;    break;
+					case AudioType::Voice: typeVolume = voiceVolume_; break;
+					default: break;
+					}
+				}
+				audio->SetVolume(volumeMap_[key] * masterVolume_ * typeVolume);
 				audio->Update();
 			}
 		}
@@ -129,6 +151,42 @@ namespace MadoEngine {
 	void AudioManager::SetMasterVolume(float volume) {
 		Logger::Output("AudioManager : マスターボリュームを " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
 		masterVolume_ = volume;
+	}
+
+	void AudioManager::SetBGMVolume(float volume) {
+		Logger::Output("AudioManager : BGM音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
+		bgmVolume_ = volume;
+	}
+
+	void AudioManager::SetSEVolume(float volume) {
+		Logger::Output("AudioManager : SE音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
+		seVolume_ = volume;
+	}
+
+	void AudioManager::SetVoiceVolume(float volume) {
+		Logger::Output("AudioManager : Voice音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
+		voiceVolume_ = volume;
+	}
+
+	AudioType AudioManager::GetAudioType(const std::string& key) const {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		auto it = typeMap_.find(lowerKey);
+		if (it != typeMap_.end()) {
+			return it->second;
+		}
+		return AudioType::SE;
+	}
+
+	AudioType AudioManager::DetermineTypeFromPath(const std::filesystem::path& filePath) const {
+		// ファイルパスの各ディレクトリ名をチェックし、SE / BGM / Voiceに一致するものを返す
+		for (const auto& part : filePath) {
+			const std::string name = part.string();
+			if (name == "SE")    return AudioType::SE;
+			if (name == "BGM")   return AudioType::BGM;
+			if (name == "Voice") return AudioType::Voice;
+		}
+		return AudioType::SE;
 	}
 
 	void AudioManager::SetVolume(const std::string& key, float volume) {
@@ -143,7 +201,12 @@ namespace MadoEngine {
 			// 即座に反映
 			auto audioIt = audioMap_.find(lowerKey);
 			if (audioIt != audioMap_.end() && audioIt->second) {
-				audioIt->second->SetVolume(volume * masterVolume_);
+				// 最終的な音量を計算して適用する
+				AudioType type = GetAudioType(lowerKey);
+				float categoryVol = (type == AudioType::SE) ? seVolume_ :
+					(type == AudioType::BGM) ? bgmVolume_ : voiceVolume_;
+
+				audioIt->second->SetVolume(volume * categoryVol * masterVolume_);
 			}
 		} else {
 			Logger::Output("AudioManager	: 音量の設定に失敗しました - キーが見つかりません: " + key, Logger::Level::Warning);
@@ -178,4 +241,14 @@ namespace MadoEngine {
 		return keys;
 	}
 
+	bool AudioManager::IsPlaying(const std::string& key) const {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		auto it = audioMap_.find(lowerKey);
+
+		if (it != audioMap_.end() && it->second) {
+			return it->second->IsPlaying();
+		}
+		return false;
+	}
 } // namespace MadoEngine

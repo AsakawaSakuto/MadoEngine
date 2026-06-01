@@ -187,6 +187,7 @@
     <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
+    <ClCompile Include="Engine\Utility\Json\JsonLoader.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
     <ClCompile Include="Externals\imgui\imgui.cpp">
@@ -303,6 +304,8 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Plane.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
+    <ClInclude Include="Engine\Utility\Json\ISerializable.h" />
+    <ClInclude Include="Engine\Utility\Json\JsonLoader.h" />
     <ClInclude Include="Engine\Utility\Logger\Logger.h" />
     <ClInclude Include="Engine\Utility\Material.h" />
     <ClInclude Include="Engine\Utility\Random.h" />

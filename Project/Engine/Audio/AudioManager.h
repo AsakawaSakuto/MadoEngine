@@ -1,11 +1,11 @@
 #pragma once
-#pragma once
 #include <unordered_map>
 #include <memory>
 #include <string>
 #include <filesystem>
 #include <vector>
 #include "Data/Audio.h"
+#include "AudioType.h"
 
 namespace MadoEngine {
 
@@ -26,8 +26,56 @@ namespace MadoEngine {
 
 		/// @brief 音声ファイルを手動で追加読み込み
 		/// @param filePath 音声ファイルのパス
+		/// @param type オーディオの種類（SE / BGM / Voice）
 		/// @param volume 個別音量（0.0f～1.0f、デフォルト: 1.0f）
-		void Load(const std::string& filePath, float volume = 1.0f);
+		void Load(const std::string& filePath, AudioType type = AudioType::SE, float volume = 1.0f);
+
+		/// @brief キーに対応するAudioTypeを取得
+		/// @param key ファイル名（拡張子なし）
+		/// @return AudioType（見つからない場合はAudioType::SE）
+		AudioType GetAudioType(const std::string& key) const;
+
+		/// @brief マスターボリュームを設定
+		/// @param volume 音量（0.0f～1.0f）
+		void SetMasterVolume(float volume);
+
+		/// @brief マスターボリュームを取得
+		/// @return 現在のマスターボリューム
+		float GetMasterVolume() const { return masterVolume_; }
+
+		/// @brief 個別の音声の音量を設定
+		/// @param key ファイル名（拡張子なし）
+		/// @param volume 音量（0.0f～1.0f）
+		void SetVolume(const std::string& key, float volume);
+
+		/// @brief 個別の音声の音量を取得
+		/// @param key ファイル名（拡張子なし）
+		/// @return 音量（見つからない場合は1.0f）
+		float GetVolume(const std::string& key) const;
+
+		/// @brief BGM音量を設定
+		/// @param volume 音量（0.0f～1.0f）
+		void SetBGMVolume(float volume);
+
+		/// @brief SE音量を設定
+		/// @param volume 音量（0.0f～1.0f）
+		void SetSEVolume(float volume);
+
+		/// @brief Voice音量を設定
+		/// @param volume 音量（0.0f～1.0f）
+		void SetVoiceVolume(float volume);
+
+		/// @brief BGM音量を取得
+		/// @return 現在のBGM音量
+		float GetBGMVolume() const { return bgmVolume_; }
+
+		/// @brief SE音量を取得
+		/// @return 現在のSE音量
+		float GetSEVolume() const { return seVolume_; }
+
+		/// @brief Voice音量を取得
+		/// @return 現在のVoice音量
+		float GetVoiceVolume() const { return voiceVolume_; }
 
 		/// @brief 音声を再生
 		/// @param key ファイル名（拡張子なし）。例: "fire.mp3" → "fire"
@@ -52,28 +100,14 @@ namespace MadoEngine {
 		/// @brief デストラクタ
 		~AudioManager() = default;
 
-		/// @brief マスターボリュームを設定
-		/// @param volume 音量（0.0f～1.0f）
-		void SetMasterVolume(float volume);
-
-		/// @brief マスターボリュームを取得
-		/// @return 現在のマスターボリューム
-		float GetMasterVolume() const { return masterVolume_; }
-
-		/// @brief 個別の音声の音量を設定
-		/// @param key ファイル名（拡張子なし）
-		/// @param volume 音量（0.0f～1.0f）
-		void SetVolume(const std::string& key, float volume);
-
-		/// @brief 個別の音声の音量を取得
-		/// @param key ファイル名（拡張子なし）
-		/// @return 音量（見つからない場合は1.0f）
-		float GetVolume(const std::string& key) const;
-
 		/// @brief 読み込み済みの全キーを取得
 		/// @return キーのリスト
 		std::vector<std::string> GetAllKeys() const;
 
+		/// @brief 音声が現在再生中か確認
+	    /// @param key ファイル名（拡張子なし）
+	    /// @return 再生中ならtrue
+		bool IsPlaying(const std::string& key) const;
 	private:
 		AudioManager() = default;
 		AudioManager(const AudioManager&) = delete;
@@ -88,8 +122,16 @@ namespace MadoEngine {
 		/// @return キー名（拡張子なし）
 		std::string MakeKey(const std::filesystem::path& filePath) const;
 
+		/// @brief ファイルパスの親ディレクトリ名からAudioTypeを判定
+		/// @param filePath ファイルパス
+		/// @return 判定されたAudioType
+		AudioType DetermineTypeFromPath(const std::filesystem::path& filePath) const;
+
 		// 音声データ管理（キー → AudioX）
 		std::unordered_map<std::string, std::unique_ptr<AudioX>> audioMap_;
+
+		// AudioType管理（キー → AudioType）
+		std::unordered_map<std::string, AudioType> typeMap_;
 
 		// 個別音量管理（キー → 音量）
 		std::unordered_map<std::string, float> volumeMap_;

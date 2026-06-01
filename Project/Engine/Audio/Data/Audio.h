@@ -113,6 +113,11 @@ public:
 
     ~AudioX() { Reset(); }
 
+    // アクティブな再生インスタンスが存在するか（再生中かどうか）を返す
+    bool IsPlaying() const {
+        return !actives_.empty();
+    }
+
 private:
 	std::string filePath_{};
 
