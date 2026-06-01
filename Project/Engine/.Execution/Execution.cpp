@@ -1,4 +1,5 @@
 #include "Execution.h"
+#include "Render/ImGui/EditorUI.h"
 
 namespace MadoEngine
 {
@@ -169,9 +170,17 @@ namespace MadoEngine
 		ImGui::Begin("Engine Info");
 		ImGui::Text("FPS: %.1f", deltaTime_->GetFPS());
 		ImGui::Text("DeltaTime: %.4f ms", deltaTime_->GetDeltaTime() * 1000.0);
+		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
 
-		DrawAudioManagerUI();
+		//if (ImGui::BeginMainMenuBar())
+		//{
+		//	
+		//	// 必ず最後はEndで閉じる
+		//	ImGui::EndMainMenuBar();
+		//}
+
+		MadoEngine::Editor::DrawAudioManagerUI();
 #endif // USE_IMGUI
 	}
 

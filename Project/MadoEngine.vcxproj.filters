@@ -73,6 +73,7 @@
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
     <ClCompile Include="Engine\Utility\Json\JsonLoader.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -406,6 +407,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Json\ISerializable.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\EditorUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

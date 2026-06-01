@@ -165,6 +165,7 @@
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
+    <ClInclude Include="Engine\Render\ImGui\EditorUI.h" />
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />

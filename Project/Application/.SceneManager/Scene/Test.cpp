@@ -70,21 +70,8 @@ void Test::Draw() {
 void Test::DrawImGui() {
 	// テストシーンの描画処理
 #ifdef USE_IMGUI
-	ImGui::Begin("test");
-
-	ImGui::DragFloat2("pos", &testPos_.x, 0.1f);
-
-	ImGui::End();
-
-	ImGui::Begin("testPos");
-
-	ImGui::DragFloat3("planePos", &planePos_.x, 0.1f);
-
-	ImGui::End();
 
 	tpsCamera_.DrawImGui();
-
-	sprites_[0]->SetPosition(testPos_);
 
 	debugCamera_.DrawImGui();
 
