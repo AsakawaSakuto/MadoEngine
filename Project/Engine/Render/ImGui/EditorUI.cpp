@@ -2,6 +2,8 @@
 
 namespace MadoEngine::Editor {
 
+#ifdef USE_IMGUI
+
     void DrawAudioManagerUI() {
         //auto audioManager = AudioManager::GetInstance();
 
@@ -154,5 +156,7 @@ namespace MadoEngine::Editor {
 
         ImGui::End();
     }
+
+#endif // USE_IMGUI
 
 } // namespace MadoEngine::Editor
