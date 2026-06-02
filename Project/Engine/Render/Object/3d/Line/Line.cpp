@@ -511,7 +511,7 @@ void Line3d::Draw(Camera& camera) {
 
     // 描画コマンド
     commandList_->SetGraphicsRootSignature(
-        MadoEngine::RootSignatureManager::GetInstance()->Get(psoDesc_.rootSigKey));
+        MadoEngine::RootSignatureManager::GetInstance().Get(psoDesc_.rootSigKey));
     commandList_->SetPipelineState(psoRegistry_->Get(psoDesc_));
 
     // プリミティブトポロジーを設定（ラインリスト）

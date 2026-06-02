@@ -13,13 +13,13 @@ namespace MyCollider {
 	/// @param callback 衝突時のコールバック関数（省略可）
 	/// @param weight 押し戻しの重み（省略可、デフォルトは0.5f）
 	inline void RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight = 0.5f, CollisionCallback callback = nullptr) {
-		ColliderManager::GetInstance()->RegisterCollider(name, tag, pShape, pPos, weight, callback);
+		ColliderManager::GetInstance().RegisterCollider(name, tag, pShape, pPos, weight, callback);
 	}
 
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）
 	/// @param name 識別名
 	inline void RemoveCollider(const std::string& name) {
-		ColliderManager::GetInstance()->RemoveCollider(name);
+		ColliderManager::GetInstance().RemoveCollider(name);
 	}
 
 	/// @brief 衝突ルールを登録する（初期化時に呼ぶ。Enemy vs Enemy も可能）
@@ -27,7 +27,7 @@ namespace MyCollider {
 	/// @param tagB グループB
 	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする。デフォルトはfalse）
 	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve = false) {
-		ColliderManager::GetInstance()->RegisterCollisionPair(tagA, tagB, enableResolve);
+		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, enableResolve);
 	}
 
 	/// @brief 特定の個体同士が衝突しているか
@@ -35,7 +35,7 @@ namespace MyCollider {
 	/// @param nameB 個体Bの識別名
 	/// @return 衝突していればtrue
 	inline bool IsHitName(const std::string& nameA, const std::string& nameB) {
-		return ColliderManager::GetInstance()->IsHitName(nameA, nameB);
+		return ColliderManager::GetInstance().IsHitName(nameA, nameB);
 	}
 
 	/// @brief 特定の個体が、指定したTagを持つ誰かと衝突しているか
@@ -43,7 +43,7 @@ namespace MyCollider {
 	/// @param targetTag 対象のタグ
 	/// @return 衝突していればtrue
 	inline bool IsHitWithTag(const std::string& name, CollisionTag targetTag) {
-		return ColliderManager::GetInstance()->IsHitWithTag(name, targetTag);
+		return ColliderManager::GetInstance().IsHitWithTag(name, targetTag);
 	}
 
 	/// @brief タグ同士の衝突判定
@@ -51,7 +51,7 @@ namespace MyCollider {
 	/// @param tagB タグB
 	/// @return 衝突していればtrue
 	inline bool IsHitTags(CollisionTag tagA, CollisionTag tagB) {
-		return ColliderManager::GetInstance()->IsHitTags(tagA, tagB);
+		return ColliderManager::GetInstance().IsHitTags(tagA, tagB);
 	}
 
 	/// @brief 指定した個体が、対象タグのAABB上面に乗っているかを判定する
@@ -59,7 +59,7 @@ namespace MyCollider {
 	/// @param targetTag 床として扱うタグ
 	/// @return 床面に接触していればtrue
 	inline bool IsGroundContact(const std::string& name, CollisionTag targetTag) {
-		return ColliderManager::GetInstance()->IsGroundContact(name, targetTag);
+		return ColliderManager::GetInstance().IsGroundContact(name, targetTag);
 	}
 
 };

@@ -2,9 +2,9 @@
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
-DebugLineManager* DebugLineManager::GetInstance() {
+DebugLineManager& DebugLineManager::GetInstance() {
 	static DebugLineManager instance;
-	return &instance;
+	return instance;
 }
 
 void DebugLineManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, uint32_t maxVertices) {

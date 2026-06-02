@@ -6,9 +6,9 @@
 
 namespace MadoEngine {
 
-	RootSignatureManager* RootSignatureManager::GetInstance() {
+	RootSignatureManager& RootSignatureManager::GetInstance() {
 		static RootSignatureManager instance;
-		return &instance;
+		return instance;
 	}
 
 	void RootSignatureManager::Initialize(Core::DxDevice* device) {
@@ -150,7 +150,7 @@ namespace MadoEngine {
 			rootSigDesc.pStaticSamplers = &staticSampler;
 			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-			MadoEngine::RootSignatureManager::GetInstance()->Register("Sprite.RootSig", rootSigDesc);
+			MadoEngine::RootSignatureManager::GetInstance().Register("Sprite.RootSig", rootSigDesc);
 		}
 
 		// Line3d 用 RootSignature
@@ -169,7 +169,7 @@ namespace MadoEngine {
 			rootSigDesc.pStaticSamplers = nullptr;
 			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-			MadoEngine::RootSignatureManager::GetInstance()->Register("Line3d.RootSig", rootSigDesc);
+			MadoEngine::RootSignatureManager::GetInstance().Register("Line3d.RootSig", rootSigDesc);
 		}
 
 	}

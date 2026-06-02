@@ -46,11 +46,11 @@ namespace MadoEngine
 		dsvManager_->Initialize(dxDevice_.get());
 		
 		// ShaderManagerの初期化（Assets/Shader 内の全HLSLをコンパイル・キャッシュ）
-		MadoEngine::ShaderManager::GetInstance()->Initialize();
+		MadoEngine::ShaderManager::GetInstance().Initialize();
 
 		// RootSignatureManagerの初期化 デフォルトのRootSignatureを生成・登録
-		MadoEngine::RootSignatureManager::GetInstance()->Initialize(dxDevice_.get());
-		MadoEngine::RootSignatureManager::GetInstance()->Make();
+		MadoEngine::RootSignatureManager::GetInstance().Initialize(dxDevice_.get());
+		MadoEngine::RootSignatureManager::GetInstance().Make();
 
 		// PSOFactoryの初期化
 		psoFactory_ = std::make_unique<MadoEngine::Render::PSOFactory>();
@@ -64,7 +64,7 @@ namespace MadoEngine
 		deltaTime_ = std::make_unique<MadoEngine::DeltaTime>();
 
 		// InputManagerの初期化
-		MadoEngine::InputManager::GetInstance()->Initialize();
+		MadoEngine::InputManager::GetInstance().Initialize();
 		MyInput::SetInput("Up", { DIK_UP,DIK_W }, { GAMEPAD_UP });
 		MyInput::SetInput("Down", { DIK_DOWN,DIK_S }, { GAMEPAD_DOWN });
 		MyInput::SetInput("Left", { DIK_LEFT,DIK_A }, { GAMEPAD_LEFT });
@@ -75,10 +75,10 @@ namespace MadoEngine
 		MyInput::SetInput("Dash", { DIK_LSHIFT,DIK_X }, { GAMEPAD_STICK_L });
 
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
-		MadoEngine::AudioManager::GetInstance()->Initialize();
+		MadoEngine::AudioManager::GetInstance().Initialize();
 
 		// TextureManagerの初期化（Assets/Texture内の全.pngを自動ロード）
-		MadoEngine::TextureManager::GetInstance()->Initialize(dxDevice_.get()->GetDevice(), srvManager_.get());
+		MadoEngine::TextureManager::GetInstance().Initialize(dxDevice_.get()->GetDevice(), srvManager_.get());
 
 		// DepthStencilBuffer の生成
 		depthStencilBuffer_ = std::make_unique<MadoEngine::Core::DepthStencilBuffer>();
@@ -88,10 +88,10 @@ namespace MadoEngine
 		viewportScissor_ = std::make_unique<MadoEngine::Render::ViewportScissor>();
 		viewportScissor_->UpdateSize(winDesc_.width, winDesc_.height);
 
-		MadoEngine::SpriteManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 
-		DebugLineManager::GetInstance()->Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
-		DebugLineManager::GetInstance()->SetPSORegistry(psoRegistry_.get());
+		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
+		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
@@ -109,10 +109,10 @@ namespace MadoEngine
 		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
 
 		// AudioManagerの更新（終了した音声のクリーンアップなど）
-		MadoEngine::AudioManager::GetInstance()->Update();
+		MadoEngine::AudioManager::GetInstance().Update();
 
 		// InputManagerの更新（キーボード、マウス、ゲームパッドの状態を更新）
-		MadoEngine::InputManager::GetInstance()->Update(windowsAPI_->GetHWnd(), dt);
+		MadoEngine::InputManager::GetInstance().Update(windowsAPI_->GetHWnd(), dt);
 
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
@@ -207,12 +207,12 @@ namespace MadoEngine
 	void Execution::Finalize()
 	{
 		// 終了処理
-		MadoEngine::AudioManager::GetInstance()->Finalize();
-		MadoEngine::InputManager::GetInstance()->Finalize();
-		MadoEngine::TextureManager::GetInstance()->Finalize();
-		MadoEngine::ShaderManager::GetInstance()->Finalize();
-		MadoEngine::RootSignatureManager::GetInstance()->Finalize();
-		MadoEngine::SpriteManager::GetInstance()->Finalize();
+		MadoEngine::AudioManager::GetInstance().Finalize();
+		MadoEngine::InputManager::GetInstance().Finalize();
+		MadoEngine::TextureManager::GetInstance().Finalize();
+		MadoEngine::ShaderManager::GetInstance().Finalize();
+		MadoEngine::RootSignatureManager::GetInstance().Finalize();
+		MadoEngine::SpriteManager::GetInstance().Finalize();
 
 		psoRegistry_->Finalize();
 

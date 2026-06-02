@@ -5,9 +5,9 @@
 
 namespace MadoEngine {
 
-	AudioManager* AudioManager::GetInstance() {
+	AudioManager& AudioManager::GetInstance() {
 		static AudioManager instance;
-		return &instance;
+		return instance;
 	}
 
 	void AudioManager::Initialize() {

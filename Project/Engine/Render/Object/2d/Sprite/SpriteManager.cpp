@@ -5,9 +5,9 @@
 
 namespace MadoEngine {
 
-SpriteManager* SpriteManager::GetInstance() {
+SpriteManager& SpriteManager::GetInstance() {
 	static SpriteManager instance;
-	return &instance;
+	return instance;
 }
 
 void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, MadoEngine::Render::PSORegistry* psoRegistry) {
@@ -84,7 +84,7 @@ void SpriteManager::DrawAll(SceneType currentSceneType) {
 		// 最初の有効なスプライトのタイミングで共通ステートを1回だけ設定
 		if (!isStateSet) {
 			commandList_->SetGraphicsRootSignature(
-				MadoEngine::RootSignatureManager::GetInstance()->Get(sprite->GetRootSigKey()));
+				MadoEngine::RootSignatureManager::GetInstance().Get(sprite->GetRootSigKey()));
 			commandList_->SetPipelineState(psoRegistry_->Get(sprite->GetPSODesc()));
 			commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			commandList_->IASetVertexBuffers(0, 1, &sharedGeometry_.vbv);

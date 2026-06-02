@@ -15,7 +15,7 @@ public:
 
 	/// @brief シングルトンインスタンスを取得する
 	/// @return SpriteManagerの唯一のインスタンス
-	static SpriteManager* GetInstance();
+	static SpriteManager& GetInstance();
 
 	// コピー・ムーブ禁止
 	SpriteManager(const SpriteManager&)            = delete;

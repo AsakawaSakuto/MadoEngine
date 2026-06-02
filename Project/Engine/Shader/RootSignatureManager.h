@@ -15,7 +15,7 @@ namespace MadoEngine {
 	public:
 		/// @brief シングルトンインスタンスを取得する
 		/// @return RootSignatureManagerの唯一のインスタンス
-		static RootSignatureManager* GetInstance();
+		static RootSignatureManager& GetInstance();
 
 		// コピー・ムーブ禁止
 		RootSignatureManager(const RootSignatureManager&) = delete;

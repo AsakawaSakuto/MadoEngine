@@ -88,9 +88,9 @@ namespace MadoEngine::Render {
 		psoDesc.SampleDesc.Count = 1;
 
 		// TODO: ShaderManagerから取得する
-		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance()->Get(desc.vsKey);
-		psoDesc.PS             = MadoEngine::ShaderManager::GetInstance()->Get(desc.psKey);
-		psoDesc.pRootSignature = MadoEngine::RootSignatureManager::GetInstance()->Get(desc.rootSigKey);
+		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance().Get(desc.vsKey);
+		psoDesc.PS             = MadoEngine::ShaderManager::GetInstance().Get(desc.psKey);
+		psoDesc.pRootSignature = MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey);
 
 		return psoDesc;
 	}

@@ -13,7 +13,7 @@ namespace MadoEngine {
 	public:
 		/// @brief シングルトンインスタンスを取得する
 		/// @return ShaderManagerの唯一のインスタンス
-		static ShaderManager* GetInstance();
+		static ShaderManager& GetInstance();
 
 		// コピー・ムーブ禁止
 		ShaderManager(const ShaderManager&) = delete;

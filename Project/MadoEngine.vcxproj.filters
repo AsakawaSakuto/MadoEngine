@@ -412,5 +412,8 @@
     <ClInclude Include="Engine\Render\ImGui\EditorUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Object\Obgect.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

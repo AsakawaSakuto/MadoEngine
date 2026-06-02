@@ -23,7 +23,7 @@ namespace MadoEngine {
     public:
         /// @brief シングルトンインスタンスを取得する
         /// @return TextureManagerの唯一のインスタンス
-        static TextureManager* GetInstance();
+        static TextureManager& GetInstance();
 
         // コピー・ムーブ禁止
         TextureManager(const TextureManager&) = delete;

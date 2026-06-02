@@ -3,7 +3,7 @@
 namespace MadoEngine::Editor {
 
     void DrawAudioManagerUI() {
-        auto* audioManager = AudioManager::GetInstance();
+        //auto audioManager = AudioManager::GetInstance();
 
         ImGui::Begin("Audio Manager");
 
@@ -28,9 +28,9 @@ namespace MadoEngine::Editor {
                         ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);
                         ImGui::TableHeadersRow();
 
-                        auto keys = audioManager->GetAllKeys();
+                        auto keys = AudioManager::GetInstance().GetAllKeys();
                         for (const auto& key : keys) {
-                            if (audioManager->GetAudioType(key) == tabTypes[i]) {
+                            if (AudioManager::GetInstance().GetAudioType(key) == tabTypes[i]) {
                                 ImGui::TableNextRow();
 
                                 // --- 1列目: 音源名 ---
@@ -41,10 +41,10 @@ namespace MadoEngine::Editor {
                                 ImGui::TableNextColumn();
                                 ImGui::PushID((key + "_vol").c_str());
 
-                                float vol = audioManager->GetVolume(key); // 現在の音量を取得
+                                float vol = AudioManager::GetInstance().GetVolume(key); // 現在の音量を取得
                                 ImGui::PushItemWidth(-1); // スライダーを列の横幅いっぱいに広げる
                                 if (ImGui::SliderFloat("##Volume", &vol, 0.0f, 1.0f, "%.2f")) {
-                                    audioManager->SetVolume(key, vol); // 変更されたら即座に反映
+                                    AudioManager::GetInstance().SetVolume(key, vol); // 変更されたら即座に反映
                                 }
                                 ImGui::PopItemWidth();
                                 ImGui::PopID();
@@ -59,7 +59,7 @@ namespace MadoEngine::Editor {
                                 ImGui::TableNextColumn();
                                 ImGui::PushID((key + "_play").c_str());
                                 if (ImGui::Button("Play", ImVec2(60, 0))) {
-                                    audioManager->Play(key, loopStates[key]);
+                                    AudioManager::GetInstance().Play(key, loopStates[key]);
                                 }
                                 ImGui::PopID();
                             }
@@ -77,28 +77,28 @@ namespace MadoEngine::Editor {
                 ImGui::Separator();
                 ImGui::Spacing();
 
-                float masterVol = audioManager->GetMasterVolume();
+                float masterVol = AudioManager::GetInstance().GetMasterVolume();
                 if (ImGui::SliderFloat("Master Volume", &masterVol, 0.0f, 1.0f, "%.2f")) {
-                    audioManager->SetMasterVolume(masterVol);
+                    AudioManager::GetInstance().SetMasterVolume(masterVol);
                 }
 
                 ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
 
-                float seVol = audioManager->GetSEVolume();
+                float seVol = AudioManager::GetInstance().GetSEVolume();
                 if (ImGui::SliderFloat("SE Volume", &seVol, 0.0f, 1.0f, "%.2f")) {
-                    audioManager->SetSEVolume(seVol);
+                    AudioManager::GetInstance().SetSEVolume(seVol);
                 }
 
-                float bgmVol = audioManager->GetBGMVolume();
+                float bgmVol = AudioManager::GetInstance().GetBGMVolume();
                 if (ImGui::SliderFloat("BGM Volume", &bgmVol, 0.0f, 1.0f, "%.2f")) {
-                    audioManager->SetBGMVolume(bgmVol);
+                    AudioManager::GetInstance().SetBGMVolume(bgmVol);
                 }
 
-                float voiceVol = audioManager->GetVoiceVolume();
+                float voiceVol = AudioManager::GetInstance().GetVoiceVolume();
                 if (ImGui::SliderFloat("Voice Volume", &voiceVol, 0.0f, 1.0f, "%.2f")) {
-                    audioManager->SetVoiceVolume(voiceVol);
+                    AudioManager::GetInstance().SetVoiceVolume(voiceVol);
                 }
 
                 ImGui::EndTabItem();
@@ -118,14 +118,14 @@ namespace MadoEngine::Editor {
         ImGui::Spacing();
 
         bool anyPlaying = false;
-        auto allKeys = audioManager->GetAllKeys();
+        auto allKeys = AudioManager::GetInstance().GetAllKeys();
 
         if (ImGui::BeginTable("PlayingTable", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
             ImGui::TableSetupColumn("Playing Name", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);
 
             for (const auto& key : allKeys) {
-                if (audioManager->IsPlaying(key)) {
+                if (AudioManager::GetInstance().IsPlaying(key)) {
                     anyPlaying = true;
                     ImGui::TableNextRow();
 
@@ -135,7 +135,7 @@ namespace MadoEngine::Editor {
                     ImGui::TableNextColumn();
                     ImGui::PushID((key + "_stop").c_str());
                     if (ImGui::Button("Stop", ImVec2(60, 0))) {
-                        audioManager->Stop(key);
+                        AudioManager::GetInstance().Stop(key);
                     }
                     ImGui::PopID();
                 }
@@ -148,7 +148,7 @@ namespace MadoEngine::Editor {
         } else {
             ImGui::Spacing();
             if (ImGui::Button("Stop All", ImVec2(-1, 0))) {
-                audioManager->StopAll();
+                AudioManager::GetInstance().StopAll();
             }
         }
 

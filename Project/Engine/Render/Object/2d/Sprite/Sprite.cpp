@@ -13,8 +13,8 @@ void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 	device_ = device;
 	commandList_ = commandList;
 
-	textureIndex_ = MadoEngine::TextureManager::GetInstance()->GetTextureIndex(textureName);
-	size_ = MadoEngine::TextureManager::GetInstance()->GetPixelSize(textureName);
+	textureIndex_ = MadoEngine::TextureManager::GetInstance().GetTextureIndex(textureName);
+	size_ = MadoEngine::TextureManager::GetInstance().GetPixelSize(textureName);
 
 	// ユニットクワッド（0〜1）で生成。size・anchorPoint の反映は Update() 側の行列で行う
 	SpriteVertexData* vertexData = CreateMappedBuffer<SpriteVertexData>(device_.Get(), vertexResource_, 4);
@@ -52,8 +52,8 @@ void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 	device_ = device;
 	commandList_ = commandList;
 
-	textureIndex_ = MadoEngine::TextureManager::GetInstance()->GetTextureIndex(textureName);
-	size_ = MadoEngine::TextureManager::GetInstance()->GetPixelSize(textureName);
+	textureIndex_ = MadoEngine::TextureManager::GetInstance().GetTextureIndex(textureName);
+	size_ = MadoEngine::TextureManager::GetInstance().GetPixelSize(textureName);
 
 	// 共有ジオメトリのVBV・IBVを参照する（このSpriteはバッファを所有しない）
 	activeVBV_ = &sharedGeo.vbv;
@@ -121,7 +121,7 @@ void Sprite::Draw() {
 	// b0: Material, b1: Transform, t0: Texture
 	commandList_->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, transformationResource_->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_));
+	commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
 
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }

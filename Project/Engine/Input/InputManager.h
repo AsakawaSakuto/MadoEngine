@@ -14,7 +14,7 @@ namespace MadoEngine
 	class InputManager
 	{
 	public:
-		static InputManager* GetInstance();
+		static InputManager& GetInstance();
 
 		void Initialize();
 		void Finalize();

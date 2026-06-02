@@ -11,9 +11,9 @@
 /// </summary>
 class DebugLineManager {
 public:
-    /// @brief Singleton インスタンスの取得（ポインタ）
+    /// @brief Singleton インスタンスの取得（参照）
     /// @return DebugLineManager のシングルトンインスタンス
-    static DebugLineManager* GetInstance();
+    static DebugLineManager& GetInstance();
 
     // コピー・ムーブ禁止
     DebugLineManager(const DebugLineManager&) = delete;

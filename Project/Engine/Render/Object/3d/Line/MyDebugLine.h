@@ -9,7 +9,7 @@ namespace MyDebugLine {
     /// @param shape 描画する形状（AABB, OBB, Sphere, OvalSphere, Plane, Segment, Line）
     /// @param color 描画色（デフォルト：白）
     inline void AddShape(const Shape& shape, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f }) {
-        DebugLineManager::GetInstance()->AddShape(shape, color);
+        DebugLineManager::GetInstance().AddShape(shape, color);
     }
 
     /// @brief グリッド描画
@@ -17,12 +17,12 @@ namespace MyDebugLine {
     /// @param divisions 分割数
     /// @param color 描画色（デフォルト：白）
     inline void AddGrid(float size, int divisions, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f }) {
-        DebugLineManager::GetInstance()->AddGrid(size, divisions, color);
+        DebugLineManager::GetInstance().AddGrid(size, divisions, color);
     }
 
     /// @brief すべての線を描画
     /// @param camera 使用するカメラ
     inline void Draw(Camera& camera) {
-        DebugLineManager::GetInstance()->Draw(camera);
+        DebugLineManager::GetInstance().Draw(camera);
     }
 }

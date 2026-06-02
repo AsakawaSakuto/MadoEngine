@@ -5,9 +5,9 @@
 
 namespace MadoEngine {
 
-    TextureManager* TextureManager::GetInstance() {
+    TextureManager& TextureManager::GetInstance() {
         static TextureManager instance;
-        return &instance;
+        return instance;
     }
 
     void TextureManager::Initialize(ID3D12Device* device, MadoEngine::Core::SRVManager* srvManager) {

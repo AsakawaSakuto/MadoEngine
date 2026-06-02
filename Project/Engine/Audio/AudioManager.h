@@ -16,7 +16,7 @@ namespace MadoEngine {
 
 		/// @brief シングルトンインスタンスを取得
 		/// @return AudioManagerのインスタンスポインタ
-		static AudioManager* GetInstance();
+		static AudioManager& GetInstance();
 
 		/// @brief 初期化（Assets/Audio内の全wav/mp3を自動ロード）
 		void Initialize();

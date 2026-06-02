@@ -36,7 +36,7 @@ namespace MadoEngine::Screen {
 
 		case WM_MOUSEWHEEL:
 		{
-			auto* mouse = MadoEngine::InputManager::GetInstance()->GetMouse();
+			auto* mouse = MadoEngine::InputManager::GetInstance().GetMouse();
 			if (mouse) {
 				float delta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wparam)) / WHEEL_DELTA;
 				mouse->AddWheelDelta(delta);
@@ -296,7 +296,7 @@ namespace MadoEngine::Screen {
 
 	// 入力処理（フルスクリーン切り替えなど）
 	void WindowsAPI::ProcessInput() {
-		auto* keyboard = MadoEngine::InputManager::GetInstance()->GetKeybord();
+		auto* keyboard = MadoEngine::InputManager::GetInstance().GetKeybord();
 		if (keyboard) {
 			// ALT+Enterでフルスクリーン切り替え
 			bool altPressed = keyboard->IsPress(DIK_LMENU) || keyboard->IsPress(DIK_RMENU);

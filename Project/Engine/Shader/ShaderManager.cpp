@@ -11,9 +11,9 @@ namespace MadoEngine {
 	static constexpr const char* kShaderRoot = "Assets/Shader";
 	static constexpr const char* kCacheDir   = "Assets/Shader/.cache";
 
-	ShaderManager* ShaderManager::GetInstance() {
+	ShaderManager& ShaderManager::GetInstance() {
 		static ShaderManager instance;
-		return &instance;
+		return instance;
 	}
 
 	void ShaderManager::Initialize() {

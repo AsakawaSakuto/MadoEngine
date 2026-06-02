@@ -24,9 +24,9 @@ public:
 		float weight = 0.0f;           // 押し戻されにくさ (0.0: 通常, 1.0: 完全固定)
 	};
 
-	static ColliderManager* GetInstance() {
+	static ColliderManager& GetInstance() {
 		static ColliderManager instance;
-		return &instance;
+		return instance;
 	}
 
 	// --- 公開インターフェース ---
