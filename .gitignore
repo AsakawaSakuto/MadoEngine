@@ -1,8 +1,6 @@
 /generated/
 .vs/
 **/x64/
-**/Debug/
-**/Release/
 
 *.cso
 *.log
@@ -10,7 +8,6 @@
 *.exe
 *.dll
 *.pdb
-*.lib
 *.ilk
 *.ini
 
