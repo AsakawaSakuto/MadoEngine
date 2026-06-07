@@ -4,11 +4,17 @@
 #include "Math/Vector4.h"
 #include "Math/Matrix4x4.h"
 #include "Math/Function/MatrixFunction.h"
-#include "Utility/Transform.h"
-#include "assimp/scene.h"
+#include "Math/Transform.h"
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 #include <string>
 #include <vector>
 #include <map>
+#include<cassert>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
 
 struct ModelVertexData {
 	Vector4 position; // 位置
@@ -19,19 +25,19 @@ struct ModelVertexData {
 };
 
 struct ModelMaterial {
-    Vector4 color;               // 色
-    int32_t enableLighting;      // ライティングの有効化
-    int32_t useEnvironmentMap;   // 環境マップの使用
+    Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};             // 色
+    int32_t enableLighting = true;                        // ライティングの有効化
+    int32_t useEnvironmentMap = 0;                        // 環境マップの使用
     float pad1[2];
-    Matrix4x4 uvTransformMatrix; // UV変換行列
-    float shininess;             // 光沢度
+    Matrix4x4 uvTransformMatrix = Matrix::MakeIdentity(); // UV変換行列
+    float shininess = 10000.0f;                           // 光沢度
     float pad2[3];
 };
 
 struct ModelTransformationMatrix {
-	Matrix4x4 WVP;                   // ワールドビュー射影行列
-	Matrix4x4 World;                 // ワールド行列
-	Matrix4x4 WorldInverseTranspose; // ワールド行列の逆行列の転置（法線変換用）
+	Matrix4x4 WVP = Matrix::MakeIdentity();   // ワールドビュー射影行列
+	Matrix4x4 World = Matrix::MakeIdentity(); // ワールド行列
+	Matrix4x4 WorldInverseTranspose;          // ワールド行列の逆行列の転置（法線変換用）
 };
 
 struct ModelSubMesh {
@@ -83,3 +89,5 @@ struct ModelData {
     std::vector<ModelSubMesh> subMeshes;                    // サブメッシュ情報
 	ModelNode rootNode;                                     // ノード階層のルート
 };
+
+ModelData LoadObject3dFile(const std::string& filepath);

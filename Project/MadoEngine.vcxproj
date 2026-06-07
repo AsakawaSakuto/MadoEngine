@@ -88,6 +88,7 @@
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Debug;$(ProjectDir)Externals\DirectXTex\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,8 +169,10 @@
     <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelData.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
@@ -269,6 +272,8 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteSharedGeometry.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationFunction.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationStruct.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\DebugLineManager.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
@@ -294,6 +299,7 @@
     <ClInclude Include="Engine\Shader\ShaderManager.h" />
     <ClInclude Include="Engine\UtilityHeaders.h" />
     <ClInclude Include="Engine\Utility\Camera\Camera.h" />
+    <ClInclude Include="Engine\Utility\Camera\CameraForGPU.h" />
     <ClInclude Include="Engine\Utility\Camera\DebugCamera.h" />
     <ClInclude Include="Engine\Utility\Camera\Frustum.h" />
     <ClInclude Include="Engine\Utility\Camera\TPS_Camera.h" />
@@ -312,11 +318,14 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
     <ClInclude Include="Engine\Utility\Json\ISerializable.h" />
     <ClInclude Include="Engine\Utility\Json\JsonLoader.h" />
+    <ClInclude Include="Engine\Utility\Light\DirectionalLight.h" />
+    <ClInclude Include="Engine\Utility\Light\PointLight.h" />
+    <ClInclude Include="Engine\Utility\Light\SpotLight.h" />
     <ClInclude Include="Engine\Utility\Logger\Logger.h" />
     <ClInclude Include="Engine\Utility\Material.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="Engine\Utility\ResourceHelper\ResourceHelper.h" />
-    <ClInclude Include="Engine\Utility\Transform.h" />
+    <ClInclude Include="Engine\Math\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\Math\Vector4.h" />

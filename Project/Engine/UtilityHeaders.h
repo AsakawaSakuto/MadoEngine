@@ -1,7 +1,6 @@
 #pragma once
 #include "Audio/MyAudio.h"
 #include "Input/MyInput.h"
-#include "Utility/Transform.h"
 #include "Utility/Random.h"
 #include "Utility/Easing/Easing.h"
 #include "Utility/GameTimer/GameTimer.h"
@@ -9,5 +8,10 @@
 #include "Utility/Camera/Camera.h"
 #include "Utility/Camera/DebugCamera.h"
 #include "Utility/Camera/TPS_Camera.h"
+#include "Utility/Camera/CameraForGPU.h"
 #include "Utility/Collider/ColliderManager.h"
 #include "Utility/Collider/MyCollider.h"
+#include "Utility/Light/DirectionalLight.h"
+#include "Utility/Light/PointLight.h"
+#include "Utility/Light/SpotLight.h"
+#include "Utility/ResourceHelper/ResourceHelper.h"

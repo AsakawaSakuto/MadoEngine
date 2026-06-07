@@ -1,13 +1,10 @@
 #pragma once
 #include <string>
-#include "Math/Vector3.h"
-#include "Math/Vector4.h"
-#include "Utility/Transform.h"
-#include "Utility/Camera/Camera.h"
+#include "MathHeaders.h"
+#include "UtilityHeaders.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/TextureManager/TextureManager.h"
-#include "Utility/ResourceHelper/ResourceHelper.h"
 #include "Render/PSO/PSODesc.h"
 #include "Render/PSO/PSORegistry.h"
 
@@ -21,13 +18,13 @@ public:
 	/// @brief 初期化処理（派生クラスでオーバーライド）
 	/// @param device D3D12デバイス
 	/// @param commandList グラフィクスコマンドリスト
-	virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) = 0;
+	virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) = 0;
 
 	/// @brief 更新処理（派生クラスでオーバーライド）
 	virtual void Update() = 0;
 
 	/// @brief 描画処理（派生クラスでオーバーライド）
-	virtual void Draw() = 0;
+	virtual void Draw(Camera& useCamera) = 0;
 
 	// ===== Transform関連 =====
 
@@ -96,8 +93,13 @@ protected:
 	Vector4 color_;         // 色（RGBA）
 	bool isVisible_;        // 表示フラグ
 
+	Camera camera_; // カメラ
+
 	std::string textureName_;
 	uint32_t textureIndex_ = 0;
+
+	std::vector<std::string> textureNames_;
+	std::vector<uint32_t> textureIndices_;
 
 	MadoEngine::Render::PSODesc psoDesc_;                    // PSO記述子
 	MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr; // PSOレジストリ（外部からセット）
@@ -113,6 +115,10 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> transformationResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_ = {};
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_ = {};

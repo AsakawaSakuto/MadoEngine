@@ -30,19 +30,19 @@ namespace MadoEngine
 		commandManager_->Initialize(dxDevice_.get());
 
 		// RTVManagerの初期化
-		rtvManager_ = std::make_unique<MadoEngine::Core::RTVManager>();
+		rtvManager_ = &MadoEngine::Core::RTVManager::GetInstance();
 		rtvManager_->Initialize(dxDevice_.get());
 
 		// SwapChainの初期化
 		swapChain_ = std::make_unique<MadoEngine::Screen::SwapChain>();
-		swapChain_->Initialize(dxDevice_.get(), commandManager_.get(), windowsAPI_->GetHWnd(), winDesc_.width, winDesc_.height, 2, rtvManager_.get());
+		swapChain_->Initialize(dxDevice_.get(), commandManager_.get(), windowsAPI_->GetHWnd(), winDesc_.width, winDesc_.height, 2, rtvManager_);
 
 		// SRVManagerの初期化
-		srvManager_ = std::make_unique<MadoEngine::Core::SRVManager>();
+		srvManager_ = &MadoEngine::Core::SRVManager::GetInstance();
 		srvManager_->Initialize(dxDevice_.get());
 
 		// DSVManagerの初期化
-		dsvManager_ = std::make_unique<MadoEngine::Core::DSVManager>();
+		dsvManager_ = &MadoEngine::Core::DSVManager::GetInstance();
 		dsvManager_->Initialize(dxDevice_.get());
 		
 		// ShaderManagerの初期化（Assets/Shader 内の全HLSLをコンパイル・キャッシュ）
@@ -78,11 +78,11 @@ namespace MadoEngine
 		MadoEngine::AudioManager::GetInstance().Initialize();
 
 		// TextureManagerの初期化（Assets/Texture内の全.pngを自動ロード）
-		MadoEngine::TextureManager::GetInstance().Initialize(dxDevice_.get()->GetDevice(), srvManager_.get());
+		MadoEngine::TextureManager::GetInstance().Initialize(dxDevice_.get()->GetDevice(), srvManager_);
 
 		// DepthStencilBuffer の生成
 		depthStencilBuffer_ = std::make_unique<MadoEngine::Core::DepthStencilBuffer>();
-		depthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_.get(), winDesc_.width, winDesc_.height);
+		depthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, winDesc_.width, winDesc_.height);
 
 		// ViewportScissor の初期化
 		viewportScissor_ = std::make_unique<MadoEngine::Render::ViewportScissor>();
@@ -95,11 +95,11 @@ namespace MadoEngine
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
-		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_.get(), windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
+		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
 
 		// オフスクリーンレンダーターゲットの生成（ゲーム描画をImGui内に表示するため）
 		offscreenRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
-		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_.get(), srvManager_.get(), winDesc_.width, winDesc_.height);
+		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, winDesc_.width, winDesc_.height);
 #endif // USE_IMGUI
 	}
 

@@ -12,6 +12,8 @@ namespace MadoEngine::Core {
 	/// @brief Depth Stencil View (DSV) を管理するクラス
 	class DSVManager {
 	public:
+		static DSVManager& GetInstance();
+
 		/// @brief DSVManagerを初期化する
 		/// @param device DxDeviceのポインタ
 		/// @param maxDescriptors 最大デスクリプタ数（デフォルト: 128）
@@ -56,17 +58,16 @@ namespace MadoEngine::Core {
 		uint32_t descriptorSize_ = 0;
 		uint32_t maxDescriptors_ = 0;
 		uint32_t nextIndex_ = 0;
+		DSVManager() = default;
+		~DSVManager() = default;
+
 		std::queue<uint32_t> freeIndices_; // 解放されたインデックスを再利用
 		std::vector<bool> allocated_; // デスクリプタの割り当て状態を追跡
 
-		// コピー禁止、ムーブ許可
+		// コピー・ムーブ禁止
 		DSVManager(const DSVManager&) = delete;
 		DSVManager& operator=(const DSVManager&) = delete;
-		DSVManager(DSVManager&&) = default;
-		DSVManager& operator=(DSVManager&&) = default;
-
-	public:
-		DSVManager() = default;
-		~DSVManager() = default;
+		DSVManager(DSVManager&&) = delete;
+		DSVManager& operator=(DSVManager&&) = delete;
 	};
 }

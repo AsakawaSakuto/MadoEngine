@@ -39,6 +39,22 @@ public:
 	/// @param farClip ファークリップ面距離
 	void SetFarClip(float farClip) { farClip_ = farClip; }
 
+	/// @brief カメラパラメータをまとめて設定する
+	/// @param position ワールド座標
+	float GetFovY() const { return fovY_; }
+
+	/// @brief アスペクト比を取得する
+	/// @return 幅/高さ
+	float GetAspectRatio() const { return aspectRatio_; }
+
+	/// @brief ニアクリップ距離を取得する
+	/// @return ニアクリップ面距離
+	float GetNearClip() const { return nearClip_; }
+
+	/// @brief ファークリップ距離を取得する
+	/// @return ファークリップ面距離
+	float GetFarClip() const { return farClip_; }
+
 	// --- Getter ---
 
 	/// @brief カメラの位置を取得する

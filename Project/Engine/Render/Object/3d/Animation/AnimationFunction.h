@@ -1,20 +1,21 @@
 #pragma once
-#include "Math/Type/Vector3.h"
-#include "Math/Type/Matrix4x4.h"
-#include "Math/Type/Quaternion.h"
-#include "3d/Model/Data/ModelDataStruct.h"
-#include "3d/Model/Data/Animation/AnimationStruct.h"
-#include "Core/CreateResource/CreateResource.h"
+#include "Math/Vector3.h"
+#include "Math/Matrix4x4.h"
+#include "Math/Quaternion.h"
+#include "../Model/ModelData.h"
+#include "AnimationStruct.h"
 #include <vector>
 #include <cassert> 
 #include <d3d12.h>
 #include <wrl/client.h>
 
+namespace MadoEngine::Core { class SRVManager; }
+
 Animation LoadAnimationFile(const std::string& filename, int index = 0);
 
 Skeleton CreateSkeleton(const ModelNode& rootNode);
 
-SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const Skeleton& skeleton, const ModelData& modelData, const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t srvIndex);
+SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const Skeleton& skeleton, const ModelData& modelData, uint32_t srvIndex);
 
 int32_t CreateJoint(const ModelNode& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 

@@ -1,12 +1,13 @@
 #include "AnimationFunction.h"
-#include "Math/MatrixFunction/MatrixFunction.h"
-#include "Math/Quaternion/QuaternionFunction.h"
+#include "Core/View/SRVManager.h"
+#include "Math/Function/MatrixFunction.h"
+#include "Math/Function/QuaternionFunction.h"
 #include "Utility/Easing/Easing.h"
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+#include "Utility/ResourceHelper/ResourceHelper.h"
+#include "Core/View/SRVManager.h"
 Animation LoadAnimationFile(const std::string& filename, int index)
 {
 	Animation animation; // 今回作るアニメーション
@@ -132,36 +133,15 @@ Skeleton CreateSkeleton(const ModelNode& rootNode) {
 	return skeleton;
 }
 
-SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const Skeleton& skeleton, const ModelData& modelData, const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t srvIndex)
+SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const Skeleton& skeleton, const ModelData& modelData, uint32_t srvIndex)
 {
 	SkinCluster skinCluster;
 
-	// ★デバッグログ追加
-	char buffer[512];
-	sprintf_s(buffer, "=== CreateSkinCluster Debug ===\n");
-	OutputDebugStringA(buffer);
-
-	sprintf_s(buffer, "Joint count: %zu\n", skeleton.joints.size());
-	OutputDebugStringA(buffer);
-
-	sprintf_s(buffer, "Vertex count: %zu\n", modelData.vertices.size());
-	OutputDebugStringA(buffer);
-
 	// palette用のResourceを確保
-	size_t paletteSize = sizeof(WellForGPU) * skeleton.joints.size();
-	sprintf_s(buffer, "Palette buffer size: %zu bytes (WellForGPU size: %zu)\n",
-		paletteSize, sizeof(WellForGPU));
-	OutputDebugStringA(buffer);
-
-	OutputDebugStringA("Creating palette resource...\n");
-	skinCluster.paletteResource = CreateBufferResource(device.Get(), paletteSize);
-	OutputDebugStringA("Palette resource created successfully!\n");
-
-	WellForGPU* mappedPalette = nullptr;
-	skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
+	WellForGPU* mappedPalette = CreateMappedBuffer<WellForGPU>(device.Get(), skinCluster.paletteResource, skeleton.joints.size());
 	skinCluster.mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
-	skinCluster.paletteSrvHandle.first = GetCPUDescriptorHandle(descriptorHeap.Get(), descriptorSize, srvIndex);
-	skinCluster.paletteSrvHandle.second = GetGPUDescriptorHandle(descriptorHeap.Get(), descriptorSize, srvIndex);
+    skinCluster.paletteSrvHandle.first = MadoEngine::Core::SRVManager::GetInstance().GetCPUHandle(srvIndex);
+	skinCluster.paletteSrvHandle.second = MadoEngine::Core::SRVManager::GetInstance().GetGPUHandle(srvIndex);
 
 	// palette用のsrvを作成。StructuredBufferでアクセスできるようにする。
 	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
@@ -174,20 +154,8 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-	OutputDebugStringA("Palette SRV created successfully!\n");
-
 	// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
-	size_t influenceSize = sizeof(VertexInfluence) * modelData.vertices.size();
-	sprintf_s(buffer, "Influence buffer size: %zu bytes (VertexInfluence size: %zu)\n",
-		influenceSize, sizeof(VertexInfluence));
-	OutputDebugStringA(buffer);
-
-	OutputDebugStringA("Creating influence resource...\n");
-	skinCluster.influenceResource = CreateBufferResource(device.Get(), influenceSize);
-	OutputDebugStringA("Influence resource created successfully!\n");
-
-	VertexInfluence* mappedInfluence = nullptr;
-	skinCluster.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
+	VertexInfluence* mappedInfluence = CreateMappedBuffer<VertexInfluence>(device.Get(), skinCluster.influenceResource, modelData.vertices.size());
 	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData.vertices.size());  // 0埋め。weightを0にしておく。
 	skinCluster.mappedInfluence = { mappedInfluence, modelData.vertices.size() };
 
@@ -198,7 +166,7 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 
 	// InverseBindPoseMatrixを格納する場所を作成して、単位行列で埋める
 	skinCluster.inverseBindPoseMatrices.resize(skeleton.joints.size());
-	std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), MakeIdentityMatrix);
+	std::generate(skinCluster.inverseBindPoseMatrices.begin(), skinCluster.inverseBindPoseMatrices.end(), Matrix::MakeIdentity);
 
 	for (const auto& jointWeight : modelData.skinClusterData) { // ModelのSkinClusterの情報を解析
 		auto it = skeleton.jointMap.find(jointWeight.first);    // jointWeight.firstはjoint名なので、skeletonに対象となるjointが含まれているか判断
@@ -221,9 +189,6 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 		}
 	}
 
-	OutputDebugStringA("CreateSkinCluster completed successfully!\n");
-	OutputDebugStringA("===============================\n");
-
 	return skinCluster;
 }
 
@@ -232,7 +197,7 @@ int32_t CreateJoint(const ModelNode& node, const std::optional<int32_t>& parent,
 	Joint joint;
 	joint.name = node.name;
 	joint.localMatrix = node.localMatrix;
-	joint.skeletonSpaceMatrix = MakeIdentityMatrix();
+	joint.skeletonSpaceMatrix = Matrix::MakeIdentity();
 	joint.transform = node.transform;
 	joint.index = int32_t(joints.size()); // 現在登録されている数をIndexに
 	joint.parent = parent;
@@ -268,7 +233,7 @@ Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time
 				(time - keyframes[index].time) /
 				(keyframes[nextIndex].time - keyframes[index].time);
 
-			return MyEasing::Lerp(keyframes[index].value,
+			return Math::Lerp(keyframes[index].value,
 				keyframes[nextIndex].value,
 				t);
 		}
@@ -296,7 +261,7 @@ Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, floa
 				(time - keyframes[index].time) /
 				(keyframes[nextIndex].time - keyframes[index].time);
 
-			return Slerp(keyframes[index].value,
+			return QuaternionFunc::Slerp(keyframes[index].value,
 				keyframes[nextIndex].value,
 				t);
 		}
@@ -308,7 +273,7 @@ Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, floa
 void UpdateAnimation(Skeleton& skeleton) {
 	// すべてのJointを更新。親が若いので通常ループで処理可能になっている
 	for (Joint& joint : skeleton.joints) {
-		joint.localMatrix = MakeAffineAnimationMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
+		joint.localMatrix = Matrix::MakeAffineAnimation(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
 		if (joint.parent) { // 親がいれば親の行列を掛ける
 			joint.skeletonSpaceMatrix = joint.localMatrix * skeleton.joints[*joint.parent].skeletonSpaceMatrix;
 		} else { // 親がいないのでlocalMatrixとskeletonSpaceMatrixは一致する
@@ -323,7 +288,7 @@ void UpdateCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
 		skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
 			skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
 		skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-			TransposeMatrix(InverseMatrix(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
+			Matrix::Transpose(Matrix::Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
 	}
 }
 

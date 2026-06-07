@@ -5,6 +5,7 @@
 #include "Math/Matrix2x2.h"
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
+#include "Math/Transform.h"
 #include "Math/Quaternion.h"
 #include "Math/Function/MatrixFunction.h"
 #include "Math/Function/MathFunction.h"

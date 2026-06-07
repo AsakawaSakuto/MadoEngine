@@ -6,6 +6,11 @@
 
 namespace MadoEngine::Core {
 
+	RTVManager& RTVManager::GetInstance() {
+		static RTVManager instance;
+		return instance;
+	}
+
 	void RTVManager::Initialize(DxDevice* device, uint32_t maxDescriptors) {
 		assert(device != nullptr);
 		assert(maxDescriptors > 0);

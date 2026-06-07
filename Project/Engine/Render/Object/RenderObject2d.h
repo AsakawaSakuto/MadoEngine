@@ -1,12 +1,10 @@
 #pragma once
 #include <string>
-#include "Math/Vector2.h"
-#include "Math/Vector4.h"
-#include "Utility/Transform.h"
+#include "MathHeaders.h"
+#include "UtilityHeaders.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/TextureManager/TextureManager.h"
-#include "Utility/ResourceHelper/ResourceHelper.h"
 #include "Render/PSO/PSODesc.h"
 #include "Render/PSO/PSORegistry.h"
 

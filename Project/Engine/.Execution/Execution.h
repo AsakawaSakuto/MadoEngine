@@ -62,9 +62,9 @@ namespace MadoEngine
 
 		std::unique_ptr<MadoEngine::Screen::SwapChain> swapChain_;
 
-		std::unique_ptr<MadoEngine::Core::RTVManager> rtvManager_;
-		std::unique_ptr<MadoEngine::Core::SRVManager> srvManager_;
-		std::unique_ptr<MadoEngine::Core::DSVManager> dsvManager_;
+		MadoEngine::Core::RTVManager* rtvManager_ = nullptr;
+		MadoEngine::Core::SRVManager* srvManager_ = nullptr;
+		MadoEngine::Core::DSVManager* dsvManager_ = nullptr;
 
 		std::unique_ptr<MadoEngine::Render::PSOFactory> psoFactory_;
 		std::unique_ptr<MadoEngine::Render::PSORegistry> psoRegistry_;

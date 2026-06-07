@@ -6,6 +6,11 @@
 
 namespace MadoEngine::Core {
 
+	SRVManager& SRVManager::GetInstance() {
+		static SRVManager instance;
+		return instance;
+	}
+
 	void SRVManager::Initialize(DxDevice* device, uint32_t maxDescriptors) {
 		assert(device != nullptr);
 		assert(maxDescriptors > 0);

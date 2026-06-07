@@ -6,6 +6,11 @@
 
 namespace MadoEngine::Core {
 
+	DSVManager& DSVManager::GetInstance() {
+		static DSVManager instance;
+		return instance;
+	}
+
 	void DSVManager::Initialize(DxDevice* device, uint32_t maxDescriptors) {
 		assert(device != nullptr);
 		assert(maxDescriptors > 0);

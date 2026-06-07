@@ -12,6 +12,8 @@ namespace MadoEngine::Core {
 	/// @brief Render Target View (RTV) を管理するクラス
 	class RTVManager {
 	public:
+		static RTVManager& GetInstance();
+
 		/// @brief RTVManagerを初期化する
 		/// @param device DxDeviceのポインタ
 		/// @param maxDescriptors 最大デスクリプタ数（デフォルト: 256）
@@ -56,17 +58,16 @@ namespace MadoEngine::Core {
 		uint32_t descriptorSize_ = 0;
 		uint32_t maxDescriptors_ = 0;
 		uint32_t nextIndex_ = 0;
+		RTVManager() = default;
+		~RTVManager() = default;
+
 		std::queue<uint32_t> freeIndices_; // 解放されたインデックスを再利用
 		std::vector<bool> allocated_; // デスクリプタの割り当て状態を追跡
 
-		// コピー禁止、ムーブ許可
+		// コピー・ムーブ禁止
 		RTVManager(const RTVManager&) = delete;
 		RTVManager& operator=(const RTVManager&) = delete;
-		RTVManager(RTVManager&&) = default;
-		RTVManager& operator=(RTVManager&&) = default;
-
-	public:
-		RTVManager() = default;
-		~RTVManager() = default;
+		RTVManager(RTVManager&&) = delete;
+		RTVManager& operator=(RTVManager&&) = delete;
 	};
 }
