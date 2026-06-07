@@ -8,20 +8,25 @@
 #include <assimp/postprocess.h>
 #include "Utility/ResourceHelper/ResourceHelper.h"
 #include "Core/View/SRVManager.h"
+#include <algorithm>
+#include <cstring>
 Animation LoadAnimationFile(const std::string& filename, int index)
 {
 	Animation animation; // 今回作るアニメーション
 
+	animation.duration = 0.0f;
+
 	Assimp::Importer importer;
-	std::string filePath = "resources/model/" + filename;
+	std::string filePath = filename;
 
 	// モデルと同じでOK。資料では 0 になってるが、既に使ってるフラグがあればそれでいい
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
-	assert(scene && "Failed to load animation file");
-	assert(scene->mNumAnimations != 0 && "No animations in file");
+	if (!scene || scene->mNumAnimations == 0) {
+		return animation;
+	}
 
 	// 指定されたアニメーションを指定
-	index = std::clamp(index, 0, int(scene->mNumAnimations));
+	index = std::clamp(index, 0, int(scene->mNumAnimations - 1));
 	aiAnimation* animationAssimp = scene->mAnimations[index];
 
 	// 時間の単位を秒に変換

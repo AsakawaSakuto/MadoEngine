@@ -89,6 +89,7 @@ namespace MadoEngine
 		viewportScissor_->UpdateSize(winDesc_.width, winDesc_.height);
 
 		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+		MadoEngine::ModelManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 
 		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
@@ -213,6 +214,7 @@ namespace MadoEngine
 		MadoEngine::ShaderManager::GetInstance().Finalize();
 		MadoEngine::RootSignatureManager::GetInstance().Finalize();
 		MadoEngine::SpriteManager::GetInstance().Finalize();
+		MadoEngine::ModelManager::GetInstance().Finalize();
 
 		psoRegistry_->Finalize();
 

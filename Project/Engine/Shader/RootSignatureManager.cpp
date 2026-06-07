@@ -153,6 +153,182 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("Sprite.RootSig", rootSigDesc);
 		}
 
+		// Model RootSignature
+		{
+			D3D12_DESCRIPTOR_RANGE textureRange{};
+			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			textureRange.NumDescriptors = 1;
+			textureRange.BaseShaderRegister = 0;
+			textureRange.RegisterSpace = 0;
+			textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_DESCRIPTOR_RANGE environmentRange{};
+			environmentRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			environmentRange.NumDescriptors = 1;
+			environmentRange.BaseShaderRegister = 1;
+			environmentRange.RegisterSpace = 0;
+			environmentRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[8]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[0].Descriptor.ShaderRegister = 0;
+			rootParams[0].Descriptor.RegisterSpace = 0;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[1].Descriptor.ShaderRegister = 1;
+			rootParams[1].Descriptor.RegisterSpace = 0;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[2].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[2].DescriptorTable.pDescriptorRanges = &textureRange;
+			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[3].Descriptor.ShaderRegister = 2;
+			rootParams[3].Descriptor.RegisterSpace = 0;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[4].Descriptor.ShaderRegister = 3;
+			rootParams[4].Descriptor.RegisterSpace = 0;
+			rootParams[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[5].Descriptor.ShaderRegister = 4;
+			rootParams[5].Descriptor.RegisterSpace = 0;
+			rootParams[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[6].Descriptor.ShaderRegister = 5;
+			rootParams[6].Descriptor.RegisterSpace = 0;
+			rootParams[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[7].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[7].DescriptorTable.pDescriptorRanges = &environmentRange;
+			rootParams[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC staticSampler{};
+			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSampler.MipLODBias = 0.0f;
+			staticSampler.MaxAnisotropy = 0;
+			staticSampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			staticSampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			staticSampler.MinLOD = 0.0f;
+			staticSampler.MaxLOD = D3D12_FLOAT32_MAX;
+			staticSampler.ShaderRegister = 0;
+			staticSampler.RegisterSpace = 0;
+			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &staticSampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("Model.RootSig", rootSigDesc);
+		}
+
+		// SkinningModel RootSignature
+		{
+			D3D12_DESCRIPTOR_RANGE textureRange{};
+			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			textureRange.NumDescriptors = 1;
+			textureRange.BaseShaderRegister = 0;
+			textureRange.RegisterSpace = 0;
+			textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_DESCRIPTOR_RANGE paletteRange{};
+			paletteRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			paletteRange.NumDescriptors = 1;
+			paletteRange.BaseShaderRegister = 1;
+			paletteRange.RegisterSpace = 0;
+			paletteRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_DESCRIPTOR_RANGE environmentRange{};
+			environmentRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			environmentRange.NumDescriptors = 1;
+			environmentRange.BaseShaderRegister = 2;
+			environmentRange.RegisterSpace = 0;
+			environmentRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[9]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[0].Descriptor.ShaderRegister = 0;
+			rootParams[0].Descriptor.RegisterSpace = 0;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[1].Descriptor.ShaderRegister = 1;
+			rootParams[1].Descriptor.RegisterSpace = 0;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[2].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[2].DescriptorTable.pDescriptorRanges = &textureRange;
+			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[3].Descriptor.ShaderRegister = 2;
+			rootParams[3].Descriptor.RegisterSpace = 0;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[4].Descriptor.ShaderRegister = 3;
+			rootParams[4].Descriptor.RegisterSpace = 0;
+			rootParams[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[5].Descriptor.ShaderRegister = 4;
+			rootParams[5].Descriptor.RegisterSpace = 0;
+			rootParams[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[6].Descriptor.ShaderRegister = 5;
+			rootParams[6].Descriptor.RegisterSpace = 0;
+			rootParams[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[7].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[7].DescriptorTable.pDescriptorRanges = &paletteRange;
+			rootParams[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[8].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[8].DescriptorTable.pDescriptorRanges = &environmentRange;
+			rootParams[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC staticSampler{};
+			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSampler.MipLODBias = 0.0f;
+			staticSampler.MaxAnisotropy = 0;
+			staticSampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			staticSampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			staticSampler.MinLOD = 0.0f;
+			staticSampler.MaxLOD = D3D12_FLOAT32_MAX;
+			staticSampler.ShaderRegister = 0;
+			staticSampler.RegisterSpace = 0;
+			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &staticSampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("SkinningModel.RootSig", rootSigDesc);
+		}
+
 		// Line3d 用 RootSignature
 		// b0: LineTransform (viewProjection) VS のみ
 		{

@@ -1,47 +1,52 @@
-#include "ModelData.h"
-#include "ModelType.h"
+#pragma once
+#include "ModelSharedData.h"
 #include "Render/Object/RenderObject3d.h"
-#include "../Animation/AnimationFunction.h"
-#include "../Animation/AnimationStruct.h"
+#include ".SceneManager/SceneType.h"
+#include <memory>
+#include <string>
 
 class Model : public RenderObject3d {
 public:
-
-	Model(std::string ObjectName);
+	Model(std::string objectName);
 
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) override;
+	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
 
 	void Update() override;
-
 	void Draw(Camera& useCamera) override;
+
+	void SetSceneType(SceneType sceneType) { sceneType_ = sceneType; }
+	SceneType GetSceneType() const { return sceneType_; }
+
+	const ModelSharedData* GetSharedData() const { return sharedData_; }
+
 private:
+	void InitializeInstanceResources();
 
 	ModelType type_ = ModelType::Static;
-	ModelData modelData_;
+	const ModelSharedData* sharedData_ = nullptr;
+	std::unique_ptr<ModelSharedData> ownedSharedData_;
 
-	// ワールド変換行列情報
 	Matrix4x4 worldMatrix_;
-	Transform2D uvTransform_; // UV変換情報
+	Transform2D uvTransform_;
 
-	// 環境マップ（CubeMap）関連
-	std::string environmentMapName_;   // 環境マップテクスチャファイルパス
-	uint32_t environmentMapIndex_ = 0; // 環境マップテクスチャインデックス
-	bool useEnvironmentMap_ = false;   // 環境マップ使用フラグ
+	std::string environmentMapName_;
+	uint32_t environmentMapIndex_ = 0;
+	bool useEnvironmentMap_ = false;
 
-	// アニメーション関連
-	bool useAnimationTimer_ = false; // アニメーション使用フラグ
-	float animationTime_ = 0.0f;     // アニメーション再生時間
-	Animation animationData_;     // 共有アニメーションデータ
-	Skeleton skeletonData_;       // 共有スケルトンデータ
-	SkinCluster skinClusterData_; // 共有スキンクラスター
-	uint32_t skinClusterIndex_;   // スキンクラスター用SRVインデックス
+	bool useAnimationTimer_ = false;
+	float animationTime_ = 0.0f;
+	Skeleton skeletonData_;
+	SkinCluster skinClusterData_;
+	uint32_t skinClusterIndex_ = 0;
 
-	ModelVertexData* vertexData_ = nullptr;
-	uint32_t* indexData_ = nullptr;
 	ModelMaterial* materialData_ = nullptr;
 	ModelTransformationMatrix* transformationData_ = nullptr;
 	DirectionalLight* directionalLightData_ = nullptr;
 	PointLight* pointLightData_ = nullptr;
 	SpotLight* spotLightData_ = nullptr;
 	CameraForGPU* cameraData_ = nullptr;
+
+	ModelNode rootNode_;
+	SceneType sceneType_ = SceneType::None;
 };

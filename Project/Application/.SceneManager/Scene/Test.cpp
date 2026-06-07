@@ -39,6 +39,8 @@ void Test::Initialize() {
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize();
+
+	model_ = MyModel::Create("testModel", "cube", SceneType::Test);
 }
 
 SceneType Test::Update(float dt) {
@@ -65,6 +67,7 @@ SceneType Test::Update(float dt) {
 
 void Test::Draw() {
 	MyDebugLine::Draw(tpsCamera_);
+	MadoEngine::ModelManager::GetInstance().DrawAll(SceneType::Test, tpsCamera_);
 }
 
 void Test::DrawImGui() {

@@ -1,0 +1,231 @@
+#include "ModelManager.h"
+#include "Utility/Logger/Logger.h"
+#include <algorithm>
+#include <cassert>
+#include <cctype>
+#include <filesystem>
+
+namespace {
+
+std::string ToLower(std::string value) {
+	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
+		return static_cast<char>(std::tolower(c));
+	});
+	return value;
+}
+
+std::string NormalizePath(const std::filesystem::path& path) {
+	return path.lexically_normal().generic_string();
+}
+
+bool IsModelExtension(const std::filesystem::path& path) {
+	const std::string extension = ToLower(path.extension().string());
+	return extension == ".obj" || extension == ".gltf" || extension == ".glb";
+}
+
+bool TryGetModelType(const std::filesystem::path& modelRoot, const std::filesystem::path& path, ModelType& outType) {
+	std::error_code ec;
+	std::filesystem::path relative = std::filesystem::relative(path.parent_path(), modelRoot, ec);
+	if (ec || relative.empty()) {
+		return false;
+	}
+
+	const std::string firstDirectory = ToLower((*relative.begin()).string());
+	if (firstDirectory == "static") {
+		outType = ModelType::Static;
+		return true;
+	}
+	if (firstDirectory == "animation" || firstDirectory == "animated") {
+		outType = ModelType::Animated;
+		return true;
+	}
+	if (firstDirectory == "skining" || firstDirectory == "skinning") {
+		outType = ModelType::Skinning;
+		return true;
+	}
+
+	return false;
+}
+
+} // namespace
+
+namespace MadoEngine {
+
+ModelManager& ModelManager::GetInstance() {
+	static ModelManager instance;
+	return instance;
+}
+
+void ModelManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, MadoEngine::Render::PSORegistry* psoRegistry) {
+	assert(device);
+	assert(commandList);
+	assert(psoRegistry);
+
+	device_ = device;
+	commandList_ = commandList;
+	psoRegistry_ = psoRegistry;
+
+	LoadAllModels();
+
+	Logger::Output("ModelManager : loaded " + std::to_string(sharedData_.size()) + " model assets", Logger::Level::Engine);
+}
+
+void ModelManager::Finalize() {
+	models_.clear();
+	for (auto& [key, data] : sharedData_) {
+		MadoEngine::ModelResource::Finalize(*data);
+	}
+	sharedData_.clear();
+	aliases_.clear();
+	activeCamera_ = nullptr;
+
+	Logger::Output("ModelManager : finalized", Logger::Level::Engine);
+}
+
+void ModelManager::LoadAllModels() {
+	const std::filesystem::path modelRoot = "Assets/Model";
+	if (!std::filesystem::exists(modelRoot)) {
+		Logger::Output("ModelManager : Assets/Model was not found", Logger::Level::Warning);
+		return;
+	}
+
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
+		if (!entry.is_regular_file() || !IsModelExtension(entry.path())) {
+			continue;
+		}
+
+		ModelType type = ModelType::Static;
+		if (!TryGetModelType(modelRoot, entry.path(), type)) {
+			continue;
+		}
+
+		LoadModelFile(NormalizePath(entry.path()), type);
+	}
+}
+
+void ModelManager::LoadModelFile(const std::string& path, ModelType type) {
+	if (sharedData_.contains(path)) {
+		return;
+	}
+
+	auto data = std::make_unique<ModelSharedData>();
+	MadoEngine::ModelResource::Initialize(*data, device_, path, type);
+
+	const std::string stem = std::filesystem::path(path).stem().string();
+	if (!aliases_.contains(stem)) {
+		aliases_.emplace(stem, path);
+	} else {
+		Logger::Output("ModelManager : duplicate model alias, use path instead : " + stem, Logger::Level::Warning);
+	}
+
+	aliases_.emplace(path, path);
+	sharedData_.emplace(path, std::move(data));
+
+	Logger::Output("ModelManager : loaded " + path + " [" + MadoEngine::ModelResource::ModelTypeToString(sharedData_.at(path)->type) + "]", Logger::Level::Assets);
+}
+
+Model* ModelManager::Create(const std::string& name, const std::string& modelName, SceneType sceneType) {
+	if (models_.contains(name)) {
+		Logger::Output("ModelManager : model instance already exists : " + name, Logger::Level::Warning);
+		return models_.at(name).get();
+	}
+
+	const ModelSharedData* sharedData = FindSharedData(modelName);
+	if (!sharedData) {
+		Logger::Output("ModelManager : model asset was not found : " + modelName, Logger::Level::Warning);
+		return nullptr;
+	}
+
+	auto model = std::make_unique<Model>(name);
+	model->Initialize(device_, commandList_, *sharedData);
+	model->SetPSORegistry(psoRegistry_);
+	model->SetSceneType(sceneType);
+
+	Model* ptr = model.get();
+	models_.emplace(name, std::move(model));
+
+	Logger::Output("ModelManager : created model instance : " + name + " Asset : " + modelName + " Scene : " + (sceneType == SceneType::None ? "All" : SceneTypeToString(sceneType)), Logger::Level::Application);
+	return ptr;
+}
+
+Model* ModelManager::Get(const std::string& name) const {
+	auto it = models_.find(name);
+	if (it == models_.end()) {
+		Logger::Output("ModelManager : model instance was not found : " + name, Logger::Level::Warning);
+		return nullptr;
+	}
+	return it->second.get();
+}
+
+void ModelManager::Destroy(const std::string& name) {
+	if (models_.erase(name) > 0) {
+		Logger::Output("ModelManager : destroyed model instance : " + name, Logger::Level::Application);
+	}
+}
+
+const ModelSharedData* ModelManager::GetSharedData(const std::string& modelName) const {
+	return FindSharedData(modelName);
+}
+
+const ModelSharedData* ModelManager::FindSharedData(const std::string& modelName) const {
+	auto aliasIt = aliases_.find(modelName);
+	if (aliasIt != aliases_.end()) {
+		auto dataIt = sharedData_.find(aliasIt->second);
+		if (dataIt != sharedData_.end()) {
+			return dataIt->second.get();
+		}
+	}
+
+	const std::string normalized = NormalizePath(modelName);
+	auto dataIt = sharedData_.find(normalized);
+	if (dataIt != sharedData_.end()) {
+		return dataIt->second.get();
+	}
+
+	return nullptr;
+}
+
+void ModelManager::UpdateAll(SceneType currentSceneType) {
+	if (models_.empty()) {
+		return;
+	}
+
+	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+
+		model->Update();
+	}
+}
+
+void ModelManager::DrawAll(SceneType currentSceneType) {
+	if (!activeCamera_) {
+		return;
+	}
+	DrawAll(currentSceneType, *activeCamera_);
+}
+
+void ModelManager::DrawAll(SceneType currentSceneType, Camera& camera) {
+	if (models_.empty()) {
+		return;
+	}
+
+	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+
+		model->Draw(camera);
+	}
+}
+
+} // namespace MadoEngine

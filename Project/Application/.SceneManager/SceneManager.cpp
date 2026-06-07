@@ -21,6 +21,7 @@ void SceneManager::Initialize(SceneType initialScene) {
 
 void SceneManager::Update(float dt) {
 	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
+	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
 
 	ColliderManager::GetInstance().Update();
 
@@ -34,7 +35,7 @@ void SceneManager::Update(float dt) {
 
 void SceneManager::Draw() {
 	MadoEngine::SpriteManager::GetInstance().DrawAll(currentSceneType_);
-
+	
 	if (currentScene_) {
 		currentScene_->Draw();
 	}

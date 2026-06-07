@@ -77,6 +77,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -424,6 +425,8 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
