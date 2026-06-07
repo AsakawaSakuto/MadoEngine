@@ -469,4 +469,42 @@ namespace Matrix {
 
 		return result;
 	}
+
+	Matrix4x4 MakeAffineAnimation(const Vector3& scale, const Quaternion& rotate, const Vector3& translate) {
+
+		Matrix4x4 m{};
+
+		// 回転行列を取得
+		Matrix4x4 rot = QuaternionFunc::MakeRotateMatrix(rotate);
+
+		// 拡大を反映（行列の各要素にスケールを掛ける）
+		rot.m[0][0] *= scale.x;
+		rot.m[0][1] *= scale.x;
+		rot.m[0][2] *= scale.x;
+
+		rot.m[1][0] *= scale.y;
+		rot.m[1][1] *= scale.y;
+		rot.m[1][2] *= scale.y;
+
+		rot.m[2][0] *= scale.z;
+		rot.m[2][1] *= scale.z;
+		rot.m[2][2] *= scale.z;
+
+		// 行列にコピー
+		for (int r = 0; r < 3; r++) {
+			for (int c = 0; c < 3; c++) {
+				m.m[r][c] = rot.m[r][c];
+			}
+		}
+
+		// 平行移動
+		m.m[3][0] = translate.x;
+		m.m[3][1] = translate.y;
+		m.m[3][2] = translate.z;
+
+		// 最後の要素
+		m.m[3][3] = 1.0f;
+
+		return m;
+	}
 }

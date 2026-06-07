@@ -40,7 +40,7 @@ private:
 
 	// 実際に描画で使うVBV/IBVへのポインタ
 	// SpriteManager経由: sharedGeo のバッファを指す
-	// 単独使用時     : 自前の vertexResource_/indexResource_ のビューを指す
+	// 単独使用時 : 自前の vertexResource_/indexResource_ のビューを指す
 	const D3D12_VERTEX_BUFFER_VIEW* activeVBV_ = nullptr;
 	const D3D12_INDEX_BUFFER_VIEW* activeIBV_ = nullptr;
 

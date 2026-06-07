@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -80,7 +80,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals;$(ProjectDir)Externals\assimp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,7 +102,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals;$(ProjectDir)Externals\assimp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,7 +123,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Engine;$(ProjectDir)Application;$(ProjectDir)Externals;$(ProjectDir)Externals\assimp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,6 +169,8 @@
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
@@ -178,7 +180,6 @@
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
-    <ClCompile Include="Engine\Render\Object\3d\Model\StaticModel.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
@@ -270,7 +271,10 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteSharedGeometry.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\DebugLineManager.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelManager.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h" />
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />
@@ -283,7 +287,6 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h" />
-    <ClInclude Include="Engine\Render\Object\3d\Model\StaticModel.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject2d.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject3d.h" />
     <ClInclude Include="Engine\Render\Screen\SwapChain.h" />

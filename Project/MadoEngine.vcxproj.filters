@@ -42,7 +42,6 @@
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\Line.cpp" />
-    <ClCompile Include="Engine\Render\Object\3d\Model\StaticModel.cpp" />
     <ClCompile Include="Engine\Render\Screen\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\Screen\WindowsAPI.cpp" />
     <ClCompile Include="Engine\Shader\ShaderManager.cpp" />
@@ -74,6 +73,8 @@
     <ClCompile Include="Application\Object\Map\Map.cpp" />
     <ClCompile Include="Engine\Utility\Json\JsonLoader.cpp" />
     <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -230,9 +231,6 @@
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h">
-      <Filter>�w�b�_�[ �t�@�C��</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Render\Object\3d\Model\StaticModel.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\RenderObject2d.h">
@@ -413,6 +411,15 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\Object\Obgect.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Model\Model.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

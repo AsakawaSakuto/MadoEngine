@@ -20,7 +20,7 @@ void SceneManager::Initialize(SceneType initialScene) {
 }
 
 void SceneManager::Update(float dt) {
-	MadoEngine::SpriteManager::GetInstance().UpdateAll();
+	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
 
 	ColliderManager::GetInstance().Update();
 

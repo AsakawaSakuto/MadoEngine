@@ -63,8 +63,17 @@ void SpriteManager::Destroy(const std::string& name) {
 	}
 }
 
-void SpriteManager::UpdateAll() {
+void SpriteManager::UpdateAll(SceneType currentSceneType) {
+
+	if (sprites_.empty()) { return; }
+
 	for (auto& [name, sprite] : sprites_) {
+
+		SceneType spriteScene = sprite->GetSceneType();
+		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
+		if (!sprite->IsVisible()) { continue; }
+		if (spriteScene != SceneType::None && spriteScene != currentSceneType) { continue; }
+
 		sprite->Update();
 	}
 }

@@ -40,8 +40,8 @@ private:
 	Shape plane_;
 
 	Vector3 planePos_ = { 0.0f, 0.0f, 0.0f };
-
 	std::unique_ptr<Sprite> sprite_;
+
 	std::unique_ptr<Player> player_;
 
 	std::unique_ptr<Map> map_;

@@ -3,6 +3,8 @@
 #include "Math/Vector3.h"
 #include "Math/Matrix4x4.h"
 #include "MathFunction.h"
+#include "Math/Quaternion.h"
+#include "Math/Function/QuaternionFunction.h"
 
 namespace Matrix {
 
@@ -121,4 +123,6 @@ namespace Matrix {
 	/// @return 変換されたベクトル（同次座標として扱い、w成分は1として計算）
 	Vector3 Transform(const Vector3& v, const Matrix4x4& m);
 
+	/// @brief クォータニオンを回転行列に変換する
+	Matrix4x4 MakeAffineAnimation(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
 }

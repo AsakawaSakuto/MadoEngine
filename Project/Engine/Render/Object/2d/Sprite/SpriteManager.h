@@ -49,7 +49,7 @@ public:
 	void Destroy(const std::string& name);
 
 	/// @brief 管理下の全Spriteを更新する
-	void UpdateAll();
+	void UpdateAll(SceneType currentSceneType);
 
 	/// @brief 管理下の全Spriteを描画する（IsVisible() == false またはシーン不一致はスキップ）
 	/// @param currentSceneType 現在実行中のシーンの種類
