@@ -70,6 +70,12 @@ public:
 	/// @return 床面に接触していればtrue
 	bool IsGroundContact(const std::string& name, CollisionTag targetTag);
 
+	/// @brief Check whether the specified collider is on a slope surface.
+	/// @param name Target collider name.
+	/// @param targetTag Slope collider tag.
+	/// @return True when the collider is touching a slope surface.
+	bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag);
+
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();
 

@@ -27,8 +27,9 @@ void Player::Update(float deltaTime) {
 
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する
 	bool isGroundContact = MyCollider::IsGroundContact("PlayerSphere", CollisionTag::MapBlock);
+	bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact("PlayerSphere", CollisionTag::MapSlope);
 
-	if (isGroundContact) {
+	if (isGroundContact || isSlopeGroundContact) {
 		// AABBの上面に乗っている → 接地
 		if (velocityY_ < 0.0f) {
 			velocityY_ = 0.0f;
@@ -40,7 +41,7 @@ void Player::Update(float deltaTime) {
 	}
 
 	// デバッグ表示
-	Vector4 color = { 1.0f,1.0f,0.0f,1.0f };
+	Vector4 color = { 0.0f,0.0f,0.0f,1.0f };
 	MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
 	MyDebugLine::AddShape(std::get<Sphere>(hitSphere_), color);
 }

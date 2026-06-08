@@ -99,6 +99,75 @@ namespace Collision
     /// </summary>
     namespace Detail
     {
+        /// @brief Get the slope top surface Y at the specified world position.
+        /// @param slope Target slope.
+        /// @param point World position used for XZ sampling.
+        /// @return Y coordinate of the slope top surface.
+        inline float GetSlopeSurfaceY(const Slope& slope, const Vector3& point)
+        {
+            Vector3 worldMin = slope.GetMinWorld();
+            Vector3 worldMax = slope.GetMaxWorld();
+            float width = std::max(worldMax.x - worldMin.x, 0.0001f);
+            float depth = std::max(worldMax.z - worldMin.z, 0.0001f);
+            float height = worldMax.y - worldMin.y;
+            float rate = 0.0f;
+
+            switch (slope.direction) {
+            case SlopeDirection::PulsX:
+                rate = (point.x - worldMin.x) / width;
+                break;
+            case SlopeDirection::MinusX:
+                rate = (worldMax.x - point.x) / width;
+                break;
+            case SlopeDirection::PulsZ:
+                rate = (point.z - worldMin.z) / depth;
+                break;
+            case SlopeDirection::MinusZ:
+                rate = (worldMax.z - point.z) / depth;
+                break;
+            }
+
+            rate = std::clamp(rate, 0.0f, 1.0f);
+            return worldMin.y + height * rate;
+        }
+
+        /// @brief Get the upward normal of the slope top surface.
+        /// @param slope Target slope.
+        /// @return Normalized upward normal.
+        inline Vector3 GetSlopeTopNormal(const Slope& slope)
+        {
+            Vector3 worldMin = slope.GetMinWorld();
+            Vector3 worldMax = slope.GetMaxWorld();
+            float width = std::max(worldMax.x - worldMin.x, 0.0001f);
+            float depth = std::max(worldMax.z - worldMin.z, 0.0001f);
+            float height = worldMax.y - worldMin.y;
+
+            switch (slope.direction) {
+            case SlopeDirection::PulsX:
+                return Vector3{ -height / width, 1.0f, 0.0f }.Normalized();
+            case SlopeDirection::MinusX:
+                return Vector3{ height / width, 1.0f, 0.0f }.Normalized();
+            case SlopeDirection::PulsZ:
+                return Vector3{ 0.0f, 1.0f, -height / depth }.Normalized();
+            case SlopeDirection::MinusZ:
+                return Vector3{ 0.0f, 1.0f, height / depth }.Normalized();
+            }
+
+            return Vector3{ 0.0f, 1.0f, 0.0f };
+        }
+
+        /// @brief Check whether a point is inside the slope XZ footprint.
+        /// @param slope Target slope.
+        /// @param point World position.
+        /// @param margin Additional accepted margin.
+        /// @return True when the point is inside the slope XZ footprint.
+        inline bool IsInsideSlopeXZ(const Slope& slope, const Vector3& point, float margin = 0.0f)
+        {
+            Vector3 worldMin = slope.GetMinWorld();
+            Vector3 worldMax = slope.GetMaxWorld();
+            return point.x >= worldMin.x - margin && point.x <= worldMax.x + margin &&
+                point.z >= worldMin.z - margin && point.z <= worldMax.z + margin;
+        }
         /// <summary>
         /// OBBを指定された軸に投影した際の範囲を計算
         /// OBBの8頂点をワールド空間で計算し、軸への投影範囲を求める
@@ -179,6 +248,51 @@ namespace Collision
     /// <summary>
     /// OBB × OBB 判定（分離軸定理）
     /// </summary>
+    /// @brief Check collision between a sphere and a slope.
+    /// @param sphere Target sphere.
+    /// @param slope Target slope.
+    /// @return True when the sphere intersects the slope volume.
+    inline bool IsHit(const Sphere& sphere, const Slope& slope)
+    {
+        Vector3 worldMin = slope.GetMinWorld();
+        Vector3 worldMax = slope.GetMaxWorld();
+
+        if (sphere.center.x < worldMin.x - sphere.radius || sphere.center.x > worldMax.x + sphere.radius ||
+            sphere.center.y < worldMin.y - sphere.radius || sphere.center.y > worldMax.y + sphere.radius ||
+            sphere.center.z < worldMin.z - sphere.radius || sphere.center.z > worldMax.z + sphere.radius) {
+            return false;
+        }
+
+        float closestX = std::clamp(sphere.center.x, worldMin.x, worldMax.x);
+        float closestZ = std::clamp(sphere.center.z, worldMin.z, worldMax.z);
+        Vector3 closestXZ = { closestX, sphere.center.y, closestZ };
+        float surfaceY = Detail::GetSlopeSurfaceY(slope, closestXZ);
+
+        if (Detail::IsInsideSlopeXZ(slope, sphere.center)) {
+            float sphereBottomY = sphere.center.y - sphere.radius;
+            float sphereTopY = sphere.center.y + sphere.radius;
+            return sphereBottomY <= surfaceY && sphereTopY >= worldMin.y;
+        }
+
+        Vector3 closestPoint = {
+            closestX,
+            std::clamp(sphere.center.y, worldMin.y, surfaceY),
+            closestZ
+        };
+
+        Vector3 diff = sphere.center - closestPoint;
+        return diff.LengthSq() <= sphere.radius * sphere.radius;
+    }
+
+    /// @brief Check collision between a slope and a sphere.
+    /// @param slope Target slope.
+    /// @param sphere Target sphere.
+    /// @return True when the sphere intersects the slope volume.
+    inline bool IsHit(const Slope& slope, const Sphere& sphere)
+    {
+        return IsHit(sphere, slope);
+    }
+
     inline bool IsHit(const OBB& a, const OBB& b)
     {
         // 分離軸定理: 15個の軸でテスト

@@ -39,12 +39,14 @@ void Map::Update() {
 					mapModel_[z][x]->SetVisible(false);
 				}
 			}
+			isModelDraw_ = false;
 		} else {
 			for (int z = 0; z < mapHeight_; ++z) {
 				for (int x = 0; x < mapWidth_; ++x) {
 					mapModel_[z][x]->SetVisible(true);
 				}
 			}
+			isModelDraw_ = true;
 		}
 
 	}

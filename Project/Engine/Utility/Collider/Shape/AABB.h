@@ -14,4 +14,16 @@ struct AABB {
 	Vector3 GetMaxWorld() const {
 		return center + max;
 	}
+
+#ifdef USE_IMGUI
+
+	void DrawImGui(const char* label) {
+		ImGui::Begin(label);
+		ImGui::DragFloat3("Center", &center.x, 0.01f);
+		ImGui::DragFloat3("Min", &min.x, 0.01f);
+		ImGui::DragFloat3("Max", &max.x, 0.01f);
+		ImGui::End();
+	}
+
+#endif // USE_IMGUI
 };

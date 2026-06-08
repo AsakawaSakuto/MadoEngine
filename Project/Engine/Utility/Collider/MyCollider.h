@@ -62,4 +62,12 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsGroundContact(name, targetTag);
 	}
 
+	/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定する
+	/// @param name 個体の識別名
+	/// @param targetTag スロープとして扱うタグ
+	/// @return スロープ面に接触していればtrue
+	inline bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
+		return ColliderManager::GetInstance().IsSlopeGroundContact(name, targetTag);
+	}
+
 };

@@ -16,7 +16,106 @@ static Shape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
     return syncedShape;
 }
 
-// ★ 引数を Shape* に変更
+/// @brief Resolve overlap between a sphere and a slope.
+/// @param sphereInfo Sphere collider information.
+/// @param slopeInfo Slope collider information.
+/// @param factorSphere Movement ratio applied to the sphere.
+/// @param factorSlope Movement ratio applied to the slope.
+static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, ColliderManager::ColliderInfo& slopeInfo, float factorSphere, float factorSlope) {
+    auto& sphere = std::get<Sphere>(*(sphereInfo.pShape));
+    auto& slope = std::get<Slope>(*(slopeInfo.pShape));
+
+    Vector3 worldMin = slope.GetMinWorld();
+    Vector3 worldMax = slope.GetMaxWorld();
+    Vector3 center = *(sphereInfo.pPosition);
+    float radius = sphere.radius;
+    static constexpr float kSkinWidth = 0.001f;
+
+    if (center.x < worldMin.x - radius || center.x > worldMax.x + radius ||
+        center.y < worldMin.y - radius || center.y > worldMax.y + radius ||
+        center.z < worldMin.z - radius || center.z > worldMax.z + radius) {
+        return;
+    }
+
+    bool insideXZ = Collision::Detail::IsInsideSlopeXZ(slope, center);
+    float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
+    float targetY = surfaceY + radius + kSkinWidth;
+    float topPenetration = targetY - center.y;
+
+    if (insideXZ && topPenetration > 0.0f && center.y + radius >= worldMin.y) {
+        float distMinX = center.x - worldMin.x;
+        float distMaxX = worldMax.x - center.x;
+        float distMinZ = center.z - worldMin.z;
+        float distMaxZ = worldMax.z - center.z;
+        float nearestSideDistance = std::min(std::min(distMinX, distMaxX), std::min(distMinZ, distMaxZ));
+        float sidePenetration = nearestSideDistance + radius + kSkinWidth;
+
+        if (topPenetration <= sidePenetration || center.y >= surfaceY) {
+            Vector3 pushVec = { 0.0f, topPenetration, 0.0f };
+            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushVec * factorSphere;
+            *(slopeInfo.pPosition) = *(slopeInfo.pPosition) - pushVec * factorSlope;
+            return;
+        }
+    }
+
+    float closestX = std::clamp(center.x, worldMin.x, worldMax.x);
+    float closestZ = std::clamp(center.z, worldMin.z, worldMax.z);
+    Vector3 closestXZ = { closestX, center.y, closestZ };
+    float sideTopY = Collision::Detail::GetSlopeSurfaceY(slope, closestXZ);
+    Vector3 closestPoint = {
+        closestX,
+        std::clamp(center.y, worldMin.y, sideTopY),
+        closestZ
+    };
+
+    Vector3 diff = center - closestPoint;
+    float distanceSq = diff.LengthSq();
+    if (distanceSq > radius * radius) {
+        return;
+    }
+
+    Vector3 pushDir = { 0.0f, 0.0f, 0.0f };
+    float penetration = 0.0f;
+
+    if (insideXZ) {
+        float distMinX = center.x - worldMin.x;
+        float distMaxX = worldMax.x - center.x;
+        float distMinZ = center.z - worldMin.z;
+        float distMaxZ = worldMax.z - center.z;
+        float nearest = distMinX;
+        pushDir = { -1.0f, 0.0f, 0.0f };
+
+        if (distMaxX < nearest) {
+            nearest = distMaxX;
+            pushDir = { 1.0f, 0.0f, 0.0f };
+        }
+        if (distMinZ < nearest) {
+            nearest = distMinZ;
+            pushDir = { 0.0f, 0.0f, -1.0f };
+        }
+        if (distMaxZ < nearest) {
+            nearest = distMaxZ;
+            pushDir = { 0.0f, 0.0f, 1.0f };
+        }
+
+        penetration = nearest + radius + kSkinWidth;
+    } else if (distanceSq > 0.0001f) {
+        float distance = std::sqrt(distanceSq);
+        penetration = radius - distance + kSkinWidth;
+        Vector3 horizontalDiff = { diff.x, 0.0f, diff.z };
+        float horizontalLength = horizontalDiff.Length();
+        if (horizontalLength > 0.0001f) {
+            pushDir = horizontalDiff / horizontalLength;
+        }
+    }
+
+    if (penetration > 0.0f && pushDir.LengthSq() > 0.0001f) {
+        Vector3 pushVec = pushDir * penetration;
+        *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushVec * factorSphere;
+        *(slopeInfo.pPosition) = *(slopeInfo.pPosition) - pushVec * factorSlope;
+    }
+}
+
 void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight, CollisionCallback callback    ) {
     m_colliders[name] = { name, tag, pShape, pPos, callback, weight };
 #ifdef _DEBUG
@@ -41,9 +140,9 @@ void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB
 
 void ColliderManager::SyncPositions() {
     for (auto& [name, info] : m_colliders) {
-        if (!info.pPosition || !info.pShape) continue; // ★ Nullチェック追加
+        if (!info.pPosition || !info.pShape) continue; // Nullチェック追加
 
-        // ★ pShape の中身に対して visit を行う
+        // pShape の中身に対して visit を行う
         std::visit([&info](auto& shapeActual) {
             if constexpr (requires { shapeActual.center; }) {
                 shapeActual.center = *(info.pPosition);
@@ -188,6 +287,18 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     // ==========================================
     // 4. Sphere vs Plane (Planeは静止物として扱い、Sphereを100%押し戻す)
     // ==========================================
+    bool isASlope = std::holds_alternative<Slope>(*(a.pShape));
+    bool isBSlope = std::holds_alternative<Slope>(*(b.pShape));
+
+    if ((isASphere && isBSlope) || (isASlope && isBSphere)) {
+        ColliderInfo& sphereInfo = isASphere ? a : b;
+        ColliderInfo& slopeInfo = isASphere ? b : a;
+        float factorSphere = isASphere ? factorA : factorB;
+        float factorSlope = isASphere ? factorB : factorA;
+        ResolveSphereSlope(sphereInfo, slopeInfo, factorSphere, factorSlope);
+        return;
+    }
+
     bool isBPlane = std::holds_alternative<Plane>(*(b.pShape));
     bool isAPlane = std::holds_alternative<Plane>(*(a.pShape));
 
@@ -263,12 +374,27 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
     // ==========================================
     else if (std::holds_alternative<Sphere>(*(playerInfo.pShape))) {
         auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
+        auto checkSlopeGround = [&playerInfo, &sphere](const Slope& slope) -> bool {
+            if (!Collision::Detail::IsInsideSlopeXZ(slope, *(playerInfo.pPosition), sphere.radius * 0.25f)) {
+                return false;
+            }
+
+            float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, *(playerInfo.pPosition));
+            float bottomY = playerInfo.pPosition->y - sphere.radius;
+            return playerInfo.pPosition->y >= surfaceY - 0.05f && bottomY <= surfaceY + 0.08f;
+        };
 
         for (const auto& [otherName, otherInfo] : m_colliders) {
             if (otherName == name) continue;
             if (otherInfo.tag != targetTag) continue;
             if (!otherInfo.pShape || !otherInfo.pPosition) continue;
             // 対象がAABB(MapBlock等)の場合のみ判定
+            if (std::holds_alternative<Slope>(*(otherInfo.pShape))) {
+                if (checkSlopeGround(std::get<Slope>(*(otherInfo.pShape)))) {
+                    return true;
+                }
+                continue;
+            }
             if (!std::holds_alternative<AABB>(*(otherInfo.pShape))) continue;
 
             auto& boxAABB = std::get<AABB>(*(otherInfo.pShape));
@@ -298,6 +424,41 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
                     }
                 }
             }
+        }
+    }
+
+    return false;
+}
+
+/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定する
+/// @param name 個体の識別名
+/// @param targetTag スロープとして扱うタグ
+/// @return スロープ面に接触していればtrue
+bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
+    auto it = m_colliders.find(name);
+    if (it == m_colliders.end()) return false;
+
+    const ColliderInfo& playerInfo = it->second;
+    if (!playerInfo.pShape || !playerInfo.pPosition) return false;
+    if (!std::holds_alternative<Sphere>(*(playerInfo.pShape))) return false;
+
+    const auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
+
+    for (const auto& [otherName, otherInfo] : m_colliders) {
+        if (otherName == name) continue;
+        if (otherInfo.tag != targetTag) continue;
+        if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+        if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
+
+        const auto& slope = std::get<Slope>(*(otherInfo.pShape));
+        if (!Collision::Detail::IsInsideSlopeXZ(slope, *(playerInfo.pPosition), sphere.radius * 0.25f)) {
+            continue;
+        }
+
+        float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, *(playerInfo.pPosition));
+        float bottomY = playerInfo.pPosition->y - sphere.radius;
+        if (playerInfo.pPosition->y >= surfaceY - 0.05f && bottomY <= surfaceY + 0.08f) {
+            return true;
         }
     }
 

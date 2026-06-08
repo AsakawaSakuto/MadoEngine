@@ -32,16 +32,33 @@ void Test::Initialize() {
 	planePos_ = { 0.0f, 1.15f, -4.7f };
 
 	Slope slope;
-	slope.center = { -10.0f, 0.0f, -10.0f };
+	slope.center = { -20.0f, 0.0f, -10.0f };
 	slope.min = { -5.0f, 0.0f, -5.0f };
 	slope.max = { 5.0f, 5.0f, 5.0f };
 	slope.direction = SlopeDirection::PulsX;
 	slope_ = slope;
 
-	MyCollider::RegisterCollider("TestPlane",   CollisionTag::Plane,  &plane_,  &planePos_,  1.0f);
+	Slope slope2;
+	slope2.center = { -10.0f, 10.0f, -10.0f };
+	slope2.min = { -5.0f, -5.0f, -5.0f };
+	slope2.max = { 5.0f, 5.0f, 5.0f };
+	slope2.direction = SlopeDirection::PulsX;
+	slope2_ = slope2;
+
+	AABB aabb;
+	aabb.center = { -20.0f, 5.0f, -10.0f };
+	aabb.min = { -25.0f, -5.0f, -25.0f };
+	aabb.max = { 5.0f, 0.0f, 5.0f };
+	aabb_ = aabb;
+
+	MyCollider::RegisterCollider("TestPlane",CollisionTag::Plane,  &plane_,  &planePos_,  1.0f);
+	MyCollider::RegisterCollider("TestSlope", CollisionTag::MapSlope, &slope_, &slopePos_, 1.0f);
+	MyCollider::RegisterCollider("TestSlope2", CollisionTag::MapSlope, &slope2_, &slope2Pos_, 1.0f);
+	MyCollider::RegisterCollider("AABB", CollisionTag::MapBlock, &aabb_, &aabbPos_, 1.0f);
 
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerAABB, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapBlock, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapSlope, true);
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize();
@@ -65,6 +82,8 @@ SceneType Test::Update(float dt) {
 
 	MyDebugLine::AddShape(std::get<Plane>(plane_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddShape(std::get<Slope>(slope_), { 1.0f, 1.0f, 1.0f, 1.0f });
+	MyDebugLine::AddShape(std::get<Slope>(slope2_), { 1.0f, 1.0f, 1.0f, 1.0f });
+	MyDebugLine::AddShape(std::get<AABB>(aabb_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 
 	map_->Update();
@@ -80,6 +99,10 @@ void Test::Draw() {
 void Test::DrawImGui() {
 	// テストシーンの描画処理
 #ifdef USE_IMGUI
+
+	std::get<Slope>(slope_).DrawImGui("slope");
+	std::get<Slope>(slope2_).DrawImGui("slope2");
+	std::get<AABB>(aabb_).DrawImGui("aabb");
 
 	tpsCamera_.DrawImGui();
 
