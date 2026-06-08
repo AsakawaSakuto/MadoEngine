@@ -4,7 +4,29 @@
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
 
+namespace {
+
+std::string GetMapBlockName(int x, int z) {
+	return "MapBlock_x:" + std::to_string(x) + "_z:" + std::to_string(z);
+}
+
+std::string GetMapSlopeName(int x, int z) {
+	return "MapSlope_x:" + std::to_string(x) + "_z:" + std::to_string(z);
+}
+
+std::string GetMapModelName(int x, int z, int mapWidth) {
+	return "mapBlockModel" + std::to_string(z * mapWidth + x);
+}
+
+std::string GetMapSlopeModelName(int x, int z, int mapWidth) {
+	return "mapSlopeModel" + std::to_string(z * mapWidth + x);
+}
+
+}
+
 void Map::Initialize() {
+
+	ClampHeightSettings();
 
 	mapPositionY_.assign(mapHeight_, std::vector<uint32_t>(mapWidth_, 0));
 	mapBlockType_.assign(mapHeight_, std::vector<MapBlockType>(mapWidth_, MapBlockType::Ground));
@@ -16,7 +38,7 @@ void Map::Initialize() {
 	for (int z = 0; z < mapHeight_; ++z) {
 		for (int x = 0; x < mapWidth_; ++x) {
 			if (x == 0 && z == 0) {
-				mapPositionY_[z][x] = MyRand::GetInt(minStartHeight_, maxStartHeight_ / 2);
+				mapPositionY_[z][x] = MyRand::GetInt(minStartHeight_, std::max(minStartHeight_, maxStartHeight_ / 2));
 				continue;
 			}
 
@@ -65,7 +87,7 @@ void Map::Initialize() {
 
 				mapBlockType_[z][x] = MapBlockType::Slope;
 				mapShape_[z][x] = slopeShape;
-				MyCollider::RegisterCollider("MapSlope_x:" + std::to_string(x) + "_z:" + std::to_string(z), CollisionTag::MapSlope, &mapShape_[z][x], &mapTranslate_[z][x], 1.0f);
+				MyCollider::RegisterCollider(GetMapSlopeName(x, z), CollisionTag::MapSlope, &mapShape_[z][x], &mapTranslate_[z][x], 1.0f);
 			} else {
 				AABB blockShape;
 				blockShape.min = Vector3(-blockSize_.x / 2.0f, 0.0f, -blockSize_.z / 2.0f);
@@ -73,13 +95,13 @@ void Map::Initialize() {
 
 				mapBlockType_[z][x] = MapBlockType::Ground;
 				mapShape_[z][x] = blockShape;
-				MyCollider::RegisterCollider("MapBlock_x:" + std::to_string(x) + "_z:" + std::to_string(z), CollisionTag::MapBlock, &mapShape_[z][x], &mapTranslate_[z][x], 1.0f);
+				MyCollider::RegisterCollider(GetMapBlockName(x, z), CollisionTag::MapBlock, &mapShape_[z][x], &mapTranslate_[z][x], 1.0f);
 			}
 
-			mapModel_[z][x] = MyModel::Create("mapBlockModel" + std::to_string(z * mapWidth_ + x), "block", SceneType::Test);
+			mapModel_[z][x] = MyModel::Create(GetMapModelName(x, z, mapWidth_), "block", SceneType::Test);
 			mapModel_[z][x]->SetPosition({ mapTranslate_[z][x].x, blockSize_.y * static_cast<float>(currentHeight), mapTranslate_[z][x].z });
 			mapModel_[z][x]->SetScale({ blockSize_.x / 2.0f, blockSize_.y / 2.0f * static_cast<float>(currentHeight), blockSize_.z / 2.0f });
-			mapModel_[z][x]->SetVisible(true);
+			mapModel_[z][x]->SetVisible(isModelDraw_);
 
 			if (useSlope) {
 				std::string slopeModelName = "SlopePlusX";
@@ -98,15 +120,62 @@ void Map::Initialize() {
 					break;
 				}
 
-				mapSlopeModel_[z][x] = MyModel::Create("mapSlopeModel" + std::to_string(z * mapWidth_ + x), slopeModelName, SceneType::Test);
+				mapSlopeModel_[z][x] = MyModel::Create(GetMapSlopeModelName(x, z, mapWidth_), slopeModelName, SceneType::Test);
 				if (mapSlopeModel_[z][x]) {
 					mapSlopeModel_[z][x]->SetPosition({ mapTranslate_[z][x].x, blockSize_.y * static_cast<float>(currentHeight + 1), mapTranslate_[z][x].z });
 					mapSlopeModel_[z][x]->SetScale({ blockSize_.x / 2.0f, blockSize_.y / 2.0f, blockSize_.z / 2.0f });
-					mapSlopeModel_[z][x]->SetVisible(true);
+					mapSlopeModel_[z][x]->SetVisible(isModelDraw_);
 				}
 			}
 		}
 	}
+
+	Logger::Output("Map : 地形を生成しました", Logger::Level::Application);
+}
+
+void Map::RegenerateTerrain() {
+
+	ClearTerrainObjects();
+	Initialize();
+
+	Logger::Output("Map : 地形を再生成しました", Logger::Level::Debug);
+}
+
+void Map::ClearTerrainObjects() {
+
+	for (int z = 0; z < mapHeight_; ++z) {
+		for (int x = 0; x < mapWidth_; ++x) {
+			if (z < static_cast<int>(mapBlockType_.size()) && x < static_cast<int>(mapBlockType_[z].size())) {
+				if (mapBlockType_[z][x] == MapBlockType::Slope) {
+					MyCollider::RemoveCollider(GetMapSlopeName(x, z));
+				} else if (mapBlockType_[z][x] == MapBlockType::Ground) {
+					MyCollider::RemoveCollider(GetMapBlockName(x, z));
+				}
+			}
+
+			if (z < static_cast<int>(mapModel_.size()) && x < static_cast<int>(mapModel_[z].size()) && mapModel_[z][x]) {
+				MyModel::Destroy(GetMapModelName(x, z, mapWidth_));
+				mapModel_[z][x] = nullptr;
+			}
+
+			if (z < static_cast<int>(mapSlopeModel_.size()) && x < static_cast<int>(mapSlopeModel_[z].size()) && mapSlopeModel_[z][x]) {
+				MyModel::Destroy(GetMapSlopeModelName(x, z, mapWidth_));
+				mapSlopeModel_[z][x] = nullptr;
+			}
+		}
+	}
+}
+
+void Map::ClampHeightSettings() {
+
+	minHeight_ = std::clamp(minHeight_, 1, 100);
+	maxHeight_ = std::clamp(maxHeight_, minHeight_, 100);
+
+	minStartHeight_ = std::clamp(minStartHeight_, 1, 100);
+	maxStartHeight_ = std::clamp(maxStartHeight_, minStartHeight_, 100);
+
+	minRangeHeight_ = std::clamp(minRangeHeight_, -10, -1);
+	maxRangeHeight_ = std::clamp(maxRangeHeight_, 1, 10);
 }
 
 void Map::Update() {
@@ -157,6 +226,13 @@ void Map::DrawImGui() {
 
 	ImGui::Begin("Map");
 
+	ClampHeightSettings();
+
+	if (ImGui::Button("地形を再生成")) {
+		RegenerateTerrain();
+	}
+	ImGui::Separator();
+
 	ImGui::Text("Block Size");
 	ImGui::DragFloat3(".", &blockSize_.x, 0.1f);
 	ImGui::Separator();
@@ -174,7 +250,6 @@ void Map::DrawImGui() {
 	ImGui::Text("生成する地形の高さの範囲");
 	ImGui::DragInt("min  ", &minRangeHeight_, 1, -10, -1);
 	ImGui::DragInt("max  ", &maxRangeHeight_, 1, 1, 10);
-	ImGui::Separator();
 
 	ImGui::End();
 
