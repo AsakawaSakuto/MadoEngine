@@ -108,6 +108,8 @@ void Test::DrawImGui() {
 
 	debugCamera_.DrawImGui();
 
+	map_->DrawImGui();
+
 #endif // USE_IMGUI
 }
 
