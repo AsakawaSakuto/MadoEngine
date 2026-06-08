@@ -8,6 +8,7 @@
 #include "Utility/Collider/Shape/Segment.h"
 #include "Utility/Collider/Shape/Line.h"
 #include "Utility/Collider/Shape/Circle.h"
+#include "Utility/Collider/Shape/Slope.h"
 
 /// @brief 複数の当たり判定形状をまとめるための型
 using Shape = std::variant<
@@ -18,5 +19,6 @@ using Shape = std::variant<
     Plane,
     Segment,
     Line,
-    Circle
+    Circle,
+    Slope
 >;

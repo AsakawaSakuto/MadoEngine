@@ -36,6 +36,8 @@ void DebugLineManager::AddShape(const Shape& shape, const Vector4& color) {
 			line_->AddLine(arg, color);
 		} else if constexpr (std::is_same_v<T, Circle>) {
 			line_->AddCircle(arg, color);
+		} else if constexpr (std::is_same_v<T, Slope>) {
+			line_->AddSlope(arg, color);
 		}
 		}, shape);
 }

@@ -492,6 +492,71 @@ void Line3d::AddPlane(const Plane& plane, int divisions, const Vector4& color) {
     AddLine(planeOrigin, normalEnd, { 1.0f, 1.0f, 0.0f, 1.0f }); // 法線は黄色で表示
 }
 
+void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
+    Vector3 worldMin = slope.GetMinWorld();
+    Vector3 worldMax = slope.GetMaxWorld();
+
+    Vector3 bottom[4] = {
+        { worldMin.x, worldMin.y, worldMin.z },
+        { worldMax.x, worldMin.y, worldMin.z },
+        { worldMax.x, worldMin.y, worldMax.z },
+        { worldMin.x, worldMin.y, worldMax.z }
+    };
+
+    Vector3 high[2] = {};
+    int highBottomA = 0;
+    int highBottomB = 0;
+    int lowBottomA = 0;
+    int lowBottomB = 0;
+
+    switch (slope.direction) {
+    case SlopeDirection::PulsX:
+        high[0] = { worldMax.x, worldMax.y, worldMin.z };
+        high[1] = { worldMax.x, worldMax.y, worldMax.z };
+        highBottomA = 1;
+        highBottomB = 2;
+        lowBottomA = 0;
+        lowBottomB = 3;
+        break;
+    case SlopeDirection::MinusX:
+        high[0] = { worldMin.x, worldMax.y, worldMin.z };
+        high[1] = { worldMin.x, worldMax.y, worldMax.z };
+        highBottomA = 0;
+        highBottomB = 3;
+        lowBottomA = 1;
+        lowBottomB = 2;
+        break;
+    case SlopeDirection::PulsZ:
+        high[0] = { worldMin.x, worldMax.y, worldMax.z };
+        high[1] = { worldMax.x, worldMax.y, worldMax.z };
+        highBottomA = 3;
+        highBottomB = 2;
+        lowBottomA = 0;
+        lowBottomB = 1;
+        break;
+    case SlopeDirection::MinusZ:
+        high[0] = { worldMin.x, worldMax.y, worldMin.z };
+        high[1] = { worldMax.x, worldMax.y, worldMin.z };
+        highBottomA = 0;
+        highBottomB = 1;
+        lowBottomA = 3;
+        lowBottomB = 2;
+        break;
+    }
+
+    AddLine(bottom[0], bottom[1], color);
+    AddLine(bottom[1], bottom[2], color);
+    AddLine(bottom[2], bottom[3], color);
+    AddLine(bottom[3], bottom[0], color);
+
+    AddLine(bottom[highBottomA], high[0], color);
+    AddLine(bottom[highBottomB], high[1], color);
+    AddLine(high[0], high[1], color);
+
+    AddLine(bottom[lowBottomA], high[0], color);
+    AddLine(bottom[lowBottomB], high[1], color);
+}
+
 void Line3d::Draw(Camera& camera) {
 
     if (vertices_.empty()) return;

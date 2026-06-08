@@ -31,6 +31,24 @@ void Map::Initialize() {
 
 void Map::Update() {
 
+	if (MyInput::GetKeybord()->IsTrigger(DIK_1)) {
+
+		if (isModelDraw_) {
+			for (int z = 0; z < mapHeight_; ++z) {
+				for (int x = 0; x < mapWidth_; ++x) {
+					mapModel_[z][x]->SetVisible(false);
+				}
+			}
+		} else {
+			for (int z = 0; z < mapHeight_; ++z) {
+				for (int x = 0; x < mapWidth_; ++x) {
+					mapModel_[z][x]->SetVisible(true);
+				}
+			}
+		}
+
+	}
+
 	for (int z = 0; z < mapHeight_; ++z) {
 		for (int x = 0; x < mapWidth_; ++x) {
 			MyDebugLine::AddShape(mapShape_[z][x], Vector4(1.0f, 0.0f, 0.0f, 1.0f));

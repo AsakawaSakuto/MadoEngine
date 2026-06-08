@@ -172,7 +172,6 @@
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
-    <ClCompile Include="Engine\Render\Object\3d\Model\ModelData.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
@@ -318,6 +317,7 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\OvalSphere.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Plane.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\Slope.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
     <ClInclude Include="Engine\Utility\Json\ISerializable.h" />
     <ClInclude Include="Engine\Utility\Json\JsonLoader.h" />

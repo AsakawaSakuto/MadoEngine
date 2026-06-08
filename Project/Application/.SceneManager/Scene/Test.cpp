@@ -31,11 +31,17 @@ void Test::Initialize() {
 	plane_ = p;
 	planePos_ = { 0.0f, 1.15f, -4.7f };
 
+	Slope slope;
+	slope.center = { -10.0f, 0.0f, -10.0f };
+	slope.min = { -5.0f, 0.0f, -5.0f };
+	slope.max = { 5.0f, 5.0f, 5.0f };
+	slope.direction = SlopeDirection::PulsX;
+	slope_ = slope;
+
 	MyCollider::RegisterCollider("TestPlane",   CollisionTag::Plane,  &plane_,  &planePos_,  1.0f);
 
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerAABB, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapBlock, true);
-
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize();
@@ -58,6 +64,7 @@ SceneType Test::Update(float dt) {
 	player_->Update(dt);
 
 	MyDebugLine::AddShape(std::get<Plane>(plane_), { 1.0f, 1.0f, 1.0f, 1.0f });
+	MyDebugLine::AddShape(std::get<Slope>(slope_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 
 	map_->Update();

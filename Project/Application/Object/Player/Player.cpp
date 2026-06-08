@@ -102,7 +102,7 @@ void Player::Jump(float deltaTime) {
 		if (!isGrounded_) {
 			isGrounded_ = true;
 			jumpCount_  = kJumpCount;
-			Logger::Output("着地", Logger::Level::Application);
+			//Logger::Output("着地", Logger::Level::Application);
 		}
 	}
 }

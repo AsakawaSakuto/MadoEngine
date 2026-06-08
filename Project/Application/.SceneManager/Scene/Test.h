@@ -39,6 +39,8 @@ private:
 
 	Shape plane_;
 
+	Shape slope_;
+
 	Vector3 planePos_ = { 0.0f, 0.0f, 0.0f };
 	std::unique_ptr<Sprite> sprite_;
 

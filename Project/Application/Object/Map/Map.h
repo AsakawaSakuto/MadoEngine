@@ -18,4 +18,6 @@ private:
 
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;
+
+	bool isModelDraw_ = true;
 };

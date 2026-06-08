@@ -15,6 +15,7 @@
 #include "Utility/Collider/Shape/Segment.h"
 #include "Utility/Collider/Shape/Line.h"
 #include "Utility/Collider/Shape/Circle.h"
+#include "Utility/Collider/Shape/Slope.h"
 #include "Render/PSO/PSORegistry.h"
 #include "Render/PSO/PSODesc.h"
 
@@ -119,6 +120,11 @@ public:
     /// @param divisions グリッド分割数（デフォルト：10）
     /// @param color 色（デフォルト：白）
     void AddPlane(const Plane& plane, int divisions = 10, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
+
+    /// @brief 坂道をワイヤーフレームで描画する
+    /// @param slope 坂道形状
+    /// @param color 描画色
+    void AddSlope(const Slope& slope, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
     /// @brief 描画
     /// @param camera 使用するカメラ
