@@ -14,12 +14,16 @@ void Player::Initialize() {
 
 	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &hitSphere_, &position_, 0.0f);
 	//MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
+
+	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 }
 
 void Player::Update(float deltaTime) {
 	// 先に入力移動と、重力による落下処理を行う
 	Move(deltaTime);
 	Jump(deltaTime);
+
+	model_->SetPosition(position_);
 
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する
 	bool isGroundContact = MyCollider::IsGroundContact("PlayerSphere", CollisionTag::MapBlock);

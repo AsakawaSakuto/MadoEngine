@@ -14,6 +14,7 @@ private:
 	std::vector<std::vector<uint32_t>> mapPositionY_;
 	std::vector<std::vector<Vector3>> mapTranslate_;
 	std::vector<std::vector<Shape>> mapShape_;
+	std::vector<std::vector<Model*>> mapModel_;
 
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;

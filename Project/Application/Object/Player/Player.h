@@ -30,6 +30,8 @@ private:
 
 	Camera* camera_ = nullptr;
 
+	Model* model_ = nullptr;
+
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;
 
