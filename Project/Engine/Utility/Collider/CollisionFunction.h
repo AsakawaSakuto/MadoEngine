@@ -105,7 +105,7 @@ namespace Collision
         /// @return Y coordinate of the slope top surface.
         inline float GetSlopeSurfaceY(const Slope& slope, const Vector3& point)
         {
-            Vector3 worldMin = slope.GetMinWorld();
+            Vector3 worldMin = slope.GetSurfaceMinWorld();
             Vector3 worldMax = slope.GetMaxWorld();
             float width = std::max(worldMax.x - worldMin.x, 0.0001f);
             float depth = std::max(worldMax.z - worldMin.z, 0.0001f);
@@ -136,7 +136,7 @@ namespace Collision
         /// @return Normalized upward normal.
         inline Vector3 GetSlopeTopNormal(const Slope& slope)
         {
-            Vector3 worldMin = slope.GetMinWorld();
+            Vector3 worldMin = slope.GetSurfaceMinWorld();
             Vector3 worldMax = slope.GetMaxWorld();
             float width = std::max(worldMax.x - worldMin.x, 0.0001f);
             float depth = std::max(worldMax.z - worldMin.z, 0.0001f);

@@ -494,6 +494,7 @@ void Line3d::AddPlane(const Plane& plane, int divisions, const Vector4& color) {
 
 void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
     Vector3 worldMin = slope.GetMinWorld();
+    Vector3 surfaceMin = slope.GetSurfaceMinWorld();
     Vector3 worldMax = slope.GetMaxWorld();
 
     Vector3 bottom[4] = {
@@ -503,6 +504,7 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
         { worldMin.x, worldMin.y, worldMax.z }
     };
 
+    Vector3 low[2] = {};
     Vector3 high[2] = {};
     int highBottomA = 0;
     int highBottomB = 0;
@@ -511,6 +513,8 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
 
     switch (slope.direction) {
     case SlopeDirection::PulsX:
+        low[0] = { worldMin.x, surfaceMin.y, worldMin.z };
+        low[1] = { worldMin.x, surfaceMin.y, worldMax.z };
         high[0] = { worldMax.x, worldMax.y, worldMin.z };
         high[1] = { worldMax.x, worldMax.y, worldMax.z };
         highBottomA = 1;
@@ -519,6 +523,8 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
         lowBottomB = 3;
         break;
     case SlopeDirection::MinusX:
+        low[0] = { worldMax.x, surfaceMin.y, worldMin.z };
+        low[1] = { worldMax.x, surfaceMin.y, worldMax.z };
         high[0] = { worldMin.x, worldMax.y, worldMin.z };
         high[1] = { worldMin.x, worldMax.y, worldMax.z };
         highBottomA = 0;
@@ -527,6 +533,8 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
         lowBottomB = 2;
         break;
     case SlopeDirection::PulsZ:
+        low[0] = { worldMin.x, surfaceMin.y, worldMin.z };
+        low[1] = { worldMax.x, surfaceMin.y, worldMin.z };
         high[0] = { worldMin.x, worldMax.y, worldMax.z };
         high[1] = { worldMax.x, worldMax.y, worldMax.z };
         highBottomA = 3;
@@ -535,6 +543,8 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
         lowBottomB = 1;
         break;
     case SlopeDirection::MinusZ:
+        low[0] = { worldMin.x, surfaceMin.y, worldMax.z };
+        low[1] = { worldMax.x, surfaceMin.y, worldMax.z };
         high[0] = { worldMin.x, worldMax.y, worldMin.z };
         high[1] = { worldMax.x, worldMax.y, worldMin.z };
         highBottomA = 0;
@@ -551,10 +561,13 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
 
     AddLine(bottom[highBottomA], high[0], color);
     AddLine(bottom[highBottomB], high[1], color);
+    AddLine(bottom[lowBottomA], low[0], color);
+    AddLine(bottom[lowBottomB], low[1], color);
+    AddLine(low[0], low[1], color);
     AddLine(high[0], high[1], color);
 
-    AddLine(bottom[lowBottomA], high[0], color);
-    AddLine(bottom[lowBottomB], high[1], color);
+    AddLine(low[0], high[0], color);
+    AddLine(low[1], high[1], color);
 }
 
 void Line3d::Draw(Camera& camera) {
