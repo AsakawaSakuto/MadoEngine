@@ -67,7 +67,7 @@ void ModelManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* c
 
 	LoadAllModels();
 
-	Logger::Output("ModelManager : loaded " + std::to_string(sharedData_.size()) + " model assets", Logger::Level::Engine);
+	Logger::Output(std::to_string(sharedData_.size()) + " 件のモデルアセットを読み込みました", Logger::Level::Engine);
 }
 
 void ModelManager::Finalize() {
@@ -79,13 +79,13 @@ void ModelManager::Finalize() {
 	aliases_.clear();
 	activeCamera_ = nullptr;
 
-	Logger::Output("ModelManager : finalized", Logger::Level::Engine);
+	Logger::Output("終了処理完了", Logger::Level::Engine);
 }
 
 void ModelManager::LoadAllModels() {
 	const std::filesystem::path modelRoot = "Assets/Model";
 	if (!std::filesystem::exists(modelRoot)) {
-		Logger::Output("ModelManager : Assets/Model was not found", Logger::Level::Warning);
+		Logger::Output("Assets/Model フォルダが見つかりません", Logger::Level::Warning);
 		return;
 	}
 
@@ -115,24 +115,24 @@ void ModelManager::LoadModelFile(const std::string& path, ModelType type) {
 	if (!aliases_.contains(stem)) {
 		aliases_.emplace(stem, path);
 	} else {
-		Logger::Output("ModelManager : duplicate model alias, use path instead : " + stem, Logger::Level::Warning);
+		Logger::Output("モデルエイリアスが重複しています。パスを使用してください : " + stem, Logger::Level::Warning);
 	}
 
 	aliases_.emplace(path, path);
 	sharedData_.emplace(path, std::move(data));
 
-	Logger::Output("ModelManager : loaded " + path + " [" + MadoEngine::ModelResource::ModelTypeToString(sharedData_.at(path)->type) + "]", Logger::Level::Assets);
+	Logger::Output("読み込み完了 " + path + " [" + MadoEngine::ModelResource::ModelTypeToString(sharedData_.at(path)->type) + "]", Logger::Level::Assets);
 }
 
 Model* ModelManager::Create(const std::string& name, const std::string& modelName, SceneType sceneType) {
 	if (models_.contains(name)) {
-		Logger::Output("ModelManager : model instance already exists : " + name, Logger::Level::Warning);
+		Logger::Output("モデルインスタンスが既に存在します : " + name, Logger::Level::Warning);
 		return models_.at(name).get();
 	}
 
 	const ModelSharedData* sharedData = FindSharedData(modelName);
 	if (!sharedData) {
-		Logger::Output("ModelManager : model asset was not found : " + modelName, Logger::Level::Warning);
+		Logger::Output("モデルアセットが見つかりません : " + modelName, Logger::Level::Warning);
 		return nullptr;
 	}
 
@@ -144,14 +144,14 @@ Model* ModelManager::Create(const std::string& name, const std::string& modelNam
 	Model* ptr = model.get();
 	models_.emplace(name, std::move(model));
 
-	Logger::Output("ModelManager : created model instance : " + name + " Asset : " + modelName + " Scene : " + (sceneType == SceneType::None ? "All" : SceneTypeToString(sceneType)), Logger::Level::Application);
+	Logger::Output("モデルインスタンスを作成しました : " + name + " アセット : " + modelName + " シーン : " + (sceneType == SceneType::None ? "全て" : SceneTypeToString(sceneType)), Logger::Level::Application);
 	return ptr;
 }
 
 Model* ModelManager::Get(const std::string& name) const {
 	auto it = models_.find(name);
 	if (it == models_.end()) {
-		Logger::Output("ModelManager : model instance was not found : " + name, Logger::Level::Warning);
+		Logger::Output("モデルインスタンスが見つかりません : " + name, Logger::Level::Warning);
 		return nullptr;
 	}
 	return it->second.get();
@@ -159,7 +159,7 @@ Model* ModelManager::Get(const std::string& name) const {
 
 void ModelManager::Destroy(const std::string& name) {
 	if (models_.erase(name) > 0) {
-		Logger::Output("ModelManager : destroyed model instance : " + name, Logger::Level::Application);
+		Logger::Output("モデルインスタンスを削除しました : " + name, Logger::Level::Application);
 	}
 }
 

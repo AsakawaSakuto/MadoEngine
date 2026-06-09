@@ -235,6 +235,7 @@
     <ClInclude Include="Application\.SceneManager\Scene\Result.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
+    <ClInclude Include="Application\Object\Player\PlayerStatus.h" />
     <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\AudioType.h" />

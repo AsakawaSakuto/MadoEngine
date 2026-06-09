@@ -54,6 +54,7 @@ void Model::InitializeInstanceResources() {
 	materialData_->color = color_;
 	materialData_->uvTransformMatrix = Matrix::MakeIdentity();
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+	//materialData_->enableLighting = true;
 
 	transformationData_ = CreateMappedBuffer<ModelTransformationMatrix>(device_.Get(), transformationResource_);
 	transformationData_->WVP = Matrix::MakeIdentity();
@@ -61,8 +62,12 @@ void Model::InitializeInstanceResources() {
 	transformationData_->WorldInverseTranspose = Matrix::MakeIdentity();
 
 	cameraData_ = CreateMappedBuffer<CameraForGPU>(device_.Get(), cameraResource_);
+
 	directionalLightData_ = CreateMappedBuffer<DirectionalLight>(device_.Get(), directionalLightResource_);
+	directionalLightData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 	pointLightData_ = CreateMappedBuffer<PointLight>(device_.Get(), pointLightResource_);
+
 	spotLightData_ = CreateMappedBuffer<SpotLight>(device_.Get(), spotLightResource_);
 }
 

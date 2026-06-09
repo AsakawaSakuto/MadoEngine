@@ -86,7 +86,7 @@ namespace MadoEngine {
     Vector2 TextureManager::GetPixelSize(const std::string& fileName) const {
         auto it = textures_.find(fileName);
         if (it == textures_.end()) {
-            Logger::Output("[TextureManager] PixelSize の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
+            Logger::Output("PixelSize の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
             return { 0.0f, 0.0f };
         }
         return { static_cast<float>(it->second.width), static_cast<float>(it->second.height) };
@@ -95,7 +95,7 @@ namespace MadoEngine {
     uint32_t TextureManager::GetTextureIndex(const std::string& fileName) const {
         auto it = textures_.find(fileName);
         if (it == textures_.end()) {
-            Logger::Output("[TextureManager] TextureIndex の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
+            Logger::Output("TextureIndex の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
             return UINT32_MAX;
         }
         return it->second.index;

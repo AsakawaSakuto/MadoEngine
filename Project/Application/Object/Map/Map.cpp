@@ -141,6 +141,20 @@ void Map::RegenerateTerrain() {
 	Logger::Output("Map : 地形を再生成しました", Logger::Level::Debug);
 }
 
+void Map::Finalize() {
+
+	ClearTerrainObjects();
+
+	mapPositionY_.clear();
+	mapBlockType_.clear();
+	mapTranslate_.clear();
+	mapShape_.clear();
+	mapModel_.clear();
+	mapSlopeModel_.clear();
+
+	Logger::Output("Map : 登録済みColliderとModelを破棄しました", Logger::Level::Application);
+}
+
 void Map::ClearTerrainObjects() {
 
 	for (int z = 0; z < mapHeight_; ++z) {

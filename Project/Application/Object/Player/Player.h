@@ -8,6 +8,9 @@ public:
 
 	void Initialize();
 
+	/// @brief Playerが登録したリソースとColliderを破棄する
+	void Finalize();
+
 	void Update(float deltaTime);
 
 	Vector3 GetPosition() const { return position_; }
@@ -35,11 +38,11 @@ private:
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;
 
-	static constexpr float kMoveSpeed  = 5.0f;
-	static constexpr float kDashSpeed  = 10.0f;
-	static constexpr float kJumpPower  = 8.0f;
-	static constexpr float kGravity    = 20.0f;
-	static constexpr float kGroundY    = 0.0f;
-	static constexpr int   kJumpCount  = 10;    // ジャンプ可能回数
-	int jumpCount_ = 0;                        // 残りジャンプ回数
+	float moveSpeed_  = 5.0f;
+	float dashSpeed_  = 10.0f;
+	float jumpPower_  = 8.0f;
+	float gravity_    = 20.0f;
+	float groundY_    = 0.0f;
+	int   jumpCount_  = 10;      // ジャンプ可能回数
+	int remainingJumpCount_ = 0; // 残りジャンプ回数
 };

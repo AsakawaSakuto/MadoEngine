@@ -8,6 +8,9 @@ class Map {
 public:
 	void Initialize();
 
+	/// @brief マップが登録したリソースとColliderを破棄する
+	void Finalize();
+
 	void Update();
 
 	void DrawImGui();

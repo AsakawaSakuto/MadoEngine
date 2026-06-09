@@ -125,7 +125,7 @@ private:
 	float followStrength_ = 0.1f;
 
 	// 肩越しオフセット（ターゲット座標系のローカルオフセット）
-	Vector3 offset_ = { 0.0f, 10.0f, -5.0f }; // 少し右・少し上
+	Vector3 offset_ = { 0.0f, 35.0f, -5.0f }; // 少し右・少し上
 
 	/// @brief 入力を処理してYaw/Pitchを更新する
 	/// @param deltaTime フレーム時間（秒）

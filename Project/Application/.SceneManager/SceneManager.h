@@ -6,12 +6,12 @@
 
 class IScene;
 
-/// @brief シーンを管理するマネージャークラス
-/// @details シーンの遷移、更新、描画を一元管理する
+/// @brief シーンのライフサイクルを管理します
+/// @details シーンの登録、更新、描画、および遷移を処理します
 class SceneManager
 {
 public:
-	/// @brief シーン生成関数の型エイリアス
+	/// @brief シーン生成関数の型
 	using CreatorFunc = std::function<std::unique_ptr<IScene>()>;
 
 	/// @brief コンストラクタ
@@ -20,29 +20,42 @@ public:
 	/// @brief デストラクタ
 	~SceneManager();
 
-	/// @brief シーンを登録する
-	/// @param type シーンの種類
+	/// @brief シーン生成関数を登録します
+	/// @param type シーンのタイプ
 	/// @param creator シーン生成関数
 	void RegisterScene(SceneType type, CreatorFunc creator);
 
-	/// @brief シーンマネージャーの初期化
-	/// @param initialScene 最初に起動するシーンの種類
+	/// @brief SceneManagerを初期化します
+	/// @param initialScene 初期シーンのタイプ
 	void Initialize(SceneType initialScene);
 
-	/// @brief 現在のシーンを更新
+	/// @brief 現在のシーンを更新します
 	void Update(float dt);
 
-	/// @brief 現在のシーンを描画
+	/// @brief 現在のシーンを描画します
 	void Draw();
 
-	/// @brief 現在のシーンのImGui描画
+	/// @brief 現在のシーンのImGuiを描画します
 	void DrawImGui();
+
+	/// @brief 保留中のシーン遷移を適用します
+	void ApplyPendingSceneChange();
+
 private:
-	/// @brief 次のシーンに遷移
-	/// @param type 遷移先のシーンの種類
+	/// @brief SceneManagerのデバッグ用ImGuiを描画します
+	void DrawSceneManagerImGui();
+
+	/// @brief 現在のフレームの終了時にシーン遷移をリクエストします
+	/// @param type 遷移先のシーンのタイプ
+	void RequestSceneChange(SceneType type);
+
+	/// @brief 指定されたシーンに変更します
+	/// @param type 遷移先のシーンのタイプ
 	void ChangeScene(SceneType type);
 
-	std::map<SceneType, CreatorFunc> creators_;  // 登録済みシーン生成関数マップ
-	std::unique_ptr<IScene> currentScene_;        // 現在のシーン
-	SceneType currentSceneType_;                  // 現在のシーンの種類
+	std::map<SceneType, CreatorFunc> creators_;  // 登録されたシーン生成関数
+	std::unique_ptr<IScene> currentScene_;       // 現在のシーン
+	SceneType currentSceneType_;                 // 現在のシーンのタイプ
+	SceneType pendingSceneType_;                 // 保留中の遷移先シーン
+	bool hasPendingSceneChange_;                 // シーン遷移が保留中かどうか
 };

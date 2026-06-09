@@ -34,6 +34,9 @@ void Terminal::Run() {
 		sceneManager_->DrawImGui();
 
 		execution_->PostDraw();
+
+		// シーン遷移の予約があれば、フレームの最後に遷移を実行する
+		sceneManager_->ApplyPendingSceneChange();
 	}
 
 }

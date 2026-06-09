@@ -51,7 +51,7 @@ void Test::Initialize() {
 	aabb.max = { 5.0f, 0.0f, 5.0f };
 	aabb_ = aabb;
 
-	MyCollider::RegisterCollider("TestPlane",CollisionTag::Plane,  &plane_,  &planePos_,  1.0f);
+	MyCollider::RegisterCollider("TestPlane", CollisionTag::Plane, &plane_, &planePos_, 1.0f);
 	MyCollider::RegisterCollider("TestSlope", CollisionTag::MapSlope, &slope_, &slopePos_, 1.0f);
 	MyCollider::RegisterCollider("TestSlope2", CollisionTag::MapSlope, &slope2_, &slope2Pos_, 1.0f);
 	MyCollider::RegisterCollider("AABB", CollisionTag::MapBlock, &aabb_, &aabbPos_, 1.0f);
@@ -114,5 +114,34 @@ void Test::DrawImGui() {
 }
 
 void Test::Finalize() {
+	MyCollider::RemoveCollider("TestPlane");
+	MyCollider::RemoveCollider("TestSlope");
+	MyCollider::RemoveCollider("TestSlope2");
+	MyCollider::RemoveCollider("AABB");
+
+	if (player_) {
+		player_->Finalize();
+		player_.reset();
+	}
+
+	if (map_) {
+		map_->Finalize();
+		map_.reset();
+	}
+
+	if (model_) {
+		MyModel::Destroy("testModel");
+		model_ = nullptr;
+	}
+
+	for (int i = 0; i < static_cast<int>(sprites_.size()); ++i) {
+		if (sprites_[i]) {
+			MySprite::Destroy("testSprite" + std::to_string(i));
+			sprites_[i] = nullptr;
+		}
+	}
+
+	sprite_.reset();
+
 	Logger::Output("テストシーンの終了処理を実行しました", Logger::Level::Application);
 }

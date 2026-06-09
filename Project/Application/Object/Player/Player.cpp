@@ -18,6 +18,18 @@ void Player::Initialize() {
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 }
 
+void Player::Finalize() {
+
+	MyCollider::RemoveCollider("PlayerSphere");
+
+	if (model_) {
+		MyModel::Destroy("Player");
+		model_ = nullptr;
+	}
+
+	Logger::Output("Player : 登録済みColliderとModelを破棄しました", Logger::Level::Application);
+}
+
 void Player::Update(float deltaTime) {
 	// 先に入力移動と、重力による落下処理を行う
 	Move(deltaTime);
@@ -68,7 +80,7 @@ void Player::Move(float deltaTime) {
 		forward.z * stick.y + right.z * stick.x
 	};
 
-	const float speed = MyInput::Press("Dash") ? kDashSpeed : kMoveSpeed;
+	const float speed = MyInput::Press("Dash") ? dashSpeed_ : moveSpeed_;
 	position_.x += moveDir.x * speed * deltaTime;
 	position_.y += moveDir.y * speed * deltaTime;
 	position_.z += moveDir.z * speed * deltaTime;
@@ -77,32 +89,32 @@ void Player::Move(float deltaTime) {
 void Player::Jump(float deltaTime) {
 	// 着地時にジャンプ回数をリセット
 	if (isGrounded_) {
-		jumpCount_ = kJumpCount;
+		remainingJumpCount_ = jumpCount_;
 	}
 
 	// ジャンプ入力（Aボタン）：残りジャンプ回数があれば受け付ける
-	if (jumpCount_ > 0 && MyInput::Trigger("Jump")) {
-		velocityY_  = kJumpPower;
+	if (remainingJumpCount_ > 0 && MyInput::Trigger("Jump")) {
+		velocityY_  = jumpPower_;
 		isGrounded_ = false;
-		jumpCount_--;
-		Logger::Output("ジャンプ開始 残り回数: " + std::to_string(jumpCount_), Logger::Level::Application);
+		remainingJumpCount_--;
+		Logger::Output("ジャンプ開始 残り回数: " + std::to_string(remainingJumpCount_), Logger::Level::Application);
 	}
 
 	// 重力を加算
 	if (!isGrounded_) {
-		velocityY_ -= kGravity * deltaTime;
+		velocityY_ -= gravity_ * deltaTime;
 	}
 
 	// Y座標に速度を反映
 	position_.y += velocityY_ * deltaTime;
 
 	// 地面着地判定
-	if (position_.y <= kGroundY) {
-		position_.y = kGroundY;
+	if (position_.y <= groundY_) {
+		position_.y = groundY_;
 		velocityY_  = 0.0f;
 		if (!isGrounded_) {
 			isGrounded_ = true;
-			jumpCount_  = kJumpCount;
+			remainingJumpCount_  = jumpCount_;
 			//Logger::Output("着地", Logger::Level::Application);
 		}
 	}
