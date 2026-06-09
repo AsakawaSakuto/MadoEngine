@@ -104,6 +104,10 @@ void Map::Initialize() {
 				useSlope = true;
 			}
 
+			if (useSlope && MyRand::GetFloat(0.0f, 1.0f) >= slopeSpawnRate_) {
+				useSlope = false;
+			}
+
 			if (useSlope) {
 				Slope slopeShape;
 				slopeShape.min = Vector3(-blockSize_.x / 2.0f, blockSize_.y * static_cast<float>(currentHeight), -blockSize_.z / 2.0f);
@@ -216,6 +220,8 @@ void Map::ClampHeightSettings() {
 
 	minRangeHeight_ = std::clamp(minRangeHeight_, -10, -1);
 	maxRangeHeight_ = std::clamp(maxRangeHeight_, 1, 10);
+
+	slopeSpawnRate_ = std::clamp(slopeSpawnRate_, 0.0f, 1.0f);
 }
 
 void Map::Update() {
@@ -290,6 +296,10 @@ void Map::DrawImGui() {
 	ImGui::Text("生成する地形の高さの範囲");
 	ImGui::DragInt("min  ", &minRangeHeight_, 1, -10, -1);
 	ImGui::DragInt("max  ", &maxRangeHeight_, 1, 1, 10);
+	ImGui::Separator();
+
+	ImGui::Text("Slope出現率");
+	ImGui::SliderFloat("出現率", &slopeSpawnRate_, 0.0f, 1.0f);
 
 	ImGui::End();
 

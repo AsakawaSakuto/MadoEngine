@@ -47,4 +47,6 @@ private:
 
 	int minRangeHeight_ = -1;
 	int maxRangeHeight_ = 1;
+
+	float slopeSpawnRate_ = 1.0f;
 };
