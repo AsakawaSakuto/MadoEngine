@@ -22,6 +22,28 @@ std::string GetMapSlopeModelName(int x, int z, int mapWidth) {
 	return "mapSlopeModel" + std::to_string(z * mapWidth + x);
 }
 
+/// @brief Slopeの低い側がMap外周の壁側を向いているか判定する
+/// @param x Map上のX座標
+/// @param z Map上のZ座標
+/// @param mapWidth Mapの横幅
+/// @param mapHeight Mapの奥行き
+/// @param direction Slopeの上り方向
+/// @return Slopeの低い側がMap外周の壁側を向いていればtrue
+bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDirection direction) {
+	switch (direction) {
+	case SlopeDirection::PulsX:
+		return x == 0;
+	case SlopeDirection::MinusX:
+		return x == mapWidth - 1;
+	case SlopeDirection::PulsZ:
+		return z == 0;
+	case SlopeDirection::MinusZ:
+		return z == mapHeight - 1;
+	}
+
+	return false;
+}
+
 }
 
 void Map::Initialize() {
@@ -64,16 +86,20 @@ void Map::Initialize() {
 			SlopeDirection slopeDirection = SlopeDirection::PulsX;
 			bool useSlope = false;
 
-			if (x + 1 < mapWidth_ && mapPositionY_[z][x + 1] == currentHeight + 1) {
+			if (x + 1 < mapWidth_ && mapPositionY_[z][x + 1] == currentHeight + 1 &&
+				!IsSlopeMinFacingMapWall(x, z, mapWidth_, mapHeight_, SlopeDirection::PulsX)) {
 				slopeDirection = SlopeDirection::PulsX;
 				useSlope = true;
-			} else if (x > 0 && mapPositionY_[z][x - 1] == currentHeight + 1) {
+			} else if (x > 0 && mapPositionY_[z][x - 1] == currentHeight + 1 &&
+				!IsSlopeMinFacingMapWall(x, z, mapWidth_, mapHeight_, SlopeDirection::MinusX)) {
 				slopeDirection = SlopeDirection::MinusX;
 				useSlope = true;
-			} else if (z + 1 < mapHeight_ && mapPositionY_[z + 1][x] == currentHeight + 1) {
+			} else if (z + 1 < mapHeight_ && mapPositionY_[z + 1][x] == currentHeight + 1 &&
+				!IsSlopeMinFacingMapWall(x, z, mapWidth_, mapHeight_, SlopeDirection::PulsZ)) {
 				slopeDirection = SlopeDirection::PulsZ;
 				useSlope = true;
-			} else if (z > 0 && mapPositionY_[z - 1][x] == currentHeight + 1) {
+			} else if (z > 0 && mapPositionY_[z - 1][x] == currentHeight + 1 &&
+				!IsSlopeMinFacingMapWall(x, z, mapWidth_, mapHeight_, SlopeDirection::MinusZ)) {
 				slopeDirection = SlopeDirection::MinusZ;
 				useSlope = true;
 			}
