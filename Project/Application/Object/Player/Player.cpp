@@ -119,3 +119,19 @@ void Player::Jump(float deltaTime) {
 		}
 	}
 }
+
+void Player::DrawImGui() {
+
+#ifdef USE_IMGUI
+
+	ImGui::Begin("Player");
+	ImGui::DragFloat3("Position", &position_.x, 0.1f);
+	ImGui::DragFloat("Move Speed", &moveSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("Dash Speed", &dashSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("Jump Power", &jumpPower_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("Gravity", &gravity_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragInt("Jump Count", &jumpCount_, 1, 0, 10);
+	ImGui::End();
+
+#endif // USE_IMGUI
+}

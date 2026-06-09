@@ -8,9 +8,6 @@ public:
 
 	void Initialize();
 
-	/// @brief Playerが登録したリソースとColliderを破棄する
-	void Finalize();
-
 	void Update(float deltaTime);
 
 	Vector3 GetPosition() const { return position_; }
@@ -18,6 +15,11 @@ public:
 	/// @brief 移動の基準となるカメラをセットする
 	/// @param camera カメラへのポインタ
 	void SetCamera(Camera* camera) { camera_ = camera; }
+
+	/// @brief Playerが登録したリソースとColliderを破棄する
+	void Finalize();
+
+	void DrawImGui();
 
 private:
 
