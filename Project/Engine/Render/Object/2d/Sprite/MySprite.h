@@ -24,4 +24,10 @@ namespace MySprite {
 	inline void Destroy(const std::string& name) {
 		MadoEngine::SpriteManager::GetInstance().Destroy(name);
 	}
+
+	/// @brief 指定したシーンに属するSpriteインスタンスをすべて破棄する
+	/// @param sceneType 破棄対象のシーン種別
+	inline void DestroyByScene(SceneType sceneType) {
+		MadoEngine::SpriteManager::GetInstance().DestroyByScene(sceneType);
+	}
 };

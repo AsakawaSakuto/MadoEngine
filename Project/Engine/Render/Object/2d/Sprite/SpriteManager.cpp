@@ -63,6 +63,25 @@ void SpriteManager::Destroy(const std::string& name) {
 	}
 }
 
+void SpriteManager::DestroyByScene(SceneType sceneType) {
+	if (sceneType == SceneType::None) {
+		Logger::Output("SceneType::Noneは全シーン共通のため、Spriteのシーン単位破棄をスキップしました", Logger::Level::Warning);
+		return;
+	}
+
+	size_t destroyCount = 0;
+	for (auto it = sprites_.begin(); it != sprites_.end();) {
+		if (it->second->GetSceneType() == sceneType) {
+			it = sprites_.erase(it);
+			++destroyCount;
+		} else {
+			++it;
+		}
+	}
+
+	Logger::Output("シーン内のSpriteインスタンスを破棄しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyCount), Logger::Level::Application);
+}
+
 void SpriteManager::UpdateAll(SceneType currentSceneType) {
 
 	if (sprites_.empty()) { return; }

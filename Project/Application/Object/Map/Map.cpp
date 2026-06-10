@@ -189,7 +189,7 @@ void Map::ClearTerrainObjects() {
 
 	for (int z = 0; z < mapHeight_; ++z) {
 		for (int x = 0; x < mapWidth_; ++x) {
-			if (z < static_cast<int>(mapBlockType_.size()) && x < static_cast<int>(mapBlockType_[z].size())) {
+			/*if (z < static_cast<int>(mapBlockType_.size()) && x < static_cast<int>(mapBlockType_[z].size())) {
 				if (mapBlockType_[z][x] == MapBlockType::Slope) {
 					MyCollider::RemoveCollider(GetMapSlopeName(x, z));
 				} else if (mapBlockType_[z][x] == MapBlockType::Ground) {
@@ -205,7 +205,7 @@ void Map::ClearTerrainObjects() {
 			if (z < static_cast<int>(mapSlopeModel_.size()) && x < static_cast<int>(mapSlopeModel_[z].size()) && mapSlopeModel_[z][x]) {
 				MyModel::Destroy(GetMapSlopeModelName(x, z, mapWidth_));
 				mapSlopeModel_[z][x] = nullptr;
-			}
+			}*/
 		}
 	}
 }

@@ -24,6 +24,10 @@ public:
 	Model* Get(const std::string& name) const;
 	void Destroy(const std::string& name);
 
+	/// @brief 指定したシーンに属するModelインスタンスをすべて破棄する
+	/// @param sceneType 破棄対象のシーン種別
+	void DestroyByScene(SceneType sceneType);
+
 	const ModelSharedData* GetSharedData(const std::string& modelName) const;
 
 	void SetCamera(Camera* camera) { activeCamera_ = camera; }

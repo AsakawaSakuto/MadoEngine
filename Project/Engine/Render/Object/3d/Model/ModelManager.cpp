@@ -163,6 +163,25 @@ void ModelManager::Destroy(const std::string& name) {
 	}
 }
 
+void ModelManager::DestroyByScene(SceneType sceneType) {
+	if (sceneType == SceneType::None) {
+		Logger::Output("SceneType::Noneは全シーン共通のため、Modelのシーン単位破棄をスキップしました", Logger::Level::Warning);
+		return;
+	}
+
+	size_t destroyCount = 0;
+	for (auto it = models_.begin(); it != models_.end();) {
+		if (it->second->GetSceneType() == sceneType) {
+			it = models_.erase(it);
+			++destroyCount;
+		} else {
+			++it;
+		}
+	}
+
+	Logger::Output("シーン内のModelインスタンスを破棄しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyCount), Logger::Level::Application);
+}
+
 const ModelSharedData* ModelManager::GetSharedData(const std::string& modelName) const {
 	return FindSharedData(modelName);
 }

@@ -43,6 +43,9 @@ public:
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）
 	void RemoveCollider(const std::string& name);
 
+	/// @brief 登録されているすべてのコライダーを削除する
+	void RemoveColliderAll();
+
 	/// @brief 衝突ルールを登録する（初期化時に呼ぶ。Enemy vs Enemy も可能）
 	/// @param tagA グループA
 	/// @param tagB グループB

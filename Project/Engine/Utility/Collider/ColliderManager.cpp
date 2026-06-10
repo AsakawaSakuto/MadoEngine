@@ -132,6 +132,11 @@ void ColliderManager::RemoveCollider(const std::string& name) {
     }
 }
 
+void ColliderManager::RemoveColliderAll() {
+    m_colliders.clear();
+    Logger::Output("すべてのコライダーを削除しました", Logger::Level::Application);
+}
+
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve) {
     m_matrix[tagA][tagB] = { true, enableResolve };
     m_matrix[tagB][tagA] = { true, enableResolve };

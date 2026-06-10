@@ -48,6 +48,10 @@ public:
 	/// @param name Spriteの識別名
 	void Destroy(const std::string& name);
 
+	/// @brief 指定したシーンに属するSpriteインスタンスをすべて破棄する
+	/// @param sceneType 破棄対象のシーン種別
+	void DestroyByScene(SceneType sceneType);
+
 	/// @brief 管理下の全Spriteを更新する
 	void UpdateAll(SceneType currentSceneType);
 

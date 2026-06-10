@@ -20,13 +20,6 @@ void Player::Initialize() {
 
 void Player::Finalize() {
 
-	MyCollider::RemoveCollider("PlayerSphere");
-
-	if (model_) {
-		MyModel::Destroy("Player");
-		model_ = nullptr;
-	}
-
 	Logger::Output("Player : 登録済みColliderとModelを破棄しました", Logger::Level::Application);
 }
 

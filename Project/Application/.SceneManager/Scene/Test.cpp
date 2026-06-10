@@ -117,34 +117,9 @@ void Test::DrawImGui() {
 }
 
 void Test::Finalize() {
-	MyCollider::RemoveCollider("TestPlane");
-	MyCollider::RemoveCollider("TestSlope");
-	MyCollider::RemoveCollider("TestSlope2");
-	MyCollider::RemoveCollider("AABB");
-
-	if (player_) {
-		player_->Finalize();
-		player_.reset();
-	}
-
-	if (map_) {
-		map_->Finalize();
-		map_.reset();
-	}
-
-	if (model_) {
-		MyModel::Destroy("testModel");
-		model_ = nullptr;
-	}
-
-	for (int i = 0; i < static_cast<int>(sprites_.size()); ++i) {
-		if (sprites_[i]) {
-			MySprite::Destroy("testSprite" + std::to_string(i));
-			sprites_[i] = nullptr;
-		}
-	}
-
-	sprite_.reset();
+	MyCollider::RemoveColliderAll();
+	MySprite::DestroyByScene(SceneType::Test);
+	MyModel::DestroyByScene(SceneType::Test);
 
 	Logger::Output("テストシーンの終了処理を実行しました", Logger::Level::Application);
 }

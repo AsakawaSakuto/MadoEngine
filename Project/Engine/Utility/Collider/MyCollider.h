@@ -70,4 +70,7 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(name, targetTag);
 	}
 
+	inline void RemoveColliderAll() {
+		ColliderManager::GetInstance().RemoveColliderAll();
+	}
 };
