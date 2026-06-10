@@ -1,7 +1,7 @@
 #include "ResourceHelper.h"
 #include <string>
 
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes, bool useLogger) {
 	assert(device);
 	assert(sizeInBytes > 0);
 
@@ -36,7 +36,9 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device
 
 	assert(SUCCEEDED(hr));
 
-	Logger::Output("バッファリソースの生成が完了しました。サイズ : " + std::to_string(sizeInBytes) + " bytes", Logger::Level::Engine);
+	if (useLogger) {
+		Logger::Output("バッファリソースの生成が完了しました。サイズ : " + std::to_string(sizeInBytes) + " bytes", Logger::Level::Engine);
+	}
 
 	return bufferResource;
 }

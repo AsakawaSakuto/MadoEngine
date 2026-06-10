@@ -63,7 +63,8 @@ void Test::Initialize() {
 	map_ = std::make_unique<Map>();
 	map_->Initialize();
 
-	model_ = MyModel::Create("testModel", "cube", SceneType::Test);
+	model_ = MyModel::Create("testModel", "AnimatedCube", SceneType::Test);
+	model_->SetPosition(modelPos_);
 }
 
 SceneType Test::Update(float dt) {

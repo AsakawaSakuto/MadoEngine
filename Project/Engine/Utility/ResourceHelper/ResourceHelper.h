@@ -9,7 +9,7 @@
 /// @param device D3D12デバイスのポインタ
 /// @param sizeInBytes バッファのバイトサイズ
 /// @return 生成されたバッファリソース
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device, size_t sizeInBytes, bool useLogger = true);
 
 /// @brief 深度ステンシルテクスチャリソースを生成する
 /// @param device D3D12デバイスのポインタ
@@ -25,8 +25,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12D
 /// @param count 要素数（デフォルト1）
 /// @return マップされたT型ポインタ
 template<typename T>
-T* CreateMappedBuffer(ID3D12Device* device, Microsoft::WRL::ComPtr<ID3D12Resource>& outResource, size_t count = 1) {
-	outResource = CreateBufferResource(device, sizeof(T) * count);
+T* CreateMappedBuffer(ID3D12Device* device, Microsoft::WRL::ComPtr<ID3D12Resource>& outResource, size_t count = 1, bool useLogger = true) {
+	outResource = CreateBufferResource(device, sizeof(T) * count, useLogger);
 	T* ptr = nullptr;
 	outResource->Map(0, nullptr, reinterpret_cast<void**>(&ptr));
 	return ptr;

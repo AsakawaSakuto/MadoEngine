@@ -40,9 +40,9 @@ private:
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;
 
-	float moveSpeed_  = 5.0f;
+	float moveSpeed_  = 30.0f;
 	float dashSpeed_  = 10.0f;
-	float jumpPower_  = 8.0f;
+	float jumpPower_  = 20.0f;
 	float gravity_    = 20.0f;
 	float groundY_    = 0.0f;
 	int   jumpCount_  = 10;      // ジャンプ可能回数
