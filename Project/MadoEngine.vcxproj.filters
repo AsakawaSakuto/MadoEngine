@@ -71,7 +71,6 @@
     <ClCompile Include="Application\Object\Player\Player.cpp" />
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
-    <ClCompile Include="Engine\Utility\Json\JsonLoader.cpp" />
     <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
@@ -404,12 +403,6 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\Object\Map\MapBlockType.h">
-      <Filter>�w�b�_�[ �t�%40�C��</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Utility\Json\JsonLoader.h">
-      <Filter>�w�b�_�[ �t�%40�C��</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Utility\Json\ISerializable.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\EditorUI.h">
