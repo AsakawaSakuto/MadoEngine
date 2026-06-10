@@ -5,6 +5,7 @@
 #include "Utility/Easing/Easing.h"
 #include "Utility/GameTimer/GameTimer.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Json/JsonHeaders.h"
 #include "Utility/Camera/Camera.h"
 #include "Utility/Camera/DebugCamera.h"
 #include "Utility/Camera/TPS_Camera.h"

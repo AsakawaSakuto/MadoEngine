@@ -192,6 +192,9 @@
     <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
+    <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
+    <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
+    <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
     <ClCompile Include="Externals\imgui\imgui.cpp">
@@ -319,9 +322,14 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Slope.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
+    <ClInclude Include="Engine\Utility\Json\JsonHeaders.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h" />
     <ClInclude Include="Engine\Utility\Light\PointLight.h" />
     <ClInclude Include="Engine\Utility\Light\SpotLight.h" />
+    <ClInclude Include="Engine\Utility\Json\Data\ConfigManager.h" />
+    <ClInclude Include="Engine\Utility\Json\Core\IJsonSerializable.h" />
+    <ClInclude Include="Engine\Utility\Json\Core\JsonFile.h" />
+    <ClInclude Include="Engine\Utility\Json\Core\JsonSerializer.h" />
     <ClInclude Include="Engine\Utility\Logger\Logger.h" />
     <ClInclude Include="Engine\Utility\Material.h" />
     <ClInclude Include="Engine\Utility\Random.h" />

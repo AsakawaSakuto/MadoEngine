@@ -50,6 +50,12 @@
     <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
+    <ClCompile Include="Engine\Utility\Json\ConfigManager.cpp" />
+    <ClCompile Include="Engine\Utility\Json\JsonFile.cpp" />
+    <ClCompile Include="Engine\Utility\Json\JsonSerializer.cpp" />
+    <ClCompile Include="Engine\Utility\Json\ParameterTable.cpp" />
+    <ClCompile Include="Engine\Utility\Json\SaveDataManager.cpp" />
+    <ClCompile Include="Engine\Utility\Json\SceneData.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
@@ -165,6 +171,13 @@
     <ClInclude Include="Engine\Utility\Logger\Logger.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Utility\Json\ConfigManager.h" />
+    <ClInclude Include="Engine\Utility\Json\IJsonSerializable.h" />
+    <ClInclude Include="Engine\Utility\Json\JsonFile.h" />
+    <ClInclude Include="Engine\Utility\Json\JsonSerializer.h" />
+    <ClInclude Include="Engine\Utility\Json\ParameterTable.h" />
+    <ClInclude Include="Engine\Utility\Json\SaveDataManager.h" />
+    <ClInclude Include="Engine\Utility\Json\SceneData.h" />
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
