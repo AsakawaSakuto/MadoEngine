@@ -28,6 +28,9 @@ void Player::Update(float deltaTime) {
 	Move(deltaTime);
 	Jump(deltaTime);
 
+	// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する
+	MyCollider::Update();
+
 	model_->SetPosition(position_);
 
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する

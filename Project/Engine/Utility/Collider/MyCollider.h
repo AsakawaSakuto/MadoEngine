@@ -4,6 +4,7 @@
 namespace MyCollider {
 
 	using CollisionCallback = ColliderManager::CollisionCallback;
+	using CollisionPairSetting = ColliderManager::CollisionPairSetting;
 
 	/// @brief コライダーを登録する
 	/// @param name 識別名（例: "Enemy_0001"）
@@ -28,6 +29,23 @@ namespace MyCollider {
 	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする。デフォルトはfalse）
 	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve = false) {
 		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, enableResolve);
+	}
+
+	/// @brief 衝突ルールを詳細設定付きで登録する
+	/// @param tagA グループA
+	/// @param tagB グループB
+	/// @param setting 押し戻しやCCDの有効状態
+	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, const CollisionPairSetting& setting) {
+		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, setting);
+	}
+
+	/// @brief 衝突ルールを押し戻しとCCD指定付きで登録する
+	/// @param tagA グループA
+	/// @param tagB グループB
+	/// @param enableResolve 押し戻しを有効にするか
+	/// @param enableCCD 連続衝突判定を有効にするか
+	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve, bool enableCCD) {
+		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, enableResolve, enableCCD);
 	}
 
 	/// @brief 特定の個体同士が衝突しているか
@@ -68,6 +86,11 @@ namespace MyCollider {
 	/// @return スロープ面に接触していればtrue
 	inline bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(name, targetTag);
+	}
+
+	/// @brief 登録済みコライダーの衝突判定と押し戻しを更新する
+	inline void Update() {
+		ColliderManager::GetInstance().Update();
 	}
 
 	inline void RemoveColliderAll() {

@@ -56,9 +56,13 @@ void Test::Initialize() {
 	MyCollider::RegisterCollider("TestSlope2", CollisionTag::MapSlope, &slope2_, &slope2Pos_, 1.0f);
 	MyCollider::RegisterCollider("AABB", CollisionTag::MapBlock, &aabb_, &aabbPos_, 1.0f);
 
+	MyCollider::CollisionPairSetting playerMapCollision;
+	playerMapCollision.enableResolve = true;
+	playerMapCollision.enableCCD = true;
+
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerAABB, CollisionTag::MapBlock, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapBlock, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapSlope, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapBlock, playerMapCollision);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerSphere, CollisionTag::MapSlope, playerMapCollision);
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize();
