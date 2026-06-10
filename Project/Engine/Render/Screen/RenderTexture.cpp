@@ -21,12 +21,40 @@ namespace MadoEngine::Render {
 		assert(width  > 0            && "width は 0 より大きい値を指定してください");
 		assert(height > 0            && "height は 0 より大きい値を指定してください");
 
+		device_ = device;
 		rtvManager_ = rtvManager;
 		srvManager_ = srvManager;
 		width_      = width;
 		height_     = height;
 		format_     = format;
+		rtvIndex_ = rtvManager_->Allocate();
+		srvIndex_ = srvManager_->Allocate();
 
+		CreateResourceAndViews();
+	}
+
+	void RenderTexture::Resize(uint32_t width, uint32_t height) {
+		assert(device_ != nullptr && "DxDevice が nullptr です");
+		assert(rtvManager_ != nullptr && "RTVManager が nullptr です");
+		assert(srvManager_ != nullptr && "SRVManager が nullptr です");
+		assert(width > 0 && height > 0);
+
+		if (width_ == width && height_ == height) {
+			return;
+		}
+
+		width_ = width;
+		height_ = height;
+		CreateResourceAndViews();
+
+		Logger::Output(
+			"レンダーテクスチャをリサイズしました: " +
+			std::to_string(width_) + "x" + std::to_string(height_),
+			Logger::Level::Engine
+		);
+	}
+
+	void RenderTexture::CreateResourceAndViews() {
 		// --- リソースデスクリプタの設定 ---
 		D3D12_RESOURCE_DESC desc{};
 		desc.Dimension          = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -58,7 +86,8 @@ namespace MadoEngine::Render {
 		clearValue.Color[3] = 1.0f;
 
 		// --- テクスチャリソースの生成 ---
-		HRESULT hr = device->GetDevice()->CreateCommittedResource(
+		textureResource_.Reset();
+		HRESULT hr = device_->GetDevice()->CreateCommittedResource(
 			&heapProps,
 			D3D12_HEAP_FLAG_NONE,
 			&desc,
@@ -73,13 +102,11 @@ namespace MadoEngine::Render {
 		Logger::Output("テクスチャリソースを生成しました", Logger::Level::Engine);
 
 		// --- RTV の生成 ---
-		rtvIndex_ = rtvManager_->Allocate();
 		rtvManager_->CreateRenderTargetView(textureResource_.Get(), rtvIndex_, format_);
 
 		Logger::Output("RTVを生成しました (index=" + std::to_string(rtvIndex_) + ")", Logger::Level::Engine);
 
 		// --- SRV の生成 ---
-		srvIndex_ = srvManager_->Allocate();
 		srvManager_->CreateShaderResourceView(textureResource_.Get(), srvIndex_, format_);
 
 		Logger::Output("SRVを生成しました (index=" + std::to_string(srvIndex_) + ")", Logger::Level::Engine);

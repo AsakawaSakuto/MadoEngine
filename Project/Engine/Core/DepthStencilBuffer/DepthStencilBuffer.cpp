@@ -18,11 +18,37 @@ namespace MadoEngine::Core {
 		assert(width  > 0            && "width は 0 より大きい値を指定してください");
 		assert(height > 0            && "height は 0 より大きい値を指定してください");
 
+		device_ = device;
 		dsvManager_ = dsvManager;
 		width_      = width;
 		height_     = height;
 		format_     = format;
+		dsvIndex_ = dsvManager_->Allocate();
 
+		CreateResourceAndView();
+	}
+
+	void DepthStencilBuffer::Resize(uint32_t width, uint32_t height) {
+		assert(device_ != nullptr && "DxDevice が nullptr です");
+		assert(dsvManager_ != nullptr && "DSVManager が nullptr です");
+		assert(width > 0 && height > 0);
+
+		if (width_ == width && height_ == height) {
+			return;
+		}
+
+		width_ = width;
+		height_ = height;
+		CreateResourceAndView();
+
+		Logger::Output(
+			"デプスステンシルバッファをリサイズしました: " +
+			std::to_string(width_) + "x" + std::to_string(height_),
+			Logger::Level::Engine
+		);
+	}
+
+	void DepthStencilBuffer::CreateResourceAndView() {
 		// --- リソースデスクリプタの設定 ---
 		D3D12_RESOURCE_DESC desc{};
 		desc.Dimension          = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -52,7 +78,8 @@ namespace MadoEngine::Core {
 		clearValue.DepthStencil.Stencil = 0;
 
 		// --- デプスバッファリソースの生成 ---
-		HRESULT hr = device->GetDevice()->CreateCommittedResource(
+		textureResource_.Reset();
+		HRESULT hr = device_->GetDevice()->CreateCommittedResource(
 			&heapProps,
 			D3D12_HEAP_FLAG_NONE,
 			&desc,
@@ -69,7 +96,6 @@ namespace MadoEngine::Core {
 		);
 
 		// --- DSV の生成 ---
-		dsvIndex_ = dsvManager_->Allocate();
 		dsvManager_->CreateDepthStencilView(textureResource_.Get(), dsvIndex_, format_);
 
 		Logger::Output(

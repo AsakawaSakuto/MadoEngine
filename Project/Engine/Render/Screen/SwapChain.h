@@ -64,9 +64,25 @@ namespace MadoEngine::Screen {
 		/// @brief 画面をスワップする（Present）
 		void Present();
 
+		/// @brief スワップチェーンのバックバッファをリサイズする
+		/// @param width 新しいバックバッファ幅
+		/// @param height 新しいバックバッファ高さ
+		void Resize(uint32_t width, uint32_t height);
+
+		/// @brief バックバッファ幅を取得する
+		/// @return バックバッファ幅
+		uint32_t GetWidth() const { return width_; }
+
+		/// @brief バックバッファ高さを取得する
+		/// @return バックバッファ高さ
+		uint32_t GetHeight() const { return height_; }
+
 		private:
 		/// @brief SwapChainの生成
 		void CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height);
+
+		/// @brief バックバッファとRTVを取得・再作成する
+		void CreateBackBufferViews();
 
 		Core::DxDevice* device_ = nullptr;
 		Core::CommandManager* commandManager_ = nullptr;
@@ -76,5 +92,7 @@ namespace MadoEngine::Screen {
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 		std::vector<uint32_t> backBufferRTVIndices_;
 		uint32_t bufferCount_ = 2;
+		uint32_t width_ = 0;
+		uint32_t height_ = 0;
 	};
 }

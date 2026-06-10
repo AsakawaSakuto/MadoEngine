@@ -26,26 +26,20 @@ namespace MadoEngine::Screen {
 		commandManager_ = commandManager;
 		bufferCount_ = bufferCount;
 		rtvManager_ = rtvManager;
+		width_ = width;
+		height_ = height;
 
 		CreateSwapChain(hwnd, width, height);
-
-		// バックバッファリソースを取得
-		backBuffers_.resize(bufferCount_);
-		for (uint32_t i = 0; i < bufferCount_; ++i) {
-			HRESULT hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
-			assert(SUCCEEDED(hr));
-			Logger::Output("バックバッファ " + std::to_string(i) + " を取得しました", Logger::Level::Engine);
-		}
 
 		// RTVの確保と生成
 		if (rtvManager_ != nullptr) {
 			backBufferRTVIndices_.resize(bufferCount_);
 			for (uint32_t i = 0; i < bufferCount_; ++i) {
 				backBufferRTVIndices_[i] = rtvManager_->Allocate();
-				rtvManager_->CreateRenderTargetView(backBuffers_[i].Get(), backBufferRTVIndices_[i]);
 			}
-			Logger::Output("バックバッファ用RTVの生成が完了しました", Logger::Level::Engine);
 		}
+
+		CreateBackBufferViews();
 	}
 
 	uint32_t SwapChain::GetCurrentBackBufferIndex() const {
@@ -104,6 +98,37 @@ namespace MadoEngine::Screen {
 		assert(SUCCEEDED(hr));
 	}
 
+	void SwapChain::Resize(uint32_t width, uint32_t height) {
+		assert(swapChain_ != nullptr);
+		assert(width > 0 && height > 0);
+
+		if (width_ == width && height_ == height) {
+			return;
+		}
+
+		for (auto& backBuffer : backBuffers_) {
+			backBuffer.Reset();
+		}
+
+		HRESULT hr = swapChain_->ResizeBuffers(
+			bufferCount_,
+			width,
+			height,
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH
+		);
+		assert(SUCCEEDED(hr));
+
+		width_ = width;
+		height_ = height;
+		CreateBackBufferViews();
+
+		Logger::Output(
+			"SwapChainをリサイズしました: " + std::to_string(width_) + "x" + std::to_string(height_),
+			Logger::Level::Engine
+		);
+	}
+
 	void SwapChain::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height) {
 		// SwapChainの設定
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
@@ -134,5 +159,22 @@ namespace MadoEngine::Screen {
 		assert(SUCCEEDED(hr));
 
 		Logger::Output("SwapChainの作成に成功しました", Logger::Level::Engine);
+	}
+
+	void SwapChain::CreateBackBufferViews() {
+		backBuffers_.resize(bufferCount_);
+		for (uint32_t i = 0; i < bufferCount_; ++i) {
+			HRESULT hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
+			assert(SUCCEEDED(hr));
+			Logger::Output("バックバッファ " + std::to_string(i) + " を取得しました", Logger::Level::Engine);
+
+			if (rtvManager_ != nullptr) {
+				rtvManager_->CreateRenderTargetView(backBuffers_[i].Get(), backBufferRTVIndices_[i]);
+			}
+		}
+
+		if (rtvManager_ != nullptr) {
+			Logger::Output("バックバッファ用RTVの生成が完了しました", Logger::Level::Engine);
+		}
 	}
 }

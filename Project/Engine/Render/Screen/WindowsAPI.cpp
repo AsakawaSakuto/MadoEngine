@@ -44,6 +44,20 @@ namespace MadoEngine::Screen {
 			return 0;
 		}
 
+		case WM_SIZE:
+			if (api && wparam != SIZE_MINIMIZED) {
+				int width = static_cast<int>(LOWORD(lparam));
+				int height = static_cast<int>(HIWORD(lparam));
+				if (width > 0 && height > 0) {
+					api->desc_.width = width;
+					api->desc_.height = height;
+					api->pendingResizeWidth_ = width;
+					api->pendingResizeHeight_ = height;
+					api->hasResizeRequest_ = true;
+				}
+			}
+			break;
+
 		case WM_SIZING:
 			// ウィンドウのリサイズ時にアスペクト比を維持
 			if (api && api->desc_.isResizable && !api->isFullscreen_ && api->aspectRatio_ > 0.0f) {
@@ -218,7 +232,36 @@ namespace MadoEngine::Screen {
 
 		ShowWindow(hWnd_, SW_SHOW);
 
+		RECT clientRect = {};
+		if (GetClientRect(hWnd_, &clientRect)) {
+			desc_.width = clientRect.right - clientRect.left;
+			desc_.height = clientRect.bottom - clientRect.top;
+		}
+
 		Logger::Output("WindowsAPIの初期化が完了しました", Logger::Level::Engine);
+	}
+
+	std::pair<int, int> WindowsAPI::GetClientSize() const {
+		RECT clientRect = {};
+		if (hWnd_ && GetClientRect(hWnd_, &clientRect)) {
+			return {
+				clientRect.right - clientRect.left,
+				clientRect.bottom - clientRect.top
+			};
+		}
+
+		return { desc_.width, desc_.height };
+	}
+
+	bool WindowsAPI::ConsumeResize(uint32_t& width, uint32_t& height) {
+		if (!hasResizeRequest_ || pendingResizeWidth_ <= 0 || pendingResizeHeight_ <= 0) {
+			return false;
+		}
+
+		width = static_cast<uint32_t>(pendingResizeWidth_);
+		height = static_cast<uint32_t>(pendingResizeHeight_);
+		hasResizeRequest_ = false;
+		return true;
 	}
 
 	// メッセージを処理する。アプリを継続する場合はtrue、終了する場合はfalseを返す

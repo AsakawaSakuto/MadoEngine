@@ -14,12 +14,15 @@ namespace MadoEngine
 		winDesc_.width = 1280;
 		winDesc_.height = 720;
 		winDesc_.iconPath = "Assets/.EngineResource/icon.png";
-		winDesc_.isResizable = false;
+		winDesc_.isResizable = true;
 		winDesc_.isShowMouseCursor = true;
 
 		// ウィンドウの初期化
 		windowsAPI_ = std::make_unique<MadoEngine::Screen::WindowsAPI>();
 		windowsAPI_->Initialize(winDesc_, hInstance);
+		auto [clientWidth, clientHeight] = windowsAPI_->GetClientSize();
+		renderWidth_ = static_cast<uint32_t>(clientWidth > 0 ? clientWidth : winDesc_.width);
+		renderHeight_ = static_cast<uint32_t>(clientHeight > 0 ? clientHeight : winDesc_.height);
 
 		// DxDeviceの初期化
 		dxDevice_ = std::make_unique<MadoEngine::Core::DxDevice>();
@@ -35,7 +38,7 @@ namespace MadoEngine
 
 		// SwapChainの初期化
 		swapChain_ = std::make_unique<MadoEngine::Screen::SwapChain>();
-		swapChain_->Initialize(dxDevice_.get(), commandManager_.get(), windowsAPI_->GetHWnd(), winDesc_.width, winDesc_.height, 2, rtvManager_);
+		swapChain_->Initialize(dxDevice_.get(), commandManager_.get(), windowsAPI_->GetHWnd(), renderWidth_, renderHeight_, 2, rtvManager_);
 
 		// SRVManagerの初期化
 		srvManager_ = &MadoEngine::Core::SRVManager::GetInstance();
@@ -82,11 +85,11 @@ namespace MadoEngine
 
 		// DepthStencilBuffer の生成
 		depthStencilBuffer_ = std::make_unique<MadoEngine::Core::DepthStencilBuffer>();
-		depthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, winDesc_.width, winDesc_.height);
+		depthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, renderWidth_, renderHeight_);
 
 		// ViewportScissor の初期化
 		viewportScissor_ = std::make_unique<MadoEngine::Render::ViewportScissor>();
-		viewportScissor_->UpdateSize(winDesc_.width, winDesc_.height);
+		viewportScissor_->UpdateSize(renderWidth_, renderHeight_);
 
 		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::ModelManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
@@ -100,7 +103,7 @@ namespace MadoEngine
 
 		// オフスクリーンレンダーターゲットの生成（ゲーム描画をImGui内に表示するため）
 		offscreenRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
-		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, winDesc_.width, winDesc_.height);
+		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_);
 #endif // USE_IMGUI
 	}
 
@@ -108,6 +111,9 @@ namespace MadoEngine
 		// デルタタイムを計算
 		deltaTime_->Update();
 		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
+
+		// ウィンドウリサイズ要求があれば描画リソースへ反映
+		HandleResize();
 
 		// AudioManagerの更新（終了した音声のクリーンアップなど）
 		MadoEngine::AudioManager::GetInstance().Update();
@@ -117,6 +123,34 @@ namespace MadoEngine
 
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
+	}
+
+	void Execution::HandleResize() {
+		uint32_t width = 0;
+		uint32_t height = 0;
+		if (!windowsAPI_->ConsumeResize(width, height)) {
+			return;
+		}
+
+		if (width == renderWidth_ && height == renderHeight_) {
+			return;
+		}
+
+		commandManager_->WaitForGPU();
+		swapChain_->Resize(width, height);
+		depthStencilBuffer_->Resize(width, height);
+		viewportScissor_->UpdateSize(width, height);
+#ifdef USE_IMGUI
+		offscreenRT_->Resize(width, height);
+#endif // USE_IMGUI
+
+		renderWidth_ = width;
+		renderHeight_ = height;
+		Logger::Output(
+			"描画サイズを更新しました: " +
+			std::to_string(renderWidth_) + "x" + std::to_string(renderHeight_),
+			Logger::Level::Engine
+		);
 	}
 
 	void Execution::PreDraw()

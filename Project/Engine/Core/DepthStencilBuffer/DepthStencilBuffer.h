@@ -35,6 +35,11 @@ namespace MadoEngine::Core {
 			DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT
 		);
 
+		/// @brief デプスステンシルバッファをリサイズする
+		/// @param width 新しいバッファ幅
+		/// @param height 新しいバッファ高さ
+		void Resize(uint32_t width, uint32_t height);
+
 		/// @brief DSVデスクリプタインデックスを取得する
 		/// @return DSVデスクリプタインデックス
 		uint32_t GetDSVIndex() const { return dsvIndex_; }
@@ -60,6 +65,10 @@ namespace MadoEngine::Core {
 		DXGI_FORMAT GetFormat() const { return format_; }
 
 	private:
+		/// @brief デプスリソースとDSVを作成する
+		void CreateResourceAndView();
+
+		DxDevice* device_ = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource_ = nullptr;
 
 		uint32_t dsvIndex_ = 0;

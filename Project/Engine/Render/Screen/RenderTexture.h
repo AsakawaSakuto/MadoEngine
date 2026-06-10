@@ -41,6 +41,11 @@ namespace MadoEngine::Render {
 			DXGI_FORMAT                    format = DXGI_FORMAT_R8G8B8A8_UNORM
 		);
 
+		/// @brief レンダーテクスチャをリサイズする
+		/// @param width 新しいテクスチャ幅
+		/// @param height 新しいテクスチャ高さ
+		void Resize(uint32_t width, uint32_t height);
+
 		/// @brief 描画開始処理を行う（PSR → RTV へのリソースバリア、RTV/DSV セット、クリア）
 		/// @param commandList コマンドリスト
 		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル
@@ -90,6 +95,10 @@ namespace MadoEngine::Render {
 		DXGI_FORMAT GetFormat() const { return format_; }
 
 	private:
+		/// @brief テクスチャリソースとRTV/SRVを作成する
+		void CreateResourceAndViews();
+
+		MadoEngine::Core::DxDevice* device_ = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource_ = nullptr;
 
 		uint32_t rtvIndex_ = 0;

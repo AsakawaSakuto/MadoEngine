@@ -226,7 +226,7 @@ void Map::ClampHeightSettings() {
 
 void Map::Update() {
 
-	if (MyInput::GetKeybord()->IsTrigger(DIK_1)) {
+	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {
 
 		if (isModelDraw_) {
 			for (int z = 0; z < mapHeight_; ++z) {

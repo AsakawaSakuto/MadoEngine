@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <cstdint>
 #include <vector>
 #include <memory>
 #include <d3d12.h>
@@ -49,7 +50,12 @@ namespace MadoEngine
 
 		//D3DResourceLeakChecker leakChecker;
 
+		/// @brief ウィンドウリサイズ要求を描画リソースへ反映する
+		void HandleResize();
+
 		bool isStopApplication_ = false;
+		uint32_t renderWidth_ = 0;
+		uint32_t renderHeight_ = 0;
 
 		std::unique_ptr<MadoEngine::Screen::WindowsAPI> windowsAPI_;
 		MadoEngine::Screen::WindowsAPI::WindowDesc winDesc_;
