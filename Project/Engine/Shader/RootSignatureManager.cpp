@@ -348,6 +348,47 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("Line3d.RootSig", rootSigDesc);
 		}
 
+		// PostEffect 用 RootSignature
+		// t0: 入力テクスチャ, s0: サンプラー
+		{
+			D3D12_DESCRIPTOR_RANGE srvRange{};
+			srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			srvRange.NumDescriptors = 1;
+			srvRange.BaseShaderRegister = 0;
+			srvRange.RegisterSpace = 0;
+			srvRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParam{};
+			rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParam.DescriptorTable.NumDescriptorRanges = 1;
+			rootParam.DescriptorTable.pDescriptorRanges = &srvRange;
+			rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC staticSampler{};
+			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			staticSampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			staticSampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			staticSampler.MipLODBias = 0.0f;
+			staticSampler.MaxAnisotropy = 0;
+			staticSampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			staticSampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			staticSampler.MinLOD = 0.0f;
+			staticSampler.MaxLOD = D3D12_FLOAT32_MAX;
+			staticSampler.ShaderRegister = 0;
+			staticSampler.RegisterSpace = 0;
+			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = 1;
+			rootSigDesc.pParameters = &rootParam;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &staticSampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("PostEffect.RootSig", rootSigDesc);
+		}
+
 	}
 
 } // namespace MadoEngine

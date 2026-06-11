@@ -53,6 +53,9 @@ namespace MadoEngine
 		/// @brief ウィンドウリサイズ要求を描画リソースへ反映する
 		void HandleResize();
 
+		/// @brief オフスクリーン描画結果をバックバッファへコピーする
+		void DrawPostEffectCopy();
+
 		bool isStopApplication_ = false;
 		uint32_t renderWidth_ = 0;
 		uint32_t renderHeight_ = 0;
@@ -79,9 +82,11 @@ namespace MadoEngine
 
 		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 
+		std::unique_ptr<MadoEngine::Render::RenderTexture> offscreenRT_;
+		MadoEngine::Render::PSODesc postEffectCopyDesc_;
+
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
-		std::unique_ptr<MadoEngine::Render::RenderTexture> offscreenRT_;
 #endif
 	};
 }

@@ -87,7 +87,7 @@ namespace MadoEngine::Render {
 		psoDesc.SampleMask       = D3D12_DEFAULT_SAMPLE_MASK;
 		psoDesc.SampleDesc.Count = 1;
 
-		// TODO: ShaderManagerから取得する
+		// ShaderManagerから取得する
 		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance().Get(desc.vsKey);
 		psoDesc.PS             = MadoEngine::ShaderManager::GetInstance().Get(desc.psKey);
 		psoDesc.pRootSignature = MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey);
@@ -101,6 +101,10 @@ namespace MadoEngine::Render {
 		UINT* outCount)
 	{
 		switch (type) {
+			case InputLayoutType::None:
+				*outElements = nullptr;
+				*outCount = 0;
+				break;
 		    case InputLayoutType::Triangle:
 			    *outElements = kTriangleLayout;
 			    *outCount = _countof(kTriangleLayout);

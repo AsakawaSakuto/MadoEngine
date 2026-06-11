@@ -96,14 +96,25 @@ namespace MadoEngine
 
 		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
+
+		offscreenRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
+		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+
+		postEffectCopyDesc_.blendMode = MadoEngine::Render::BlendMode::None;
+		postEffectCopyDesc_.depthMode = MadoEngine::Render::DepthMode::Disable;
+		postEffectCopyDesc_.cullMode = MadoEngine::Render::CullMode::None;
+		postEffectCopyDesc_.fillMode = MadoEngine::Render::FillMode::Solid;
+		postEffectCopyDesc_.topology = MadoEngine::Render::TopologyType::Triangle;
+		postEffectCopyDesc_.inputLayout = MadoEngine::Render::InputLayoutType::None;
+		postEffectCopyDesc_.rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		postEffectCopyDesc_.dsvFormat = DXGI_FORMAT_UNKNOWN;
+		postEffectCopyDesc_.vsKey = "PostEffect/CopyImage.VS";
+		postEffectCopyDesc_.psKey = "PostEffect/CopyImage.PS";
+		postEffectCopyDesc_.rootSigKey = "PostEffect.RootSig";
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
-
-		// オフスクリーンレンダーターゲットの生成（ゲーム描画をImGui内に表示するため）
-		offscreenRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
-		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_);
 #endif // USE_IMGUI
 	}
 
@@ -140,9 +151,7 @@ namespace MadoEngine
 		swapChain_->Resize(width, height);
 		depthStencilBuffer_->Resize(width, height);
 		viewportScissor_->UpdateSize(width, height);
-#ifdef USE_IMGUI
 		offscreenRT_->Resize(width, height);
-#endif // USE_IMGUI
 
 		renderWidth_ = width;
 		renderHeight_ = height;
@@ -167,19 +176,11 @@ namespace MadoEngine
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
 
-#ifdef USE_IMGUI
-		// USE_IMGUI時: オフスクリーンRTへ描画する
+		// オフスクリーンRTへ描画する
 		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
 		offscreenRT_->BeginRender(commandManager_->GetCommandList(), dsvHandle);
 		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-#else
-		// バックバッファをレンダーターゲットに遷移し、RTV/DSVをセット・クリア
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
-		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
-		swapChain_->BeginRender(commandManager_->GetCommandList(), &dsvHandle, clearColor);
-		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-#endif // USE_IMGUI
 
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 	}
@@ -216,7 +217,24 @@ namespace MadoEngine
 		//}
 
 		MadoEngine::Editor::DrawAudioManagerUI();
+#else
+		offscreenRT_->EndRender(commandManager_->GetCommandList());
+
+		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		DrawPostEffectCopy();
 #endif // USE_IMGUI
+	}
+
+	void Execution::DrawPostEffectCopy() {
+		auto* commandList = commandManager_->GetCommandList();
+		commandList->SetGraphicsRootSignature(
+			MadoEngine::RootSignatureManager::GetInstance().Get(postEffectCopyDesc_.rootSigKey));
+		commandList->SetPipelineState(psoRegistry_->Get(postEffectCopyDesc_));
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		commandList->SetGraphicsRootDescriptorTable(0, offscreenRT_->GetSRVGPUHandle());
+		commandList->DrawInstanced(3, 1, 0, 0);
 	}
 
 	void Execution::PostDraw()

@@ -42,6 +42,7 @@ namespace MadoEngine::Render {
 
 	/// @brief 入力レイアウトタイプ
 	enum class InputLayoutType {
+		None,
 		Triangle,
 		Sprite,
 		StaticModel,
