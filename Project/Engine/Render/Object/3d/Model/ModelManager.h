@@ -30,7 +30,23 @@ public:
 
 	const ModelSharedData* GetSharedData(const std::string& modelName) const;
 
-	void SetCamera(Camera* camera) { activeCamera_ = camera; }
+	/// @brief レイにヒットする最前面のModelを取得する
+	/// @param currentSceneType 選択対象のシーン種別
+	/// @param rayOrigin レイの始点
+	/// @param rayDirection 正規化済みのレイ方向
+	/// @param maxDistance 判定する最大距離
+	/// @param outDistance ヒット距離の出力先
+	/// @return ヒットしたModel。ヒットしない場合はnullptr
+	Model* PickByRay(
+		SceneType currentSceneType,
+		const Vector3& rayOrigin,
+		const Vector3& rayDirection,
+		float maxDistance,
+		float* outDistance = nullptr) const;
+
+	void SetCamera(const Camera& camera) { activeCamera_ = camera; }
+	Camera GetCamera() const { return activeCamera_; }
+
 	void UpdateAll(SceneType currentSceneType);
 	void DrawAll(SceneType currentSceneType);
 	void DrawAll(SceneType currentSceneType, Camera& camera);
@@ -46,7 +62,7 @@ private:
 	ID3D12Device* device_ = nullptr;
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
 	MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr;
-	Camera* activeCamera_ = nullptr;
+	Camera activeCamera_;
 
 	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>> sharedData_;
 	std::unordered_map<std::string, std::string> aliases_;

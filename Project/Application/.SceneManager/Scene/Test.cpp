@@ -1,7 +1,6 @@
 #include "Test.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
-
 Test::Test()
 	
 {}
@@ -93,12 +92,17 @@ SceneType Test::Update(float dt) {
 
 	map_->Update();
 
+	if (model_) {
+		model_->Update();
+	}
+
+	sceneCamera_ = tpsCamera_;
+
 	return SceneType::Test;
 }
 
 void Test::Draw() {
-	MyDebugLine::Draw(tpsCamera_);
-	MadoEngine::ModelManager::GetInstance().DrawAll(SceneType::Test, tpsCamera_);
+	
 }
 
 void Test::DrawImGui() {

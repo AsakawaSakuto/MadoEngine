@@ -1,8 +1,10 @@
 #pragma once
+#include "SceneType.h"
+#include "Render/Object/3d/Model/Model.h"
 #include <memory>
 #include <functional>
 #include <map>
-#include "SceneType.h"
+#include <memory>
 
 class IScene;
 
@@ -58,4 +60,6 @@ private:
 	SceneType currentSceneType_;                 // 現在のシーンのタイプ
 	SceneType pendingSceneType_;                 // 保留中の遷移先シーン
 	bool hasPendingSceneChange_;                 // シーン遷移が保留中かどうか
+
+	Model* selectedModel_;     // 選択されたモデル
 };

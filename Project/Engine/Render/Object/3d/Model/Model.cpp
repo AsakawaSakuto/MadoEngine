@@ -2,8 +2,62 @@
 #include "Core/View/SRVManager.h"
 #include "Shader/RootSignatureManager.h"
 #include "../Animation/AnimationFunction.h"
+#include <algorithm>
 #include <cassert>
+#include <cfloat>
 #include <cmath>
+
+namespace {
+
+	/// @brief レイとAABBの交差距離を計算する
+	/// @param rayOrigin レイの始点
+	/// @param rayDirection 正規化済みのレイ方向
+	/// @param boxMin AABBの最小座標
+	/// @param boxMax AABBの最大座標
+	/// @param maxDistance 判定する最大距離
+	/// @param outDistance ヒットした距離の出力先
+	/// @return レイがAABBにヒットした場合はtrue
+	bool IntersectRayAABB(
+		const Vector3& rayOrigin,
+		const Vector3& rayDirection,
+		const Vector3& boxMin,
+		const Vector3& boxMax,
+		float maxDistance,
+		float& outDistance) {
+		float tMin = 0.0f;
+		float tMax = maxDistance;
+
+		for (int axis = 0; axis < 3; ++axis) {
+			const float origin = rayOrigin[axis];
+			const float direction = rayDirection[axis];
+			const float minValue = boxMin[axis];
+			const float maxValue = boxMax[axis];
+
+			if (std::abs(direction) < 0.0001f) {
+				if (origin < minValue || origin > maxValue) {
+					return false;
+				}
+				continue;
+			}
+
+			float t1 = (minValue - origin) / direction;
+			float t2 = (maxValue - origin) / direction;
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
+
+			tMin = (std::max)(tMin, t1);
+			tMax = (std::min)(tMax, t2);
+			if (tMin > tMax) {
+				return false;
+			}
+		}
+
+		outDistance = tMin;
+		return true;
+	}
+
+} // namespace
 
 Model::Model(std::string objectName) {
 	objectName_ = objectName;
@@ -143,6 +197,56 @@ void Model::Update() {
 	materialData_->color = color_;
 	materialData_->uvTransformMatrix = scale * rot * trans;
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+}
+
+bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float maxDistance, float& outDistance) const {
+	if (!sharedData_ || !isVisible_ || sharedData_->modelData.vertices.empty()) {
+		return false;
+	}
+
+	Vector3 localMin = { FLT_MAX, FLT_MAX, FLT_MAX };
+	Vector3 localMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+	for (const ModelVertexData& vertex : sharedData_->modelData.vertices) {
+		const Vector3 position = {
+			vertex.position.x,
+			vertex.position.y,
+			vertex.position.z
+		};
+
+		localMin.x = (std::min)(localMin.x, position.x);
+		localMin.y = (std::min)(localMin.y, position.y);
+		localMin.z = (std::min)(localMin.z, position.z);
+		localMax.x = (std::max)(localMax.x, position.x);
+		localMax.y = (std::max)(localMax.y, position.y);
+		localMax.z = (std::max)(localMax.z, position.z);
+	}
+
+	const Matrix4x4 worldMatrix = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	const Vector3 corners[8] = {
+		{ localMin.x, localMin.y, localMin.z },
+		{ localMax.x, localMin.y, localMin.z },
+		{ localMin.x, localMax.y, localMin.z },
+		{ localMax.x, localMax.y, localMin.z },
+		{ localMin.x, localMin.y, localMax.z },
+		{ localMax.x, localMin.y, localMax.z },
+		{ localMin.x, localMax.y, localMax.z },
+		{ localMax.x, localMax.y, localMax.z }
+	};
+
+	Vector3 worldMin = { FLT_MAX, FLT_MAX, FLT_MAX };
+	Vector3 worldMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	for (const Vector3& corner : corners) {
+		const Vector3 world = Matrix::Transform(corner, worldMatrix);
+		worldMin.x = (std::min)(worldMin.x, world.x);
+		worldMin.y = (std::min)(worldMin.y, world.y);
+		worldMin.z = (std::min)(worldMin.z, world.z);
+		worldMax.x = (std::max)(worldMax.x, world.x);
+		worldMax.y = (std::max)(worldMax.y, world.y);
+		worldMax.z = (std::max)(worldMax.z, world.z);
+	}
+
+	return IntersectRayAABB(rayOrigin, rayDirection, worldMin, worldMax, maxDistance, outDistance);
 }
 
 void Model::Draw(Camera& useCamera) {

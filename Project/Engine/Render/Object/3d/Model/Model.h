@@ -15,6 +15,14 @@ public:
 	void Update() override;
 	void Draw(Camera& useCamera) override;
 
+	/// @brief レイとModelのワールドAABBの交差判定を行う
+	/// @param rayOrigin レイの始点
+	/// @param rayDirection 正規化済みのレイ方向
+	/// @param maxDistance 判定する最大距離
+	/// @param outDistance ヒットした距離の出力先
+	/// @return レイがModelにヒットした場合はtrue
+	bool Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float maxDistance, float& outDistance) const;
+
 	void SetSceneType(SceneType sceneType) { sceneType_ = sceneType; }
 	SceneType GetSceneType() const { return sceneType_; }
 

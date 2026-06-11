@@ -15,4 +15,7 @@ public:
 	virtual void Draw() = 0;
 	virtual void DrawImGui() = 0;
 	virtual void Finalize() = 0;
+
+	Camera GetCamera() const { return sceneCamera_; }
+	Camera sceneCamera_;
 };

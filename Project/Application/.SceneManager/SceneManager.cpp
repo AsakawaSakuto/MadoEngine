@@ -2,6 +2,7 @@
 #include "IScene.h"
 #include "ImGuiHeaders.h"
 #include "Utility/Logger/Logger.h"
+#include "Render/ImGui/EditorUI.h"
 #include <cassert>
 
 SceneManager::SceneManager()
@@ -20,6 +21,8 @@ void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
 void SceneManager::Initialize(SceneType initialScene) {
 	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
 	ChangeScene(initialScene);
+
+	selectedModel_ = nullptr;
 }
 
 void SceneManager::Update(float dt) {
@@ -33,12 +36,16 @@ void SceneManager::Update(float dt) {
 	}
 
 	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
+
+	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
 	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
 }
 
 void SceneManager::Draw() {
+	MadoEngine::DebugLineManager::GetInstance().Draw(currentScene_->GetCamera());
 	MadoEngine::SpriteManager::GetInstance().DrawAll(currentSceneType_);
-	
+	MadoEngine::ModelManager::GetInstance().DrawAll(currentSceneType_);
+
 	if (currentScene_) {
 		currentScene_->Draw();
 	}
@@ -47,6 +54,8 @@ void SceneManager::Draw() {
 void SceneManager::DrawImGui() {
 #ifdef USE_IMGUI
 	DrawSceneManagerImGui();
+
+	MadoEngine::Editor::DrawModelGizmoOnGameView(currentScene_->GetCamera(), currentSceneType_, selectedModel_);
 #endif // USE_IMGUI
 
 	if (currentScene_) {

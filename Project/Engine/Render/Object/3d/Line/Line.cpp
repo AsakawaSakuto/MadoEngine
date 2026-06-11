@@ -570,7 +570,7 @@ void Line3d::AddSlope(const Slope& slope, const Vector4& color) {
     AddLine(low[1], high[1], color);
 }
 
-void Line3d::Draw(Camera& camera) {
+void Line3d::Draw(const Camera& camera) {
 
     if (vertices_.empty()) return;
 

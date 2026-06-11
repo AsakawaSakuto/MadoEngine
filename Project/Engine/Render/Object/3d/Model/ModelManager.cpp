@@ -77,7 +77,7 @@ void ModelManager::Finalize() {
 	}
 	sharedData_.clear();
 	aliases_.clear();
-	activeCamera_ = nullptr;
+	activeCamera_ = {};
 
 	Logger::Output("終了処理完了", Logger::Level::Engine);
 }
@@ -186,6 +186,37 @@ const ModelSharedData* ModelManager::GetSharedData(const std::string& modelName)
 	return FindSharedData(modelName);
 }
 
+Model* ModelManager::PickByRay(
+	SceneType currentSceneType,
+	const Vector3& rayOrigin,
+	const Vector3& rayDirection,
+	float maxDistance,
+	float* outDistance) const {
+	Model* pickedModel = nullptr;
+	float nearestDistance = maxDistance;
+
+	for (const auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+
+		float hitDistance = 0.0f;
+		if (model->Raycast(rayOrigin, rayDirection, maxDistance, hitDistance) && hitDistance < nearestDistance) {
+			nearestDistance = hitDistance;
+			pickedModel = model.get();
+		}
+	}
+
+	if (outDistance) {
+		*outDistance = nearestDistance;
+	}
+	return pickedModel;
+}
+
 const ModelSharedData* ModelManager::FindSharedData(const std::string& modelName) const {
 	auto aliasIt = aliases_.find(modelName);
 	if (aliasIt != aliases_.end()) {
@@ -223,10 +254,7 @@ void ModelManager::UpdateAll(SceneType currentSceneType) {
 }
 
 void ModelManager::DrawAll(SceneType currentSceneType) {
-	if (!activeCamera_) {
-		return;
-	}
-	DrawAll(currentSceneType, *activeCamera_);
+	DrawAll(currentSceneType, activeCamera_);
 }
 
 void ModelManager::DrawAll(SceneType currentSceneType, Camera& camera) {

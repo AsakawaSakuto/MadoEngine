@@ -22,7 +22,7 @@ namespace MyDebugLine {
 
     /// @brief すべての線を描画
     /// @param camera 使用するカメラ
-    inline void Draw(Camera& camera) {
+    inline void Draw(const Camera& camera) {
         DebugLineManager::GetInstance().Draw(camera);
     }
 }

@@ -28,7 +28,7 @@ inline void DestroyByScene(SceneType sceneType) {
 }
 
 /// @brief カメラをセットする
-inline void SetCamera(Camera* camera) {
+inline void SetCamera(Camera& camera) {
 	MadoEngine::ModelManager::GetInstance().SetCamera(camera);
 }
 

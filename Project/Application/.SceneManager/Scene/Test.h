@@ -56,5 +56,6 @@ private:
 	std::unique_ptr<Map> map_;
 
 	Model* model_ = nullptr;
+	Model* selectedModel_ = nullptr;
 	Vector3 modelPos_ = { -10.0f, 0.0f, -10.0f };
 };

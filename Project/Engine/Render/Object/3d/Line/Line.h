@@ -128,7 +128,7 @@ public:
 
     /// @brief 描画
     /// @param camera 使用するカメラ
-    void Draw(Camera& camera);
+    void Draw(const Camera& camera);
 
 private:
 
