@@ -35,6 +35,8 @@ void SceneManager::Update(float dt) {
 		}
 	}
 
+	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
+
 	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
 
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());

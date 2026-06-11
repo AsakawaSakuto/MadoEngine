@@ -88,7 +88,6 @@ SceneType Test::Update(float dt) {
 	MyDebugLine::AddShape(std::get<Slope>(slope_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddShape(std::get<Slope>(slope2_), { 1.0f, 1.0f, 1.0f, 1.0f });
 	MyDebugLine::AddShape(std::get<AABB>(aabb_), { 1.0f, 1.0f, 1.0f, 1.0f });
-	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 
 	map_->Update();
 

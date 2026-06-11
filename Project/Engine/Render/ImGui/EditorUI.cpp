@@ -51,17 +51,36 @@ namespace MadoEngine::Editor {
             return true;
         }
 
+        /// @brief 現在のギズモ操作を取得する
+        /// @return 現在のギズモ操作
+        ImGuizmo::OPERATION& CurrentGizmoOperation() {
+            static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE;
+            return currentOperation;
+        }
+
+        /// @brief ギズモ操作をTranslate、Rotate、Scaleの順に切り替える
+        void CycleGizmoOperation() {
+            ImGuizmo::OPERATION& currentOperation = CurrentGizmoOperation();
+            if (currentOperation == ImGuizmo::TRANSLATE) {
+                currentOperation = ImGuizmo::ROTATE;
+            } else if (currentOperation == ImGuizmo::ROTATE) {
+                currentOperation = ImGuizmo::SCALE;
+            } else {
+                currentOperation = ImGuizmo::TRANSLATE;
+            }
+        }
+
         /// @brief ギズモ操作モードの選択ボタンを描画する
         /// @param imageMin Game View画像領域の左上座標
         /// @return 現在選択されているImGuizmo操作
         ImGuizmo::OPERATION DrawGizmoOperationButtons(const ImVec2& imageMin) {
-            static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE;
+            ImGuizmo::OPERATION& currentOperation = CurrentGizmoOperation();
 
             ImGui::SetCursorScreenPos({ imageMin.x + 8.0f, imageMin.y + 8.0f });
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4.0f, 0.0f });
 
-            auto drawButton = [](const char* label, ImGuizmo::OPERATION operation) {
+            auto drawButton = [&currentOperation](const char* label, ImGuizmo::OPERATION operation) {
                 const bool isSelected = currentOperation == operation;
                 if (isSelected) {
                     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
@@ -232,6 +251,16 @@ namespace MadoEngine::Editor {
             isChanged = true;
         }
 
+        const ImVec2 mousePosition = ImGui::GetMousePos();
+        const bool isMouseOnGameView = IsPointInRect(mousePosition, imageMin, imageSize);
+        if (selectedModel &&
+            ImGui::IsMouseClicked(ImGuiMouseButton_Right) &&
+            isMouseOnGameView &&
+            !ImGuizmo::IsUsing()) {
+            CycleGizmoOperation();
+            isChanged = true;
+        }
+
         if (selectedModel) {
             Transform3D transform = selectedModel->GetTransform();
             if (DrawTransformGizmoInRect(camera, transform, imageMin, imageSize)) {
@@ -240,10 +269,9 @@ namespace MadoEngine::Editor {
             }
         }
 
-        const ImVec2 mousePosition = ImGui::GetMousePos();
         const bool canSelect =
             ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
-            IsPointInRect(mousePosition, imageMin, imageSize) &&
+            isMouseOnGameView &&
             !ImGui::IsAnyItemHovered() &&
             !ImGuizmo::IsOver() &&
             !ImGuizmo::IsUsing();
