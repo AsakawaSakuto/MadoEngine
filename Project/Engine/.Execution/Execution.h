@@ -83,6 +83,7 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 
 		std::unique_ptr<MadoEngine::Render::RenderTexture> offscreenRT_;
+		std::unique_ptr<MadoEngine::Render::RenderTexture> postEffectRT_;
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
 
 #ifdef USE_IMGUI

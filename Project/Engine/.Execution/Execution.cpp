@@ -100,6 +100,9 @@ namespace MadoEngine
 		offscreenRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
 		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
 
+		postEffectRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
+		postEffectRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_, DXGI_FORMAT_R8G8B8A8_UNORM);
+
 		postEffectCopyDesc_.blendMode = MadoEngine::Render::BlendMode::None;
 		postEffectCopyDesc_.depthMode = MadoEngine::Render::DepthMode::Disable;
 		postEffectCopyDesc_.cullMode = MadoEngine::Render::CullMode::None;
@@ -152,6 +155,7 @@ namespace MadoEngine
 		depthStencilBuffer_->Resize(width, height);
 		viewportScissor_->UpdateSize(width, height);
 		offscreenRT_->Resize(width, height);
+		postEffectRT_->Resize(width, height);
 
 		renderWidth_ = width;
 		renderHeight_ = height;
@@ -191,13 +195,19 @@ namespace MadoEngine
 		// オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
 		offscreenRT_->EndRender(commandManager_->GetCommandList());
 
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
+		postEffectRT_->BeginRender(commandManager_->GetCommandList(), dsvHandle);
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		DrawPostEffectCopy();
+		postEffectRT_->EndRender(commandManager_->GetCommandList());
+
 		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 
 		// エディタレイアウト（DockSpace + Game View）を描画
 		// ※必ずシーンの DrawImGui() より前に呼ぶこと（DockSpaceを先に生成する必要があるため）
-		imguiManager_->DrawEditorLayout(offscreenRT_->GetSRVGPUHandle());
+		imguiManager_->DrawEditorLayout(postEffectRT_->GetSRVGPUHandle());
 
 		// デモウィンドウ（動作確認用、不要になったら削除してください）
 		ImGui::ShowDemoWindow();
