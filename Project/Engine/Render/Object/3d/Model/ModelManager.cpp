@@ -254,10 +254,26 @@ void ModelManager::UpdateAll(SceneType currentSceneType) {
 }
 
 void ModelManager::DrawAll(SceneType currentSceneType) {
-	DrawAll(currentSceneType, activeCamera_);
+	DrawLayerMask(currentSceneType, activeCamera_, MadoEngine::Render::kAllRenderLayers);
 }
 
 void ModelManager::DrawAll(SceneType currentSceneType, Camera& camera) {
+	DrawLayerMask(currentSceneType, camera, MadoEngine::Render::kAllRenderLayers);
+}
+
+void ModelManager::DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer) {
+	DrawLayerMask(currentSceneType, activeCamera_, MadoEngine::Render::ToRenderLayerMask(layer));
+}
+
+void ModelManager::DrawLayer(SceneType currentSceneType, Camera& camera, MadoEngine::Render::RenderLayer layer) {
+	DrawLayerMask(currentSceneType, camera, MadoEngine::Render::ToRenderLayerMask(layer));
+}
+
+void ModelManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask) {
+	DrawLayerMask(currentSceneType, activeCamera_, layerMask);
+}
+
+void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, MadoEngine::Render::RenderLayerMask layerMask) {
 	if (models_.empty()) {
 		return;
 	}
@@ -268,6 +284,9 @@ void ModelManager::DrawAll(SceneType currentSceneType, Camera& camera) {
 			continue;
 		}
 		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
 			continue;
 		}
 

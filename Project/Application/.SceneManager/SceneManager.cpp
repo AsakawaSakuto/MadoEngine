@@ -44,10 +44,31 @@ void SceneManager::Update(float dt) {
 }
 
 void SceneManager::Draw() {
-	MadoEngine::DebugLineManager::GetInstance().Draw(currentScene_->GetCamera());
-	MadoEngine::SpriteManager::GetInstance().DrawAll(currentSceneType_);
-	MadoEngine::ModelManager::GetInstance().DrawAll(currentSceneType_);
+	DrawLayerMask(MadoEngine::Render::kAllRenderLayers);
 
+	if (currentScene_) {
+		currentScene_->Draw();
+	}
+}
+
+void SceneManager::DrawLayer(MadoEngine::Render::RenderLayer layer) {
+	DrawLayerMask(MadoEngine::Render::ToRenderLayerMask(layer));
+}
+
+void SceneManager::DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {
+	if (!currentScene_) {
+		return;
+	}
+
+	Camera camera = currentScene_->GetCamera();
+	if (MadoEngine::Render::ContainsRenderLayer(layerMask, MadoEngine::Render::RenderLayer::Debug)) {
+		MadoEngine::DebugLineManager::GetInstance().Draw(camera);
+	}
+	MadoEngine::SpriteManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
+	MadoEngine::ModelManager::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
+}
+
+void SceneManager::DrawCurrentScene() {
 	if (currentScene_) {
 		currentScene_->Draw();
 	}

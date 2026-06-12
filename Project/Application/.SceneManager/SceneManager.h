@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneType.h"
+#include "Render/Object/RenderLayer.h"
 #include "Render/Object/3d/Model/Model.h"
 #include <memory>
 #include <functional>
@@ -36,6 +37,17 @@ public:
 
 	/// @brief 現在のシーンを描画します
 	void Draw();
+
+	/// @brief 指定した描画レイヤーのみを描画します
+	/// @param layer 描画対象のレイヤー
+	void DrawLayer(MadoEngine::Render::RenderLayer layer);
+
+	/// @brief 指定したレイヤーマスクに含まれる描画対象を描画します
+	/// @param layerMask 描画対象のレイヤーマスク
+	void DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
+
+	/// @brief 現在のシーン固有の描画処理を実行します
+	void DrawCurrentScene();
 
 	/// @brief 現在のシーンのImGuiを描画します
 	void DrawImGui();

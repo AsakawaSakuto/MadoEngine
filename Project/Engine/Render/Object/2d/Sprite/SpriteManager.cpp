@@ -98,6 +98,14 @@ void SpriteManager::UpdateAll(SceneType currentSceneType) {
 }
 
 void SpriteManager::DrawAll(SceneType currentSceneType) {
+	DrawLayerMask(currentSceneType, MadoEngine::Render::kAllRenderLayers);
+}
+
+void SpriteManager::DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer) {
+	DrawLayerMask(currentSceneType, MadoEngine::Render::ToRenderLayerMask(layer));
+}
+
+void SpriteManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask) {
 	if (sprites_.empty()) { return; }
 
 	// 全スプライト共通のステートをループ外で1回だけ設定する
@@ -108,6 +116,7 @@ void SpriteManager::DrawAll(SceneType currentSceneType) {
 		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
 		if (!sprite->IsVisible()) { continue; }
 		if (spriteScene != SceneType::None && spriteScene != currentSceneType) { continue; }
+		if (!sprite->IsRenderLayerIncluded(layerMask)) { continue; }
 
 		// 最初の有効なスプライトのタイミングで共通ステートを1回だけ設定
 		if (!isStateSet) {

@@ -1,5 +1,17 @@
 #include "Execution.h"
 #include "Render/ImGui/EditorUI.h"
+#include <cassert>
+
+namespace {
+
+	const std::string kSceneColorTarget = "SceneColor";
+	const std::string kPostEffectResultTarget = "PostEffectResult";
+	const std::string kPostEffectWorkTarget = "PostEffectWork";
+	const std::string kLayerColorTarget = "LayerColor";
+	const std::string kLayerEffectResultTarget = "LayerEffectResult";
+	const std::string kLayerEffectWorkTarget = "LayerEffectWork";
+
+} // namespace
 
 namespace MadoEngine
 {
@@ -97,11 +109,38 @@ namespace MadoEngine
 		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
 
-		offscreenRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
-		offscreenRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+		renderTargetManager_ = std::make_unique<MadoEngine::Render::RenderTargetManager>();
+		renderTargetManager_->Initialize(dxDevice_.get(), rtvManager_, srvManager_);
 
-		postEffectRT_ = std::make_unique<MadoEngine::Render::RenderTexture>();
-		postEffectRT_->Initialize(dxDevice_.get(), rtvManager_, srvManager_, renderWidth_, renderHeight_, DXGI_FORMAT_R8G8B8A8_UNORM);
+		MadoEngine::Render::RenderTargetManager::Desc sceneColorDesc{};
+		sceneColorDesc.width = renderWidth_;
+		sceneColorDesc.height = renderHeight_;
+		sceneColorDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		sceneColorDesc.clearColor = { 0.1f, 0.25f, 0.5f, 1.0f };
+		renderTargetManager_->Create(kSceneColorTarget, sceneColorDesc);
+
+		MadoEngine::Render::RenderTargetManager::Desc postEffectDesc{};
+		postEffectDesc.width = renderWidth_;
+		postEffectDesc.height = renderHeight_;
+		postEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		postEffectDesc.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		renderTargetManager_->Create(kPostEffectResultTarget, postEffectDesc);
+		renderTargetManager_->Create(kPostEffectWorkTarget, postEffectDesc);
+
+		MadoEngine::Render::RenderTargetManager::Desc layerColorDesc{};
+		layerColorDesc.width = renderWidth_;
+		layerColorDesc.height = renderHeight_;
+		layerColorDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		layerColorDesc.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+		renderTargetManager_->Create(kLayerColorTarget, layerColorDesc);
+
+		MadoEngine::Render::RenderTargetManager::Desc layerEffectDesc{};
+		layerEffectDesc.width = renderWidth_;
+		layerEffectDesc.height = renderHeight_;
+		layerEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		layerEffectDesc.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+		renderTargetManager_->Create(kLayerEffectResultTarget, layerEffectDesc);
+		renderTargetManager_->Create(kLayerEffectWorkTarget, layerEffectDesc);
 
 		postEffectCopyDesc_.blendMode = MadoEngine::Render::BlendMode::None;
 		postEffectCopyDesc_.depthMode = MadoEngine::Render::DepthMode::Disable;
@@ -114,6 +153,11 @@ namespace MadoEngine
 		postEffectCopyDesc_.vsKey = "PostEffect/CopyImage.VS";
 		postEffectCopyDesc_.psKey = "PostEffect/CopyImage.PS";
 		postEffectCopyDesc_.rootSigKey = "PostEffect.RootSig";
+
+		compositeDesc_ = postEffectCopyDesc_;
+		compositeDesc_.psKey = "PostEffect/Composite.PS";
+		compositeDesc_.rootSigKey = "PostEffect.Composite.RootSig";
+
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
@@ -154,8 +198,7 @@ namespace MadoEngine
 		swapChain_->Resize(width, height);
 		depthStencilBuffer_->Resize(width, height);
 		viewportScissor_->UpdateSize(width, height);
-		offscreenRT_->Resize(width, height);
-		postEffectRT_->Resize(width, height);
+		renderTargetManager_->ResizeAll(width, height);
 
 		renderWidth_ = width;
 		renderHeight_ = height;
@@ -166,8 +209,52 @@ namespace MadoEngine
 		);
 	}
 
+	MadoEngine::Render::LayerEffectPass* Execution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
+		layerEffectPasses_.emplace_back();
+		layerEffectPasses_.back().Initialize(desc, postEffectCopyDesc_);
+		return &layerEffectPasses_.back();
+	}
+
+	void Execution::ClearLayerEffectPasses() {
+		layerEffectPasses_.clear();
+	}
+
+	const std::vector<MadoEngine::Render::LayerEffectPass>& Execution::GetLayerEffectPasses() const {
+		return layerEffectPasses_;
+	}
+
+	const MadoEngine::Render::LayerEffectPass* Execution::GetFirstEnabledLayerEffectPass() const {
+		for (const MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
+			if (pass.IsEnabled() && pass.GetTargetLayerMask() != 0) {
+				return &pass;
+			}
+		}
+
+		return nullptr;
+	}
+
+	MadoEngine::Render::RenderLayerMask Execution::GetEnabledLayerEffectTargetMask() const {
+		MadoEngine::Render::RenderLayerMask layerMask = 0;
+		for (const MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
+			if (!pass.IsEnabled()) {
+				continue;
+			}
+
+			layerMask |= pass.GetTargetLayerMask();
+		}
+
+		return layerMask;
+	}
+
 	void Execution::PreDraw()
 	{
+		isSceneColorEnded_ = false;
+		isLayerEffectChainResolved_ = false;
+		isLayerEffectResolved_ = false;
+		currentCompositeSourceName_ = kSceneColorTarget;
+		resolvedPostEffectTargetName_ = kPostEffectResultTarget;
+		currentLayerEffectSourceName_ = kLayerColorTarget;
+
 #ifdef USE_IMGUI
 		// ImGuiフレーム開始
 		imguiManager_->Begin();
@@ -183,23 +270,88 @@ namespace MadoEngine
 		// オフスクリーンRTへ描画する
 		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
-		offscreenRT_->BeginRender(commandManager_->GetCommandList(), dsvHandle);
+		renderTargetManager_->Begin(kSceneColorTarget, commandManager_->GetCommandList(), dsvHandle);
 		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		viewportScissor_->Apply(commandManager_->GetCommandList());
+	}
+
+	void Execution::EndSceneColorRender() {
+		if (isSceneColorEnded_) {
+			return;
+		}
+
+		renderTargetManager_->End(kSceneColorTarget, commandManager_->GetCommandList());
+		isSceneColorEnded_ = true;
+	}
+
+	void Execution::BeginLayerEffectRender(const MadoEngine::Render::LayerEffectPass& pass) {
+		assert(pass.IsEnabled() && "無効なLayerEffectPassは実行できません");
+		assert(pass.GetTargetLayerMask() != 0 && "LayerEffectPassの対象LayerMaskが0です");
+
+		EndSceneColorRender();
+		isLayerEffectChainResolved_ = false;
+		currentLayerEffectSourceName_ = kLayerColorTarget;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
+		renderTargetManager_->Begin(kLayerColorTarget, commandManager_->GetCommandList(), dsvHandle);
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+	}
+
+	void Execution::EndLayerEffectRender() {
+		renderTargetManager_->End(kLayerColorTarget, commandManager_->GetCommandList());
+	}
+
+	void Execution::ApplyLayerEffectAndComposite(const MadoEngine::Render::LayerEffectPass& pass) {
+		ApplyLayerEffectToChain(pass);
+		CompositeLayerEffectChain();
+	}
+
+	void Execution::ApplyLayerEffectToChain(const MadoEngine::Render::LayerEffectPass& pass) {
+		assert(pass.IsEnabled() && "無効なLayerEffectPassは実行できません");
+		assert(pass.GetTargetLayerMask() != 0 && "LayerEffectPassの対象LayerMaskが0です");
+
+		const std::string& outputTargetName = GetNextLayerEffectOutputName();
+		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_), pass.GetEffectPSODesc());
+		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+
+		currentLayerEffectSourceName_ = outputTargetName;
+		isLayerEffectChainResolved_ = true;
+	}
+
+	void Execution::CompositeLayerEffectChain() {
+		assert(isLayerEffectChainResolved_ && "LayerEffectChainが解決されていません");
+
+		const std::string& outputTargetName = GetNextPostEffectOutputName();
+		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		DrawComposite(
+			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+			renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_)
+		);
+		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+
+		currentCompositeSourceName_ = outputTargetName;
+		resolvedPostEffectTargetName_ = outputTargetName;
+		isLayerEffectResolved_ = true;
 	}
 
 	void Execution::BeginImGuiLayout()
 	{
 #ifdef USE_IMGUI
 		// オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
-		offscreenRT_->EndRender(commandManager_->GetCommandList());
-
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
-		postEffectRT_->BeginRender(commandManager_->GetCommandList(), dsvHandle);
-		viewportScissor_->Apply(commandManager_->GetCommandList());
-		DrawPostEffectCopy();
-		postEffectRT_->EndRender(commandManager_->GetCommandList());
+		if (!isLayerEffectResolved_) {
+			EndSceneColorRender();
+			renderTargetManager_->Begin(kPostEffectResultTarget, commandManager_->GetCommandList());
+			viewportScissor_->Apply(commandManager_->GetCommandList());
+			DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(kSceneColorTarget), postEffectCopyDesc_);
+			renderTargetManager_->End(kPostEffectResultTarget, commandManager_->GetCommandList());
+			currentCompositeSourceName_ = kPostEffectResultTarget;
+			resolvedPostEffectTargetName_ = kPostEffectResultTarget;
+			isLayerEffectResolved_ = true;
+		}
 
 		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
@@ -207,7 +359,7 @@ namespace MadoEngine
 
 		// エディタレイアウト（DockSpace + Game View）を描画
 		// ※必ずシーンの DrawImGui() より前に呼ぶこと（DockSpaceを先に生成する必要があるため）
-		imguiManager_->DrawEditorLayout(postEffectRT_->GetSRVGPUHandle());
+		imguiManager_->DrawEditorLayout(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_));
 
 		// デモウィンドウ（動作確認用、不要になったら削除してください）
 		ImGui::ShowDemoWindow();
@@ -228,23 +380,59 @@ namespace MadoEngine
 
 		MadoEngine::Editor::DrawAudioManagerUI();
 #else
-		offscreenRT_->EndRender(commandManager_->GetCommandList());
+		if (!isLayerEffectResolved_) {
+			EndSceneColorRender();
+			renderTargetManager_->Begin(kPostEffectResultTarget, commandManager_->GetCommandList());
+			viewportScissor_->Apply(commandManager_->GetCommandList());
+			DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(kSceneColorTarget), postEffectCopyDesc_);
+			renderTargetManager_->End(kPostEffectResultTarget, commandManager_->GetCommandList());
+			currentCompositeSourceName_ = kPostEffectResultTarget;
+			resolvedPostEffectTargetName_ = kPostEffectResultTarget;
+			isLayerEffectResolved_ = true;
+		}
 
 		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 		viewportScissor_->Apply(commandManager_->GetCommandList());
-		DrawPostEffectCopy();
+		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_), postEffectCopyDesc_);
 #endif // USE_IMGUI
 	}
 
-	void Execution::DrawPostEffectCopy() {
+	void Execution::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE inputSrv, const MadoEngine::Render::PSODesc& desc) {
 		auto* commandList = commandManager_->GetCommandList();
 		commandList->SetGraphicsRootSignature(
-			MadoEngine::RootSignatureManager::GetInstance().Get(postEffectCopyDesc_.rootSigKey));
-		commandList->SetPipelineState(psoRegistry_->Get(postEffectCopyDesc_));
+			MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey));
+		commandList->SetPipelineState(psoRegistry_->Get(desc));
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->SetGraphicsRootDescriptorTable(0, offscreenRT_->GetSRVGPUHandle());
+		commandList->SetGraphicsRootDescriptorTable(0, inputSrv);
 		commandList->DrawInstanced(3, 1, 0, 0);
+	}
+
+	void Execution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {
+		auto* commandList = commandManager_->GetCommandList();
+		commandList->SetGraphicsRootSignature(
+			MadoEngine::RootSignatureManager::GetInstance().Get(compositeDesc_.rootSigKey));
+		commandList->SetPipelineState(psoRegistry_->Get(compositeDesc_));
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		commandList->SetGraphicsRootDescriptorTable(0, sceneSrv);
+		commandList->SetGraphicsRootDescriptorTable(1, effectSrv);
+		commandList->DrawInstanced(3, 1, 0, 0);
+	}
+
+	const std::string& Execution::GetNextPostEffectOutputName() const {
+		if (currentCompositeSourceName_ == kPostEffectResultTarget) {
+			return kPostEffectWorkTarget;
+		}
+
+		return kPostEffectResultTarget;
+	}
+
+	const std::string& Execution::GetNextLayerEffectOutputName() const {
+		if (currentLayerEffectSourceName_ == kLayerEffectResultTarget) {
+			return kLayerEffectWorkTarget;
+		}
+
+		return kLayerEffectResultTarget;
 	}
 
 	void Execution::PostDraw()

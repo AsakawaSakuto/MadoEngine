@@ -54,6 +54,16 @@ namespace MadoEngine::Render {
 			D3D12_CPU_DESCRIPTOR_HANDLE  depthStencilHandle
 		);
 
+		/// @brief 描画開始処理を行う
+		/// @param commandList コマンドリスト
+		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル。不要な場合はnullptr
+		/// @param clearColor クリアカラー。nullptrの場合はデフォルトカラーを使用する
+		void BeginRender(
+			ID3D12GraphicsCommandList*         commandList,
+			const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilHandle,
+			const float*                       clearColor
+		);
+
 		/// @brief 描画終了処理を行う（RTV → PSR へのリソースバリア）
 		/// @param commandList コマンドリスト
 		void EndRender(ID3D12GraphicsCommandList* commandList);

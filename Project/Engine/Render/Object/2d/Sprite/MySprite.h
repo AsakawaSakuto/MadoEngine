@@ -12,6 +12,25 @@ namespace MySprite {
 		return MadoEngine::SpriteManager::GetInstance().Create(name, textureName, sceneType);
 	};
 
+	/// @brief 描画レイヤーを指定してSpriteを作成する
+	/// @param name Spriteの識別名
+	/// @param textureName 使用するテクスチャ名
+	/// @param sceneType 描画を許可するシーンの種類
+	/// @param layer 設定する描画レイヤー
+	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
+	inline Sprite* Create(
+		const std::string& name,
+		const std::string& textureName,
+		SceneType sceneType,
+		MadoEngine::Render::RenderLayer layer)
+	{
+		Sprite* sprite = MadoEngine::SpriteManager::GetInstance().Create(name, textureName, sceneType);
+		if (sprite) {
+			sprite->SetRenderLayer(layer);
+		}
+		return sprite;
+	}
+
 	/// @brief 識別名でSpriteを取得する
 	/// @param name Spriteの識別名
 	/// @return Spriteのポインタ（存在しない場合はnullptr）

@@ -140,6 +140,33 @@ namespace MadoEngine::Render {
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 	}
 
+	void RenderTexture::BeginRender(
+		ID3D12GraphicsCommandList*         commandList,
+		const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilHandle,
+		const float*                       clearColor)
+	{
+		assert(commandList != nullptr && "commandList が nullptr です");
+		assert(textureResource_ != nullptr && "テクスチャリソースが未初期化です");
+
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = textureResource_.Get();
+		barrier.Transition.StateBefore = currentState_;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		commandList->ResourceBarrier(1, &barrier);
+
+		currentState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvManager_->GetCPUHandle(rtvIndex_);
+		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, depthStencilHandle);
+
+		float defaultClearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
+		const float* actualClearColor = clearColor != nullptr ? clearColor : defaultClearColor;
+		commandList->ClearRenderTargetView(rtvHandle, actualClearColor, 0, nullptr);
+	}
+
 	void RenderTexture::EndRender(ID3D12GraphicsCommandList* commandList) {
 		assert(commandList      != nullptr && "commandList が nullptr です");
 		assert(textureResource_ != nullptr && "テクスチャリソースが未初期化です");

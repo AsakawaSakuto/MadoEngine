@@ -1,6 +1,7 @@
 #pragma once
 #include "Sprite.h"
 #include "SpriteSharedGeometry.h"
+#include "Render/Object/RenderLayer.h"
 #include ".SceneManager/SceneType.h"
 #include <unordered_map>
 #include <memory>
@@ -58,6 +59,16 @@ public:
 	/// @brief 管理下の全Spriteを描画する（IsVisible() == false またはシーン不一致はスキップ）
 	/// @param currentSceneType 現在実行中のシーンの種類
 	void DrawAll(SceneType currentSceneType);
+
+	/// @brief 指定した描画レイヤーのSpriteのみを描画する
+	/// @param currentSceneType 現在のシーン種別
+	/// @param layer 描画対象のレイヤー
+	void DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer);
+
+	/// @brief 指定したレイヤーマスクに含まれるSpriteを描画する
+	/// @param currentSceneType 現在のシーン種別
+	/// @param layerMask 描画対象のレイヤーマスク
+	void DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask);
 
 private:
 

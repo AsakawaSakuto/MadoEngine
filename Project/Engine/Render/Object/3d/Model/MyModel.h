@@ -9,6 +9,25 @@ inline Model* Create(const std::string& name, const std::string& modelName, Scen
 	return MadoEngine::ModelManager::GetInstance().Create(name, modelName, sceneType);
 }
 
+/// @brief 描画レイヤーを指定してモデルインスタンスを作成する
+/// @param name 作成するモデルの識別名
+/// @param modelName 使用するモデルアセット名
+/// @param sceneType 描画を許可するシーン種別
+/// @param layer 設定する描画レイヤー
+/// @return 作成したモデルのポインタ。作成に失敗した場合はnullptr
+inline Model* Create(
+	const std::string& name,
+	const std::string& modelName,
+	SceneType sceneType,
+	MadoEngine::Render::RenderLayer layer)
+{
+	Model* model = MadoEngine::ModelManager::GetInstance().Create(name, modelName, sceneType);
+	if (model) {
+		model->SetRenderLayer(layer);
+	}
+	return model;
+}
+
 /// @brief モデルインスタンスを取得する
 /// @param name 取得対象のモデル名
 inline Model* Get(const std::string& name) {

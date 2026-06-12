@@ -1,6 +1,7 @@
 #pragma once
 #include "Render/Screen/WindowsAPI.h"
 #include "Render/Screen/SwapChain.h"
+#include "Render/Object/RenderLayer.h"
 #include "Render/Object/RenderObject2d.h"
 #include "Render/Object/RenderObject3d.h"
 #include "Render/Object/2d/Sprite/Sprite.h"
@@ -17,7 +18,9 @@
 #include "Render/PSO/PSOFactory.h"
 #include "Render/PSO/PSORegistry.h"
 #include "Render/PSO/ShaderReflector.h"
+#include "Render/LayerEffectPass.h"
 #include "Shader/ShaderManager.h"
 #include "Shader/RootSignatureManager.h"
 #include "Render/Screen/RenderTexture.h"
+#include "Render/Screen/RenderTargetManager.h"
 #include "Render/Screen/ViewportScissor.h"

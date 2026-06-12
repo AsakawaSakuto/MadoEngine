@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <string>
 #include <d3d12.h>
 #include <wrl/client.h>
 #include "CoreHeaders.h"
@@ -28,6 +29,47 @@ namespace MadoEngine
 		/// @brief 描画前処理
 		void PreDraw();
 
+		/// @brief LayerEffectPassを登録する
+		/// @param desc LayerEffectPassの生成設定
+		/// @return 登録したLayerEffectPassのポインタ
+		MadoEngine::Render::LayerEffectPass* AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc);
+
+		/// @brief 登録済みLayerEffectPassをすべて削除する
+		void ClearLayerEffectPasses();
+
+		/// @brief 登録済みLayerEffectPassを取得する
+		/// @return 登録済みLayerEffectPass配列
+		const std::vector<MadoEngine::Render::LayerEffectPass>& GetLayerEffectPasses() const;
+
+		/// @brief 最初に有効なLayerEffectPassを取得する
+		/// @return 有効なLayerEffectPass。存在しない場合はnullptr
+		const MadoEngine::Render::LayerEffectPass* GetFirstEnabledLayerEffectPass() const;
+
+		/// @brief 有効なLayerEffectPassの対象Layerをまとめたマスクを取得する
+		/// @return 有効なLayerEffectPassの対象Layerマスク
+		MadoEngine::Render::RenderLayerMask GetEnabledLayerEffectTargetMask() const;
+
+		/// @brief シーンカラーRenderTargetへの描画を終了する
+		void EndSceneColorRender();
+
+		/// @brief ポストエフェクト対象Layer用RenderTargetへの描画を開始する
+		/// @param pass 実行するLayerEffectPass
+		void BeginLayerEffectRender(const MadoEngine::Render::LayerEffectPass& pass);
+
+		/// @brief ポストエフェクト対象Layer用RenderTargetへの描画を終了する
+		void EndLayerEffectRender();
+
+		/// @brief 対象Layerのポストエフェクト結果をシーンへ合成する
+		/// @param pass 実行するLayerEffectPass
+		void ApplyLayerEffectAndComposite(const MadoEngine::Render::LayerEffectPass& pass);
+
+		/// @brief 対象Layerの現在のチェーン結果へポストエフェクトを適用する
+		/// @param pass 実行するLayerEffectPass
+		void ApplyLayerEffectToChain(const MadoEngine::Render::LayerEffectPass& pass);
+
+		/// @brief 対象Layerのエフェクトチェーン結果を現在の合成済み画像へ合成する
+		void CompositeLayerEffectChain();
+
 		/// @brief ImGuiレイアウト開始（DockSpace・GameView生成）
 		/// @brief シーンの DrawImGui() より前に呼ぶこと
 		void BeginImGuiLayout();
@@ -44,6 +86,8 @@ namespace MadoEngine
 		/// @brief アプリケーションを終了するフラグを設定
 		bool IsStopApplication() const { return isStopApplication_; }
 
+		/// @brief 1フレームの経過時間を取得する
+		/// @return 経過時間（秒）
 		float GetDeltaTime() const { return static_cast<float>(deltaTime_->GetDeltaTime()); }
 
 	private:
@@ -53,8 +97,23 @@ namespace MadoEngine
 		/// @brief ウィンドウリサイズ要求を描画リソースへ反映する
 		void HandleResize();
 
-		/// @brief オフスクリーン描画結果をバックバッファへコピーする
-		void DrawPostEffectCopy();
+		/// @brief 指定したSRVを現在の描画先へポストエフェクト描画する
+		/// @param inputSrv 入力テクスチャのGPU SRVハンドル
+		/// @param desc 使用するPSO設定
+		void DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE inputSrv, const MadoEngine::Render::PSODesc& desc);
+
+		/// @brief シーンとLayerエフェクト結果を現在の描画先へ合成する
+		/// @param sceneSrv シーンカラーのGPU SRVハンドル
+		/// @param effectSrv エフェクト結果のGPU SRVハンドル
+		void DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv);
+
+		/// @brief 次のポストエフェクト合成先RenderTarget名を取得する
+		/// @return 次の合成先RenderTarget名
+		const std::string& GetNextPostEffectOutputName() const;
+
+		/// @brief 次のLayerエフェクトチェーン出力先RenderTarget名を取得する
+		/// @return 次のLayerエフェクトチェーン出力先RenderTarget名
+		const std::string& GetNextLayerEffectOutputName() const;
 
 		bool isStopApplication_ = false;
 		uint32_t renderWidth_ = 0;
@@ -82,9 +141,16 @@ namespace MadoEngine
 
 		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 
-		std::unique_ptr<MadoEngine::Render::RenderTexture> offscreenRT_;
-		std::unique_ptr<MadoEngine::Render::RenderTexture> postEffectRT_;
+		std::unique_ptr<MadoEngine::Render::RenderTargetManager> renderTargetManager_;
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
+		MadoEngine::Render::PSODesc compositeDesc_;
+		std::vector<MadoEngine::Render::LayerEffectPass> layerEffectPasses_;
+		std::string currentCompositeSourceName_ = "SceneColor";
+		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
+		std::string currentLayerEffectSourceName_ = "LayerColor";
+		bool isSceneColorEnded_ = false;
+		bool isLayerEffectChainResolved_ = false;
+		bool isLayerEffectResolved_ = false;
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;

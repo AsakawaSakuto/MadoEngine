@@ -1,4 +1,6 @@
 #include "Terminal.h"
+#include "LayerEffectPassSetup.h"
+#include <cstddef>
 
 Terminal::Terminal(HINSTANCE hInstance)
 {
@@ -10,6 +12,7 @@ Terminal::Terminal(HINSTANCE hInstance)
 	sceneManager_->RegisterScene(SceneType::Game,   []() { return std::make_unique<Game>(); });
 	sceneManager_->RegisterScene(SceneType::Result, []() { return std::make_unique<Result>(); });
 	sceneManager_->Initialize(SceneType::Test);
+	RenderPassSetup::RegisterLayerEffectPasses(*execution_);
 }
 
 void Terminal::Run() {
@@ -26,7 +29,53 @@ void Terminal::Run() {
 
 		execution_->PreDraw();
 
-		sceneManager_->Draw();
+		const MadoEngine::Render::RenderLayerMask layerEffectTargetMask = execution_->GetEnabledLayerEffectTargetMask();
+		if (layerEffectTargetMask != 0) {
+			const MadoEngine::Render::RenderLayerMask baseLayerMask =
+				MadoEngine::Render::RemoveRenderLayerMask(
+					MadoEngine::Render::kAllRenderLayers,
+					layerEffectTargetMask
+				);
+
+			sceneManager_->DrawLayerMask(baseLayerMask);
+			sceneManager_->DrawCurrentScene();
+			execution_->EndSceneColorRender();
+
+			const std::vector<MadoEngine::Render::LayerEffectPass>& layerEffectPasses = execution_->GetLayerEffectPasses();
+			for (std::size_t passIndex = 0; passIndex < layerEffectPasses.size(); ++passIndex) {
+				const MadoEngine::Render::LayerEffectPass& layerEffectPass = layerEffectPasses[passIndex];
+				if (!layerEffectPass.IsEnabled() || layerEffectPass.GetTargetLayerMask() == 0) {
+					continue;
+				}
+
+				const MadoEngine::Render::RenderLayerMask chainLayerMask = layerEffectPass.GetTargetLayerMask();
+				execution_->BeginLayerEffectRender(layerEffectPass);
+				sceneManager_->DrawLayerMask(chainLayerMask);
+				execution_->EndLayerEffectRender();
+
+				execution_->ApplyLayerEffectToChain(layerEffectPass);
+
+				while (passIndex + 1 < layerEffectPasses.size()) {
+					const MadoEngine::Render::LayerEffectPass& nextLayerEffectPass = layerEffectPasses[passIndex + 1];
+					if (!nextLayerEffectPass.IsEnabled() || nextLayerEffectPass.GetTargetLayerMask() == 0) {
+						++passIndex;
+						continue;
+					}
+
+					if (nextLayerEffectPass.GetTargetLayerMask() != chainLayerMask) {
+						break;
+					}
+
+					++passIndex;
+					execution_->ApplyLayerEffectToChain(nextLayerEffectPass);
+				}
+
+				execution_->CompositeLayerEffectChain();
+			}
+		} else {
+			sceneManager_->DrawLayerMask(MadoEngine::Render::kAllRenderLayers);
+			sceneManager_->DrawCurrentScene();
+		}
 
 		// DockSpaceを先に生成してから、シーンのImGuiウィンドウを作成する
 		execution_->BeginImGuiLayout();

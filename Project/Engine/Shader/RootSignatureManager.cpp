@@ -389,6 +389,59 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("PostEffect.RootSig", rootSigDesc);
 		}
 
+		// Composite PostEffect用 RootSignature
+		// t0: シーンテクスチャ, t1: エフェクトテクスチャ, s0: サンプラー
+		{
+			D3D12_DESCRIPTOR_RANGE sceneRange{};
+			sceneRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			sceneRange.NumDescriptors = 1;
+			sceneRange.BaseShaderRegister = 0;
+			sceneRange.RegisterSpace = 0;
+			sceneRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_DESCRIPTOR_RANGE effectRange{};
+			effectRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			effectRange.NumDescriptors = 1;
+			effectRange.BaseShaderRegister = 1;
+			effectRange.RegisterSpace = 0;
+			effectRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[2]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[0].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[0].DescriptorTable.pDescriptorRanges = &sceneRange;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[1].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[1].DescriptorTable.pDescriptorRanges = &effectRange;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC staticSampler{};
+			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			staticSampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			staticSampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			staticSampler.MipLODBias = 0.0f;
+			staticSampler.MaxAnisotropy = 0;
+			staticSampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			staticSampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			staticSampler.MinLOD = 0.0f;
+			staticSampler.MaxLOD = D3D12_FLOAT32_MAX;
+			staticSampler.ShaderRegister = 0;
+			staticSampler.RegisterSpace = 0;
+			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &staticSampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("PostEffect.Composite.RootSig", rootSigDesc);
+		}
+
 	}
 
 } // namespace MadoEngine

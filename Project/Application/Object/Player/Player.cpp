@@ -16,6 +16,7 @@ void Player::Initialize() {
 	//MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
 
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
+	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 }
 
 void Player::Finalize() {

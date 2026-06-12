@@ -137,6 +137,7 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Application\.Core\LayerEffectPassSetup.cpp" />
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
     <ClCompile Include="Application\Object\Player\Player.cpp" />
@@ -174,10 +175,12 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
     <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
+    <ClCompile Include="Engine\Render\Screen\RenderTargetManager.cpp" />
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
     <ClCompile Include="Engine\Shader\RootSignatureManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
@@ -224,6 +227,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\.Core\LayerEffectPassSetup.h" />
     <ClInclude Include="Application\.Core\Terminal.h" />
     <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\.SceneManager\SceneType.h" />
@@ -285,18 +289,21 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
+    <ClInclude Include="Engine\Render\LayerEffectPass.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h" />
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />
     <ClInclude Include="Engine\Render\PSO\PSORegistry.h" />
     <ClInclude Include="Engine\Render\PSO\ShaderReflector.h" />
     <ClInclude Include="Engine\Render\Screen\RenderTexture.h" />
+    <ClInclude Include="Engine\Render\Screen\RenderTargetManager.h" />
     <ClInclude Include="Engine\Render\Screen\ViewportScissor.h" />
     <ClInclude Include="Engine\Shader\RootSignatureManager.h" />
     <ClInclude Include="Engine\RenderHeaders.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h" />
+    <ClInclude Include="Engine\Render\Object\RenderLayer.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject2d.h" />
     <ClInclude Include="Engine\Render\Object\RenderObject3d.h" />
     <ClInclude Include="Engine\Render\Screen\SwapChain.h" />

@@ -5,6 +5,7 @@
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/TextureManager/TextureManager.h"
+#include "Render/Object/RenderLayer.h"
 #include "Render/PSO/PSODesc.h"
 #include "Render/PSO/PSORegistry.h"
 
@@ -80,6 +81,21 @@ public:
 	/// @return true:表示、false:非表示
 	bool IsVisible() const { return isVisible_; }
 
+	/// @brief 描画レイヤーを設定する
+	/// @param layer 設定する描画レイヤー
+	void SetRenderLayer(MadoEngine::Render::RenderLayer layer) { renderLayer_ = layer; }
+
+	/// @brief 描画レイヤーを取得する
+	/// @return 現在の描画レイヤー
+	MadoEngine::Render::RenderLayer GetRenderLayer() const { return renderLayer_; }
+
+	/// @brief 指定したレイヤーマスクに自身の描画レイヤーが含まれているか確認する
+	/// @param layerMask 判定対象のレイヤーマスク
+	/// @return 含まれている場合はtrue
+	bool IsRenderLayerIncluded(MadoEngine::Render::RenderLayerMask layerMask) const {
+		return MadoEngine::Render::ContainsRenderLayer(layerMask, renderLayer_);
+	}
+
 	// ===== PSO関連 =====
 
 	/// @brief PSORegistryを設定する
@@ -92,6 +108,7 @@ protected:
 	Transform3D transform_; // トランスフォーム（座標、スケール、回転）
 	Vector4 color_;         // 色（RGBA）
 	bool isVisible_;        // 表示フラグ
+	MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Default;
 
 	Camera camera_; // カメラ
 
