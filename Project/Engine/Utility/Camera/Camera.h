@@ -2,6 +2,7 @@
 #include "Math/Vector3.h"
 #include "Math/Matrix4x4.h"
 #include "Utility/Camera/Frustum.h"
+#include "Math/Function/MathFunction.h"
 
 /// @brief カメラクラス
 /// ビュー行列・プロジェクション行列・ビュープロジェクション行列を管理する
