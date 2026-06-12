@@ -199,51 +199,73 @@ void Model::Update() {
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
 }
 
-bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float maxDistance, float& outDistance) const {
-	if (!sharedData_ || !isVisible_ || sharedData_->modelData.vertices.empty()) {
+/// @brief モデルのワールド空間AABBを計算する
+/// @param outMin ワールド空間AABBの最小座標
+/// @param outMax ワールド空間AABBの最大座標
+/// @return 計算できた場合はtrue
+bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax) const {
+	if (!sharedData_ || !sharedData_->modelData.bounds.isValid) {
 		return false;
 	}
 
-	Vector3 localMin = { FLT_MAX, FLT_MAX, FLT_MAX };
-	Vector3 localMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
-
-	for (const ModelVertexData& vertex : sharedData_->modelData.vertices) {
-		const Vector3 position = {
-			vertex.position.x,
-			vertex.position.y,
-			vertex.position.z
-		};
-
-		localMin.x = (std::min)(localMin.x, position.x);
-		localMin.y = (std::min)(localMin.y, position.y);
-		localMin.z = (std::min)(localMin.z, position.z);
-		localMax.x = (std::max)(localMax.x, position.x);
-		localMax.y = (std::max)(localMax.y, position.y);
-		localMax.z = (std::max)(localMax.z, position.z);
+	const ModelBounds& bounds = sharedData_->modelData.bounds;
+	Matrix4x4 cullingMatrix = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	if (type_ == ModelType::Animated) {
+		cullingMatrix = Matrix::Multiply(rootNode_.localMatrix, cullingMatrix);
 	}
 
-	const Matrix4x4 worldMatrix = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
 	const Vector3 corners[8] = {
-		{ localMin.x, localMin.y, localMin.z },
-		{ localMax.x, localMin.y, localMin.z },
-		{ localMin.x, localMax.y, localMin.z },
-		{ localMax.x, localMax.y, localMin.z },
-		{ localMin.x, localMin.y, localMax.z },
-		{ localMax.x, localMin.y, localMax.z },
-		{ localMin.x, localMax.y, localMax.z },
-		{ localMax.x, localMax.y, localMax.z }
+		{ bounds.min.x, bounds.min.y, bounds.min.z },
+		{ bounds.max.x, bounds.min.y, bounds.min.z },
+		{ bounds.min.x, bounds.max.y, bounds.min.z },
+		{ bounds.max.x, bounds.max.y, bounds.min.z },
+		{ bounds.min.x, bounds.min.y, bounds.max.z },
+		{ bounds.max.x, bounds.min.y, bounds.max.z },
+		{ bounds.min.x, bounds.max.y, bounds.max.z },
+		{ bounds.max.x, bounds.max.y, bounds.max.z }
 	};
 
-	Vector3 worldMin = { FLT_MAX, FLT_MAX, FLT_MAX };
-	Vector3 worldMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	outMin = { FLT_MAX, FLT_MAX, FLT_MAX };
+	outMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 	for (const Vector3& corner : corners) {
-		const Vector3 world = Matrix::Transform(corner, worldMatrix);
-		worldMin.x = (std::min)(worldMin.x, world.x);
-		worldMin.y = (std::min)(worldMin.y, world.y);
-		worldMin.z = (std::min)(worldMin.z, world.z);
-		worldMax.x = (std::max)(worldMax.x, world.x);
-		worldMax.y = (std::max)(worldMax.y, world.y);
-		worldMax.z = (std::max)(worldMax.z, world.z);
+		const Vector3 world = Matrix::Transform(corner, cullingMatrix);
+		outMin.x = (std::min)(outMin.x, world.x);
+		outMin.y = (std::min)(outMin.y, world.y);
+		outMin.z = (std::min)(outMin.z, world.z);
+		outMax.x = (std::max)(outMax.x, world.x);
+		outMax.y = (std::max)(outMax.y, world.y);
+		outMax.z = (std::max)(outMax.z, world.z);
+	}
+
+	return true;
+}
+
+/// @brief モデルがカメラの視錐台内にあるか判定する
+/// @param camera 判定に使用するカメラ
+/// @return 視錐台内、または視錐台と交差している場合はtrue
+bool Model::IsInsideCameraFrustum(const Camera& camera) const {
+	if (!enableFrustumCulling_) {
+		return true;
+	}
+
+	Vector3 worldMin;
+	Vector3 worldMax;
+	if (!CalculateWorldAABB(worldMin, worldMax)) {
+		return true;
+	}
+
+	return camera.GetFrustum().IntersectsAABB(worldMin, worldMax);
+}
+
+bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float maxDistance, float& outDistance) const {
+	if (!sharedData_ || !isVisible_) {
+		return false;
+	}
+
+	Vector3 worldMin;
+	Vector3 worldMax;
+	if (!CalculateWorldAABB(worldMin, worldMax)) {
+		return false;
 	}
 
 	return IntersectRayAABB(rayOrigin, rayDirection, worldMin, worldMax, maxDistance, outDistance);
@@ -255,6 +277,10 @@ void Model::Draw(Camera& useCamera) {
 	}
 
 	camera_ = useCamera;
+
+	if (!IsInsideCameraFrustum(useCamera)) {
+		return;
+	}
 
 	assert(psoRegistry_);
 	commandList_->SetGraphicsRootSignature(

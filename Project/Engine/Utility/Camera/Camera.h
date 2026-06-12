@@ -12,7 +12,7 @@ public:
 	virtual ~Camera() = default;
 
 	/// @brief 更新処理
-	virtual void Update();
+	virtual void Update(float deltaTime = 0.0f);
 
 	// --- Setter ---
 

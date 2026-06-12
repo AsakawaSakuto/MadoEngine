@@ -81,6 +81,7 @@ SceneType Test::Update(float dt) {
 
 	tpsCamera_.SetTargetPosition(player_->GetPosition());
 	tpsCamera_.Update(dt);
+	debugCamera_.Update(dt);
 
 	player_->Update(dt);
 
@@ -96,6 +97,7 @@ SceneType Test::Update(float dt) {
 	}
 
 	sceneCamera_ = tpsCamera_;
+	sceneCamera_ = debugCamera_;
 
 	return SceneType::Test;
 }

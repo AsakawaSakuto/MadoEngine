@@ -8,6 +8,7 @@
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <map>
@@ -44,6 +45,13 @@ struct ModelSubMesh {
 	uint32_t indexStart;    // インデックスバッファ内の開始位置
 	uint32_t indexCount;    // インデックスの数
 	uint32_t materialIndex; // マテリアルインデックス（マルチマテリアル対応）
+};
+
+/// @brief モデルのローカル空間AABB
+struct ModelBounds {
+    Vector3 min = {};
+    Vector3 max = {};
+    bool isValid = false;
 };
 
 struct ModelNode {
@@ -87,6 +95,7 @@ struct ModelData {
 	std::vector<uint32_t> indeces;                          // 全サブメッシュのインデックスを連結して格納
     std::vector<std::string> materialPaths;                 // マルチマテリアル対応
     std::vector<ModelSubMesh> subMeshes;                    // サブメッシュ情報
+	ModelBounds bounds;                                     // ローカル空間AABB
 	ModelNode rootNode;                                     // ノード階層のルート
 };
 
@@ -152,6 +161,24 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
             // 右手系→左手系への変換
             vertex.position = { -position.x, position.y, position.z, 1.0f };
             vertex.normal = { -normal.x, normal.y, normal.z };
+
+            const Vector3 localPosition = {
+                vertex.position.x,
+                vertex.position.y,
+                vertex.position.z
+            };
+            if (!modelData.bounds.isValid) {
+                modelData.bounds.min = localPosition;
+                modelData.bounds.max = localPosition;
+                modelData.bounds.isValid = true;
+            } else {
+                modelData.bounds.min.x = (std::min)(modelData.bounds.min.x, localPosition.x);
+                modelData.bounds.min.y = (std::min)(modelData.bounds.min.y, localPosition.y);
+                modelData.bounds.min.z = (std::min)(modelData.bounds.min.z, localPosition.z);
+                modelData.bounds.max.x = (std::max)(modelData.bounds.max.x, localPosition.x);
+                modelData.bounds.max.y = (std::max)(modelData.bounds.max.y, localPosition.y);
+                modelData.bounds.max.z = (std::max)(modelData.bounds.max.z, localPosition.z);
+            }
 
             // テクスチャ座標が存在する場合のみ取得、なければデフォルト値(0,0)
             if (mesh->HasTextureCoords(0)) {

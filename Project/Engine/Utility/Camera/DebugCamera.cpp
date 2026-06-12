@@ -6,13 +6,13 @@
 
 DebugCamera::DebugCamera() {
 	ApplySphericalCoord();
-	Camera::Update();
+	Camera::Update(1.0f / 60.0f);
 }
 
-void DebugCamera::Update() {
+void DebugCamera::Update(float deltaTime) {
 	auto* mouse = MyInput::GetMouse();
 	if (!mouse) {
-		Camera::Update();
+		Camera::Update(deltaTime);
 		return;
 	}
 
@@ -31,16 +31,16 @@ void DebugCamera::Update() {
 			Vector3 right = { cosY, 0.0f, -sinY };
 			Vector3 up    = { 0.0f, 1.0f,  0.0f };
 
-			float panX = delta.x * panSensitivity_ * distance_;
-			float panY = delta.y * panSensitivity_ * distance_;
+			float panX = delta.x * panSensitivity_ * distance_ * deltaTime;
+			float panY = delta.y * panSensitivity_ * distance_ * deltaTime;
 
 			target_.x += right.x * panX + up.x * panY;
 			target_.y += right.y * panX + up.y * panY;
 			target_.z += right.z * panX + up.z * panY;
 		} else {
 			// 中ドラッグ: 注視点を中心にオービット回転
-				yaw_   += delta.x * rotateSensitivity_;
-				pitch_ += delta.y * rotateSensitivity_;
+				yaw_   += delta.x * rotateSensitivity_ * deltaTime;
+				pitch_ += delta.y * rotateSensitivity_ * deltaTime;
 
 			// ピッチ角をクランプ（真上・真下を超えないように）
 			constexpr float kPitchLimit = static_cast<float>(M_PI) * 0.499f;
@@ -51,14 +51,14 @@ void DebugCamera::Update() {
 	// マウスホイール: カメラの向いているベクトルに対して前後移動
 	float wheel = mouse->GetWheelDelta();
 	if (wheel != 0.0f) {
-		distance_ -= wheel * dollySensitivity_ * distance_ * 0.1f;
+		distance_ -= wheel * dollySensitivity_ * distance_ * 0.1f * deltaTime;
 		constexpr float kMinDistance = 1.0f;
 		constexpr float kMaxDistance = 1000.0f;
 		distance_ = std::clamp(distance_, kMinDistance, kMaxDistance);
 	}
 
 	ApplySphericalCoord();
-	Camera::Update();
+	Camera::Update(deltaTime);
 }
 
 void DebugCamera::ApplySphericalCoord() {

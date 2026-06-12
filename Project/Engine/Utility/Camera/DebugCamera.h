@@ -9,7 +9,7 @@ public:
 	~DebugCamera() override = default;
 
 	/// @brief 更新処理（マウス入力によるカメラ操作）
-	void Update() override;
+	void Update(float deltaTime) override;
 
 	/// @brief 回転感度を設定する
 	/// @param sensitivity 回転感度（デフォルト: 0.005f）
@@ -36,9 +36,9 @@ private:
 	float yaw_ = 0.0f;   // Y軸周りの回転
 	float pitch_ = 0.3f; // X軸周りの回転
 
-	float rotateSensitivity_ = 0.0025f; // 回転感度
-	float panSensitivity_ = 0.0025f;    // パン感度
-	float dollySensitivity_ = 1.0f;     // ドリー感度
+	float rotateSensitivity_ = 0.25f; // 回転感度
+	float panSensitivity_ = 0.25f;    // パン感度
+	float dollySensitivity_ = 10.0f;     // ドリー感度
 
 	/// @brief 球面座標からカメラ位置・回転を計算してベースクラスへ反映する
 	void ApplySphericalCoord();

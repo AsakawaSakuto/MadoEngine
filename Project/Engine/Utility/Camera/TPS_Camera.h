@@ -21,10 +21,7 @@ public:
 
 	/// @brief 更新処理（入力・追従・カメラ位置計算）
 	/// @param deltaTime フレーム時間（秒）
-	void Update(float deltaTime);
-
-	/// @brief Cameraの仮想Update（deltaTime=1/60として呼び出し）
-	void Update() override;
+	void Update(float deltaTime) override;
 
 	// --- ターゲット設定 ---
 

@@ -5,18 +5,14 @@
 TPS_Camera::TPS_Camera() {
 	currentTarget_ = targetPosition_;
 	ApplySphericalCoord();
-	Camera::Update();
-}
-
-void TPS_Camera::Update() {
-	Update(kDefaultDeltaTime);
+	Camera::Update(1.0f / 60.0f);
 }
 
 void TPS_Camera::Update(float deltaTime) {
 	HandleInput(deltaTime);
 	UpdateCurrentTarget();
 	ApplySphericalCoord();
-	Camera::Update();
+	Camera::Update(deltaTime);
 }
 
 void TPS_Camera::HandleInput(float deltaTime) {

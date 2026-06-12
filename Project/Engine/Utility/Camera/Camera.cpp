@@ -3,10 +3,10 @@
 #include "Math/Function/MathFunction.h"
 
 Camera::Camera() {
-	Update();
+	Update(1.0f / 60.0f);
 }
 
-void Camera::Update() {
+void Camera::Update(float deltaTime) {
 	// ビュー行列の生成（アフィン行列の逆行列）
 	Matrix4x4 affine = Matrix::MakeAffine({ 1.0f,1.0f,1.0f }, rotation_, position_);
 	viewMatrix_ = Matrix::Inverse(affine);
