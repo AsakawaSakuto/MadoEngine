@@ -10,7 +10,7 @@ namespace MyInput {
 	/// @param keybordKeys キーボードのキーコード配列（例: {DIK_SPACE, DIK_Z}）
 	/// @param gamePadButtons ゲームパッドのボタン配列（例: {GAMEPAD_A}）
 	/// @param mouseButtons マウスのボタン配列（例: {MOUSE_LEFT}）
-	inline void SetInput(
+	inline void RegisterInput(
 		const std::string& actionName,
 		const std::vector<int>& keybordKeys = {},
 		const std::vector<int>& gamePadButtons = {},
@@ -23,7 +23,7 @@ namespace MyInput {
 	/// @param actionName アクション名（例: "Jump"）
 	/// @param keys キーコード（例: DIK_SPACE, DIK_Z, GAMEPAD_A, MOUSE_LEFT）
 	template<typename... Args>
-	void SetInputKeys(const std::string& actionName, Args... keys) {
+	void RegisterInputKeys(const std::string& actionName, Args... keys) {
 		MadoEngine::InputManager::GetInstance().SetInputKeys(actionName, keys...);
 	}
 

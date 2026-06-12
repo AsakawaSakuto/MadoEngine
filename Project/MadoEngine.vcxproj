@@ -233,7 +233,7 @@
     <ClInclude Include="Application\.SceneManager\SceneType.h" />
     <ClInclude Include="Application\Object\Map\Map.h" />
     <ClInclude Include="Application\Object\Map\MapBlockType.h" />
-    <ClInclude Include="Application\Object\Obgect.h" />
+    <ClInclude Include="Application\Object\Object.h" />
     <ClInclude Include="Application\Object\Player\Player.h" />
     <ClInclude Include="Application\.SceneManager\IScene.h" />
     <ClInclude Include="Application\.SceneManager\SceneManager.h" />
