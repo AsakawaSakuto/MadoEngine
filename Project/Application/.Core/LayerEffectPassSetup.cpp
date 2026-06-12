@@ -11,6 +11,13 @@ namespace {
 		float padding = 0.0f;
 	};
 
+	struct BloomParams {
+		float intensity = 0.6f;
+		float threshold = 0.7f;
+		float radius = 4.0f;
+		float softKnee = 0.5f;
+	};
+
 } // namespace
 
 namespace RenderPassSetup {
@@ -41,6 +48,19 @@ namespace RenderPassSetup {
 		playerSepiaPass.effectShaderKey = "PostEffect/Sepia.PS";
 		playerSepiaPass.enabled = true;
 		execution.AddLayerEffectPass(playerSepiaPass);
+
+		MadoEngine::Render::LayerEffectPass::Desc bloomPass{};
+		bloomPass.name = "Bloom";
+		bloomPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
+		bloomPass.effectShaderKey = "PostEffect/Bloom.PS";
+		bloomPass.enabled = true;
+
+		MadoEngine::Render::LayerEffectPass* registeredBloomPass = execution.AddScreenEffectPass(bloomPass);
+		registeredBloomPass->SetParameterData(BloomParams{});
+		registeredBloomPass->AddFloatParameterControl("Intensity", offsetof(BloomParams, intensity), 0.0f, 5.0f, 0.01f);
+		registeredBloomPass->AddFloatParameterControl("Threshold", offsetof(BloomParams, threshold), 0.0f, 1.0f, 0.01f);
+		registeredBloomPass->AddFloatParameterControl("Radius", offsetof(BloomParams, radius), 0.0f, 32.0f, 0.1f);
+		registeredBloomPass->AddFloatParameterControl("SoftKnee", offsetof(BloomParams, softKnee), 0.0f, 1.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc vignettePass{};
 		vignettePass.name = "Vignette";
