@@ -30,6 +30,8 @@ private:
 private:
 
 	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 rotate_ = { 0.0f, 0.0f, 0.0f };
+
 	Shape hitAABB_;
 	Shape hitSphere_;
 

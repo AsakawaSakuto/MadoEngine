@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <string>
 #include "MathHeaders.h"
 #include "UtilityHeaders.h"
@@ -70,6 +71,32 @@ public:
 	/// @brief 色を取得
 	/// @return 色（RGBA）
 	const Vector4& GetColor() const { return color_; }
+
+	// ===== テクスチャ関連 =====
+
+	/// @brief オブジェクトのテクスチャを変更する
+	/// @param textureName TextureManagerに登録されているテクスチャ名
+	/// @return テクスチャの変更に成功した場合はtrue
+	bool SetTexture(const std::string& textureName) {
+		const uint32_t textureIndex = MadoEngine::TextureManager::GetInstance().GetTextureIndex(textureName);
+		if (textureIndex == UINT32_MAX) {
+			Logger::Output(objectName_ + " のテクスチャ変更に失敗しました。テクスチャが見つかりません: " + textureName, Logger::Level::Warning);
+			return false;
+		}
+
+		textureName_ = textureName;
+		textureIndex_ = textureIndex;
+
+		if (!textureNames_.empty()) {
+			std::fill(textureNames_.begin(), textureNames_.end(), textureName);
+		}
+		if (!textureIndices_.empty()) {
+			std::fill(textureIndices_.begin(), textureIndices_.end(), textureIndex);
+		}
+
+		Logger::Output(objectName_ + " のテクスチャを変更しました: " + textureName, Logger::Level::Debug);
+		return true;
+	}
 
 	// ===== 可視性関連 =====
 

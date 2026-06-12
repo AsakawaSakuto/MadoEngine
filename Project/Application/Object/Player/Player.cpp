@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <cmath>
 
 void Player::Initialize() {
 	position_   = { -10.0f, 0.0f, -10.0f };
@@ -17,6 +18,7 @@ void Player::Initialize() {
 
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
+	//model_->SetTexture("white16x16");
 }
 
 void Player::Finalize() {
@@ -30,7 +32,7 @@ void Player::Update(float deltaTime) {
 	Jump(deltaTime);
 
 	// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する
-	MyCollider::Update();
+	//MyCollider::Update();
 
 	model_->SetPosition(position_);
 
@@ -60,9 +62,20 @@ void Player::Move(float deltaTime) {
 		return;
 	}
 
-	const Vector2 stick = MyInput::GetGamePad()->GetLeftStick();
-	if (std::abs(stick.x) < 1e-5f && std::abs(stick.y) < 1e-5f) {
+	Vector2 input = MyInput::GetGamePad()->GetLeftStick();
+	input.x += MyInput::Press("Right") ? 1.0f : 0.0f;
+	input.x -= MyInput::Press("Left") ? 1.0f : 0.0f;
+	input.y += MyInput::Press("Up") ? 1.0f : 0.0f;
+	input.y -= MyInput::Press("Down") ? 1.0f : 0.0f;
+
+	const float inputLengthSq = input.x * input.x + input.y * input.y;
+	if (inputLengthSq < 1e-5f) {
 		return;
+	}
+	if (inputLengthSq > 1.0f) {
+		const float inputLength = std::sqrt(inputLengthSq);
+		input.x /= inputLength;
+		input.y /= inputLength;
 	}
 
 	// カメラのY軸回転（ヨー）からXZ平面上の前方・右方ベクトルを算出
@@ -72,10 +85,15 @@ void Player::Move(float deltaTime) {
 
 	// 左スティックの入力をカメラ基準のXZ方向に変換
 	Vector3 moveDir = {
-		forward.x * stick.y + right.x * stick.x,
+		forward.x * input.y + right.x * input.x,
 		0.0f,
-		forward.z * stick.y + right.z * stick.x
+		forward.z * input.y + right.z * input.x
 	};
+
+	const float moveLengthSq = moveDir.x * moveDir.x + moveDir.z * moveDir.z;
+	if (moveLengthSq > 1e-5f && model_) {
+		model_->SetRotation({ 0.0f, std::atan2(moveDir.x, moveDir.z), 0.0f });
+	}
 
 	const float speed = MyInput::Press("Dash") ? dashSpeed_ : moveSpeed_;
 	position_.x += moveDir.x * speed * deltaTime;
