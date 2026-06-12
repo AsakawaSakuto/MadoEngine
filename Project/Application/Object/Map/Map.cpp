@@ -130,7 +130,7 @@ void Map::Initialize() {
 
 			mapModel_[z][x] = MyModel::Create(GetMapModelName(x, z, mapWidth_), "block", SceneType::Test);
 			if (mapModel_[z][x]) {
-				mapModel_[z][x]->SetRenderLayer(MadoEngine::Render::RenderLayer::World);
+				mapModel_[z][x]->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 				mapModel_[z][x]->SetPosition({ mapTranslate_[z][x].x, blockSize_.y * static_cast<float>(currentHeight), mapTranslate_[z][x].z });
 				mapModel_[z][x]->SetScale({ blockSize_.x / 2.0f, blockSize_.y / 2.0f * static_cast<float>(currentHeight), blockSize_.z / 2.0f });
 				mapModel_[z][x]->SetVisible(isModelDraw_);
@@ -155,7 +155,7 @@ void Map::Initialize() {
 
 				mapSlopeModel_[z][x] = MyModel::Create(GetMapSlopeModelName(x, z, mapWidth_), slopeModelName, SceneType::Test);
 				if (mapSlopeModel_[z][x]) {
-					mapSlopeModel_[z][x]->SetRenderLayer(MadoEngine::Render::RenderLayer::World);
+					mapSlopeModel_[z][x]->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 					mapSlopeModel_[z][x]->SetPosition({ mapTranslate_[z][x].x, blockSize_.y * static_cast<float>(currentHeight + 1), mapTranslate_[z][x].z });
 					mapSlopeModel_[z][x]->SetScale({ blockSize_.x / 2.0f, blockSize_.y / 2.0f, blockSize_.z / 2.0f });
 					mapSlopeModel_[z][x]->SetVisible(isModelDraw_);

@@ -12,7 +12,7 @@ namespace MadoEngine::Render {
 		struct Desc {
 			std::string name = "LayerEffect";
 			RenderLayerMask targetLayerMask = ToRenderLayerMask(RenderLayer::Default);
-			std::string effectShaderKey = "PostEffect/GrayScale.PS";
+			std::string effectShaderKey = "PostEffect/CopyImage.PS";
 			bool enabled = true;
 		};
 

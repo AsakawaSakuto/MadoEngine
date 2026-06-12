@@ -1,15 +1,46 @@
 #include "Execution.h"
 #include "Render/ImGui/EditorUI.h"
+#include <algorithm>
 #include <cassert>
 
 namespace {
 
-	const std::string kSceneColorTarget = "SceneColor";
-	const std::string kPostEffectResultTarget = "PostEffectResult";
-	const std::string kPostEffectWorkTarget = "PostEffectWork";
-	const std::string kLayerColorTarget = "LayerColor";
-	const std::string kLayerEffectResultTarget = "LayerEffectResult";
-	const std::string kLayerEffectWorkTarget = "LayerEffectWork";
+	// レンダーターゲットの識別用キー
+	const std::string kSceneColorTarget = "SceneColor";               // 通常のシーン全体を最初に描く
+	const std::string kPostEffectResultTarget = "PostEffectResult";   // ポストエフェクト後の結果を置く場所
+	const std::string kPostEffectWorkTarget = "PostEffectWork";       // 複数回ポストエフェクトするための作業用バッファ
+	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
+	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
+	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
+
+#ifdef USE_IMGUI
+	bool EndsWith(const std::string& text, const std::string& suffix) {
+		if (text.size() < suffix.size()) {
+			return false;
+		}
+
+		return text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0;
+	}
+
+	std::vector<std::string> BuildLayerEffectShaderKeys() {
+		std::vector<std::string> shaderKeys = MadoEngine::ShaderManager::GetInstance().GetKeysByPrefix("PostEffect/");
+		shaderKeys.erase(
+			std::remove_if(
+				shaderKeys.begin(),
+				shaderKeys.end(),
+				[](const std::string& shaderKey) {
+					if (!EndsWith(shaderKey, ".PS")) {
+						return true;
+					}
+
+					return shaderKey == "PostEffect/Composite.PS";
+				}
+			),
+			shaderKeys.end()
+		);
+		return shaderKeys;
+	}
+#endif // USE_IMGUI
 
 } // namespace
 
@@ -371,6 +402,8 @@ namespace MadoEngine
 		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
 
+		DrawLayerEffectPassDebugUI();
+
 		//if (ImGui::BeginMainMenuBar())
 		//{
 		//	
@@ -397,6 +430,103 @@ namespace MadoEngine
 		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_), postEffectCopyDesc_);
 #endif // USE_IMGUI
 	}
+
+#ifdef USE_IMGUI
+	void Execution::DrawLayerEffectPassDebugUI() {
+		static std::vector<std::string> shaderKeys = BuildLayerEffectShaderKeys();
+
+		if (!ImGui::Begin("Layer Effect Pass")) {
+			ImGui::End();
+			return;
+		}
+
+		if (ImGui::Button("Shader一覧を更新")) {
+			shaderKeys = BuildLayerEffectShaderKeys();
+		}
+
+		if (layerEffectPasses_.empty()) {
+			ImGui::TextDisabled("LayerEffectPassは登録されていません");
+			ImGui::End();
+			return;
+		}
+
+		if (shaderKeys.empty()) {
+			ImGui::TextColored(ImVec4(1.0f, 0.65f, 0.2f, 1.0f), "使用可能なPostEffect PixelShaderがありません");
+		}
+
+		const ImGuiTableFlags tableFlags =
+			ImGuiTableFlags_BordersInnerV |
+			ImGuiTableFlags_BordersInnerH |
+			ImGuiTableFlags_RowBg |
+			ImGuiTableFlags_SizingStretchProp;
+
+		if (ImGui::BeginTable("LayerEffectPassTable", 4, tableFlags)) {
+			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("LayerMask", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+			ImGui::TableHeadersRow();
+
+			for (std::size_t passIndex = 0; passIndex < layerEffectPasses_.size(); ++passIndex) {
+				MadoEngine::Render::LayerEffectPass& pass = layerEffectPasses_[passIndex];
+				ImGui::PushID(static_cast<int>(passIndex));
+
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				bool enabled = pass.IsEnabled();
+				if (ImGui::Checkbox("##Enabled", &enabled)) {
+					pass.SetEnabled(enabled);
+					Logger::Output(
+						"LayerEffectPassの有効状態を変更しました: " + pass.GetName(),
+						Logger::Level::Debug
+					);
+				}
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::TextUnformatted(pass.GetName().c_str());
+
+				ImGui::TableSetColumnIndex(2);
+				const std::string& currentShaderKey = pass.GetEffectShaderKey();
+				ImGui::PushItemWidth(-1.0f);
+				if (ImGui::BeginCombo("##Shader", currentShaderKey.c_str())) {
+					for (const std::string& shaderKey : shaderKeys) {
+						const bool isSelected = shaderKey == currentShaderKey;
+						if (ImGui::Selectable(shaderKey.c_str(), isSelected)) {
+							pass.SetEffectShaderKey(shaderKey);
+							Logger::Output(
+								"LayerEffectPassのShaderを変更しました: " + pass.GetName() + " -> " + shaderKey,
+								Logger::Level::Debug
+							);
+						}
+
+						if (isSelected) {
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+
+					if (!currentShaderKey.empty() &&
+						std::find(shaderKeys.begin(), shaderKeys.end(), currentShaderKey) == shaderKeys.end()) {
+						ImGui::Separator();
+						ImGui::TextDisabled("現在のShaderは候補外です");
+					}
+
+					ImGui::EndCombo();
+				}
+				ImGui::PopItemWidth();
+
+				ImGui::TableSetColumnIndex(3);
+				ImGui::Text("0x%08X", pass.GetTargetLayerMask());
+
+				ImGui::PopID();
+			}
+
+			ImGui::EndTable();
+		}
+
+		ImGui::End();
+	}
+#endif // USE_IMGUI
 
 	void Execution::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE inputSrv, const MadoEngine::Render::PSODesc& desc) {
 		auto* commandList = commandManager_->GetCommandList();

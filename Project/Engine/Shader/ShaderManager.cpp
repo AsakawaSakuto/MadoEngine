@@ -1,5 +1,6 @@
 #include "Shader/ShaderManager.h"
 #include "Utility/Logger/Logger.h"
+#include <algorithm>
 #include <fstream>
 #include <format>
 #include <cassert>
@@ -130,6 +131,21 @@ namespace MadoEngine {
 			it->second->GetBufferPointer(),
 			it->second->GetBufferSize()
 		};
+	}
+
+	std::vector<std::string> ShaderManager::GetKeysByPrefix(const std::string& prefix) const {
+		std::vector<std::string> keys;
+		for (const auto& shaderPair : shaderMap_) {
+			const std::string& key = shaderPair.first;
+			if (key.rfind(prefix, 0) != 0) {
+				continue;
+			}
+
+			keys.push_back(key);
+		}
+
+		std::sort(keys.begin(), keys.end());
+		return keys;
 	}
 
 	void ShaderManager::Finalize() {

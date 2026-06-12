@@ -115,6 +115,11 @@ namespace MadoEngine
 		/// @return 次のLayerエフェクトチェーン出力先RenderTarget名
 		const std::string& GetNextLayerEffectOutputName() const;
 
+#ifdef USE_IMGUI
+		/// @brief LayerEffectPassのデバッグ操作UIを描画する
+		void DrawLayerEffectPassDebugUI();
+#endif // USE_IMGUI
+
 		bool isStopApplication_ = false;
 		uint32_t renderWidth_ = 0;
 		uint32_t renderHeight_ = 0;

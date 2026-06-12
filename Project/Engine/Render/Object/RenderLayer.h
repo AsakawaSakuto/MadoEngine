@@ -5,12 +5,12 @@ namespace MadoEngine::Render {
 
 	/// @brief 描画対象を分類するLayer
 	enum class RenderLayer : uint32_t {
-		Default = 1u << 0,
-		World = 1u << 1,
-		Player = 1u << 2,
-		Effect = 1u << 3,
-		UI = 1u << 4,
-		Debug = 1u << 5
+		Default = 1u << 0, // デフォルトレイヤー。特に指定がない場合はこちらに属する
+		World = 1u << 1,   // ワールドレイヤー。主にゲーム内のオブジェクトに使用
+		Player = 1u << 2,  // プレイヤーレイヤー。プレイヤーキャラクターに使用
+		Effect = 1u << 3,  // エフェクトレイヤー。パーティクルや特殊効果に使用
+		UI = 1u << 4,      // UIレイヤー。ユーザーインターフェースに使用
+		Debug = 1u << 5    // デバッグ用レイヤー。主に開発中の情報表示に使用
 	};
 
 	using RenderLayerMask = uint32_t;

@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <filesystem>
+#include <vector>
 
 namespace MadoEngine {
 
@@ -28,6 +29,11 @@ namespace MadoEngine {
 		/// @param key シェーダーキー（例: "PostEffect/CopyImage.VS"）
 		/// @return D3D12_SHADER_BYTECODE（見つからない場合はサイズ0）
 		D3D12_SHADER_BYTECODE Get(const std::string& key) const;
+
+		/// @brief 指定した先頭文字列に一致するシェーダーキー一覧を取得する
+		/// @param prefix 検索するシェーダーキーの先頭文字列
+		/// @return 条件に一致したシェーダーキー一覧
+		std::vector<std::string> GetKeysByPrefix(const std::string& prefix) const;
 
 		/// @brief 全シェーダーを解放する
 		void Finalize();
