@@ -349,7 +349,7 @@ namespace MadoEngine {
 		}
 
 		// PostEffect 用 RootSignature
-		// t0: 入力テクスチャ, s0: サンプラー
+		// t0: 入力テクスチャ, b0: ポストエフェクトパラメータ, s0: サンプラー
 		{
 			D3D12_DESCRIPTOR_RANGE srvRange{};
 			srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -358,11 +358,16 @@ namespace MadoEngine {
 			srvRange.RegisterSpace = 0;
 			srvRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-			D3D12_ROOT_PARAMETER rootParam{};
-			rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-			rootParam.DescriptorTable.NumDescriptorRanges = 1;
-			rootParam.DescriptorTable.pDescriptorRanges = &srvRange;
-			rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+			D3D12_ROOT_PARAMETER rootParams[2]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[0].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[0].DescriptorTable.pDescriptorRanges = &srvRange;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[1].Descriptor.ShaderRegister = 0;
+			rootParams[1].Descriptor.RegisterSpace = 0;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 			D3D12_STATIC_SAMPLER_DESC staticSampler{};
 			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
@@ -380,8 +385,8 @@ namespace MadoEngine {
 			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
-			rootSigDesc.NumParameters = 1;
-			rootSigDesc.pParameters = &rootParam;
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
 			rootSigDesc.NumStaticSamplers = 1;
 			rootSigDesc.pStaticSamplers = &staticSampler;
 			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;

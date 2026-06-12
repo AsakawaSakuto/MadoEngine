@@ -2,6 +2,7 @@
 #include "Render/ImGui/EditorUI.h"
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 
 namespace {
 
@@ -189,6 +190,17 @@ namespace MadoEngine
 		compositeDesc_.psKey = "PostEffect/Composite.PS";
 		compositeDesc_.rootSigKey = "PostEffect.Composite.RootSig";
 
+		postEffectDefaultParameterResource_ = CreateBufferResource(
+			dxDevice_->GetDevice(),
+			D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT,
+			false
+		);
+		void* defaultParameter = nullptr;
+		HRESULT defaultParameterResult = postEffectDefaultParameterResource_->Map(0, nullptr, &defaultParameter);
+		assert(SUCCEEDED(defaultParameterResult));
+		std::memset(defaultParameter, 0, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		postEffectDefaultParameterResource_->Unmap(0, nullptr);
+
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
@@ -242,12 +254,22 @@ namespace MadoEngine
 
 	MadoEngine::Render::LayerEffectPass* Execution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
 		layerEffectPasses_.emplace_back();
-		layerEffectPasses_.back().Initialize(desc, postEffectCopyDesc_);
+		layerEffectPasses_.back().Initialize(desc, postEffectCopyDesc_, dxDevice_->GetDevice());
 		return &layerEffectPasses_.back();
+	}
+
+	MadoEngine::Render::LayerEffectPass* Execution::AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
+		screenEffectPasses_.emplace_back();
+		screenEffectPasses_.back().Initialize(desc, postEffectCopyDesc_, dxDevice_->GetDevice());
+		return &screenEffectPasses_.back();
 	}
 
 	void Execution::ClearLayerEffectPasses() {
 		layerEffectPasses_.clear();
+	}
+
+	void Execution::ClearScreenEffectPasses() {
+		screenEffectPasses_.clear();
 	}
 
 	const std::vector<MadoEngine::Render::LayerEffectPass>& Execution::GetLayerEffectPasses() const {
@@ -345,7 +367,11 @@ namespace MadoEngine
 		const std::string& outputTargetName = GetNextLayerEffectOutputName();
 		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
 		viewportScissor_->Apply(commandManager_->GetCommandList());
-		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_), pass.GetEffectPSODesc());
+		DrawPostEffect(
+			renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_),
+			pass.GetEffectPSODesc(),
+			pass.GetParameterGPUVirtualAddress()
+		);
 		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
 
 		currentLayerEffectSourceName_ = outputTargetName;
@@ -369,6 +395,28 @@ namespace MadoEngine
 		isLayerEffectResolved_ = true;
 	}
 
+	void Execution::ApplyScreenEffectPasses() {
+		for (MadoEngine::Render::LayerEffectPass& pass : screenEffectPasses_) {
+			if (!pass.IsEnabled()) {
+				continue;
+			}
+
+			const std::string& outputTargetName = GetNextPostEffectOutputName();
+			renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
+			viewportScissor_->Apply(commandManager_->GetCommandList());
+			DrawPostEffect(
+				renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+				pass.GetEffectPSODesc(),
+				pass.GetParameterGPUVirtualAddress()
+			);
+			renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+
+			currentCompositeSourceName_ = outputTargetName;
+			resolvedPostEffectTargetName_ = outputTargetName;
+			isLayerEffectResolved_ = true;
+		}
+	}
+
 	void Execution::BeginImGuiLayout()
 	{
 #ifdef USE_IMGUI
@@ -385,6 +433,8 @@ namespace MadoEngine
 		}
 
 		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
+		ApplyScreenEffectPasses();
+
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 
@@ -424,6 +474,8 @@ namespace MadoEngine
 			isLayerEffectResolved_ = true;
 		}
 
+		ApplyScreenEffectPasses();
+
 		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 		viewportScissor_->Apply(commandManager_->GetCommandList());
@@ -444,7 +496,7 @@ namespace MadoEngine
 			shaderKeys = BuildLayerEffectShaderKeys();
 		}
 
-		if (layerEffectPasses_.empty()) {
+		if (layerEffectPasses_.empty() && screenEffectPasses_.empty()) {
 			ImGui::TextDisabled("LayerEffectPassは登録されていません");
 			ImGui::End();
 			return;
@@ -460,7 +512,7 @@ namespace MadoEngine
 			ImGuiTableFlags_RowBg |
 			ImGuiTableFlags_SizingStretchProp;
 
-		if (ImGui::BeginTable("LayerEffectPassTable", 4, tableFlags)) {
+		if (!layerEffectPasses_.empty() && ImGui::BeginTable("LayerEffectPassTable", 4, tableFlags)) {
 			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
@@ -524,17 +576,151 @@ namespace MadoEngine
 			ImGui::EndTable();
 		}
 
+		if (!screenEffectPasses_.empty() && ImGui::BeginTable("ScreenEffectPassTable", 4, tableFlags)) {
+			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Target", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+			ImGui::TableHeadersRow();
+
+			for (std::size_t passIndex = 0; passIndex < screenEffectPasses_.size(); ++passIndex) {
+				MadoEngine::Render::LayerEffectPass& pass = screenEffectPasses_[passIndex];
+				ImGui::PushID(static_cast<int>(passIndex + layerEffectPasses_.size()));
+
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				bool enabled = pass.IsEnabled();
+				if (ImGui::Checkbox("##Enabled", &enabled)) {
+					pass.SetEnabled(enabled);
+					Logger::Output(
+						"画面全体ポストエフェクトの有効状態を変更しました: " + pass.GetName(),
+						Logger::Level::Debug
+					);
+				}
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::TextUnformatted(pass.GetName().c_str());
+
+				ImGui::TableSetColumnIndex(2);
+				const std::string& currentShaderKey = pass.GetEffectShaderKey();
+				ImGui::PushItemWidth(-1.0f);
+				if (ImGui::BeginCombo("##Shader", currentShaderKey.c_str())) {
+					for (const std::string& shaderKey : shaderKeys) {
+						const bool isSelected = shaderKey == currentShaderKey;
+						if (ImGui::Selectable(shaderKey.c_str(), isSelected)) {
+							pass.SetEffectShaderKey(shaderKey);
+							Logger::Output(
+								"画面全体ポストエフェクトのShaderを変更しました: " + pass.GetName() + " -> " + shaderKey,
+								Logger::Level::Debug
+							);
+						}
+
+						if (isSelected) {
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+
+					if (!currentShaderKey.empty() &&
+						std::find(shaderKeys.begin(), shaderKeys.end(), currentShaderKey) == shaderKeys.end()) {
+						ImGui::Separator();
+						ImGui::TextDisabled("現在のShaderは候補外です");
+					}
+
+					ImGui::EndCombo();
+				}
+				ImGui::PopItemWidth();
+
+				ImGui::TableSetColumnIndex(3);
+				ImGui::TextUnformatted("Screen");
+
+				ImGui::PopID();
+			}
+
+			ImGui::EndTable();
+		}
+
+		bool hasParameterControls = false;
+		for (MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
+			if (pass.GetFloatParameterControls().empty()) {
+				continue;
+			}
+
+			if (!hasParameterControls) {
+				ImGui::Separator();
+				ImGui::TextUnformatted("Parameters");
+				hasParameterControls = true;
+			}
+
+			if (ImGui::TreeNode(pass.GetName().c_str())) {
+				for (const MadoEngine::Render::LayerEffectPass::FloatParameterControl& control : pass.GetFloatParameterControls()) {
+					float value = 0.0f;
+					if (!pass.TryGetFloatParameter(control.offset, value)) {
+						ImGui::TextDisabled("%s: invalid offset", control.label.c_str());
+						continue;
+					}
+
+					const float speed = control.speed > 0.0f ? control.speed : 0.01f;
+					if (ImGui::DragFloat(control.label.c_str(), &value, speed, control.minValue, control.maxValue)) {
+						pass.SetFloatParameter(control.offset, value);
+					}
+				}
+
+				ImGui::TreePop();
+			}
+		}
+
+		for (MadoEngine::Render::LayerEffectPass& pass : screenEffectPasses_) {
+			if (pass.GetFloatParameterControls().empty()) {
+				continue;
+			}
+
+			if (!hasParameterControls) {
+				ImGui::Separator();
+				ImGui::TextUnformatted("Parameters");
+				hasParameterControls = true;
+			}
+
+			if (ImGui::TreeNode(pass.GetName().c_str())) {
+				for (const MadoEngine::Render::LayerEffectPass::FloatParameterControl& control : pass.GetFloatParameterControls()) {
+					float value = 0.0f;
+					if (!pass.TryGetFloatParameter(control.offset, value)) {
+						ImGui::TextDisabled("%s: invalid offset", control.label.c_str());
+						continue;
+					}
+
+					const float speed = control.speed > 0.0f ? control.speed : 0.01f;
+					if (ImGui::DragFloat(control.label.c_str(), &value, speed, control.minValue, control.maxValue)) {
+						pass.SetFloatParameter(control.offset, value);
+					}
+				}
+
+				ImGui::TreePop();
+			}
+		}
+
 		ImGui::End();
 	}
 #endif // USE_IMGUI
 
-	void Execution::DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE inputSrv, const MadoEngine::Render::PSODesc& desc) {
+	void Execution::DrawPostEffect(
+		D3D12_GPU_DESCRIPTOR_HANDLE inputSrv,
+		const MadoEngine::Render::PSODesc& desc,
+		D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress)
+	{
 		auto* commandList = commandManager_->GetCommandList();
 		commandList->SetGraphicsRootSignature(
 			MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey));
 		commandList->SetPipelineState(psoRegistry_->Get(desc));
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->SetGraphicsRootDescriptorTable(0, inputSrv);
+		if (desc.rootSigKey == "PostEffect.RootSig") {
+			if (parameterBufferAddress == 0) {
+				assert(postEffectDefaultParameterResource_ && "ポストエフェクト用の既定ConstantBufferが未作成です");
+				parameterBufferAddress = postEffectDefaultParameterResource_->GetGPUVirtualAddress();
+			}
+			commandList->SetGraphicsRootConstantBufferView(1, parameterBufferAddress);
+		}
 		commandList->DrawInstanced(3, 1, 0, 0);
 	}
 

@@ -9,7 +9,7 @@ void Player::Initialize() {
 	hitAABB_ = aabb;
 
 	Sphere s;
-	s.radius = 0.5f;
+	s.radius = 1.0f;
 	hitSphere_ = s;
 
 	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &hitSphere_, &position_, 0.0f);

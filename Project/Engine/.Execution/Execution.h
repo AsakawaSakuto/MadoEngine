@@ -34,8 +34,16 @@ namespace MadoEngine
 		/// @return 登録したLayerEffectPassのポインタ
 		MadoEngine::Render::LayerEffectPass* AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc);
 
+		/// @brief 画面全体に適用するポストエフェクトPassを登録する
+		/// @param desc ポストエフェクトPassの生成設定
+		/// @return 登録したポストエフェクトPassのポインタ
+		MadoEngine::Render::LayerEffectPass* AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc);
+
 		/// @brief 登録済みLayerEffectPassをすべて削除する
 		void ClearLayerEffectPasses();
+
+		/// @brief 登録済みの画面全体ポストエフェクトPassをすべて削除する
+		void ClearScreenEffectPasses();
 
 		/// @brief 登録済みLayerEffectPassを取得する
 		/// @return 登録済みLayerEffectPass配列
@@ -70,6 +78,9 @@ namespace MadoEngine
 		/// @brief 対象Layerのエフェクトチェーン結果を現在の合成済み画像へ合成する
 		void CompositeLayerEffectChain();
 
+		/// @brief 画面全体ポストエフェクトを合成済み画像へ適用する
+		void ApplyScreenEffectPasses();
+
 		/// @brief ImGuiレイアウト開始（DockSpace・GameView生成）
 		/// @brief シーンの DrawImGui() より前に呼ぶこと
 		void BeginImGuiLayout();
@@ -100,7 +111,12 @@ namespace MadoEngine
 		/// @brief 指定したSRVを現在の描画先へポストエフェクト描画する
 		/// @param inputSrv 入力テクスチャのGPU SRVハンドル
 		/// @param desc 使用するPSO設定
-		void DrawPostEffect(D3D12_GPU_DESCRIPTOR_HANDLE inputSrv, const MadoEngine::Render::PSODesc& desc);
+		/// @param parameterBufferAddress パラメータ用ConstantBufferのGPU仮想アドレス
+		void DrawPostEffect(
+			D3D12_GPU_DESCRIPTOR_HANDLE inputSrv,
+			const MadoEngine::Render::PSODesc& desc,
+			D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress = 0
+		);
 
 		/// @brief シーンとLayerエフェクト結果を現在の描画先へ合成する
 		/// @param sceneSrv シーンカラーのGPU SRVハンドル
@@ -149,7 +165,9 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::RenderTargetManager> renderTargetManager_;
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
 		MadoEngine::Render::PSODesc compositeDesc_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> postEffectDefaultParameterResource_;
 		std::vector<MadoEngine::Render::LayerEffectPass> layerEffectPasses_;
+		std::vector<MadoEngine::Render::LayerEffectPass> screenEffectPasses_;
 		std::string currentCompositeSourceName_ = "SceneColor";
 		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
 		std::string currentLayerEffectSourceName_ = "LayerColor";
