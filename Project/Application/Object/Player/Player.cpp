@@ -35,8 +35,6 @@ void Player::Update(float deltaTime) {
 	// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する
 	MyCollider::Update();
 
-	model_->SetPosition(position_);
-
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する
 	bool isGroundContact = MyCollider::IsGroundContact("PlayerSphere", CollisionTag::MapBlock);
 	bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact("PlayerSphere", CollisionTag::MapSlope);
@@ -51,6 +49,8 @@ void Player::Update(float deltaTime) {
 		// 床面接触なし（側面のみ接触 or 空中）→ 空中扱いにして重力を継続させる
 		isGrounded_ = false;
 	}
+
+	UpdateModelTransform(isSlopeGroundContact);
 
 	// デバッグ表示
 	Vector4 color = { 0.0f,0.0f,0.0f,1.0f };
@@ -92,8 +92,8 @@ void Player::Move(float deltaTime) {
 	};
 
 	const float moveLengthSq = moveDir.x * moveDir.x + moveDir.z * moveDir.z;
-	if (moveLengthSq > 1e-5f && model_) {
-		model_->SetRotation({ 0.0f, std::atan2(moveDir.x, moveDir.z), 0.0f });
+	if (moveLengthSq > 1e-5f) {
+		rotate_.y = std::atan2(moveDir.x, moveDir.z);
 	}
 
 	const float speed = MyInput::Press("Dash") ? dashSpeed_ : moveSpeed_;
@@ -122,6 +122,34 @@ void Player::ApplySlopeGroundSnap(float deltaTime) {
 		}
 		isGrounded_ = true;
 	}
+}
+
+/// @brief PlayerのModel座標と回転を現在の接地状態に合わせて更新する
+/// @param isSlopeGroundContact Slope上面に接地していればtrue
+void Player::UpdateModelTransform(bool isSlopeGroundContact) {
+	if (!model_) {
+		return;
+	}
+
+	rotate_.x = 0.0f;
+	rotate_.z = 0.0f;
+
+	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
+	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal("PlayerSphere", CollisionTag::MapSlope, slopeNormal)) {
+		const float cosYaw = std::cos(rotate_.y);
+		const float sinYaw = std::sin(rotate_.y);
+		Vector3 localNormal = {
+			slopeNormal.x * cosYaw - slopeNormal.z * sinYaw,
+			slopeNormal.y,
+			slopeNormal.x * sinYaw + slopeNormal.z * cosYaw
+		};
+
+		rotate_.x = std::atan2(localNormal.z, localNormal.y);
+		rotate_.z = std::atan2(-localNormal.x, localNormal.y);
+	}
+
+	model_->SetPosition(position_);
+	model_->SetRotation(rotate_);
 }
 
 void Player::Jump(float deltaTime) {

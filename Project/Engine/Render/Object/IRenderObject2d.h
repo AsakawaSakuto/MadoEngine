@@ -10,11 +10,11 @@
 #include "Render/PSO/PSORegistry.h"
 
 /// @brief 2D描画オブジェクトの基底クラス
-class RenderObject2d {
+class IRenderObject2d {
 public:
 	
 	/// @brief デストラクタ
-	virtual ~RenderObject2d() = default;
+	virtual ~IRenderObject2d() = default;
 
 	/// @brief 初期化処理（派生クラスでオーバーライド）
 	virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) = 0;

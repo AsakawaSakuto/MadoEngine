@@ -98,6 +98,15 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().TryGetSlopeGroundCenterY(name, targetTag, outCenterY, maxSnapDownDistance);
 	}
 
+	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
+	/// @param name Sphereコライダーの識別名
+	/// @param targetTag Slopeとして扱うタグ
+	/// @param outNormal Slope上面の法線の出力先
+	/// @return 接地しているSlopeが見つかればtrue
+	inline bool TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
+		return ColliderManager::GetInstance().TryGetSlopeGroundNormal(name, targetTag, outNormal);
+	}
+
 	/// @brief 登録済みコライダーの衝突判定と押し戻しを更新する
 	inline void Update() {
 		ColliderManager::GetInstance().Update();

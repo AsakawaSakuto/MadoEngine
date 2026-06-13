@@ -1,16 +1,14 @@
 #pragma once
 
-class Object
+class IGameObject
 {
 public:
-	Object();
-	~Object();
+	IGameObject();
+	virtual ~IGameObject();
 
 	virtual void Initialize();
 
 	virtual void Update(float dt);
-
-	virtual void Draw();
 
 private:
 

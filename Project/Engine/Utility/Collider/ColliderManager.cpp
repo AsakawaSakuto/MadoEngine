@@ -994,6 +994,58 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     return true;
 }
 
+/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
+/// @param name Sphereコライダーの識別名
+/// @param targetTag Slopeとして扱うタグ
+/// @param outNormal Slope上面の法線の出力先
+/// @return 接地しているSlopeが見つかればtrue
+bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
+    auto it = m_colliders.find(name);
+    if (it == m_colliders.end()) return false;
+
+    const ColliderInfo& playerInfo = it->second;
+    if (!playerInfo.pShape || !playerInfo.pPosition) return false;
+    if (!std::holds_alternative<Sphere>(*(playerInfo.pShape))) return false;
+
+    const auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
+    const Vector3& center = *(playerInfo.pPosition);
+    bool foundSlope = false;
+    float bestSurfaceY = -FLT_MAX;
+    Vector3 bestNormal = { 0.0f, 1.0f, 0.0f };
+
+    for (const auto& [otherName, otherInfo] : m_colliders) {
+        if (otherName == name) continue;
+        if (otherInfo.tag != targetTag) continue;
+        if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+        if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
+
+        Slope slope = std::get<Slope>(*(otherInfo.pShape));
+        slope.center = *(otherInfo.pPosition);
+        if (!Collision::Detail::IsInsideSlopeXZ(slope, center, sphere.radius * 0.25f)) {
+            continue;
+        }
+
+        float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
+        float bottomY = center.y - sphere.radius;
+        if (center.y < surfaceY - 0.05f || bottomY > surfaceY + 0.08f) {
+            continue;
+        }
+
+        if (!foundSlope || surfaceY > bestSurfaceY) {
+            foundSlope = true;
+            bestSurfaceY = surfaceY;
+            bestNormal = Collision::Detail::GetSlopeTopNormal(slope);
+        }
+    }
+
+    if (!foundSlope) {
+        return false;
+    }
+
+    outNormal = bestNormal;
+    return true;
+}
+
 bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nameB) {
     if (m_colliders.find(nameA) == m_colliders.end() || m_colliders.find(nameB) == m_colliders.end()) {
         return false;

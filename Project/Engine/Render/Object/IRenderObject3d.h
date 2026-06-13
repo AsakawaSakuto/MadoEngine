@@ -11,11 +11,11 @@
 #include "Render/PSO/PSORegistry.h"
 
 /// @brief 3D描画オブジェクトの基底クラス
-class RenderObject3d {
+class IRenderObject3d {
 public:
 	
 	/// @brief デストラクタ
-	virtual ~RenderObject3d() = default;
+	virtual ~IRenderObject3d() = default;
 
 	/// @brief 初期化処理（派生クラスでオーバーライド）
 	/// @param device D3D12デバイス

@@ -246,10 +246,10 @@
     <ClInclude Include="Engine\Render\Object\RenderLayer.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\Object\RenderObject2d.h">
+    <ClInclude Include="Engine\Render\Object\IRenderObject2d.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\Object\RenderObject3d.h">
+    <ClInclude Include="Engine\Render\Object\IRenderObject3d.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\LayerEffectPass.h">
@@ -426,7 +426,7 @@
     <ClInclude Include="Engine\Render\ImGui\EditorUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Object.h">
+    <ClInclude Include="Application\Object\IGameObject.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h">

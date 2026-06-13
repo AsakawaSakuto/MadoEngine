@@ -27,6 +27,10 @@ private:
 	/// @param deltaTime 1フレームの経過時間
 	void ApplySlopeGroundSnap(float deltaTime);
 
+	/// @brief PlayerのModel座標と回転を現在の接地状態に合わせて更新する
+	/// @param isSlopeGroundContact Slope上面に接地していればtrue
+	void UpdateModelTransform(bool isSlopeGroundContact);
+
 	void Move(float deltaTime);
 
 	void Jump(float deltaTime);
@@ -46,8 +50,8 @@ private:
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;
 
-	float moveSpeed_  = 30.0f;
-	float dashSpeed_  = 10.0f;
+	float moveSpeed_  = 10.0f;
+	float dashSpeed_  = 30.0f;
 	float jumpPower_  = 20.0f;
 	float gravity_    = 20.0f;
 	float groundY_    = 0.0f;

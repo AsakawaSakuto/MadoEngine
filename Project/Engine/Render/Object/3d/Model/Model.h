@@ -1,11 +1,11 @@
 #pragma once
 #include "ModelSharedData.h"
-#include "Render/Object/RenderObject3d.h"
+#include "Render/Object/IRenderObject3d.h"
 #include ".SceneManager/SceneType.h"
 #include <memory>
 #include <string>
 
-class Model : public RenderObject3d {
+class Model : public IRenderObject3d {
 public:
 	Model(std::string objectName);
 

@@ -108,6 +108,13 @@ public:
 	/// @return 追従できるSlopeが見つかればtrue
 	bool TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f);
 
+	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
+	/// @param name Sphereコライダーの識別名
+	/// @param targetTag Slopeとして扱うタグ
+	/// @param outNormal Slope上面の法線の出力先
+	/// @return 接地しているSlopeが見つかればtrue
+	bool TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal);
+
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();
 

@@ -1,10 +1,10 @@
 #pragma once
 #include "SpriteData.h"
 #include "SpriteSharedGeometry.h"
-#include "Render/Object/RenderObject2d.h"
+#include "Render/Object/IRenderObject2d.h"
 #include ".SceneManager/SceneType.h"
 
-class Sprite : public RenderObject2d {
+class Sprite : public IRenderObject2d {
 public:
 
 	Sprite(std::string objectName = "default");
