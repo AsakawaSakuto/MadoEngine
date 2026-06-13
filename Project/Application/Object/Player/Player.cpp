@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <algorithm>
 #include <cmath>
 
 void Player::Initialize() {
@@ -47,12 +48,18 @@ void Player::Update(float deltaTime) {
 			velocityY_ = 0.0f;
 		}
 		isGrounded_ = true;
+
+		if (!MyInput::Press("Crouching")) {
+			slideVelocity_ = { 0.0f, 0.0f, 0.0f };
+		}
 	} else {
 		// 床面接触なし（側面のみ接触 or 空中）→ 空中扱いにして重力を継続させる
 		isGrounded_ = false;
 	}
 
 	UpdateModelTransform(isSlopeGroundContact);
+
+	model_->SetScale(scale_);
 
 	// デバッグ表示
 	Vector4 color = { 0.0f,0.0f,0.0f,1.0f };
@@ -65,6 +72,8 @@ void Player::Move(float deltaTime) {
 		return;
 	}
 
+	const bool isCrouching = MyInput::Press("Crouching");
+	const bool isCrouchingStarted = isCrouching && !wasCrouching_;
 	Vector2 input = MyInput::GetGamePad()->GetLeftStick();
 	input.x += MyInput::Press("Right") ? 1.0f : 0.0f;
 	input.x -= MyInput::Press("Left") ? 1.0f : 0.0f;
@@ -72,10 +81,8 @@ void Player::Move(float deltaTime) {
 	input.y -= MyInput::Press("Down") ? 1.0f : 0.0f;
 
 	const float inputLengthSq = input.x * input.x + input.y * input.y;
-	if (inputLengthSq < 1e-5f) {
-		return;
-	}
-	if (inputLengthSq > 1.0f) {
+	bool hasMoveInput = inputLengthSq >= 1e-5f;
+	if (hasMoveInput && inputLengthSq > 1.0f) {
 		const float inputLength = std::sqrt(inputLengthSq);
 		input.x /= inputLength;
 		input.y /= inputLength;
@@ -96,12 +103,130 @@ void Player::Move(float deltaTime) {
 	const float moveLengthSq = moveDir.x * moveDir.x + moveDir.z * moveDir.z;
 	if (moveLengthSq > 1e-5f) {
 		rotate_.y = std::atan2(moveDir.x, moveDir.z);
+	} else {
+		hasMoveInput = false;
 	}
 
-	const float speed = MyInput::Press("Dash") ? dashSpeed_ : moveSpeed_;
-	position_.x += moveDir.x * speed * deltaTime;
-	position_.y += moveDir.y * speed * deltaTime;
-	position_.z += moveDir.z * speed * deltaTime;
+	if (!isCrouching && hasMoveInput) {
+		const float speed = MyInput::Press("Dash") ? dashSpeed_ : moveSpeed_;
+		position_.x += moveDir.x * speed * deltaTime;
+		position_.z += moveDir.z * speed * deltaTime;
+		currentMotion_ = PlayerMotion::Walk;
+	} else if (!isCrouching && !isGrounded_) {
+		currentMotion_ = PlayerMotion::Jump;
+	} else if (!isCrouching) {
+		currentMotion_ = PlayerMotion::Idle;
+	}
+
+	UpdateSliding(deltaTime, isCrouching, isCrouchingStarted, moveDir, hasMoveInput);
+	wasCrouching_ = isCrouching;
+}
+
+/// @brief Crouching中のスライディング速度を更新する
+/// @param deltaTime 1フレームの経過時間
+/// @param isCrouching Crouching入力が押されていればtrue
+/// @param isCrouchingStarted このフレームでCrouching入力が押され始めたらtrue
+/// @param moveDir 入力から計算した水平移動方向
+/// @param hasMoveInput 移動入力があればtrue
+void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingStarted, const Vector3& moveDir, bool hasMoveInput) {
+	if (isCrouching) {
+		currentMotion_ = PlayerMotion::Crouching;
+	}
+
+	if (isCrouchingStarted && hasMoveInput) {
+		slideVelocity_.x = moveDir.x * slideStartSpeed_;
+		slideVelocity_.z = moveDir.z * slideStartSpeed_;
+	}
+
+	Vector3 slopeDownDirection = { 0.0f, 0.0f, 0.0f };
+	const bool isCrouchingOnSlope = isCrouching && TryGetSlopeDownDirection(slopeDownDirection);
+	if (isCrouchingOnSlope) {
+		slideVelocity_.x += slopeDownDirection.x * slopeSlideAcceleration_ * deltaTime;
+		slideVelocity_.z += slopeDownDirection.z * slopeSlideAcceleration_ * deltaTime;
+	}
+
+	const float slideSpeedSq = slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z;
+	if (isCrouching && hasMoveInput && slideSpeedSq > 1e-6f) {
+		const float slideSpeed = std::sqrt(slideSpeedSq);
+		Vector3 currentDir = { slideVelocity_.x / slideSpeed, 0.0f, slideVelocity_.z / slideSpeed };
+		const float steerT = std::clamp(slideSteerRate_ * deltaTime, 0.0f, 1.0f);
+		Vector3 steeredDir = {
+			currentDir.x + (moveDir.x - currentDir.x) * steerT,
+			0.0f,
+			currentDir.z + (moveDir.z - currentDir.z) * steerT
+		};
+
+		const float steeredLengthSq = steeredDir.x * steeredDir.x + steeredDir.z * steeredDir.z;
+		if (steeredLengthSq > 1e-6f) {
+			const float steeredLength = std::sqrt(steeredLengthSq);
+			slideVelocity_.x = steeredDir.x / steeredLength * slideSpeed;
+			slideVelocity_.z = steeredDir.z / steeredLength * slideSpeed;
+		}
+	}
+
+	const float steeredSlideSpeedSq = slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z;
+	if (steeredSlideSpeedSq > maxSlideSpeed_ * maxSlideSpeed_) {
+		const float slideSpeed = std::sqrt(steeredSlideSpeedSq);
+		const float speedScale = maxSlideSpeed_ / slideSpeed;
+		slideVelocity_.x *= speedScale;
+		slideVelocity_.z *= speedScale;
+	}
+
+	position_.x += slideVelocity_.x * deltaTime;
+	position_.z += slideVelocity_.z * deltaTime;
+
+	if (std::abs(slideVelocity_.x) > 0.001f || std::abs(slideVelocity_.z) > 0.001f) {
+		rotate_.y = std::atan2(slideVelocity_.x, slideVelocity_.z);
+	}
+
+	const float friction = isCrouching ? slideFriction_ : slideReleaseFriction_;
+	ApplySlideFriction(deltaTime, isCrouchingOnSlope ? slideFriction_ * 0.35f : friction);
+}
+
+/// @brief 現在接地しているSlopeの下り方向を取得する
+/// @param outDownDirection 下り方向の出力先
+/// @return Slopeの下り方向を取得できればtrue
+bool Player::TryGetSlopeDownDirection(Vector3& outDownDirection) const {
+	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
+	if (!MyCollider::IsSlopeGroundContact("PlayerSphere", CollisionTag::MapSlope) ||
+		!MyCollider::TryGetSlopeGroundNormal("PlayerSphere", CollisionTag::MapSlope, slopeNormal)) {
+		return false;
+	}
+
+	outDownDirection = { slopeNormal.x, 0.0f, slopeNormal.z };
+	const float downLengthSq = outDownDirection.x * outDownDirection.x + outDownDirection.z * outDownDirection.z;
+	if (downLengthSq < 1e-5f) {
+		return false;
+	}
+
+	const float downLength = std::sqrt(downLengthSq);
+	outDownDirection.x /= downLength;
+	outDownDirection.z /= downLength;
+	return true;
+}
+
+/// @brief 水平スライディング速度に摩擦を適用する
+/// @param deltaTime 1フレームの経過時間
+/// @param friction 減速量
+void Player::ApplySlideFriction(float deltaTime, float friction) {
+	const float slideSpeedSq = slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z;
+	if (slideSpeedSq < 1e-6f) {
+		slideVelocity_.x = 0.0f;
+		slideVelocity_.z = 0.0f;
+		return;
+	}
+
+	const float slideSpeed = std::sqrt(slideSpeedSq);
+	const float nextSpeed = std::max(0.0f, slideSpeed - friction * deltaTime);
+	if (nextSpeed <= 0.001f) {
+		slideVelocity_.x = 0.0f;
+		slideVelocity_.z = 0.0f;
+		return;
+	}
+
+	const float speedScale = nextSpeed / slideSpeed;
+	slideVelocity_.x *= speedScale;
+	slideVelocity_.z *= speedScale;
 }
 
 /// @brief Slope上を移動しているときに足元を斜面へ追従させる
@@ -192,13 +317,26 @@ void Player::DrawImGui() {
 
 #ifdef USE_IMGUI
 
-	ImGui::Begin("Player");
-	ImGui::DragFloat3("Position", &position_.x, 0.1f);
-	ImGui::DragFloat("Move Speed", &moveSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("Dash Speed", &dashSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("Jump Power", &jumpPower_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("Gravity", &gravity_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragInt("Jump Count", &jumpCount_, 1, 0, 10);
+	ImGui::Begin("プレイヤー");
+	const float horizontalSpeed = std::sqrt(slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z);
+	const float currentSpeed = std::sqrt(horizontalSpeed * horizontalSpeed + velocityY_ * velocityY_);
+	ImGui::Text("現在の動作: %s", ToMotionText(currentMotion_));
+	ImGui::Text("速度: %.2f", currentSpeed);
+	ImGui::Text("水平速度: %.2f", horizontalSpeed);
+	ImGui::Text("Y速度: %.2f", velocityY_);
+	ImGui::Separator();
+	ImGui::DragFloat3("座標", &position_.x, 0.1f);
+	ImGui::DragFloat("移動速度", &moveSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("ダッシュ速度", &dashSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("ジャンプ力", &jumpPower_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("重力", &gravity_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド開始速度", &slideStartSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド方向補正率", &slideSteerRate_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("斜面スライド加速度", &slopeSlideAcceleration_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("最大スライド速度", &maxSlideSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド摩擦", &slideFriction_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド解除後摩擦", &slideReleaseFriction_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragInt("ジャンプ回数", &jumpCount_, 1, 0, 10);
 	ImGui::End();
 
 #endif // USE_IMGUI

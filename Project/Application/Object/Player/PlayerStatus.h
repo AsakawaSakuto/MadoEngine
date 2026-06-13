@@ -14,3 +14,21 @@ enum class PlayerMotion {
 	
 	Count
 };
+
+/// @brief PlayerMotionを表示用文字列へ変換する
+/// @param motion 変換するPlayerMotion
+/// @return 表示用文字列
+inline const char* ToMotionText(PlayerMotion motion) {
+	switch (motion) {
+	case PlayerMotion::Idle:
+		return "Idle";
+	case PlayerMotion::Walk:
+		return "Walk";
+	case PlayerMotion::Crouching:
+		return "Crouching";
+	case PlayerMotion::Jump:
+		return "Jump";
+	default:
+		return "Unknown";
+	}
+}

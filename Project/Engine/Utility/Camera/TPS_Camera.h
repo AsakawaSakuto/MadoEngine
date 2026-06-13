@@ -118,7 +118,7 @@ private:
 	// 球面座標パラメータ
 	float yaw_      = 0.0f;  // Y軸周りの回転（ラジアン）
 	float pitch_    = 0.3f;  // X軸周りの回転（ラジアン）
-	float distance_ = 20.0f;  // ターゲットからの距離
+	float distance_ = 15.0f;  // ターゲットからの距離
 
 	// Pitch角クランプ範囲
 	float minPitch_ = -0.1f;
@@ -132,7 +132,7 @@ private:
 	float followStrength_ = 0.5f;
 
 	// 肩越しオフセット（ターゲット座標系のローカルオフセット）
-	Vector3 offset_ = { 0.0f, 4.0f, -5.0f };
+	Vector3 offset_ = { 0.0f, 3.0f, 0.0f };
 
 	/// @brief 入力を処理してYaw/Pitchを更新する
 	/// @param deltaTime フレーム時間（秒）

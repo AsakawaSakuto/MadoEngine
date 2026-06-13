@@ -36,10 +36,30 @@ private:
 
 	void Jump(float deltaTime);
 
+	/// @brief Crouching中のスライディング速度を更新する
+	/// @param deltaTime 1フレームの経過時間
+	/// @param isCrouching Crouching入力が押されていればtrue
+	/// @param isCrouchingStarted このフレームでCrouching入力が押され始めたらtrue
+	/// @param moveDir 入力から計算した水平移動方向
+	/// @param hasMoveInput 移動入力があればtrue
+	void UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingStarted, const Vector3& moveDir, bool hasMoveInput);
+
+	/// @brief 現在接地しているSlopeの下り方向を取得する
+	/// @param outDownDirection 下り方向の出力先
+	/// @return Slopeの下り方向を取得できればtrue
+	bool TryGetSlopeDownDirection(Vector3& outDownDirection) const;
+
+	/// @brief 水平スライディング速度に摩擦を適用する
+	/// @param deltaTime 1フレームの経過時間
+	/// @param friction 減速量
+	void ApplySlideFriction(float deltaTime, float friction);
+
 private:
 
 	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 rotate_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 scale_ = { 0.5f, 0.5f, 0.5f };
+	Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
 
 	Shape hitAABB_;
 	Shape hitSphere_;
@@ -51,14 +71,21 @@ private:
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;
 
-	float moveSpeed_  = 10.0f;
+	float moveSpeed_  = 5.0f;
 	float dashSpeed_  = 30.0f;
-	float jumpPower_  = 20.0f;
+	float jumpPower_  = 15.0f;
 	float gravity_    = 20.0f;
 	float groundY_    = 0.0f;
 	float slopeSnapDistance_ = 1.0f;
+	float slideStartSpeed_ = 7.5f;
+	float slideSteerRate_ = 8.0f;
+	float slopeSlideAcceleration_ = 24.0f;
+	float maxSlideSpeed_ = 35.0f;
+	float slideFriction_ = 2.5f;
+	float slideReleaseFriction_ = 10.0f;
 	int   jumpCount_  = 10;      // ジャンプ可能回数
 	int remainingJumpCount_ = 0; // 残りジャンプ回数
+	bool wasCrouching_ = false;
 
 	PlayerMotion currentMotion_ = PlayerMotion::Idle;
 };
