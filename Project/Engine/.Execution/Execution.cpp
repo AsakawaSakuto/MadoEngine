@@ -119,7 +119,8 @@ namespace MadoEngine
 		MyInput::RegisterInput("Q", { DIK_Q }, { });
 		MyInput::RegisterInput("E", { DIK_E }, { });
 		MyInput::RegisterInput("Jump", { DIK_SPACE,DIK_Z }, { GAMEPAD_A });
-		MyInput::RegisterInput("Dash", { DIK_LSHIFT,DIK_X }, { GAMEPAD_STICK_L });
+		MyInput::RegisterInput("Dash", { DIK_LSHIFT,DIK_X }, { GAMEPAD_L });
+		MyInput::RegisterInput("Crouching", { DIK_LSHIFT }, { GAMEPAD_R });
 
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance().Initialize();

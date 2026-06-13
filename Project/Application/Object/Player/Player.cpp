@@ -10,15 +10,17 @@ void Player::Initialize() {
 	hitAABB_ = aabb;
 
 	Sphere s;
-	s.radius = 1.0f;
+	s.radius = 0.5f;
 	hitSphere_ = s;
 
 	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &hitSphere_, &position_, 0.0f);
-	//MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
+	MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
 
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 	//model_->SetTexture("white16x16");
+
+	currentMotion_ = PlayerMotion::Idle;
 }
 
 void Player::Finalize() {

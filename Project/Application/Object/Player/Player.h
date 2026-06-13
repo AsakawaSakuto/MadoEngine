@@ -2,6 +2,7 @@
 #include "UtilityHeaders.h"
 #include "RenderHeaders.h"
 #include "MathHeaders.h"
+#include "PlayerStatus.h"
 
 class Player {
 public:
@@ -58,4 +59,6 @@ private:
 	float slopeSnapDistance_ = 1.0f;
 	int   jumpCount_  = 10;      // ジャンプ可能回数
 	int remainingJumpCount_ = 0; // 残りジャンプ回数
+
+	PlayerMotion currentMotion_ = PlayerMotion::Idle;
 };
