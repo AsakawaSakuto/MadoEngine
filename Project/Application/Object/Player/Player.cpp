@@ -30,9 +30,10 @@ void Player::Update(float deltaTime) {
 	// 先に入力移動と、重力による落下処理を行う
 	Move(deltaTime);
 	Jump(deltaTime);
+	ApplySlopeGroundSnap(deltaTime);
 
 	// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する
-	//MyCollider::Update();
+	MyCollider::Update();
 
 	model_->SetPosition(position_);
 
@@ -99,6 +100,28 @@ void Player::Move(float deltaTime) {
 	position_.x += moveDir.x * speed * deltaTime;
 	position_.y += moveDir.y * speed * deltaTime;
 	position_.z += moveDir.z * speed * deltaTime;
+}
+
+/// @brief Slope上を移動しているときに足元を斜面へ追従させる
+/// @param deltaTime 1フレームの経過時間
+void Player::ApplySlopeGroundSnap(float deltaTime) {
+	if (!isGrounded_ || velocityY_ > 0.0f) {
+		return;
+	}
+
+	float slopeCenterY = 0.0f;
+	float snapDistance = slopeSnapDistance_ + gravity_ * deltaTime * deltaTime;
+	if (!MyCollider::TryGetSlopeGroundCenterY("PlayerSphere", CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
+		return;
+	}
+
+	if (position_.y > slopeCenterY) {
+		position_.y = slopeCenterY;
+		if (velocityY_ < 0.0f) {
+			velocityY_ = 0.0f;
+		}
+		isGrounded_ = true;
+	}
 }
 
 void Player::Jump(float deltaTime) {

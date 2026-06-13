@@ -88,6 +88,16 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(name, targetTag);
 	}
 
+	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
+	/// @param name Sphereコライダーの識別名
+	/// @param targetTag Slopeとして扱うタグ
+	/// @param outCenterY Sphere中心に設定するY座標の出力先
+	/// @param maxSnapDownDistance 下方向に追従できる最大距離
+	/// @return 追従できるSlopeが見つかればtrue
+	inline bool TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f) {
+		return ColliderManager::GetInstance().TryGetSlopeGroundCenterY(name, targetTag, outCenterY, maxSnapDownDistance);
+	}
+
 	/// @brief 登録済みコライダーの衝突判定と押し戻しを更新する
 	inline void Update() {
 		ColliderManager::GetInstance().Update();

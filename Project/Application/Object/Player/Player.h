@@ -23,6 +23,10 @@ public:
 
 private:
 
+	/// @brief Slope上を移動しているときに足元を斜面へ追従させる
+	/// @param deltaTime 1フレームの経過時間
+	void ApplySlopeGroundSnap(float deltaTime);
+
 	void Move(float deltaTime);
 
 	void Jump(float deltaTime);
@@ -47,6 +51,7 @@ private:
 	float jumpPower_  = 20.0f;
 	float gravity_    = 20.0f;
 	float groundY_    = 0.0f;
+	float slopeSnapDistance_ = 1.0f;
 	int   jumpCount_  = 10;      // ジャンプ可能回数
 	int remainingJumpCount_ = 0; // 残りジャンプ回数
 };

@@ -940,6 +940,60 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     return false;
 }
 
+/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
+/// @param name Sphereコライダーの識別名
+/// @param targetTag Slopeとして扱うタグ
+/// @param outCenterY Sphere中心に設定するY座標の出力先
+/// @param maxSnapDownDistance 下方向に追従できる最大距離
+/// @return 追従できるSlopeが見つかればtrue
+bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
+    auto it = m_colliders.find(name);
+    if (it == m_colliders.end()) return false;
+
+    const ColliderInfo& playerInfo = it->second;
+    if (!playerInfo.pShape || !playerInfo.pPosition) return false;
+    if (!std::holds_alternative<Sphere>(*(playerInfo.pShape))) return false;
+
+    const auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
+    const Vector3& center = *(playerInfo.pPosition);
+    bool foundSlope = false;
+    float bestCenterY = 0.0f;
+    float bestSurfaceY = -FLT_MAX;
+
+    for (const auto& [otherName, otherInfo] : m_colliders) {
+        if (otherName == name) continue;
+        if (otherInfo.tag != targetTag) continue;
+        if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+        if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
+
+        Slope slope = std::get<Slope>(*(otherInfo.pShape));
+        slope.center = *(otherInfo.pPosition);
+        if (!Collision::Detail::IsInsideSlopeXZ(slope, center)) {
+            continue;
+        }
+
+        float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
+        float targetCenterY = surfaceY + sphere.radius;
+        float snapDownDistance = center.y - targetCenterY;
+        if (snapDownDistance < 0.0f || snapDownDistance > maxSnapDownDistance) {
+            continue;
+        }
+
+        if (!foundSlope || surfaceY > bestSurfaceY) {
+            foundSlope = true;
+            bestSurfaceY = surfaceY;
+            bestCenterY = targetCenterY;
+        }
+    }
+
+    if (!foundSlope) {
+        return false;
+    }
+
+    outCenterY = bestCenterY;
+    return true;
+}
+
 bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nameB) {
     if (m_colliders.find(nameA) == m_colliders.end() || m_colliders.find(nameB) == m_colliders.end()) {
         return false;

@@ -100,6 +100,14 @@ public:
 	/// @return True when the collider is touching a slope surface.
 	bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag);
 
+	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
+	/// @param name Sphereコライダーの識別名
+	/// @param targetTag Slopeとして扱うタグ
+	/// @param outCenterY Sphere中心に設定するY座標の出力先
+	/// @param maxSnapDownDistance 下方向に追従できる最大距離
+	/// @return 追従できるSlopeが見つかればtrue
+	bool TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f);
+
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();
 
