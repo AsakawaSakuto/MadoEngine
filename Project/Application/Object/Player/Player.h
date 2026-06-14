@@ -78,10 +78,10 @@ private:
 	float groundY_    = 0.0f;
 	float slopeSnapDistance_ = 1.0f;
 	float slideStartSpeed_ = 7.5f;
-	float slideSteerRate_ = 8.0f;
-	float slopeSlideAcceleration_ = 24.0f;
-	float maxSlideSpeed_ = 35.0f;
-	float slideFriction_ = 2.5f;
+	float slideSteerRate_ = 5.0f;
+	float slopeSlideAcceleration_ = 30.0f;
+	float maxSlideSpeed_ = 25.0f;
+	float slideFriction_ = 5.0f;
 	float slideReleaseFriction_ = 10.0f;
 	int   jumpCount_  = 10;      // ジャンプ可能回数
 	int remainingJumpCount_ = 0; // 残りジャンプ回数

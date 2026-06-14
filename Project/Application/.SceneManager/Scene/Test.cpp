@@ -110,10 +110,6 @@ void Test::DrawImGui() {
 	// テストシーンの描画処理
 #ifdef USE_IMGUI
 
-	std::get<Slope>(slope_).DrawImGui("slope");
-	std::get<Slope>(slope2_).DrawImGui("slope2");
-	std::get<AABB>(aabb_).DrawImGui("aabb");
-
 	tpsCamera_.DrawImGui();
 
 	debugCamera_.DrawImGui();

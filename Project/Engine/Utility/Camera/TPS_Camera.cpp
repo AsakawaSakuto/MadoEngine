@@ -128,6 +128,16 @@ void TPS_Camera::DrawImGui() {
 	ImGui::DragFloat3("Offset",           &offset_.x,          0.01f);
 	ImGui::SliderFloat("Follow Strength", &followStrength_,    0.0f, 1.0f);
 	ImGui::Separator();
+
+	// --- プロジェクション設定 ---
+	float fovDeg = fovY_ * kRadiansToDegrees;
+	if (ImGui::DragFloat("FoV (deg)", &fovDeg, 0.5f, 1.0f, 120.0f)) {
+		fovY_ = fovDeg * kDegreesToRadians;
+	}
+	ImGui::DragFloat("Near Clip", &nearClip_, 0.01f, 0.01f,   10.0f);
+	ImGui::DragFloat("Far Clip",  &farClip_,  1.0f,  10.0f, 10000.0f);
+	ImGui::Separator();
+
 	ImGui::Checkbox("Use Mouse Input",   &useMouseInput_);
 	ImGui::SameLine();
 	ImGui::Checkbox("Use GamePad Input", &useGamePadInput_);
