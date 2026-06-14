@@ -89,8 +89,8 @@ namespace RenderPassSetup {
 
 		MadoEngine::Render::LayerEffectPass* registeredPixelArtPass = execution.AddScreenEffectPass(pixelArtPass);
 		registeredPixelArtPass->SetParameterData(PixelArtParams{});
-		registeredPixelArtPass->AddFloatParameterControl("PixelSize", offsetof(PixelArtParams, pixelSize), 1.0f, 32.0f, 0.1f);
-		registeredPixelArtPass->AddFloatParameterControl("ColorSteps", offsetof(PixelArtParams, colorSteps), 2.0f, 32.0f, 0.1f);
+		registeredPixelArtPass->AddFloatParameterControl("PixelSize", offsetof(PixelArtParams, pixelSize), 1.0f, 128.0f, 1.0f);
+		registeredPixelArtPass->AddFloatParameterControl("ColorSteps", offsetof(PixelArtParams, colorSteps), 2.0f, 128.0f, 1.0f);
 		registeredPixelArtPass->AddFloatParameterControl("Contrast", offsetof(PixelArtParams, contrast), 0.0f, 3.0f, 0.01f);
 		registeredPixelArtPass->AddFloatParameterControl("Intensity", offsetof(PixelArtParams, intensity), 0.0f, 1.0f, 0.01f);
 	}

@@ -117,9 +117,8 @@ void Player::Move(float deltaTime) {
 	}
 
 	if (!isCrouching && hasMoveInput) {
-		const float speed = MyInput::Press("Dash") ? dashSpeed_ : moveSpeed_;
-		position_.x += moveDir.x * speed * deltaTime;
-		position_.z += moveDir.z * speed * deltaTime;
+		position_.x += moveDir.x * moveSpeed_ * deltaTime;
+		position_.z += moveDir.z * moveSpeed_ * deltaTime;
 		currentMotion_ = PlayerMotion::Walk;
 	} else if (!isCrouching && !isGrounded_) {
 		currentMotion_ = PlayerMotion::Jump;

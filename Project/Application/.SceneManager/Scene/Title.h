@@ -28,4 +28,10 @@ public:
 
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
+
+private:
+	Sprite* wallPaperSprite_ = nullptr;
+	Sprite* fadeSprite_ = nullptr;
+
+	GameTimer fadeInTimer_;
 };

@@ -3,73 +3,88 @@
 #include <cmath>
 
 GameTimer::GameTimer(float duration, bool loop)
-    : duration_(duration), loop_(loop) {
+    : duration_((std::max)(0.0f, duration))
+    , loop_(loop) {
 }
 
 void GameTimer::Update(float deltaTime) {
-    if (!isActive_) return;
+    if (state_ != State::Running) {
+        return;
+    }
 
     loopedThisFrame_ = false;
     finished_ = false;
 
-    float scaledDeltaTime = deltaTime;
+    currentTime_ += (std::max)(0.0f, deltaTime);
 
-    currentTime_ += scaledDeltaTime;
-    if (currentTime_ >= duration_) {
-        finished_ = true;
-
-        if (loop_) {
-            currentTime_ = 0.0f;
-            loopedThisFrame_ = true;
-        } else {
-            isActive_ = false;
-        }
+    if (currentTime_ < duration_) {
+        return;
     }
+
+    finished_ = true;
+
+    if (loop_ && duration_ > 0.0f) {
+        currentTime_ = std::fmod(currentTime_, duration_);
+        loopedThisFrame_ = true;
+        return;
+    }
+
+    currentTime_ = duration_;
+    state_ = State::Finished;
 }
 
-
 void GameTimer::Start(float duration, bool loop) {
-    duration_ = duration;
+    duration_ = (std::max)(0.0f, duration);
     loop_ = loop;
     currentTime_ = 0.0f;
-    isActive_ = true;
     finished_ = false;
-    useFrameMode_ = false;
     loopedThisFrame_ = false;
+    state_ = State::Running;
 }
 
 void GameTimer::Stop() {
-    isActive_ = false;
+    state_ = State::Stopped;
+    finished_ = false;
+    loopedThisFrame_ = false;
 }
 
 void GameTimer::Reset() {
     currentTime_ = 0.0f;
-    isActive_ = false;
     finished_ = false;
     loopedThisFrame_ = false;
+    state_ = State::Stopped;
 }
 
 void GameTimer::Pause() {
-    isActive_ = false;
+    if (state_ == State::Running) {
+        state_ = State::Paused;
+    }
 }
 
 void GameTimer::Resume() {
-    if (currentTime_ < duration_) {
-        isActive_ = true;
+    if (state_ == State::Paused && currentTime_ < duration_) {
+        state_ = State::Running;
         finished_ = false;
+        loopedThisFrame_ = false;
     }
 }
 
 bool GameTimer::IsActive() const {
-    return isActive_;
+    return state_ == State::Running;
 }
 
 bool GameTimer::IsFinished() const {
     return finished_;
 }
 
+bool GameTimer::WasLoopedThisFrame() const {
+    return loopedThisFrame_;
+}
+
 float GameTimer::GetProgress() const {
-    if (duration_ <= 0.0f) return 1.0f;
+    if (duration_ <= 0.0f) {
+        return 1.0f;
+    }
 
     float progress = currentTime_ / duration_;
     progress = std::clamp(progress, 0.0f, 1.0f);
@@ -94,13 +109,22 @@ float GameTimer::GetDuration() const {
 }
 
 void GameTimer::SetDuration(float duration) {
-    duration_ = duration;
-    if (currentTime_ >= duration_ && isActive_) {
-        finished_ = true;
-        if (!loop_) {
-            isActive_ = false;
-        }
+    duration_ = (std::max)(0.0f, duration);
+
+    if (currentTime_ < duration_ || state_ != State::Running) {
+        return;
     }
+
+    finished_ = true;
+
+    if (loop_ && duration_ > 0.0f) {
+        currentTime_ = std::fmod(currentTime_, duration_);
+        loopedThisFrame_ = true;
+        return;
+    }
+
+    currentTime_ = duration_;
+    state_ = State::Finished;
 }
 
 void GameTimer::SetLoop(bool loop) {

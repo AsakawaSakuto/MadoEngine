@@ -8,13 +8,28 @@ Title::~Title() {}
 
 void Title::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
+
+	wallPaperSprite_ = MySprite::Create("TitleWallPaper", "wallPaper", SceneType::Title);
+	fadeSprite_ = MySprite::Create("TitleFade", "black128x72", SceneType::Title);
+	fadeSprite_->SetScale({ 10.0f, 10.0f });
+	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 0.0f });
 }
 
 SceneType Title::Update(float dt) {
-	// スペースキーが押されたらゲームシーンに遷移
-	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
-		Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
-		return SceneType::Game;
+	// フェードイン処理
+	fadeInTimer_.Update(dt);
+	
+	if (MyInput::Trigger("Interact")) {
+		if (!fadeInTimer_.IsActive()) { fadeInTimer_.Start(1.0f); }
+	}
+
+	if (fadeInTimer_.IsActive()) {
+		fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, fadeInTimer_.GetProgress() });
+	}
+    
+	if (fadeInTimer_.IsFinished()) {
+		Logger::Output("Interactが押されました - Testシーンへ遷移", Logger::Level::Application);
+		return SceneType::Test;
 	}
 	return SceneType::Title;
 }

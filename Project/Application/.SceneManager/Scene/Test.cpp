@@ -68,14 +68,21 @@ void Test::Initialize() {
 
 	model_ = MyModel::Create("testModel", "AnimatedCube", SceneType::Test);
 	model_->SetPosition(modelPos_);
+
+	fadeSprite_ = MySprite::Create("testFade", "black128x72", SceneType::Test);
+	fadeSprite_->SetScale({ 10.0f, 10.0f });
+	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	fadeSprite_->SetRenderLayer(MadoEngine::Render::RenderLayer::UI);
+
+	fadeOutTimer_.Start(2.0f);
 }
 
 SceneType Test::Update(float dt) {
-	// スペースキーが押されたらゲームシーンに遷移
-	/*if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
-		Logger::Output("スペースキーが押されました - Gameシーンへ遷移", Logger::Level::Application);
-		return SceneType::Game;
-	}*/
+	
+	fadeOutTimer_.Update(dt);
+	if (fadeOutTimer_.IsActive()) {
+		fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, fadeOutTimer_.GetReverseProgress() });
+	}
 
 	//debugCamera_.Update();
 
