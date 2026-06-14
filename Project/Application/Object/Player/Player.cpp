@@ -52,6 +52,9 @@ void Player::Update(float deltaTime) {
 		if (!MyInput::Press("Crouching")) {
 			slideVelocity_ = { 0.0f, 0.0f, 0.0f };
 		}
+		if (velocityY_ <= 0.0f) {
+			jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
+		}
 	} else {
 		// 床面接触なし（側面のみ接触 or 空中）→ 空中扱いにして重力を継続させる
 		isGrounded_ = false;
@@ -68,6 +71,9 @@ void Player::Update(float deltaTime) {
 }
 
 void Player::Move(float deltaTime) {
+	hasMoveInput_ = false;
+	lastMoveDirection_ = { 0.0f, 0.0f, 0.0f };
+
 	if (!camera_) {
 		return;
 	}
@@ -102,6 +108,9 @@ void Player::Move(float deltaTime) {
 
 	const float moveLengthSq = moveDir.x * moveDir.x + moveDir.z * moveDir.z;
 	if (moveLengthSq > 1e-5f) {
+		const float moveLength = std::sqrt(moveLengthSq);
+		lastMoveDirection_ = { moveDir.x / moveLength, 0.0f, moveDir.z / moveLength };
+		hasMoveInput_ = true;
 		rotate_.y = std::atan2(moveDir.x, moveDir.z);
 	} else {
 		hasMoveInput = false;
@@ -116,6 +125,10 @@ void Player::Move(float deltaTime) {
 		currentMotion_ = PlayerMotion::Jump;
 	} else if (!isCrouching) {
 		currentMotion_ = PlayerMotion::Idle;
+	}
+
+	if (!isCrouching) {
+		ApplyJumpMoveBoost(deltaTime);
 	}
 
 	UpdateSliding(deltaTime, isCrouching, isCrouchingStarted, moveDir, hasMoveInput);
@@ -229,6 +242,58 @@ void Player::ApplySlideFriction(float deltaTime, float friction) {
 	slideVelocity_.z *= speedScale;
 }
 
+/// @brief ジャンプ時に加えた水平初速を反映する
+/// @param deltaTime 1フレームの経過時間
+void Player::ApplyJumpMoveBoost(float deltaTime) {
+	if (isGrounded_ && velocityY_ <= 0.0f) {
+		jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
+		return;
+	}
+
+	const float boostSpeedSq = jumpMoveVelocity_.x * jumpMoveVelocity_.x + jumpMoveVelocity_.z * jumpMoveVelocity_.z;
+	if (boostSpeedSq < 1e-6f) {
+		jumpMoveVelocity_.x = 0.0f;
+		jumpMoveVelocity_.z = 0.0f;
+		return;
+	}
+
+	position_.x += jumpMoveVelocity_.x * deltaTime;
+	position_.z += jumpMoveVelocity_.z * deltaTime;
+
+	const float boostSpeed = std::sqrt(boostSpeedSq);
+	const float nextSpeed = std::max(0.0f, boostSpeed - jumpMoveBoostFriction_ * deltaTime);
+	if (nextSpeed <= 0.001f) {
+		jumpMoveVelocity_.x = 0.0f;
+		jumpMoveVelocity_.z = 0.0f;
+		return;
+	}
+
+	const float speedScale = nextSpeed / boostSpeed;
+	jumpMoveVelocity_.x *= speedScale;
+	jumpMoveVelocity_.z *= speedScale;
+}
+
+/// @brief 移動入力中のジャンプに水平初速を加える
+void Player::AddJumpMoveBoost() {
+	if (!hasMoveInput_ || MyInput::Press("Crouching")) {
+		return;
+	}
+
+	jumpMoveVelocity_.x += lastMoveDirection_.x * jumpMoveBoostSpeed_;
+	jumpMoveVelocity_.z += lastMoveDirection_.z * jumpMoveBoostSpeed_;
+
+	const float maxBoostSpeed = jumpMoveBoostSpeed_ * 2.0f;
+	const float boostSpeedSq = jumpMoveVelocity_.x * jumpMoveVelocity_.x + jumpMoveVelocity_.z * jumpMoveVelocity_.z;
+	if (boostSpeedSq <= maxBoostSpeed * maxBoostSpeed) {
+		return;
+	}
+
+	const float boostSpeed = std::sqrt(boostSpeedSq);
+	const float speedScale = maxBoostSpeed / boostSpeed;
+	jumpMoveVelocity_.x *= speedScale;
+	jumpMoveVelocity_.z *= speedScale;
+}
+
 /// @brief Slope上を移動しているときに足元を斜面へ追従させる
 /// @param deltaTime 1フレームの経過時間
 void Player::ApplySlopeGroundSnap(float deltaTime) {
@@ -289,6 +354,7 @@ void Player::Jump(float deltaTime) {
 	if (remainingJumpCount_ > 0 && MyInput::Trigger("Jump")) {
 		velocityY_  = jumpPower_;
 		isGrounded_ = false;
+		AddJumpMoveBoost();
 		remainingJumpCount_--;
 		Logger::Output("ジャンプ開始 残り回数: " + std::to_string(remainingJumpCount_), Logger::Level::Application);
 	}
@@ -318,12 +384,16 @@ void Player::DrawImGui() {
 #ifdef USE_IMGUI
 
 	ImGui::Begin("プレイヤー");
-	const float horizontalSpeed = std::sqrt(slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z);
+	const float horizontalVelocityX = slideVelocity_.x + jumpMoveVelocity_.x;
+	const float horizontalVelocityZ = slideVelocity_.z + jumpMoveVelocity_.z;
+	const float horizontalSpeed = std::sqrt(horizontalVelocityX * horizontalVelocityX + horizontalVelocityZ * horizontalVelocityZ);
+	const float jumpMoveBoostSpeed = std::sqrt(jumpMoveVelocity_.x * jumpMoveVelocity_.x + jumpMoveVelocity_.z * jumpMoveVelocity_.z);
 	const float currentSpeed = std::sqrt(horizontalSpeed * horizontalSpeed + velocityY_ * velocityY_);
 	ImGui::Text("現在の動作: %s", ToMotionText(currentMotion_));
 	ImGui::Text("速度: %.2f", currentSpeed);
 	ImGui::Text("水平速度: %.2f", horizontalSpeed);
 	ImGui::Text("Y速度: %.2f", velocityY_);
+	ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
 	ImGui::Separator();
 	ImGui::DragFloat3("座標", &position_.x, 0.1f);
 	ImGui::DragFloat("移動速度", &moveSpeed_, 0.1f, 0.0f, 100.0f);
@@ -337,6 +407,8 @@ void Player::DrawImGui() {
 	ImGui::DragFloat("スライド摩擦", &slideFriction_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat("スライド解除後摩擦", &slideReleaseFriction_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragInt("ジャンプ回数", &jumpCount_, 1, 0, 10);
+	ImGui::DragFloat("ジャンプ横初速", &jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("ジャンプ横初速減速", &jumpMoveBoostFriction_, 0.1f, 0.0f, 100.0f);
 	ImGui::End();
 
 #endif // USE_IMGUI

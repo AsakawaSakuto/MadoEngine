@@ -36,6 +36,13 @@ private:
 
 	void Jump(float deltaTime);
 
+	/// @brief ジャンプ時に加えた水平初速を反映する
+	/// @param deltaTime 1フレームの経過時間
+	void ApplyJumpMoveBoost(float deltaTime);
+
+	/// @brief 移動入力中のジャンプに水平初速を加える
+	void AddJumpMoveBoost();
+
 	/// @brief Crouching中のスライディング速度を更新する
 	/// @param deltaTime 1フレームの経過時間
 	/// @param isCrouching Crouching入力が押されていればtrue
@@ -60,6 +67,8 @@ private:
 	Vector3 rotate_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 scale_ = { 0.5f, 0.5f, 0.5f };
 	Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 lastMoveDirection_ = { 0.0f, 0.0f, 0.0f };
 
 	Shape hitAABB_;
 	Shape hitSphere_;
@@ -81,11 +90,14 @@ private:
 	float slideSteerRate_ = 5.0f;
 	float slopeSlideAcceleration_ = 30.0f;
 	float maxSlideSpeed_ = 25.0f;
-	float slideFriction_ = 5.0f;
+	float slideFriction_ = 2.0f;
 	float slideReleaseFriction_ = 10.0f;
+	float jumpMoveBoostSpeed_ = 3.0f;
+	float jumpMoveBoostFriction_ = 0.0f;
 	int   jumpCount_  = 10;      // ジャンプ可能回数
 	int remainingJumpCount_ = 0; // 残りジャンプ回数
 	bool wasCrouching_ = false;
+	bool hasMoveInput_ = false;
 
 	PlayerMotion currentMotion_ = PlayerMotion::Idle;
 };
