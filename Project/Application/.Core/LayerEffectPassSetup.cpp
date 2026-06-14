@@ -18,6 +18,13 @@ namespace {
 		float softKnee = 0.5f;
 	};
 
+	struct PixelArtParams {
+		float pixelSize = 6.0f;
+		float colorSteps = 8.0f;
+		float contrast = 1.15f;
+		float intensity = 1.0f;
+	};
+
 } // namespace
 
 namespace RenderPassSetup {
@@ -73,6 +80,19 @@ namespace RenderPassSetup {
 		registeredVignettePass->AddFloatParameterControl("Strength", offsetof(VignetteParams, strength), 0.0f, 100.0f, 0.01f);
 		registeredVignettePass->AddFloatParameterControl("Radius", offsetof(VignetteParams, radius), 0.0f, 100.0f, 0.01f);
 		registeredVignettePass->AddFloatParameterControl("Smoothness", offsetof(VignetteParams, smoothness), 1.0f, 100.0f, 0.01f);
+
+		MadoEngine::Render::LayerEffectPass::Desc pixelArtPass{};
+		pixelArtPass.name = "PixelArt";
+		pixelArtPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
+		pixelArtPass.effectShaderKey = "PostEffect/PixelArt.PS";
+		pixelArtPass.enabled = true;
+
+		MadoEngine::Render::LayerEffectPass* registeredPixelArtPass = execution.AddScreenEffectPass(pixelArtPass);
+		registeredPixelArtPass->SetParameterData(PixelArtParams{});
+		registeredPixelArtPass->AddFloatParameterControl("PixelSize", offsetof(PixelArtParams, pixelSize), 1.0f, 32.0f, 0.1f);
+		registeredPixelArtPass->AddFloatParameterControl("ColorSteps", offsetof(PixelArtParams, colorSteps), 2.0f, 32.0f, 0.1f);
+		registeredPixelArtPass->AddFloatParameterControl("Contrast", offsetof(PixelArtParams, contrast), 0.0f, 3.0f, 0.01f);
+		registeredPixelArtPass->AddFloatParameterControl("Intensity", offsetof(PixelArtParams, intensity), 0.0f, 1.0f, 0.01f);
 	}
 
 } // namespace RenderPassSetup
