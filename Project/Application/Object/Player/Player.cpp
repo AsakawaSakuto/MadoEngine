@@ -396,7 +396,6 @@ void Player::DrawImGui() {
 	ImGui::Separator();
 	ImGui::DragFloat3("座標", &position_.x, 0.1f);
 	ImGui::DragFloat("移動速度", &moveSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("ダッシュ速度", &dashSpeed_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat("ジャンプ力", &jumpPower_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat("重力", &gravity_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat("スライド開始速度", &slideStartSpeed_, 0.1f, 0.0f, 100.0f);

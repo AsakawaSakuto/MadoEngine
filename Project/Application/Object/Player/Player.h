@@ -81,7 +81,6 @@ private:
 	bool  isGrounded_ = false;
 
 	float moveSpeed_  = 5.0f;
-	float dashSpeed_  = 30.0f;
 	float jumpPower_  = 10.0f;
 	float gravity_    = 20.0f;
 	float groundY_    = 0.0f;

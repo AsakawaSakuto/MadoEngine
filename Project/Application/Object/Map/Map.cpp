@@ -134,6 +134,7 @@ void Map::Initialize() {
 				mapModel_[z][x]->SetPosition({ mapTranslate_[z][x].x, blockSize_.y * static_cast<float>(currentHeight), mapTranslate_[z][x].z });
 				mapModel_[z][x]->SetScale({ blockSize_.x / 2.0f, blockSize_.y / 2.0f * static_cast<float>(currentHeight), blockSize_.z / 2.0f });
 				mapModel_[z][x]->SetVisible(isModelDraw_);
+				mapModel_[z][x]->SetTexture("blockTexture");
 			}
 
 			if (useSlope) {
@@ -159,6 +160,7 @@ void Map::Initialize() {
 					mapSlopeModel_[z][x]->SetPosition({ mapTranslate_[z][x].x, blockSize_.y * static_cast<float>(currentHeight + 1), mapTranslate_[z][x].z });
 					mapSlopeModel_[z][x]->SetScale({ blockSize_.x / 2.0f, blockSize_.y / 2.0f, blockSize_.z / 2.0f });
 					mapSlopeModel_[z][x]->SetVisible(isModelDraw_);
+					mapSlopeModel_[z][x]->SetTexture("blockTexture");
 				}
 			}
 		}
