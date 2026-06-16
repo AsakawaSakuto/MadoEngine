@@ -31,6 +31,10 @@ void Player::Update(float deltaTime) {
 	Jump(deltaTime);
 	ApplySlopeGroundSnap(deltaTime);
 
+	transform_.translate.x = std::clamp(transform_.translate.x, -7.5f, 292.5f);
+	transform_.translate.y = std::clamp(transform_.translate.y, 0.0f, 100.0f);
+	transform_.translate.z = std::clamp(transform_.translate.z, -7.5f, 292.5f);
+
 	// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する
 	MyCollider::Update();
 
