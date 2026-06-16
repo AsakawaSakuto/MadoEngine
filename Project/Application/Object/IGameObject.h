@@ -1,15 +1,18 @@
 #pragma once
+#include "UtilityHeaders.h"
+#include "RenderHeaders.h"
+#include "MathHeaders.h"
 
-class IGameObject
-{
+class IGameObject {
 public:
-	IGameObject();
-	virtual ~IGameObject();
+	
+	virtual void Initialize() = 0;
 
-	virtual void Initialize();
+	virtual void Update(float deltaTime) = 0;
 
-	virtual void Update(float dt);
+protected:
 
-private:
-
+	Model* model_ = nullptr;
+	Transform3D transform_;
+	ColliderShape colliderShape_;
 };

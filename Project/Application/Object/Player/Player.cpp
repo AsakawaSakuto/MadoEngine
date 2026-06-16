@@ -3,7 +3,8 @@
 #include <cmath>
 
 void Player::Initialize() {
-	position_   = { -10.0f, 0.0f, -10.0f };
+	transform_.translate = { 0.0f, 100.0f, 0.0f };
+	transform_.SetAllScale(0.5f);
 
 	AABB aabb;
 	aabb.min = { -0.5f, 0.0f, -0.5f };
@@ -12,21 +13,16 @@ void Player::Initialize() {
 
 	Sphere s;
 	s.radius = 0.5f;
-	hitSphere_ = s;
+	colliderShape_ = s;
 
-	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &hitSphere_, &position_, 0.0f);
-	MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &position_, 0.0f);
+	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &colliderShape_, &transform_.translate, 0.0f);
+	MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &transform_.translate, 0.0f);
 
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 	//model_->SetTexture("white16x16");
 
 	currentMotion_ = PlayerMotion::Idle;
-}
-
-void Player::Finalize() {
-
-	Logger::Output("Player : 登録済みColliderとModelを破棄しました", Logger::Level::Application);
 }
 
 void Player::Update(float deltaTime) {
@@ -62,12 +58,22 @@ void Player::Update(float deltaTime) {
 
 	UpdateModelTransform(isSlopeGroundContact);
 
-	model_->SetScale(scale_);
+	model_->SetTransform(transform_);
+
+	if (currentMotion_ == PlayerMotion::Crouching) {
+		model_->SetColor({ 1.0f,0.0f,0.0f,1.0f });
+	} else {
+		model_->SetColor({ 1.0f,1.0f,1.0f,1.0f });
+	}
+
+	if (MyInput::GetKeybord()->IsTrigger(DIK_F2)) {
+		transform_.translate = { 0.0f,100.0f,0.0f };
+	}
 
 	// デバッグ表示
 	Vector4 color = { 0.0f,0.0f,0.0f,1.0f };
 	MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
-	MyDebugLine::AddShape(std::get<Sphere>(hitSphere_), color);
+	MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
 }
 
 void Player::Move(float deltaTime) {
@@ -111,14 +117,14 @@ void Player::Move(float deltaTime) {
 		const float moveLength = std::sqrt(moveLengthSq);
 		lastMoveDirection_ = { moveDir.x / moveLength, 0.0f, moveDir.z / moveLength };
 		hasMoveInput_ = true;
-		rotate_.y = std::atan2(moveDir.x, moveDir.z);
+		transform_.rotate.y = std::atan2(moveDir.x, moveDir.z);
 	} else {
 		hasMoveInput = false;
 	}
 
 	if (!isCrouching && hasMoveInput) {
-		position_.x += moveDir.x * moveSpeed_ * deltaTime;
-		position_.z += moveDir.z * moveSpeed_ * deltaTime;
+		transform_.translate.x += moveDir.x * moveSpeed_ * deltaTime;
+		transform_.translate.z += moveDir.z * moveSpeed_ * deltaTime;
 		currentMotion_ = PlayerMotion::Walk;
 	} else if (!isCrouching && !isGrounded_) {
 		currentMotion_ = PlayerMotion::Jump;
@@ -184,11 +190,11 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 		slideVelocity_.z *= speedScale;
 	}
 
-	position_.x += slideVelocity_.x * deltaTime;
-	position_.z += slideVelocity_.z * deltaTime;
+	transform_.translate.x += slideVelocity_.x * deltaTime;
+	transform_.translate.z += slideVelocity_.z * deltaTime;
 
 	if (std::abs(slideVelocity_.x) > 0.001f || std::abs(slideVelocity_.z) > 0.001f) {
-		rotate_.y = std::atan2(slideVelocity_.x, slideVelocity_.z);
+		transform_.rotate.y = std::atan2(slideVelocity_.x, slideVelocity_.z);
 	}
 
 	const float friction = isCrouching ? slideFriction_ : slideReleaseFriction_;
@@ -256,8 +262,8 @@ void Player::ApplyJumpMoveBoost(float deltaTime) {
 		return;
 	}
 
-	position_.x += jumpMoveVelocity_.x * deltaTime;
-	position_.z += jumpMoveVelocity_.z * deltaTime;
+	transform_.translate.x += jumpMoveVelocity_.x * deltaTime;
+	transform_.translate.z += jumpMoveVelocity_.z * deltaTime;
 
 	const float boostSpeed = std::sqrt(boostSpeedSq);
 	const float nextSpeed = std::max(0.0f, boostSpeed - jumpMoveBoostFriction_ * deltaTime);
@@ -306,8 +312,8 @@ void Player::ApplySlopeGroundSnap(float deltaTime) {
 		return;
 	}
 
-	if (position_.y > slopeCenterY) {
-		position_.y = slopeCenterY;
+	if (transform_.translate.y > slopeCenterY) {
+		transform_.translate.y = slopeCenterY;
 		if (velocityY_ < 0.0f) {
 			velocityY_ = 0.0f;
 		}
@@ -322,25 +328,25 @@ void Player::UpdateModelTransform(bool isSlopeGroundContact) {
 		return;
 	}
 
-	rotate_.x = 0.0f;
-	rotate_.z = 0.0f;
+	transform_.rotate.x = 0.0f;
+	transform_.rotate.z = 0.0f;
 
 	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
 	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal("PlayerSphere", CollisionTag::MapSlope, slopeNormal)) {
-		const float cosYaw = std::cos(rotate_.y);
-		const float sinYaw = std::sin(rotate_.y);
+		const float cosYaw = std::cos(transform_.rotate.y);
+		const float sinYaw = std::sin(transform_.rotate.y);
 		Vector3 localNormal = {
 			slopeNormal.x * cosYaw - slopeNormal.z * sinYaw,
 			slopeNormal.y,
 			slopeNormal.x * sinYaw + slopeNormal.z * cosYaw
 		};
 
-		rotate_.x = std::atan2(localNormal.z, localNormal.y);
-		rotate_.z = std::atan2(-localNormal.x, localNormal.y);
+		transform_.rotate.x = std::atan2(localNormal.z, localNormal.y);
+		transform_.rotate.z = std::atan2(-localNormal.x, localNormal.y);
 	}
 
-	model_->SetPosition(position_);
-	model_->SetRotation(rotate_);
+	model_->SetPosition(transform_.translate);
+	model_->SetRotation(transform_.rotate);
 }
 
 void Player::Jump(float deltaTime) {
@@ -364,11 +370,11 @@ void Player::Jump(float deltaTime) {
 	}
 
 	// Y座標に速度を反映
-	position_.y += velocityY_ * deltaTime;
+	transform_.translate.y += velocityY_ * deltaTime;
 
 	// 地面着地判定
-	if (position_.y <= groundY_) {
-		position_.y = groundY_;
+	if (transform_.translate.y <= groundY_) {
+		transform_.translate.y = groundY_;
 		velocityY_  = 0.0f;
 		if (!isGrounded_) {
 			isGrounded_ = true;
@@ -394,7 +400,6 @@ void Player::DrawImGui() {
 	ImGui::Text("Y速度: %.2f", velocityY_);
 	ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
 	ImGui::Separator();
-	ImGui::DragFloat3("座標", &position_.x, 0.1f);
 	ImGui::DragFloat("移動速度", &moveSpeed_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat("ジャンプ力", &jumpPower_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat("重力", &gravity_, 0.1f, 0.0f, 100.0f);

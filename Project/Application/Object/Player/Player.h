@@ -1,25 +1,18 @@
 #pragma once
-#include "UtilityHeaders.h"
-#include "RenderHeaders.h"
-#include "MathHeaders.h"
+#include "../IGameObject.h"
 #include "PlayerStatus.h"
 
-class Player {
+class Player : public IGameObject {
 public:
 
-	void Initialize();
+	void Initialize() override;
 
-	void Update(float deltaTime);
+	void Update(float deltaTime) override;
 
-	Vector3 GetPosition() const { return position_; }
+	Vector3 GetPosition() const { return transform_.translate; }
 
-	/// @brief 移動の基準となるカメラをセットする
-	/// @param camera カメラへのポインタ
 	void SetCamera(Camera* camera) { camera_ = camera; }
-
-	/// @brief Playerが登録したリソースとColliderを破棄する
-	void Finalize();
-
+	
 	void DrawImGui();
 
 private:
@@ -63,19 +56,13 @@ private:
 
 private:
 
-	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
-	Vector3 rotate_ = { 0.0f, 0.0f, 0.0f };
-	Vector3 scale_ = { 0.5f, 0.5f, 0.5f };
 	Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 lastMoveDirection_ = { 0.0f, 0.0f, 0.0f };
 
-	Shape hitAABB_;
-	Shape hitSphere_;
+	ColliderShape hitAABB_;
 
 	Camera* camera_ = nullptr;
-
-	Model* model_ = nullptr;
 
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;

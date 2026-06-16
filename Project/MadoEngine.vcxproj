@@ -140,6 +140,7 @@
     <ClCompile Include="Application\.Core\LayerEffectPassSetup.cpp" />
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
+    <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
     <ClCompile Include="Application\Object\Player\Player.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
@@ -232,6 +233,7 @@
     <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\.SceneManager\SceneType.h" />
     <ClInclude Include="Application\Object\Map\Map.h" />
+    <ClInclude Include="Application\Object\Map\MapBlock.h" />
     <ClInclude Include="Application\Object\Map\MapBlockType.h" />
     <ClInclude Include="Application\Object\IGameObject.h" />
     <ClInclude Include="Application\Object\Player\Player.h" />

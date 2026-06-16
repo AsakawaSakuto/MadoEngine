@@ -16,7 +16,7 @@ namespace MadoEngine {
 		Logger::Output("初期化完了", Logger::Level::Engine);
 	}
 
-	void DebugLineManager::AddShape(const Shape& shape, const Vector4& color) {
+	void DebugLineManager::AddShape(const ColliderShape& shape, const Vector4& color) {
 
 		// std::visit を使って型に応じた処理を実行
 		std::visit([this, &color](auto&& arg) {

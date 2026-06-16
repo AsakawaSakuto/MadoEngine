@@ -72,7 +72,7 @@ void Test::Initialize() {
 	fadeSprite_ = MySprite::Create("testFade", "black128x72", SceneType::Test);
 	fadeSprite_->SetScale({ 10.0f, 10.0f });
 	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	fadeSprite_->SetRenderLayer(MadoEngine::Render::RenderLayer::UI);
+	fadeSprite_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 
 	fadeOutTimer_.Start(2.0f);
 }

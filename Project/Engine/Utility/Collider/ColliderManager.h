@@ -24,7 +24,7 @@ public:
 	struct ColliderInfo {
 		std::string actorName;         // 固有ID (例: "Enemy_0001")
 		CollisionTag tag;              // グループ (例: CollisionTag::Enemy)
-		Shape* pShape = nullptr;       // 形状データ (std::variant)
+		ColliderShape* pShape = nullptr;       // 形状データ (std::variant)
 		Vector3* pPosition = nullptr;  // アクターの現在座標へのポインタ
 		CollisionCallback onHit = nullptr;
 		float weight = 0.0f;           // 押し戻されにくさ (0.0: 通常, 1.0: 完全固定)
@@ -46,7 +46,7 @@ public:
 	/// @param pPos アクターの現在座標へのポインタ（Shape内のcenterを自動更新するために必要）
 	/// @param callback 衝突時のコールバック関数（省略可）
 	/// @param weight 押し戻されにくさ（0.0: 通常, 1.0: 完全固定。省略可）
-	void RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight = 0.0f, CollisionCallback callback = nullptr);
+	void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.0f, CollisionCallback callback = nullptr);
 
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）
 	void RemoveCollider(const std::string& name);
@@ -134,7 +134,7 @@ private:
 
 	// --- 内部処理 ---
 	void SyncPositions();
-	bool CheckVariantCollision(const Shape& shapeA, const Shape& shapeB);
+	bool CheckVariantCollision(const ColliderShape& shapeA, const ColliderShape& shapeB);
 
 	/// @brief 前回座標から現在座標への移動で連続衝突しているか判定する
 	/// @param a コライダーA

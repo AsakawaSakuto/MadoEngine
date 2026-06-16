@@ -2,10 +2,10 @@
 #include "Utility/Logger/Logger.h"
 
 // pShape から実体を取得してコピーを作るように変更
-static Shape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
+static ColliderShape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
     if (!info.pShape) return {}; // 万が一ポインタがnullの場合は空を返すなどの保護
 
-    Shape syncedShape = *(info.pShape);
+    ColliderShape syncedShape = *(info.pShape);
     if (info.pPosition) {
         std::visit([&info](auto& s) {
             if constexpr (requires { s.center; }) {
@@ -19,7 +19,7 @@ static Shape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
 /// @brief 指定したShapeのcenterを座標に同期する
 /// @param shape 同期する形状
 /// @param position 反映する座標
-static void SyncShapeCenter(Shape& shape, const Vector3& position) {
+static void SyncShapeCenter(ColliderShape& shape, const Vector3& position) {
     std::visit([&position](auto& shapeActual) {
         if constexpr (requires { shapeActual.center; }) {
             shapeActual.center = position;
@@ -465,7 +465,7 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
     }
 }
 
-void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight, CollisionCallback callback    ) {
+void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight, CollisionCallback callback    ) {
     ColliderInfo info;
     info.actorName = name;
     info.tag = tag;
@@ -536,7 +536,7 @@ void ColliderManager::SyncPositions() {
     }
 }
 
-bool ColliderManager::CheckVariantCollision(const Shape& shapeA, const Shape& shapeB) {
+bool ColliderManager::CheckVariantCollision(const ColliderShape& shapeA, const ColliderShape& shapeB) {
     return std::visit([](auto&& typeA, auto&& typeB) -> bool {
         if constexpr (requires { Collision::IsHit(typeA, typeB); }) return Collision::IsHit(typeA, typeB);
         else if constexpr (requires { Collision::IsHit(typeB, typeA); }) return Collision::IsHit(typeB, typeA);

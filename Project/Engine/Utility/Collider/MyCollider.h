@@ -13,7 +13,7 @@ namespace MyCollider {
 	/// @param pPos アクターの現在座標へのポインタ（Shape内のcenterを自動更新するために必要）
 	/// @param callback 衝突時のコールバック関数（省略可）
 	/// @param weight 押し戻しの重み（省略可、デフォルトは0.5f）
-	inline void RegisterCollider(const std::string& name, CollisionTag tag, Shape* pShape, Vector3* pPos, float weight = 0.5f, CollisionCallback callback = nullptr) {
+	inline void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.5f, CollisionCallback callback = nullptr) {
 		ColliderManager::GetInstance().RegisterCollider(name, tag, pShape, pPos, weight, callback);
 	}
 

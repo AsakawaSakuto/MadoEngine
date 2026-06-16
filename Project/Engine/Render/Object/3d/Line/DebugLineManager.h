@@ -33,7 +33,7 @@ namespace MadoEngine {
         /// @brief 形状を追加（統一API）
         /// @param shape 描画する形状
         /// @param color 描画色（デフォルト：白）
-        void AddShape(const Shape& shape, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
+        void AddShape(const ColliderShape& shape, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
         /// @brief グリッド描画
         /// @param size グリッドサイズ

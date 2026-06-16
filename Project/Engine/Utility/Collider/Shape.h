@@ -11,7 +11,7 @@
 #include "Utility/Collider/Shape/Slope.h"
 
 /// @brief 複数の当たり判定形状をまとめるための型
-using Shape = std::variant<
+using ColliderShape = std::variant<
     AABB,
     OBB,
     Sphere,

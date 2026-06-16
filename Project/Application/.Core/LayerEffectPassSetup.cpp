@@ -60,7 +60,7 @@ namespace RenderPassSetup {
 		bloomPass.name = "Bloom";
 		bloomPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		bloomPass.effectShaderKey = "PostEffect/Bloom.PS";
-		bloomPass.enabled = true;
+		bloomPass.enabled = false;
 
 		MadoEngine::Render::LayerEffectPass* registeredBloomPass = execution.AddScreenEffectPass(bloomPass);
 		registeredBloomPass->SetParameterData(BloomParams{});
@@ -73,7 +73,7 @@ namespace RenderPassSetup {
 		vignettePass.name = "Vignette";
 		vignettePass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		vignettePass.effectShaderKey = "PostEffect/Vignette.PS";
-		vignettePass.enabled = true;
+		vignettePass.enabled = false;
 
 		MadoEngine::Render::LayerEffectPass* registeredVignettePass = execution.AddScreenEffectPass(vignettePass);
 		registeredVignettePass->SetParameterData(VignetteParams{});
@@ -85,7 +85,7 @@ namespace RenderPassSetup {
 		pixelArtPass.name = "PixelArt";
 		pixelArtPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		pixelArtPass.effectShaderKey = "PostEffect/PixelArt.PS";
-		pixelArtPass.enabled = true;
+		pixelArtPass.enabled = false;
 
 		MadoEngine::Render::LayerEffectPass* registeredPixelArtPass = execution.AddScreenEffectPass(pixelArtPass);
 		registeredPixelArtPass->SetParameterData(PixelArtParams{});

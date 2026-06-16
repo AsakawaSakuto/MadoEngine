@@ -37,15 +37,15 @@ private:
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 
-	Shape plane_;
+	ColliderShape plane_;
 
-	Shape slope_;
+	ColliderShape slope_;
 	Vector3 slopePos_ = { -30.0f, 5.0f, -10.0f };
 
-	Shape slope2_;
+	ColliderShape slope2_;
 	Vector3 slope2Pos_ = { -20.0f, 10.0f, -10.0f };
 
-	Shape aabb_;
+	ColliderShape aabb_;
 	Vector3 aabbPos_ = { -20.0f, 5.0f, -10.0f };
 
 	Vector3 planePos_ = { 0.0f, 0.0f, 0.0f };

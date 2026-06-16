@@ -1,36 +1,34 @@
 #pragma once
 #include "UtilityHeaders.h"
 #include "RenderHeaders.h"
-#include "MapBlockType.h"
+#include "MapBlock.h"
 
-/// @brief マップクラス サイズ20x20
+/// @brief マップ全体を管理するクラスです。
 class Map {
 public:
+	/// @brief マップを初期化します。
 	void Initialize();
 
-	/// @brief マップが登録したリソースとColliderを破棄する
-	void Finalize();
-
+	/// @brief マップを更新します。
 	void Update();
 
+	/// @brief マップ調整用のImGuiを描画します。
 	void DrawImGui();
 
 private:
-	/// @brief 地形を再生成する
+	/// @brief 地形を再生成します。
 	void RegenerateTerrain();
 
-	/// @brief 生成済みの地形オブジェクトを破棄する
-	void ClearTerrainObjects();
-
-	/// @brief 地形生成用の高さ設定を有効な範囲に補正する
+	/// @brief 地形生成用の高さ設定を有効範囲に補正します。
 	void ClampHeightSettings();
 
-	std::vector<std::vector<uint32_t>> mapPositionY_;
-	std::vector<std::vector<MapBlockType>> mapBlockType_;
-	std::vector<std::vector<Vector3>> mapTranslate_;
-	std::vector<std::vector<Shape>> mapShape_;
-	std::vector<std::vector<Model*>> mapModel_;
-	std::vector<std::vector<Model*>> mapSlopeModel_;
+	/// @brief 指定座標のブロック高さを取得します。
+	/// @param x マップ上のX座標です。
+	/// @param z マップ上のZ座標です。
+	/// @return ブロック高さです。
+	uint32_t GetBlockHeight(int x, int z) const;
+
+	std::vector<std::vector<MapBlock>> mapBlocks_;
 
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;
