@@ -20,6 +20,7 @@ namespace MadoEngine::Render {
 			RenderLayerMask targetLayerMask = ToRenderLayerMask(RenderLayer::Default);
 			std::string effectShaderKey = "PostEffect/CopyImage.PS";
 			bool enabled = true;
+			bool ignoreDepthForMask = false;
 		};
 
 		/// @brief ImGuiで編集するfloatパラメータの設定
@@ -44,6 +45,14 @@ namespace MadoEngine::Render {
 		/// @brief 有効状態を取得する
 		/// @return 有効な場合はtrue
 		bool IsEnabled() const;
+
+		/// @brief マスク描画時にDepthを無視するか設定する
+		/// @param ignoreDepth Depthを無視する場合はtrue
+		void SetIgnoreDepthForMask(bool ignoreDepth);
+
+		/// @brief マスク描画時にDepthを無視するか取得する
+		/// @return Depthを無視する場合はtrue
+		bool IsIgnoreDepthForMask() const;
 
 		/// @brief パス名を設定する
 		/// @param name 設定するパス名

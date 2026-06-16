@@ -115,8 +115,14 @@ namespace MadoEngine
 		void DrawPostEffect(
 			D3D12_GPU_DESCRIPTOR_HANDLE inputSrv,
 			const MadoEngine::Render::PSODesc& desc,
-			D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress = 0
+			D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress = 0,
+			MadoEngine::Core::DepthStencilBuffer* maskDepthStencilBuffer = nullptr
 		);
+
+		/// @brief 指定LayerMaskのチェーンにDepth無視マスクが必要か判定する
+		/// @param layerMask 判定するLayerMask
+		/// @return Depth無視マスクが必要な場合はtrue
+		bool NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const;
 
 		/// @brief シーンとLayerエフェクト結果を現在の描画先へ合成する
 		/// @param sceneSrv シーンカラーのGPU SRVハンドル
@@ -159,6 +165,8 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::PSORegistry> psoRegistry_;
 
 		std::unique_ptr<MadoEngine::Core::DepthStencilBuffer> depthStencilBuffer_;
+		std::unique_ptr<MadoEngine::Core::DepthStencilBuffer> layerDepthStencilBuffer_;
+		MadoEngine::Core::DepthStencilBuffer* currentLayerMaskDepthStencilBuffer_ = nullptr;
 
 		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 

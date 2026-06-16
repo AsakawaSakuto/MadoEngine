@@ -130,7 +130,9 @@ namespace MadoEngine
 
 		// DepthStencilBuffer の生成
 		depthStencilBuffer_ = std::make_unique<MadoEngine::Core::DepthStencilBuffer>();
-		depthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, renderWidth_, renderHeight_);
+		depthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, srvManager_, renderWidth_, renderHeight_);
+		layerDepthStencilBuffer_ = std::make_unique<MadoEngine::Core::DepthStencilBuffer>();
+		layerDepthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, srvManager_, renderWidth_, renderHeight_);
 
 		// ViewportScissor の初期化
 		viewportScissor_ = std::make_unique<MadoEngine::Render::ViewportScissor>();
@@ -241,6 +243,7 @@ namespace MadoEngine
 		commandManager_->WaitForGPU();
 		swapChain_->Resize(width, height);
 		depthStencilBuffer_->Resize(width, height);
+		layerDepthStencilBuffer_->Resize(width, height);
 		viewportScissor_->UpdateSize(width, height);
 		renderTargetManager_->ResizeAll(width, height);
 
@@ -324,6 +327,7 @@ namespace MadoEngine
 		// オフスクリーンRTへ描画する
 		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
+		depthStencilBuffer_->Transition(commandManager_->GetCommandList(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		renderTargetManager_->Begin(kSceneColorTarget, commandManager_->GetCommandList(), dsvHandle);
 		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
@@ -347,8 +351,14 @@ namespace MadoEngine
 		isLayerEffectChainResolved_ = false;
 		currentLayerEffectSourceName_ = kLayerColorTarget;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
+		const bool ignoreDepthForMask = NeedsIgnoreDepthMask(pass.GetTargetLayerMask());
+		currentLayerMaskDepthStencilBuffer_ = ignoreDepthForMask ? layerDepthStencilBuffer_.get() : depthStencilBuffer_.get();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = currentLayerMaskDepthStencilBuffer_->GetDSVCPUHandle();
+		currentLayerMaskDepthStencilBuffer_->Transition(commandManager_->GetCommandList(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		renderTargetManager_->Begin(kLayerColorTarget, commandManager_->GetCommandList(), dsvHandle);
+		if (ignoreDepthForMask) {
+			commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		}
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 	}
 
@@ -371,7 +381,8 @@ namespace MadoEngine
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_),
 			pass.GetEffectPSODesc(),
-			pass.GetParameterGPUVirtualAddress()
+			pass.GetParameterGPUVirtualAddress(),
+			currentLayerMaskDepthStencilBuffer_
 		);
 		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
 
@@ -513,10 +524,11 @@ namespace MadoEngine
 			ImGuiTableFlags_RowBg |
 			ImGuiTableFlags_SizingStretchProp;
 
-		if (!layerEffectPasses_.empty() && ImGui::BeginTable("LayerEffectPassTable", 4, tableFlags)) {
+		if (!layerEffectPasses_.empty() && ImGui::BeginTable("LayerEffectPassTable", 5, tableFlags)) {
 			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("DepthIgnore", ImGuiTableColumnFlags_WidthFixed, 90.0f);
 			ImGui::TableSetupColumn("LayerMask", ImGuiTableColumnFlags_WidthFixed, 90.0f);
 			ImGui::TableHeadersRow();
 
@@ -569,6 +581,16 @@ namespace MadoEngine
 				ImGui::PopItemWidth();
 
 				ImGui::TableSetColumnIndex(3);
+				bool ignoreDepthForMask = pass.IsIgnoreDepthForMask();
+				if (ImGui::Checkbox("##DepthIgnore", &ignoreDepthForMask)) {
+					pass.SetIgnoreDepthForMask(ignoreDepthForMask);
+					Logger::Output(
+						"LayerEffectPassのDepth無視マスクを変更しました: " + pass.GetName(),
+						Logger::Level::Debug
+					);
+				}
+
+				ImGui::TableSetColumnIndex(4);
 				ImGui::Text("0x%08X", pass.GetTargetLayerMask());
 
 				ImGui::PopID();
@@ -707,7 +729,8 @@ namespace MadoEngine
 	void Execution::DrawPostEffect(
 		D3D12_GPU_DESCRIPTOR_HANDLE inputSrv,
 		const MadoEngine::Render::PSODesc& desc,
-		D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress)
+		D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress,
+		MadoEngine::Core::DepthStencilBuffer* maskDepthStencilBuffer)
 	{
 		auto* commandList = commandManager_->GetCommandList();
 		commandList->SetGraphicsRootSignature(
@@ -716,13 +739,37 @@ namespace MadoEngine
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->SetGraphicsRootDescriptorTable(0, inputSrv);
 		if (desc.rootSigKey == "PostEffect.RootSig") {
+			depthStencilBuffer_->Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->SetGraphicsRootDescriptorTable(1, depthStencilBuffer_->GetSRVGPUHandle());
+			MadoEngine::Core::DepthStencilBuffer* maskDepth =
+				maskDepthStencilBuffer != nullptr ? maskDepthStencilBuffer : depthStencilBuffer_.get();
+			maskDepth->Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->SetGraphicsRootDescriptorTable(2, maskDepth->GetSRVGPUHandle());
 			if (parameterBufferAddress == 0) {
 				assert(postEffectDefaultParameterResource_ && "ポストエフェクト用の既定ConstantBufferが未作成です");
 				parameterBufferAddress = postEffectDefaultParameterResource_->GetGPUVirtualAddress();
 			}
-			commandList->SetGraphicsRootConstantBufferView(1, parameterBufferAddress);
+			commandList->SetGraphicsRootConstantBufferView(3, parameterBufferAddress);
 		}
 		commandList->DrawInstanced(3, 1, 0, 0);
+	}
+
+	bool Execution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
+		for (const MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
+			if (!pass.IsEnabled()) {
+				continue;
+			}
+
+			if (pass.GetTargetLayerMask() != layerMask) {
+				continue;
+			}
+
+			if (pass.IsIgnoreDepthForMask()) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	void Execution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {

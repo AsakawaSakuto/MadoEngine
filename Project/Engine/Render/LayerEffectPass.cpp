@@ -27,6 +27,14 @@ namespace MadoEngine::Render {
 		return desc_.enabled;
 	}
 
+	void LayerEffectPass::SetIgnoreDepthForMask(bool ignoreDepth) {
+		desc_.ignoreDepthForMask = ignoreDepth;
+	}
+
+	bool LayerEffectPass::IsIgnoreDepthForMask() const {
+		return desc_.ignoreDepthForMask;
+	}
+
 	void LayerEffectPass::SetName(const std::string& name) {
 		assert(!name.empty() && "LayerEffectPass名が空です");
 		desc_.name = name;
