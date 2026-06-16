@@ -65,6 +65,8 @@
     <ClCompile Include="Externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Externals\imgui\ImGuizmo.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\EditorHistory.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\ModelTransformCommand.cpp" />
     <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
     <ClCompile Include="Engine\Render\Screen\RenderTargetManager.cpp" />
     <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
@@ -428,6 +430,9 @@
     <ClInclude Include="Engine\Render\ImGui\EditorUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\EditorCommand.h" />
+    <ClInclude Include="Engine\Render\ImGui\EditorHistory.h" />
+    <ClInclude Include="Engine\Render\ImGui\ModelTransformCommand.h" />
     <ClInclude Include="Application\Object\IGameObject.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
