@@ -232,6 +232,7 @@
     <ClInclude Include="Application\.Core\Terminal.h" />
     <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\.SceneManager\SceneType.h" />
+    <ClInclude Include="Application\Object\Map\EventObject\Jar.h" />
     <ClInclude Include="Application\Object\Map\Map.h" />
     <ClInclude Include="Application\Object\Map\MapBlock.h" />
     <ClInclude Include="Application\Object\Map\MapBlockType.h" />
