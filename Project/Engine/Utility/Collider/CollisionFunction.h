@@ -269,9 +269,13 @@ namespace Collision
         float surfaceY = Detail::GetSlopeSurfaceY(slope, closestXZ);
 
         if (Detail::IsInsideSlopeXZ(slope, sphere.center)) {
-            float sphereBottomY = sphere.center.y - sphere.radius;
             float sphereTopY = sphere.center.y + sphere.radius;
-            return sphereBottomY <= surfaceY && sphereTopY >= worldMin.y;
+            Vector3 normal = Detail::GetSlopeTopNormal(slope);
+            Vector3 planePoint = { sphere.center.x, surfaceY, sphere.center.z };
+            float signedDistance = Math::Dot(sphere.center - planePoint, normal);
+            return signedDistance >= -sphere.radius &&
+                signedDistance <= sphere.radius &&
+                sphereTopY >= worldMin.y;
         }
 
         Vector3 closestPoint = {

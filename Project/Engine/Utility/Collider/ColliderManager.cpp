@@ -249,27 +249,94 @@ static bool IsSphereSlopeHitAtTime(ColliderManager::ColliderInfo& sphereInfo, Co
     return Collision::IsHit(sphere, slope);
 }
 
+/// @brief Sphere中心からSlope上面までの法線方向距離を計算する
+/// @param center Sphere中心座標
+/// @param slope 対象Slope
+/// @param samplePoint 高さを取得するXZ座標
+/// @return Slope上面の法線方向距離
+static float CalcSphereSlopeTopSignedDistance(const Vector3& center, const Slope& slope, const Vector3& samplePoint) {
+    Vector3 normal = Collision::Detail::GetSlopeTopNormal(slope);
+    float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, samplePoint);
+    Vector3 planePoint = { samplePoint.x, surfaceY, samplePoint.z };
+    return Math::Dot(center - planePoint, normal);
+}
+
+/// @brief SphereがSlope上面に接地しているかを法線方向距離で判定する
+/// @param sphere 対象Sphere
+/// @param slope 対象Slope
+/// @param center Sphere中心座標
+/// @param xzMargin XZ範囲に追加する余白
+/// @param belowTolerance Slope上面より下側に許容する距離
+/// @param aboveTolerance Slope上面より上側に許容する距離
+/// @return Slope上面に接地していればtrue
+static bool IsSphereTouchingSlopeTop(const Sphere& sphere, const Slope& slope, const Vector3& center, float xzMargin, float belowTolerance = 0.08f, float aboveTolerance = 0.08f) {
+    if (!Collision::Detail::IsInsideSlopeXZ(slope, center, xzMargin)) {
+        return false;
+    }
+
+    float signedDistance = CalcSphereSlopeTopSignedDistance(center, slope, center);
+    return signedDistance >= -belowTolerance && signedDistance <= sphere.radius + aboveTolerance;
+}
+
+/// @brief Slope上面にSphereを接地させる中心Y座標を取得する
+/// @param sphere 対象Sphere
+/// @param slope 対象Slope
+/// @param samplePoint 高さを取得するXZ座標
+/// @return Sphere中心のY座標
+static float CalcSlopeTopSupportCenterY(const Sphere& sphere, const Slope& slope, const Vector3& samplePoint) {
+    Vector3 normal = Collision::Detail::GetSlopeTopNormal(slope);
+    float normalY = std::max(normal.y, 0.0001f);
+    float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, samplePoint);
+    return surfaceY + sphere.radius / normalY;
+}
+
+/// @brief Slope上面の法線方向にSphereを押し出すベクトルを取得する
+/// @param center Sphere中心座標
+/// @param radius Sphere半径
+/// @param slope 対象Slope
+/// @param outPushVec 押し出しベクトル
+/// @return 押し出し可能であればtrue
+static bool TryGetSlopeTopPushVector(const Vector3& center, float radius, const Slope& slope, Vector3& outPushVec) {
+    static constexpr float kSkinWidth = 0.001f;
+    Vector3 worldMin = slope.GetMinWorld();
+    Vector3 worldMax = slope.GetMaxWorld();
+    Vector3 samplePoint = {
+        std::clamp(center.x, worldMin.x, worldMax.x),
+        center.y,
+        std::clamp(center.z, worldMin.z, worldMax.z)
+    };
+
+    if (!Collision::Detail::IsInsideSlopeXZ(slope, center, radius * 0.25f)) {
+        return false;
+    }
+
+    Vector3 normal = Collision::Detail::GetSlopeTopNormal(slope);
+    float signedDistance = CalcSphereSlopeTopSignedDistance(center, slope, samplePoint);
+    if (signedDistance < -radius || signedDistance > radius) {
+        return false;
+    }
+
+    float penetration = radius - signedDistance + kSkinWidth;
+    if (penetration <= 0.0f) {
+        return false;
+    }
+
+    outPushVec = normal * penetration;
+    return true;
+}
+
 /// @brief 指定時刻のSphereがSlope上面に乗る接触か判定する
 /// @param sphereInfo Sphereのコライダー情報
 /// @param slopeInfo Slopeのコライダー情報
 /// @param t 判定時刻
 /// @return 上面接触として扱える場合はtrue
 static bool IsSphereOnSlopeTopAtTime(ColliderManager::ColliderInfo& sphereInfo, ColliderManager::ColliderInfo& slopeInfo, float t) {
-    static constexpr float kTopTolerance = 0.08f;
     Sphere sphere = std::get<Sphere>(*(sphereInfo.pShape));
     Slope slope = std::get<Slope>(*(slopeInfo.pShape));
     sphere.center = LerpVector3(sphereInfo.previousPosition, *(sphereInfo.pPosition), t);
     slope.center = LerpVector3(slopeInfo.previousPosition, *(slopeInfo.pPosition), t);
 
-    if (!Collision::Detail::IsInsideSlopeXZ(slope, sphere.center, sphere.radius)) {
-        return false;
-    }
-
-    float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, sphere.center);
-    float bottomY = sphere.center.y - sphere.radius;
-    return sphere.center.y >= surfaceY &&
-        bottomY >= surfaceY - kTopTolerance &&
-        bottomY <= surfaceY + kTopTolerance;
+    return IsSphereTouchingSlopeTop(sphere, slope, sphere.center, sphere.radius);
 }
 
 /// @brief Slope側面の接触を歩行用の継ぎ目として無視できるか判定する
@@ -280,9 +347,10 @@ static bool IsSphereOnSlopeTopAtTime(ColliderManager::ColliderInfo& sphereInfo, 
 /// @return 側面押し戻しを無視できる場合はtrue
 static bool CanIgnoreSlopeSideSeam(const Vector3& center, float radius, const Slope& slope, const Vector3& samplePoint) {
     static constexpr float kSeamTolerance = 0.12f;
-    float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, samplePoint);
-    float bottomY = center.y - radius;
-    return bottomY >= surfaceY - kSeamTolerance;
+    Sphere sphere;
+    sphere.radius = radius;
+    float supportCenterY = CalcSlopeTopSupportCenterY(sphere, slope, samplePoint);
+    return center.y >= supportCenterY - kSeamTolerance;
 }
 
 /// @brief SphereとSlopeの連続衝突判定を行う
@@ -383,24 +451,12 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
     }
 
     bool insideXZ = Collision::Detail::IsInsideSlopeXZ(slope, center);
-    float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
-    float targetY = surfaceY + radius + kSkinWidth;
-    float topPenetration = targetY - center.y;
 
-    if (insideXZ && topPenetration > 0.0f && center.y + radius >= worldMin.y) {
-        float distMinX = center.x - worldMin.x;
-        float distMaxX = worldMax.x - center.x;
-        float distMinZ = center.z - worldMin.z;
-        float distMaxZ = worldMax.z - center.z;
-        float nearestSideDistance = std::min(std::min(distMinX, distMaxX), std::min(distMinZ, distMaxZ));
-        float sidePenetration = nearestSideDistance + radius + kSkinWidth;
-
-        if (topPenetration <= sidePenetration || center.y >= surfaceY) {
-            Vector3 pushVec = { 0.0f, topPenetration, 0.0f };
-            *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushVec * factorSphere;
-            *(slopeInfo.pPosition) = *(slopeInfo.pPosition) - pushVec * factorSlope;
-            return;
-        }
+    Vector3 topPushVec = { 0.0f, 0.0f, 0.0f };
+    if (center.y + radius >= worldMin.y && TryGetSlopeTopPushVector(center, radius, slope, topPushVec)) {
+        *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + topPushVec * factorSphere;
+        *(slopeInfo.pPosition) = *(slopeInfo.pPosition) - topPushVec * factorSlope;
+        return;
     }
 
     float closestX = std::clamp(center.x, worldMin.x, worldMax.x);
@@ -850,13 +906,7 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
     else if (std::holds_alternative<Sphere>(*(playerInfo.pShape))) {
         auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
         auto checkSlopeGround = [&playerInfo, &sphere](const Slope& slope) -> bool {
-            if (!Collision::Detail::IsInsideSlopeXZ(slope, *(playerInfo.pPosition), sphere.radius * 0.25f)) {
-                return false;
-            }
-
-            float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, *(playerInfo.pPosition));
-            float bottomY = playerInfo.pPosition->y - sphere.radius;
-            return playerInfo.pPosition->y >= surfaceY - 0.05f && bottomY <= surfaceY + 0.08f;
+            return IsSphereTouchingSlopeTop(sphere, slope, *(playerInfo.pPosition), sphere.radius * 0.25f, 0.05f, 0.08f);
         };
 
         for (const auto& [otherName, otherInfo] : m_colliders) {
@@ -926,13 +976,7 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
         if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
 
         const auto& slope = std::get<Slope>(*(otherInfo.pShape));
-        if (!Collision::Detail::IsInsideSlopeXZ(slope, *(playerInfo.pPosition), sphere.radius * 0.25f)) {
-            continue;
-        }
-
-        float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, *(playerInfo.pPosition));
-        float bottomY = playerInfo.pPosition->y - sphere.radius;
-        if (playerInfo.pPosition->y >= surfaceY - 0.05f && bottomY <= surfaceY + 0.08f) {
+        if (IsSphereTouchingSlopeTop(sphere, slope, *(playerInfo.pPosition), sphere.radius * 0.25f, 0.05f, 0.08f)) {
             return true;
         }
     }
@@ -973,7 +1017,7 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
         }
 
         float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
-        float targetCenterY = surfaceY + sphere.radius;
+        float targetCenterY = CalcSlopeTopSupportCenterY(sphere, slope, center);
         float snapDownDistance = center.y - targetCenterY;
         if (snapDownDistance < 0.0f || snapDownDistance > maxSnapDownDistance) {
             continue;
@@ -1021,16 +1065,11 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
 
         Slope slope = std::get<Slope>(*(otherInfo.pShape));
         slope.center = *(otherInfo.pPosition);
-        if (!Collision::Detail::IsInsideSlopeXZ(slope, center, sphere.radius * 0.25f)) {
+        if (!IsSphereTouchingSlopeTop(sphere, slope, center, sphere.radius * 0.25f, 0.05f, 0.08f)) {
             continue;
         }
 
         float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
-        float bottomY = center.y - sphere.radius;
-        if (center.y < surfaceY - 0.05f || bottomY > surfaceY + 0.08f) {
-            continue;
-        }
-
         if (!foundSlope || surfaceY > bestSurfaceY) {
             foundSlope = true;
             bestSurfaceY = surfaceY;
