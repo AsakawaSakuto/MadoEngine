@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="Application\.Core\LayerEffectPassSetup.cpp" />
     <ClCompile Include="Application\.Core\Terminal.cpp" />
+    <ClCompile Include="Application\Object\Map\EventObject\Jar.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
     <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
     <ClCompile Include="Application\Object\Player\Player.cpp" />
