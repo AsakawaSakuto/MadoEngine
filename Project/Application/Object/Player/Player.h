@@ -67,23 +67,19 @@ private:
 	float velocityY_  = 0.0f;
 	bool  isGrounded_ = false;
 
-	float moveSpeed_  = 5.0f;
-	float jumpPower_  = 10.0f;
-	float gravity_    = 20.0f;
-	float groundY_    = 0.0f;
-	float slopeSnapDistance_ = 1.0f;
-	float slideStartSpeed_ = 7.5f;
-	float slideSteerRate_ = 5.0f;
-	float slopeSlideAcceleration_ = 30.0f;
-	float maxSlideSpeed_ = 25.0f;
-	float slideFriction_ = 2.0f;
-	float slideReleaseFriction_ = 10.0f;
-	float jumpMoveBoostSpeed_ = 3.0f;
-	float jumpMoveBoostFriction_ = 0.0f;
-	int   jumpCount_  = 10;      // ジャンプ可能回数
-	int remainingJumpCount_ = 0; // 残りジャンプ回数
-	bool wasCrouching_ = false;
-	bool hasMoveInput_ = false;
+	// --- 調整用パラメータ ---
+	float groundY_ = 0.0f;               // 接地している地面のY座標
+	float slopeSnapDistance_ = 1.0f;     // Slopeに足が届いているとみなす距離
+	float jumpMoveBoostFriction_ = 0.0f; // ジャンプ時の水平初速に対する摩擦（0なら減速なし）
+	float slideReleaseFriction_ = 10.0f; // スライディング解除時の摩擦
+	int remainingJumpCount_ = 0;         // 残りジャンプ回数
+
+	PlayerStatus status_;                     // ステータス
+	PlayerStatusMultiplier statusMultiplier_; // ステータスの倍率
+	PlayerMovementParams movementParams_;     // 移動に関するパラメータ
+
+	bool wasCrouching_ = false; // 前フレームのCrouching入力状態
+	bool hasMoveInput_ = false; // 移動入力があるか
 
 	PlayerMotion currentMotion_ = PlayerMotion::Idle;
 };

@@ -127,8 +127,8 @@ void Player::Move(float deltaTime) {
 	}
 
 	if (!isCrouching && hasMoveInput) {
-		transform_.translate.x += moveDir.x * moveSpeed_ * deltaTime;
-		transform_.translate.z += moveDir.z * moveSpeed_ * deltaTime;
+		transform_.translate.x += moveDir.x * movementParams_.moveSpeed_ * deltaTime;
+		transform_.translate.z += moveDir.z * movementParams_.moveSpeed_ * deltaTime;
 		currentMotion_ = PlayerMotion::Walk;
 	} else if (!isCrouching && !isGrounded_) {
 		currentMotion_ = PlayerMotion::Jump;
@@ -156,22 +156,22 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 	}
 
 	if (isCrouchingStarted && hasMoveInput) {
-		slideVelocity_.x = moveDir.x * slideStartSpeed_;
-		slideVelocity_.z = moveDir.z * slideStartSpeed_;
+		slideVelocity_.x = moveDir.x * movementParams_.slideStartSpeed_;
+		slideVelocity_.z = moveDir.z * movementParams_.slideStartSpeed_;
 	}
 
 	Vector3 slopeDownDirection = { 0.0f, 0.0f, 0.0f };
 	const bool isCrouchingOnSlope = isCrouching && TryGetSlopeDownDirection(slopeDownDirection);
 	if (isCrouchingOnSlope) {
-		slideVelocity_.x += slopeDownDirection.x * slopeSlideAcceleration_ * deltaTime;
-		slideVelocity_.z += slopeDownDirection.z * slopeSlideAcceleration_ * deltaTime;
+		slideVelocity_.x += slopeDownDirection.x * movementParams_.slopeSlideAcceleration_ * deltaTime;
+		slideVelocity_.z += slopeDownDirection.z * movementParams_.slopeSlideAcceleration_ * deltaTime;
 	}
 
 	const float slideSpeedSq = slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z;
 	if (isCrouching && hasMoveInput && slideSpeedSq > 1e-6f) {
 		const float slideSpeed = std::sqrt(slideSpeedSq);
 		Vector3 currentDir = { slideVelocity_.x / slideSpeed, 0.0f, slideVelocity_.z / slideSpeed };
-		const float steerT = std::clamp(slideSteerRate_ * deltaTime, 0.0f, 1.0f);
+		const float steerT = std::clamp(movementParams_.slideSteerRate_ * deltaTime, 0.0f, 1.0f);
 		Vector3 steeredDir = {
 			currentDir.x + (moveDir.x - currentDir.x) * steerT,
 			0.0f,
@@ -187,9 +187,9 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 	}
 
 	const float steeredSlideSpeedSq = slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z;
-	if (steeredSlideSpeedSq > maxSlideSpeed_ * maxSlideSpeed_) {
+	if (steeredSlideSpeedSq > movementParams_.maxSlideSpeed_ * movementParams_.maxSlideSpeed_) {
 		const float slideSpeed = std::sqrt(steeredSlideSpeedSq);
-		const float speedScale = maxSlideSpeed_ / slideSpeed;
+		const float speedScale = movementParams_.maxSlideSpeed_ / slideSpeed;
 		slideVelocity_.x *= speedScale;
 		slideVelocity_.z *= speedScale;
 	}
@@ -201,8 +201,8 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 		transform_.rotate.y = std::atan2(slideVelocity_.x, slideVelocity_.z);
 	}
 
-	const float friction = isCrouching ? slideFriction_ : slideReleaseFriction_;
-	ApplySlideFriction(deltaTime, isCrouchingOnSlope ? slideFriction_ * 0.35f : friction);
+	const float friction = isCrouching ? movementParams_.slideFriction_ : slideReleaseFriction_;
+	ApplySlideFriction(deltaTime, isCrouchingOnSlope ? movementParams_.slideFriction_ * 0.35f : friction);
 }
 
 /// @brief 現在接地しているSlopeの下り方向を取得する
@@ -288,10 +288,10 @@ void Player::AddJumpMoveBoost() {
 		return;
 	}
 
-	jumpMoveVelocity_.x += lastMoveDirection_.x * jumpMoveBoostSpeed_;
-	jumpMoveVelocity_.z += lastMoveDirection_.z * jumpMoveBoostSpeed_;
+	jumpMoveVelocity_.x += lastMoveDirection_.x * movementParams_.jumpMoveBoostSpeed_;
+	jumpMoveVelocity_.z += lastMoveDirection_.z * movementParams_.jumpMoveBoostSpeed_;
 
-	const float maxBoostSpeed = jumpMoveBoostSpeed_ * 2.0f;
+	const float maxBoostSpeed = movementParams_.jumpMoveBoostSpeed_ * 2.0f;
 	const float boostSpeedSq = jumpMoveVelocity_.x * jumpMoveVelocity_.x + jumpMoveVelocity_.z * jumpMoveVelocity_.z;
 	if (boostSpeedSq <= maxBoostSpeed * maxBoostSpeed) {
 		return;
@@ -311,7 +311,7 @@ void Player::ApplySlopeGroundSnap(float deltaTime) {
 	}
 
 	float slopeCenterY = 0.0f;
-	float snapDistance = slopeSnapDistance_ + gravity_ * deltaTime * deltaTime;
+	float snapDistance = slopeSnapDistance_ + movementParams_.gravity_ * deltaTime * deltaTime;
 	if (!MyCollider::TryGetSlopeGroundCenterY("PlayerSphere", CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
 		return;
 	}
@@ -356,12 +356,12 @@ void Player::UpdateModelTransform(bool isSlopeGroundContact) {
 void Player::Jump(float deltaTime) {
 	// 着地時にジャンプ回数をリセット
 	if (isGrounded_) {
-		remainingJumpCount_ = jumpCount_;
+		remainingJumpCount_ = movementParams_.jumpCount_;
 	}
 
 	// ジャンプ入力（Aボタン）：残りジャンプ回数があれば受け付ける
 	if (remainingJumpCount_ > 0 && MyInput::Trigger("Jump")) {
-		velocityY_  = jumpPower_;
+		velocityY_  = movementParams_.jumpPower_;
 		isGrounded_ = false;
 		AddJumpMoveBoost();
 		remainingJumpCount_--;
@@ -370,7 +370,7 @@ void Player::Jump(float deltaTime) {
 
 	// 重力を加算
 	if (!isGrounded_) {
-		velocityY_ -= gravity_ * deltaTime;
+		velocityY_ -= movementParams_.gravity_ * deltaTime;
 	}
 
 	// Y座標に速度を反映
@@ -382,7 +382,7 @@ void Player::Jump(float deltaTime) {
 		velocityY_  = 0.0f;
 		if (!isGrounded_) {
 			isGrounded_ = true;
-			remainingJumpCount_  = jumpCount_;
+			remainingJumpCount_  = movementParams_.jumpCount_;
 			//Logger::Output("着地", Logger::Level::Application);
 		}
 	}
@@ -404,18 +404,16 @@ void Player::DrawImGui() {
 	ImGui::Text("Y速度: %.2f", velocityY_);
 	ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
 	ImGui::Separator();
-	ImGui::DragFloat("移動速度", &moveSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("ジャンプ力", &jumpPower_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("重力", &gravity_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("スライド開始速度", &slideStartSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("スライド方向補正率", &slideSteerRate_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("斜面スライド加速度", &slopeSlideAcceleration_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("最大スライド速度", &maxSlideSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("スライド摩擦", &slideFriction_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("スライド解除後摩擦", &slideReleaseFriction_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragInt("ジャンプ回数", &jumpCount_, 1, 0, 10);
-	ImGui::DragFloat("ジャンプ横初速", &jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat("ジャンプ横初速減速", &jumpMoveBoostFriction_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("移動速度", &movementParams_.moveSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("ジャンプ力", &movementParams_.jumpPower_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("重力", &movementParams_.gravity_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド開始速度", &movementParams_.slideStartSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド方向補正率", &movementParams_.slideSteerRate_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("斜面スライド加速度", &movementParams_.slopeSlideAcceleration_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("最大スライド速度", &movementParams_.maxSlideSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat("スライド摩擦", &movementParams_.slideFriction_, 0.1f, 0.0f, 100.0f);
+	ImGui::DragInt("ジャンプ回数", &movementParams_.jumpCount_, 1, 0, 10);
+	ImGui::DragFloat("ジャンプ横初速", &movementParams_.jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
 	ImGui::End();
 
 #endif // USE_IMGUI

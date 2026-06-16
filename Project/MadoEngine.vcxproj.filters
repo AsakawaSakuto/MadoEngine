@@ -85,7 +85,7 @@
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
-    <ClCompile Include="Application\Object\Map\EventObject\Jar.cpp" />
+    <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\Vector2.h">
@@ -486,7 +486,10 @@
     <ClInclude Include="Application\Object\Map\MapBlock.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\EventObject\Jar.h">
+    <ClInclude Include="Application\Object\Map\EventObject\Jar\Jar.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Object\Map\EventObject\Jar\JarType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>
