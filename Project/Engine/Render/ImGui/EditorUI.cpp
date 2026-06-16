@@ -307,6 +307,9 @@ namespace MadoEngine::Editor {
             const ImVec2& imageSize) {
             Matrix4x4 modelMatrix = Matrix::MakeAffine(transform.scale, transform.rotate, transform.translate);
             ImGuizmo::OPERATION operation = DrawGizmoOperationButtons(imageMin);
+            const bool isSnapEnabled = ImGui::IsKeyDown(ImGuiKey_LeftShift);
+            const float snapValue[3] = { 0.1f, 0.1f, 0.1f };
+            const float* snap = isSnapEnabled ? snapValue : nullptr;
 
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
@@ -317,7 +320,9 @@ namespace MadoEngine::Editor {
                 &camera.GetProjectionMatrix().m[0][0],
                 operation,
                 ImGuizmo::WORLD,
-                &modelMatrix.m[0][0]);
+                &modelMatrix.m[0][0],
+                nullptr,
+                snap);
 
             if (isChanged) {
                 ApplyMatrixToTransform(modelMatrix, operation, transform);

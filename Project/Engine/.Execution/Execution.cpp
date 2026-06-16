@@ -750,6 +750,14 @@ namespace MadoEngine
 				parameterBufferAddress = postEffectDefaultParameterResource_->GetGPUVirtualAddress();
 			}
 			commandList->SetGraphicsRootConstantBufferView(3, parameterBufferAddress);
+
+			static const uint32_t noiseTextureIndex =
+				MadoEngine::TextureManager::GetInstance().GetTextureIndex("noise0");
+			D3D12_GPU_DESCRIPTOR_HANDLE effectTextureSrv = inputSrv;
+			if (noiseTextureIndex != UINT32_MAX) {
+				effectTextureSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(noiseTextureIndex);
+			}
+			commandList->SetGraphicsRootDescriptorTable(4, effectTextureSrv);
 		}
 		commandList->DrawInstanced(3, 1, 0, 0);
 	}

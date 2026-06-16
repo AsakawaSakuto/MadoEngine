@@ -349,7 +349,7 @@ namespace MadoEngine {
 		}
 
 		// PostEffect 用 RootSignature
-		// t0: 入力カラー, t1: 深度, b0: ポストエフェクトパラメータ, s0: Linear, s1: Point
+		// t0: 入力カラー, t1: シーン深度, t2: マスク深度, t3: エフェクト用テクスチャ, b0: パラメータ, s0: Linear, s1: Point
 		{
 			D3D12_DESCRIPTOR_RANGE colorRange{};
 			colorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -372,7 +372,14 @@ namespace MadoEngine {
 			maskDepthRange.RegisterSpace = 0;
 			maskDepthRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-			D3D12_ROOT_PARAMETER rootParams[4]{};
+			D3D12_DESCRIPTOR_RANGE effectTextureRange{};
+			effectTextureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			effectTextureRange.NumDescriptors = 1;
+			effectTextureRange.BaseShaderRegister = 3;
+			effectTextureRange.RegisterSpace = 0;
+			effectTextureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[5]{};
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			rootParams[0].DescriptorTable.NumDescriptorRanges = 1;
 			rootParams[0].DescriptorTable.pDescriptorRanges = &colorRange;
@@ -392,6 +399,11 @@ namespace MadoEngine {
 			rootParams[3].Descriptor.ShaderRegister = 0;
 			rootParams[3].Descriptor.RegisterSpace = 0;
 			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[4].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[4].DescriptorTable.pDescriptorRanges = &effectTextureRange;
+			rootParams[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 			D3D12_STATIC_SAMPLER_DESC staticSamplers[2]{};
 			staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;

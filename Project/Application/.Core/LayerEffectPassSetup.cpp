@@ -30,6 +30,11 @@ namespace {
 		float outlineParams[4] = { 1.0f, 80.0f, 0.005f, 1.0f };
 	};
 
+	struct DissolveParams {
+		float dissolveParams[4] = { 0.35f, 0.06f, 1.0f, 2.0f };
+		float edgeColor[4] = { 1.0f, 0.45f, 0.05f, 1.0f };
+	};
+
 } // namespace
 
 namespace RenderPassSetup {
@@ -79,6 +84,22 @@ namespace RenderPassSetup {
 		playerOutlinePass.enabled = false;
 		playerOutlinePass.ignoreDepthForMask = true;
 		setupOutlineParameters(execution.AddLayerEffectPass(playerOutlinePass));
+
+		MadoEngine::Render::LayerEffectPass::Desc playerDissolvePass{};
+		playerDissolvePass.name = "プレイヤーDissolve";
+		playerDissolvePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
+		playerDissolvePass.effectShaderKey = "PostEffect/Dissolve.PS";
+		playerDissolvePass.enabled = true;
+
+		MadoEngine::Render::LayerEffectPass* registeredDissolvePass = execution.AddLayerEffectPass(playerDissolvePass);
+		registeredDissolvePass->SetParameterData(DissolveParams{});
+		registeredDissolvePass->AddFloatParameterControl("Dissolve進行度", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("Dissolve境界幅", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 1, 0.001f, 0.3f, 0.001f);
+		registeredDissolvePass->AddFloatParameterControl("Dissolve境界強度", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 2, 0.0f, 5.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("Dissolveノイズ倍率", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 3, 0.1f, 16.0f, 0.1f);
+		registeredDissolvePass->AddFloatParameterControl("Dissolve境界色 R", offsetof(DissolveParams, edgeColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("Dissolve境界色 G", offsetof(DissolveParams, edgeColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("Dissolve境界色 B", offsetof(DissolveParams, edgeColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc bloomPass{};
 		bloomPass.name = "ブルーム";
