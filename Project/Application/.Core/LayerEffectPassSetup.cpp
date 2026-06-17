@@ -26,8 +26,8 @@ namespace {
 	};
 
 	struct OutlineParams {
-		float outlineColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		float outlineParams[4] = { 1.0f, 80.0f, 0.005f, 1.0f };
+		float outlineColor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+		float outlineParams[4] = { 1.5f, 80.0f, 0.005f, 1.0f };
 	};
 
 	struct DissolveParams {
@@ -67,21 +67,21 @@ namespace RenderPassSetup {
 		playerLayerPass.name = "プレイヤー白黒";
 		playerLayerPass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerLayerPass.effectShaderKey = "PostEffect/GrayScale.PS";
-		playerLayerPass.enabled = true;
+		playerLayerPass.enabled = false;
 		execution.AddLayerEffectPass(playerLayerPass);
 
 		MadoEngine::Render::LayerEffectPass::Desc playerSepiaPass{};
 		playerSepiaPass.name = "プレイヤーセピア";
 		playerSepiaPass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerSepiaPass.effectShaderKey = "PostEffect/Sepia.PS";
-		playerSepiaPass.enabled = true;
+		playerSepiaPass.enabled = false;
 		execution.AddLayerEffectPass(playerSepiaPass);
 
 		MadoEngine::Render::LayerEffectPass::Desc playerOutlinePass{};
 		playerOutlinePass.name = "プレイヤー輪郭";
 		playerOutlinePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerOutlinePass.effectShaderKey = "PostEffect/Outline.PS";
-		playerOutlinePass.enabled = false;
+		playerOutlinePass.enabled = true;
 		playerOutlinePass.ignoreDepthForMask = true;
 		setupOutlineParameters(execution.AddLayerEffectPass(playerOutlinePass));
 
@@ -89,7 +89,7 @@ namespace RenderPassSetup {
 		playerDissolvePass.name = "プレイヤーDissolve";
 		playerDissolvePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerDissolvePass.effectShaderKey = "PostEffect/Dissolve.PS";
-		playerDissolvePass.enabled = true;
+		playerDissolvePass.enabled = false;
 
 		MadoEngine::Render::LayerEffectPass* registeredDissolvePass = execution.AddLayerEffectPass(playerDissolvePass);
 		registeredDissolvePass->SetParameterData(DissolveParams{});

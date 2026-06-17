@@ -94,11 +94,23 @@ public:
 	/// @return 床面に接触していればtrue
 	bool IsGroundContact(const std::string& name, CollisionTag targetTag);
 
+	/// @brief 指定したタグ同士で地面接触しているかを判定します。
+	/// @param selfTag 接地を判定する側のタグです。
+	/// @param targetTag 地面として扱う側のタグです。
+	/// @return 接地していればtrueを返します。
+	bool IsGroundContact(CollisionTag selfTag, CollisionTag targetTag);
+
 	/// @brief Check whether the specified collider is on a slope surface.
 	/// @param name Target collider name.
 	/// @param targetTag Slope collider tag.
 	/// @return True when the collider is touching a slope surface.
 	bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag);
+
+	/// @brief 指定したタグ同士で坂地面に接触しているかを判定します。
+	/// @param selfTag 接地を判定する側のタグです。
+	/// @param targetTag 坂地面として扱う側のタグです。
+	/// @return 坂地面に接地していればtrueを返します。
+	bool IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag);
 
 	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
 	/// @param name Sphereコライダーの識別名
@@ -108,12 +120,27 @@ public:
 	/// @return 追従できるSlopeが見つかればtrue
 	bool TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f);
 
+	/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得します。
+	/// @param selfTag Sphereコライダーとして扱う側のタグです。
+	/// @param targetTag Slopeとして扱う側のタグです。
+	/// @param outCenterY Sphere中心に設定するY座標の出力先です。
+	/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
+	/// @return 追従できるSlopeが見つかればtrueを返します。
+	bool TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f);
+
 	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ
 	/// @param outNormal Slope上面の法線の出力先
 	/// @return 接地しているSlopeが見つかればtrue
 	bool TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal);
+
+	/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得します。
+	/// @param selfTag Sphereコライダーとして扱う側のタグです。
+	/// @param targetTag Slopeとして扱う側のタグです。
+	/// @param outNormal Slope上面の法線の出力先です。
+	/// @return 接地しているSlopeが見つかればtrueを返します。
+	bool TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal);
 
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();

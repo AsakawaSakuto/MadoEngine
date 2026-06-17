@@ -20,7 +20,7 @@ void Player::Initialize() {
 
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
-	//model_->SetTexture("white16x16");
+	model_->SetTexture("white16x16");
 
 	currentMotion_ = PlayerMotion::Idle;
 }
@@ -39,8 +39,8 @@ void Player::Update(float deltaTime) {
 	MyCollider::Update();
 
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する
-	bool isGroundContact = MyCollider::IsGroundContact("PlayerMovementSphere", CollisionTag::MapBlock);
-	bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact("PlayerMovementSphere", CollisionTag::MapSlope);
+	bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
+	bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
 
 	if (isGroundContact || isSlopeGroundContact) {
 		// AABBの上面に乗っている → 接地
@@ -210,8 +210,8 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 /// @return Slopeの下り方向を取得できればtrue
 bool Player::TryGetSlopeDownDirection(Vector3& outDownDirection) const {
 	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
-	if (!MyCollider::IsSlopeGroundContact("PlayerMovementSphere", CollisionTag::MapSlope) ||
-		!MyCollider::TryGetSlopeGroundNormal("PlayerMovementSphere", CollisionTag::MapSlope, slopeNormal)) {
+	if (!MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope) ||
+		!MyCollider::TryGetSlopeGroundNormal(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, slopeNormal)) {
 		return false;
 	}
 
@@ -312,7 +312,7 @@ void Player::ApplySlopeGroundSnap(float deltaTime) {
 
 	float slopeCenterY = 0.0f;
 	float snapDistance = slopeSnapDistance_ + movementParams_.gravity_ * deltaTime * deltaTime;
-	if (!MyCollider::TryGetSlopeGroundCenterY("PlayerMovementSphere", CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
+	if (!MyCollider::TryGetSlopeGroundCenterY(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
 		return;
 	}
 
@@ -336,7 +336,7 @@ void Player::UpdateModelTransform(bool isSlopeGroundContact) {
 	transform_.rotate.z = 0.0f;
 
 	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
-	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal("PlayerMovementSphere", CollisionTag::MapSlope, slopeNormal)) {
+	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, slopeNormal)) {
 		const float cosYaw = std::cos(transform_.rotate.y);
 		const float sinYaw = std::sin(transform_.rotate.y);
 		Vector3 localNormal = {
@@ -414,6 +414,19 @@ void Player::DrawImGui() {
 	ImGui::DragFloat("スライド摩擦", &movementParams_.slideFriction_, 0.1f, 0.0f, 100.0f);
 	ImGui::DragInt("ジャンプ回数", &movementParams_.jumpCount_, 1, 0, 10);
 	ImGui::DragFloat("ジャンプ横初速", &movementParams_.jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
+	ImGui::End();
+
+	ImGui::Begin("プレイヤーステータス");
+
+	ImGui::Text("Health : %d / %d", status_.currentHealth, status_.maxHealth);
+	ImGui::Text("Shield : %d / %d", status_.currentShield, status_.maxShield);
+	ImGui::Separator();
+	ImGui::Text("Lv : %d", status_.level);
+	ImGui::Text("CurrentExp : %d", status_.currentExp);
+	ImGui::Text("NextLvExp  : %d", status_.expToNextLevel);
+	ImGui::Separator();
+	ImGui::Text("Money : %d", status_.currentMoney);
+
 	ImGui::End();
 
 #endif // USE_IMGUI

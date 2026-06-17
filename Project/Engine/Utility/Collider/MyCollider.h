@@ -80,12 +80,28 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsGroundContact(name, targetTag);
 	}
 
+	/// @brief 指定したタグ同士で地面接触しているかを判定します。
+	/// @param selfTag 接地を判定する側のタグです。
+	/// @param targetTag 地面として扱う側のタグです。
+	/// @return 接地していればtrueを返します。
+	inline bool IsGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
+		return ColliderManager::GetInstance().IsGroundContact(selfTag, targetTag);
+	}
+
 	/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定する
 	/// @param name 個体の識別名
 	/// @param targetTag スロープとして扱うタグ
 	/// @return スロープ面に接触していればtrue
 	inline bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(name, targetTag);
+	}
+
+	/// @brief 指定したタグ同士で坂地面に接触しているかを判定します。
+	/// @param selfTag 接地を判定する側のタグです。
+	/// @param targetTag 坂地面として扱う側のタグです。
+	/// @return 坂地面に接地していればtrueを返します。
+	inline bool IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
+		return ColliderManager::GetInstance().IsSlopeGroundContact(selfTag, targetTag);
 	}
 
 	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
@@ -98,6 +114,16 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().TryGetSlopeGroundCenterY(name, targetTag, outCenterY, maxSnapDownDistance);
 	}
 
+	/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得します。
+	/// @param selfTag Sphereコライダーとして扱う側のタグです。
+	/// @param targetTag Slopeとして扱う側のタグです。
+	/// @param outCenterY Sphere中心に設定するY座標の出力先です。
+	/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
+	/// @return 追従できるSlopeが見つかればtrueを返します。
+	inline bool TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f) {
+		return ColliderManager::GetInstance().TryGetSlopeGroundCenterY(selfTag, targetTag, outCenterY, maxSnapDownDistance);
+	}
+
 	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ
@@ -105,6 +131,15 @@ namespace MyCollider {
 	/// @return 接地しているSlopeが見つかればtrue
 	inline bool TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
 		return ColliderManager::GetInstance().TryGetSlopeGroundNormal(name, targetTag, outNormal);
+	}
+
+	/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得します。
+	/// @param selfTag Sphereコライダーとして扱う側のタグです。
+	/// @param targetTag Slopeとして扱う側のタグです。
+	/// @param outNormal Slope上面の法線の出力先です。
+	/// @return 接地しているSlopeが見つかればtrueを返します。
+	inline bool TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal) {
+		return ColliderManager::GetInstance().TryGetSlopeGroundNormal(selfTag, targetTag, outNormal);
 	}
 
 	/// @brief 登録済みコライダーの衝突判定と押し戻しを更新する

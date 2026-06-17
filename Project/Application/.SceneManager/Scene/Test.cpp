@@ -25,13 +25,13 @@ void Test::Initialize() {
 	player_->Initialize();
 	player_->SetCamera(&tpsCamera_);
 
-	MyCollider::CollisionPairSetting playerMapCollision;
+	/*MyCollider::CollisionPairSetting playerMapCollision;
 	playerMapCollision.enableResolve = true;
-	playerMapCollision.enableCCD = false;
+	playerMapCollision.enableCCD = false;*/
 
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::MapBlock, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock, playerMapCollision);
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, playerMapCollision);
+	//MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::MapBlock, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize();

@@ -955,10 +955,28 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
     return false;
 }
 
-/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定する
-/// @param name 個体の識別名
-/// @param targetTag スロープとして扱うタグ
-/// @return スロープ面に接触していればtrue
+/// @brief 指定したタグ同士で地面接触しているかを判定します。
+/// @param selfTag 接地を判定する側のタグです。
+/// @param targetTag 地面として扱う側のタグです。
+/// @return 接地していればtrueを返します。
+bool ColliderManager::IsGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
+    for (const auto& [name, info] : m_colliders) {
+        if (info.tag != selfTag) {
+            continue;
+        }
+
+        if (IsGroundContact(name, targetTag)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定します。
+/// @param name 個体の識別名です。
+/// @param targetTag スロープとして扱うタグです。
+/// @return スロープ面に接触していればtrueを返します。
 bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -984,12 +1002,30 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     return false;
 }
 
-/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
-/// @param name Sphereコライダーの識別名
-/// @param targetTag Slopeとして扱うタグ
-/// @param outCenterY Sphere中心に設定するY座標の出力先
-/// @param maxSnapDownDistance 下方向に追従できる最大距離
-/// @return 追従できるSlopeが見つかればtrue
+/// @brief 指定したタグ同士で坂地面に接触しているかを判定します。
+/// @param selfTag 接地を判定する側のタグです。
+/// @param targetTag 坂地面として扱う側のタグです。
+/// @return 坂地面に接地していればtrueを返します。
+bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
+    for (const auto& [name, info] : m_colliders) {
+        if (info.tag != selfTag) {
+            continue;
+        }
+
+        if (IsSlopeGroundContact(name, targetTag)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得します。
+/// @param name Sphereコライダーの識別名です。
+/// @param targetTag Slopeとして扱うタグです。
+/// @param outCenterY Sphere中心に設定するY座標の出力先です。
+/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
+/// @return 追従できるSlopeが見つかればtrueを返します。
 bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1038,11 +1074,31 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     return true;
 }
 
-/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
-/// @param name Sphereコライダーの識別名
-/// @param targetTag Slopeとして扱うタグ
-/// @param outNormal Slope上面の法線の出力先
-/// @return 接地しているSlopeが見つかればtrue
+/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得します。
+/// @param selfTag Sphereコライダーとして扱う側のタグです。
+/// @param targetTag Slopeとして扱う側のタグです。
+/// @param outCenterY Sphere中心に設定するY座標の出力先です。
+/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
+/// @return 追従できるSlopeが見つかればtrueを返します。
+bool ColliderManager::TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
+    for (const auto& [name, info] : m_colliders) {
+        if (info.tag != selfTag) {
+            continue;
+        }
+
+        if (TryGetSlopeGroundCenterY(name, targetTag, outCenterY, maxSnapDownDistance)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/// @brief Sphereコライダーが接地しているSlope上面の法線を取得します。
+/// @param name Sphereコライダーの識別名です。
+/// @param targetTag Slopeとして扱うタグです。
+/// @param outNormal Slope上面の法線の出力先です。
+/// @return 接地しているSlopeが見つかればtrueを返します。
 bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1083,6 +1139,25 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
 
     outNormal = bestNormal;
     return true;
+}
+
+/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得します。
+/// @param selfTag Sphereコライダーとして扱う側のタグです。
+/// @param targetTag Slopeとして扱う側のタグです。
+/// @param outNormal Slope上面の法線の出力先です。
+/// @return 接地しているSlopeが見つかればtrueを返します。
+bool ColliderManager::TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal) {
+    for (const auto& [name, info] : m_colliders) {
+        if (info.tag != selfTag) {
+            continue;
+        }
+
+        if (TryGetSlopeGroundNormal(name, targetTag, outNormal)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nameB) {
