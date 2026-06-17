@@ -19,9 +19,9 @@ namespace {
 	};
 
 	struct PixelArtParams {
-		float pixelSize = 6.0f;
+		float pixelSize = 3.0f;
 		float colorSteps = 8.0f;
-		float contrast = 1.15f;
+		float contrast = 1.0f;
 		float intensity = 1.0f;
 	};
 

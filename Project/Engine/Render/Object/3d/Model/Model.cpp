@@ -9,6 +9,17 @@
 
 namespace {
 
+	/// @brief 平行光源の方向を正規化する
+	/// @param direction 正規化する方向
+	/// @return 正規化済み方向。0ベクトルの場合は下向きを返す
+	Vector3 NormalizeLightDirection(const Vector3& direction) {
+		Vector3 normalized = direction.Normalized();
+		if (normalized.LengthSq() == 0.0f) {
+			normalized = { 0.0f, -1.0f, 0.0f };
+		}
+		return normalized;
+	}
+
 	/// @brief レイとAABBの交差距離を計算する
 	/// @param rayOrigin レイの始点
 	/// @param rayDirection 正規化済みのレイ方向
@@ -82,6 +93,56 @@ void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 	InitializeInstanceResources();
 }
 
+void Model::SetLightingEnabled(bool enabled) {
+	enableLighting_ = enabled;
+	if (materialData_) {
+		materialData_->enableLighting = enabled ? 1 : 0;
+	}
+}
+
+void Model::SetDirectionalLight(const DirectionalLight& light) {
+	directionalLight_ = light;
+	directionalLight_.direction = NormalizeLightDirection(light.direction);
+	if (directionalLightData_) {
+		*directionalLightData_ = directionalLight_;
+	}
+}
+
+void Model::SetDirectionalLightEnabled(bool enabled) {
+	directionalLight_.useLight = enabled ? 1u : 0u;
+	if (directionalLightData_) {
+		directionalLightData_->useLight = directionalLight_.useLight;
+	}
+}
+
+void Model::SetDirectionalLightDirection(const Vector3& direction) {
+	directionalLight_.direction = NormalizeLightDirection(direction);
+	if (directionalLightData_) {
+		directionalLightData_->direction = directionalLight_.direction;
+	}
+}
+
+void Model::SetDirectionalLightColor(const Vector4& color) {
+	directionalLight_.color = color;
+	if (directionalLightData_) {
+		directionalLightData_->color = directionalLight_.color;
+	}
+}
+
+void Model::SetDirectionalLightIntensity(float intensity) {
+	directionalLight_.intensity = (std::max)(0.0f, intensity);
+	if (directionalLightData_) {
+		directionalLightData_->intensity = directionalLight_.intensity;
+	}
+}
+
+void Model::SetUseHalfLambert(bool enabled) {
+	directionalLight_.useHalfLambert = enabled ? 1u : 0u;
+	if (directionalLightData_) {
+		directionalLightData_->useHalfLambert = directionalLight_.useHalfLambert;
+	}
+}
+
 void Model::InitializeInstanceResources() {
 	assert(sharedData_);
 
@@ -106,9 +167,9 @@ void Model::InitializeInstanceResources() {
 
 	materialData_ = CreateMappedBuffer<ModelMaterial>(device_.Get(), materialResource_);
 	materialData_->color = color_;
+	materialData_->enableLighting = enableLighting_ ? 1 : 0;
 	materialData_->uvTransformMatrix = Matrix::MakeIdentity();
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
-	//materialData_->enableLighting = true;
 
 	transformationData_ = CreateMappedBuffer<ModelTransformationMatrix>(device_.Get(), transformationResource_);
 	transformationData_->WVP = Matrix::MakeIdentity();
@@ -118,7 +179,8 @@ void Model::InitializeInstanceResources() {
 	cameraData_ = CreateMappedBuffer<CameraForGPU>(device_.Get(), cameraResource_);
 
 	directionalLightData_ = CreateMappedBuffer<DirectionalLight>(device_.Get(), directionalLightResource_);
-	directionalLightData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	directionalLight_.direction = NormalizeLightDirection(directionalLight_.direction);
+	*directionalLightData_ = directionalLight_;
 
 	pointLightData_ = CreateMappedBuffer<PointLight>(device_.Get(), pointLightResource_);
 
@@ -195,6 +257,7 @@ void Model::Update() {
 	trans.m[3][1] = uvTransform_.translate.y;
 
 	materialData_->color = color_;
+	materialData_->enableLighting = enableLighting_ ? 1 : 0;
 	materialData_->uvTransformMatrix = scale * rot * trans;
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
 }

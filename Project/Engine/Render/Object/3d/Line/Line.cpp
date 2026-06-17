@@ -608,6 +608,10 @@ void Line3d::Draw(const Camera& camera) {
     vertices_.clear();
 }
 
+void Line3d::Clear() {
+    vertices_.clear();
+}
+
 void Line3d::CreateVertexBuffer() {
     Logger::Output("Line3d頂点バッファ作成開始", Logger::Level::Debug);
 

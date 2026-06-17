@@ -31,7 +31,7 @@ struct ModelMaterial {
     int32_t useEnvironmentMap = 0;                        // 環境マップの使用
     float pad1[2];
     Matrix4x4 uvTransformMatrix = Matrix::MakeIdentity(); // UV変換行列
-    float shininess = 10000.0f;                           // 光沢度
+    float shininess = 64.0f;                              // 光沢度
     float pad2[3];
 };
 

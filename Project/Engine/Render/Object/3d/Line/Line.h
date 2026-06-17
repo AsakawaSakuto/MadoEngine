@@ -130,6 +130,9 @@ public:
     /// @param camera 使用するカメラ
     void Draw(const Camera& camera);
 
+    /// @brief 追加済みのデバッグライン頂点を破棄
+    void Clear();
+
 private:
 
     Microsoft::WRL::ComPtr<ID3D12Device> device_;

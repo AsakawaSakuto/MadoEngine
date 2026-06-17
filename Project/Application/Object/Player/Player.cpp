@@ -70,7 +70,7 @@ void Player::Update(float deltaTime) {
 		model_->SetColor({ 1.0f,1.0f,1.0f,1.0f });
 	}
 
-	if (MyInput::GetKeybord()->IsTrigger(DIK_F2)) {
+	if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
 		transform_.translate = { 0.0f,100.0f,0.0f };
 	}
 

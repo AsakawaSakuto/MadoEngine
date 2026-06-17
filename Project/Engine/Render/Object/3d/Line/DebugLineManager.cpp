@@ -17,6 +17,9 @@ namespace MadoEngine {
 	}
 
 	void DebugLineManager::AddShape(const ColliderShape& shape, const Vector4& color) {
+		if (!isDrawing_) {
+			return;
+		}
 
 		// std::visit を使って型に応じた処理を実行
 		std::visit([this, &color](auto&& arg) {
@@ -45,18 +48,29 @@ namespace MadoEngine {
 	}
 
 	void DebugLineManager::AddGrid(float size, int divisions, const Vector4& color) {
+		if (!isDrawing_) {
+			return;
+		}
+
 		line_->AddGrid(size, divisions, color);
 	}
 
 	void DebugLineManager::Draw(const Camera& camera) {
 
+		if (MyInput::GetKeybord()->IsTrigger(DIK_F2)) {
+			if (isDrawing_) {
+				isDrawing_ = false;
+			} else {
+				isDrawing_ = true;
+			}
+		}
+
 		// 描画
 		if (isDrawing_) {
 			line_->Draw(camera);
 		} else {
-
+			line_->Clear();
 		}
-
 	}
 
 	void DebugLineManager::SetPSORegistry(MadoEngine::Render::PSORegistry* psoRegistry) {

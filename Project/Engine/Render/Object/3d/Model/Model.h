@@ -15,6 +15,34 @@ public:
 	void Update() override;
 	void Draw(Camera& useCamera) override;
 
+	/// @brief モデルのライティング有効状態を設定する
+	/// @param enabled trueの場合はライト計算を行う
+	void SetLightingEnabled(bool enabled);
+
+	/// @brief 平行光源を設定する
+	/// @param light モデル描画に使用する平行光源
+	void SetDirectionalLight(const DirectionalLight& light);
+
+	/// @brief 平行光源を有効化する
+	/// @param enabled trueの場合は平行光源を使用する
+	void SetDirectionalLightEnabled(bool enabled);
+
+	/// @brief 平行光源の方向を設定する
+	/// @param direction 光が進む方向
+	void SetDirectionalLightDirection(const Vector3& direction);
+
+	/// @brief 平行光源の色を設定する
+	/// @param color ライトカラー
+	void SetDirectionalLightColor(const Vector4& color);
+
+	/// @brief 平行光源の強度を設定する
+	/// @param intensity ライト強度
+	void SetDirectionalLightIntensity(float intensity);
+
+	/// @brief ハーフランバートを使用するか設定する
+	/// @param enabled trueの場合はハーフランバートで拡散反射を計算する
+	void SetUseHalfLambert(bool enabled);
+
 	/// @brief レイとModelのワールドAABBの交差判定を行う
 	/// @param rayOrigin レイの始点
 	/// @param rayDirection 正規化済みのレイ方向
@@ -60,6 +88,8 @@ private:
 	std::string environmentMapName_;
 	uint32_t environmentMapIndex_ = 0;
 	bool useEnvironmentMap_ = false;
+	bool enableLighting_ = true;
+	DirectionalLight directionalLight_;
 
 	bool useAnimationTimer_ = false;
 	float animationTime_ = 0.0f;
