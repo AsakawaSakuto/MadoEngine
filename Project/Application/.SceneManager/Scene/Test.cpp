@@ -1,6 +1,7 @@
 #include "Test.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
+
 Test::Test()
 	
 {}
@@ -23,6 +24,14 @@ void Test::Initialize() {
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 	player_->SetCamera(&tpsCamera_);
+
+	MyCollider::CollisionPairSetting playerMapCollision;
+	playerMapCollision.enableResolve = true;
+	playerMapCollision.enableCCD = false;
+
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::MapBlock, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock, playerMapCollision);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, playerMapCollision);
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize();

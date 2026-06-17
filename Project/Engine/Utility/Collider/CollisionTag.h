@@ -26,6 +26,8 @@ inline std::string CollisionTagToString(CollisionTag tag) {
 	case CollisionTag::MapBlock: return "MapBlock";
 	case CollisionTag::MapSlope: return "MapSlope";
 
+	case CollisionTag::MapEventObject: return "MapEventObject";
+
 	default:                     return "Unknown";
 	}
 }

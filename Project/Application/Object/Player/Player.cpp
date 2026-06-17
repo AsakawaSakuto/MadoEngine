@@ -39,8 +39,8 @@ void Player::Update(float deltaTime) {
 	MyCollider::Update();
 
 	// 床面接触（Y軸が最小解決軸）かどうかを判定する
-	bool isGroundContact = MyCollider::IsGroundContact("PlayerSphere", CollisionTag::MapBlock);
-	bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact("PlayerSphere", CollisionTag::MapSlope);
+	bool isGroundContact = MyCollider::IsGroundContact("PlayerMovementSphere", CollisionTag::MapBlock);
+	bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact("PlayerMovementSphere", CollisionTag::MapSlope);
 
 	if (isGroundContact || isSlopeGroundContact) {
 		// AABBの上面に乗っている → 接地
@@ -210,8 +210,8 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 /// @return Slopeの下り方向を取得できればtrue
 bool Player::TryGetSlopeDownDirection(Vector3& outDownDirection) const {
 	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
-	if (!MyCollider::IsSlopeGroundContact("PlayerSphere", CollisionTag::MapSlope) ||
-		!MyCollider::TryGetSlopeGroundNormal("PlayerSphere", CollisionTag::MapSlope, slopeNormal)) {
+	if (!MyCollider::IsSlopeGroundContact("PlayerMovementSphere", CollisionTag::MapSlope) ||
+		!MyCollider::TryGetSlopeGroundNormal("PlayerMovementSphere", CollisionTag::MapSlope, slopeNormal)) {
 		return false;
 	}
 
@@ -312,7 +312,7 @@ void Player::ApplySlopeGroundSnap(float deltaTime) {
 
 	float slopeCenterY = 0.0f;
 	float snapDistance = slopeSnapDistance_ + movementParams_.gravity_ * deltaTime * deltaTime;
-	if (!MyCollider::TryGetSlopeGroundCenterY("PlayerSphere", CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
+	if (!MyCollider::TryGetSlopeGroundCenterY("PlayerMovementSphere", CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
 		return;
 	}
 
@@ -336,7 +336,7 @@ void Player::UpdateModelTransform(bool isSlopeGroundContact) {
 	transform_.rotate.z = 0.0f;
 
 	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
-	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal("PlayerSphere", CollisionTag::MapSlope, slopeNormal)) {
+	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal("PlayerMovementSphere", CollisionTag::MapSlope, slopeNormal)) {
 		const float cosYaw = std::cos(transform_.rotate.y);
 		const float sinYaw = std::sin(transform_.rotate.y);
 		Vector3 localNormal = {
