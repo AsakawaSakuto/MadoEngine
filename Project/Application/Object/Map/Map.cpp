@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Utility/Collider/CollisionFunction.h"
 
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
@@ -28,11 +29,61 @@ bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDir
 	return false;
 }
 
+/// @brief Jarの配置Y座標を計算します。
+/// @param block 配置対象のMapBlockです。
+/// @param blockCenter 配置対象ブロックの中心座標です。
+/// @param blockSize ブロックサイズです。
+/// @param spawnPosition Jarの配置予定座標です。
+/// @return Jarの配置Y座標です。
+float CalculateJarSpawnY(const MapBlock& block, const Vector3& blockCenter, const Vector3& blockSize, const Vector3& spawnPosition) {
+	if (block.GetType() != MapBlockType::Slope) {
+		return blockSize.y * static_cast<float>(block.GetHeight());
+	}
+
+	Slope slope;
+	slope.center = blockCenter;
+	slope.min = Vector3(-blockSize.x / 2.0f, blockSize.y * static_cast<float>(block.GetHeight()), -blockSize.z / 2.0f);
+	slope.max = Vector3(blockSize.x / 2.0f, blockSize.y * static_cast<float>(block.GetHeight() + 1), blockSize.z / 2.0f);
+	slope.bottomExtendY = slope.min.y;
+	slope.direction = block.GetSlopeDirection();
+
+	return Collision::Detail::GetSlopeSurfaceY(slope, spawnPosition);
+}
+
+/// @brief Jarの配置回転を計算します。
+/// @param block 配置対象のMapBlockです。
+/// @param blockSize ブロックサイズです。
+/// @return Jarの配置回転です。
+Vector3 CalculateJarSpawnRotation(const MapBlock& block, const Vector3& blockSize) {
+	if (block.GetType() != MapBlockType::Slope) {
+		return { 0.0f, 0.0f, 0.0f };
+	}
+
+	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
+	switch (block.GetSlopeDirection()) {
+	case SlopeDirection::PulsX:
+		rotation.z = std::atan2(blockSize.y, blockSize.x);
+		break;
+	case SlopeDirection::MinusX:
+		rotation.z = -std::atan2(blockSize.y, blockSize.x);
+		break;
+	case SlopeDirection::PulsZ:
+		rotation.x = -std::atan2(blockSize.y, blockSize.z);
+		break;
+	case SlopeDirection::MinusZ:
+		rotation.x = std::atan2(blockSize.y, blockSize.z);
+		break;
+	}
+
+	return rotation;
+}
+
 }
 
 void Map::Initialize() {
 
 	ClampHeightSettings();
+	jars_.clear();
 
 	mapBlocks_.assign(mapHeight_, std::vector<MapBlock>(mapWidth_));
 
@@ -100,6 +151,7 @@ void Map::Initialize() {
 	}
 
 	Logger::Output("Map : 地形を生成しました", Logger::Level::Application);
+	GenerateJars();
 }
 
 void Map::Update() {
@@ -119,6 +171,10 @@ void Map::Update() {
 			block.Update(0.0f);
 			block.DrawDebugLine();
 		}
+	}
+
+	for (Jar& jar : jars_) {
+		jar.Update(0.0f);
 	}
 }
 
@@ -168,6 +224,64 @@ void Map::RegenerateTerrain() {
 	Initialize();
 
 	Logger::Output("Map : 地形を再生成しました", Logger::Level::Debug);
+}
+
+void Map::GenerateJars() {
+
+	jars_.clear();
+
+	const int maxSpawnCount = jarSpawnCount_;
+	if (maxSpawnCount <= 0) {
+		return;
+	}
+
+	jars_.reserve(static_cast<size_t>(maxSpawnCount));
+
+	int createdCount = 0;
+	int retryCount = 0;
+	const int maxRetryCount = maxSpawnCount * 20;
+
+	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
+		++retryCount;
+
+		const int x = MyRand::GetInt(0, mapWidth_ - 1);
+		const int z = MyRand::GetInt(0, mapHeight_ - 1);
+
+		MapBlock& spawnBlock = mapBlocks_[z][x];
+		if (spawnBlock.GetType() == MapBlockType::Air) {
+			continue;
+		}
+
+		const float jarHalfSize = 0.5f;
+		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - jarHalfSize);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - jarHalfSize);
+		const float offsetX = MyRand::GetFloat(-spawnRangeX, spawnRangeX);
+		const float offsetZ = MyRand::GetFloat(-spawnRangeZ, spawnRangeZ);
+
+		Vector3 spawnPosition = {
+			static_cast<float>(x) * blockSize_.x + offsetX,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z + offsetZ
+		};
+		Vector3 blockCenter = {
+			static_cast<float>(x) * blockSize_.x,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z
+		};
+		spawnPosition.y = CalculateJarSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+
+		Jar::InitializeDesc desc;
+		desc.position = spawnPosition;
+		desc.rotation = CalculateJarSpawnRotation(spawnBlock, blockSize_);
+		desc.modelName = "JarModel_" + std::to_string(createdCount);
+		desc.colliderName = "JarAABB_" + std::to_string(createdCount);
+
+		jars_.emplace_back();
+		jars_.back().Initialize(desc);
+		++createdCount;
+	}
+
+	Logger::Output("Map : Jarを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
 }
 
 void Map::ClampHeightSettings() {

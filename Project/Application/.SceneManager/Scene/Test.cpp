@@ -44,7 +44,7 @@ void Test::Initialize() {
 	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 	fadeSprite_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 
-	fadeOutTimer_.Start(2.0f);
+	fadeOutTimer_.Start(10.0f);
 }
 
 SceneType Test::Update(float dt) {

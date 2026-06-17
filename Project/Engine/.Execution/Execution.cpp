@@ -141,7 +141,7 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::ModelManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 
-		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 20000);
+		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 50000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
 
 		renderTargetManager_ = std::make_unique<MadoEngine::Render::RenderTargetManager>();

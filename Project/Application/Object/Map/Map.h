@@ -2,6 +2,7 @@
 #include "UtilityHeaders.h"
 #include "RenderHeaders.h"
 #include "MapBlock.h"
+#include "EventObject/Jar/Jar.h"
 
 /// @brief マップ全体を管理するクラスです。
 class Map {
@@ -19,6 +20,9 @@ private:
 	/// @brief 地形を再生成します。
 	void RegenerateTerrain();
 
+	/// @brief Map上にJarをランダム配置します。
+	void GenerateJars();
+
 	/// @brief 地形生成用の高さ設定を有効範囲に補正します。
 	void ClampHeightSettings();
 
@@ -29,9 +33,11 @@ private:
 	uint32_t GetBlockHeight(int x, int z) const;
 
 	std::vector<std::vector<MapBlock>> mapBlocks_;
+	std::vector<Jar> jars_;
 
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;
+	int jarSpawnCount_ = 500;
 
 	bool isModelDraw_ = true;
 

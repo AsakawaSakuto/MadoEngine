@@ -45,6 +45,10 @@ public:
 	/// @return ブロックの種類です。
 	MapBlockType GetType() const;
 
+	/// @brief 坂ブロックの向きを取得します。
+	/// @return 坂ブロックの向きです。
+	SlopeDirection GetSlopeDirection() const;
+
 private:
 	/// @brief 通常ブロック用のCollider形状を作成します。
 	/// @param blockSize ブロック共通サイズです。

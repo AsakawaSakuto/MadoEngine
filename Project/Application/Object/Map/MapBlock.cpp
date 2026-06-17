@@ -98,6 +98,10 @@ MapBlockType MapBlock::GetType() const {
 	return type_;
 }
 
+SlopeDirection MapBlock::GetSlopeDirection() const {
+	return slopeDirection_;
+}
+
 void MapBlock::CreateGroundShape(const Vector3& blockSize) {
 
 	AABB blockShape;
