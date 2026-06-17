@@ -10,5 +10,6 @@ public:
 	void Update(float deltaTime) override;
 
 private:
-
+	JarType type_ = JarType::Money;
+	JarSize size_ = JarSize::Small;
 };

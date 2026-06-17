@@ -20,6 +20,12 @@ void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
 
 void SceneManager::Initialize(SceneType initialScene) {
 	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
+
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox,         CollisionTag::MapBlock,       true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock,       true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope,       true);
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox,         CollisionTag::MapEventObject, false);
+
 	ChangeScene(initialScene);
 
 	selectedModel_ = nullptr;

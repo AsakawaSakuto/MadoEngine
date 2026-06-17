@@ -37,18 +37,6 @@ private:
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 
-	ColliderShape plane_;
-
-	ColliderShape slope_;
-	Vector3 slopePos_ = { -30.0f, 5.0f, -10.0f };
-
-	ColliderShape slope2_;
-	Vector3 slope2Pos_ = { -20.0f, 10.0f, -10.0f };
-
-	ColliderShape aabb_;
-	Vector3 aabbPos_ = { -20.0f, 5.0f, -10.0f };
-
-	Vector3 planePos_ = { 0.0f, 0.0f, 0.0f };
 	std::unique_ptr<Sprite> sprite_;
 
 	std::unique_ptr<Player> player_;

@@ -1,8 +1,15 @@
 #pragma once
 
-enum class JarType {
+enum class JarSize {
 	Small,
 	Big,
+
+	Count
+};
+
+enum class JarType {
+	Money,
+	Exp,
 
 	Count
 };

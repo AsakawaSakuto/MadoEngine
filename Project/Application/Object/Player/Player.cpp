@@ -15,8 +15,8 @@ void Player::Initialize() {
 	s.radius = 0.5f;
 	colliderShape_ = s;
 
-	MyCollider::RegisterCollider("PlayerSphere", CollisionTag::PlayerSphere, &colliderShape_, &transform_.translate, 0.0f);
-	MyCollider::RegisterCollider("PlayerAABB", CollisionTag::PlayerAABB, &hitAABB_, &transform_.translate, 0.0f);
+	MyCollider::RegisterCollider("PlayerMovementSphere", CollisionTag::PlayerMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
+	MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
 
 	model_ = MyModel::Create("Player", "walk",SceneType::Test);
 	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);

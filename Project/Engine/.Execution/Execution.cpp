@@ -752,7 +752,7 @@ namespace MadoEngine
 			commandList->SetGraphicsRootConstantBufferView(3, parameterBufferAddress);
 
 			static const uint32_t noiseTextureIndex =
-				MadoEngine::TextureManager::GetInstance().GetTextureIndex("noise0");
+				MadoEngine::TextureManager::GetInstance().GetTextureIndex("noise1");
 			D3D12_GPU_DESCRIPTOR_HANDLE effectTextureSrv = inputSrv;
 			if (noiseTextureIndex != UINT32_MAX) {
 				effectTextureSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(noiseTextureIndex);
