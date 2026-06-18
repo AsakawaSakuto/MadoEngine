@@ -23,7 +23,8 @@ private:
 
 	/// @brief PlayerのModel座標と回転を現在の接地状態に合わせて更新する
 	/// @param isSlopeGroundContact Slope上面に接地していればtrue
-	void UpdateModelTransform(bool isSlopeGroundContact);
+	/// @param deltaTime 1フレームの経過時間
+	void UpdateModelTransform(float deltaTime, bool isSlopeGroundContact);
 
 	void Move(float deltaTime);
 
@@ -80,6 +81,11 @@ private:
 
 	bool wasCrouching_ = false; // 前フレームのCrouching入力状態
 	bool hasMoveInput_ = false; // 移動入力があるか
+
+	float faceYaw_ = 0.0f;      // Playerの水平な向き
+
+	float modelGroundNormalFollowSpeed_ = 16.0f; // Model接地法線の補間速度
+	Vector3 currentGroundNormal_ = { 0.0f, 1.0f, 0.0f }; // 補間中の接地法線
 
 	PlayerMotion currentMotion_ = PlayerMotion::Idle;
 };

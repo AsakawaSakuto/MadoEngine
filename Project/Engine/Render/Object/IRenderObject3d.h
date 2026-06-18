@@ -159,9 +159,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> transformationResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> lightGpuDataResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_ = {};

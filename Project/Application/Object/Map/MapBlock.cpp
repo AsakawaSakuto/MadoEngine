@@ -133,7 +133,7 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 	model_->SetPosition({ transform_.translate.x, blockSize.y * static_cast<float>(height_), transform_.translate.z });
 	model_->SetScale({ blockSize.x / 2.0f, blockSize.y / 2.0f * static_cast<float>(height_), blockSize.z / 2.0f });
 	model_->SetVisible(isModelDraw_);
-	model_->SetTexture("blockTexture");
+	model_->SetTexture("blockTexture2");
 }
 
 void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
@@ -147,7 +147,7 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 	slopeModel_->SetPosition({ transform_.translate.x, blockSize.y * static_cast<float>(height_ + 1), transform_.translate.z });
 	slopeModel_->SetScale({ blockSize.x / 2.0f, blockSize.y / 2.0f, blockSize.z / 2.0f });
 	slopeModel_->SetVisible(isModelDraw_);
-	slopeModel_->SetTexture("blockTexture");
+	slopeModel_->SetTexture("blockTexture2");
 }
 
 std::string MapBlock::CreateColliderName() const {

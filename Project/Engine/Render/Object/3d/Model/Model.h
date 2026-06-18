@@ -1,6 +1,7 @@
 #pragma once
 #include "ModelSharedData.h"
 #include "Render/Object/IRenderObject3d.h"
+#include "Utility/Light/LightManager.h"
 #include ".SceneManager/SceneType.h"
 #include <memory>
 #include <string>
@@ -51,8 +52,16 @@ public:
 	/// @return レイがModelにヒットした場合はtrue
 	bool Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float maxDistance, float& outDistance) const;
 
-	void SetSceneType(SceneType sceneType) { sceneType_ = sceneType; }
+	void SetSceneType(SceneType sceneType);
 	SceneType GetSceneType() const { return sceneType_; }
+
+	/// @brief モデルが受け取るライトレイヤーマスクを設定する
+	/// @param receiveLightMask 受け取るライトレイヤーマスク
+	void SetReceiveLightMask(LightLayerMask receiveLightMask);
+
+	/// @brief モデルが受け取るライトレイヤーマスクを取得する
+	/// @return 受け取るライトレイヤーマスク
+	LightLayerMask GetReceiveLightMask() const { return receiveLightMask_; }
 
 	/// @brief 視錐台カリングの有効状態を設定する
 	/// @param enabled trueの場合はカメラ範囲外のDrawCallをスキップする
@@ -66,6 +75,9 @@ public:
 
 private:
 	void InitializeInstanceResources();
+
+	/// @brief LightManagerからGPU送信用ライトデータを作成して定数バッファへ反映する
+	void UpdateLightGpuData();
 
 	/// @brief モデルのワールド空間AABBを計算する
 	/// @param outMin ワールド空間AABBの最小座標
@@ -99,12 +111,11 @@ private:
 
 	ModelMaterial* materialData_ = nullptr;
 	ModelTransformationMatrix* transformationData_ = nullptr;
-	DirectionalLight* directionalLightData_ = nullptr;
-	PointLight* pointLightData_ = nullptr;
-	SpotLight* spotLightData_ = nullptr;
+	LightGpuData* lightGpuData_ = nullptr;
 	CameraForGPU* cameraData_ = nullptr;
 
 	ModelNode rootNode_;
 	SceneType sceneType_ = SceneType::None;
+	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);
 	bool enableFrustumCulling_ = true;
 };

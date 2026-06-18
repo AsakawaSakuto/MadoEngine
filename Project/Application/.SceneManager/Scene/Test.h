@@ -2,6 +2,7 @@
 #include ".SceneManager/IScene.h"
 #include "Object/Player/Player.h"
 #include "Object/Map/Map.h"
+#include "Utility/Light/LightManager.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -31,6 +32,19 @@ public:
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
 private:
+	/// @brief テストシーン用ライトを登録する
+	void RegisterTestLights();
+
+	/// @brief テストシーンで登録したライトを破棄する
+	void DestroyTestLights();
+
+	/// @brief テストシーン用ライトを更新する
+	/// @param dt デルタタイム
+	void UpdateTestLights(float dt);
+
+	/// @brief テストライト編集用のImGuiを描画する
+	void DrawTestLightImGui();
+
 	std::array<Sprite* ,10> sprites_;
 	Vector2 testPos_ = { 0.0f, 0.0f };
 
@@ -46,6 +60,13 @@ private:
 	Model* model_ = nullptr;
 	Model* selectedModel_ = nullptr;
 	Vector3 modelPos_ = { -10.0f, 0.0f, -10.0f };
+
+	LightHandle testDirectionalLightHandle_;
+	LightHandle testPointLightHandle_;
+	LightHandle testPointLightHandle2_;
+	LightHandle testSpotLightHandle_;
+	float testLightTime_ = 0.0f;
+	bool animateTestPointLight_ = true;
 
 	Sprite* fadeSprite_ = nullptr;
 	GameTimer fadeOutTimer_;

@@ -2,6 +2,90 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+	constexpr float kRotationEpsilon = 1e-5f;
+
+	/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返す
+	/// @param value 正規化するベクトル
+	/// @param fallback 代替ベクトル
+	/// @return 正規化済みベクトル
+	Vector3 NormalizeOrFallback(const Vector3& value, const Vector3& fallback) {
+		const float lengthSq = value.LengthSq();
+		if (lengthSq < kRotationEpsilon) {
+			return fallback;
+		}
+
+		const float invLength = 1.0f / std::sqrt(lengthSq);
+		return value * invLength;
+	}
+
+	/// @brief 2つのベクトルを線形補間する
+	/// @param current 現在のベクトル
+	/// @param target 目標のベクトル
+	/// @param t 補間率
+	/// @return 補間後のベクトル
+	Vector3 LerpVector3(const Vector3& current, const Vector3& target, float t) {
+		return current + (target - current) * t;
+	}
+
+	/// @brief 水平Yawから前方向ベクトルを作成する
+	/// @param yaw 水平Yaw角度
+	/// @return 水平面上の前方向
+	Vector3 CreateHorizontalForward(float yaw) {
+		return { std::sin(yaw), 0.0f, std::cos(yaw) };
+	}
+
+	/// @brief 水平Yawから右方向ベクトルを作成する
+	/// @param yaw 水平Yaw角度
+	/// @return 水平面上の右方向
+	Vector3 CreateHorizontalRight(float yaw) {
+		return { std::cos(yaw), 0.0f, -std::sin(yaw) };
+	}
+
+	/// @brief 回転行列の各軸からMakeAffineと同じ順序のEuler角を復元する
+	/// @param right ローカルX軸のワールド方向
+	/// @param up ローカルY軸のワールド方向
+	/// @param forward ローカルZ軸のワールド方向
+	/// @return 復元したEuler角
+	Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& forward) {
+		Vector3 euler = {};
+		const float sinY = std::clamp(-right.z, -1.0f, 1.0f);
+		euler.y = std::asin(sinY);
+
+		const float cosY = std::cos(euler.y);
+		if (std::abs(cosY) > kRotationEpsilon) {
+			euler.x = std::atan2(up.z, forward.z);
+			euler.z = std::atan2(right.y, right.x);
+			return euler;
+		}
+
+		euler.x = std::atan2(up.x * sinY, up.y);
+		euler.z = 0.0f;
+		return euler;
+	}
+	/// @brief 斜面法線と水平向きに沿うModel回転を作成する
+	/// @param faceYaw Playerが向いている水平Yaw角度
+	/// @param slopeNormal Slope上面の法線
+	/// @return 斜面に沿ったModel回転
+	Vector3 CreateSlopeAlignedRotation(float faceYaw, const Vector3& slopeNormal) {
+		const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
+		const Vector3 desiredForward = CreateHorizontalForward(faceYaw);
+
+		Vector3 forward = desiredForward - up * Math::Dot(desiredForward, up);
+		if (forward.LengthSq() < kRotationEpsilon) {
+			const Vector3 horizontalRight = CreateHorizontalRight(faceYaw);
+			forward = Math::Cross(horizontalRight, up);
+		}
+		forward = NormalizeOrFallback(forward, { 0.0f, 0.0f, 1.0f });
+
+		Vector3 right = Math::Cross(up, forward);
+		right = NormalizeOrFallback(right, CreateHorizontalRight(faceYaw));
+		forward = NormalizeOrFallback(Math::Cross(right, up), forward);
+
+		return ExtractEulerXYZ(right, up, forward);
+	}
+}
+
 void Player::Initialize() {
 	transform_.translate = { 0.0f, 100.0f, 0.0f };
 	transform_.SetAllScale(0.5f);
@@ -23,6 +107,7 @@ void Player::Initialize() {
 	model_->SetTexture("white16x16");
 
 	currentMotion_ = PlayerMotion::Idle;
+	currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
 }
 
 void Player::Update(float deltaTime) {
@@ -60,7 +145,7 @@ void Player::Update(float deltaTime) {
 		isGrounded_ = false;
 	}
 
-	UpdateModelTransform(isSlopeGroundContact);
+	UpdateModelTransform(deltaTime, isSlopeGroundContact);
 
 	model_->SetTransform(transform_);
 
@@ -121,7 +206,8 @@ void Player::Move(float deltaTime) {
 		const float moveLength = std::sqrt(moveLengthSq);
 		lastMoveDirection_ = { moveDir.x / moveLength, 0.0f, moveDir.z / moveLength };
 		hasMoveInput_ = true;
-		transform_.rotate.y = std::atan2(moveDir.x, moveDir.z);
+		faceYaw_ = std::atan2(moveDir.x, moveDir.z);
+		transform_.rotate.y = faceYaw_;
 	} else {
 		hasMoveInput = false;
 	}
@@ -198,7 +284,8 @@ void Player::UpdateSliding(float deltaTime, bool isCrouching, bool isCrouchingSt
 	transform_.translate.z += slideVelocity_.z * deltaTime;
 
 	if (std::abs(slideVelocity_.x) > 0.001f || std::abs(slideVelocity_.z) > 0.001f) {
-		transform_.rotate.y = std::atan2(slideVelocity_.x, slideVelocity_.z);
+		faceYaw_ = std::atan2(slideVelocity_.x, slideVelocity_.z);
+		transform_.rotate.y = faceYaw_;
 	}
 
 	const float friction = isCrouching ? movementParams_.slideFriction_ : slideReleaseFriction_;
@@ -327,27 +414,20 @@ void Player::ApplySlopeGroundSnap(float deltaTime) {
 
 /// @brief PlayerのModel座標と回転を現在の接地状態に合わせて更新する
 /// @param isSlopeGroundContact Slope上面に接地していればtrue
-void Player::UpdateModelTransform(bool isSlopeGroundContact) {
+void Player::UpdateModelTransform(float deltaTime, bool isSlopeGroundContact) {
 	if (!model_) {
 		return;
 	}
 
-	transform_.rotate.x = 0.0f;
-	transform_.rotate.z = 0.0f;
-
+	Vector3 targetGroundNormal = { 0.0f, 1.0f, 0.0f };
 	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
 	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, slopeNormal)) {
-		const float cosYaw = std::cos(transform_.rotate.y);
-		const float sinYaw = std::sin(transform_.rotate.y);
-		Vector3 localNormal = {
-			slopeNormal.x * cosYaw - slopeNormal.z * sinYaw,
-			slopeNormal.y,
-			slopeNormal.x * sinYaw + slopeNormal.z * cosYaw
-		};
-
-		transform_.rotate.x = std::atan2(localNormal.z, localNormal.y);
-		transform_.rotate.z = std::atan2(-localNormal.x, localNormal.y);
+		targetGroundNormal = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
 	}
+
+	const float normalT = std::clamp(1.0f - std::exp(-modelGroundNormalFollowSpeed_ * deltaTime), 0.0f, 1.0f);
+	currentGroundNormal_ = NormalizeOrFallback(LerpVector3(currentGroundNormal_, targetGroundNormal, normalT), targetGroundNormal);
+	transform_.rotate = CreateSlopeAlignedRotation(faceYaw_, currentGroundNormal_);
 
 	model_->SetPosition(transform_.translate);
 	model_->SetRotation(transform_.rotate);

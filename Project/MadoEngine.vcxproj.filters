@@ -84,6 +84,7 @@
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
+    <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
     <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
   </ItemGroup>
@@ -448,6 +449,12 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\Light\LightLayer.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\Light\LightManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Light\PointLight.h">

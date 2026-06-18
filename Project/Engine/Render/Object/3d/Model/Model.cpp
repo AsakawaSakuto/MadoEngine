@@ -103,44 +103,36 @@ void Model::SetLightingEnabled(bool enabled) {
 void Model::SetDirectionalLight(const DirectionalLight& light) {
 	directionalLight_ = light;
 	directionalLight_.direction = NormalizeLightDirection(light.direction);
-	if (directionalLightData_) {
-		*directionalLightData_ = directionalLight_;
-	}
 }
 
 void Model::SetDirectionalLightEnabled(bool enabled) {
 	directionalLight_.useLight = enabled ? 1u : 0u;
-	if (directionalLightData_) {
-		directionalLightData_->useLight = directionalLight_.useLight;
-	}
 }
 
 void Model::SetDirectionalLightDirection(const Vector3& direction) {
 	directionalLight_.direction = NormalizeLightDirection(direction);
-	if (directionalLightData_) {
-		directionalLightData_->direction = directionalLight_.direction;
-	}
 }
 
 void Model::SetDirectionalLightColor(const Vector4& color) {
 	directionalLight_.color = color;
-	if (directionalLightData_) {
-		directionalLightData_->color = directionalLight_.color;
-	}
 }
 
 void Model::SetDirectionalLightIntensity(float intensity) {
 	directionalLight_.intensity = (std::max)(0.0f, intensity);
-	if (directionalLightData_) {
-		directionalLightData_->intensity = directionalLight_.intensity;
-	}
 }
 
 void Model::SetUseHalfLambert(bool enabled) {
 	directionalLight_.useHalfLambert = enabled ? 1u : 0u;
-	if (directionalLightData_) {
-		directionalLightData_->useHalfLambert = directionalLight_.useHalfLambert;
-	}
+}
+
+void Model::SetSceneType(SceneType sceneType) {
+	sceneType_ = sceneType;
+	UpdateLightGpuData();
+}
+
+void Model::SetReceiveLightMask(LightLayerMask receiveLightMask) {
+	receiveLightMask_ = receiveLightMask;
+	UpdateLightGpuData();
 }
 
 void Model::InitializeInstanceResources() {
@@ -178,13 +170,18 @@ void Model::InitializeInstanceResources() {
 
 	cameraData_ = CreateMappedBuffer<CameraForGPU>(device_.Get(), cameraResource_);
 
-	directionalLightData_ = CreateMappedBuffer<DirectionalLight>(device_.Get(), directionalLightResource_);
 	directionalLight_.direction = NormalizeLightDirection(directionalLight_.direction);
-	*directionalLightData_ = directionalLight_;
 
-	pointLightData_ = CreateMappedBuffer<PointLight>(device_.Get(), pointLightResource_);
+	lightGpuData_ = CreateMappedBuffer<LightGpuData>(device_.Get(), lightGpuDataResource_);
+	UpdateLightGpuData();
+}
 
-	spotLightData_ = CreateMappedBuffer<SpotLight>(device_.Get(), spotLightResource_);
+void Model::UpdateLightGpuData() {
+	if (!lightGpuData_) {
+		return;
+	}
+
+	*lightGpuData_ = LightManager::GetInstance().GetCachedGpuData(sceneType_, receiveLightMask_);
 }
 
 void Model::Update() {
@@ -340,6 +337,9 @@ void Model::Draw(Camera& useCamera) {
 	}
 
 	camera_ = useCamera;
+	if (cameraData_) {
+		cameraData_->worldPosition = camera_.GetPosition();
+	}
 
 	if (!IsInsideCameraFrustum(useCamera)) {
 		return;
@@ -366,14 +366,15 @@ void Model::Draw(Camera& useCamera) {
 	commandList_->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, transformationResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
-	commandList_->SetGraphicsRootConstantBufferView(3, directionalLightResource_->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(4, cameraResource_->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(5, pointLightResource_->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(6, spotLightResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, cameraResource_->GetGPUVirtualAddress());
 
-	const UINT environmentRootIndex = (type_ == ModelType::Skinning) ? 8u : 7u;
+	const UINT environmentRootIndex = (type_ == ModelType::Skinning) ? 5u : 4u;
+	const UINT lightGpuDataRootIndex = (type_ == ModelType::Skinning) ? 6u : 5u;
+	UpdateLightGpuData();
+	commandList_->SetGraphicsRootConstantBufferView(lightGpuDataRootIndex, lightGpuDataResource_->GetGPUVirtualAddress());
+
 	if (type_ == ModelType::Skinning) {
-		commandList_->SetGraphicsRootDescriptorTable(7, skinClusterData_.paletteSrvHandle.second);
+		commandList_->SetGraphicsRootDescriptorTable(4, skinClusterData_.paletteSrvHandle.second);
 	}
 
 	if (useEnvironmentMap_) {

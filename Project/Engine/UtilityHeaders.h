@@ -13,6 +13,8 @@
 #include "Utility/Collider/ColliderManager.h"
 #include "Utility/Collider/MyCollider.h"
 #include "Utility/Light/DirectionalLight.h"
+#include "Utility/Light/LightLayer.h"
+#include "Utility/Light/LightManager.h"
 #include "Utility/Light/PointLight.h"
 #include "Utility/Light/SpotLight.h"
 #include "Utility/ResourceHelper/ResourceHelper.h"

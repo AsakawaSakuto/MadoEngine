@@ -2,6 +2,7 @@
 #include "EditorHistory.h"
 #include "ModelTransformCommand.h"
 #include <cmath>
+#include <cstring>
 #include <memory>
 
 namespace MadoEngine::Editor {
@@ -9,6 +10,80 @@ namespace MadoEngine::Editor {
 #ifdef USE_IMGUI 
 
     namespace {
+
+        constexpr ImVec2 kEditorIconButtonSize = { 28.0f, 28.0f };
+        constexpr ImVec2 kEditorIconButtonPadding = { 4.0f, 4.0f };
+
+        /// @brief Editor UIで使用するアイコン情報
+        struct EditorIconButtonInfo {
+            const char* id;
+            const char* textureName;
+            const char* fallbackLabel;
+            const char* tooltip;
+        };
+
+        /// @brief 指定したテクスチャ名のImGui用テクスチャIDを取得する
+        /// @param textureName TextureManagerに登録されているテクスチャ名
+        /// @return ImGuiへ渡すテクスチャID。取得できない場合は0
+        ImTextureID GetEditorIconTextureId(const char* textureName) {
+            struct IconTextureCache {
+                const char* textureName;
+                ImTextureID textureId;
+                bool isInitialized;
+            };
+
+            static IconTextureCache caches[] = {
+                { "Translate", ImTextureID_Invalid, false },
+                { "Rotate", ImTextureID_Invalid, false },
+                { "Scale", ImTextureID_Invalid, false },
+                { "Undo", ImTextureID_Invalid, false },
+                { "Redo", ImTextureID_Invalid, false },
+            };
+
+            for (IconTextureCache& cache : caches) {
+                if (std::strcmp(cache.textureName, textureName) != 0) {
+                    continue;
+                }
+
+                if (!cache.isInitialized) {
+                    const uint32_t textureIndex = TextureManager::GetInstance().GetTextureIndex(textureName);
+                    if (textureIndex != UINT32_MAX) {
+                        cache.textureId = static_cast<ImTextureID>(TextureManager::GetInstance().GetSrvHandleGPU(textureIndex).ptr);
+                    }
+                    cache.isInitialized = true;
+                }
+
+                return cache.textureId;
+            }
+
+            const uint32_t textureIndex = TextureManager::GetInstance().GetTextureIndex(textureName);
+            if (textureIndex == UINT32_MAX) {
+                return ImTextureID_Invalid;
+            }
+
+            return static_cast<ImTextureID>(TextureManager::GetInstance().GetSrvHandleGPU(textureIndex).ptr);
+        }
+
+        /// @brief アイコン画像ボタンを描画する
+        /// @param info アイコンボタンの表示情報
+        /// @param size ボタン内に表示する画像サイズ
+        /// @return ボタンが押された場合はtrue
+        bool DrawEditorIconButton(const EditorIconButtonInfo& info, const ImVec2& size = kEditorIconButtonSize) {
+            const ImTextureID textureId = GetEditorIconTextureId(info.textureName);
+            bool isPressed = false;
+
+            if (textureId != ImTextureID_Invalid) {
+                isPressed = ImGui::ImageButton(info.id, textureId, size);
+            } else {
+                isPressed = ImGui::Button(info.fallbackLabel, { 72.0f, 24.0f });
+            }
+
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s", info.tooltip);
+            }
+
+            return isPressed;
+        }
 
         /// @brief Game Viewの画像表示領域を計算する
         /// @param outImageMin 画像領域の左上座標
@@ -83,15 +158,16 @@ namespace MadoEngine::Editor {
             ImGui::SetCursorScreenPos({ imageMin.x + 8.0f, imageMin.y + 8.0f });
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4.0f, 0.0f });
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, kEditorIconButtonPadding);
 
-            auto drawButton = [&currentOperation](const char* label, ImGuizmo::OPERATION operation) {
+            auto drawButton = [&currentOperation](const EditorIconButtonInfo& info, ImGuizmo::OPERATION operation) {
                 const bool isSelected = currentOperation == operation;
                 if (isSelected) {
                     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
                 }
 
-                if (ImGui::Button(label, { 72.0f, 24.0f })) {
+                if (DrawEditorIconButton(info)) {
                     currentOperation = operation;
                 }
 
@@ -100,13 +176,13 @@ namespace MadoEngine::Editor {
                 }
             };
 
-            drawButton("Translate", ImGuizmo::TRANSLATE);
+            drawButton({ "##GizmoTranslate", "Translate", "Translate", "移動" }, ImGuizmo::TRANSLATE);
             ImGui::SameLine();
-            drawButton("Rotate", ImGuizmo::ROTATE);
+            drawButton({ "##GizmoRotate", "Rotate", "Rotate", "回転" }, ImGuizmo::ROTATE);
             ImGui::SameLine();
-            drawButton("Scale", ImGuizmo::SCALE);
+            drawButton({ "##GizmoScale", "Scale", "Scale", "拡縮" }, ImGuizmo::SCALE);
 
-            ImGui::PopStyleVar(2);
+            ImGui::PopStyleVar(3);
             return currentOperation;
         }
 
@@ -159,14 +235,15 @@ namespace MadoEngine::Editor {
             const bool canUndo = history.CanUndo();
             const bool canRedo = history.CanRedo();
 
-            ImGui::SetCursorScreenPos({ imageMin.x + 8.0f, imageMin.y + 36.0f });
+            ImGui::SetCursorScreenPos({ imageMin.x + 8.0f, imageMin.y + 48.0f });
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4.0f, 0.0f });
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, kEditorIconButtonPadding);
 
             if (!canUndo) {
                 ImGui::BeginDisabled();
             }
-            if (ImGui::Button("Undo", { 72.0f, 24.0f })) {
+            if (DrawEditorIconButton({ "##GizmoUndo", "Undo", "Undo", "元に戻す" })) {
                 history.Undo();
             }
             if (!canUndo) {
@@ -178,14 +255,14 @@ namespace MadoEngine::Editor {
             if (!canRedo) {
                 ImGui::BeginDisabled();
             }
-            if (ImGui::Button("Redo", { 72.0f, 24.0f })) {
+            if (DrawEditorIconButton({ "##GizmoRedo", "Redo", "Redo", "やり直す" })) {
                 history.Redo();
             }
             if (!canRedo) {
                 ImGui::EndDisabled();
             }
 
-            ImGui::PopStyleVar(2);
+            ImGui::PopStyleVar(3);
         }
 
         /// @brief Editor履歴のショートカットを処理する
@@ -395,7 +472,6 @@ namespace MadoEngine::Editor {
 
         bool isChanged = false;
         HandleHistoryShortcuts();
-        DrawHistoryButtons(imageMin);
 
         if (selectedModel && !selectedModel->IsVisible()) {
             selectedModel = nullptr;
@@ -413,6 +489,8 @@ namespace MadoEngine::Editor {
         }
 
         if (selectedModel) {
+            DrawHistoryButtons(imageMin);
+
             Transform3D transform = selectedModel->GetTransform();
             const Transform3D beforeDrawTransform = transform;
             if (DrawTransformGizmoInRect(camera, transform, imageMin, imageSize)) {
