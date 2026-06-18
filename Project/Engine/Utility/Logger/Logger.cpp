@@ -77,7 +77,7 @@ namespace {
             localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
             localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
 
-        std::string baseDir = "Assets/.EngineResource/Log/";
+        std::string baseDir = "Assets/.Log/";
         std::string baseName = std::string(buf);
 
         // ファイルが存在しない場合は番号なしで返す

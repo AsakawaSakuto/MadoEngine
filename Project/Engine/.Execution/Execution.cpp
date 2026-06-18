@@ -57,7 +57,7 @@ namespace MadoEngine
 		winDesc_.title = "MadoEngine";
 		winDesc_.width = 1280;
 		winDesc_.height = 720;
-		winDesc_.iconPath = "Assets/.EngineResource/icon.png";
+		winDesc_.iconPath = "Assets/Texture/.Engine/icon.png";
 		winDesc_.isResizable = true;
 		winDesc_.isShowMouseCursor = true;
 
