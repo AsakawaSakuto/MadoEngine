@@ -2,8 +2,48 @@
 #include "IScene.h"
 #include "ImGuiHeaders.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Light/LightManager.h"
+#include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/ImGui/EditorUI.h"
 #include <cassert>
+
+namespace {
+
+	/// @brief PointLightとSpotLightの位置をDebugLineで表示する
+	void AddLightPositionDebugSpheres() {
+		LightManager& lightManager = LightManager::GetInstance();
+		constexpr float kLightDebugSphereRadius = 0.5f;
+		const Vector4 enabledPointColor = { 1.0f, 0.85f, 0.1f, 1.0f };
+		const Vector4 disabledPointColor = { 0.35f, 0.3f, 0.08f, 1.0f };
+		const Vector4 enabledSpotColor = { 0.1f, 0.8f, 1.0f, 1.0f };
+		const Vector4 disabledSpotColor = { 0.05f, 0.25f, 0.35f, 1.0f };
+
+		for (LightHandle handle : lightManager.GetPointLightHandles()) {
+			const PointLight* light = lightManager.GetPointLightData(handle);
+			if (!light) {
+				continue;
+			}
+
+			Sphere sphere;
+			sphere.center = light->position;
+			sphere.radius = kLightDebugSphereRadius;
+			MyDebugLine::AddShape(sphere, lightManager.IsEnabled(handle) ? enabledPointColor : disabledPointColor);
+		}
+
+		for (LightHandle handle : lightManager.GetSpotLightHandles()) {
+			const SpotLight* light = lightManager.GetSpotLightData(handle);
+			if (!light) {
+				continue;
+			}
+
+			Sphere sphere;
+			sphere.center = light->position;
+			sphere.radius = kLightDebugSphereRadius;
+			MyDebugLine::AddShape(sphere, lightManager.IsEnabled(handle) ? enabledSpotColor : disabledSpotColor);
+		}
+	}
+
+} // namespace
 
 SceneManager::SceneManager()
 	: currentScene_(nullptr)
@@ -37,6 +77,7 @@ void SceneManager::Update(float dt) {
 	}
 
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
+	AddLightPositionDebugSpheres();
 
 	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
 
