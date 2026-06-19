@@ -53,16 +53,17 @@ namespace RenderPassSetup {
 
 		auto setupOutlineParameters = [](MadoEngine::Render::LayerEffectPass* pass) {
 			pass->SetParameterData(OutlineParams{});
-			pass->AddFloatParameterControl("輪郭色 R", offsetof(OutlineParams, outlineColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
-			pass->AddFloatParameterControl("輪郭色 G", offsetof(OutlineParams, outlineColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
-			pass->AddFloatParameterControl("輪郭色 B", offsetof(OutlineParams, outlineColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
-			pass->AddFloatParameterControl("輪郭の太さ", offsetof(OutlineParams, outlineParams) + sizeof(float) * 0, 0.25f, 8.0f, 0.05f);
-			pass->AddFloatParameterControl("深度感度", offsetof(OutlineParams, outlineParams) + sizeof(float) * 1, 1.0f, 300.0f, 1.0f);
-			pass->AddFloatParameterControl("輪郭しきい値", offsetof(OutlineParams, outlineParams) + sizeof(float) * 2, 0.0001f, 0.1f, 0.001f);
-			pass->AddFloatParameterControl("輪郭の強さ", offsetof(OutlineParams, outlineParams) + sizeof(float) * 3, 0.0f, 3.0f, 0.01f);
+			pass->AddFloatParameterControl("OutlineColorR", "輪郭色 R", offsetof(OutlineParams, outlineColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+			pass->AddFloatParameterControl("OutlineColorG", "輪郭色 G", offsetof(OutlineParams, outlineColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
+			pass->AddFloatParameterControl("OutlineColorB", "輪郭色 B", offsetof(OutlineParams, outlineColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
+			pass->AddFloatParameterControl("Thickness", "輪郭の太さ", offsetof(OutlineParams, outlineParams) + sizeof(float) * 0, 0.25f, 8.0f, 0.05f);
+			pass->AddFloatParameterControl("DepthSensitivity", "深度感度", offsetof(OutlineParams, outlineParams) + sizeof(float) * 1, 1.0f, 300.0f, 1.0f);
+			pass->AddFloatParameterControl("Threshold", "輪郭しきい値", offsetof(OutlineParams, outlineParams) + sizeof(float) * 2, 0.0001f, 0.1f, 0.001f);
+			pass->AddFloatParameterControl("Intensity", "輪郭の強さ", offsetof(OutlineParams, outlineParams) + sizeof(float) * 3, 0.0f, 3.0f, 0.01f);
 		};
 
 		MadoEngine::Render::LayerEffectPass::Desc defaultLayerPass{};
+		defaultLayerPass.key = "DefaultLayer";
 		defaultLayerPass.name = "デフォルトレイヤー";
 		defaultLayerPass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Default);
 		defaultLayerPass.effectShaderKey = "PostEffect/CopyImage.PS";
@@ -70,6 +71,7 @@ namespace RenderPassSetup {
 		execution.AddLayerEffectPass(defaultLayerPass);
 
 		MadoEngine::Render::LayerEffectPass::Desc playerLayerPass{};
+		playerLayerPass.key = "PlayerGrayScale";
 		playerLayerPass.name = "プレイヤー白黒";
 		playerLayerPass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerLayerPass.effectShaderKey = "PostEffect/GrayScale.PS";
@@ -77,6 +79,7 @@ namespace RenderPassSetup {
 		execution.AddLayerEffectPass(playerLayerPass);
 
 		MadoEngine::Render::LayerEffectPass::Desc playerSepiaPass{};
+		playerSepiaPass.key = "PlayerSepia";
 		playerSepiaPass.name = "プレイヤーセピア";
 		playerSepiaPass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerSepiaPass.effectShaderKey = "PostEffect/Sepia.PS";
@@ -84,6 +87,7 @@ namespace RenderPassSetup {
 		execution.AddLayerEffectPass(playerSepiaPass);
 
 		MadoEngine::Render::LayerEffectPass::Desc playerOutlinePass{};
+		playerOutlinePass.key = "PlayerOutline";
 		playerOutlinePass.name = "プレイヤー輪郭";
 		playerOutlinePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerOutlinePass.effectShaderKey = "PostEffect/Outline.PS";
@@ -92,6 +96,7 @@ namespace RenderPassSetup {
 		setupOutlineParameters(execution.AddLayerEffectPass(playerOutlinePass));
 
 		MadoEngine::Render::LayerEffectPass::Desc mapEventObjOutlinePass{};
+		mapEventObjOutlinePass.key = "MapEventObjectOutline";
 		mapEventObjOutlinePass.name = "マップイベントオブジェクト輪郭";
 		mapEventObjOutlinePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::MapEventObject);
 		mapEventObjOutlinePass.effectShaderKey = "PostEffect/Outline.PS";
@@ -100,6 +105,7 @@ namespace RenderPassSetup {
 		setupOutlineParameters(execution.AddLayerEffectPass(mapEventObjOutlinePass));
 
 		MadoEngine::Render::LayerEffectPass::Desc playerDissolvePass{};
+		playerDissolvePass.key = "PlayerDissolve";
 		playerDissolvePass.name = "プレイヤーDissolve";
 		playerDissolvePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);
 		playerDissolvePass.effectShaderKey = "PostEffect/Dissolve.PS";
@@ -107,15 +113,16 @@ namespace RenderPassSetup {
 
 		MadoEngine::Render::LayerEffectPass* registeredDissolvePass = execution.AddLayerEffectPass(playerDissolvePass);
 		registeredDissolvePass->SetParameterData(DissolveParams{});
-		registeredDissolvePass->AddFloatParameterControl("Dissolve進行度", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
-		registeredDissolvePass->AddFloatParameterControl("Dissolve境界幅", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 1, 0.001f, 0.3f, 0.001f);
-		registeredDissolvePass->AddFloatParameterControl("Dissolve境界強度", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 2, 0.0f, 5.0f, 0.01f);
-		registeredDissolvePass->AddFloatParameterControl("Dissolveノイズ倍率", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 3, 0.1f, 16.0f, 0.1f);
-		registeredDissolvePass->AddFloatParameterControl("Dissolve境界色 R", offsetof(DissolveParams, edgeColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
-		registeredDissolvePass->AddFloatParameterControl("Dissolve境界色 G", offsetof(DissolveParams, edgeColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
-		registeredDissolvePass->AddFloatParameterControl("Dissolve境界色 B", offsetof(DissolveParams, edgeColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("Progress", "Dissolve進行度", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("EdgeWidth", "Dissolve境界幅", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 1, 0.001f, 0.3f, 0.001f);
+		registeredDissolvePass->AddFloatParameterControl("EdgeIntensity", "Dissolve境界強度", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 2, 0.0f, 5.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("NoiseScale", "Dissolveノイズ倍率", offsetof(DissolveParams, dissolveParams) + sizeof(float) * 3, 0.1f, 16.0f, 0.1f);
+		registeredDissolvePass->AddFloatParameterControl("EdgeColorR", "Dissolve境界色 R", offsetof(DissolveParams, edgeColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("EdgeColorG", "Dissolve境界色 G", offsetof(DissolveParams, edgeColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
+		registeredDissolvePass->AddFloatParameterControl("EdgeColorB", "Dissolve境界色 B", offsetof(DissolveParams, edgeColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc bloomPass{};
+		bloomPass.key = "Bloom";
 		bloomPass.name = "ブルーム";
 		bloomPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		bloomPass.effectShaderKey = "PostEffect/Bloom.PS";
@@ -123,12 +130,13 @@ namespace RenderPassSetup {
 
 		MadoEngine::Render::LayerEffectPass* registeredBloomPass = execution.AddScreenEffectPass(bloomPass);
 		registeredBloomPass->SetParameterData(BloomParams{});
-		registeredBloomPass->AddFloatParameterControl("発光の強さ", offsetof(BloomParams, intensity), 0.0f, 5.0f, 0.01f);
-		registeredBloomPass->AddFloatParameterControl("発光しきい値", offsetof(BloomParams, threshold), 0.0f, 1.0f, 0.01f);
-		registeredBloomPass->AddFloatParameterControl("ぼかし半径", offsetof(BloomParams, radius), 0.0f, 32.0f, 0.1f);
-		registeredBloomPass->AddFloatParameterControl("境界の柔らかさ", offsetof(BloomParams, softKnee), 0.0f, 1.0f, 0.01f);
+		registeredBloomPass->AddFloatParameterControl("Intensity", "発光の強さ", offsetof(BloomParams, intensity), 0.0f, 5.0f, 0.01f);
+		registeredBloomPass->AddFloatParameterControl("Threshold", "発光しきい値", offsetof(BloomParams, threshold), 0.0f, 1.0f, 0.01f);
+		registeredBloomPass->AddFloatParameterControl("Radius", "ぼかし半径", offsetof(BloomParams, radius), 0.0f, 32.0f, 0.1f);
+		registeredBloomPass->AddFloatParameterControl("SoftKnee", "境界の柔らかさ", offsetof(BloomParams, softKnee), 0.0f, 1.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc vignettePass{};
+		vignettePass.key = "Vignette";
 		vignettePass.name = "周辺減光";
 		vignettePass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		vignettePass.effectShaderKey = "PostEffect/Vignette.PS";
@@ -136,11 +144,12 @@ namespace RenderPassSetup {
 
 		MadoEngine::Render::LayerEffectPass* registeredVignettePass = execution.AddScreenEffectPass(vignettePass);
 		registeredVignettePass->SetParameterData(VignetteParams{});
-		registeredVignettePass->AddFloatParameterControl("減光の強さ", offsetof(VignetteParams, strength), 0.0f, 100.0f, 0.01f);
-		registeredVignettePass->AddFloatParameterControl("減光半径", offsetof(VignetteParams, radius), 0.0f, 100.0f, 0.01f);
-		registeredVignettePass->AddFloatParameterControl("滑らかさ", offsetof(VignetteParams, smoothness), 1.0f, 100.0f, 0.01f);
+		registeredVignettePass->AddFloatParameterControl("Strength", "減光の強さ", offsetof(VignetteParams, strength), 0.0f, 100.0f, 0.01f);
+		registeredVignettePass->AddFloatParameterControl("Radius", "減光半径", offsetof(VignetteParams, radius), 0.0f, 100.0f, 0.01f);
+		registeredVignettePass->AddFloatParameterControl("Smoothness", "滑らかさ", offsetof(VignetteParams, smoothness), 1.0f, 100.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc fogPass{};
+		fogPass.key = "Fog";
 		fogPass.name = "Fog";
 		fogPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		fogPass.effectShaderKey = "PostEffect/Fog.PS";
@@ -148,17 +157,18 @@ namespace RenderPassSetup {
 
 		MadoEngine::Render::LayerEffectPass* registeredFogPass = execution.AddScreenEffectPass(fogPass);
 		registeredFogPass->SetParameterData(FogParams{});
-		registeredFogPass->AddFloatParameterControl("Fog色 R", offsetof(FogParams, fogColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
-		registeredFogPass->AddFloatParameterControl("Fog色 G", offsetof(FogParams, fogColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
-		registeredFogPass->AddFloatParameterControl("Fog色 B", offsetof(FogParams, fogColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
-		registeredFogPass->AddFloatParameterControl("Fog開始距離", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 0, 0.0f, 10000.0f, 1.0f);
-		registeredFogPass->AddFloatParameterControl("Fog終了距離", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 1, 0.0f, 10000.0f, 1.0f);
-		registeredFogPass->AddFloatParameterControl("Fog濃度", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 2, 0.0f, 3.0f, 0.01f);
-		registeredFogPass->AddFloatParameterControl("Fog高さ強度", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 3, 0.0f, 2.0f, 0.01f);
-		registeredFogPass->AddFloatParameterControl("Camera Near", offsetof(FogParams, fogCameraParams) + sizeof(float) * 0, 0.001f, 1000.0f, 0.01f);
-		registeredFogPass->AddFloatParameterControl("Camera Far", offsetof(FogParams, fogCameraParams) + sizeof(float) * 1, 1.0f, 10000.0f, 1.0f);
+		registeredFogPass->AddFloatParameterControl("ColorR", "Fog色 R", offsetof(FogParams, fogColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("ColorG", "Fog色 G", offsetof(FogParams, fogColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("ColorB", "Fog色 B", offsetof(FogParams, fogColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("StartDistance", "Fog開始距離", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 0, 0.0f, 10000.0f, 1.0f);
+		registeredFogPass->AddFloatParameterControl("EndDistance", "Fog終了距離", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 1, 0.0f, 10000.0f, 1.0f);
+		registeredFogPass->AddFloatParameterControl("Density", "Fog濃度", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 2, 0.0f, 3.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("HeightIntensity", "Fog高さ強度", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 3, 0.0f, 2.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("CameraNear", "Camera Near", offsetof(FogParams, fogCameraParams) + sizeof(float) * 0, 0.001f, 1000.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("CameraFar", "Camera Far", offsetof(FogParams, fogCameraParams) + sizeof(float) * 1, 1.0f, 10000.0f, 1.0f);
 
 		MadoEngine::Render::LayerEffectPass::Desc pixelArtPass{};
+		pixelArtPass.key = "PixelArt";
 		pixelArtPass.name = "ドット絵風";
 		pixelArtPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		pixelArtPass.effectShaderKey = "PostEffect/PixelArt.PS";
@@ -166,12 +176,13 @@ namespace RenderPassSetup {
 
 		MadoEngine::Render::LayerEffectPass* registeredPixelArtPass = execution.AddScreenEffectPass(pixelArtPass);
 		registeredPixelArtPass->SetParameterData(PixelArtParams{});
-		registeredPixelArtPass->AddFloatParameterControl("ピクセルサイズ", offsetof(PixelArtParams, pixelSize), 1.0f, 128.0f, 1.0f);
-		registeredPixelArtPass->AddFloatParameterControl("色数", offsetof(PixelArtParams, colorSteps), 2.0f, 128.0f, 1.0f);
-		registeredPixelArtPass->AddFloatParameterControl("コントラスト", offsetof(PixelArtParams, contrast), 0.0f, 3.0f, 0.01f);
-		registeredPixelArtPass->AddFloatParameterControl("効果の強さ", offsetof(PixelArtParams, intensity), 0.0f, 1.0f, 0.01f);
+		registeredPixelArtPass->AddFloatParameterControl("PixelSize", "ピクセルサイズ", offsetof(PixelArtParams, pixelSize), 1.0f, 128.0f, 1.0f);
+		registeredPixelArtPass->AddFloatParameterControl("ColorSteps", "色数", offsetof(PixelArtParams, colorSteps), 2.0f, 128.0f, 1.0f);
+		registeredPixelArtPass->AddFloatParameterControl("Contrast", "コントラスト", offsetof(PixelArtParams, contrast), 0.0f, 3.0f, 0.01f);
+		registeredPixelArtPass->AddFloatParameterControl("Intensity", "効果の強さ", offsetof(PixelArtParams, intensity), 0.0f, 1.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc screenOutlinePass{};
+		screenOutlinePass.key = "ScreenOutline";
 		screenOutlinePass.name = "画面全体輪郭";
 		screenOutlinePass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
 		screenOutlinePass.effectShaderKey = "PostEffect/Outline.PS";

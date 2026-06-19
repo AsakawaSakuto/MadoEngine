@@ -180,6 +180,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
     <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
+    <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Render\LayerEffectPass.h" />
+    <ClInclude Include="Engine\Render\PostEffectManager.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h" />
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />

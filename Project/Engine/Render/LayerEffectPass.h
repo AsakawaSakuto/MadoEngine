@@ -16,6 +16,7 @@ namespace MadoEngine::Render {
 	public:
 		/// @brief LayerEffectPassの生成設定
 		struct Desc {
+			std::string key;
 			std::string name = "LayerEffect";
 			RenderLayerMask targetLayerMask = ToRenderLayerMask(RenderLayer::Default);
 			std::string effectShaderKey = "PostEffect/CopyImage.PS";
@@ -25,6 +26,7 @@ namespace MadoEngine::Render {
 
 		/// @brief ImGuiで編集するfloatパラメータの設定
 		struct FloatParameterControl {
+			std::string key;
 			std::string label;
 			std::size_t offset = 0;
 			float minValue = 0.0f;
@@ -61,6 +63,10 @@ namespace MadoEngine::Render {
 		/// @brief パス名を取得する
 		/// @return パス名
 		const std::string& GetName() const;
+
+		/// @brief コードから参照するためのパスキーを取得する
+		/// @return パスキー
+		const std::string& GetKey() const;
 
 		/// @brief 対象Layerを単体で設定する
 		/// @param layer 対象Layer
@@ -119,6 +125,22 @@ namespace MadoEngine::Render {
 			float speed = 0.01f
 		);
 
+		/// @brief ImGui表示名とは別の内部キーを持つfloatパラメータを追加する
+		/// @param key コードから参照するためのパラメータキー
+		/// @param label UIに表示する名前
+		/// @param offset ConstantBuffer内のfloat先頭位置
+		/// @param minValue 最小値
+		/// @param maxValue 最大値
+		/// @param speed ドラッグ操作時の変化量
+		void AddFloatParameterControl(
+			const std::string& key,
+			const std::string& label,
+			std::size_t offset,
+			float minValue,
+			float maxValue,
+			float speed = 0.01f
+		);
+
 		/// @brief ImGui編集用のfloatパラメータ一覧を取得する
 		/// @return floatパラメータ設定の配列
 		const std::vector<FloatParameterControl>& GetFloatParameterControls() const;
@@ -129,10 +151,22 @@ namespace MadoEngine::Render {
 		/// @return 取得できた場合はtrue
 		bool TryGetFloatParameter(std::size_t offset, float& outValue) const;
 
+		/// @brief 内部キーからfloatパラメータを取得する
+		/// @param key パラメータキー
+		/// @param outValue 取得した値の出力先
+		/// @return 取得できた場合はtrue
+		bool TryGetFloatParameter(const std::string& key, float& outValue) const;
+
 		/// @brief ConstantBuffer内のfloat値を更新する
 		/// @param offset ConstantBuffer内のfloat先頭位置
 		/// @param value 書き込む値
 		void SetFloatParameter(std::size_t offset, float value);
+
+		/// @brief 内部キーからfloatパラメータを更新する
+		/// @param key パラメータキー
+		/// @param value 設定する値
+		/// @return 更新できた場合はtrue
+		bool SetFloatParameter(const std::string& key, float value);
 
 		/// @brief パラメータ用ConstantBufferを保持しているかを取得する
 		/// @return ConstantBufferを保持している場合はtrue

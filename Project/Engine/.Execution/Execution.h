@@ -8,6 +8,7 @@
 #include <wrl/client.h>
 #include "CoreHeaders.h"
 #include "RenderHeaders.h"
+#include "Render/PostEffectManager.h"
 #include "UtilityHeaders.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
@@ -56,6 +57,14 @@ namespace MadoEngine
 		/// @brief 有効なLayerEffectPassの対象Layerをまとめたマスクを取得する
 		/// @return 有効なLayerEffectPassの対象Layerマスク
 		MadoEngine::Render::RenderLayerMask GetEnabledLayerEffectTargetMask() const;
+
+		/// @brief ポストエフェクト管理クラスを取得する
+		/// @return ポストエフェクト管理クラス
+		MadoEngine::Render::PostEffectManager& GetPostEffectManager();
+
+		/// @brief ポストエフェクト管理クラスを取得する
+		/// @return ポストエフェクト管理クラス
+		const MadoEngine::Render::PostEffectManager& GetPostEffectManager() const;
 
 		/// @brief シーンカラーRenderTargetへの描画を終了する
 		void EndSceneColorRender();
@@ -174,8 +183,7 @@ namespace MadoEngine
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
 		MadoEngine::Render::PSODesc compositeDesc_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> postEffectDefaultParameterResource_;
-		std::vector<MadoEngine::Render::LayerEffectPass> layerEffectPasses_;
-		std::vector<MadoEngine::Render::LayerEffectPass> screenEffectPasses_;
+		MadoEngine::Render::PostEffectManager postEffectManager_;
 		std::string currentCompositeSourceName_ = "SceneColor";
 		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
 		std::string currentLayerEffectSourceName_ = "LayerColor";

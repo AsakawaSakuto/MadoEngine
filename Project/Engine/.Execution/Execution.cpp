@@ -204,6 +204,8 @@ namespace MadoEngine
 		std::memset(defaultParameter, 0, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		postEffectDefaultParameterResource_->Unmap(0, nullptr);
 
+		postEffectManager_.Initialize(postEffectCopyDesc_, dxDevice_->GetDevice());
+
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
@@ -257,50 +259,39 @@ namespace MadoEngine
 	}
 
 	MadoEngine::Render::LayerEffectPass* Execution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
-		layerEffectPasses_.emplace_back();
-		layerEffectPasses_.back().Initialize(desc, postEffectCopyDesc_, dxDevice_->GetDevice());
-		return &layerEffectPasses_.back();
+		return postEffectManager_.AddLayerPass(desc);
 	}
 
 	MadoEngine::Render::LayerEffectPass* Execution::AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
-		screenEffectPasses_.emplace_back();
-		screenEffectPasses_.back().Initialize(desc, postEffectCopyDesc_, dxDevice_->GetDevice());
-		return &screenEffectPasses_.back();
+		return postEffectManager_.AddScreenPass(desc);
 	}
 
 	void Execution::ClearLayerEffectPasses() {
-		layerEffectPasses_.clear();
+		postEffectManager_.ClearLayerPasses();
 	}
 
 	void Execution::ClearScreenEffectPasses() {
-		screenEffectPasses_.clear();
+		postEffectManager_.ClearScreenPasses();
 	}
 
 	const std::vector<MadoEngine::Render::LayerEffectPass>& Execution::GetLayerEffectPasses() const {
-		return layerEffectPasses_;
+		return postEffectManager_.GetLayerPasses();
 	}
 
 	const MadoEngine::Render::LayerEffectPass* Execution::GetFirstEnabledLayerEffectPass() const {
-		for (const MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
-			if (pass.IsEnabled() && pass.GetTargetLayerMask() != 0) {
-				return &pass;
-			}
-		}
-
-		return nullptr;
+		return postEffectManager_.GetFirstEnabledLayerPass();
 	}
 
 	MadoEngine::Render::RenderLayerMask Execution::GetEnabledLayerEffectTargetMask() const {
-		MadoEngine::Render::RenderLayerMask layerMask = 0;
-		for (const MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
-			if (!pass.IsEnabled()) {
-				continue;
-			}
+		return postEffectManager_.GetEnabledLayerTargetMask();
+	}
 
-			layerMask |= pass.GetTargetLayerMask();
-		}
+	MadoEngine::Render::PostEffectManager& Execution::GetPostEffectManager() {
+		return postEffectManager_;
+	}
 
-		return layerMask;
+	const MadoEngine::Render::PostEffectManager& Execution::GetPostEffectManager() const {
+		return postEffectManager_;
 	}
 
 	void Execution::PreDraw()
@@ -408,7 +399,7 @@ namespace MadoEngine
 	}
 
 	void Execution::ApplyScreenEffectPasses() {
-		for (MadoEngine::Render::LayerEffectPass& pass : screenEffectPasses_) {
+		for (MadoEngine::Render::LayerEffectPass& pass : postEffectManager_.GetScreenPasses()) {
 			if (!pass.IsEnabled()) {
 				continue;
 			}
@@ -498,6 +489,8 @@ namespace MadoEngine
 #ifdef USE_IMGUI
 	void Execution::DrawLayerEffectPassDebugUI() {
 		static std::vector<std::string> shaderKeys = BuildLayerEffectShaderKeys();
+		std::vector<MadoEngine::Render::LayerEffectPass>& layerEffectPasses = postEffectManager_.GetLayerPasses();
+		std::vector<MadoEngine::Render::LayerEffectPass>& screenEffectPasses = postEffectManager_.GetScreenPasses();
 
 		if (!ImGui::Begin("Layer Effect Pass")) {
 			ImGui::End();
@@ -508,7 +501,7 @@ namespace MadoEngine
 			shaderKeys = BuildLayerEffectShaderKeys();
 		}
 
-		if (layerEffectPasses_.empty() && screenEffectPasses_.empty()) {
+		if (layerEffectPasses.empty() && screenEffectPasses.empty()) {
 			ImGui::TextDisabled("LayerEffectPassは登録されていません");
 			ImGui::End();
 			return;
@@ -524,7 +517,7 @@ namespace MadoEngine
 			ImGuiTableFlags_RowBg |
 			ImGuiTableFlags_SizingStretchProp;
 
-		if (!layerEffectPasses_.empty() && ImGui::BeginTable("LayerEffectPassTable", 5, tableFlags)) {
+		if (!layerEffectPasses.empty() && ImGui::BeginTable("LayerEffectPassTable", 5, tableFlags)) {
 			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
@@ -532,8 +525,8 @@ namespace MadoEngine
 			ImGui::TableSetupColumn("LayerMask", ImGuiTableColumnFlags_WidthFixed, 90.0f);
 			ImGui::TableHeadersRow();
 
-			for (std::size_t passIndex = 0; passIndex < layerEffectPasses_.size(); ++passIndex) {
-				MadoEngine::Render::LayerEffectPass& pass = layerEffectPasses_[passIndex];
+			for (std::size_t passIndex = 0; passIndex < layerEffectPasses.size(); ++passIndex) {
+				MadoEngine::Render::LayerEffectPass& pass = layerEffectPasses[passIndex];
 				ImGui::PushID(static_cast<int>(passIndex));
 
 				ImGui::TableNextRow();
@@ -599,16 +592,16 @@ namespace MadoEngine
 			ImGui::EndTable();
 		}
 
-		if (!screenEffectPasses_.empty() && ImGui::BeginTable("ScreenEffectPassTable", 4, tableFlags)) {
+		if (!screenEffectPasses.empty() && ImGui::BeginTable("ScreenEffectPassTable", 4, tableFlags)) {
 			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("Target", ImGuiTableColumnFlags_WidthFixed, 90.0f);
 			ImGui::TableHeadersRow();
 
-			for (std::size_t passIndex = 0; passIndex < screenEffectPasses_.size(); ++passIndex) {
-				MadoEngine::Render::LayerEffectPass& pass = screenEffectPasses_[passIndex];
-				ImGui::PushID(static_cast<int>(passIndex + layerEffectPasses_.size()));
+			for (std::size_t passIndex = 0; passIndex < screenEffectPasses.size(); ++passIndex) {
+				MadoEngine::Render::LayerEffectPass& pass = screenEffectPasses[passIndex];
+				ImGui::PushID(static_cast<int>(passIndex + layerEffectPasses.size()));
 
 				ImGui::TableNextRow();
 
@@ -664,7 +657,7 @@ namespace MadoEngine
 		}
 
 		bool hasParameterControls = false;
-		for (MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
+		for (MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses) {
 			if (pass.GetFloatParameterControls().empty()) {
 				continue;
 			}
@@ -693,7 +686,7 @@ namespace MadoEngine
 			}
 		}
 
-		for (MadoEngine::Render::LayerEffectPass& pass : screenEffectPasses_) {
+		for (MadoEngine::Render::LayerEffectPass& pass : screenEffectPasses) {
 			if (pass.GetFloatParameterControls().empty()) {
 				continue;
 			}
@@ -763,21 +756,7 @@ namespace MadoEngine
 	}
 
 	bool Execution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
-		for (const MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses_) {
-			if (!pass.IsEnabled()) {
-				continue;
-			}
-
-			if (pass.GetTargetLayerMask() != layerMask) {
-				continue;
-			}
-
-			if (pass.IsIgnoreDepthForMask()) {
-				return true;
-			}
-		}
-
-		return false;
+		return postEffectManager_.NeedsIgnoreDepthMask(layerMask);
 	}
 
 	void Execution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {

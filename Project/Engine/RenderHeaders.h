@@ -19,6 +19,7 @@
 #include "Render/PSO/PSORegistry.h"
 #include "Render/PSO/ShaderReflector.h"
 #include "Render/LayerEffectPass.h"
+#include "Render/PostEffectManager.h"
 #include "Shader/ShaderManager.h"
 #include "Shader/RootSignatureManager.h"
 #include "Render/Screen/RenderTexture.h"

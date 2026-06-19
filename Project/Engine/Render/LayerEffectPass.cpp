@@ -12,6 +12,9 @@ namespace MadoEngine::Render {
 		assert(device && "D3D12Deviceが空です");
 
 		desc_ = desc;
+		if (desc_.key.empty()) {
+			desc_.key = desc_.name;
+		}
 		effectDesc_ = basePostEffectDesc;
 		effectDesc_.psKey = desc_.effectShaderKey;
 		device_ = device;
@@ -42,6 +45,10 @@ namespace MadoEngine::Render {
 
 	const std::string& LayerEffectPass::GetName() const {
 		return desc_.name;
+	}
+
+	const std::string& LayerEffectPass::GetKey() const {
+		return desc_.key;
 	}
 
 	void LayerEffectPass::SetTargetLayer(RenderLayer layer) {
@@ -92,10 +99,23 @@ namespace MadoEngine::Render {
 		float maxValue,
 		float speed)
 	{
+		AddFloatParameterControl(label, label, offset, minValue, maxValue, speed);
+	}
+
+	void LayerEffectPass::AddFloatParameterControl(
+		const std::string& key,
+		const std::string& label,
+		std::size_t offset,
+		float minValue,
+		float maxValue,
+		float speed)
+	{
+		assert(!key.empty() && "floatパラメータキーが空です");
 		assert(!label.empty() && "floatパラメータ名が空です");
 		assert(offset + sizeof(float) <= parameterSizeInBytes_ && "floatパラメータのoffsetがConstantBufferの範囲外です");
 
 		FloatParameterControl control{};
+		control.key = key;
 		control.label = label;
 		control.offset = offset;
 		control.minValue = minValue;
@@ -117,11 +137,32 @@ namespace MadoEngine::Render {
 		return true;
 	}
 
+	bool LayerEffectPass::TryGetFloatParameter(const std::string& key, float& outValue) const {
+		for (const FloatParameterControl& control : floatParameterControls_) {
+			if (control.key == key) {
+				return TryGetFloatParameter(control.offset, outValue);
+			}
+		}
+
+		return false;
+	}
+
 	void LayerEffectPass::SetFloatParameter(std::size_t offset, float value) {
 		assert(offset + sizeof(float) <= parameterData_.size() && "floatパラメータのoffsetがConstantBufferの範囲外です");
 
 		std::memcpy(parameterData_.data() + offset, &value, sizeof(float));
 		UploadParameterData();
+	}
+
+	bool LayerEffectPass::SetFloatParameter(const std::string& key, float value) {
+		for (const FloatParameterControl& control : floatParameterControls_) {
+			if (control.key == key) {
+				SetFloatParameter(control.offset, value);
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool LayerEffectPass::HasParameterBuffer() const {

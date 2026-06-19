@@ -81,6 +81,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
     <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
+    <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="Engine\Render\LayerEffectPass.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\PostEffectManager.h" />
     <ClInclude Include="Application\.SceneManager\SceneManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
