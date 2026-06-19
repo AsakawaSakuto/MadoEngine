@@ -85,6 +85,14 @@ namespace RenderPassSetup {
 		playerOutlinePass.ignoreDepthForMask = true;
 		setupOutlineParameters(execution.AddLayerEffectPass(playerOutlinePass));
 
+		MadoEngine::Render::LayerEffectPass::Desc mapEventObjOutlinePass{};
+		mapEventObjOutlinePass.name = "マップイベントオブジェクト輪郭";
+		mapEventObjOutlinePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::MapEventObject);
+		mapEventObjOutlinePass.effectShaderKey = "PostEffect/Outline.PS";
+		mapEventObjOutlinePass.enabled = true;
+		mapEventObjOutlinePass.ignoreDepthForMask = false;
+		setupOutlineParameters(execution.AddLayerEffectPass(mapEventObjOutlinePass));
+
 		MadoEngine::Render::LayerEffectPass::Desc playerDissolvePass{};
 		playerDissolvePass.name = "プレイヤーDissolve";
 		playerDissolvePass.targetLayerMask = MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Player);

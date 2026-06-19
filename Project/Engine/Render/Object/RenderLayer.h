@@ -5,12 +5,13 @@ namespace MadoEngine::Render {
 
 	/// @brief 描画対象を分類するLayer
 	enum class RenderLayer : uint32_t {
-		Default = 1u << 0, // デフォルトレイヤー。特に指定がない場合はこちらに属する
-		World = 1u << 1,   // ワールドレイヤー。主にゲーム内のオブジェクトに使用
-		Player = 1u << 2,  // プレイヤーレイヤー。プレイヤーキャラクターに使用
-		Effect = 1u << 3,  // エフェクトレイヤー。パーティクルや特殊効果に使用
-		UI = 1u << 4,      // UIレイヤー。ユーザーインターフェースに使用
-		Debug = 1u << 5    // デバッグ用レイヤー。主に開発中の情報表示に使用
+		Default = 1u << 0,        // デフォルトレイヤー 特に指定がない場合はこちらに属する
+		World = 1u << 1,          // ワールドレイヤー 主にゲーム内のオブジェクトに使用
+		MapEventObject = 1u << 2, // マップイベントオブジェクトレイヤー
+		Player = 1u << 3,         // プレイヤーレイヤー
+		Effect = 1u << 4,         // エフェクトレイヤー
+		UI = 1u << 5,             // UIレイヤー
+		Debug = 1u << 6           // デバッグ用レイヤー
 	};
 
 	using RenderLayerMask = uint32_t;
@@ -18,6 +19,7 @@ namespace MadoEngine::Render {
 	inline constexpr RenderLayerMask kAllRenderLayers =
 		static_cast<RenderLayerMask>(RenderLayer::Default) |
 		static_cast<RenderLayerMask>(RenderLayer::World) |
+		static_cast<RenderLayerMask>(RenderLayer::MapEventObject) |
 		static_cast<RenderLayerMask>(RenderLayer::Player) |
 		static_cast<RenderLayerMask>(RenderLayer::Effect) |
 		static_cast<RenderLayerMask>(RenderLayer::UI) |
