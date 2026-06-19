@@ -76,6 +76,18 @@ LightHandle LightManager::Find(const std::string& name) const {
 	return it->second;
 }
 
+std::vector<LightHandle> LightManager::GetDirectionalLightHandles() const {
+	return GetActiveHandles(directionalLights_, LightType::Directional);
+}
+
+std::vector<LightHandle> LightManager::GetPointLightHandles() const {
+	return GetActiveHandles(pointLights_, LightType::Point);
+}
+
+std::vector<LightHandle> LightManager::GetSpotLightHandles() const {
+	return GetActiveHandles(spotLights_, LightType::Spot);
+}
+
 bool LightManager::IsValid(LightHandle handle) const {
 	if (!handle.IsValid()) {
 		return false;
@@ -131,6 +143,36 @@ bool LightManager::Destroy(LightHandle handle) {
 
 bool LightManager::Destroy(const std::string& name) {
 	return Destroy(Find(name));
+}
+
+bool LightManager::RenameLight(LightHandle handle, const std::string& newName) {
+	LightMetaData* meta = GetMetaData(handle);
+	if (!meta) {
+		Logger::Output("ライト名を変更できません。無効なハンドルです。", Logger::Level::Warning);
+		return false;
+	}
+
+	if (newName.empty()) {
+		Logger::Output("ライト名を変更できません。新しい名前が空です。", Logger::Level::Warning);
+		return false;
+	}
+
+	if (meta->name == newName) {
+		return true;
+	}
+
+	auto nameIt = nameToHandle_.find(newName);
+	if (nameIt != nameToHandle_.end()) {
+		Logger::Output("ライト名を変更できません。同名のライトが存在します : " + newName, Logger::Level::Warning);
+		return false;
+	}
+
+	nameToHandle_.erase(meta->name);
+	meta->name = newName;
+	nameToHandle_.emplace(meta->name, handle);
+	AdvanceRevision();
+	Logger::Output("ライト名を変更しました : " + meta->name, Logger::Level::Application);
+	return true;
 }
 
 void LightManager::Clear() {
@@ -224,6 +266,7 @@ bool LightManager::SetDirectionalLight(LightHandle handle, const DirectionalLigh
 	}
 
 	*targetLight = light;
+	AdvanceRevision();
 	return true;
 }
 
@@ -234,6 +277,7 @@ bool LightManager::SetPointLight(LightHandle handle, const PointLight& light) {
 	}
 
 	*targetLight = light;
+	AdvanceRevision();
 	return true;
 }
 
@@ -244,6 +288,7 @@ bool LightManager::SetSpotLight(LightHandle handle, const SpotLight& light) {
 	}
 
 	*targetLight = light;
+	AdvanceRevision();
 	return true;
 }
 
@@ -479,6 +524,27 @@ void LightManager::ClearSlots(std::vector<TSlot>& slots) {
 			++slot.generation;
 		}
 	}
+}
+
+template <typename TSlot>
+std::vector<LightHandle> LightManager::GetActiveHandles(const std::vector<TSlot>& slots, LightType type) const {
+	std::vector<LightHandle> handles;
+	handles.reserve(slots.size());
+
+	for (uint32_t index = 0; index < static_cast<uint32_t>(slots.size()); ++index) {
+		const TSlot& slot = slots[index];
+		if (!slot.active) {
+			continue;
+		}
+
+		LightHandle handle;
+		handle.type = type;
+		handle.index = index;
+		handle.generation = slot.generation;
+		handles.push_back(handle);
+	}
+
+	return handles;
 }
 
 bool LightManager::IsLightMatched(const LightMetaData& meta, SceneType sceneType, LightLayerMask receiveLightMask) const {

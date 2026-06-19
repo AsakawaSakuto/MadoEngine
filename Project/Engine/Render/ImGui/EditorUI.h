@@ -17,6 +17,9 @@ namespace MadoEngine::Editor {
 	/// @param postEffectManager 編集対象のポストエフェクト管理クラス
 	void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager);
 
+	/// @brief LightManager Editorを描画する
+	void DrawLightManagerEditorUI();
+
 	/// @brief Game View上にTransformギズモを描画し、Transformへ反映する
 	/// @param camera ギズモ表示に使用するカメラ
 	/// @param transform 操作対象のTransform

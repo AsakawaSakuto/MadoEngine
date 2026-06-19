@@ -465,6 +465,7 @@ namespace MadoEngine
 		//}
 
 		MadoEngine::Editor::DrawAudioManagerUI();
+		MadoEngine::Editor::DrawLightManagerEditorUI();
 #else
 		if (!isLayerEffectResolved_) {
 			EndSceneColorRender();

@@ -127,6 +127,18 @@ public:
 	/// @return 見つかったライトのハンドル。見つからない場合は無効なハンドル
 	LightHandle Find(const std::string& name) const;
 
+	/// @brief 登録済み平行光源のハンドル一覧を取得する
+	/// @return 登録済み平行光源のハンドル配列
+	std::vector<LightHandle> GetDirectionalLightHandles() const;
+
+	/// @brief 登録済み点光源のハンドル一覧を取得する
+	/// @return 登録済み点光源のハンドル配列
+	std::vector<LightHandle> GetPointLightHandles() const;
+
+	/// @brief 登録済みスポットライトのハンドル一覧を取得する
+	/// @return 登録済みスポットライトのハンドル配列
+	std::vector<LightHandle> GetSpotLightHandles() const;
+
 	/// @brief ハンドルが現在も有効か確認する
 	/// @param handle 確認するハンドル
 	/// @return 有効なライトを指す場合はtrue
@@ -141,6 +153,12 @@ public:
 	/// @param name 削除するライト名
 	/// @return 削除できた場合はtrue
 	bool Destroy(const std::string& name);
+
+	/// @brief ライト名を変更する
+	/// @param handle 対象ライトのハンドル
+	/// @param newName 新しいライト名
+	/// @return 変更できた場合はtrue
+	bool RenameLight(LightHandle handle, const std::string& newName);
 
 	/// @brief 登録済みライトをすべて削除する
 	void Clear();
@@ -370,6 +388,13 @@ private:
 	/// @param slots 無効化するライトスロット配列
 	template <typename TSlot>
 	void ClearSlots(std::vector<TSlot>& slots);
+
+	/// @brief ライトスロット配列から有効なハンドル一覧を取得する
+	/// @param slots 検索対象のライトスロット配列
+	/// @param type ライト種別
+	/// @return 有効なハンドル配列
+	template <typename TSlot>
+	std::vector<LightHandle> GetActiveHandles(const std::vector<TSlot>& slots, LightType type) const;
 
 	/// @brief ライトが抽出条件に一致するか判定する
 	/// @param meta 判定するライトの共通メタ情報
