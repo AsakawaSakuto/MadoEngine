@@ -197,12 +197,12 @@ namespace MadoEngine::Render {
 			case DepthMode::ReadWrite:
 				desc.DepthEnable    = TRUE;
 				desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-				desc.DepthFunc      = D3D12_COMPARISON_FUNC_LESS;
+				desc.DepthFunc      = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 				break;
 			case DepthMode::ReadOnly:
 				desc.DepthEnable    = TRUE;
 				desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-				desc.DepthFunc      = D3D12_COMPARISON_FUNC_LESS;
+				desc.DepthFunc      = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 				break;
 			case DepthMode::Disable:
 				desc.DepthEnable    = FALSE;

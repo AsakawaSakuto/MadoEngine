@@ -31,13 +31,7 @@ void Terminal::Run() {
 
 		const MadoEngine::Render::RenderLayerMask layerEffectTargetMask = execution_->GetEnabledLayerEffectTargetMask();
 		if (layerEffectTargetMask != 0) {
-			const MadoEngine::Render::RenderLayerMask baseLayerMask =
-				MadoEngine::Render::RemoveRenderLayerMask(
-					MadoEngine::Render::kAllRenderLayers,
-					layerEffectTargetMask
-				);
-
-			sceneManager_->DrawLayerMask(baseLayerMask);
+			sceneManager_->DrawLayerMask(MadoEngine::Render::kAllRenderLayers);
 			sceneManager_->DrawCurrentScene();
 			execution_->EndSceneColorRender();
 
