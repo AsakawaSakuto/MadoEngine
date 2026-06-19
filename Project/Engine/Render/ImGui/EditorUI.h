@@ -13,6 +13,10 @@ namespace MadoEngine::Editor {
 	/// @brief AudioManagerの内容を表示・操作するImGui UIを描画する
 	void DrawAudioManagerUI();
 
+	/// @brief Layer Effect Pass Editorを描画する
+	/// @param postEffectManager 編集対象のポストエフェクト管理クラス
+	void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager);
+
 	/// @brief Game View上にTransformギズモを描画し、Transformへ反映する
 	/// @param camera ギズモ表示に使用するカメラ
 	/// @param transform 操作対象のTransform

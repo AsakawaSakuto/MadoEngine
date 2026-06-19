@@ -1,5 +1,6 @@
 #pragma once
 #include "Render/LayerEffectPass.h"
+#include <cstddef>
 #include <d3d12.h>
 #include <string>
 #include <vector>
@@ -23,6 +24,21 @@ namespace MadoEngine::Render {
 		/// @param desc 追加するPassの生成設定
 		/// @return 追加したPassのポインタ
 		LayerEffectPass* AddScreenPass(const LayerEffectPass::Desc& desc);
+
+		/// @brief レイヤー対象のPassを指定indexで削除する
+		/// @param index 削除するPassのindex
+		/// @return 削除できた場合はtrue
+		bool RemoveLayerPass(std::size_t index);
+
+		/// @brief 画面全体のPassを指定indexで削除する
+		/// @param index 削除するPassのindex
+		/// @return 削除できた場合はtrue
+		bool RemoveScreenPass(std::size_t index);
+
+		/// @brief Pass名または内部キーからPassを削除する
+		/// @param name 削除するPass名または内部キー
+		/// @return 削除できた場合はtrue
+		bool RemovePass(const std::string& name);
 
 		/// @brief レイヤー対象のPassをすべて削除する
 		void ClearLayerPasses();
@@ -108,6 +124,12 @@ namespace MadoEngine::Render {
 		/// @return 見つかったPass。存在しない場合はnullptr
 		static const LayerEffectPass* FindPassIn(const std::vector<LayerEffectPass>& passes, const std::string& name);
 
+		/// @brief 指定配列からPass名または内部キーに一致するPassを削除する
+		/// @param passes 削除対象のPass配列
+		/// @param name 削除するPass名または内部キー
+		/// @return 削除できた場合はtrue
+		static bool RemovePassIn(std::vector<LayerEffectPass>& passes, const std::string& name);
+
 		PSODesc basePostEffectDesc_{};
 		ID3D12Device* device_ = nullptr;
 		std::vector<LayerEffectPass> layerPasses_;
@@ -115,4 +137,3 @@ namespace MadoEngine::Render {
 	};
 
 } // namespace MadoEngine::Render
-

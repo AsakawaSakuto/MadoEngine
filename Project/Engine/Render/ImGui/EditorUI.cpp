@@ -1,7 +1,10 @@
 #include "EditorUI.h"
 #include "EditorHistory.h"
 #include "ModelTransformCommand.h"
+#include <array>
 #include <cmath>
+#include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <memory>
 
@@ -13,6 +16,159 @@ namespace MadoEngine::Editor {
 
         constexpr ImVec2 kEditorIconButtonSize = { 28.0f, 28.0f };
         constexpr ImVec2 kEditorIconButtonPadding = { 4.0f, 4.0f };
+
+        /// @brief 固定配列の要素数を取得する
+        /// @tparam T 配列要素の型
+        /// @tparam N 配列要素数
+        /// @param values 要素数を取得する配列
+        /// @return 配列要素数
+        template<typename T, std::size_t N>
+        constexpr std::size_t CountOf(const T(&values)[N]) {
+            (void)values;
+            return N;
+        }
+
+        /// @brief PostEffect定義内のfloatパラメータ情報
+        struct PostEffectFloatParameterDefinition {
+            const char* key;
+            const char* label;
+            std::size_t offset;
+            float minValue;
+            float maxValue;
+            float speed;
+        };
+
+        /// @brief ImGuiから選択可能なPostEffect定義
+        struct PostEffectDefinition {
+            const char* displayName;
+            const char* shaderKey;
+            const float* initialValues;
+            std::size_t initialValueCount;
+            const PostEffectFloatParameterDefinition* parameters;
+            std::size_t parameterCount;
+        };
+
+        /// @brief Layer選択用の表示情報
+        struct RenderLayerDefinition {
+            const char* displayName;
+            Render::RenderLayerMask layerMask;
+        };
+
+        /// @brief Passの所属配列種別
+        enum class LayerEffectPassListType {
+            Layer,
+            Screen,
+        };
+
+        /// @brief 削除ボタンが押されたPass情報
+        struct LayerEffectPassRemoveRequest {
+            bool isRequested = false;
+            LayerEffectPassListType listType = LayerEffectPassListType::Layer;
+            std::size_t index = 0;
+        };
+
+        constexpr std::size_t kFloatSize = sizeof(float);
+
+        const float kBloomInitialValues[] = {
+            0.6f, 0.7f, 4.0f, 0.5f
+        };
+        const PostEffectFloatParameterDefinition kBloomParameters[] = {
+            { "Intensity", "強度", 0 * kFloatSize, 0.0f, 5.0f, 0.01f },
+            { "Threshold", "しきい値", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Radius", "半径", 2 * kFloatSize, 0.0f, 32.0f, 0.1f },
+            { "SoftKnee", "ソフトニー", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const float kVignetteInitialValues[] = {
+            0.8f, 0.35f, 2.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kVignetteParameters[] = {
+            { "Intensity", "強度", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "InnerRadius", "内側半径", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "OuterScale", "外側倍率", 2 * kFloatSize, 1.0f, 4.0f, 0.01f },
+        };
+
+        const float kPixelArtInitialValues[] = {
+            6.0f, 8.0f, 1.15f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kPixelArtParameters[] = {
+            { "PixelSize", "ピクセルサイズ", 0 * kFloatSize, 1.0f, 64.0f, 1.0f },
+            { "ColorSteps", "色階調数", 1 * kFloatSize, 2.0f, 32.0f, 1.0f },
+            { "Contrast", "コントラスト", 2 * kFloatSize, 0.0f, 4.0f, 0.01f },
+            { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const float kOutlineInitialValues[] = {
+            1.0f, 0.85f, 0.15f, 1.0f,
+            1.0f, 80.0f, 0.005f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kOutlineParameters[] = {
+            { "ColorR", "色R", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorG", "色G", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorB", "色B", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorA", "色A", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Thickness", "太さ", 4 * kFloatSize, 0.25f, 12.0f, 0.05f },
+            { "DepthSensitivity", "深度感度", 5 * kFloatSize, 1.0f, 300.0f, 1.0f },
+            { "EdgeThreshold", "エッジしきい値", 6 * kFloatSize, 0.0001f, 0.1f, 0.0001f },
+            { "Intensity", "濃さ", 7 * kFloatSize, 0.0f, 4.0f, 0.01f },
+        };
+
+        const float kFogInitialValues[] = {
+            0.58f, 0.68f, 0.74f, 1.0f,
+            850.0f, 1000.0f, 1.0f, 0.0f,
+            0.1f, 1000.0f, 0.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kFogParameters[] = {
+            { "ColorR", "色R", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorG", "色G", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorB", "色B", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorA", "色A", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "StartDistance", "開始距離", 4 * kFloatSize, 0.0f, 5000.0f, 1.0f },
+            { "EndDistance", "終了距離", 5 * kFloatSize, 0.0f, 5000.0f, 1.0f },
+            { "Density", "濃度", 6 * kFloatSize, 0.0f, 4.0f, 0.01f },
+            { "HeightStrength", "高さ強度", 7 * kFloatSize, 0.0f, 4.0f, 0.01f },
+            { "NearClip", "NearClip", 8 * kFloatSize, 0.001f, 100.0f, 0.01f },
+            { "FarClip", "FarClip", 9 * kFloatSize, 1.0f, 10000.0f, 1.0f },
+        };
+
+        const float kDissolveInitialValues[] = {
+            0.35f, 0.06f, 1.0f, 2.0f,
+            1.0f, 0.45f, 0.05f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kDissolveParameters[] = {
+            { "Amount", "進行度", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "EdgeWidth", "境界幅", 1 * kFloatSize, 0.001f, 0.5f, 0.001f },
+            { "EdgeIntensity", "境界強度", 2 * kFloatSize, 0.0f, 8.0f, 0.01f },
+            { "NoiseScale", "ノイズ倍率", 3 * kFloatSize, 0.001f, 32.0f, 0.01f },
+            { "EdgeColorR", "境界色R", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "EdgeColorG", "境界色G", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "EdgeColorB", "境界色B", 6 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "EdgeColorA", "境界色A", 7 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const PostEffectDefinition kPostEffectDefinitions[] = {
+            { "CopyImage", "PostEffect/CopyImage.PS", nullptr, 0, nullptr, 0 },
+            { "GrayScale", "PostEffect/GrayScale.PS", nullptr, 0, nullptr, 0 },
+            { "Sepia", "PostEffect/Sepia.PS", nullptr, 0, nullptr, 0 },
+            { "Invert", "PostEffect/Invert.PS", nullptr, 0, nullptr, 0 },
+            { "Bloom", "PostEffect/Bloom.PS", kBloomInitialValues, CountOf(kBloomInitialValues), kBloomParameters, CountOf(kBloomParameters) },
+            { "Vignette", "PostEffect/Vignette.PS", kVignetteInitialValues, CountOf(kVignetteInitialValues), kVignetteParameters, CountOf(kVignetteParameters) },
+            { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
+            { "Outline", "PostEffect/Outline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
+            { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
+            { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },
+        };
+
+        const RenderLayerDefinition kRenderLayerDefinitions[] = {
+            { "Default", Render::ToRenderLayerMask(Render::RenderLayer::Default) },
+            { "World", Render::ToRenderLayerMask(Render::RenderLayer::World) },
+            { "MapEventObject", Render::ToRenderLayerMask(Render::RenderLayer::MapEventObject) },
+            { "Player", Render::ToRenderLayerMask(Render::RenderLayer::Player) },
+            { "Effect", Render::ToRenderLayerMask(Render::RenderLayer::Effect) },
+            { "UI", Render::ToRenderLayerMask(Render::RenderLayer::UI) },
+            { "Debug", Render::ToRenderLayerMask(Render::RenderLayer::Debug) },
+            { "All", Render::kAllRenderLayers },
+        };
 
         /// @brief Editor UIで使用するアイコン情報
         struct EditorIconButtonInfo {
@@ -83,6 +239,245 @@ namespace MadoEngine::Editor {
             }
 
             return isPressed;
+        }
+
+        /// @brief shaderKeyに一致するPostEffect定義のindexを取得する
+        /// @param shaderKey 検索するPixelShaderキー
+        /// @return 一致した定義index。一致しない場合は0
+        int FindPostEffectDefinitionIndex(const std::string& shaderKey) {
+            for (int index = 0; index < static_cast<int>(CountOf(kPostEffectDefinitions)); ++index) {
+                if (shaderKey == kPostEffectDefinitions[index].shaderKey) {
+                    return index;
+                }
+            }
+
+            return 0;
+        }
+
+        /// @brief PostEffect定義をPassへ反映する
+        /// @param pass 反映先のPass
+        /// @param definition 反映するPostEffect定義
+        void ApplyPostEffectDefinition(Render::LayerEffectPass& pass, const PostEffectDefinition& definition) {
+            pass.SetEffectShaderKey(definition.shaderKey);
+            pass.ClearFloatParameterControls();
+            pass.ClearParameterData();
+
+            if (definition.initialValues && definition.initialValueCount > 0) {
+                pass.SetParameterData(definition.initialValues, definition.initialValueCount * sizeof(float));
+
+                for (std::size_t i = 0; i < definition.parameterCount; ++i) {
+                    const PostEffectFloatParameterDefinition& parameter = definition.parameters[i];
+                    pass.AddFloatParameterControl(
+                        parameter.key,
+                        parameter.label,
+                        parameter.offset,
+                        parameter.minValue,
+                        parameter.maxValue,
+                        parameter.speed
+                    );
+                }
+            }
+        }
+
+        /// @brief 重複しないPassキーを作成する
+        /// @param postEffectManager 重複確認に使用する管理クラス
+        /// @param prefix Passキーの接頭辞
+        /// @param nextId 次に試すID
+        /// @return 重複しないPassキー
+        std::string CreateUniquePassKey(
+            const Render::PostEffectManager& postEffectManager,
+            const char* prefix,
+            int& nextId)
+        {
+            std::string key;
+            do {
+                key = std::string(prefix) + std::to_string(nextId);
+                ++nextId;
+            } while (postEffectManager.FindPass(key));
+
+            return key;
+        }
+
+        /// @brief Layer Effect Passを追加する
+        /// @param postEffectManager 追加先のポストエフェクト管理クラス
+        /// @param isScreenPass フルスクリーンPassを追加する場合はtrue
+        void AddLayerEffectPassFromEditor(Render::PostEffectManager& postEffectManager, bool isScreenPass) {
+            static int nextLayerPassId = 1;
+            static int nextScreenPassId = 1;
+
+            const PostEffectDefinition& definition = kPostEffectDefinitions[0];
+            Render::LayerEffectPass::Desc desc{};
+            if (isScreenPass) {
+                desc.key = CreateUniquePassKey(postEffectManager, "ScreenEffectPass_", nextScreenPassId);
+                desc.name = "Screen Effect " + std::to_string(nextScreenPassId - 1);
+                desc.targetLayerMask = Render::kAllRenderLayers;
+            } else {
+                desc.key = CreateUniquePassKey(postEffectManager, "LayerEffectPass_", nextLayerPassId);
+                desc.name = "Layer Effect " + std::to_string(nextLayerPassId - 1);
+                desc.targetLayerMask = Render::ToRenderLayerMask(Render::RenderLayer::Default);
+            }
+            desc.effectShaderKey = definition.shaderKey;
+            desc.enabled = true;
+            desc.ignoreDepthForMask = false;
+
+            Render::LayerEffectPass* pass = isScreenPass ?
+                postEffectManager.AddScreenPass(desc) :
+                postEffectManager.AddLayerPass(desc);
+            if (pass) {
+                ApplyPostEffectDefinition(*pass, definition);
+            }
+        }
+
+        /// @brief 対象Layerの選択Comboを描画する
+        /// @param pass 編集対象のPass
+        void DrawLayerSelectionCombo(Render::LayerEffectPass& pass) {
+            const Render::RenderLayerMask currentLayerMask = pass.GetTargetLayerMask();
+            const char* previewName = "Custom";
+            for (const RenderLayerDefinition& definition : kRenderLayerDefinitions) {
+                if (definition.layerMask == currentLayerMask) {
+                    previewName = definition.displayName;
+                    break;
+                }
+            }
+
+            ImGui::SetNextItemWidth(-1.0f);
+            if (ImGui::BeginCombo("##TargetLayer", previewName)) {
+                for (const RenderLayerDefinition& definition : kRenderLayerDefinitions) {
+                    const bool isSelected = definition.layerMask == currentLayerMask;
+                    if (ImGui::Selectable(definition.displayName, isSelected)) {
+                        pass.SetTargetLayerMask(definition.layerMask);
+                    }
+
+                    if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+        }
+
+        /// @brief PostEffect選択Comboを描画する
+        /// @param pass 編集対象のPass
+        void DrawPostEffectSelectionCombo(Render::LayerEffectPass& pass) {
+            const int currentIndex = FindPostEffectDefinitionIndex(pass.GetEffectShaderKey());
+            const char* previewName = kPostEffectDefinitions[currentIndex].displayName;
+
+            ImGui::SetNextItemWidth(-1.0f);
+            if (ImGui::BeginCombo("##PostEffect", previewName)) {
+                for (int index = 0; index < static_cast<int>(CountOf(kPostEffectDefinitions)); ++index) {
+                    const bool isSelected = index == currentIndex;
+                    if (ImGui::Selectable(kPostEffectDefinitions[index].displayName, isSelected)) {
+                        ApplyPostEffectDefinition(pass, kPostEffectDefinitions[index]);
+                    }
+
+                    if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+        }
+
+        /// @brief 選択中PostEffectのパラメータ調整行を描画する
+        /// @param pass 編集対象のPass
+        void DrawPostEffectParameterRows(Render::LayerEffectPass& pass) {
+            const std::vector<Render::LayerEffectPass::FloatParameterControl>& controls = pass.GetFloatParameterControls();
+            if (controls.empty()) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextDisabled("調整項目はありません");
+                return;
+            }
+
+            for (const Render::LayerEffectPass::FloatParameterControl& control : controls) {
+                float value = 0.0f;
+                if (!pass.TryGetFloatParameter(control.offset, value)) {
+                    continue;
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextUnformatted(control.label.c_str());
+
+                ImGui::TableSetColumnIndex(2);
+                ImGui::SetNextItemWidth(-1.0f);
+                const std::string sliderId = "##" + control.key;
+                if (ImGui::DragFloat(sliderId.c_str(), &value, control.speed, control.minValue, control.maxValue)) {
+                    pass.SetFloatParameter(control.offset, value);
+                }
+            }
+        }
+
+        /// @brief Layer Effect Pass Editorの1行を描画する
+        /// @param pass 編集対象のPass
+        /// @param listType Passの所属配列種別
+        /// @param index Pass配列内のindex
+        /// @param removeRequest 削除要求の出力先
+        void DrawLayerEffectPassEditorRow(
+            Render::LayerEffectPass& pass,
+            LayerEffectPassListType listType,
+            std::size_t index,
+            LayerEffectPassRemoveRequest& removeRequest)
+        {
+            ImGui::PushID(pass.GetKey().c_str());
+
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            bool enabled = pass.IsEnabled();
+            if (ImGui::Checkbox("##Enabled", &enabled)) {
+                pass.SetEnabled(enabled);
+            }
+
+            ImGui::TableNextColumn();
+            std::array<char, 128> nameBuffer{};
+            std::snprintf(nameBuffer.data(), nameBuffer.size(), "%s", pass.GetName().c_str());
+            ImGui::SetNextItemWidth(-1.0f);
+            if (ImGui::InputText("##Name", nameBuffer.data(), nameBuffer.size())) {
+                if (nameBuffer[0] != '\0') {
+                    pass.SetName(nameBuffer.data());
+                }
+            }
+
+            ImGui::TableNextColumn();
+            DrawPostEffectSelectionCombo(pass);
+
+            ImGui::TableNextColumn();
+            if (listType == LayerEffectPassListType::Layer) {
+                DrawLayerSelectionCombo(pass);
+            } else {
+                ImGui::TextDisabled("全画面");
+            }
+
+            ImGui::TableNextColumn();
+            bool ignoreDepth = pass.IsIgnoreDepthForMask();
+            if (listType == LayerEffectPassListType::Layer) {
+                if (ImGui::Checkbox("##Depth", &ignoreDepth)) {
+                    pass.SetIgnoreDepthForMask(ignoreDepth);
+                }
+            } else {
+                ImGui::BeginDisabled();
+                ImGui::Checkbox("##Depth", &ignoreDepth);
+                ImGui::EndDisabled();
+            }
+
+            ImGui::TableNextColumn();
+            if (ImGui::Button("削除")) {
+                removeRequest.isRequested = true;
+                removeRequest.listType = listType;
+                removeRequest.index = index;
+            }
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            if (ImGui::TreeNodeEx("値を調整", ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_LabelSpanAllColumns)) {
+                DrawPostEffectParameterRows(pass);
+                ImGui::TreePop();
+            }
+
+            ImGui::PopID();
         }
 
         /// @brief Game Viewの画像表示領域を計算する
@@ -449,6 +844,60 @@ namespace MadoEngine::Editor {
         }
 
     } // namespace
+
+    void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager) {
+        ImGui::Begin("Layer Effect Pass Editor");
+
+        if (ImGui::Button("追加")) {
+            AddLayerEffectPassFromEditor(postEffectManager, false);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("フルスクリーン追加")) {
+            AddLayerEffectPassFromEditor(postEffectManager, true);
+        }
+
+        ImGui::Separator();
+
+        LayerEffectPassRemoveRequest removeRequest{};
+        constexpr ImGuiTableFlags tableFlags =
+            ImGuiTableFlags_BordersInnerV |
+            ImGuiTableFlags_BordersInnerH |
+            ImGuiTableFlags_RowBg |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_SizingStretchProp;
+
+        if (ImGui::BeginTable("LayerEffectPassEditorTable", 6, tableFlags)) {
+            ImGui::TableSetupColumn("On", ImGuiTableColumnFlags_WidthFixed, 36.0f);
+            ImGui::TableSetupColumn("名前", ImGuiTableColumnFlags_WidthStretch, 1.5f);
+            ImGui::TableSetupColumn("ポストエフェクト", ImGuiTableColumnFlags_WidthStretch, 1.2f);
+            ImGui::TableSetupColumn("レイヤー", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+            ImGui::TableSetupColumn("Depth", ImGuiTableColumnFlags_WidthFixed, 52.0f);
+            ImGui::TableSetupColumn("削除", ImGuiTableColumnFlags_WidthFixed, 56.0f);
+            ImGui::TableHeadersRow();
+
+            std::vector<Render::LayerEffectPass>& layerPasses = postEffectManager.GetLayerPasses();
+            for (std::size_t i = 0; i < layerPasses.size(); ++i) {
+                DrawLayerEffectPassEditorRow(layerPasses[i], LayerEffectPassListType::Layer, i, removeRequest);
+            }
+
+            std::vector<Render::LayerEffectPass>& screenPasses = postEffectManager.GetScreenPasses();
+            for (std::size_t i = 0; i < screenPasses.size(); ++i) {
+                DrawLayerEffectPassEditorRow(screenPasses[i], LayerEffectPassListType::Screen, i, removeRequest);
+            }
+
+            ImGui::EndTable();
+        }
+
+        if (removeRequest.isRequested) {
+            if (removeRequest.listType == LayerEffectPassListType::Layer) {
+                postEffectManager.RemoveLayerPass(removeRequest.index);
+            } else {
+                postEffectManager.RemoveScreenPass(removeRequest.index);
+            }
+        }
+
+        ImGui::End();
+    }
 
     bool DrawTransformGizmoOnGameView(const Camera& camera, Transform3D& transform) {
         ImVec2 imageMin{};

@@ -145,6 +145,12 @@ namespace MadoEngine::Render {
 		/// @return floatパラメータ設定の配列
 		const std::vector<FloatParameterControl>& GetFloatParameterControls() const;
 
+		/// @brief ImGui編集用のfloatパラメータ一覧を削除する
+		void ClearFloatParameterControls();
+
+		/// @brief ポストエフェクト用パラメータデータを削除する
+		void ClearParameterData();
+
 		/// @brief ConstantBuffer内のfloat値を取得する
 		/// @param offset ConstantBuffer内のfloat先頭位置
 		/// @param outValue 取得した値の出力先

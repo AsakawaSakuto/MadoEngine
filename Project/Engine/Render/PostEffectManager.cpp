@@ -1,4 +1,5 @@
 #include "Render/PostEffectManager.h"
+#include "Utility/Logger/Logger.h"
 #include <cassert>
 
 namespace MadoEngine::Render {
@@ -24,6 +25,42 @@ namespace MadoEngine::Render {
 		screenPasses_.emplace_back();
 		screenPasses_.back().Initialize(desc, basePostEffectDesc_, device_);
 		return &screenPasses_.back();
+	}
+
+	bool PostEffectManager::RemoveLayerPass(std::size_t index) {
+		if (index >= layerPasses_.size()) {
+			return false;
+		}
+
+		const std::string passName = layerPasses_[index].GetName();
+		layerPasses_.erase(layerPasses_.begin() + static_cast<std::ptrdiff_t>(index));
+		Logger::Output("[Engine] レイヤーポストエフェクトPassを削除しました: " + passName, Logger::Level::Engine);
+		return true;
+	}
+
+	bool PostEffectManager::RemoveScreenPass(std::size_t index) {
+		if (index >= screenPasses_.size()) {
+			return false;
+		}
+
+		const std::string passName = screenPasses_[index].GetName();
+		screenPasses_.erase(screenPasses_.begin() + static_cast<std::ptrdiff_t>(index));
+		Logger::Output("[Engine] フルスクリーンポストエフェクトPassを削除しました: " + passName, Logger::Level::Engine);
+		return true;
+	}
+
+	bool PostEffectManager::RemovePass(const std::string& name) {
+		if (RemovePassIn(layerPasses_, name)) {
+			Logger::Output("[Engine] レイヤーポストエフェクトPassを削除しました: " + name, Logger::Level::Engine);
+			return true;
+		}
+
+		if (RemovePassIn(screenPasses_, name)) {
+			Logger::Output("[Engine] フルスクリーンポストエフェクトPassを削除しました: " + name, Logger::Level::Engine);
+			return true;
+		}
+
+		return false;
 	}
 
 	void PostEffectManager::ClearLayerPasses() {
@@ -163,6 +200,17 @@ namespace MadoEngine::Render {
 		}
 
 		return nullptr;
+	}
+
+	bool PostEffectManager::RemovePassIn(std::vector<LayerEffectPass>& passes, const std::string& name) {
+		for (auto it = passes.begin(); it != passes.end(); ++it) {
+			if (it->GetKey() == name || it->GetName() == name) {
+				passes.erase(it);
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 } // namespace MadoEngine::Render

@@ -128,6 +128,22 @@ namespace MadoEngine::Render {
 		return floatParameterControls_;
 	}
 
+	void LayerEffectPass::ClearFloatParameterControls() {
+		floatParameterControls_.clear();
+	}
+
+	void LayerEffectPass::ClearParameterData() {
+		if (parameterResource_ && mappedParameter_) {
+			parameterResource_->Unmap(0, nullptr);
+		}
+
+		parameterResource_.Reset();
+		mappedParameter_ = nullptr;
+		parameterData_.clear();
+		parameterSizeInBytes_ = 0;
+		parameterBufferSizeInBytes_ = 0;
+	}
+
 	bool LayerEffectPass::TryGetFloatParameter(std::size_t offset, float& outValue) const {
 		if (offset + sizeof(float) > parameterData_.size()) {
 			return false;

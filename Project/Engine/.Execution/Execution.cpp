@@ -455,7 +455,7 @@ namespace MadoEngine
 		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
 
-		DrawLayerEffectPassDebugUI();
+		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
 
 		//if (ImGui::BeginMainMenuBar())
 		//{
