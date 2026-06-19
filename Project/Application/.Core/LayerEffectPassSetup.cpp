@@ -35,6 +35,12 @@ namespace {
 		float edgeColor[4] = { 1.0f, 0.45f, 0.05f, 1.0f };
 	};
 
+	struct FogParams {
+		float fogColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float fogDistanceParams[4] = { 35.0f, 200.0f, 0.95f, 0.0f };
+		float fogCameraParams[4] = { 0.1f, 1000.0f, 0.0f, 0.0f };
+	};
+
 } // namespace
 
 namespace RenderPassSetup {
@@ -133,6 +139,24 @@ namespace RenderPassSetup {
 		registeredVignettePass->AddFloatParameterControl("減光の強さ", offsetof(VignetteParams, strength), 0.0f, 100.0f, 0.01f);
 		registeredVignettePass->AddFloatParameterControl("減光半径", offsetof(VignetteParams, radius), 0.0f, 100.0f, 0.01f);
 		registeredVignettePass->AddFloatParameterControl("滑らかさ", offsetof(VignetteParams, smoothness), 1.0f, 100.0f, 0.01f);
+
+		MadoEngine::Render::LayerEffectPass::Desc fogPass{};
+		fogPass.name = "Fog";
+		fogPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
+		fogPass.effectShaderKey = "PostEffect/Fog.PS";
+		fogPass.enabled = false;
+
+		MadoEngine::Render::LayerEffectPass* registeredFogPass = execution.AddScreenEffectPass(fogPass);
+		registeredFogPass->SetParameterData(FogParams{});
+		registeredFogPass->AddFloatParameterControl("Fog色 R", offsetof(FogParams, fogColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("Fog色 G", offsetof(FogParams, fogColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("Fog色 B", offsetof(FogParams, fogColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("Fog開始距離", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 0, 0.0f, 10000.0f, 1.0f);
+		registeredFogPass->AddFloatParameterControl("Fog終了距離", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 1, 0.0f, 10000.0f, 1.0f);
+		registeredFogPass->AddFloatParameterControl("Fog濃度", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 2, 0.0f, 3.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("Fog高さ強度", offsetof(FogParams, fogDistanceParams) + sizeof(float) * 3, 0.0f, 2.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("Camera Near", offsetof(FogParams, fogCameraParams) + sizeof(float) * 0, 0.001f, 1000.0f, 0.01f);
+		registeredFogPass->AddFloatParameterControl("Camera Far", offsetof(FogParams, fogCameraParams) + sizeof(float) * 1, 1.0f, 10000.0f, 1.0f);
 
 		MadoEngine::Render::LayerEffectPass::Desc pixelArtPass{};
 		pixelArtPass.name = "ドット絵風";
