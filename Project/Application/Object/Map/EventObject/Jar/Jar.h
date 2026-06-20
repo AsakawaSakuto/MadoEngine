@@ -24,6 +24,10 @@ public:
 	/// @param deltaTime 前フレームからの経過時間です。
 	void Update(float deltaTime) override;
 
+	/// @brief Playerの当たり判定と衝突しているか判定します。
+	/// @return Playerと衝突していればtrueです。
+	bool IsHitPlayer() const;
+
 private:
 	JarType type_ = JarType::Money;
 	JarSize size_ = JarSize::Small;

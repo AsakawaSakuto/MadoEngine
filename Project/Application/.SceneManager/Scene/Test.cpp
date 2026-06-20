@@ -86,7 +86,7 @@ SceneType Test::Update(float dt) {
 
 	player_->Update(dt);
 
-	map_->Update();
+	map_->Update(*player_);
 
 	if (model_) {
 		model_->Update();

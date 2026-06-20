@@ -39,3 +39,7 @@ void Jar::Update(float deltaTime) {
 	std::get<AABB>(colliderShape_).center = transform_.translate;
 	MyDebugLine::AddShape(std::get<AABB>(colliderShape_), { 0.0f,0.0f,0.0f,1.0f });
 }
+
+bool Jar::IsHitPlayer() const {
+	return MyCollider::IsHitWithTag(colliderName_, CollisionTag::PlayerHitBox);
+}

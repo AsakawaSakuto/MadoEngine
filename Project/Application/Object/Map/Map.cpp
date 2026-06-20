@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Object/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
 
 #ifdef USE_IMGUI
@@ -154,7 +155,7 @@ void Map::Initialize() {
 	GenerateJars();
 }
 
-void Map::Update() {
+void Map::Update(Player& player) {
 
 	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {
 		isModelDraw_ = !isModelDraw_;
@@ -173,9 +174,11 @@ void Map::Update() {
 		}
 	}
 
-	for (Jar& jar : jars_) {
-		jar.Update(0.0f);
+	for (std::unique_ptr<Jar>& jar : jars_) {
+		jar->Update(0.0f);
 	}
+
+	HandleJarInteraction(player);
 }
 
 void Map::DrawImGui() {
@@ -276,12 +279,30 @@ void Map::GenerateJars() {
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
 		desc.colliderName = "JarAABB_" + std::to_string(createdCount);
 
-		jars_.emplace_back();
-		jars_.back().Initialize(desc);
+		std::unique_ptr<Jar> jar = std::make_unique<Jar>();
+		jar->Initialize(desc);
+		jars_.push_back(std::move(jar));
 		++createdCount;
 	}
 
 	Logger::Output("Map : Jarを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+}
+
+void Map::HandleJarInteraction(Player& player) {
+	if (!MyInput::Trigger("Interact")) {
+		return;
+	}
+
+	for (auto it = jars_.begin(); it != jars_.end(); ++it) {
+		if (!(*it)->IsHitPlayer()) {
+			continue;
+		}
+
+		player.AddMoney(10);
+		jars_.erase(it);
+		Logger::Output("Jarを回収しました。所持金を10加算しました。", Logger::Level::Application);
+		return;
+	}
 }
 
 void Map::ClampHeightSettings() {

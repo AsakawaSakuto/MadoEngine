@@ -110,6 +110,14 @@ void Player::Initialize() {
 	currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
 }
 
+void Player::AddMoney(int amount) {
+	if (amount <= 0) {
+		return;
+	}
+
+	status_.currentMoney += amount;
+}
+
 void Player::Update(float deltaTime) {
 	// 先に入力移動と、重力による落下処理を行う
 	Move(deltaTime);

@@ -19,7 +19,7 @@ SceneType Title::Update(float dt) {
 	// フェードイン処理
 	fadeInTimer_.Update(dt);
 	
-	if (MyInput::Trigger("Interact")) {
+	if (MyInput::Trigger("Decision")) {
 		if (!fadeInTimer_.IsActive()) { fadeInTimer_.Start(1.0f); }
 	}
 
@@ -28,7 +28,7 @@ SceneType Title::Update(float dt) {
 	}
     
 	if (fadeInTimer_.IsFinished()) {
-		Logger::Output("Interactが押されました - Testシーンへ遷移", Logger::Level::Application);
+		Logger::Output("Decisionが押されました - Testシーンへ遷移", Logger::Level::Application);
 		return SceneType::Test;
 	}
 	return SceneType::Title;

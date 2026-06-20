@@ -12,6 +12,10 @@ public:
 	Vector3 GetPosition() const { return transform_.translate; }
 
 	void SetCamera(Camera* camera) { camera_ = camera; }
+
+	/// @brief 所持金を加算します。
+	/// @param amount 加算する所持金です。
+	void AddMoney(int amount);
 	
 	void DrawImGui();
 

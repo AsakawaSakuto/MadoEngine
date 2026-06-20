@@ -3,6 +3,10 @@
 #include "RenderHeaders.h"
 #include "MapBlock.h"
 #include "EventObject/Jar/Jar.h"
+#include <memory>
+#include <vector>
+
+class Player;
 
 /// @brief マップ全体を管理するクラスです。
 class Map {
@@ -11,7 +15,8 @@ public:
 	void Initialize();
 
 	/// @brief マップを更新します。
-	void Update();
+	/// @param player 相互作用の対象になるPlayerです。
+	void Update(Player& player);
 
 	/// @brief マップ調整用のImGuiを描画します。
 	void DrawImGui();
@@ -23,6 +28,10 @@ private:
 	/// @brief Map上にJarをランダム配置します。
 	void GenerateJars();
 
+	/// @brief PlayerとJarの相互作用を処理します。
+	/// @param player 相互作用の対象になるPlayerです。
+	void HandleJarInteraction(Player& player);
+
 	/// @brief 地形生成用の高さ設定を有効範囲に補正します。
 	void ClampHeightSettings();
 
@@ -33,7 +42,7 @@ private:
 	uint32_t GetBlockHeight(int x, int z) const;
 
 	std::vector<std::vector<MapBlock>> mapBlocks_;
-	std::vector<Jar> jars_;
+	std::vector<std::unique_ptr<Jar>> jars_;
 
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;
