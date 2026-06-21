@@ -1,6 +1,9 @@
 #include "Map.h"
+#include "Object/Map/EventObject/Jar/Jar.h"
 #include "Object/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
+#include <algorithm>
+#include <cmath>
 
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
@@ -8,13 +11,13 @@
 
 namespace {
 
-/// @brief 坂の低い側がマップ外周の壁を向いているか判定します。
-/// @param x マップ上のX座標です。
-/// @param z マップ上のZ座標です。
-/// @param mapWidth マップの横幅です。
-/// @param mapHeight マップの奥行きです。
+/// @brief 低い側がMap外周の壁を向いている坂か判定します。
+/// @param x Map上のX座標です。
+/// @param z Map上のZ座標です。
+/// @param mapWidth Mapの横幅です。
+/// @param mapHeight Mapの奥行きです。
 /// @param direction 坂の上り方向です。
-/// @return 坂の低い側がマップ外周の壁を向いていればtrueです。
+/// @return 低い側がMap外周の壁を向いていればtrueを返します。
 bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDirection direction) {
 	switch (direction) {
 	case SlopeDirection::PulsX:
@@ -84,7 +87,8 @@ Vector3 CalculateJarSpawnRotation(const MapBlock& block, const Vector3& blockSiz
 void Map::Initialize() {
 
 	ClampHeightSettings();
-	jars_.clear();
+	eventObjects_.clear();
+	currentHitEventObject_ = nullptr;
 
 	mapBlocks_.assign(mapHeight_, std::vector<MapBlock>(mapWidth_));
 
@@ -174,11 +178,7 @@ void Map::Update(Player& player) {
 		}
 	}
 
-	for (std::unique_ptr<Jar>& jar : jars_) {
-		jar->Update(0.0f);
-	}
-
-	HandleJarInteraction(player);
+	UpdateEventObjects(player);
 }
 
 void Map::DrawImGui() {
@@ -198,12 +198,12 @@ void Map::DrawImGui() {
 	ImGui::DragFloat3(".", &blockSize_.x, 0.1f);
 	ImGui::Separator();
 
-	ImGui::Text("マップの高さ");
+	ImGui::Text("Mapの高さ");
 	ImGui::DragInt("min", &minHeight_, 1, 1, 100);
 	ImGui::DragInt("max", &maxHeight_, 1, 2, 100);
 	ImGui::Separator();
 
-	ImGui::Text("最初に生成する地形の高さ");
+	ImGui::Text("初期生成する地形の高さ");
 	ImGui::DragInt("min ", &minStartHeight_, 1, 1, 100);
 	ImGui::DragInt("max ", &maxStartHeight_, 1, 2, 100);
 	ImGui::Separator();
@@ -231,14 +231,15 @@ void Map::RegenerateTerrain() {
 
 void Map::GenerateJars() {
 
-	jars_.clear();
+	eventObjects_.clear();
+	currentHitEventObject_ = nullptr;
 
 	const int maxSpawnCount = jarSpawnCount_;
 	if (maxSpawnCount <= 0) {
 		return;
 	}
 
-	jars_.reserve(static_cast<size_t>(maxSpawnCount));
+	eventObjects_.reserve(static_cast<size_t>(maxSpawnCount));
 
 	int createdCount = 0;
 	int retryCount = 0;
@@ -281,28 +282,59 @@ void Map::GenerateJars() {
 
 		std::unique_ptr<Jar> jar = std::make_unique<Jar>();
 		jar->Initialize(desc);
-		jars_.push_back(std::move(jar));
+		eventObjects_.push_back(std::move(jar));
 		++createdCount;
 	}
 
 	Logger::Output("Map : Jarを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
 }
 
-void Map::HandleJarInteraction(Player& player) {
-	if (!MyInput::Trigger("Interact")) {
-		return;
+void Map::UpdateEventObjects(Player& player) {
+	MapEventObjectBase* hitObject = nullptr;
+
+	for (std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
+		object->Update(0.0f);
+
+		if (!hitObject && object->IsHitPlayer()) {
+			hitObject = object.get();
+		}
 	}
 
-	for (auto it = jars_.begin(); it != jars_.end(); ++it) {
-		if (!(*it)->IsHitPlayer()) {
-			continue;
+	if (currentHitEventObject_ != hitObject) {
+		if (currentHitEventObject_) {
+			currentHitEventObject_->SetHighlighted(false);
 		}
 
-		player.AddMoney(10);
-		jars_.erase(it);
-		Logger::Output("Jarを回収しました。所持金を10加算しました。", Logger::Level::Application);
+		if (hitObject) {
+			hitObject->SetHighlighted(true);
+		}
+
+		currentHitEventObject_ = hitObject;
+	}
+
+	HandleEventObjectInteraction(player);
+}
+
+void Map::HandleEventObjectInteraction(Player& player) {
+	if (!currentHitEventObject_ || !MyInput::Trigger("Interact")) {
 		return;
 	}
+
+	MapEventObjectBase* interactedObject = currentHitEventObject_;
+	if (!interactedObject->Interact(player)) {
+		return;
+	}
+
+	auto it = std::find_if(eventObjects_.begin(), eventObjects_.end(), [interactedObject](const std::unique_ptr<MapEventObjectBase>& object) {
+		return object.get() == interactedObject;
+	});
+
+	if (it != eventObjects_.end()) {
+		(*it)->SetHighlighted(false);
+		eventObjects_.erase(it);
+	}
+
+	currentHitEventObject_ = nullptr;
 }
 
 void Map::ClampHeightSettings() {

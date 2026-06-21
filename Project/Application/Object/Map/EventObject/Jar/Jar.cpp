@@ -1,4 +1,5 @@
 #include "Jar.h"
+#include "Object/Player/Player.h"
 
 Jar::~Jar() {
 	MyCollider::RemoveCollider(colliderName_);
@@ -14,7 +15,7 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	type_ = JarType::Money;
 	size_ = JarSize::Small;
 	modelName_ = desc.modelName;
-	colliderName_ = desc.colliderName;
+	SetColliderName(desc.colliderName);
 	transform_.translate = desc.position;
 	transform_.rotate = desc.rotation;
 
@@ -29,7 +30,7 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	if (model_) {
 		model_->SetPosition(transform_.translate);
 		model_->SetRotation(transform_.rotate);
-		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::MapEventObject);
+		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 	}
 }
 
@@ -40,6 +41,8 @@ void Jar::Update(float deltaTime) {
 	MyDebugLine::AddShape(std::get<AABB>(colliderShape_), { 0.0f,0.0f,0.0f,1.0f });
 }
 
-bool Jar::IsHitPlayer() const {
-	return MyCollider::IsHitWithTag(colliderName_, CollisionTag::PlayerHitBox);
+bool Jar::Interact(Player& player) {
+	player.AddMoney(10);
+	Logger::Output("Jarを取得しました。所持金を10加算しました。", Logger::Level::Application);
+	return true;
 }

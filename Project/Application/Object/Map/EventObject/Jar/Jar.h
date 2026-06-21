@@ -1,8 +1,8 @@
 #pragma once
-#include "../../../IGameObject.h"
+#include "../MapEventObjectBase.h"
 #include "JarType.h"
 
-class Jar : public IGameObject {
+class Jar : public MapEventObjectBase {
 public:
 	struct InitializeDesc {
 		Vector3 position = { 0.0f, 0.0f, 0.0f };
@@ -12,11 +12,11 @@ public:
 	};
 
 	~Jar();
-	
+
 	/// @brief Jarを初期化します。
 	void Initialize() override;
 
-	/// @brief Jarを設定付きで初期化します。
+	/// @brief 設定付きでJarを初期化します。
 	/// @param desc 初期化に使用する設定です。
 	void Initialize(const InitializeDesc& desc);
 
@@ -24,13 +24,13 @@ public:
 	/// @param deltaTime 前フレームからの経過時間です。
 	void Update(float deltaTime) override;
 
-	/// @brief Playerの当たり判定と衝突しているか判定します。
-	/// @return Playerと衝突していればtrueです。
-	bool IsHitPlayer() const;
+	/// @brief Jarを取得した時の処理を実行します。
+	/// @param player 取得するPlayerです。
+	/// @return JarをMapから削除するためtrueを返します。
+	bool Interact(Player& player) override;
 
 private:
 	JarType type_ = JarType::Money;
 	JarSize size_ = JarSize::Small;
 	std::string modelName_ = "Jar";
-	std::string colliderName_ = "JarAABB";
 };

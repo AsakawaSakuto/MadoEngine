@@ -5,6 +5,7 @@
 
 class IGameObject {
 public:
+	virtual ~IGameObject() = default;
 	
 	virtual void Initialize() = 0;
 

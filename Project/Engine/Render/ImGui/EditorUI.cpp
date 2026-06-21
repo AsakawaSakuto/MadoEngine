@@ -38,6 +38,14 @@ namespace MadoEngine::Editor {
             float speed;
         };
 
+        /// @brief ColorEditでまとめて扱う色パラメータ情報
+        struct PostEffectColorParameterGroup {
+            const Render::LayerEffectPass::FloatParameterControl* controls[4] = {};
+            std::string key;
+            std::string label;
+            int componentCount = 0;
+        };
+
         /// @brief ImGuiから選択可能なPostEffect定義
         struct PostEffectDefinition {
             const char* displayName;
@@ -46,12 +54,6 @@ namespace MadoEngine::Editor {
             std::size_t initialValueCount;
             const PostEffectFloatParameterDefinition* parameters;
             std::size_t parameterCount;
-        };
-
-        /// @brief Layer選択用の表示情報
-        struct RenderLayerDefinition {
-            const char* displayName;
-            Render::RenderLayerMask layerMask;
         };
 
         /// @brief Passの所属配列種別
@@ -96,6 +98,25 @@ namespace MadoEngine::Editor {
             { "ColorSteps", "色階調数", 1 * kFloatSize, 2.0f, 32.0f, 1.0f },
             { "Contrast", "コントラスト", 2 * kFloatSize, 0.0f, 4.0f, 0.01f },
             { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const float kToonInitialValues[] = {
+            4.0f, 1.15f, 1.1f, 1.0f,
+            1.25f, 80.0f, 0.005f, 1.0f,
+            0.02f, 0.025f, 0.03f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kToonParameters[] = {
+            { "ColorSteps", "色階調数", 0 * kFloatSize, 2.0f, 12.0f, 1.0f },
+            { "Saturation", "彩度", 1 * kFloatSize, 0.0f, 3.0f, 0.01f },
+            { "Contrast", "コントラスト", 2 * kFloatSize, 0.0f, 4.0f, 0.01f },
+            { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Thickness", "輪郭太さ", 4 * kFloatSize, 0.25f, 12.0f, 0.05f },
+            { "DepthSensitivity", "深度感度", 5 * kFloatSize, 1.0f, 300.0f, 1.0f },
+            { "EdgeThreshold", "輪郭しきい値", 6 * kFloatSize, 0.0001f, 0.1f, 0.0001f },
+            { "EdgeIntensity", "輪郭強度", 7 * kFloatSize, 0.0f, 4.0f, 0.01f },
+            { "OutlineColorR", "輪郭色R", 8 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "OutlineColorG", "輪郭色G", 9 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "OutlineColorB", "輪郭色B", 10 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
         const float kOutlineInitialValues[] = {
@@ -154,42 +175,16 @@ namespace MadoEngine::Editor {
             { "Bloom", "PostEffect/Bloom.PS", kBloomInitialValues, CountOf(kBloomInitialValues), kBloomParameters, CountOf(kBloomParameters) },
             { "Vignette", "PostEffect/Vignette.PS", kVignetteInitialValues, CountOf(kVignetteInitialValues), kVignetteParameters, CountOf(kVignetteParameters) },
             { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
+            { "Toon", "PostEffect/Toon.PS", kToonInitialValues, CountOf(kToonInitialValues), kToonParameters, CountOf(kToonParameters) },
             { "Outline", "PostEffect/Outline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
             { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
             { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },
-        };
-
-        const RenderLayerDefinition kRenderLayerDefinitions[] = {
-            { "Default", Render::ToRenderLayerMask(Render::RenderLayer::Default) },
-            { "World", Render::ToRenderLayerMask(Render::RenderLayer::World) },
-            { "MapEventObject", Render::ToRenderLayerMask(Render::RenderLayer::MapEventObject) },
-            { "Player", Render::ToRenderLayerMask(Render::RenderLayer::Player) },
-            { "Effect", Render::ToRenderLayerMask(Render::RenderLayer::Effect) },
-            { "UI", Render::ToRenderLayerMask(Render::RenderLayer::UI) },
-            { "Debug", Render::ToRenderLayerMask(Render::RenderLayer::Debug) },
-            { "All", Render::kAllRenderLayers },
-        };
-
-        /// @brief LightLayer選択用の表示情報
-        struct LightLayerDefinition {
-            const char* displayName;
-            LightLayerMask layerMask;
         };
 
         /// @brief 削除ボタンが押されたライト情報
         struct LightRemoveRequest {
             bool isRequested = false;
             LightHandle handle;
-        };
-
-        const LightLayerDefinition kLightLayerDefinitions[] = {
-            { "None", ToLightLayerMask(LightLayer::None) },
-            { "World", ToLightLayerMask(LightLayer::World) },
-            { "Player", ToLightLayerMask(LightLayer::Player) },
-            { "Enemy", ToLightLayerMask(LightLayer::Enemy) },
-            { "Effect", ToLightLayerMask(LightLayer::Effect) },
-            { "UI", ToLightLayerMask(LightLayer::UI) },
-            { "All", ToLightLayerMask(LightLayer::All) },
         };
 
         /// @brief Editor UIで使用するアイコン情報
@@ -354,25 +349,30 @@ namespace MadoEngine::Editor {
         /// @param pass 編集対象のPass
         void DrawLayerSelectionCombo(Render::LayerEffectPass& pass) {
             const Render::RenderLayerMask currentLayerMask = pass.GetTargetLayerMask();
-            const char* previewName = "Custom";
-            for (const RenderLayerDefinition& definition : kRenderLayerDefinitions) {
-                if (definition.layerMask == currentLayerMask) {
-                    previewName = definition.displayName;
-                    break;
-                }
-            }
+            const char* previewName = Render::GetRenderLayerMaskName(currentLayerMask);
 
             ImGui::SetNextItemWidth(-1.0f);
             if (ImGui::BeginCombo("##TargetLayer", previewName)) {
-                for (const RenderLayerDefinition& definition : kRenderLayerDefinitions) {
-                    const bool isSelected = definition.layerMask == currentLayerMask;
-                    if (ImGui::Selectable(definition.displayName, isSelected)) {
-                        pass.SetTargetLayerMask(definition.layerMask);
+                for (uint32_t index = 0; index < Render::kRenderLayerCount; ++index) {
+                    const Render::RenderLayer layer = Render::GetRenderLayerByIndex(index);
+                    const Render::RenderLayerMask layerMask = Render::ToRenderLayerMask(layer);
+                    const bool isSelected = layerMask == currentLayerMask;
+                    if (ImGui::Selectable(Render::GetRenderLayerName(layer), isSelected)) {
+                        pass.SetTargetLayerMask(layerMask);
                     }
 
                     if (isSelected) {
                         ImGui::SetItemDefaultFocus();
                     }
+                }
+
+                const bool isAllSelected = Render::kAllRenderLayers == currentLayerMask;
+                if (ImGui::Selectable("All", isAllSelected)) {
+                    pass.SetTargetLayerMask(Render::kAllRenderLayers);
+                }
+
+                if (isAllSelected) {
+                    ImGui::SetItemDefaultFocus();
                 }
 
                 ImGui::EndCombo();
@@ -402,6 +402,139 @@ namespace MadoEngine::Editor {
             }
         }
 
+        /// @brief 文字列が指定した文字で終わるか確認する
+        /// @param text 確認する文字列
+        /// @param suffix 末尾に期待する文字
+        /// @return 指定した文字で終わる場合はtrue
+        bool EndsWith(const std::string& text, char suffix) {
+            return !text.empty() && text.back() == suffix;
+        }
+
+        /// @brief 色成分キーから共通部分を取得する
+        /// @param key 色成分キー
+        /// @return R/G/B/Aの末尾を除いたキー
+        std::string GetColorBaseKey(const std::string& key) {
+            if (EndsWith(key, 'R') || EndsWith(key, 'G') || EndsWith(key, 'B') || EndsWith(key, 'A')) {
+                return key.substr(0, key.size() - 1);
+            }
+
+            return key;
+        }
+
+        /// @brief 色成分ラベルから共通表示名を取得する
+        /// @param label 色成分ラベル
+        /// @return R/G/B/Aの末尾を除いた表示名
+        std::string GetColorBaseLabel(const std::string& label) {
+            if (EndsWith(label, 'R') || EndsWith(label, 'G') || EndsWith(label, 'B') || EndsWith(label, 'A')) {
+                std::string result = label.substr(0, label.size() - 1);
+                while (!result.empty() && result.back() == ' ') {
+                    result.pop_back();
+                }
+
+                return result.empty() ? label : result;
+            }
+
+            return label;
+        }
+
+        /// @brief floatパラメータが指定した色成分として扱えるか確認する
+        /// @param control 確認するパラメータ
+        /// @param baseKey 色パラメータの共通キー
+        /// @param component 期待する色成分
+        /// @param expectedOffset 期待するConstantBuffer上の位置
+        /// @return 色成分として扱える場合はtrue
+        bool IsColorComponentControl(
+            const Render::LayerEffectPass::FloatParameterControl& control,
+            const std::string& baseKey,
+            char component,
+            std::size_t expectedOffset)
+        {
+            return control.key == baseKey + component &&
+                control.offset == expectedOffset &&
+                control.minValue == 0.0f &&
+                control.maxValue == 1.0f;
+        }
+
+        /// @brief 指定位置からColorEdit用の色パラメータグループを取得する
+        /// @param controls floatパラメータ一覧
+        /// @param startIndex 確認を開始するindex
+        /// @param outGroup 取得した色パラメータグループ
+        /// @return 色パラメータとして取得できた場合はtrue
+        bool TryGetColorParameterGroup(
+            const std::vector<Render::LayerEffectPass::FloatParameterControl>& controls,
+            std::size_t startIndex,
+            PostEffectColorParameterGroup& outGroup)
+        {
+            if (startIndex + 2 >= controls.size()) {
+                return false;
+            }
+
+            const Render::LayerEffectPass::FloatParameterControl& red = controls[startIndex];
+            if (!EndsWith(red.key, 'R') || red.minValue != 0.0f || red.maxValue != 1.0f) {
+                return false;
+            }
+
+            const std::string baseKey = GetColorBaseKey(red.key);
+            if (!IsColorComponentControl(controls[startIndex + 1], baseKey, 'G', red.offset + kFloatSize) ||
+                !IsColorComponentControl(controls[startIndex + 2], baseKey, 'B', red.offset + kFloatSize * 2)) {
+                return false;
+            }
+
+            outGroup = {};
+            outGroup.controls[0] = &controls[startIndex];
+            outGroup.controls[1] = &controls[startIndex + 1];
+            outGroup.controls[2] = &controls[startIndex + 2];
+            outGroup.key = baseKey;
+            outGroup.label = GetColorBaseLabel(red.label);
+            outGroup.componentCount = 3;
+
+            if (startIndex + 3 < controls.size() &&
+                IsColorComponentControl(controls[startIndex + 3], baseKey, 'A', red.offset + kFloatSize * 3)) {
+                outGroup.controls[3] = &controls[startIndex + 3];
+                outGroup.componentCount = 4;
+            }
+
+            return true;
+        }
+
+        /// @brief ColorEditでポストエフェクトの色パラメータを描画する
+        /// @param pass 編集対象のPass
+        /// @param group 描画する色パラメータグループ
+        /// @return 値が変更された場合はtrue
+        bool DrawPostEffectColorParameterRow(
+            Render::LayerEffectPass& pass,
+            const PostEffectColorParameterGroup& group)
+        {
+            float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+            for (int i = 0; i < group.componentCount; ++i) {
+                if (!pass.TryGetFloatParameter(group.controls[i]->offset, color[i])) {
+                    return false;
+                }
+            }
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(group.label.c_str());
+
+            ImGui::TableSetColumnIndex(2);
+            ImGui::SetNextItemWidth(-1.0f);
+            const std::string colorEditId = "##" + group.key;
+            bool isChanged = false;
+            if (group.componentCount == 4) {
+                isChanged = ImGui::ColorEdit4(colorEditId.c_str(), color);
+            } else {
+                isChanged = ImGui::ColorEdit3(colorEditId.c_str(), color);
+            }
+
+            if (isChanged) {
+                for (int i = 0; i < group.componentCount; ++i) {
+                    pass.SetFloatParameter(group.controls[i]->offset, color[i]);
+                }
+            }
+
+            return isChanged;
+        }
+
         /// @brief 選択中PostEffectのパラメータ調整行を描画する
         /// @param pass 編集対象のPass
         void DrawPostEffectParameterRows(Render::LayerEffectPass& pass) {
@@ -413,7 +546,15 @@ namespace MadoEngine::Editor {
                 return;
             }
 
-            for (const Render::LayerEffectPass::FloatParameterControl& control : controls) {
+            for (std::size_t i = 0; i < controls.size(); ++i) {
+                PostEffectColorParameterGroup colorGroup{};
+                if (TryGetColorParameterGroup(controls, i, colorGroup)) {
+                    DrawPostEffectColorParameterRow(pass, colorGroup);
+                    i += static_cast<std::size_t>(colorGroup.componentCount - 1);
+                    continue;
+                }
+
+                const Render::LayerEffectPass::FloatParameterControl& control = controls[i];
                 float value = 0.0f;
                 if (!pass.TryGetFloatParameter(control.offset, value)) {
                     continue;
@@ -578,25 +719,40 @@ namespace MadoEngine::Editor {
         /// @param handle 編集対象ライトのハンドル
         void DrawLightLayerSelectionCombo(LightManager& lightManager, LightHandle handle) {
             const LightLayerMask currentLayerMask = lightManager.GetLayerMask(handle);
-            const char* previewName = "Custom";
-            for (const LightLayerDefinition& definition : kLightLayerDefinitions) {
-                if (definition.layerMask == currentLayerMask) {
-                    previewName = definition.displayName;
-                    break;
-                }
-            }
+            const char* previewName = GetLightLayerMaskName(currentLayerMask);
 
             ImGui::SetNextItemWidth(-1.0f);
             if (ImGui::BeginCombo("##LightLayer", previewName)) {
-                for (const LightLayerDefinition& definition : kLightLayerDefinitions) {
-                    const bool isSelected = definition.layerMask == currentLayerMask;
-                    if (ImGui::Selectable(definition.displayName, isSelected)) {
-                        lightManager.SetLayerMask(handle, definition.layerMask);
+                const LightLayerMask noneLayerMask = ToLightLayerMask(LightLayer::None);
+                const bool isNoneSelected = noneLayerMask == currentLayerMask;
+                if (ImGui::Selectable(GetLightLayerName(LightLayer::None), isNoneSelected)) {
+                    lightManager.SetLayerMask(handle, noneLayerMask);
+                }
+
+                if (isNoneSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+
+                for (uint32_t index = 0; index < kLightLayerCount; ++index) {
+                    const LightLayer layer = GetLightLayerByIndex(index);
+                    const LightLayerMask layerMask = ToLightLayerMask(layer);
+                    const bool isSelected = layerMask == currentLayerMask;
+                    if (ImGui::Selectable(GetLightLayerName(layer), isSelected)) {
+                        lightManager.SetLayerMask(handle, layerMask);
                     }
 
                     if (isSelected) {
                         ImGui::SetItemDefaultFocus();
                     }
+                }
+
+                const bool isAllSelected = kAllLightLayers == currentLayerMask;
+                if (ImGui::Selectable(GetLightLayerName(LightLayer::All), isAllSelected)) {
+                    lightManager.SetLayerMask(handle, kAllLightLayers);
+                }
+
+                if (isAllSelected) {
+                    ImGui::SetItemDefaultFocus();
                 }
 
                 ImGui::EndCombo();

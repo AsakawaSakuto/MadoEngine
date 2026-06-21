@@ -88,8 +88,10 @@
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
     <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
+    <ClCompile Include="Application\Object\Map\EventObject\MapEventObjectBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>

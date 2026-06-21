@@ -25,6 +25,12 @@ namespace {
 		float intensity = 1.0f;
 	};
 
+	struct ToonParams {
+		float colorParams[4] = { 4.0f, 1.15f, 1.1f, 1.0f };
+		float edgeParams[4] = { 1.25f, 80.0f, 0.005f, 1.0f };
+		float outlineColor[4] = { 0.02f, 0.025f, 0.03f, 1.0f };
+	};
+
 	struct OutlineParams {
 		float outlineColor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 		float outlineParams[4] = { 1.5f, 80.0f, 0.005f, 1.0f };
@@ -180,6 +186,27 @@ namespace RenderPassSetup {
 		registeredPixelArtPass->AddFloatParameterControl("ColorSteps", "色数", offsetof(PixelArtParams, colorSteps), 2.0f, 128.0f, 1.0f);
 		registeredPixelArtPass->AddFloatParameterControl("Contrast", "コントラスト", offsetof(PixelArtParams, contrast), 0.0f, 3.0f, 0.01f);
 		registeredPixelArtPass->AddFloatParameterControl("Intensity", "効果の強さ", offsetof(PixelArtParams, intensity), 0.0f, 1.0f, 0.01f);
+
+		MadoEngine::Render::LayerEffectPass::Desc toonPass{};
+		toonPass.key = "Toon";
+		toonPass.name = "トゥーン";
+		toonPass.targetLayerMask = MadoEngine::Render::kAllRenderLayers;
+		toonPass.effectShaderKey = "PostEffect/Toon.PS";
+		toonPass.enabled = false;
+
+		MadoEngine::Render::LayerEffectPass* registeredToonPass = execution.AddScreenEffectPass(toonPass);
+		registeredToonPass->SetParameterData(ToonParams{});
+		registeredToonPass->AddFloatParameterControl("ColorSteps", "色階調数", offsetof(ToonParams, colorParams) + sizeof(float) * 0, 2.0f, 12.0f, 1.0f);
+		registeredToonPass->AddFloatParameterControl("Saturation", "彩度", offsetof(ToonParams, colorParams) + sizeof(float) * 1, 0.0f, 3.0f, 0.01f);
+		registeredToonPass->AddFloatParameterControl("Contrast", "コントラスト", offsetof(ToonParams, colorParams) + sizeof(float) * 2, 0.0f, 4.0f, 0.01f);
+		registeredToonPass->AddFloatParameterControl("Intensity", "適用率", offsetof(ToonParams, colorParams) + sizeof(float) * 3, 0.0f, 1.0f, 0.01f);
+		registeredToonPass->AddFloatParameterControl("Thickness", "輪郭太さ", offsetof(ToonParams, edgeParams) + sizeof(float) * 0, 0.25f, 12.0f, 0.05f);
+		registeredToonPass->AddFloatParameterControl("DepthSensitivity", "深度感度", offsetof(ToonParams, edgeParams) + sizeof(float) * 1, 1.0f, 300.0f, 1.0f);
+		registeredToonPass->AddFloatParameterControl("EdgeThreshold", "輪郭しきい値", offsetof(ToonParams, edgeParams) + sizeof(float) * 2, 0.0001f, 0.1f, 0.0001f);
+		registeredToonPass->AddFloatParameterControl("EdgeIntensity", "輪郭強度", offsetof(ToonParams, edgeParams) + sizeof(float) * 3, 0.0f, 4.0f, 0.01f);
+		registeredToonPass->AddFloatParameterControl("OutlineColorR", "輪郭色 R", offsetof(ToonParams, outlineColor) + sizeof(float) * 0, 0.0f, 1.0f, 0.01f);
+		registeredToonPass->AddFloatParameterControl("OutlineColorG", "輪郭色 G", offsetof(ToonParams, outlineColor) + sizeof(float) * 1, 0.0f, 1.0f, 0.01f);
+		registeredToonPass->AddFloatParameterControl("OutlineColorB", "輪郭色 B", offsetof(ToonParams, outlineColor) + sizeof(float) * 2, 0.0f, 1.0f, 0.01f);
 
 		MadoEngine::Render::LayerEffectPass::Desc screenOutlinePass{};
 		screenOutlinePass.key = "ScreenOutline";

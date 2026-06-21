@@ -3,55 +3,124 @@
 
 namespace MadoEngine::Render {
 
-	/// @brief 描画対象を分類するLayer
+	/// @brief 描画対象を分類するレイヤー
 	enum class RenderLayer : uint32_t {
-		Default = 1u << 0,        // デフォルトレイヤー 特に指定がない場合はこちらに属する
-		World = 1u << 1,          // ワールドレイヤー 主にゲーム内のオブジェクトに使用
-		MapEventObject = 1u << 2, // マップイベントオブジェクトレイヤー
-		Player = 1u << 3,         // プレイヤーレイヤー
-		Effect = 1u << 4,         // エフェクトレイヤー
-		UI = 1u << 5,             // UIレイヤー
-		Debug = 1u << 6           // デバッグ用レイヤー
+		Default,
+		World,
+		MapEventObject,
+		MapEventObjectOutline,
+		Player,
+		Effect,
+		UI,
+		Debug,
+
+		Count,
 	};
 
 	using RenderLayerMask = uint32_t;
 
-	inline constexpr RenderLayerMask kAllRenderLayers =
-		static_cast<RenderLayerMask>(RenderLayer::Default) |
-		static_cast<RenderLayerMask>(RenderLayer::World) |
-		static_cast<RenderLayerMask>(RenderLayer::MapEventObject) |
-		static_cast<RenderLayerMask>(RenderLayer::Player) |
-		static_cast<RenderLayerMask>(RenderLayer::Effect) |
-		static_cast<RenderLayerMask>(RenderLayer::UI) |
-		static_cast<RenderLayerMask>(RenderLayer::Debug);
+	inline constexpr uint32_t kRenderLayerCount = static_cast<uint32_t>(RenderLayer::Count);
 
-	/// @brief RenderLayerをマスク値へ変換する
-	/// @param layer 変換対象のLayer
-	/// @return 指定Layerのみを含むマスク
-	inline constexpr RenderLayerMask ToRenderLayerMask(RenderLayer layer) {
-		return static_cast<RenderLayerMask>(layer);
+	inline constexpr const char* kRenderLayerNames[] = {
+		"Default",
+		"World",
+		"MapEventObject",
+		"MapEventObjectOutline",
+		"Player",
+		"Effect",
+		"UI",
+		"Debug",
+	};
+
+	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
+
+	/// @brief インデックスからRenderLayerを取得する
+	/// @param index 取得するRenderLayerのインデックス
+	/// @return インデックスに対応するRenderLayer
+	inline constexpr RenderLayer GetRenderLayerByIndex(uint32_t index) {
+		return static_cast<RenderLayer>(index);
 	}
 
-	/// @brief マスクに指定Layerが含まれているか確認する
+	/// @brief RenderLayerが有効な実レイヤーか確認する
+	/// @param layer 確認するレイヤー
+	/// @return 実レイヤーの場合はtrue
+	inline constexpr bool IsValidRenderLayer(RenderLayer layer) {
+		return static_cast<uint32_t>(layer) < kRenderLayerCount;
+	}
+
+	/// @brief RenderLayerをマスク値へ変換する
+	/// @param layer 変換対象のレイヤー
+	/// @return 指定レイヤーのみを含むマスク
+	inline constexpr RenderLayerMask ToRenderLayerMask(RenderLayer layer) {
+		if (!IsValidRenderLayer(layer)) {
+			return 0;
+		}
+
+		return 1u << static_cast<uint32_t>(layer);
+	}
+
+	/// @brief 定義済みRenderLayerをすべて含むマスクを作成する
+	/// @return 定義済みRenderLayerをすべて含むマスク
+	inline constexpr RenderLayerMask BuildAllRenderLayerMask() {
+		RenderLayerMask mask = 0;
+		for (uint32_t index = 0; index < kRenderLayerCount; ++index) {
+			mask |= ToRenderLayerMask(GetRenderLayerByIndex(index));
+		}
+
+		return mask;
+	}
+
+	inline constexpr RenderLayerMask kAllRenderLayers = BuildAllRenderLayerMask();
+
+	/// @brief RenderLayerの表示名を取得する
+	/// @param layer 表示名を取得するレイヤー
+	/// @return レイヤーの表示名。未定義の場合はUnknown
+	inline constexpr const char* GetRenderLayerName(RenderLayer layer) {
+		if (!IsValidRenderLayer(layer)) {
+			return "Unknown";
+		}
+
+		return kRenderLayerNames[static_cast<uint32_t>(layer)];
+	}
+
+	/// @brief RenderLayerMaskの表示名を取得する
+	/// @param layerMask 表示名を取得するレイヤーマスク
+	/// @return レイヤーマスクの表示名。未定義の組み合わせの場合はCustom
+	inline constexpr const char* GetRenderLayerMaskName(RenderLayerMask layerMask) {
+		if (layerMask == kAllRenderLayers) {
+			return "All";
+		}
+
+		for (uint32_t index = 0; index < kRenderLayerCount; ++index) {
+			const RenderLayer layer = GetRenderLayerByIndex(index);
+			if (layerMask == ToRenderLayerMask(layer)) {
+				return GetRenderLayerName(layer);
+			}
+		}
+
+		return "Custom";
+	}
+
+	/// @brief マスクに指定レイヤーが含まれているか確認する
 	/// @param mask 判定対象のマスク
-	/// @param layer 判定対象のLayer
+	/// @param layer 判定対象のレイヤー
 	/// @return 含まれている場合はtrue
 	inline constexpr bool ContainsRenderLayer(RenderLayerMask mask, RenderLayer layer) {
 		return (mask & ToRenderLayerMask(layer)) != 0;
 	}
 
-	/// @brief マスクから指定Layerを除外する
+	/// @brief マスクから指定レイヤーを除外する
 	/// @param mask 元のマスク
-	/// @param layer 除外するLayer
-	/// @return 指定Layerを除外したマスク
+	/// @param layer 除外するレイヤー
+	/// @return 指定レイヤーを除外したマスク
 	inline constexpr RenderLayerMask RemoveRenderLayer(RenderLayerMask mask, RenderLayer layer) {
 		return mask & ~ToRenderLayerMask(layer);
 	}
 
-	/// @brief マスクから指定Layerマスクを除外する
+	/// @brief マスクから指定レイヤーマスクを除外する
 	/// @param mask 元のマスク
-	/// @param removeMask 除外するLayerマスク
-	/// @return 指定Layerマスクを除外したマスク
+	/// @param removeMask 除外するレイヤーマスク
+	/// @return 指定レイヤーマスクを除外したマスク
 	inline constexpr RenderLayerMask RemoveRenderLayerMask(RenderLayerMask mask, RenderLayerMask removeMask) {
 		return mask & ~removeMask;
 	}
