@@ -511,6 +511,7 @@
     <ClInclude Include="Application\Object\Map\EventObject\Chest\Chest.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Object\Map\EventObject\Chest\ChestType.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

@@ -118,6 +118,14 @@ void Player::AddMoney(int amount) {
 	status_.currentMoney += amount;
 }
 
+void Player::AddExp(int amount) {
+	if (amount <= 0) {
+		return;
+	}
+
+	status_.currentExp += amount;
+}
+
 void Player::Update(float deltaTime) {
 	// 先に入力移動と、重力による落下処理を行う
 	Move(deltaTime);

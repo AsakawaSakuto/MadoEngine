@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Object/Map/EventObject/Chest/Chest.h"
 #include "Object/Map/EventObject/Jar/Jar.h"
 #include "Object/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
@@ -157,6 +158,7 @@ void Map::Initialize() {
 
 	Logger::Output("Map : 地形を生成しました", Logger::Level::Application);
 	GenerateJars();
+	GenerateChests();
 }
 
 void Map::Update(Player& player) {
@@ -277,6 +279,8 @@ void Map::GenerateJars() {
 		Jar::InitializeDesc desc;
 		desc.position = spawnPosition;
 		desc.rotation = CalculateJarSpawnRotation(spawnBlock, blockSize_);
+		desc.type = MyRand::GetInt(0, 1) == 0 ? JarType::Money : JarType::Exp;
+		desc.size = MyRand::GetInt(0, 1) == 0 ? JarSize::Small : JarSize::Big;
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
 		desc.colliderName = "JarAABB_" + std::to_string(createdCount);
 
@@ -287,6 +291,64 @@ void Map::GenerateJars() {
 	}
 
 	Logger::Output("Map : Jarを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+}
+
+void Map::GenerateChests() {
+
+	const int maxSpawnCount = chestSpawnCount_;
+	if (maxSpawnCount <= 0) {
+		return;
+	}
+
+	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
+
+	int createdCount = 0;
+	int retryCount = 0;
+	const int maxRetryCount = maxSpawnCount * 20;
+
+	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
+		++retryCount;
+
+		const int x = MyRand::GetInt(0, mapWidth_ - 1);
+		const int z = MyRand::GetInt(0, mapHeight_ - 1);
+
+		MapBlock& spawnBlock = mapBlocks_[z][x];
+		if (spawnBlock.GetType() == MapBlockType::Air) {
+			continue;
+		}
+
+		const float chestHalfSize = 0.6f;
+		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - chestHalfSize);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - chestHalfSize);
+		const float offsetX = MyRand::GetFloat(-spawnRangeX, spawnRangeX);
+		const float offsetZ = MyRand::GetFloat(-spawnRangeZ, spawnRangeZ);
+
+		Vector3 spawnPosition = {
+			static_cast<float>(x) * blockSize_.x + offsetX,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z + offsetZ
+		};
+		Vector3 blockCenter = {
+			static_cast<float>(x) * blockSize_.x,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z
+		};
+		spawnPosition.y = CalculateJarSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+
+		Chest::InitializeDesc desc;
+		desc.position = spawnPosition;
+		desc.rotation = CalculateJarSpawnRotation(spawnBlock, blockSize_);
+		desc.type = MyRand::GetInt(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
+		desc.modelName = "ChestModel_" + std::to_string(createdCount);
+		desc.colliderName = "ChestAABB_" + std::to_string(createdCount);
+
+		std::unique_ptr<Chest> chest = std::make_unique<Chest>();
+		chest->Initialize(desc);
+		eventObjects_.push_back(std::move(chest));
+		++createdCount;
+	}
+
+	Logger::Output("Map : Chestを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
 }
 
 void Map::UpdateEventObjects(Player& player) {

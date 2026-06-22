@@ -28,6 +28,9 @@ private:
 	/// @brief Map上にJarをランダム配置します。
 	void GenerateJars();
 
+	/// @brief Map上にChestをランダム配置します。
+	void GenerateChests();
+
 	/// @brief Map上のイベントオブジェクトを更新します。
 	/// @param player 相互作用するPlayerです。
 	void UpdateEventObjects(Player& player);
@@ -52,6 +55,7 @@ private:
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;
 	int jarSpawnCount_ = 100;
+	int chestSpawnCount_ = 50;
 
 	bool isModelDraw_ = true;
 

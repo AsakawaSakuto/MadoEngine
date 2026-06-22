@@ -16,6 +16,10 @@ public:
 	/// @brief 所持金を加算します。
 	/// @param amount 加算する所持金です。
 	void AddMoney(int amount);
+
+	/// @brief 経験値を加算します。
+	/// @param amount 加算する経験値です。
+	void AddExp(int amount);
 	
 	void DrawImGui();
 
