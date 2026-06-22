@@ -22,9 +22,6 @@ std::string GetSlopeModelName(SlopeDirection direction) {
 
 }
 
-void MapBlock::Initialize() {
-}
-
 void MapBlock::Initialize(const InitializeDesc& desc) {
 
 	x_ = desc.x;

@@ -13,9 +13,6 @@ public:
 
 	~Jar();
 
-	/// @brief Jarを初期化します。
-	void Initialize() override;
-
 	/// @brief 設定付きでJarを初期化します。
 	/// @param desc 初期化に使用する設定です。
 	void Initialize(const InitializeDesc& desc);

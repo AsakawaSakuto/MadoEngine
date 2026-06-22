@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="Application\.Core\LayerEffectPassSetup.cpp" />
     <ClCompile Include="Application\.Core\Terminal.cpp" />
+    <ClCompile Include="Application\Object\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="Application\.Core\Terminal.h" />
     <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\.SceneManager\SceneType.h" />
+    <ClInclude Include="Application\Object\Map\EventObject\Chest\Chest.h" />
     <ClInclude Include="Application\Object\Map\EventObject\Jar\Jar.h" />
     <ClInclude Include="Application\Object\Map\EventObject\Jar\JarType.h" />
     <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />

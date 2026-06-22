@@ -89,6 +89,7 @@
     <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\MapEventObjectBase.cpp" />
+    <ClCompile Include="Application\Object\Map\EventObject\Chest\Chest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />
@@ -501,6 +502,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\Object\Map\EventObject\Jar\JarType.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Object\Map\EventObject\Chest\Chest.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

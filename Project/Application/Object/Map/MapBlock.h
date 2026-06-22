@@ -15,9 +15,6 @@ public:
 		bool isModelDraw = true;
 	};
 
-	/// @brief MapBlockを初期化します。
-	void Initialize() override;
-
 	/// @brief MapBlockを設定付きで初期化します。
 	/// @param desc 初期化に使用する設定です。
 	void Initialize(const InitializeDesc& desc);

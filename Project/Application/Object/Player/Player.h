@@ -5,7 +5,7 @@
 class Player : public IGameObject {
 public:
 
-	void Initialize() override;
+	void Initialize();
 
 	void Update(float deltaTime) override;
 

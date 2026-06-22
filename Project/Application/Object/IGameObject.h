@@ -7,8 +7,6 @@ class IGameObject {
 public:
 	virtual ~IGameObject() = default;
 	
-	virtual void Initialize() = 0;
-
 	virtual void Update(float deltaTime) = 0;
 
 protected:
