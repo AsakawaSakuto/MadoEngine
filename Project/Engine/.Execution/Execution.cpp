@@ -47,7 +47,7 @@ namespace {
 
 namespace MadoEngine
 {
-	void Execution::Initialize(HINSTANCE hInstance){
+	void Execution::Initialize(HINSTANCE hInstance) {
 
 		CoInitializeEx(0, COINIT_MULTITHREADED);
 

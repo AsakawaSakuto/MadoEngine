@@ -173,6 +173,10 @@
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
     <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\EditorHistory.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ModelTransformCommand.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
@@ -289,6 +293,10 @@
     <ClInclude Include="Engine\Render\ImGui\EditorUI.h" />
     <ClInclude Include="Engine\Render\ImGui\EditorCommand.h" />
     <ClInclude Include="Engine\Render\ImGui\EditorHistory.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\GuizmoEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\ImGui\ModelTransformCommand.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h" />
