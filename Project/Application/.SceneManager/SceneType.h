@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <string>
 
 /// @brief シーンの種類を表す列挙型
@@ -13,6 +14,15 @@ enum class SceneType {
 
 	Count // シーンの総数
 };
+
+inline constexpr uint32_t kSceneTypeCount = static_cast<uint32_t>(SceneType::Count);
+
+/// @brief インデックスからSceneTypeを取得する
+/// @param index 取得するSceneTypeのインデックス
+/// @return インデックスに対応するSceneType
+constexpr SceneType GetSceneTypeByIndex(uint32_t index) {
+	return static_cast<SceneType>(index);
+}
 
 /// @brief SceneType を文字列に変換する
 /// @param type シーンの種類

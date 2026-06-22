@@ -87,6 +87,52 @@ namespace MadoEngine::Editor {
             }
         }
 
+        /// @brief SceneTypeの選択表示名を取得する
+        /// @param sceneType 表示するSceneType
+        /// @return SceneTypeの選択表示名
+        std::string GetSceneSelectionLabel(SceneType sceneType) {
+            if (sceneType == SceneType::None) {
+                return "全シーン";
+            }
+
+            return SceneTypeToString(sceneType);
+        }
+
+        /// @brief ライトを使用するシーン選択Comboを描画する
+        /// @param lightManager 編集対象のLightManager
+        /// @param handle 編集対象ライトのハンドル
+        void DrawLightSceneSelectionCombo(LightManager& lightManager, LightHandle handle) {
+            const SceneType currentSceneType = lightManager.GetSceneType(handle);
+            const std::string previewName = GetSceneSelectionLabel(currentSceneType);
+
+            ImGui::SetNextItemWidth(-1.0f);
+            if (ImGui::BeginCombo("##LightScene", previewName.c_str())) {
+                const bool isAllSceneSelected = currentSceneType == SceneType::None;
+                if (ImGui::Selectable("全シーン", isAllSceneSelected)) {
+                    lightManager.SetSceneType(handle, SceneType::None);
+                }
+
+                if (isAllSceneSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+
+                for (uint32_t index = 0; index < kSceneTypeCount; ++index) {
+                    const SceneType sceneType = GetSceneTypeByIndex(index);
+                    const bool isSelected = currentSceneType == sceneType;
+                    const std::string sceneName = SceneTypeToString(sceneType);
+                    if (ImGui::Selectable(sceneName.c_str(), isSelected)) {
+                        lightManager.SetSceneType(handle, sceneType);
+                    }
+
+                    if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+        }
+
         /// @brief ライトレイヤー選択Comboを描画する
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
@@ -306,6 +352,9 @@ namespace MadoEngine::Editor {
             DrawLightNameInput(lightManager, handle);
 
             ImGui::TableNextColumn();
+            DrawLightSceneSelectionCombo(lightManager, handle);
+
+            ImGui::TableNextColumn();
             DrawLightLayerSelectionCombo(lightManager, handle);
 
             ImGui::TableNextColumn();
@@ -356,9 +405,10 @@ namespace MadoEngine::Editor {
             ImGuiTableFlags_Resizable |
             ImGuiTableFlags_SizingStretchProp;
 
-        if (ImGui::BeginTable("LightManagerEditorTable", 4, tableFlags)) {
+        if (ImGui::BeginTable("LightManagerEditorTable", 5, tableFlags)) {
             ImGui::TableSetupColumn("On", ImGuiTableColumnFlags_WidthFixed, 36.0f);
             ImGui::TableSetupColumn("名前", ImGuiTableColumnFlags_WidthStretch, 1.5f);
+            ImGui::TableSetupColumn("シーン", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("ライトレイヤー", ImGuiTableColumnFlags_WidthStretch, 1.0f);
             ImGui::TableSetupColumn("削除", ImGuiTableColumnFlags_WidthFixed, 56.0f);
             ImGui::TableHeadersRow();

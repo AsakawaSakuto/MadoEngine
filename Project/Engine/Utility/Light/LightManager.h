@@ -154,6 +154,10 @@ public:
 	/// @return 削除できた場合はtrue
 	bool Destroy(const std::string& name);
 
+	/// @brief 指定したシーンに属するライトをすべて削除する
+	/// @param sceneType 削除対象のシーン種別
+	void DestroyByScene(SceneType sceneType);
+
 	/// @brief ライト名を変更する
 	/// @param handle 対象ライトのハンドル
 	/// @param newName 新しいライト名

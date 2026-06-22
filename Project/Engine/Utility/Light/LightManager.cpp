@@ -145,6 +145,51 @@ bool LightManager::Destroy(const std::string& name) {
 	return Destroy(Find(name));
 }
 
+void LightManager::DestroyByScene(SceneType sceneType) {
+	if (sceneType == SceneType::None) {
+		Logger::Output("SceneType::Noneは全シーン共通のため、Lightのシーン単位削除をスキップしました", Logger::Level::Warning);
+		return;
+	}
+
+	size_t destroyCount = 0;
+
+	for (DirectionalSlot& slot : directionalLights_) {
+		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
+			continue;
+		}
+
+		nameToHandle_.erase(slot.entry.meta.name);
+		slot.active = false;
+		++slot.generation;
+		++destroyCount;
+	}
+
+	for (PointSlot& slot : pointLights_) {
+		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
+			continue;
+		}
+
+		nameToHandle_.erase(slot.entry.meta.name);
+		slot.active = false;
+		++slot.generation;
+		++destroyCount;
+	}
+
+	for (SpotSlot& slot : spotLights_) {
+		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
+			continue;
+		}
+
+		nameToHandle_.erase(slot.entry.meta.name);
+		slot.active = false;
+		++slot.generation;
+		++destroyCount;
+	}
+
+	AdvanceRevision();
+	Logger::Output("シーン内のLightを削除しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyCount), Logger::Level::Application);
+}
+
 bool LightManager::RenameLight(LightHandle handle, const std::string& newName) {
 	LightMetaData* meta = GetMetaData(handle);
 	if (!meta) {
