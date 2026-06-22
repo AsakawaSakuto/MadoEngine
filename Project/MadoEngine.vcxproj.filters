@@ -93,7 +93,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
-    <ClCompile Include="Engine\Render\ImGui\GuizmoEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />
@@ -520,7 +520,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\ImGui\GuizmoEditor.h">
+    <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

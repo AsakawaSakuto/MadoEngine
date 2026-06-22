@@ -123,8 +123,6 @@ public:
 		return MadoEngine::Render::ContainsRenderLayer(layerMask, renderLayer_);
 	}
 
-	// ===== PSO関連 =====
-
 	/// @brief PSORegistryを設定する
 	/// @param registry PSORegistryポインタ
 	void SetPSORegistry(MadoEngine::Render::PSORegistry* registry) { psoRegistry_ = registry; }

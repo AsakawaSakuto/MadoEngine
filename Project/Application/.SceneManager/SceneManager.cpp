@@ -4,7 +4,7 @@
 #include "Utility/Logger/Logger.h"
 #include "Utility/Light/LightManager.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"
-#include "Render/ImGui/EditorUI.h"
+#include "EditorUIHeaders.h"
 #include <cassert>
 
 namespace {
