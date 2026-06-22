@@ -30,7 +30,7 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	if (model_) {
 		model_->SetPosition(transform_.translate);
 		model_->SetRotation(transform_.rotate);
-		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
+		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::MapEventObject);
 	}
 }
 
