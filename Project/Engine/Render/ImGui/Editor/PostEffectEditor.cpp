@@ -78,6 +78,23 @@ namespace MadoEngine::Editor {
             { "SoftKnee", "ソフトニー", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kBoxFilterInitialValues[] = {
+            1.0f, 1.0f, 0.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kBoxFilterParameters[] = {
+            { "Radius", "半径", 0 * kFloatSize, 1.0f, 8.0f, 1.0f },
+            { "Intensity", "適用率", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const float kGaussianFilterInitialValues[] = {
+            1.6f, 2.0f, 1.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kGaussianFilterParameters[] = {
+            { "Sigma", "標準偏差", 0 * kFloatSize, 0.001f, 8.0f, 0.01f },
+            { "Radius", "半径", 1 * kFloatSize, 1.0f, 8.0f, 1.0f },
+            { "Intensity", "適用率", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
         const float kVignetteInitialValues[] = {
             0.8f, 0.35f, 2.0f, 0.0f
         };
@@ -164,18 +181,34 @@ namespace MadoEngine::Editor {
             { "EdgeColorA", "境界色A", 7 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kRadialBlurInitialValues[] = {
+            0.45f, 16.0f, 0.45f, 1.0f,
+            0.5f, 0.5f, 0.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kRadialBlurParameters[] = {
+            { "Intensity", "強度", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "SampleCount", "サンプル数", 1 * kFloatSize, 1.0f, 64.0f, 1.0f },
+            { "Radius", "半径", 2 * kFloatSize, 0.0f, 2.0f, 0.01f },
+            { "Falloff", "距離減衰", 3 * kFloatSize, 0.1f, 4.0f, 0.01f },
+            { "CenterX", "中心X", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "CenterY", "中心Y", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
         const PostEffectDefinition kPostEffectDefinitions[] = {
             { "CopyImage", "PostEffect/CopyImage.PS", nullptr, 0, nullptr, 0 },
-            { "GrayScale", "PostEffect/GrayScale.PS", nullptr, 0, nullptr, 0 },
-            { "Sepia", "PostEffect/Sepia.PS", nullptr, 0, nullptr, 0 },
-            { "Invert", "PostEffect/Invert.PS", nullptr, 0, nullptr, 0 },
             { "Bloom", "PostEffect/Bloom.PS", kBloomInitialValues, CountOf(kBloomInitialValues), kBloomParameters, CountOf(kBloomParameters) },
-            { "Vignette", "PostEffect/Vignette.PS", kVignetteInitialValues, CountOf(kVignetteInitialValues), kVignetteParameters, CountOf(kVignetteParameters) },
-            { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
-            { "Toon", "PostEffect/Toon.PS", kToonInitialValues, CountOf(kToonInitialValues), kToonParameters, CountOf(kToonParameters) },
-            { "Outline", "PostEffect/Outline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
-            { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
+            { "BoxFilter", "PostEffect/BoxFilter.PS", kBoxFilterInitialValues, CountOf(kBoxFilterInitialValues), kBoxFilterParameters, CountOf(kBoxFilterParameters) },
             { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },
+            { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
+            { "GaussianFilter", "PostEffect/GaussianFilter.PS", kGaussianFilterInitialValues, CountOf(kGaussianFilterInitialValues), kGaussianFilterParameters, CountOf(kGaussianFilterParameters) },
+            { "GrayScale", "PostEffect/GrayScale.PS", nullptr, 0, nullptr, 0 },
+            { "Invert", "PostEffect/Invert.PS", nullptr, 0, nullptr, 0 },
+            { "Outline", "PostEffect/Outline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
+            { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
+            { "RadialBlur", "PostEffect/RadialBlur.PS", kRadialBlurInitialValues, CountOf(kRadialBlurInitialValues), kRadialBlurParameters, CountOf(kRadialBlurParameters) },
+            { "Sepia", "PostEffect/Sepia.PS", nullptr, 0, nullptr, 0 },
+            { "Toon", "PostEffect/Toon.PS", kToonInitialValues, CountOf(kToonInitialValues), kToonParameters, CountOf(kToonParameters) },
+            { "Vignette", "PostEffect/Vignette.PS", kVignetteInitialValues, CountOf(kVignetteInitialValues), kVignetteParameters, CountOf(kVignetteParameters) },
         };
 
         const std::filesystem::path kLayerEffectPassEditorJsonPath = "Assets/Json/LayerEffectPassEditor.json";
