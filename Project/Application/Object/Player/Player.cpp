@@ -163,7 +163,9 @@ void Player::Update(float deltaTime) {
 
 	UpdateModelTransform(deltaTime, isSlopeGroundContact);
 
-	model_->SetTransform(transform_);
+	model_->SetPosition(transform_.translate + Vector3{0.0f, -0.5f, 0.0f});
+	model_->SetRotation(transform_.rotate);
+	model_->SetScale(transform_.scale);
 
 	if (currentMotion_ == PlayerMotion::Crouching) {
 		model_->SetColor({ 1.0f,0.0f,0.0f,1.0f });

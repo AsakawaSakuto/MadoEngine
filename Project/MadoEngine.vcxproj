@@ -137,7 +137,6 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application\.Core\LayerEffectPassSetup.cpp" />
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
@@ -238,7 +237,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\.Core\LayerEffectPassSetup.h" />
     <ClInclude Include="Application\.Core\Terminal.h" />
     <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\.SceneManager\SceneType.h" />

@@ -1,9 +1,12 @@
 #include "PostEffectEditor.h"
+#include "Utility/Json/JsonHeaders.h"
 #include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
+#include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <memory>
 
 namespace MadoEngine::Editor {
@@ -174,9 +177,88 @@ namespace MadoEngine::Editor {
             { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
             { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },
         };
-        /// @brief shaderKeyに一致するPostEffect定義のindexを取得する
-        /// @param shaderKey 検索するPixelShaderキー
-        /// @return 一致した定義index。一致しない場合は0
+
+        const std::filesystem::path kLayerEffectPassEditorJsonPath = "Assets/Json/LayerEffectPassEditor.json";
+
+        /// @brief 指定したJsonパスのバックアップパスを作成する。
+        /// @param filePath バックアップ元のJsonパス。
+        /// @return .bakを付けたバックアップJsonパス。
+        std::filesystem::path CreateBackupJsonPath(const std::filesystem::path& filePath) {
+            std::filesystem::path backupPath = filePath;
+            backupPath += ".bak";
+            return backupPath;
+        }
+
+        /// @brief shaderKeyに一致するPostEffect定義を取得する。
+        /// @param shaderKey 検索するPixelShaderキー。
+        /// @return 一致したPostEffect定義。一致しない場合はnullptr。
+        const PostEffectDefinition* FindPostEffectDefinition(const std::string& shaderKey) {
+            for (const PostEffectDefinition& definition : kPostEffectDefinitions) {
+                if (shaderKey == definition.shaderKey) {
+                    return &definition;
+                }
+            }
+
+            return nullptr;
+        }
+
+        /// @brief Passのfloatパラメータ値をJsonへ変換する。
+        /// @param pass 保存対象のPass。
+        /// @return パラメータ名と値を保持したJson。
+        nlohmann::json SerializeLayerEffectPassParameters(const Render::LayerEffectPass& pass) {
+            nlohmann::json parameters = nlohmann::json::object();
+            for (const Render::LayerEffectPass::FloatParameterControl& control : pass.GetFloatParameterControls()) {
+                float value = 0.0f;
+                if (pass.TryGetFloatParameter(control.offset, value)) {
+                    parameters[control.key] = value;
+                }
+            }
+
+            return parameters;
+        }
+
+        /// @brief PassのEditor設定をJsonへ変換する。
+        /// @param pass 保存対象のPass。
+        /// @return Pass設定を保持したJson。
+        nlohmann::json SerializeLayerEffectPass(const Render::LayerEffectPass& pass) {
+            nlohmann::json passJson;
+            passJson["key"] = pass.GetKey();
+            passJson["name"] = pass.GetName();
+            passJson["enabled"] = pass.IsEnabled();
+            passJson["targetLayerMask"] = pass.GetTargetLayerMask();
+            passJson["effectShaderKey"] = pass.GetEffectShaderKey();
+            passJson["ignoreDepthForMask"] = pass.IsIgnoreDepthForMask();
+            passJson["parameters"] = SerializeLayerEffectPassParameters(pass);
+            return passJson;
+        }
+
+        /// @brief Pass配列をJsonへ変換する。
+        /// @param passes 保存対象のPass配列。
+        /// @return Pass配列を保持したJson。
+        nlohmann::json SerializeLayerEffectPassList(const std::vector<Render::LayerEffectPass>& passes) {
+            nlohmann::json passList = nlohmann::json::array();
+            for (const Render::LayerEffectPass& pass : passes) {
+                passList.push_back(SerializeLayerEffectPass(pass));
+            }
+
+            return passList;
+        }
+
+        /// @brief Layer Effect Pass Editorの状態をJsonへ保存する。
+        /// @param postEffectManager 保存対象のPostEffectManager。
+        /// @return 保存に成功した場合はtrue。
+        bool SaveLayerEffectPassEditorJson(const Render::PostEffectManager& postEffectManager) {
+            nlohmann::json root;
+            root["version"] = 1;
+            root["layerPasses"] = SerializeLayerEffectPassList(postEffectManager.GetLayerPasses());
+            root["screenPasses"] = SerializeLayerEffectPassList(postEffectManager.GetScreenPasses());
+
+            return Json::JsonFile::Save(kLayerEffectPassEditorJsonPath, root, 4, true);
+        }
+
+        /// @brief shaderKeyに一致するPostEffect定義のindexを取得する。
+        /// @param shaderKey 検索するPixelShaderキー。
+        /// @return 一致した定義index。一致しない場合は0。
         int FindPostEffectDefinitionIndex(const std::string& shaderKey) {
             for (int index = 0; index < static_cast<int>(CountOf(kPostEffectDefinitions)); ++index) {
                 if (shaderKey == kPostEffectDefinitions[index].shaderKey) {
@@ -212,11 +294,155 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief 重複しないPassキーを作成する
-        /// @param postEffectManager 重複確認に使用する管理クラス
-        /// @param prefix Passキーの接頭辞
-        /// @param nextId 次に試すID
-        /// @return 重複しないPassキー
+        /// @brief Jsonから読み込んだパラメータ値をPassへ適用する。
+        /// @param pass 適用先のPass。
+        /// @param parameters パラメータ値を保持したJson。
+        void ApplyLayerEffectPassParameters(Render::LayerEffectPass& pass, const nlohmann::json& parameters) {
+            if (!parameters.is_object()) {
+                return;
+            }
+
+            for (const Render::LayerEffectPass::FloatParameterControl& control : pass.GetFloatParameterControls()) {
+                const auto parameterIt = parameters.find(control.key);
+                if (parameterIt == parameters.end() || !parameterIt->is_number()) {
+                    continue;
+                }
+
+                pass.SetFloatParameter(control.offset, parameterIt->get<float>());
+            }
+        }
+
+        /// @brief Jsonから読み込んだPass設定を生成用Descへ変換する。
+        /// @param passJson Pass設定を保持したJson。
+        /// @param defaultKey keyが未指定だった場合に使用する値。
+        /// @param defaultName nameが未指定だった場合に使用する値。
+        /// @param defaultLayerMask targetLayerMaskが未指定だった場合に使用する値。
+        /// @return LayerEffectPass生成用Desc。
+        Render::LayerEffectPass::Desc CreateLayerEffectPassDescFromJson(
+            const nlohmann::json& passJson,
+            const std::string& defaultKey,
+            const std::string& defaultName,
+            Render::RenderLayerMask defaultLayerMask)
+        {
+            Render::LayerEffectPass::Desc desc{};
+            desc.key = passJson.value("key", defaultKey);
+            desc.name = passJson.value("name", defaultName);
+            desc.targetLayerMask = passJson.value("targetLayerMask", defaultLayerMask);
+            desc.effectShaderKey = passJson.value("effectShaderKey", std::string("PostEffect/CopyImage.PS"));
+            desc.enabled = passJson.value("enabled", true);
+            desc.ignoreDepthForMask = passJson.value("ignoreDepthForMask", false);
+
+            if (desc.key.empty()) {
+                desc.key = defaultKey;
+            }
+            if (desc.name.empty()) {
+                desc.name = defaultName;
+            }
+            if (desc.effectShaderKey.empty()) {
+                desc.effectShaderKey = "PostEffect/CopyImage.PS";
+            }
+
+            return desc;
+        }
+
+        /// @brief Jsonから読み込んだPass設定をPostEffectManagerへ追加する。
+        /// @param postEffectManager 追加先のPostEffectManager。
+        /// @param passJson Pass設定を保持したJson。
+        /// @param isScreenPass フルスクリーンPassとして追加する場合はtrue。
+        /// @param index デフォルト名に使用するPass番号。
+        void AddLayerEffectPassFromJson(
+            Render::PostEffectManager& postEffectManager,
+            const nlohmann::json& passJson,
+            bool isScreenPass,
+            std::size_t index)
+        {
+            if (!passJson.is_object()) {
+                return;
+            }
+
+            const std::string defaultKey =
+                (isScreenPass ? "ScreenEffectPass_Loaded_" : "LayerEffectPass_Loaded_") + std::to_string(index + 1);
+            const std::string defaultName =
+                (isScreenPass ? "Screen Effect Loaded " : "Layer Effect Loaded ") + std::to_string(index + 1);
+            const Render::RenderLayerMask defaultLayerMask = isScreenPass ?
+                Render::kAllRenderLayers :
+                Render::ToRenderLayerMask(Render::RenderLayer::Default);
+            const Render::LayerEffectPass::Desc desc =
+                CreateLayerEffectPassDescFromJson(passJson, defaultKey, defaultName, defaultLayerMask);
+
+            Render::LayerEffectPass* pass = isScreenPass ?
+                postEffectManager.AddScreenPass(desc) :
+                postEffectManager.AddLayerPass(desc);
+            if (!pass) {
+                return;
+            }
+
+            if (const PostEffectDefinition* definition = FindPostEffectDefinition(desc.effectShaderKey)) {
+                ApplyPostEffectDefinition(*pass, *definition);
+            }
+
+            const auto parametersIt = passJson.find("parameters");
+            if (parametersIt != passJson.end()) {
+                ApplyLayerEffectPassParameters(*pass, *parametersIt);
+            }
+        }
+
+        /// @brief 既存Passを破棄してJson読込用に空の状態へ戻す。
+        /// @param postEffectManager 初期化対象のPostEffectManager。
+        void ClearLayerEffectPassesForLoad(Render::PostEffectManager& postEffectManager) {
+            for (Render::LayerEffectPass& pass : postEffectManager.GetLayerPasses()) {
+                pass.ClearParameterData();
+            }
+
+            for (Render::LayerEffectPass& pass : postEffectManager.GetScreenPasses()) {
+                pass.ClearParameterData();
+            }
+
+            postEffectManager.ClearLayerPasses();
+            postEffectManager.ClearScreenPasses();
+        }
+
+        /// @brief JsonのPass配列をPostEffectManagerへ読み込む。
+        /// @param postEffectManager 読み込み先のPostEffectManager。
+        /// @param passList Pass配列を保持したJson。
+        /// @param isScreenPass フルスクリーンPassとして読み込む場合はtrue。
+        void LoadLayerEffectPassListFromJson(
+            Render::PostEffectManager& postEffectManager,
+            const nlohmann::json& passList,
+            bool isScreenPass)
+        {
+            if (!passList.is_array()) {
+                return;
+            }
+
+            for (std::size_t i = 0; i < passList.size(); ++i) {
+                AddLayerEffectPassFromJson(postEffectManager, passList[i], isScreenPass, i);
+            }
+        }
+
+        /// @brief Layer Effect Pass Editorの状態をJsonから読み込む。
+        /// @param postEffectManager 読み込み先のPostEffectManager。
+        /// @return 読み込みに成功した場合はtrue。
+        bool LoadLayerEffectPassEditorJson(
+            Render::PostEffectManager& postEffectManager,
+            const std::filesystem::path& filePath = kLayerEffectPassEditorJsonPath)
+        {
+            nlohmann::json root;
+            if (!Json::JsonFile::Load(filePath, root)) {
+                return false;
+            }
+
+            ClearLayerEffectPassesForLoad(postEffectManager);
+            LoadLayerEffectPassListFromJson(postEffectManager, root.value("layerPasses", nlohmann::json::array()), false);
+            LoadLayerEffectPassListFromJson(postEffectManager, root.value("screenPasses", nlohmann::json::array()), true);
+            return true;
+        }
+
+        /// @brief 重複しないPassキーを作成する。
+        /// @param postEffectManager 重複確認に使用する管理クラス。
+        /// @param prefix Passキーの接頭辞。
+        /// @param nextId 次に試すID。
+        /// @return 重複しないPassキー。
         std::string CreateUniquePassKey(
             const Render::PostEffectManager& postEffectManager,
             const char* prefix,
@@ -570,6 +796,19 @@ namespace MadoEngine::Editor {
         ImGui::SameLine();
         if (ImGui::Button("フルスクリーン追加")) {
             AddLayerEffectPassFromEditor(postEffectManager, true);
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Save")) {
+            SaveLayerEffectPassEditorJson(postEffectManager);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load")) {
+            LoadLayerEffectPassEditorJson(postEffectManager);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load Backup")) {
+            LoadLayerEffectPassEditorJson(postEffectManager, CreateBackupJsonPath(kLayerEffectPassEditorJsonPath));
         }
 
         ImGui::Separator();

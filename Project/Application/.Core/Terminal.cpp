@@ -1,5 +1,4 @@
 #include "Terminal.h"
-#include "LayerEffectPassSetup.h"
 #include <cstddef>
 
 Terminal::Terminal(HINSTANCE hInstance)
@@ -12,7 +11,6 @@ Terminal::Terminal(HINSTANCE hInstance)
 	sceneManager_->RegisterScene(SceneType::Game,   []() { return std::make_unique<Game>(); });
 	sceneManager_->RegisterScene(SceneType::Result, []() { return std::make_unique<Result>(); });
 	sceneManager_->Initialize(SceneType::Title);
-	RenderPassSetup::RegisterLayerEffectPasses(*execution_);
 }
 
 void Terminal::Run() {

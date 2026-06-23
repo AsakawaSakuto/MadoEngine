@@ -10,7 +10,6 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application\.Core\LayerEffectPassSetup.cpp" />
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
@@ -65,8 +64,6 @@
     <ClCompile Include="Externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Externals\imgui\ImGuizmo.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
-    <ClCompile Include="Engine\Render\ImGui\EditorHistory.cpp" />
-    <ClCompile Include="Engine\Render\ImGui\ModelTransformCommand.cpp" />
     <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
     <ClCompile Include="Engine\Render\Screen\RenderTargetManager.cpp" />
     <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
@@ -75,7 +72,6 @@
     <ClCompile Include="Application\Object\Player\Player.cpp" />
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
-    <ClCompile Include="Engine\Render\ImGui\EditorUI.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
@@ -94,6 +90,8 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\History\EditorHistory.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />
@@ -287,9 +285,6 @@
     <ClInclude Include="Application\.Core\Terminal.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.Core\LayerEffectPassSetup.h">
-      <Filter>�w�b�_�[ �t�@�C��</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
@@ -437,12 +432,6 @@
     <ClInclude Include="Application\Object\Map\MapBlockType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\ImGui\EditorUI.h">
-      <Filter>�w�b�_�[ �t�%40�C��</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Render\ImGui\EditorCommand.h" />
-    <ClInclude Include="Engine\Render\ImGui\EditorHistory.h" />
-    <ClInclude Include="Engine\Render\ImGui\ModelTransformCommand.h" />
     <ClInclude Include="Application\Object\IGameObject.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
@@ -522,6 +511,18 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\EditorUIHeaders.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\Editor\History\EditorCommand.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\Editor\History\EditorHistory.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

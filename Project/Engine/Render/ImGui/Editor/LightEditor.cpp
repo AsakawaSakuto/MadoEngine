@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <memory>
 
 namespace MadoEngine::Editor {
@@ -37,6 +38,14 @@ namespace MadoEngine::Editor {
         /// @param prefix ライト名の接頭辞
         /// @param nextId 次に試すID
         /// @return 重複しないライト名
+        /// @brief LightManager Jsonのバックアップパスを作成する。
+        /// @return LightManager Jsonのバックアップパス。
+        std::filesystem::path CreateLightManagerBackupJsonPath() {
+            std::filesystem::path backupPath = LightManager::kDefaultLightJsonPath;
+            backupPath += ".bak";
+            return backupPath;
+        }
+
         std::string CreateUniqueLightName(LightManager& lightManager, const char* prefix, int& nextId) {
             std::string name;
             do {
@@ -401,6 +410,10 @@ namespace MadoEngine::Editor {
         ImGui::SameLine();
         if (ImGui::Button("Load")) {
             lightManager.LoadFromJson();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load Backup")) {
+            lightManager.LoadFromJson(CreateLightManagerBackupJsonPath());
         }
 
         ImGui::Separator();
