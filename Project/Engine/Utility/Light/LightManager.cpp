@@ -1,4 +1,5 @@
 #include "LightManager.h"
+#include "Utility/Json/JsonHeaders.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 
@@ -14,6 +15,174 @@ std::string GetSceneLabel(SceneType sceneType) {
 		return "全シーン";
 	}
 	return SceneTypeToString(sceneType);
+}
+
+/// @brief Json保存用のシーン名を取得する
+/// @param sceneType 保存するSceneType
+/// @return Jsonへ保存するシーン名
+std::string GetSceneJsonName(SceneType sceneType) {
+	if (sceneType == SceneType::None) {
+		return "None";
+	}
+
+	return SceneTypeToString(sceneType);
+}
+
+/// @brief 文字列からSceneTypeを取得する
+/// @param sceneName 読み込むシーン名
+/// @return 文字列に対応するSceneType
+SceneType ParseSceneType(const std::string& sceneName) {
+	if (sceneName.empty() || sceneName == "None" || sceneName == "All" || sceneName == "全シーン") {
+		return SceneType::None;
+	}
+
+	for (uint32_t index = 0; index < kSceneTypeCount; ++index) {
+		const SceneType sceneType = GetSceneTypeByIndex(index);
+		if (SceneTypeToString(sceneType) == sceneName) {
+			return sceneType;
+		}
+	}
+
+	return SceneType::None;
+}
+
+/// @brief LightTypeをJson保存用の文字列へ変換する
+/// @param type 変換するLightType
+/// @return LightTypeの文字列
+const char* GetLightTypeJsonName(LightType type) {
+	switch (type) {
+	case LightType::Directional:
+		return "Directional";
+	case LightType::Point:
+		return "Point";
+	case LightType::Spot:
+		return "Spot";
+	default:
+		return "None";
+	}
+}
+
+/// @brief 文字列からLightTypeを取得する
+/// @param typeName 読み込むライト種別名
+/// @return 文字列に対応するLightType
+LightType ParseLightType(const std::string& typeName) {
+	if (typeName == "Directional") {
+		return LightType::Directional;
+	}
+	if (typeName == "Point") {
+		return LightType::Point;
+	}
+	if (typeName == "Spot") {
+		return LightType::Spot;
+	}
+
+	return LightType::None;
+}
+
+/// @brief 平行光源をJsonへ変換する
+/// @param light 変換する平行光源
+/// @return 変換されたJson
+nlohmann::json DirectionalLightToJson(const DirectionalLight& light) {
+	return nlohmann::json{
+		{ "color", MadoEngine::Json::JsonSerializer::ToJson(light.color) },
+		{ "direction", MadoEngine::Json::JsonSerializer::ToJson(light.direction) },
+		{ "intensity", light.intensity },
+		{ "useHalfLambert", light.useHalfLambert != 0 }
+	};
+}
+
+/// @brief 点光源をJsonへ変換する
+/// @param light 変換する点光源
+/// @return 変換されたJson
+nlohmann::json PointLightToJson(const PointLight& light) {
+	return nlohmann::json{
+		{ "color", MadoEngine::Json::JsonSerializer::ToJson(light.color) },
+		{ "position", MadoEngine::Json::JsonSerializer::ToJson(light.position) },
+		{ "intensity", light.intensity },
+		{ "radius", light.radius },
+		{ "decay", light.decay }
+	};
+}
+
+/// @brief スポットライトをJsonへ変換する
+/// @param light 変換するスポットライト
+/// @return 変換されたJson
+nlohmann::json SpotLightToJson(const SpotLight& light) {
+	return nlohmann::json{
+		{ "color", MadoEngine::Json::JsonSerializer::ToJson(light.color) },
+		{ "position", MadoEngine::Json::JsonSerializer::ToJson(light.position) },
+		{ "direction", MadoEngine::Json::JsonSerializer::ToJson(light.direction) },
+		{ "intensity", light.intensity },
+		{ "distance", light.distance },
+		{ "decay", light.decay },
+		{ "cosAngle", light.cosAngle },
+		{ "cosFalloffStart", light.cosFalloffStart }
+	};
+}
+
+/// @brief ライト共通情報をJsonへ追加する
+/// @param json 追加先のJson
+/// @param type 保存するライト種別
+/// @param meta 保存するライト共通情報
+void AddLightMetaDataToJson(nlohmann::json& json, LightType type, const LightMetaData& meta) {
+	json["type"] = GetLightTypeJsonName(type);
+	json["name"] = meta.name;
+	json["scene"] = GetSceneJsonName(meta.sceneType);
+	json["layerMask"] = meta.layerMask;
+	json["enabled"] = meta.enabled;
+}
+
+/// @brief Jsonから平行光源を読み込む
+/// @param json 読み込み元のJson
+/// @return 読み込んだ平行光源
+DirectionalLight DirectionalLightFromJson(const nlohmann::json& json) {
+	DirectionalLight light;
+	if (!json.is_object()) {
+		return light;
+	}
+
+	light.color = json.contains("color") ? MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color) : light.color;
+	light.direction = json.contains("direction") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction) : light.direction;
+	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
+	light.useHalfLambert = MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(json, "useHalfLambert", light.useHalfLambert != 0) ? 1u : 0u;
+	return light;
+}
+
+/// @brief Jsonから点光源を読み込む
+/// @param json 読み込み元のJson
+/// @return 読み込んだ点光源
+PointLight PointLightFromJson(const nlohmann::json& json) {
+	PointLight light;
+	if (!json.is_object()) {
+		return light;
+	}
+
+	light.color = json.contains("color") ? MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color) : light.color;
+	light.position = json.contains("position") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position) : light.position;
+	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
+	light.radius = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "radius", light.radius);
+	light.decay = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "decay", light.decay);
+	return light;
+}
+
+/// @brief Jsonからスポットライトを読み込む
+/// @param json 読み込み元のJson
+/// @return 読み込んだスポットライト
+SpotLight SpotLightFromJson(const nlohmann::json& json) {
+	SpotLight light;
+	if (!json.is_object()) {
+		return light;
+	}
+
+	light.color = json.contains("color") ? MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color) : light.color;
+	light.position = json.contains("position") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position) : light.position;
+	light.direction = json.contains("direction") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction) : light.direction;
+	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
+	light.distance = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "distance", light.distance);
+	light.decay = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "decay", light.decay);
+	light.cosAngle = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "cosAngle", light.cosAngle);
+	light.cosFalloffStart = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "cosFalloffStart", light.cosFalloffStart);
+	return light;
 }
 
 } // namespace
@@ -227,6 +396,131 @@ void LightManager::Clear() {
 	nameToHandle_.clear();
 	AdvanceRevision();
 	Logger::Output("登録済みライトをすべて削除しました。", Logger::Level::Application);
+}
+
+bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
+	nlohmann::json root = nlohmann::json::object();
+	root["version"] = 1;
+	root["lights"] = nlohmann::json::array();
+
+	for (const DirectionalSlot& slot : directionalLights_) {
+		if (!slot.active) {
+			continue;
+		}
+
+		nlohmann::json lightJson = nlohmann::json::object();
+		AddLightMetaDataToJson(lightJson, LightType::Directional, slot.entry.meta);
+		lightJson["data"] = DirectionalLightToJson(slot.entry.light);
+		root["lights"].push_back(lightJson);
+	}
+
+	for (const PointSlot& slot : pointLights_) {
+		if (!slot.active) {
+			continue;
+		}
+
+		nlohmann::json lightJson = nlohmann::json::object();
+		AddLightMetaDataToJson(lightJson, LightType::Point, slot.entry.meta);
+		lightJson["data"] = PointLightToJson(slot.entry.light);
+		root["lights"].push_back(lightJson);
+	}
+
+	for (const SpotSlot& slot : spotLights_) {
+		if (!slot.active) {
+			continue;
+		}
+
+		nlohmann::json lightJson = nlohmann::json::object();
+		AddLightMetaDataToJson(lightJson, LightType::Spot, slot.entry.meta);
+		lightJson["data"] = SpotLightToJson(slot.entry.light);
+		root["lights"].push_back(lightJson);
+	}
+
+	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, root, 4, true);
+	if (isSaved) {
+		Logger::Output("LightManagerの設定をJsonへ保存しました : " + filePath.generic_string(), Logger::Level::Application);
+	} else {
+		Logger::Output("LightManagerの設定保存に失敗しました : " + filePath.generic_string(), Logger::Level::Error);
+	}
+
+	return isSaved;
+}
+
+bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
+	nlohmann::json root;
+	if (!MadoEngine::Json::JsonFile::Load(filePath, root)) {
+		Logger::Output("LightManagerの設定をJsonから読み込めませんでした : " + filePath.generic_string(), Logger::Level::Error);
+		return false;
+	}
+
+	if (!root.is_object() || !root.contains("lights") || !root.at("lights").is_array()) {
+		Logger::Output("LightManagerのJson形式が不正です : " + filePath.generic_string(), Logger::Level::Error);
+		return false;
+	}
+
+	Clear();
+
+	size_t loadCount = 0;
+	for (const nlohmann::json& lightJson : root.at("lights")) {
+		if (!lightJson.is_object()) {
+			Logger::Output("LightManagerのJson内に不正なライト情報があります", Logger::Level::Warning);
+			continue;
+		}
+
+		const std::string typeName = MadoEngine::Json::JsonSerializer::GetOrDefault<std::string>(lightJson, "type", "");
+		const LightType type = ParseLightType(typeName);
+		if (type == LightType::None) {
+			Logger::Output("未対応のライト種別をスキップしました : " + typeName, Logger::Level::Warning);
+			continue;
+		}
+
+		const std::string name = MadoEngine::Json::JsonSerializer::GetOrDefault<std::string>(lightJson, "name", "");
+		if (name.empty()) {
+			Logger::Output("名前が空のライトをスキップしました", Logger::Level::Warning);
+			continue;
+		}
+
+		const std::string sceneName = MadoEngine::Json::JsonSerializer::GetOrDefault<std::string>(lightJson, "scene", "None");
+		const SceneType sceneType = ParseSceneType(sceneName);
+		const LightLayerMask layerMask = MadoEngine::Json::JsonSerializer::GetOrDefault<LightLayerMask>(lightJson, "layerMask", ToLightLayerMask(LightLayer::World));
+		const bool enabled = MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(lightJson, "enabled", true);
+		const nlohmann::json dataJson = lightJson.contains("data") ? lightJson.at("data") : nlohmann::json::object();
+
+		LightHandle handle;
+		switch (type) {
+		case LightType::Directional:
+		{
+			DirectionalLight light = DirectionalLightFromJson(dataJson);
+			light.useLight = enabled ? 1u : 0u;
+			handle = CreateDirectionalLight(name, light, sceneType, layerMask);
+			break;
+		}
+		case LightType::Point:
+		{
+			PointLight light = PointLightFromJson(dataJson);
+			light.useLight = enabled ? 1u : 0u;
+			handle = CreatePointLight(name, light, sceneType, layerMask);
+			break;
+		}
+		case LightType::Spot:
+		{
+			SpotLight light = SpotLightFromJson(dataJson);
+			light.useLight = enabled ? 1u : 0u;
+			handle = CreateSpotLight(name, light, sceneType, layerMask);
+			break;
+		}
+		default:
+			break;
+		}
+
+		if (handle.IsValid()) {
+			++loadCount;
+		}
+	}
+
+	AdvanceRevision();
+	Logger::Output("LightManagerの設定をJsonから読み込みました : " + filePath.generic_string() + " 件数 : " + std::to_string(loadCount), Logger::Level::Application);
+	return true;
 }
 
 bool LightManager::SetEnabled(LightHandle handle, bool enabled) {

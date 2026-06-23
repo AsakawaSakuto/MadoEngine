@@ -394,6 +394,14 @@ namespace MadoEngine::Editor {
         if (ImGui::Button("Spot追加")) {
             AddLightFromEditor(LightType::Spot);
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Save")) {
+            lightManager.SaveToJson();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load")) {
+            lightManager.LoadFromJson();
+        }
 
         ImGui::Separator();
 

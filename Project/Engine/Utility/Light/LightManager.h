@@ -7,6 +7,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -77,6 +78,8 @@ struct LightGpuData {
 /// @brief ライトを名前とハンドルで管理するクラス
 class LightManager {
 public:
+	static constexpr const char* kDefaultLightJsonPath = "Assets/Json/LightManager.json";
+
 	/// @brief LightManagerのシングルトンインスタンスを取得する
 	/// @return LightManagerの参照
 	static LightManager& GetInstance();
@@ -166,6 +169,16 @@ public:
 
 	/// @brief 登録済みライトをすべて削除する
 	void Clear();
+
+	/// @brief 登録済みライトをJsonファイルへ保存する
+	/// @param filePath 保存先のJsonファイルパス
+	/// @return 保存に成功した場合はtrue
+	bool SaveToJson(const std::filesystem::path& filePath = kDefaultLightJsonPath) const;
+
+	/// @brief Jsonファイルからライトを読み込む
+	/// @param filePath 読み込み元のJsonファイルパス
+	/// @return 読み込みに成功した場合はtrue
+	bool LoadFromJson(const std::filesystem::path& filePath = kDefaultLightJsonPath);
 
 	/// @brief ライトの有効状態を設定する
 	/// @param handle 対象ライトのハンドル
