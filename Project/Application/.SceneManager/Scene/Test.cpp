@@ -60,7 +60,7 @@ void Test::Initialize() {
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
 
 	map_ = std::make_unique<Map>();
-	map_->Initialize();
+	map_->Initialize(792271172);
 
 	model_ = MyModel::Create("testModel", "AnimatedCube", SceneType::Test);
 	model_->SetPosition(modelPos_);
@@ -122,6 +122,13 @@ void Test::DrawImGui() {
 	player_->DrawImGui();
 
 	map_->DrawImGui();
+
+	ImGui::Begin("seed");
+
+	ImGui::Text("seed : %u", MyRand::GetSeed());
+	ImGui::Text("map seed : %u", map_->GetSeed());
+
+	ImGui::End();
 
 #endif // USE_IMGUI
 }

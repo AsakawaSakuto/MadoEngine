@@ -11,8 +11,9 @@ class Player;
 /// @brief Map全体を管理するクラスです。
 class Map {
 public:
-	/// @brief Mapを初期化します。
-	void Initialize();
+	/// @brief 指定シードでMapを初期化します。
+	/// @param seed Map生成に使用するシード値です。
+	void Initialize(uint32_t seed);
 
 	/// @brief Mapを更新します。
 	/// @param player 相互作用の対象になるPlayerです。
@@ -21,10 +22,12 @@ public:
 	/// @brief Map調整用のImGuiを描画します。
 	void DrawImGui();
 
-private:
-	/// @brief 地形を再生成します。
-	void RegenerateTerrain();
+	/// @brief Map生成に使用したシード値を取得します。
+	/// @return uint32_t Map生成に使用したシード値です。
+	uint32_t GetSeed() const;
 
+private:
+	
 	/// @brief Map上にJarをランダム配置します。
 	void GenerateJars();
 
@@ -51,6 +54,9 @@ private:
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
+	Random terrainRandom_;
+	Random eventObjectRandom_;
+	uint32_t seed_ = 0;
 
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;

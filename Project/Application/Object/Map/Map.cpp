@@ -85,8 +85,13 @@ Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize) 
 
 }
 
-void Map::Initialize() {
+/// @brief 指定シードでMapを初期化します。
+/// @param seed Map生成に使用するシード値です。
+void Map::Initialize(uint32_t seed) {
 
+	seed_ = seed;
+	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(seed_, 100));
+	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed_, 200));
 	ClampHeightSettings();
 	eventObjects_.clear();
 	currentHitEventObject_ = nullptr;
@@ -96,7 +101,7 @@ void Map::Initialize() {
 	for (int z = 0; z < mapHeight_; ++z) {
 		for (int x = 0; x < mapWidth_; ++x) {
 			if (x == 0 && z == 0) {
-				mapBlocks_[z][x].SetHeight(MyRand::GetInt(minStartHeight_, std::max(minStartHeight_, maxStartHeight_ / 2)));
+				mapBlocks_[z][x].SetHeight(terrainRandom_.Int(minStartHeight_, std::max(minStartHeight_, maxStartHeight_ / 2)));
 				continue;
 			}
 
@@ -109,7 +114,7 @@ void Map::Initialize() {
 				baseHeight = GetBlockHeight(x, z - 1);
 			}
 
-			int nextHeight = static_cast<int>(baseHeight) + MyRand::GetInt(minRangeHeight_, maxRangeHeight_);
+			int nextHeight = static_cast<int>(baseHeight) + terrainRandom_.Int(minRangeHeight_, maxRangeHeight_);
 			mapBlocks_[z][x].SetHeight(static_cast<uint32_t>(std::clamp(nextHeight, minHeight_, maxHeight_)));
 		}
 	}
@@ -138,7 +143,7 @@ void Map::Initialize() {
 				useSlope = true;
 			}
 
-			if (useSlope && MyRand::GetFloat(0.0f, 1.0f) >= slopeSpawnRate_) {
+			if (useSlope && terrainRandom_.Float(0.0f, 1.0f) >= slopeSpawnRate_) {
 				useSlope = false;
 			}
 
@@ -191,9 +196,6 @@ void Map::DrawImGui() {
 
 	ClampHeightSettings();
 
-	if (ImGui::Button("地形を再生成")) {
-		RegenerateTerrain();
-	}
 	ImGui::Separator();
 
 	ImGui::Text("Block Size");
@@ -224,11 +226,10 @@ void Map::DrawImGui() {
 
 }
 
-void Map::RegenerateTerrain() {
-
-	Initialize();
-
-	Logger::Output("Map : 地形を再生成しました", Logger::Level::Debug);
+/// @brief Map生成に使用したシード値を取得します。
+/// @return uint32_t Map生成に使用したシード値です。
+uint32_t Map::GetSeed() const {
+	return seed_;
 }
 
 void Map::GenerateJars() {
@@ -250,8 +251,8 @@ void Map::GenerateJars() {
 	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
 		++retryCount;
 
-		const int x = MyRand::GetInt(0, mapWidth_ - 1);
-		const int z = MyRand::GetInt(0, mapHeight_ - 1);
+		const int x = eventObjectRandom_.Int(0, mapWidth_ - 1);
+		const int z = eventObjectRandom_.Int(0, mapHeight_ - 1);
 
 		MapBlock& spawnBlock = mapBlocks_[z][x];
 		if (spawnBlock.GetType() == MapBlockType::Air) {
@@ -261,8 +262,8 @@ void Map::GenerateJars() {
 		const float jarHalfSize = 0.5f;
 		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - jarHalfSize);
 		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - jarHalfSize);
-		const float offsetX = MyRand::GetFloat(-spawnRangeX, spawnRangeX);
-		const float offsetZ = MyRand::GetFloat(-spawnRangeZ, spawnRangeZ);
+		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
+		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
 		Vector3 spawnPosition = {
 			static_cast<float>(x) * blockSize_.x + offsetX,
@@ -279,8 +280,8 @@ void Map::GenerateJars() {
 		Jar::InitializeDesc desc;
 		desc.position = spawnPosition;
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_);
-		desc.type = MyRand::GetInt(0, 1) == 0 ? JarType::Money : JarType::Exp;
-		desc.size = MyRand::GetInt(0, 1) == 0 ? JarSize::Small : JarSize::Big;
+		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? JarType::Money : JarType::Exp;
+		desc.size = eventObjectRandom_.Int(0, 1) == 0 ? JarSize::Small : JarSize::Big;
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
 		desc.colliderName = "JarAABB_" + std::to_string(createdCount);
 
@@ -309,8 +310,8 @@ void Map::GenerateChests() {
 	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
 		++retryCount;
 
-		const int x = MyRand::GetInt(0, mapWidth_ - 1);
-		const int z = MyRand::GetInt(0, mapHeight_ - 1);
+		const int x = eventObjectRandom_.Int(0, mapWidth_ - 1);
+		const int z = eventObjectRandom_.Int(0, mapHeight_ - 1);
 
 		MapBlock& spawnBlock = mapBlocks_[z][x];
 		if (spawnBlock.GetType() == MapBlockType::Air) {
@@ -320,8 +321,8 @@ void Map::GenerateChests() {
 		const float chestHalfSize = 0.6f;
 		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - chestHalfSize);
 		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - chestHalfSize);
-		const float offsetX = MyRand::GetFloat(-spawnRangeX, spawnRangeX);
-		const float offsetZ = MyRand::GetFloat(-spawnRangeZ, spawnRangeZ);
+		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
+		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
 		Vector3 spawnPosition = {
 			static_cast<float>(x) * blockSize_.x + offsetX,
@@ -338,8 +339,8 @@ void Map::GenerateChests() {
 		Chest::InitializeDesc desc;
 		desc.position = spawnPosition;
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_);
-		desc.rotation.y = MyRand::GetFloat(0.0f, 360.0f);
-		desc.type = MyRand::GetInt(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
+		desc.rotation.y = eventObjectRandom_.Float(0.0f, 360.0f);
+		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
 		desc.modelName = "ChestModel_" + std::to_string(createdCount);
 		desc.colliderName = "ChestAABB_" + std::to_string(createdCount);
 
