@@ -70,6 +70,8 @@
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Application\Object\Player\Player.cpp" />
+    <ClCompile Include="Application\Object\Player\PlayerController.cpp" />
+    <ClCompile Include="Application\Object\Player\PlayerMovement.cpp" />
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
     <ClCompile Include="Application\Object\Map\Map.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
@@ -403,6 +405,12 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\Object\Player\Player.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Object\Player\PlayerController.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Object\Player\PlayerMovement.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\.SceneManager\CommonData.h">
