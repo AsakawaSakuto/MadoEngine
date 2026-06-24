@@ -209,6 +209,16 @@ namespace MadoEngine::Editor {
             { "CenterY", "中心Y", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kRandomInitialValues[] = {
+            1.0f, 1.0f, 1.0f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kRandomParameters[] = {
+            { "Time", "時間", 0 * kFloatSize, 0.0001f, 1000.0f, 0.01f },
+            { "NoiseScale", "ノイズ拡大率", 1 * kFloatSize, 0.0001f, 256.0f, 0.1f },
+            { "Contrast", "コントラスト", 2 * kFloatSize, 0.0f, 8.0f, 0.01f },
+            { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
         const PostEffectDefinition kPostEffectDefinitions[] = {
             { "CopyImage", "PostEffect/CopyImage.PS", nullptr, 0, nullptr, 0 },
             { "Bloom", "PostEffect/Bloom.PS", kBloomInitialValues, CountOf(kBloomInitialValues), kBloomParameters, CountOf(kBloomParameters) },
@@ -222,6 +232,7 @@ namespace MadoEngine::Editor {
             { "LuminanceOutline", "PostEffect/LuminanceOutline.PS", kLuminanceBasedOutlineInitialValues, CountOf(kLuminanceBasedOutlineInitialValues), kLuminanceBasedOutlineParameters, CountOf(kLuminanceBasedOutlineParameters) },
             { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
             { "RadialBlur", "PostEffect/RadialBlur.PS", kRadialBlurInitialValues, CountOf(kRadialBlurInitialValues), kRadialBlurParameters, CountOf(kRadialBlurParameters) },
+            { "Random", "PostEffect/Random.PS", kRandomInitialValues, CountOf(kRandomInitialValues), kRandomParameters, CountOf(kRandomParameters) },
             { "Sepia", "PostEffect/Sepia.PS", nullptr, 0, nullptr, 0 },
             { "Toon", "PostEffect/Toon.PS", kToonInitialValues, CountOf(kToonInitialValues), kToonParameters, CountOf(kToonParameters) },
             { "Vignette", "PostEffect/Vignette.PS", kVignetteInitialValues, CountOf(kVignetteInitialValues), kVignetteParameters, CountOf(kVignetteParameters) },
