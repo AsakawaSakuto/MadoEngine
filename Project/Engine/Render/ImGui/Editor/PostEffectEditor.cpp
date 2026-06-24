@@ -148,6 +148,21 @@ namespace MadoEngine::Editor {
             { "Intensity", "濃さ", 7 * kFloatSize, 0.0f, 4.0f, 0.01f },
         };
 
+        const float kLuminanceBasedOutlineInitialValues[] = {
+            0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 4.0f, 0.05f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kLuminanceBasedOutlineParameters[] = {
+            { "ColorR", "輪郭色R", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorG", "輪郭色G", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorB", "輪郭色B", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorA", "輪郭色A", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Thickness", "太さ", 4 * kFloatSize, 0.25f, 12.0f, 0.05f },
+            { "LuminanceSensitivity", "輝度感度", 5 * kFloatSize, 0.1f, 32.0f, 0.01f },
+            { "EdgeThreshold", "エッジしきい値", 6 * kFloatSize, 0.0001f, 0.5f, 0.0001f },
+            { "Intensity", "強さ", 7 * kFloatSize, 0.0f, 4.0f, 0.01f },
+        };
+
         const float kFogInitialValues[] = {
             0.58f, 0.68f, 0.74f, 1.0f,
             850.0f, 1000.0f, 1.0f, 0.0f,
@@ -203,7 +218,8 @@ namespace MadoEngine::Editor {
             { "GaussianFilter", "PostEffect/GaussianFilter.PS", kGaussianFilterInitialValues, CountOf(kGaussianFilterInitialValues), kGaussianFilterParameters, CountOf(kGaussianFilterParameters) },
             { "GrayScale", "PostEffect/GrayScale.PS", nullptr, 0, nullptr, 0 },
             { "Invert", "PostEffect/Invert.PS", nullptr, 0, nullptr, 0 },
-            { "Outline", "PostEffect/Outline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
+            { "DepthOutline", "PostEffect/DepthOutline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
+            { "LuminanceOutline", "PostEffect/LuminanceOutline.PS", kLuminanceBasedOutlineInitialValues, CountOf(kLuminanceBasedOutlineInitialValues), kLuminanceBasedOutlineParameters, CountOf(kLuminanceBasedOutlineParameters) },
             { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
             { "RadialBlur", "PostEffect/RadialBlur.PS", kRadialBlurInitialValues, CountOf(kRadialBlurInitialValues), kRadialBlurParameters, CountOf(kRadialBlurParameters) },
             { "Sepia", "PostEffect/Sepia.PS", nullptr, 0, nullptr, 0 },

@@ -17,8 +17,12 @@ void TPS_Camera::Update(float deltaTime) {
 
 void TPS_Camera::HandleInput(float deltaTime) {
 	// --- マウス入力 ---
+	auto* mouse = MyInput::GetMouse();
+	if (mouse) {
+		mouse->SetRelativeMode(useMouseInput_);
+	}
+
 	if (useMouseInput_) {
-		auto* mouse = MyInput::GetMouse();
 		if (mouse) {
 			Vector2 delta = mouse->GetDelta();
 			yaw_   += delta.x * mouseSensitivity_;

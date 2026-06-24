@@ -27,6 +27,12 @@ namespace MadoEngine::InputDevice
 		Vector2 GetDelta() const;
 		float GetWheelDelta() const;
 		void AddWheelDelta(float delta);
+		/// @brief マウスをウィンドウ内に固定して相対移動量を取得するモードを設定する
+		/// @param enable trueで相対入力モードを有効にする
+		void SetRelativeMode(bool enable);
+		/// @brief 相対入力モードが有効かどうかを取得する
+		/// @return 有効ならtrue
+		bool IsRelativeMode() const;
 
 	private:
 		static constexpr int BUTTON_COUNT = 3;
@@ -35,7 +41,22 @@ namespace MadoEngine::InputDevice
 
 		Vector2 currentPosition_;
 		Vector2 previousPosition_;
+		Vector2 relativeDelta_;
 		float wheelDelta_;
 		float currentWheelDelta_;
+		bool isRelativeMode_;
+		bool isRelativeCenterInitialized_;
+
+		/// @brief ウィンドウのクライアント領域中心をスクリーン座標で取得する
+		/// @param hwnd 対象ウィンドウハンドル
+		/// @param center 取得した中心座標の格納先
+		/// @return 取得できた場合はtrue
+		bool TryGetClientCenter(HWND hwnd, POINT& center) const;
+
+		/// @brief ウィンドウのクライアント領域をスクリーン座標で取得する
+		/// @param hwnd 対象ウィンドウハンドル
+		/// @param rect 取得した矩形の格納先
+		/// @return 取得できた場合はtrue
+		bool TryGetClientScreenRect(HWND hwnd, RECT& rect) const;
 	};
 }
