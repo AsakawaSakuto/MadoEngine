@@ -38,9 +38,9 @@ bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDir
 /// @param block 配置対象のMapBlockです。
 /// @param blockCenter 配置対象ブロックの中心座標です。
 /// @param blockSize ブロックサイズです。
-/// @param spawnPosition Jarの配置予定座標です。
-/// @return Jarの配置Y座標です。
-float CalculateJarSpawnY(const MapBlock& block, const Vector3& blockCenter, const Vector3& blockSize, const Vector3& spawnPosition) {
+/// @param spawnPosition 配置予定座標です。
+/// @return 配置Y座標です。
+float CalculateSpawnY(const MapBlock& block, const Vector3& blockCenter, const Vector3& blockSize, const Vector3& spawnPosition) {
 	if (block.GetType() != MapBlockType::Slope) {
 		return blockSize.y * static_cast<float>(block.GetHeight());
 	}
@@ -55,11 +55,11 @@ float CalculateJarSpawnY(const MapBlock& block, const Vector3& blockCenter, cons
 	return Collision::Detail::GetSlopeSurfaceY(slope, spawnPosition);
 }
 
-/// @brief Jarの配置回転を計算します。
+/// @brief 配置回転を計算します。
 /// @param block 配置対象のMapBlockです。
 /// @param blockSize ブロックサイズです。
 /// @return Jarの配置回転です。
-Vector3 CalculateJarSpawnRotation(const MapBlock& block, const Vector3& blockSize) {
+Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize) {
 	if (block.GetType() != MapBlockType::Slope) {
 		return { 0.0f, 0.0f, 0.0f };
 	}
@@ -274,11 +274,11 @@ void Map::GenerateJars() {
 			0.0f,
 			static_cast<float>(z) * blockSize_.z
 		};
-		spawnPosition.y = CalculateJarSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
 
 		Jar::InitializeDesc desc;
 		desc.position = spawnPosition;
-		desc.rotation = CalculateJarSpawnRotation(spawnBlock, blockSize_);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_);
 		desc.type = MyRand::GetInt(0, 1) == 0 ? JarType::Money : JarType::Exp;
 		desc.size = MyRand::GetInt(0, 1) == 0 ? JarSize::Small : JarSize::Big;
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
@@ -333,11 +333,12 @@ void Map::GenerateChests() {
 			0.0f,
 			static_cast<float>(z) * blockSize_.z
 		};
-		spawnPosition.y = CalculateJarSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
 
 		Chest::InitializeDesc desc;
 		desc.position = spawnPosition;
-		desc.rotation = CalculateJarSpawnRotation(spawnBlock, blockSize_);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_);
+		desc.rotation.y = MyRand::GetFloat(0.0f, 360.0f);
 		desc.type = MyRand::GetInt(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
 		desc.modelName = "ChestModel_" + std::to_string(createdCount);
 		desc.colliderName = "ChestAABB_" + std::to_string(createdCount);
