@@ -60,9 +60,9 @@ namespace MadoEngine {
 
             TextureEntry entry;
             entry.resource = std::move(resource);
-            entry.index    = srvIndex;
-            entry.width    = static_cast<uint32_t>(mipImage.GetMetadata().width);
-            entry.height   = static_cast<uint32_t>(mipImage.GetMetadata().height);
+            entry.index = srvIndex;
+            entry.width = static_cast<uint32_t>(mipImage.GetMetadata().width);
+            entry.height = static_cast<uint32_t>(mipImage.GetMetadata().height);
             textures_[key] = std::move(entry);
             loadCount++;
 
@@ -99,6 +99,85 @@ namespace MadoEngine {
             return UINT32_MAX;
         }
         return it->second.index;
+    }
+
+    uint32_t TextureManager::RegisterOrUpdateRGBA(
+        const std::string& key,
+        uint32_t width,
+        uint32_t height,
+        const uint8_t* rgbaPixels,
+        uint32_t dataSize) {
+        if (!device_ || !srvManager_) {
+            Logger::Output("[Engine] TextureManagerが未初期化のため動的テクスチャを登録できません: " + key, Logger::Level::Error);
+            return UINT32_MAX;
+        }
+        if (key.empty() || width == 0 || height == 0 || !rgbaPixels) {
+            Logger::Output("[Engine] 動的テクスチャの登録パラメータが不正です: " + key, Logger::Level::Error);
+            return UINT32_MAX;
+        }
+
+        const uint32_t requiredSize = width * height * 4;
+        if (dataSize < requiredSize) {
+            Logger::Output("[Engine] 動的テクスチャのピクセルデータサイズが不足しています: " + key, Logger::Level::Error);
+            return UINT32_MAX;
+        }
+
+        auto it = textures_.find(key);
+        if (it != textures_.end()) {
+            TextureEntry& existing = it->second;
+            if (existing.width != width || existing.height != height || !existing.resource) {
+                existing.resource = CreateDynamicTextureResource(width, height);
+                if (!existing.resource) {
+                    Logger::Output("[Engine] 動的テクスチャの再作成に失敗しました: " + key, Logger::Level::Error);
+                    return UINT32_MAX;
+                }
+                srvManager_->CreateShaderResourceView(existing.resource.Get(), existing.index, DXGI_FORMAT_R8G8B8A8_UNORM);
+                existing.width = width;
+                existing.height = height;
+            }
+
+            UploadRGBAData(existing.resource.Get(), width, height, rgbaPixels);
+            return existing.index;
+        }
+
+        Microsoft::WRL::ComPtr<ID3D12Resource> resource = CreateDynamicTextureResource(width, height);
+        if (!resource) {
+            Logger::Output("[Engine] 動的テクスチャの作成に失敗しました: " + key, Logger::Level::Error);
+            return UINT32_MAX;
+        }
+
+        UploadRGBAData(resource.Get(), width, height, rgbaPixels);
+
+        const uint32_t srvIndex = srvManager_->Allocate();
+        srvManager_->CreateShaderResourceView(resource.Get(), srvIndex, DXGI_FORMAT_R8G8B8A8_UNORM);
+
+        TextureEntry entry;
+        entry.resource = std::move(resource);
+        entry.index = srvIndex;
+        entry.width = width;
+        entry.height = height;
+        textures_[key] = std::move(entry);
+
+        Logger::Output("[Engine] 動的テクスチャを登録しました: " + key, Logger::Level::Assets);
+        return srvIndex;
+    }
+
+    bool TextureManager::DestroyTexture(const std::string& key) {
+        auto it = textures_.find(key);
+        if (it == textures_.end()) {
+            Logger::Output("[Engine] 解放対象のテクスチャが見つかりません: " + key, Logger::Level::Warning);
+            return false;
+        }
+
+        const uint32_t srvIndex = it->second.index;
+        textures_.erase(it);
+
+        if (srvManager_ && srvIndex != UINT32_MAX) {
+            srvManager_->Free(srvIndex);
+        }
+
+        Logger::Output("[Engine] テクスチャを解放しました: " + key, Logger::Level::Assets);
+        return true;
     }
 
     D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureIndex) {
@@ -145,18 +224,18 @@ namespace MadoEngine {
 
         // リソースデスクを TexMetadata から設定
         D3D12_RESOURCE_DESC resourceDesc{};
-        resourceDesc.Width            = static_cast<UINT>(metadata.width);
-        resourceDesc.Height           = static_cast<UINT>(metadata.height);
-        resourceDesc.MipLevels        = static_cast<UINT16>(metadata.mipLevels);
+        resourceDesc.Width = static_cast<UINT>(metadata.width);
+        resourceDesc.Height = static_cast<UINT>(metadata.height);
+        resourceDesc.MipLevels = static_cast<UINT16>(metadata.mipLevels);
         resourceDesc.DepthOrArraySize = static_cast<UINT16>(metadata.arraySize);
-        resourceDesc.Format           = metadata.format;
+        resourceDesc.Format = metadata.format;
         resourceDesc.SampleDesc.Count = 1;
-        resourceDesc.Dimension        = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
+        resourceDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
 
         // CUSTOM ヒープ（WRITE_BACK / L0）
         D3D12_HEAP_PROPERTIES heapProps{};
-        heapProps.Type                 = D3D12_HEAP_TYPE_CUSTOM;
-        heapProps.CPUPageProperty      = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+        heapProps.Type = D3D12_HEAP_TYPE_CUSTOM;
+        heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
         heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
 
         Microsoft::WRL::ComPtr<ID3D12Resource> resource;
@@ -173,6 +252,60 @@ namespace MadoEngine {
         }
 
         return resource;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::CreateDynamicTextureResource(
+        uint32_t width,
+        uint32_t height) const {
+        D3D12_RESOURCE_DESC resourceDesc{};
+        resourceDesc.Width = width;
+        resourceDesc.Height = height;
+        resourceDesc.MipLevels = 1;
+        resourceDesc.DepthOrArraySize = 1;
+        resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        resourceDesc.SampleDesc.Count = 1;
+        resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+        D3D12_HEAP_PROPERTIES heapProps{};
+        heapProps.Type = D3D12_HEAP_TYPE_CUSTOM;
+        heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+        heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+
+        Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+        HRESULT hr = device_->CreateCommittedResource(
+            &heapProps,
+            D3D12_HEAP_FLAG_NONE,
+            &resourceDesc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&resource));
+
+        if (FAILED(hr)) {
+            return nullptr;
+        }
+
+        return resource;
+    }
+
+    void TextureManager::UploadRGBAData(
+        ID3D12Resource* texture,
+        uint32_t width,
+        uint32_t height,
+        const uint8_t* rgbaPixels) const {
+        D3D12_BOX box{};
+        box.left = 0;
+        box.top = 0;
+        box.front = 0;
+        box.right = width;
+        box.bottom = height;
+        box.back = 1;
+
+        texture->WriteToSubresource(
+            0,
+            &box,
+            rgbaPixels,
+            width * 4,
+            width * height * 4);
     }
 
     void TextureManager::UploadTextureData(

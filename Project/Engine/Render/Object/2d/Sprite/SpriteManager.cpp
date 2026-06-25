@@ -30,6 +30,15 @@ void SpriteManager::Finalize() {
 	Logger::Output("全リソースを解放しました", Logger::Level::Engine);
 }
 
+void SpriteManager::SetScreenSize(float width, float height) {
+	screenWidth_ = width;
+	screenHeight_ = height;
+	for (auto& [name, sprite] : sprites_) {
+		(void)name;
+		sprite->SetScreenSize(screenWidth_, screenHeight_);
+	}
+}
+
 Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName, SceneType sceneType) {
 	if (sprites_.contains(name)) {
 		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
@@ -40,6 +49,7 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 	sprite->Initialize(device_, commandList_, textureName, sharedGeometry_);
 	sprite->SetPSORegistry(psoRegistry_);
 	sprite->SetSceneType(sceneType);
+	sprite->SetScreenSize(screenWidth_, screenHeight_);
 
 	Sprite* ptr = sprite.get();
 	sprites_.emplace(name, std::move(sprite));

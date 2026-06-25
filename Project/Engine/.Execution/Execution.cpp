@@ -140,7 +140,10 @@ namespace MadoEngine
 		viewportScissor_->UpdateSize(renderWidth_, renderHeight_);
 
 		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+		MadoEngine::TextManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::ModelManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
+		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
 
 		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 50000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
@@ -252,6 +255,8 @@ namespace MadoEngine
 
 		renderWidth_ = width;
 		renderHeight_ = height;
+		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
+		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
 		Logger::Output(
 			"描画サイズを更新しました: " +
 			std::to_string(renderWidth_) + "x" + std::to_string(renderHeight_),
@@ -467,6 +472,8 @@ namespace MadoEngine
 
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
+		MadoEngine::Editor::DrawTextManagerEditorUI();
+
 #else
 		if (!isLayerEffectResolved_) {
 			EndSceneColorRender();
@@ -813,11 +820,12 @@ namespace MadoEngine
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance().Finalize();
 		MadoEngine::InputManager::GetInstance().Finalize();
+		MadoEngine::SpriteManager::GetInstance().Finalize();
+		MadoEngine::TextManager::GetInstance().Finalize();
+		MadoEngine::ModelManager::GetInstance().Finalize();
 		MadoEngine::TextureManager::GetInstance().Finalize();
 		MadoEngine::ShaderManager::GetInstance().Finalize();
 		MadoEngine::RootSignatureManager::GetInstance().Finalize();
-		MadoEngine::SpriteManager::GetInstance().Finalize();
-		MadoEngine::ModelManager::GetInstance().Finalize();
 
 		psoRegistry_->Finalize();
 

@@ -4,30 +4,6 @@
 #include "imguiHeaders.h"
 #include <cmath>
 
-namespace {
-
-const char* kTestDirectionalLightName = "Test_DirectionalLight";
-const char* kTestPointLightName = "Test_PointLight";
-const char* kTestPointLightName2 = "Test_PointLight2";
-const char* kTestSpotLightName = "Test_SpotLight";
-
-/// @brief LightHandleが有効な場合だけLightManagerから破棄する
-/// @param lightManager ライト管理クラス
-/// @param handle 破棄対象のライトハンドル
-void DestroyLightHandle(LightManager& lightManager, LightHandle& handle) {
-	if (!handle.IsValid()) {
-		return;
-	}
-
-	if (lightManager.IsValid(handle)) {
-		lightManager.Destroy(handle);
-	}
-
-	handle = LightHandle{};
-}
-
-} // namespace
-
 Test::Test()
 	
 {}
@@ -60,7 +36,7 @@ void Test::Initialize() {
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
 
 	map_ = std::make_unique<Map>();
-	map_->Initialize(792271172);
+	map_->Initialize(MyRand::CreateSeed());
 
 	model_ = MyModel::Create("testModel", "AnimatedCube", SceneType::Test);
 	model_->SetPosition(modelPos_);
@@ -125,7 +101,6 @@ void Test::DrawImGui() {
 
 	ImGui::Begin("seed");
 
-	ImGui::Text("seed : %u", MyRand::GetSeed());
 	ImGui::Text("map seed : %u", map_->GetSeed());
 
 	ImGui::End();

@@ -33,6 +33,11 @@ public:
 	/// @brief 全リソースを解放する
 	void Finalize();
 
+	/// @brief 管理中のSpriteへスクリーンサイズを設定する
+	/// @param width スクリーン幅
+	/// @param height スクリーン高さ
+	void SetScreenSize(float width, float height);
+
 	/// @brief Spriteを生成して管理下に登録する
 	/// @param name Spriteの識別名
 	/// @param textureName 使用するテクスチャ名
@@ -82,6 +87,9 @@ private:
 
 	// 共有ジオメトリバッファ（このクラスが唯一の所有者）
 	SpriteSharedGeometry sharedGeometry_;
+
+	float screenWidth_ = 1280.0f;
+	float screenHeight_ = 720.0f;
 
 	// Sprite管理マップ（識別名 → unique_ptr）
 	std::unordered_map<std::string, std::unique_ptr<Sprite>> sprites_;

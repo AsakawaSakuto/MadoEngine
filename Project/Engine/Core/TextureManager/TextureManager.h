@@ -13,8 +13,8 @@ namespace MadoEngine {
     /// @brief テクスチャ1件分の情報
     struct TextureEntry {
         Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-        uint32_t index  = 0; // 登録順インデックス
-        uint32_t width  = 0;
+        uint32_t index = 0; // 登録順インデックス
+        uint32_t width = 0;
         uint32_t height = 0;
     };
 
@@ -51,7 +51,26 @@ namespace MadoEngine {
         /// @return テクスチャインデックス（見つからない場合は UINT32_MAX）
         uint32_t GetTextureIndex(const std::string& fileName) const;
 
-		/// @brief テクスチャインデックスからSRVハンドルを取得する
+        /// @brief RGBAピクセルを動的テクスチャとして登録または更新します。
+        /// @param key 登録キー。
+        /// @param width テクスチャ幅。
+        /// @param height テクスチャ高さ。
+        /// @param rgbaPixels RGBA8ピクセルデータ。
+        /// @param dataSize ピクセルデータサイズ。
+        /// @return SRVインデックス。失敗時はUINT32_MAX。
+        uint32_t RegisterOrUpdateRGBA(
+            const std::string& key,
+            uint32_t width,
+            uint32_t height,
+            const uint8_t* rgbaPixels,
+            uint32_t dataSize);
+
+        /// @brief 指定キーのテクスチャを登録解除し、SRVを解放します。
+        /// @param key 登録キー。
+        /// @return 解放できた場合はtrue。
+        bool DestroyTexture(const std::string& key);
+
+        /// @brief テクスチャインデックスからSRVハンドルを取得する
         /// @param textureIndex テクスチャインデックス
         /// @return GPU用のSRVハンドル
         D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(uint32_t textureIndex);
@@ -76,6 +95,25 @@ namespace MadoEngine {
         Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(
             ID3D12Device* device,
             const DirectX::TexMetadata& metadata) const;
+
+        /// @brief RGBA8用の動的テクスチャリソースを作成します。
+        /// @param width テクスチャ幅。
+        /// @param height テクスチャ高さ。
+        /// @return 作成されたテクスチャリソース。
+        Microsoft::WRL::ComPtr<ID3D12Resource> CreateDynamicTextureResource(
+            uint32_t width,
+            uint32_t height) const;
+
+        /// @brief RGBA8ピクセルをテクスチャリソースへ書き込みます。
+        /// @param texture 書き込み先テクスチャ。
+        /// @param width テクスチャ幅。
+        /// @param height テクスチャ高さ。
+        /// @param rgbaPixels RGBA8ピクセルデータ。
+        void UploadRGBAData(
+            ID3D12Resource* texture,
+            uint32_t width,
+            uint32_t height,
+            const uint8_t* rgbaPixels) const;
 
         /// @brief GPU リソースへミップマップデータを転送する
         /// @param texture 転送先リソース

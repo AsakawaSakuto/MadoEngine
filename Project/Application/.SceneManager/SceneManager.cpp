@@ -80,6 +80,7 @@ void SceneManager::Update(float dt) {
 	AddLightPositionDebugSpheres();
 
 	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
+	MadoEngine::TextManager::GetInstance().UpdateAll(currentSceneType_);
 
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
 	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
@@ -106,8 +107,9 @@ void SceneManager::DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask) 
 	if (MadoEngine::Render::ContainsRenderLayer(layerMask, MadoEngine::Render::RenderLayer::Debug)) {
 		MadoEngine::DebugLineManager::GetInstance().Draw(camera);
 	}
-	MadoEngine::SpriteManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
 	MadoEngine::ModelManager::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
+	MadoEngine::SpriteManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
+	MadoEngine::TextManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
 }
 
 void SceneManager::DrawCurrentScene() {

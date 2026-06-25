@@ -3,3 +3,4 @@
 #include "Render/ImGui/Editor/GuizmoEditor.h"
 #include "Render/ImGui/Editor/LightEditor.h"
 #include "Render/ImGui/Editor/PostEffectEditor.h"
+#include "Render/ImGui/Editor/TextEditorUI.h"

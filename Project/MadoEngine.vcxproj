@@ -87,7 +87,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Debug;$(ProjectDir)Externals\DirectXTex\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DirectXTex.lib;dwrite.lib;d2d1.lib;windowscodecs.lib;ole32.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -109,7 +109,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Release;$(ProjectDir)Externals\DirectXTex\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DirectXTex.lib;dwrite.lib;d2d1.lib;windowscodecs.lib;ole32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
@@ -130,7 +130,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Release;$(ProjectDir)Externals\DirectXTex\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>DirectXTex.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DirectXTex.lib;dwrite.lib;d2d1.lib;windowscodecs.lib;ole32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -177,9 +177,13 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
@@ -299,12 +303,17 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\TextEditorUI.h" />
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteSharedGeometry.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\MyText.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\Text.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextManager.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextTextureGenerator.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationFunction.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationStruct.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\DebugLineManager.h" />
