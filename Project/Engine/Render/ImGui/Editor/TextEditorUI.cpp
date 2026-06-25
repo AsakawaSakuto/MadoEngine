@@ -150,7 +150,6 @@ void DrawTextManagerEditorUI() {
 	TextManager& manager = TextManager::GetInstance();
 
 	static std::array<char, 128> createName{};
-	static std::array<char, 260> jsonPath{};
 	static std::string selectedName;
 	static std::string editingName;
 	static std::array<char, 4096> textBuffer{};
@@ -158,12 +157,12 @@ void DrawTextManagerEditorUI() {
 	static bool isBufferInitialized = false;
 	if (!isBufferInitialized) {
 		CopyToBuffer(createName, "Text");
-		CopyToBuffer(jsonPath, "Assets/Json/TextObjects.json");
 		isBufferInitialized = true;
 	}
 
 	ImGui::Begin("Text Editor");
 
+	ImGui::SetNextItemWidth(200.0f);
 	ImGui::InputText("New Name", createName.data(), createName.size());
 	ImGui::SameLine();
 	if (ImGui::Button("Create")) {
@@ -172,6 +171,15 @@ void DrawTextManagerEditorUI() {
 			selectedName = createName.data();
 			editingName.clear();
 		}
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Save Json")) {
+		manager.SaveToFile("Assets/Json/TextObjects.json");
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load Json")) {
+		manager.LoadFromFile("Assets/Json/TextObjects.json");
+		editingName.clear();
 	}
 
 	ImGui::Separator();
@@ -272,17 +280,6 @@ void DrawTextManagerEditorUI() {
 		ImGui::TextDisabled("Textを選択してください。");
 	}
 	ImGui::EndChild();
-
-	ImGui::Separator();
-	ImGui::InputText("Json Path", jsonPath.data(), jsonPath.size());
-	if (ImGui::Button("Save Json")) {
-		manager.SaveToFile(jsonPath.data());
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("Load Json")) {
-		manager.LoadFromFile(jsonPath.data());
-		editingName.clear();
-	}
 
 	ImGui::End();
 }

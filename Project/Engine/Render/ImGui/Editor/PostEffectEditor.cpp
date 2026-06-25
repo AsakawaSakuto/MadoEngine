@@ -848,14 +848,21 @@ namespace MadoEngine::Editor {
     } // namespace
 
     void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager) {
+        static LayerEffectPassListType selectedListType = LayerEffectPassListType::Layer;
+        static std::size_t selectedIndex = static_cast<std::size_t>(-1);
+
         ImGui::Begin("Layer Effect Pass Editor");
 
         if (ImGui::Button("追加")) {
             AddLayerEffectPassFromEditor(postEffectManager, false);
+            selectedListType = LayerEffectPassListType::Layer;
+            selectedIndex = postEffectManager.GetLayerPasses().empty() ? static_cast<std::size_t>(-1) : postEffectManager.GetLayerPasses().size() - 1;
         }
         ImGui::SameLine();
         if (ImGui::Button("フルスクリーン追加")) {
             AddLayerEffectPassFromEditor(postEffectManager, true);
+            selectedListType = LayerEffectPassListType::Screen;
+            selectedIndex = postEffectManager.GetScreenPasses().empty() ? static_cast<std::size_t>(-1) : postEffectManager.GetScreenPasses().size() - 1;
         }
 
         ImGui::SameLine();
@@ -874,40 +881,123 @@ namespace MadoEngine::Editor {
         ImGui::Separator();
 
         LayerEffectPassRemoveRequest removeRequest{};
-        constexpr ImGuiTableFlags tableFlags =
-            ImGuiTableFlags_BordersInnerV |
-            ImGuiTableFlags_BordersInnerH |
-            ImGuiTableFlags_RowBg |
-            ImGuiTableFlags_Resizable |
-            ImGuiTableFlags_SizingStretchProp;
 
-        if (ImGui::BeginTable("LayerEffectPassEditorTable", 6, tableFlags)) {
-            ImGui::TableSetupColumn("On", ImGuiTableColumnFlags_WidthFixed, 36.0f);
-            ImGui::TableSetupColumn("名前", ImGuiTableColumnFlags_WidthStretch, 1.5f);
-            ImGui::TableSetupColumn("ポストエフェクト", ImGuiTableColumnFlags_WidthStretch, 1.2f);
-            ImGui::TableSetupColumn("レイヤー", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-            ImGui::TableSetupColumn("Depth", ImGuiTableColumnFlags_WidthFixed, 52.0f);
-            ImGui::TableSetupColumn("削除", ImGuiTableColumnFlags_WidthFixed, 56.0f);
-            ImGui::TableHeadersRow();
+        std::vector<Render::LayerEffectPass>& layerPasses = postEffectManager.GetLayerPasses();
+        std::vector<Render::LayerEffectPass>& screenPasses = postEffectManager.GetScreenPasses();
 
-            std::vector<Render::LayerEffectPass>& layerPasses = postEffectManager.GetLayerPasses();
-            for (std::size_t i = 0; i < layerPasses.size(); ++i) {
-                DrawLayerEffectPassEditorRow(layerPasses[i], LayerEffectPassListType::Layer, i, removeRequest);
+        auto getSelectedPass = [&]() -> Render::LayerEffectPass* {
+            if (selectedIndex == static_cast<std::size_t>(-1)) {
+                return nullptr;
             }
-
-            std::vector<Render::LayerEffectPass>& screenPasses = postEffectManager.GetScreenPasses();
-            for (std::size_t i = 0; i < screenPasses.size(); ++i) {
-                DrawLayerEffectPassEditorRow(screenPasses[i], LayerEffectPassListType::Screen, i, removeRequest);
+            if (selectedListType == LayerEffectPassListType::Layer) {
+                if (selectedIndex >= layerPasses.size()) {
+                    return nullptr;
+                }
+                return &layerPasses[selectedIndex];
             }
+            if (selectedIndex >= screenPasses.size()) {
+                return nullptr;
+            }
+            return &screenPasses[selectedIndex];
+        };
 
-            ImGui::EndTable();
+        ImGui::BeginChild("LayerEffectPassList", ImVec2(240.0f, 0.0f), true);
+        auto drawPassListItem = [&](Render::LayerEffectPass& pass, LayerEffectPassListType listType, std::size_t index) {
+            ImGui::PushID(pass.GetKey().c_str());
+            const bool selected = selectedListType == listType && selectedIndex == index;
+            const char* typeLabel = listType == LayerEffectPassListType::Layer ? "Layer" : "Screen";
+            const std::string label = std::string("[") + typeLabel + "] " + pass.GetName();
+            const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+            float selectableWidth = ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x;
+            if (selectableWidth < 1.0f) {
+                selectableWidth = 1.0f;
+            }
+            if (ImGui::Selectable(label.c_str(), selected, 0, ImVec2(selectableWidth, 0.0f))) {
+                selectedListType = listType;
+                selectedIndex = index;
+            }
+            ImGui::SameLine();
+            if (ImGui::SmallButton("削除")) {
+                removeRequest.isRequested = true;
+                removeRequest.listType = listType;
+                removeRequest.index = index;
+            }
+            ImGui::PopID();
+        };
+
+        for (std::size_t i = 0; i < layerPasses.size(); ++i) {
+            drawPassListItem(layerPasses[i], LayerEffectPassListType::Layer, i);
         }
+        for (std::size_t i = 0; i < screenPasses.size(); ++i) {
+            drawPassListItem(screenPasses[i], LayerEffectPassListType::Screen, i);
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::BeginChild("LayerEffectPassProperties", ImVec2(0.0f, 0.0f), true);
+        Render::LayerEffectPass* selectedPass = getSelectedPass();
+        if (selectedPass) {
+            ImGui::PushID(selectedPass->GetKey().c_str());
+
+            bool enabled = selectedPass->IsEnabled();
+            if (ImGui::Checkbox("Enabled", &enabled)) {
+                selectedPass->SetEnabled(enabled);
+            }
+
+            std::array<char, 128> nameBuffer{};
+            std::snprintf(nameBuffer.data(), nameBuffer.size(), "%s", selectedPass->GetName().c_str());
+            if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
+                if (nameBuffer[0] != '\0') {
+                    selectedPass->SetName(nameBuffer.data());
+                }
+            }
+
+            DrawPostEffectSelectionCombo(*selectedPass);
+
+            if (selectedListType == LayerEffectPassListType::Layer) {
+                ImGui::TextUnformatted("Layer");
+                DrawLayerSelectionCombo(*selectedPass);
+
+                bool ignoreDepth = selectedPass->IsIgnoreDepthForMask();
+                if (ImGui::Checkbox("Ignore Depth", &ignoreDepth)) {
+                    selectedPass->SetIgnoreDepthForMask(ignoreDepth);
+                }
+            } else {
+                ImGui::TextDisabled("Target: Screen");
+            }
+
+            constexpr ImGuiTableFlags propertyTableFlags =
+                ImGuiTableFlags_BordersInnerV |
+                ImGuiTableFlags_BordersInnerH |
+                ImGuiTableFlags_RowBg |
+                ImGuiTableFlags_SizingStretchProp;
+            if (ImGui::BeginTable("LayerEffectPassPropertyTable", 3, propertyTableFlags)) {
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 1.0f);
+                ImGui::TableSetupColumn("項目", ImGuiTableColumnFlags_WidthFixed, 150.0f);
+                ImGui::TableSetupColumn("値", ImGuiTableColumnFlags_WidthStretch);
+                DrawPostEffectParameterRows(*selectedPass);
+                ImGui::EndTable();
+            }
+
+            ImGui::PopID();
+        } else {
+            selectedIndex = static_cast<std::size_t>(-1);
+            ImGui::TextDisabled("LayerEffectPassを選択してください。");
+        }
+        ImGui::EndChild();
 
         if (removeRequest.isRequested) {
+            const bool isSelectedRemoved =
+                selectedListType == removeRequest.listType &&
+                selectedIndex == removeRequest.index;
             if (removeRequest.listType == LayerEffectPassListType::Layer) {
                 postEffectManager.RemoveLayerPass(removeRequest.index);
             } else {
                 postEffectManager.RemoveScreenPass(removeRequest.index);
+            }
+            if (isSelectedRemoved) {
+                selectedIndex = static_cast<std::size_t>(-1);
             }
         }
 

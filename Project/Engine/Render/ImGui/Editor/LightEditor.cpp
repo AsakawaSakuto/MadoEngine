@@ -389,6 +389,7 @@ namespace MadoEngine::Editor {
 
     void DrawLightManagerEditorUI() {
         LightManager& lightManager = LightManager::GetInstance();
+        static LightHandle selectedHandle{};
 
         ImGui::Begin("Light Manager Editor");
 
@@ -419,40 +420,103 @@ namespace MadoEngine::Editor {
         ImGui::Separator();
 
         LightRemoveRequest removeRequest{};
-        constexpr ImGuiTableFlags tableFlags =
-            ImGuiTableFlags_BordersInnerV |
-            ImGuiTableFlags_BordersInnerH |
-            ImGuiTableFlags_RowBg |
-            ImGuiTableFlags_Resizable |
-            ImGuiTableFlags_SizingStretchProp;
 
-        if (ImGui::BeginTable("LightManagerEditorTable", 5, tableFlags)) {
-            ImGui::TableSetupColumn("On", ImGuiTableColumnFlags_WidthFixed, 36.0f);
-            ImGui::TableSetupColumn("名前", ImGuiTableColumnFlags_WidthStretch, 1.5f);
-            ImGui::TableSetupColumn("シーン", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-            ImGui::TableSetupColumn("ライトレイヤー", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-            ImGui::TableSetupColumn("削除", ImGuiTableColumnFlags_WidthFixed, 56.0f);
-            ImGui::TableHeadersRow();
+        ImGui::BeginChild("LightList", ImVec2(220.0f, 0.0f), true);
+        auto drawLightListItem = [&](LightHandle handle) {
+            ImGui::PushID(static_cast<int>(handle.type));
+            ImGui::PushID(static_cast<int>(handle.index));
+            ImGui::PushID(static_cast<int>(handle.generation));
 
-            const std::vector<LightHandle> directionalHandles = lightManager.GetDirectionalLightHandles();
-            for (LightHandle handle : directionalHandles) {
-                DrawLightManagerEditorRow(lightManager, handle, removeRequest);
+            const bool selected =
+                selectedHandle.type == handle.type &&
+                selectedHandle.index == handle.index &&
+                selectedHandle.generation == handle.generation;
+            const std::string label = std::string("[") + GetLightTypeLabel(handle.type) + "] " + lightManager.GetName(handle);
+            const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+            float selectableWidth = ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x;
+            if (selectableWidth < 1.0f) {
+                selectableWidth = 1.0f;
+            }
+            if (ImGui::Selectable(label.c_str(), selected, 0, ImVec2(selectableWidth, 0.0f))) {
+                selectedHandle = handle;
+            }
+            ImGui::SameLine();
+            if (ImGui::SmallButton("削除")) {
+                removeRequest.isRequested = true;
+                removeRequest.handle = handle;
             }
 
-            const std::vector<LightHandle> pointHandles = lightManager.GetPointLightHandles();
-            for (LightHandle handle : pointHandles) {
-                DrawLightManagerEditorRow(lightManager, handle, removeRequest);
-            }
+            ImGui::PopID();
+            ImGui::PopID();
+            ImGui::PopID();
+        };
 
-            const std::vector<LightHandle> spotHandles = lightManager.GetSpotLightHandles();
-            for (LightHandle handle : spotHandles) {
-                DrawLightManagerEditorRow(lightManager, handle, removeRequest);
-            }
-
-            ImGui::EndTable();
+        const std::vector<LightHandle> directionalHandles = lightManager.GetDirectionalLightHandles();
+        for (LightHandle handle : directionalHandles) {
+            drawLightListItem(handle);
         }
 
+        const std::vector<LightHandle> pointHandles = lightManager.GetPointLightHandles();
+        for (LightHandle handle : pointHandles) {
+            drawLightListItem(handle);
+        }
+
+        const std::vector<LightHandle> spotHandles = lightManager.GetSpotLightHandles();
+        for (LightHandle handle : spotHandles) {
+            drawLightListItem(handle);
+        }
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::BeginChild("LightProperties", ImVec2(0.0f, 0.0f), true);
+        if (lightManager.IsValid(selectedHandle)) {
+            ImGui::PushID(static_cast<int>(selectedHandle.type));
+            ImGui::PushID(static_cast<int>(selectedHandle.index));
+            ImGui::PushID(static_cast<int>(selectedHandle.generation));
+
+            bool enabled = lightManager.IsEnabled(selectedHandle);
+            if (ImGui::Checkbox("Enabled", &enabled)) {
+                lightManager.SetEnabled(selectedHandle, enabled);
+            }
+
+            ImGui::TextUnformatted("Name");
+            DrawLightNameInput(lightManager, selectedHandle);
+
+            ImGui::TextUnformatted("Scene");
+            DrawLightSceneSelectionCombo(lightManager, selectedHandle);
+
+            ImGui::TextUnformatted("Light Layer");
+            DrawLightLayerSelectionCombo(lightManager, selectedHandle);
+
+            constexpr ImGuiTableFlags propertyTableFlags =
+                ImGuiTableFlags_BordersInnerV |
+                ImGuiTableFlags_BordersInnerH |
+                ImGuiTableFlags_RowBg |
+                ImGuiTableFlags_SizingStretchProp;
+            if (ImGui::BeginTable("LightPropertyTable", 3, propertyTableFlags)) {
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 1.0f);
+                ImGui::TableSetupColumn("項目", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+                ImGui::TableSetupColumn("値", ImGuiTableColumnFlags_WidthStretch);
+                DrawLightParameterRows(lightManager, selectedHandle);
+                ImGui::EndTable();
+            }
+
+            ImGui::PopID();
+            ImGui::PopID();
+            ImGui::PopID();
+        } else {
+            selectedHandle = {};
+            ImGui::TextDisabled("Lightを選択してください。");
+        }
+        ImGui::EndChild();
+
         if (removeRequest.isRequested) {
+            if (selectedHandle.type == removeRequest.handle.type &&
+                selectedHandle.index == removeRequest.handle.index &&
+                selectedHandle.generation == removeRequest.handle.generation) {
+                selectedHandle = {};
+            }
             lightManager.Destroy(removeRequest.handle);
         }
 

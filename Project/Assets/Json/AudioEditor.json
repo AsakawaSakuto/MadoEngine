@@ -1,0 +1,78 @@
+{
+    "categoryVolumes": {
+        "BGM": 0.5,
+        "SE": 0.5,
+        "Voice": 0.5
+    },
+    "individualVolumes": {
+        "bgm1": {
+            "type": "BGM",
+            "volume": 1.0
+        },
+        "bgm2": {
+            "type": "BGM",
+            "volume": 1.0
+        },
+        "bgm3": {
+            "type": "BGM",
+            "volume": 1.0
+        },
+        "bgm4": {
+            "type": "BGM",
+            "volume": 1.0
+        },
+        "bgm5": {
+            "type": "BGM",
+            "volume": 1.0
+        },
+        "chest": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "confirm": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "damage": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "expget": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "jar": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "jump": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "lockin": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "playerdie": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "select": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "startup": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "titlebgm": {
+            "type": "BGM",
+            "volume": 1.0
+        },
+        "upgrade": {
+            "type": "SE",
+            "volume": 1.0
+        }
+    },
+    "masterVolume": 0.5
+}

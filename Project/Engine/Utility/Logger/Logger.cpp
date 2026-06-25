@@ -1,14 +1,23 @@
 #include "Logger.h"
 #include <Windows.h>
 #include <chrono>
+#include <deque>
 #include <iomanip>
 #include <sstream>
 #include <vector>
 #include <fstream>
 #include <filesystem>
 #include <mutex>
+#include <utility>
 
 namespace {
+
+	constexpr std::size_t kDefaultMaxBufferedEntries = 500;
+
+	std::deque<Logger::LogEntry> g_logEntries;
+	std::mutex g_logEntriesMutex;
+	std::size_t g_maxBufferedEntries = kDefaultMaxBufferedEntries;
+	std::uint64_t g_nextLogSequence = 1;
 
     // std::stringを返すことでメモリ安全性を確保
     std::string LevelToString(Logger::Level level) {
@@ -22,6 +31,27 @@ namespace {
         default:                         return " --- [UNKNOWN] ------- ";
         }
     }
+
+	/// @brief 保持件数を超えたログ履歴を削除する
+	void TrimLogEntries() {
+		while (g_logEntries.size() > g_maxBufferedEntries) {
+			g_logEntries.pop_front();
+		}
+	}
+
+	/// @brief ログ履歴へログを追加する
+	/// @param entry 追加するログ情報
+	void PushLogEntry(Logger::LogEntry entry) {
+		std::lock_guard<std::mutex> lock(g_logEntriesMutex);
+
+		if (g_maxBufferedEntries == 0) {
+			return;
+		}
+
+		entry.sequence = g_nextLogSequence++;
+		g_logEntries.push_back(std::move(entry));
+		TrimLogEntries();
+	}
 
     // 安定したタイムスタンプ取得
     std::string GetTimestamp() {
@@ -162,7 +192,7 @@ namespace Logger {
 #endif
     }
 
-    void Logger::Output(const std::string& message, Level level, const std::source_location& location) {
+    void Output(const std::string& message, Level level, const std::source_location& location) {
 
         // 1. 文字列を組み立てる (UTF-8のまま)
         std::string ts = GetTimestamp();
@@ -172,8 +202,18 @@ namespace Logger {
         if (lastSlash != std::string::npos) file = file.substr(lastSlash + 1);
 
         std::ostringstream oss;
-        oss << "[" << ts << "]" << lv << file << "(" << location.line() << ") : " << message << "\n";
-        std::string utf8Str = oss.str();
+        oss << "[" << ts << "]" << lv << file << "(" << location.line() << ") : " << message;
+        std::string formattedText = oss.str();
+        std::string utf8Str = formattedText + "\n";
+
+		LogEntry entry;
+		entry.level = level;
+		entry.timestamp = ts;
+		entry.fileName = file;
+		entry.line = location.line();
+		entry.message = message;
+		entry.formattedText = formattedText;
+		PushLogEntry(std::move(entry));
 
 #ifdef NDEBUG
         // Releaseビルド時はファイルに出力
@@ -189,4 +229,20 @@ namespace Logger {
         OutputDebugStringW(wideStr.c_str());
 #endif
     }
+
+	std::vector<LogEntry> GetEntries() {
+		std::lock_guard<std::mutex> lock(g_logEntriesMutex);
+		return std::vector<LogEntry>(g_logEntries.begin(), g_logEntries.end());
+	}
+
+	void ClearEntries() {
+		std::lock_guard<std::mutex> lock(g_logEntriesMutex);
+		g_logEntries.clear();
+	}
+
+	void SetMaxBufferedEntries(std::size_t maxEntries) {
+		std::lock_guard<std::mutex> lock(g_logEntriesMutex);
+		g_maxBufferedEntries = maxEntries;
+		TrimLogEntries();
+	}
 }

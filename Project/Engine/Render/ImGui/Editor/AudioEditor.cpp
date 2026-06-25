@@ -1,14 +1,159 @@
 #include "AudioEditor.h"
+#include "Utility/Json/Core/JsonFile.h"
+#include "Utility/Logger/Logger.h"
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace MadoEngine::Editor {
 
 #ifdef USE_IMGUI 
+
+    namespace {
+
+        const std::filesystem::path kAudioEditorJsonPath = "Assets/Json/AudioEditor.json";
+
+        /// @brief 音量を0.0fから1.0fの範囲に丸める
+        /// @param volume 丸める音量
+        /// @return 丸めた音量
+        float ClampVolume(float volume) {
+            return std::clamp(volume, 0.0f, 1.0f);
+        }
+
+        /// @brief Json値から音量を読み込む
+        /// @param value 読み込むJson値
+        /// @param fallback 読み込めない場合の値
+        /// @return 読み込んだ音量
+        float ReadVolumeValue(const nlohmann::json& value, float fallback) {
+            if (!value.is_number()) {
+                return fallback;
+            }
+
+            return ClampVolume(value.get<float>());
+        }
+
+        /// @brief Jsonオブジェクトから音量を読み込む
+        /// @param json 読み込むJsonオブジェクト
+        /// @param key 読み込むキー
+        /// @param fallback 読み込めない場合の値
+        /// @return 読み込んだ音量
+        float ReadVolumeMember(const nlohmann::json& json, const char* key, float fallback) {
+            if (!json.is_object()) {
+                return fallback;
+            }
+
+            const auto it = json.find(key);
+            if (it == json.end()) {
+                return fallback;
+            }
+
+            return ReadVolumeValue(*it, fallback);
+        }
+
+        /// @brief AudioEditorの音量設定をJsonへ変換する
+        /// @return 音量設定Json
+        nlohmann::json SerializeAudioEditorVolume() {
+            AudioManager& audioManager = AudioManager::GetInstance();
+
+            nlohmann::json root;
+            root["masterVolume"] = audioManager.GetMasterVolume();
+            root["categoryVolumes"] = {
+                {"SE", audioManager.GetSEVolume()},
+                {"BGM", audioManager.GetBGMVolume()},
+                {"Voice", audioManager.GetVoiceVolume()}
+            };
+
+            nlohmann::json individualVolumes = nlohmann::json::object();
+            std::vector<std::string> keys = audioManager.GetAllKeys();
+            std::sort(keys.begin(), keys.end());
+            for (const std::string& key : keys) {
+                individualVolumes[key] = {
+                    {"type", AudioTypeToString(audioManager.GetAudioType(key))},
+                    {"volume", audioManager.GetVolume(key)}
+                };
+            }
+            root["individualVolumes"] = individualVolumes;
+
+            return root;
+        }
+
+        /// @brief Jsonからカテゴリ音量を読み込む
+        /// @param categoryVolumes カテゴリ音量Json
+        void ApplyCategoryVolumes(const nlohmann::json& categoryVolumes) {
+            if (!categoryVolumes.is_object()) {
+                return;
+            }
+
+            AudioManager& audioManager = AudioManager::GetInstance();
+            audioManager.SetSEVolume(ReadVolumeMember(categoryVolumes, "SE", audioManager.GetSEVolume()));
+            audioManager.SetBGMVolume(ReadVolumeMember(categoryVolumes, "BGM", audioManager.GetBGMVolume()));
+            audioManager.SetVoiceVolume(ReadVolumeMember(categoryVolumes, "Voice", audioManager.GetVoiceVolume()));
+        }
+
+        /// @brief Jsonから個別音量を読み込む
+        /// @param individualVolumes 個別音量Json
+        void ApplyIndividualVolumes(const nlohmann::json& individualVolumes) {
+            if (!individualVolumes.is_object()) {
+                return;
+            }
+
+            AudioManager& audioManager = AudioManager::GetInstance();
+            for (const auto& [key, value] : individualVolumes.items()) {
+                if (!audioManager.IsLoaded(key)) {
+                    Logger::Output("AudioEditor : Json内の未ロード音声をスキップしました - キー: " + key, Logger::Level::Warning);
+                    continue;
+                }
+
+                if (value.is_object()) {
+                    audioManager.SetVolume(key, ReadVolumeMember(value, "volume", audioManager.GetVolume(key)));
+                } else if (value.is_number()) {
+                    audioManager.SetVolume(key, ReadVolumeValue(value, audioManager.GetVolume(key)));
+                }
+            }
+        }
+
+        /// @brief AudioEditorの音量設定をJsonへ保存する
+        /// @return 保存に成功した場合はtrue
+        bool SaveAudioEditorVolumeJson() {
+            const bool succeeded = Json::JsonFile::Save(kAudioEditorJsonPath, SerializeAudioEditorVolume(), 4, true);
+            Logger::Output(
+                succeeded ? "AudioEditor : 音量設定Jsonを保存しました" : "AudioEditor : 音量設定Jsonの保存に失敗しました",
+                succeeded ? Logger::Level::Assets : Logger::Level::Error
+            );
+            return succeeded;
+        }
+
+        /// @brief AudioEditorの音量設定をJsonから読み込む
+        /// @return 読み込みに成功した場合はtrue
+        bool LoadAudioEditorVolumeJson() {
+            nlohmann::json root;
+            if (!Json::JsonFile::Load(kAudioEditorJsonPath, root)) {
+                Logger::Output("AudioEditor : 音量設定Jsonの読み込みに失敗しました", Logger::Level::Error);
+                return false;
+            }
+
+            if (!root.is_object()) {
+                Logger::Output("AudioEditor : 音量設定Jsonの形式が不正です", Logger::Level::Error);
+                return false;
+            }
+
+            AudioManager& audioManager = AudioManager::GetInstance();
+            audioManager.SetMasterVolume(ReadVolumeMember(root, "masterVolume", audioManager.GetMasterVolume()));
+            ApplyCategoryVolumes(root.value("categoryVolumes", nlohmann::json::object()));
+            ApplyIndividualVolumes(root.value("individualVolumes", nlohmann::json::object()));
+
+            Logger::Output("AudioEditor : 音量設定Jsonを読み込みました", Logger::Level::Assets);
+            return true;
+        }
+
+    }
 
     void DrawAudioManagerUI() {
         //auto audioManager = AudioManager::GetInstance();
@@ -107,6 +252,19 @@ namespace MadoEngine::Editor {
                 float voiceVol = AudioManager::GetInstance().GetVoiceVolume();
                 if (ImGui::SliderFloat("Voice Volume", &voiceVol, 0.0f, 1.0f, "%.2f")) {
                     AudioManager::GetInstance().SetVoiceVolume(voiceVol);
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                if (ImGui::Button("Save Json")) {
+                    SaveAudioEditorVolumeJson();
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Load Json")) {
+                    LoadAudioEditorVolumeJson();
                 }
 
                 ImGui::EndTabItem();

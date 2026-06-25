@@ -90,6 +90,7 @@
     <ClCompile Include="Application\Object\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\EditorHistory.cpp" />
@@ -517,6 +518,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\Editor\LoggerEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h">

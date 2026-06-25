@@ -175,6 +175,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\History\EditorHistory.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\History\EditorHistory.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\LoggerEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\TextEditorUI.h" />
