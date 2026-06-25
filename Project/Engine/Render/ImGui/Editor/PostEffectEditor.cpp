@@ -851,7 +851,7 @@ namespace MadoEngine::Editor {
         static LayerEffectPassListType selectedListType = LayerEffectPassListType::Layer;
         static std::size_t selectedIndex = static_cast<std::size_t>(-1);
 
-        ImGui::Begin("Layer Effect Pass Editor");
+        ImGui::Begin("Layer Effect Editor");
 
         if (ImGui::Button("追加")) {
             AddLayerEffectPassFromEditor(postEffectManager, false);
@@ -866,15 +866,15 @@ namespace MadoEngine::Editor {
         }
 
         ImGui::SameLine();
-        if (ImGui::Button("Save")) {
+        if (ImGui::Button("保存")) {
             SaveLayerEffectPassEditorJson(postEffectManager);
         }
         ImGui::SameLine();
-        if (ImGui::Button("Load")) {
+        if (ImGui::Button("読込")) {
             LoadLayerEffectPassEditorJson(postEffectManager);
         }
         ImGui::SameLine();
-        if (ImGui::Button("Load Backup")) {
+        if (ImGui::Button("復元")) {
             LoadLayerEffectPassEditorJson(postEffectManager, CreateBackupJsonPath(kLayerEffectPassEditorJsonPath));
         }
 
@@ -953,6 +953,7 @@ namespace MadoEngine::Editor {
                 }
             }
 
+            ImGui::TextUnformatted("Effect");
             DrawPostEffectSelectionCombo(*selectedPass);
 
             if (selectedListType == LayerEffectPassListType::Layer) {

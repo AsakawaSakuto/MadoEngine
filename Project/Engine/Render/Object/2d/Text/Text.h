@@ -5,21 +5,10 @@
 #include "Render/Object/2d/Text/TextTextureGenerator.h"
 #include "Utility/Json/Core/IJsonSerializable.h"
 #include ".SceneManager/SceneType.h"
+#include "TextFont.h"
 #include <string>
 
 namespace MadoEngine {
-
-/// @brief Textで選択可能なフォント種別です。
-enum class TextFontFamilyType {
-	YuGothicUI,
-	Meiryo,
-	MSGothic,
-	MSMincho,
-	SegoeUI,
-	Arial,
-	Consolas,
-	Count,
-};
 
 /// @brief Textフォント種別の表示名を取得します。
 /// @param type フォント種別。
@@ -109,6 +98,14 @@ public:
 	/// @brief Textの表示領域を取得します。
 	/// @return 表示領域のピクセルサイズ。
 	const Vector2& GetAreaSize() const { return areaSize_; }
+
+	/// @brief Textのアンカーポイントを設定します。
+	/// @param anchorPoint 正規化されたアンカーポイントです。左上が{0, 0}、中央が{0.5, 0.5}、右下が{1, 1}です。
+	void SetAnchorPoint(const Vector2& anchorPoint);
+
+	/// @brief Textのアンカーポイントを取得します。
+	/// @return 正規化されたアンカーポイントです。
+	const Vector2& GetAnchorPoint() const { return anchorPoint_; }
 
 	/// @brief 水平方向の配置を設定します。
 	/// @param align 水平方向の配置。
@@ -215,6 +212,7 @@ private:
 	float lineSpacing_ = 1.0f;
 	float characterSpacing_ = 0.0f;
 	Vector2 areaSize_ = { 0.0f, 0.0f };
+	Vector2 anchorPoint_ = { 0.0f, 0.0f };
 	TextHorizontalAlign horizontalAlign_ = TextHorizontalAlign::Left;
 	TextVerticalAlign verticalAlign_ = TextVerticalAlign::Top;
 	bool wordWrap_ = true;

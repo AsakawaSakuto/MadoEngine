@@ -42,7 +42,7 @@ void Test::Initialize() {
 	model_->SetPosition(modelPos_);
 
 	fadeSprite_ = MySprite::Create("testFade", "black128x72", SceneType::Test);
-	fadeSprite_->SetScale({ 10.0f, 10.0f });
+	fadeSprite_->SetFitToScreen(true);
 	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 	fadeSprite_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 

@@ -391,7 +391,7 @@ namespace MadoEngine::Editor {
         LightManager& lightManager = LightManager::GetInstance();
         static LightHandle selectedHandle{};
 
-        ImGui::Begin("Light Manager Editor");
+        ImGui::Begin("Light Editor");
 
         if (ImGui::Button("Direction追加")) {
             AddLightFromEditor(LightType::Directional);
@@ -405,15 +405,15 @@ namespace MadoEngine::Editor {
             AddLightFromEditor(LightType::Spot);
         }
         ImGui::SameLine();
-        if (ImGui::Button("Save")) {
+        if (ImGui::Button("保存")) {
             lightManager.SaveToJson();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Load")) {
+        if (ImGui::Button("読込")) {
             lightManager.LoadFromJson();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Load Backup")) {
+        if (ImGui::Button("復元")) {
             lightManager.LoadFromJson(CreateLightManagerBackupJsonPath());
         }
 

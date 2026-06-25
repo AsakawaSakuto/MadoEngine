@@ -11,8 +11,8 @@ namespace {
 
 	/// @brief バッファへ文字列をコピーします。
 	/// @tparam Size バッファサイズ。
-	/// @param buffer コピー先。
-	/// @param text コピー元文字列。
+	/// @param buffer コピー先バッファ。
+	/// @param text コピーする文字列。
 	template<size_t Size>
 	void CopyToBuffer(std::array<char, Size>& buffer, const std::string& text) {
 		buffer.fill('\0');
@@ -33,7 +33,6 @@ namespace {
 			{ "MapEventObject", Render::RenderLayer::MapEventObject },
 			{ "Player", Render::RenderLayer::Player },
 			{ "Effect", Render::RenderLayer::Effect },
-			{ "UI", Render::RenderLayer::UI },
 			{ "Debug", Render::RenderLayer::Debug },
 		};
 
@@ -107,7 +106,7 @@ namespace {
 			? text.GetFontFamily().c_str()
 			: GetTextFontDisplayName(currentType);
 
-		if (ImGui::BeginCombo("Font", preview)) {
+		if (ImGui::BeginCombo("フォント", preview)) {
 			for (int index = 0; index < static_cast<int>(TextFontFamilyType::Count); ++index) {
 				const TextFontFamilyType type = static_cast<TextFontFamilyType>(index);
 				const bool selected = type == currentType;
@@ -121,7 +120,7 @@ namespace {
 
 			if (currentType == TextFontFamilyType::Count && !text.GetFontFamily().empty()) {
 				ImGui::Separator();
-				ImGui::TextDisabled("現在のフォントは候補外です");
+				ImGui::TextDisabled("現在のフォントは候補外です。");
 			}
 
 			ImGui::EndCombo();
@@ -131,15 +130,15 @@ namespace {
 	/// @brief Text配置を選択するComboを描画します。
 	/// @param text 編集対象Text。
 	void DrawAlignmentControls(Text& text) {
-		const char* horizontalItems[] = { "Left", "Center", "Right" };
+		const char* horizontalItems[] = { "左", "中央", "右" };
 		int horizontalIndex = static_cast<int>(text.GetHorizontalAlign());
-		if (ImGui::Combo("Horizontal", &horizontalIndex, horizontalItems, 3)) {
+		if (ImGui::Combo("横揃え", &horizontalIndex, horizontalItems, 3)) {
 			text.SetHorizontalAlign(static_cast<TextHorizontalAlign>(horizontalIndex));
 		}
 
-		const char* verticalItems[] = { "Top", "Center", "Bottom" };
+		const char* verticalItems[] = { "上", "中央", "下" };
 		int verticalIndex = static_cast<int>(text.GetVerticalAlign());
-		if (ImGui::Combo("Vertical", &verticalIndex, verticalItems, 3)) {
+		if (ImGui::Combo("縦揃え", &verticalIndex, verticalItems, 3)) {
 			text.SetVerticalAlign(static_cast<TextVerticalAlign>(verticalIndex));
 		}
 	}
@@ -165,7 +164,7 @@ void DrawTextManagerEditorUI() {
 	ImGui::SetNextItemWidth(200.0f);
 	ImGui::InputText("New Name", createName.data(), createName.size());
 	ImGui::SameLine();
-	if (ImGui::Button("Create")) {
+	if (ImGui::Button("追加")) {
 		Text* created = manager.Create(createName.data());
 		if (created) {
 			selectedName = createName.data();
@@ -173,12 +172,17 @@ void DrawTextManagerEditorUI() {
 		}
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Save Json")) {
+	if (ImGui::Button("保存")) {
 		manager.SaveToFile("Assets/Json/TextObjects.json");
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Load Json")) {
+	if (ImGui::Button("読込")) {
 		manager.LoadFromFile("Assets/Json/TextObjects.json");
+		editingName.clear();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("復元")) {
+		manager.LoadFromFile("Assets/Json/TextObjects.json.bak");
 		editingName.clear();
 	}
 
@@ -189,14 +193,14 @@ void DrawTextManagerEditorUI() {
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
 		const bool selected = name == selectedName;
-		const float deleteButtonWidth = ImGui::CalcTextSize("Delete").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 		const float selectableWidth = (std::max)(1.0f, ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x);
 		if (ImGui::Selectable(name.c_str(), selected, 0, ImVec2(selectableWidth, 0.0f))) {
 			selectedName = name;
 			editingName.clear();
 		}
 		ImGui::SameLine();
-		if (ImGui::SmallButton("Delete")) {
+		if (ImGui::SmallButton("削除")) {
 			manager.Destroy(name);
 			if (selectedName == name) {
 				selectedName.clear();
@@ -220,51 +224,57 @@ void DrawTextManagerEditorUI() {
 			editingName = selectedName;
 		}
 
-		if (ImGui::InputTextMultiline("Text", textBuffer.data(), textBuffer.size(), ImVec2(-1.0f, 120.0f))) {
+		if (ImGui::InputTextMultiline("本文", textBuffer.data(), textBuffer.size(), ImVec2(-1.0f, 120.0f))) {
 			selectedText->SetText(textBuffer.data());
 		}
 		DrawFontCombo(*selectedText);
 
 		float fontSize = selectedText->GetFontSize();
-		if (ImGui::DragFloat("Font Size", &fontSize, 0.5f, 1.0f, 256.0f)) {
+		if (ImGui::DragFloat("フォントサイズ", &fontSize, 0.5f, 1.0f, 256.0f)) {
 			selectedText->SetFontSize(fontSize);
 		}
 
 		float lineSpacing = selectedText->GetLineSpacing();
-		if (ImGui::DragFloat("Line Spacing", &lineSpacing, 0.01f, 0.1f, 4.0f, "%.2f")) {
+		if (ImGui::DragFloat("行間", &lineSpacing, 0.01f, 0.1f, 4.0f, "%.2f")) {
 			selectedText->SetLineSpacing(lineSpacing);
 		}
 
 		float characterSpacing = selectedText->GetCharacterSpacing();
-		if (ImGui::DragFloat("Character Spacing", &characterSpacing, 0.1f, -64.0f, 256.0f, "%.1f")) {
+		if (ImGui::DragFloat("文字間", &characterSpacing, 0.1f, -64.0f, 256.0f, "%.1f")) {
 			selectedText->SetCharacterSpacing(characterSpacing);
 		}
 
 		Vector2 position = selectedText->GetPosition();
 		float positionValues[2] = { position.x, position.y };
-		if (ImGui::DragFloat2("Position", positionValues, 1.0f)) {
+		if (ImGui::DragFloat2("位置", positionValues, 1.0f)) {
 			selectedText->SetPosition({ positionValues[0], positionValues[1] });
+		}
+
+		Vector2 anchorPoint = selectedText->GetAnchorPoint();
+		float anchorPointValues[2] = { anchorPoint.x, anchorPoint.y };
+		if (ImGui::DragFloat2("アンカーポイント", anchorPointValues, 0.01f, 0.0f, 1.0f, "%.2f")) {
+			selectedText->SetAnchorPoint({ anchorPointValues[0], anchorPointValues[1] });
 		}
 
 		Vector2 areaSize = selectedText->GetAreaSize();
 		float sizeValues[2] = { areaSize.x, areaSize.y };
-		if (ImGui::DragFloat2("Size", sizeValues, 1.0f, 0.0f, 4096.0f)) {
+		if (ImGui::DragFloat2("サイズ", sizeValues, 1.0f, 0.0f, 4096.0f)) {
 			selectedText->SetAreaSize({ sizeValues[0], sizeValues[1] });
 		}
 
 		Vector4 color = selectedText->GetColor();
 		float colorValues[4] = { color.x, color.y, color.z, color.w };
-		if (ImGui::ColorEdit4("Color", colorValues)) {
+		if (ImGui::ColorEdit4("色", colorValues)) {
 			selectedText->SetColor({ colorValues[0], colorValues[1], colorValues[2], colorValues[3] });
 		}
 
 		bool visible = selectedText->IsVisible();
-		if (ImGui::Checkbox("Visible", &visible)) {
+		if (ImGui::Checkbox("表示", &visible)) {
 			selectedText->SetVisible(visible);
 		}
 
 		bool wordWrap = selectedText->IsWordWrapEnabled();
-		if (ImGui::Checkbox("Word Wrap", &wordWrap)) {
+		if (ImGui::Checkbox("自動折り返し", &wordWrap)) {
 			selectedText->SetWordWrap(wordWrap);
 		}
 
@@ -272,7 +282,7 @@ void DrawTextManagerEditorUI() {
 		DrawRenderLayerCombo(*selectedText);
 		DrawSceneCombo(*selectedText);
 
-		if (ImGui::InputText("Screen", screenBuffer.data(), screenBuffer.size())) {
+		if (ImGui::InputText("スクリーン", screenBuffer.data(), screenBuffer.size())) {
 			selectedText->SetTargetScreen(screenBuffer.data());
 		}
 

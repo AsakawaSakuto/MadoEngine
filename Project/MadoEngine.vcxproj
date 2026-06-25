@@ -314,6 +314,7 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteSharedGeometry.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\MyText.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\Text.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextFont.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextTextureGenerator.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationFunction.h" />

@@ -158,7 +158,7 @@ namespace MadoEngine::Editor {
     void DrawAudioManagerUI() {
         //auto audioManager = AudioManager::GetInstance();
 
-        ImGui::Begin("Audio Manager");
+        ImGui::Begin("Audio Editor");
 
         // ---------------------------------------------------
         // タブシステム (SE / BGM / Voice / Volume)
@@ -226,7 +226,7 @@ namespace MadoEngine::Editor {
             // 2. Volume 調整タブ (前回追加分)
             if (ImGui::BeginTabItem("Volume")) {
                 ImGui::Spacing();
-                ImGui::Text("Global Volume Settings");
+                ImGui::Text("全体音量設定");
                 ImGui::Separator();
                 ImGui::Spacing();
 
@@ -258,12 +258,12 @@ namespace MadoEngine::Editor {
                 ImGui::Separator();
                 ImGui::Spacing();
 
-                if (ImGui::Button("Save Json")) {
+                if (ImGui::Button("保存")) {
                     SaveAudioEditorVolumeJson();
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button("Load Json")) {
+                if (ImGui::Button("読込")) {
                     LoadAudioEditorVolumeJson();
                 }
 
@@ -280,7 +280,7 @@ namespace MadoEngine::Editor {
         // ---------------------------------------------------
         // 再生中の音源一覧とStopボタン
         // ---------------------------------------------------
-        ImGui::Text("Currently Playing");
+        ImGui::Text("再生中");
         ImGui::Spacing();
 
         bool anyPlaying = false;

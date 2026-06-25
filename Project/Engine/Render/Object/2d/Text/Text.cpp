@@ -12,33 +12,6 @@ namespace MadoEngine {
 
 namespace {
 
-	struct TextFontDefinition {
-		TextFontFamilyType type;
-		const char* displayName;
-		const char* familyName;
-	};
-
-	const TextFontDefinition kTextFontDefinitions[] = {
-		{ TextFontFamilyType::YuGothicUI, "Yu Gothic UI", "Yu Gothic UI" },
-		{ TextFontFamilyType::Meiryo, "Meiryo", "Meiryo" },
-		{ TextFontFamilyType::MSGothic, "MS Gothic", "MS Gothic" },
-		{ TextFontFamilyType::MSMincho, "MS Mincho", "MS Mincho" },
-		{ TextFontFamilyType::SegoeUI, "Segoe UI", "Segoe UI" },
-		{ TextFontFamilyType::Arial, "Arial", "Arial" },
-		{ TextFontFamilyType::Consolas, "Consolas", "Consolas" },
-	};
-
-	/// @brief SceneTypeを文字列から取得します。
-	/// @param value Scene名。
-	/// @return SceneType。
-	SceneType SceneTypeFromString(const std::string& value) {
-		if (value == "Title") { return SceneType::Title; }
-		if (value == "Game") { return SceneType::Game; }
-		if (value == "Result") { return SceneType::Result; }
-		if (value == "Test") { return SceneType::Test; }
-		return SceneType::None;
-	}
-
 	/// @brief Json配列からVector2を読み込みます。
 	/// @param json 読み込むJson。
 	/// @param fallback 読み込みに失敗した場合の値。
@@ -179,9 +152,13 @@ void Text::Update() {
 	const float sy = size_.y * transform_.scale.y;
 
 	Matrix4x4 scaleMatrix = Matrix::MakeScale({ sx, sy, 1.0f });
+	Matrix4x4 anchorMatrix = Matrix::MakeTranslate({ -anchorPoint_.x * sx, -anchorPoint_.y * sy, 0.0f });
 	Matrix4x4 rotateMatrix = Matrix::MakeRotateZ(transform_.rotate);
 	Matrix4x4 transMatrix = Matrix::MakeTranslate({ transform_.translate.x, transform_.translate.y, 0.0f });
-	Matrix4x4 worldMatrix = Matrix::Multiply(Matrix::Multiply(scaleMatrix, rotateMatrix), transMatrix);
+	Matrix4x4 worldMatrix = Matrix::Multiply(
+		Matrix::Multiply(Matrix::Multiply(scaleMatrix, anchorMatrix), rotateMatrix),
+		transMatrix
+	);
 
 	Matrix4x4 orthoMatrix = Matrix::MakeOrthographic(0.0f, 0.0f, screenWidth_, screenHeight_, 0.0f, 1.0f);
 	transformationData_->WVP = Matrix::Multiply(worldMatrix, orthoMatrix);
@@ -263,6 +240,17 @@ void Text::SetAreaSize(const Vector2& size) {
 	MarkDirty();
 }
 
+void Text::SetAnchorPoint(const Vector2& anchorPoint) {
+	const Vector2 clampedAnchorPoint = {
+		std::clamp(anchorPoint.x, 0.0f, 1.0f),
+		std::clamp(anchorPoint.y, 0.0f, 1.0f),
+	};
+	if (anchorPoint_ == clampedAnchorPoint) {
+		return;
+	}
+	anchorPoint_ = clampedAnchorPoint;
+}
+
 void Text::SetHorizontalAlign(TextHorizontalAlign align) {
 	if (horizontalAlign_ == align) {
 		return;
@@ -296,6 +284,11 @@ void Text::FromJson(const nlohmann::json& json) {
 	lineSpacing_ = std::max(0.1f, json.value("lineSpacing", lineSpacing_));
 	characterSpacing_ = std::clamp(json.value("characterSpacing", characterSpacing_), -64.0f, 256.0f);
 	areaSize_ = ReadVector2(json.value("size", nlohmann::json::array()), areaSize_);
+	const Vector2 loadedAnchorPoint = ReadVector2(json.value("anchorPoint", nlohmann::json::array()), anchorPoint_);
+	anchorPoint_ = {
+		std::clamp(loadedAnchorPoint.x, 0.0f, 1.0f),
+		std::clamp(loadedAnchorPoint.y, 0.0f, 1.0f),
+	};
 	transform_.translate = ReadVector2(json.value("position", nlohmann::json::array()), transform_.translate);
 	transform_.scale = ReadVector2(json.value("scale", nlohmann::json::array()), transform_.scale);
 	transform_.rotate = json.value("rotation", transform_.rotate);
@@ -324,6 +317,7 @@ nlohmann::json Text::ToJson() const {
 		{ "scale", { transform_.scale.x, transform_.scale.y } },
 		{ "rotation", transform_.rotate },
 		{ "size", { areaSize_.x, areaSize_.y } },
+		{ "anchorPoint", { anchorPoint_.x, anchorPoint_.y } },
 		{ "horizontalAlign", HorizontalAlignToString(horizontalAlign_) },
 		{ "verticalAlign", VerticalAlignToString(verticalAlign_) },
 		{ "wordWrap", wordWrap_ },

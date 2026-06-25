@@ -33,6 +33,14 @@ public:
 	/// @return 登録されているシーンの種類
 	SceneType GetSceneType() const { return sceneType_; }
 
+	/// @brief 画面全体へ引き伸ばして描画するかを設定する
+	/// @param isFitToScreen trueの場合は現在のスクリーンサイズに合わせて描画する
+	void SetFitToScreen(bool isFitToScreen) { isFitToScreen_ = isFitToScreen; }
+
+	/// @brief 画面全体へ引き伸ばして描画する設定かを取得する
+	/// @return 画面全体へ引き伸ばす場合はtrue
+	bool IsFitToScreen() const { return isFitToScreen_; }
+
 private:
 
 	/// @brief マテリアル・変換行列・PSOの共通初期化処理
@@ -52,4 +60,7 @@ private:
 
 	// 描画対象シーン（SceneType::None は全シーンで描画）
 	SceneType sceneType_ = SceneType::None;
+
+	// 画面全体へ引き伸ばして描画するかのフラグ
+	bool isFitToScreen_ = true;
 };

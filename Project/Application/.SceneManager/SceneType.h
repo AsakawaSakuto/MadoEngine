@@ -29,11 +29,22 @@ constexpr SceneType GetSceneTypeByIndex(uint32_t index) {
 /// @return シーン名文字列
 inline std::string SceneTypeToString(SceneType type) {
 	switch (type) {
-	case SceneType::None:   return "";
+	case SceneType::None:   return "None";
 	case SceneType::Title:  return "Title";
 	case SceneType::Game:   return "Game";
 	case SceneType::Result: return "Result";
 	case SceneType::Test:   return "Test";
 	default:                return "Unknown";
 	}
+}
+
+/// @brief SceneTypeを文字列から取得します。
+/// @param value Scene名。
+/// @return SceneType。
+inline SceneType SceneTypeFromString(const std::string& value) {
+	if (value == "Title") { return SceneType::Title; }
+	if (value == "Game") { return SceneType::Game; }
+	if (value == "Result") { return SceneType::Result; }
+	if (value == "Test") { return SceneType::Test; }
+	return SceneType::None;
 }

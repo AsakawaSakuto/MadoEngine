@@ -94,8 +94,8 @@ void Sprite::Update() {
 	//   3. RotateZ(transform.rotate)          Z軸回転
 	//   4. Translate(transform.translate)     ワールド配置
 
-	float sx = size_.x * transform_.scale.x;
-	float sy = size_.y * transform_.scale.y;
+	float sx = isFitToScreen_ ? screenWidth_ : size_.x * transform_.scale.x;
+	float sy = isFitToScreen_ ? screenHeight_ : size_.y * transform_.scale.y;
 
 	Matrix4x4 scaleMatrix = Matrix::MakeScale({ sx, sy, 1.0f });
 	Matrix4x4 anchorMatrix = Matrix::MakeTranslate({ -anchorPoint_.x * sx, -anchorPoint_.y * sy, 0.0f });
