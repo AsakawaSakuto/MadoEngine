@@ -204,6 +204,9 @@ void SceneManager::ChangeScene(SceneType type) {
 	}
 
 	if (currentScene_) {
+#ifdef USE_IMGUI
+		MadoEngine::Editor::ResetModelGizmoOnSceneChange(selectedModel_);
+#endif // USE_IMGUI
 		currentScene_->Finalize();
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}

@@ -463,6 +463,20 @@ namespace MadoEngine::Editor {
         return isChanged;
     }
 
+    /// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄する
+    /// @param selectedModel 現在選択中のModelポインタ
+    void ResetModelGizmoOnSceneChange(Model*& selectedModel) {
+        selectedModel = nullptr;
+
+        ModelGizmoEditState& state = CurrentModelGizmoEditState();
+        state.wasUsing = false;
+        state.isEditing = false;
+        state.target = nullptr;
+        state.beforeTransform = {};
+
+        EditorHistory::GetInstance().Clear();
+    }
+
     bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, Model*& selectedModel) {
         ImVec2 imageMin{};
         ImVec2 imageSize{};
