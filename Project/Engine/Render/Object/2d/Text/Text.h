@@ -190,16 +190,6 @@ private:
 	/// @return 垂直方向配置。
 	static TextVerticalAlign VerticalAlignFromString(const std::string& value);
 
-	/// @brief RenderLayerを文字列へ変換します。
-	/// @param layer RenderLayer。
-	/// @return 文字列化されたRenderLayer名。
-	static std::string RenderLayerToString(Render::RenderLayer layer);
-
-	/// @brief 文字列からRenderLayerへ変換します。
-	/// @param value 文字列化されたRenderLayer名。
-	/// @return RenderLayer。
-	static Render::RenderLayer RenderLayerFromString(const std::string& value);
-
 	const D3D12_VERTEX_BUFFER_VIEW* activeVBV_ = nullptr;
 	const D3D12_INDEX_BUFFER_VIEW* activeIBV_ = nullptr;
 

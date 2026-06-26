@@ -298,7 +298,7 @@ void Text::FromJson(const nlohmann::json& json) {
 	wordWrap_ = json.value("wordWrap", wordWrap_);
 	targetScreen_ = json.value("screen", targetScreen_);
 	sceneType_ = SceneTypeFromString(json.value("scene", SceneTypeToString(sceneType_)));
-	renderLayer_ = RenderLayerFromString(json.value("layer", RenderLayerToString(renderLayer_)));
+	renderLayer_ = Render::RenderLayerFromString(json.value("layer", Render::RenderLayerToString(renderLayer_)));
 	isVisible_ = json.value("visible", isVisible_);
 	MarkDirty();
 }
@@ -323,7 +323,7 @@ nlohmann::json Text::ToJson() const {
 		{ "wordWrap", wordWrap_ },
 		{ "screen", targetScreen_ },
 		{ "scene", SceneTypeToString(sceneType_) },
-		{ "layer", RenderLayerToString(renderLayer_) },
+		{ "layer", Render::RenderLayerToString(renderLayer_) },
 		{ "visible", isVisible_ },
 	};
 }
@@ -418,36 +418,6 @@ TextVerticalAlign Text::VerticalAlignFromString(const std::string& value) {
 	if (value == "Center") { return TextVerticalAlign::Center; }
 	if (value == "Bottom") { return TextVerticalAlign::Bottom; }
 	return TextVerticalAlign::Top;
-}
-
-std::string Text::RenderLayerToString(Render::RenderLayer layer) {
-	switch (layer) {
-	case Render::RenderLayer::World:
-		return "World";
-	case Render::RenderLayer::MapEventObject:
-		return "MapEventObject";
-	case Render::RenderLayer::Player:
-		return "Player";
-	case Render::RenderLayer::Effect:
-		return "Effect";
-	case Render::RenderLayer::UI:
-		return "UI";
-	case Render::RenderLayer::Debug:
-		return "Debug";
-	case Render::RenderLayer::Default:
-	default:
-		return "Default";
-	}
-}
-
-Render::RenderLayer Text::RenderLayerFromString(const std::string& value) {
-	if (value == "World") { return Render::RenderLayer::World; }
-	if (value == "MapEventObject") { return Render::RenderLayer::MapEventObject; }
-	if (value == "Player") { return Render::RenderLayer::Player; }
-	if (value == "Effect") { return Render::RenderLayer::Effect; }
-	if (value == "UI") { return Render::RenderLayer::UI; }
-	if (value == "Debug") { return Render::RenderLayer::Debug; }
-	return Render::RenderLayer::Default;
 }
 
 } // namespace MadoEngine

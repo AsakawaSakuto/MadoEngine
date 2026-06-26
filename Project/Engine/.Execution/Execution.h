@@ -18,7 +18,7 @@
 namespace MadoEngine
 {
 	/// @brief ゲームエンジンの実行制御を管理するクラス
-	class Execution
+	class EngineExecution
 	{
 	public:
 		/// @brief 初期化処理
@@ -145,11 +145,6 @@ namespace MadoEngine
 		/// @brief 次のLayerエフェクトチェーン出力先RenderTarget名を取得する
 		/// @return 次のLayerエフェクトチェーン出力先RenderTarget名
 		const std::string& GetNextLayerEffectOutputName() const;
-
-#ifdef USE_IMGUI
-		/// @brief LayerEffectPassのデバッグ操作UIを描画する
-		void DrawLayerEffectPassDebugUI();
-#endif // USE_IMGUI
 
 		bool isStopApplication_ = false;
 		uint32_t renderWidth_ = 0;

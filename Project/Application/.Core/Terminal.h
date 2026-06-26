@@ -14,6 +14,6 @@ public:
 	void Run();
 
 private:
-	std::unique_ptr<MadoEngine::Execution> execution_;
+	std::unique_ptr<MadoEngine::EngineExecution> execution_;
 	std::unique_ptr<SceneManager> sceneManager_;
 };

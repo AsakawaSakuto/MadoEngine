@@ -28,12 +28,14 @@ namespace {
 		};
 
 		const LayerItem items[] = {
-			{ "Default", Render::RenderLayer::Default },
-			{ "World", Render::RenderLayer::World },
-			{ "MapEventObject", Render::RenderLayer::MapEventObject },
-			{ "Player", Render::RenderLayer::Player },
-			{ "Effect", Render::RenderLayer::Effect },
-			{ "Debug", Render::RenderLayer::Debug },
+			{ "Default",               Render::RenderLayer::Default },
+			{ "World",                 Render::RenderLayer::World },
+			{ "MapEventObject",        Render::RenderLayer::MapEventObject },
+			{ "MapEventObjectOutline", Render::RenderLayer::MapEventObjectOutline },
+			{ "Player",                Render::RenderLayer::Player },
+			{ "Effect",                Render::RenderLayer::Effect },
+			{ "UI",					   Render::RenderLayer::UI },
+			{ "Debug",                 Render::RenderLayer::Debug },
 		};
 
 		const Render::RenderLayer current = text.GetRenderLayer();
@@ -145,6 +147,10 @@ namespace {
 
 } // namespace
 
+bool LoadTextEditorJson() {
+	return TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
+}
+
 void DrawTextManagerEditorUI() {
 	TextManager& manager = TextManager::GetInstance();
 
@@ -177,7 +183,7 @@ void DrawTextManagerEditorUI() {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
-		manager.LoadFromFile("Assets/Json/TextObjects.json");
+		LoadTextEditorJson();
 		editingName.clear();
 	}
 	ImGui::SameLine();

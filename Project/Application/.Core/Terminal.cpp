@@ -3,7 +3,7 @@
 
 Terminal::Terminal(HINSTANCE hInstance)
 {
-	execution_ = std::make_unique<MadoEngine::Execution>();
+	execution_ = std::make_unique<MadoEngine::EngineExecution>();
 	execution_->Initialize(hInstance);
 	sceneManager_ = std::make_unique<SceneManager>();
 	sceneManager_->RegisterScene(SceneType::Test,   []() { return std::make_unique<Test>(); });

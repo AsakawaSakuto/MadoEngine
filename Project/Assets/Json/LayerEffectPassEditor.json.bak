@@ -60,22 +60,6 @@
                 "Threshold": 0.8500000238418579
             },
             "targetLayerMask": 255
-        },
-        {
-            "effectShaderKey": "PostEffect/RadialBlur.PS",
-            "enabled": false,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_4",
-            "name": "Screen Effect 4",
-            "parameters": {
-                "CenterX": 0.5,
-                "CenterY": 0.5,
-                "Falloff": 1.0,
-                "Intensity": 1.0,
-                "Radius": 0.5,
-                "SampleCount": 16.0
-            },
-            "targetLayerMask": 255
         }
     ],
     "version": 1

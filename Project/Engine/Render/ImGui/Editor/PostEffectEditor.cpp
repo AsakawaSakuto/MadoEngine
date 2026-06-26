@@ -483,7 +483,7 @@ namespace MadoEngine::Editor {
         /// @brief Layer Effect Pass Editorの状態をJsonから読み込む。
         /// @param postEffectManager 読み込み先のPostEffectManager。
         /// @return 読み込みに成功した場合はtrue。
-        bool LoadLayerEffectPassEditorJson(
+        bool LoadLayerEffectPassEditorJsonInternal(
             Render::PostEffectManager& postEffectManager,
             const std::filesystem::path& filePath = kLayerEffectPassEditorJsonPath)
         {
@@ -847,6 +847,14 @@ namespace MadoEngine::Editor {
 
     } // namespace
 
+    bool LoadLayerEffectPassEditorJson(Render::PostEffectManager& postEffectManager) {
+        return LoadLayerEffectPassEditorJsonInternal(postEffectManager);
+    }
+
+    bool LoadLayerEffectPassEditorJsonFromFile(Render::PostEffectManager& postEffectManager) {
+        return LoadLayerEffectPassEditorJson(postEffectManager);
+    }
+
     void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager) {
         static LayerEffectPassListType selectedListType = LayerEffectPassListType::Layer;
         static std::size_t selectedIndex = static_cast<std::size_t>(-1);
@@ -875,7 +883,7 @@ namespace MadoEngine::Editor {
         }
         ImGui::SameLine();
         if (ImGui::Button("復元")) {
-            LoadLayerEffectPassEditorJson(postEffectManager, CreateBackupJsonPath(kLayerEffectPassEditorJsonPath));
+            LoadLayerEffectPassEditorJsonInternal(postEffectManager, CreateBackupJsonPath(kLayerEffectPassEditorJsonPath));
         }
 
         ImGui::Separator();

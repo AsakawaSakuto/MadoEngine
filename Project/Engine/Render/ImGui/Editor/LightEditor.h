@@ -9,6 +9,10 @@ namespace MadoEngine::Editor {
 /// @brief LightManager Editorを描画する
 void DrawLightManagerEditorUI();
 
+/// @brief LightEditorのJson設定を読み込む
+/// @return 読み込みに成功した場合はtrue
+bool LoadLightEditorJson();
+
 #endif // USE_IMGUI
 
 } // namespace MadoEngine::Editor

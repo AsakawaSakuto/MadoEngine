@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 namespace MadoEngine::Render {
 
@@ -33,6 +34,39 @@ namespace MadoEngine::Render {
 	};
 
 	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
+
+	inline std::string RenderLayerToString(RenderLayer layer) {
+		switch (layer) {
+		case RenderLayer::World:
+			return "World";
+		case RenderLayer::MapEventObject:
+			return "MapEventObject";
+		case RenderLayer::MapEventObjectOutline:
+			return "MapEventObjectOutline";
+		case RenderLayer::Player:
+			return "Player";
+		case RenderLayer::Effect:
+			return "Effect";
+		case RenderLayer::UI:
+			return "UI";
+		case RenderLayer::Debug:
+			return "Debug";
+		case RenderLayer::Default:
+		default:
+			return "Default";
+		}
+	}
+
+	inline RenderLayer RenderLayerFromString(const std::string& value) {
+		if (value == "World") { return RenderLayer::World; }
+		if (value == "MapEventObject") { return RenderLayer::MapEventObject; }
+		if (value == "MapEventObjectOutline") { return RenderLayer::MapEventObjectOutline; }
+		if (value == "Player") { return RenderLayer::Player; }
+		if (value == "Effect") { return RenderLayer::Effect; }
+		if (value == "UI") { return RenderLayer::UI; }
+		if (value == "Debug") { return RenderLayer::Debug; }
+		return RenderLayer::Default;
+	}
 
 	/// @brief インデックスからRenderLayerを取得する
 	/// @param index 取得するRenderLayerのインデックス

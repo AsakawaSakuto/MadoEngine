@@ -15,7 +15,7 @@
             "fontFamily": "Yu Gothic UI",
             "fontSize": 128.0,
             "horizontalAlign": "Left",
-            "layer": "UI",
+            "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Start",
             "position": [
@@ -54,7 +54,7 @@
             "fontFamily": "Yu Gothic UI",
             "fontSize": 128.0,
             "horizontalAlign": "Left",
-            "layer": "UI",
+            "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Setting",
             "position": [

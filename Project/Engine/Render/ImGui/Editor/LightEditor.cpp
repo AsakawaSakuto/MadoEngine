@@ -387,6 +387,10 @@ namespace MadoEngine::Editor {
 
     } // namespace
 
+    bool LoadLightEditorJson() {
+        return LightManager::GetInstance().LoadFromJson();
+    }
+
     void DrawLightManagerEditorUI() {
         LightManager& lightManager = LightManager::GetInstance();
         static LightHandle selectedHandle{};
@@ -410,7 +414,7 @@ namespace MadoEngine::Editor {
         }
         ImGui::SameLine();
         if (ImGui::Button("読込")) {
-            lightManager.LoadFromJson();
+            LoadLightEditorJson();
         }
         ImGui::SameLine();
         if (ImGui::Button("復元")) {

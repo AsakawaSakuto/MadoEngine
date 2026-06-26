@@ -155,6 +155,10 @@ namespace MadoEngine::Editor {
 
     }
 
+    bool LoadAudioEditorJson() {
+        return LoadAudioEditorVolumeJson();
+    }
+
     void DrawAudioManagerUI() {
         //auto audioManager = AudioManager::GetInstance();
 

@@ -47,7 +47,7 @@ namespace {
 
 namespace MadoEngine
 {
-	void Execution::Initialize(HINSTANCE hInstance) {
+	void EngineExecution::Initialize(HINSTANCE hInstance) {
 
 		CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -212,12 +212,17 @@ namespace MadoEngine
 
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
+		MadoEngine::Editor::LoadAudioEditorJson();
+		MadoEngine::Editor::LoadLightEditorJson();
+		MadoEngine::Editor::LoadTextEditorJson();
+		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager_);
+
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
 #endif // USE_IMGUI
 	}
 
-	void Execution::Update() {
+	void EngineExecution::Update() {
 		// デルタタイムを計算
 		deltaTime_->Update();
 		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
@@ -235,7 +240,7 @@ namespace MadoEngine
 		windowsAPI_->ProcessInput();
 	}
 
-	void Execution::HandleResize() {
+	void EngineExecution::HandleResize() {
 		uint32_t width = 0;
 		uint32_t height = 0;
 		if (!windowsAPI_->ConsumeResize(width, height)) {
@@ -264,43 +269,43 @@ namespace MadoEngine
 		);
 	}
 
-	MadoEngine::Render::LayerEffectPass* Execution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
+	MadoEngine::Render::LayerEffectPass* EngineExecution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
 		return postEffectManager_.AddLayerPass(desc);
 	}
 
-	MadoEngine::Render::LayerEffectPass* Execution::AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
+	MadoEngine::Render::LayerEffectPass* EngineExecution::AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
 		return postEffectManager_.AddScreenPass(desc);
 	}
 
-	void Execution::ClearLayerEffectPasses() {
+	void EngineExecution::ClearLayerEffectPasses() {
 		postEffectManager_.ClearLayerPasses();
 	}
 
-	void Execution::ClearScreenEffectPasses() {
+	void EngineExecution::ClearScreenEffectPasses() {
 		postEffectManager_.ClearScreenPasses();
 	}
 
-	const std::vector<MadoEngine::Render::LayerEffectPass>& Execution::GetLayerEffectPasses() const {
+	const std::vector<MadoEngine::Render::LayerEffectPass>& EngineExecution::GetLayerEffectPasses() const {
 		return postEffectManager_.GetLayerPasses();
 	}
 
-	const MadoEngine::Render::LayerEffectPass* Execution::GetFirstEnabledLayerEffectPass() const {
+	const MadoEngine::Render::LayerEffectPass* EngineExecution::GetFirstEnabledLayerEffectPass() const {
 		return postEffectManager_.GetFirstEnabledLayerPass();
 	}
 
-	MadoEngine::Render::RenderLayerMask Execution::GetEnabledLayerEffectTargetMask() const {
+	MadoEngine::Render::RenderLayerMask EngineExecution::GetEnabledLayerEffectTargetMask() const {
 		return postEffectManager_.GetEnabledLayerTargetMask();
 	}
 
-	MadoEngine::Render::PostEffectManager& Execution::GetPostEffectManager() {
+	MadoEngine::Render::PostEffectManager& EngineExecution::GetPostEffectManager() {
 		return postEffectManager_;
 	}
 
-	const MadoEngine::Render::PostEffectManager& Execution::GetPostEffectManager() const {
+	const MadoEngine::Render::PostEffectManager& EngineExecution::GetPostEffectManager() const {
 		return postEffectManager_;
 	}
 
-	void Execution::PreDraw()
+	void EngineExecution::PreDraw()
 	{
 		isSceneColorEnded_ = false;
 		isLayerEffectChainResolved_ = false;
@@ -331,7 +336,7 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 	}
 
-	void Execution::EndSceneColorRender() {
+	void EngineExecution::EndSceneColorRender() {
 		if (isSceneColorEnded_) {
 			return;
 		}
@@ -340,7 +345,7 @@ namespace MadoEngine
 		isSceneColorEnded_ = true;
 	}
 
-	void Execution::BeginLayerEffectRender(const MadoEngine::Render::LayerEffectPass& pass) {
+	void EngineExecution::BeginLayerEffectRender(const MadoEngine::Render::LayerEffectPass& pass) {
 		assert(pass.IsEnabled() && "無効なLayerEffectPassは実行できません");
 		assert(pass.GetTargetLayerMask() != 0 && "LayerEffectPassの対象LayerMaskが0です");
 
@@ -359,16 +364,16 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 	}
 
-	void Execution::EndLayerEffectRender() {
+	void EngineExecution::EndLayerEffectRender() {
 		renderTargetManager_->End(kLayerColorTarget, commandManager_->GetCommandList());
 	}
 
-	void Execution::ApplyLayerEffectAndComposite(const MadoEngine::Render::LayerEffectPass& pass) {
+	void EngineExecution::ApplyLayerEffectAndComposite(const MadoEngine::Render::LayerEffectPass& pass) {
 		ApplyLayerEffectToChain(pass);
 		CompositeLayerEffectChain();
 	}
 
-	void Execution::ApplyLayerEffectToChain(const MadoEngine::Render::LayerEffectPass& pass) {
+	void EngineExecution::ApplyLayerEffectToChain(const MadoEngine::Render::LayerEffectPass& pass) {
 		assert(pass.IsEnabled() && "無効なLayerEffectPassは実行できません");
 		assert(pass.GetTargetLayerMask() != 0 && "LayerEffectPassの対象LayerMaskが0です");
 
@@ -387,7 +392,7 @@ namespace MadoEngine
 		isLayerEffectChainResolved_ = true;
 	}
 
-	void Execution::CompositeLayerEffectChain() {
+	void EngineExecution::CompositeLayerEffectChain() {
 		assert(isLayerEffectChainResolved_ && "LayerEffectChainが解決されていません");
 
 		const std::string& outputTargetName = GetNextPostEffectOutputName();
@@ -404,7 +409,7 @@ namespace MadoEngine
 		isLayerEffectResolved_ = true;
 	}
 
-	void Execution::ApplyScreenEffectPasses() {
+	void EngineExecution::ApplyScreenEffectPasses() {
 		for (MadoEngine::Render::LayerEffectPass& pass : postEffectManager_.GetScreenPasses()) {
 			if (!pass.IsEnabled()) {
 				continue;
@@ -426,7 +431,7 @@ namespace MadoEngine
 		}
 	}
 
-	void Execution::BeginImGuiLayout()
+	void EngineExecution::BeginImGuiLayout()
 	{
 #ifdef USE_IMGUI
 		// オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
@@ -451,9 +456,6 @@ namespace MadoEngine
 		// ※必ずシーンの DrawImGui() より前に呼ぶこと（DockSpaceを先に生成する必要があるため）
 		imguiManager_->DrawEditorLayout(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_));
 
-		// デモウィンドウ（動作確認用、不要になったら削除してください）
-		ImGui::ShowDemoWindow();
-
 		// エンジン情報ウィンドウ（FPS表示）
 		ImGui::Begin("Engine Info");
 		ImGui::Text("FPS: %.1f", deltaTime_->GetFPS());
@@ -462,18 +464,10 @@ namespace MadoEngine
 		ImGui::End();
 
 		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
-
-		//if (ImGui::BeginMainMenuBar())
-		//{
-		//	
-		//	// 必ず最後はEndで閉じる
-		//	ImGui::EndMainMenuBar();
-		//}
-
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
-		MadoEngine::Editor::DrawLoggerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
+		MadoEngine::Editor::DrawLoggerEditorUI();
 
 #else
 		if (!isLayerEffectResolved_) {
@@ -496,240 +490,7 @@ namespace MadoEngine
 #endif // USE_IMGUI
 	}
 
-#ifdef USE_IMGUI
-	void Execution::DrawLayerEffectPassDebugUI() {
-		static std::vector<std::string> shaderKeys = BuildLayerEffectShaderKeys();
-		std::vector<MadoEngine::Render::LayerEffectPass>& layerEffectPasses = postEffectManager_.GetLayerPasses();
-		std::vector<MadoEngine::Render::LayerEffectPass>& screenEffectPasses = postEffectManager_.GetScreenPasses();
-
-		if (!ImGui::Begin("Layer Effect Pass")) {
-			ImGui::End();
-			return;
-		}
-
-		if (ImGui::Button("Shader一覧を更新")) {
-			shaderKeys = BuildLayerEffectShaderKeys();
-		}
-
-		if (layerEffectPasses.empty() && screenEffectPasses.empty()) {
-			ImGui::TextDisabled("LayerEffectPassは登録されていません");
-			ImGui::End();
-			return;
-		}
-
-		if (shaderKeys.empty()) {
-			ImGui::TextColored(ImVec4(1.0f, 0.65f, 0.2f, 1.0f), "使用可能なPostEffect PixelShaderがありません");
-		}
-
-		const ImGuiTableFlags tableFlags =
-			ImGuiTableFlags_BordersInnerV |
-			ImGuiTableFlags_BordersInnerH |
-			ImGuiTableFlags_RowBg |
-			ImGuiTableFlags_SizingStretchProp;
-
-		if (!layerEffectPasses.empty() && ImGui::BeginTable("LayerEffectPassTable", 5, tableFlags)) {
-			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
-			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("DepthIgnore", ImGuiTableColumnFlags_WidthFixed, 90.0f);
-			ImGui::TableSetupColumn("LayerMask", ImGuiTableColumnFlags_WidthFixed, 90.0f);
-			ImGui::TableHeadersRow();
-
-			for (std::size_t passIndex = 0; passIndex < layerEffectPasses.size(); ++passIndex) {
-				MadoEngine::Render::LayerEffectPass& pass = layerEffectPasses[passIndex];
-				ImGui::PushID(static_cast<int>(passIndex));
-
-				ImGui::TableNextRow();
-
-				ImGui::TableSetColumnIndex(0);
-				bool enabled = pass.IsEnabled();
-				if (ImGui::Checkbox("##Enabled", &enabled)) {
-					pass.SetEnabled(enabled);
-					Logger::Output(
-						"LayerEffectPassの有効状態を変更しました: " + pass.GetName(),
-						Logger::Level::Debug
-					);
-				}
-
-				ImGui::TableSetColumnIndex(1);
-				ImGui::TextUnformatted(pass.GetName().c_str());
-
-				ImGui::TableSetColumnIndex(2);
-				const std::string& currentShaderKey = pass.GetEffectShaderKey();
-				ImGui::PushItemWidth(-1.0f);
-				if (ImGui::BeginCombo("##Shader", currentShaderKey.c_str())) {
-					for (const std::string& shaderKey : shaderKeys) {
-						const bool isSelected = shaderKey == currentShaderKey;
-						if (ImGui::Selectable(shaderKey.c_str(), isSelected)) {
-							pass.SetEffectShaderKey(shaderKey);
-							Logger::Output(
-								"LayerEffectPassのShaderを変更しました: " + pass.GetName() + " -> " + shaderKey,
-								Logger::Level::Debug
-							);
-						}
-
-						if (isSelected) {
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-
-					if (!currentShaderKey.empty() &&
-						std::find(shaderKeys.begin(), shaderKeys.end(), currentShaderKey) == shaderKeys.end()) {
-						ImGui::Separator();
-						ImGui::TextDisabled("現在のShaderは候補外です");
-					}
-
-					ImGui::EndCombo();
-				}
-				ImGui::PopItemWidth();
-
-				ImGui::TableSetColumnIndex(3);
-				bool ignoreDepthForMask = pass.IsIgnoreDepthForMask();
-				if (ImGui::Checkbox("##DepthIgnore", &ignoreDepthForMask)) {
-					pass.SetIgnoreDepthForMask(ignoreDepthForMask);
-					Logger::Output(
-						"LayerEffectPassのDepth無視マスクを変更しました: " + pass.GetName(),
-						Logger::Level::Debug
-					);
-				}
-
-				ImGui::TableSetColumnIndex(4);
-				ImGui::Text("0x%08X", pass.GetTargetLayerMask());
-
-				ImGui::PopID();
-			}
-
-			ImGui::EndTable();
-		}
-
-		if (!screenEffectPasses.empty() && ImGui::BeginTable("ScreenEffectPassTable", 4, tableFlags)) {
-			ImGui::TableSetupColumn("ON", ImGuiTableColumnFlags_WidthFixed, 42.0f);
-			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("Shader", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("Target", ImGuiTableColumnFlags_WidthFixed, 90.0f);
-			ImGui::TableHeadersRow();
-
-			for (std::size_t passIndex = 0; passIndex < screenEffectPasses.size(); ++passIndex) {
-				MadoEngine::Render::LayerEffectPass& pass = screenEffectPasses[passIndex];
-				ImGui::PushID(static_cast<int>(passIndex + layerEffectPasses.size()));
-
-				ImGui::TableNextRow();
-
-				ImGui::TableSetColumnIndex(0);
-				bool enabled = pass.IsEnabled();
-				if (ImGui::Checkbox("##Enabled", &enabled)) {
-					pass.SetEnabled(enabled);
-					Logger::Output(
-						"画面全体ポストエフェクトの有効状態を変更しました: " + pass.GetName(),
-						Logger::Level::Debug
-					);
-				}
-
-				ImGui::TableSetColumnIndex(1);
-				ImGui::TextUnformatted(pass.GetName().c_str());
-
-				ImGui::TableSetColumnIndex(2);
-				const std::string& currentShaderKey = pass.GetEffectShaderKey();
-				ImGui::PushItemWidth(-1.0f);
-				if (ImGui::BeginCombo("##Shader", currentShaderKey.c_str())) {
-					for (const std::string& shaderKey : shaderKeys) {
-						const bool isSelected = shaderKey == currentShaderKey;
-						if (ImGui::Selectable(shaderKey.c_str(), isSelected)) {
-							pass.SetEffectShaderKey(shaderKey);
-							Logger::Output(
-								"画面全体ポストエフェクトのShaderを変更しました: " + pass.GetName() + " -> " + shaderKey,
-								Logger::Level::Debug
-							);
-						}
-
-						if (isSelected) {
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-
-					if (!currentShaderKey.empty() &&
-						std::find(shaderKeys.begin(), shaderKeys.end(), currentShaderKey) == shaderKeys.end()) {
-						ImGui::Separator();
-						ImGui::TextDisabled("現在のShaderは候補外です");
-					}
-
-					ImGui::EndCombo();
-				}
-				ImGui::PopItemWidth();
-
-				ImGui::TableSetColumnIndex(3);
-				ImGui::TextUnformatted("Screen");
-
-				ImGui::PopID();
-			}
-
-			ImGui::EndTable();
-		}
-
-		bool hasParameterControls = false;
-		for (MadoEngine::Render::LayerEffectPass& pass : layerEffectPasses) {
-			if (pass.GetFloatParameterControls().empty()) {
-				continue;
-			}
-
-			if (!hasParameterControls) {
-				ImGui::Separator();
-				ImGui::TextUnformatted("Parameters");
-				hasParameterControls = true;
-			}
-
-			if (ImGui::TreeNode(pass.GetName().c_str())) {
-				for (const MadoEngine::Render::LayerEffectPass::FloatParameterControl& control : pass.GetFloatParameterControls()) {
-					float value = 0.0f;
-					if (!pass.TryGetFloatParameter(control.offset, value)) {
-						ImGui::TextDisabled("%s: invalid offset", control.label.c_str());
-						continue;
-					}
-
-					const float speed = control.speed > 0.0f ? control.speed : 0.01f;
-					if (ImGui::DragFloat(control.label.c_str(), &value, speed, control.minValue, control.maxValue)) {
-						pass.SetFloatParameter(control.offset, value);
-					}
-				}
-
-				ImGui::TreePop();
-			}
-		}
-
-		for (MadoEngine::Render::LayerEffectPass& pass : screenEffectPasses) {
-			if (pass.GetFloatParameterControls().empty()) {
-				continue;
-			}
-
-			if (!hasParameterControls) {
-				ImGui::Separator();
-				ImGui::TextUnformatted("Parameters");
-				hasParameterControls = true;
-			}
-
-			if (ImGui::TreeNode(pass.GetName().c_str())) {
-				for (const MadoEngine::Render::LayerEffectPass::FloatParameterControl& control : pass.GetFloatParameterControls()) {
-					float value = 0.0f;
-					if (!pass.TryGetFloatParameter(control.offset, value)) {
-						ImGui::TextDisabled("%s: invalid offset", control.label.c_str());
-						continue;
-					}
-
-					const float speed = control.speed > 0.0f ? control.speed : 0.01f;
-					if (ImGui::DragFloat(control.label.c_str(), &value, speed, control.minValue, control.maxValue)) {
-						pass.SetFloatParameter(control.offset, value);
-					}
-				}
-
-				ImGui::TreePop();
-			}
-		}
-
-		ImGui::End();
-	}
-#endif // USE_IMGUI
-
-	void Execution::DrawPostEffect(
+	void EngineExecution::DrawPostEffect(
 		D3D12_GPU_DESCRIPTOR_HANDLE inputSrv,
 		const MadoEngine::Render::PSODesc& desc,
 		D3D12_GPU_VIRTUAL_ADDRESS parameterBufferAddress,
@@ -765,11 +526,11 @@ namespace MadoEngine
 		commandList->DrawInstanced(3, 1, 0, 0);
 	}
 
-	bool Execution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
+	bool EngineExecution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
 		return postEffectManager_.NeedsIgnoreDepthMask(layerMask);
 	}
 
-	void Execution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {
+	void EngineExecution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {
 		auto* commandList = commandManager_->GetCommandList();
 		commandList->SetGraphicsRootSignature(
 			MadoEngine::RootSignatureManager::GetInstance().Get(compositeDesc_.rootSigKey));
@@ -780,7 +541,7 @@ namespace MadoEngine
 		commandList->DrawInstanced(3, 1, 0, 0);
 	}
 
-	const std::string& Execution::GetNextPostEffectOutputName() const {
+	const std::string& EngineExecution::GetNextPostEffectOutputName() const {
 		if (currentCompositeSourceName_ == kPostEffectResultTarget) {
 			return kPostEffectWorkTarget;
 		}
@@ -788,7 +549,7 @@ namespace MadoEngine
 		return kPostEffectResultTarget;
 	}
 
-	const std::string& Execution::GetNextLayerEffectOutputName() const {
+	const std::string& EngineExecution::GetNextLayerEffectOutputName() const {
 		if (currentLayerEffectSourceName_ == kLayerEffectResultTarget) {
 			return kLayerEffectWorkTarget;
 		}
@@ -796,7 +557,7 @@ namespace MadoEngine
 		return kLayerEffectResultTarget;
 	}
 
-	void Execution::PostDraw()
+	void EngineExecution::PostDraw()
 	{
 #ifdef USE_IMGUI
 		// ImGui描画コマンドをコマンドリストに積む
@@ -816,7 +577,7 @@ namespace MadoEngine
 		commandManager_->WaitForGPU();
 	}
 
-	void Execution::Finalize()
+	void EngineExecution::Finalize()
 	{
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance().Finalize();
@@ -839,7 +600,7 @@ namespace MadoEngine
 		CoUninitialize();
 	}
 
-	bool Execution::IsRunning() {
+	bool EngineExecution::IsRunning() {
 		return windowsAPI_->ProcessMessage();
 	}
 }
