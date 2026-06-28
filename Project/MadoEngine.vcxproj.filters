@@ -11,6 +11,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
+    <ClCompile Include="Application\Object\Enemy\Enemy.cpp" />
+    <ClCompile Include="Application\Object\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
@@ -101,6 +103,8 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Object\Enemy\Enemy.h" />
+    <ClInclude Include="Application\Object\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>

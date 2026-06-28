@@ -2,6 +2,7 @@
 #include ".SceneManager/IScene.h"
 #include "Object/Player/Player.h"
 #include "Object/Map/Map.h"
+#include "Object/Enemy/EnemySpawner.h"
 #include "Utility/Light/LightManager.h"
 
 /// @brief テストシーン
@@ -44,6 +45,8 @@ private:
 	std::unique_ptr<Player> player_;
 
 	std::unique_ptr<Map> map_;
+
+	std::unique_ptr<EnemySpawner> enemySpawner_;
 
 	Model* model_ = nullptr;
 	Model* selectedModel_ = nullptr;

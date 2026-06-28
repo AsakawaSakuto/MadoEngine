@@ -1,0 +1,165 @@
+#include "Enemy.h"
+#include "Object/Player/Player.h"
+#include <algorithm>
+#include <cmath>
+
+namespace {
+	constexpr float kDirectionEpsilon = 1e-5f;
+	constexpr float kSlopeSnapDistance = 1.0f;
+	constexpr float kDeleteGroundY = 0.0f;
+
+	/// @brief 水平方向の長さの2乗を取得します。
+	/// @param value 対象のベクトルです。
+	/// @return XZ平面での長さの2乗です。
+	float GetHorizontalLengthSq(const Vector3& value) {
+		return value.x * value.x + value.z * value.z;
+	}
+}
+
+Enemy::~Enemy() {
+	Release();
+}
+
+void Enemy::Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType sceneType) {
+	enemyId_ = enemyId;
+	transform_.translate = spawnPosition;
+	transform_.SetAllScale(0.5f);
+
+	AABB aabb;
+	aabb.min = { -0.5f, 0.0f, -0.5f };
+	aabb.max = { 0.5f, 2.0f, 0.5f };
+	hitAABB_ = aabb;
+
+	Sphere sphere;
+	sphere.radius = 0.5f;
+	colliderShape_ = sphere;
+
+	movementColliderName_ = CreateColliderName("EnemyMovementSphere");
+	hitColliderName_ = CreateColliderName("EnemyHitBox");
+	modelName_ = CreateModelName();
+
+	MyCollider::RegisterCollider(movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
+	MyCollider::RegisterCollider(hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
+
+	model_ = MyModel::Create(modelName_, "cube", sceneType);
+	if (model_) {
+		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
+		model_->SetTexture("white16x16");
+		model_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+
+	UpdateModelTransform();
+}
+
+void Enemy::Update(float deltaTime) {
+	if (!isActive_ || !targetPlayer_) {
+		return;
+	}
+
+	const Vector3 direction = GetDirectionToPlayer();
+	transform_.translate.x += direction.x * moveSpeed_ * deltaTime;
+	transform_.translate.z += direction.z * moveSpeed_ * deltaTime;
+
+	if (!isGrounded_) {
+		velocityY_ -= gravity_ * deltaTime;
+	}
+	transform_.translate.y += velocityY_ * deltaTime;
+
+	transform_.translate.x = std::clamp(transform_.translate.x, -7.5f, 292.5f);
+	transform_.translate.y = std::clamp(transform_.translate.y, 0.0f, 100.0f);
+	transform_.translate.z = std::clamp(transform_.translate.z, -7.5f, 292.5f);
+
+	if (transform_.translate.y <= kDeleteGroundY) {
+		Kill();
+		return;
+	}
+
+	if (GetHorizontalLengthSq(direction) > kDirectionEpsilon) {
+		transform_.rotate.y = std::atan2(direction.x, direction.z);
+	}
+}
+
+void Enemy::ResolveAfterCollision() {
+	if (!isActive_) {
+		return;
+	}
+
+	const bool isGroundContact = MyCollider::IsGroundContact(movementColliderName_, CollisionTag::MapBlock);
+	const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(movementColliderName_, CollisionTag::MapSlope);
+	isGrounded_ = isGroundContact || isSlopeGroundContact;
+
+	if (isGrounded_ && velocityY_ < 0.0f) {
+		velocityY_ = 0.0f;
+	}
+
+	if (isSlopeGroundContact && velocityY_ <= 0.0f) {
+		float slopeCenterY = 0.0f;
+		if (MyCollider::TryGetSlopeGroundCenterY(movementColliderName_, CollisionTag::MapSlope, slopeCenterY, kSlopeSnapDistance) &&
+			transform_.translate.y > slopeCenterY) {
+			transform_.translate.y = slopeCenterY;
+		}
+	}
+
+	UpdateModelTransform();
+}
+
+bool Enemy::IsHitPlayer() const {
+	if (!isActive_) {
+		return false;
+	}
+
+	return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerHitBox);
+}
+
+void Enemy::Release() {
+	if (isReleased_) {
+		return;
+	}
+
+	if (!movementColliderName_.empty()) {
+		MyCollider::RemoveCollider(movementColliderName_);
+	}
+	if (!hitColliderName_.empty()) {
+		MyCollider::RemoveCollider(hitColliderName_);
+	}
+	if (!modelName_.empty()) {
+		MyModel::Destroy(modelName_);
+	}
+
+	isReleased_ = true;
+}
+
+std::string Enemy::CreateColliderName(const std::string& prefix) const {
+	return prefix + "_" + std::to_string(enemyId_);
+}
+
+std::string Enemy::CreateModelName() const {
+	return "Enemy_" + std::to_string(enemyId_);
+}
+
+Vector3 Enemy::GetDirectionToPlayer() const {
+	if (!targetPlayer_) {
+		return { 0.0f, 0.0f, 0.0f };
+	}
+
+	Vector3 direction = targetPlayer_->GetPosition() - transform_.translate;
+	direction.y = 0.0f;
+
+	const float lengthSq = GetHorizontalLengthSq(direction);
+	if (lengthSq < kDirectionEpsilon) {
+		return { 0.0f, 0.0f, 0.0f };
+	}
+
+	const float invLength = 1.0f / std::sqrt(lengthSq);
+	return { direction.x * invLength, 0.0f, direction.z * invLength };
+}
+
+void Enemy::UpdateModelTransform() {
+	if (!model_) {
+		return;
+	}
+
+	model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+	model_->SetRotation(transform_.rotate);
+	model_->SetScale(transform_.scale);
+}

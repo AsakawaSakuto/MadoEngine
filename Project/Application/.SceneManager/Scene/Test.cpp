@@ -31,12 +31,19 @@ void Test::Initialize() {
 	playerMapCollision.enableResolve = true;
 	playerMapCollision.enableCCD = false;*/
 
-	//MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::MapBlock, true);
+	// Playerと地形の衝突はMapのグリッド近傍クエリで個別更新します。
+	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapBlock, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapSlope, true);
+	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::EnemyMovementSphere, true);
+
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
 
 	map_ = std::make_unique<Map>();
 	map_->Initialize(MyRand::CreateSeed());
+	
+	enemySpawner_ = std::make_unique<EnemySpawner>();
+	enemySpawner_->Initialize(player_.get(), SceneType::Test);
 
 	model_ = MyModel::Create("testModel", "AnimatedCube", SceneType::Test);
 	model_->SetPosition(modelPos_);
@@ -63,6 +70,8 @@ SceneType Test::Update(float dt) {
 	player_->Update(dt);
 
 	map_->Update(*player_);
+
+	enemySpawner_->Update(dt);
 
 	if (model_) {
 		model_->Update();
@@ -98,6 +107,10 @@ void Test::DrawImGui() {
 	player_->DrawImGui();
 
 	map_->DrawImGui();
+
+	ImGui::Begin("EnemySpawner");
+	ImGui::Text("Enemy Count : %zu", enemySpawner_->GetEnemyCount());
+	ImGui::End();
 
 	ImGui::Begin("seed");
 
