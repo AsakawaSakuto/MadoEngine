@@ -14,35 +14,6 @@ namespace {
 	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
 	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
 
-#ifdef USE_IMGUI
-	bool EndsWith(const std::string& text, const std::string& suffix) {
-		if (text.size() < suffix.size()) {
-			return false;
-		}
-
-		return text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0;
-	}
-
-	std::vector<std::string> BuildLayerEffectShaderKeys() {
-		std::vector<std::string> shaderKeys = MadoEngine::ShaderManager::GetInstance().GetKeysByPrefix("PostEffect/");
-		shaderKeys.erase(
-			std::remove_if(
-				shaderKeys.begin(),
-				shaderKeys.end(),
-				[](const std::string& shaderKey) {
-					if (!EndsWith(shaderKey, ".PS")) {
-						return true;
-					}
-
-					return shaderKey == "PostEffect/Composite.PS";
-				}
-			),
-			shaderKeys.end()
-		);
-		return shaderKeys;
-	}
-#endif // USE_IMGUI
-
 } // namespace
 
 namespace MadoEngine

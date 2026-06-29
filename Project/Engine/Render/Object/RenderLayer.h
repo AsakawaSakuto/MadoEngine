@@ -18,10 +18,6 @@ namespace MadoEngine::Render {
 		Count,
 	};
 
-	using RenderLayerMask = uint32_t;
-
-	inline constexpr uint32_t kRenderLayerCount = static_cast<uint32_t>(RenderLayer::Count);
-
 	inline constexpr const char* kRenderLayerNames[] = {
 		"Default",
 		"World",
@@ -32,8 +28,6 @@ namespace MadoEngine::Render {
 		"UI",
 		"Debug",
 	};
-
-	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
 
 	inline std::string RenderLayerToString(RenderLayer layer) {
 		switch (layer) {
@@ -67,6 +61,12 @@ namespace MadoEngine::Render {
 		if (value == "Debug") { return RenderLayer::Debug; }
 		return RenderLayer::Default;
 	}
+
+	using RenderLayerMask = uint32_t;
+
+	inline constexpr uint32_t kRenderLayerCount = static_cast<uint32_t>(RenderLayer::Count);
+
+	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
 
 	/// @brief インデックスからRenderLayerを取得する
 	/// @param index 取得するRenderLayerのインデックス

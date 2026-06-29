@@ -13,25 +13,12 @@ Test::~Test() {}
 void Test::Initialize() {
 	Logger::Output("テストシーンを初期化しました", Logger::Level::Application);
 
-	for (int i = 0; i < sprites_.size(); ++i) {
-		sprites_[i] = MySprite::Create("testSprite" + std::to_string(i), "uvChecker", SceneType::Test);
-		sprites_[i]->SetPosition({ 32.0f * i, 32.0f * i });
-		sprites_[i]->SetVisible(false);
-	}
-
 	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
-
-	sprite_ = std::make_unique<Sprite>("a");
 
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 	player_->SetCamera(&tpsCamera_);
 
-	/*MyCollider::CollisionPairSetting playerMapCollision;
-	playerMapCollision.enableResolve = true;
-	playerMapCollision.enableCCD = false;*/
-
-	// Playerと地形の衝突はMapのグリッド近傍クエリで個別更新します。
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapSlope, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::EnemyMovementSphere, true);
@@ -45,15 +32,10 @@ void Test::Initialize() {
 	enemySpawner_ = std::make_unique<EnemySpawner>();
 	enemySpawner_->Initialize(player_.get(), SceneType::Test);
 
-	model_ = MyModel::Create("testModel", "AnimatedCube", SceneType::Test);
-	model_->SetPosition(modelPos_);
-
 	fadeSprite_ = MySprite::Create("testFade", "black128x72", SceneType::Test);
-	fadeSprite_->SetFitToScreen(true);
-	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	fadeSprite_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
+	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
 
-	fadeOutTimer_.Start(10.0f);
+	fadeOutTimer_.Start(2.0f);
 }
 
 SceneType Test::Update(float dt) {
@@ -72,10 +54,6 @@ SceneType Test::Update(float dt) {
 	map_->Update(*player_);
 
 	enemySpawner_->Update(dt);
-
-	if (model_) {
-		model_->Update();
-	}
 
 	if (useDebugCamera_) {
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {

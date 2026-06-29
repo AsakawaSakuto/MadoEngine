@@ -3,12 +3,6 @@
 
 namespace MyModel {
 
-/// @brief モデルインスタンスを作成する
-/// @param name 作成するモデルの識別名
-inline Model* Create(const std::string& name, const std::string& modelName, SceneType sceneType = SceneType::None) {
-	return MadoEngine::ModelManager::GetInstance().Create(name, modelName, sceneType);
-}
-
 /// @brief 描画レイヤーを指定してモデルインスタンスを作成する
 /// @param name 作成するモデルの識別名
 /// @param modelName 使用するモデルアセット名
@@ -19,7 +13,7 @@ inline Model* Create(
 	const std::string& name,
 	const std::string& modelName,
 	SceneType sceneType,
-	MadoEngine::Render::RenderLayer layer)
+	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default)
 {
 	Model* model = MadoEngine::ModelManager::GetInstance().Create(name, modelName, sceneType);
 	if (model) {

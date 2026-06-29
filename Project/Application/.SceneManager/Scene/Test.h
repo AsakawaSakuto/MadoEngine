@@ -34,23 +34,14 @@ public:
 	void DrawImGui() override;
 private:
 	
-	std::array<Sprite* ,10> sprites_;
-	Vector2 testPos_ = { 0.0f, 0.0f };
-
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
-
-	std::unique_ptr<Sprite> sprite_;
 
 	std::unique_ptr<Player> player_;
 
 	std::unique_ptr<Map> map_;
 
 	std::unique_ptr<EnemySpawner> enemySpawner_;
-
-	Model* model_ = nullptr;
-	Model* selectedModel_ = nullptr;
-	Vector3 modelPos_ = { -10.0f, 0.0f, -10.0f };
 
 	Sprite* fadeSprite_ = nullptr;
 	GameTimer fadeOutTimer_;

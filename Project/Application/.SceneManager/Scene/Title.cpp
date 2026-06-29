@@ -10,10 +10,9 @@ void Title::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
 
 	wallPaperSprite_ = MySprite::Create("TitleWallPaper", "wallPaper", SceneType::Title);
-	wallPaperSprite_->SetFitToScreen(true);
+
 	fadeSprite_ = MySprite::Create("TitleFade", "black128x72", SceneType::Title);
-	fadeSprite_->SetFitToScreen(true);
-	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, 0.0f });
+	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
 }
 
 SceneType Title::Update(float dt) {
