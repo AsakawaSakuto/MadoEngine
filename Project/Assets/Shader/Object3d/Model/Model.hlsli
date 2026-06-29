@@ -20,6 +20,7 @@ struct VertexShaderOutput
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     float3 worldPosition : POSITION0;
+    float4 color : COLOR0;
 };
 
 struct TransformationMatrix
@@ -27,6 +28,14 @@ struct TransformationMatrix
     float4x4 WVP;
     float4x4 World;
     float4x4 WorldInverseTranspose;
+};
+
+struct InstanceData
+{
+    float4x4 WVP;
+    float4x4 World;
+    float4x4 WorldInverseTranspose;
+    float4 color;
 };
 
 struct Material

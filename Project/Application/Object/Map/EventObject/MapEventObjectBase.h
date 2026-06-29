@@ -1,5 +1,6 @@
 #pragma once
 #include "../../IGameObject.h"
+#include <cstdint>
 #include <string>
 
 class Player;
@@ -27,6 +28,24 @@ protected:
 	/// @param colliderName Collider登録名です。
 	void SetColliderName(const std::string& colliderName);
 
+	/// @brief インスタンス描画用の通常表示と強調表示を登録します。
+	/// @param normalModel 通常表示に使用するインスタンス描画モデルです。
+	/// @param normalHandle 通常表示のインスタンスハンドルです。
+	/// @param outlineModel 強調表示に使用するインスタンス描画モデルです。
+	/// @param outlineHandle 強調表示のインスタンスハンドルです。
+	void SetInstancedDraw(
+		InstancedModel* normalModel,
+		uint32_t normalHandle,
+		InstancedModel* outlineModel,
+		uint32_t outlineHandle);
+
+	/// @brief インスタンス描画の表示を解除します。
+	void HideInstancedDraw();
+
 	std::string colliderName_;
 	bool isHighlighted_ = false;
+	InstancedModel* normalInstancedModel_ = nullptr;
+	InstancedModel* outlineInstancedModel_ = nullptr;
+	uint32_t normalInstanceHandle_ = UINT32_MAX;
+	uint32_t outlineInstanceHandle_ = UINT32_MAX;
 };

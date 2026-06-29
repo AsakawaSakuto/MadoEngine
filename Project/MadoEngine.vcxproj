@@ -189,6 +189,7 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\InstancedModel.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
@@ -326,11 +327,13 @@
     <ClInclude Include="Engine\Render\Object\3d\Line\DebugLineManager.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\InstancedModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelManager.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />
     <ClInclude Include="Engine\Render\LayerEffectPass.h" />
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />

@@ -71,6 +71,7 @@
     <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\InstancedModel.cpp" />
     <ClCompile Include="Application\Object\Player\Player.cpp" />
     <ClCompile Include="Application\Object\Player\PlayerController.cpp" />
     <ClCompile Include="Application\Object\Player\PlayerMovement.cpp" />
@@ -462,7 +463,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\InstancedModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

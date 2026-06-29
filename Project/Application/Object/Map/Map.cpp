@@ -83,6 +83,21 @@ Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize) 
 	return rotation;
 }
 
+/// @brief Mapで使用するインスタンス描画バッチを破棄します。
+void DestroyMapInstancedBatches() {
+	MyInstancedModel::Destroy("MapBlock.Ground");
+	MyInstancedModel::Destroy("MapBlock.SlopePlusX");
+	MyInstancedModel::Destroy("MapBlock.SlopeMinusX");
+	MyInstancedModel::Destroy("MapBlock.SlopePlusZ");
+	MyInstancedModel::Destroy("MapBlock.SlopeMinusZ");
+	MyInstancedModel::Destroy("Jar.Small.Normal");
+	MyInstancedModel::Destroy("Jar.Small.Outline");
+	MyInstancedModel::Destroy("Jar.Big.Normal");
+	MyInstancedModel::Destroy("Jar.Big.Outline");
+	MyInstancedModel::Destroy("Chest.Normal");
+	MyInstancedModel::Destroy("Chest.Outline");
+}
+
 }
 
 /// @brief 指定シードでMapを初期化します。
@@ -94,6 +109,7 @@ void Map::Initialize(uint32_t seed) {
 	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed_, 200));
 	ClampHeightSettings();
 	eventObjects_.clear();
+	DestroyMapInstancedBatches();
 	currentHitEventObject_ = nullptr;
 
 	mapBlocks_.assign(mapHeight_, std::vector<MapBlock>(mapWidth_));

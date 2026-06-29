@@ -83,5 +83,8 @@ private:
 	SlopeDirection slopeDirection_ = SlopeDirection::PulsX;
 	bool isModelDraw_ = true;
 	bool isColliderRegistered_ = false;
-	Model* slopeModel_ = nullptr;
+	InstancedModel* groundInstancedModel_ = nullptr;
+	InstancedModel* slopeInstancedModel_ = nullptr;
+	uint32_t groundInstanceHandle_ = UINT32_MAX;
+	uint32_t slopeInstanceHandle_ = UINT32_MAX;
 };

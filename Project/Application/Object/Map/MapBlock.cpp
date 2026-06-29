@@ -61,12 +61,12 @@ void MapBlock::SetVisible(bool isVisible) {
 
 	isModelDraw_ = isVisible;
 
-	if (model_) {
-		model_->SetVisible(isModelDraw_);
+	if (groundInstancedModel_) {
+		groundInstancedModel_->SetInstanceVisible(groundInstanceHandle_, isModelDraw_);
 	}
 
-	if (slopeModel_) {
-		slopeModel_->SetVisible(isModelDraw_);
+	if (slopeInstancedModel_) {
+		slopeInstancedModel_->SetInstanceVisible(slopeInstanceHandle_, isModelDraw_);
 	}
 }
 
@@ -121,30 +121,44 @@ void MapBlock::CreateSlopeShape(const Vector3& blockSize) {
 
 void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 
-	model_ = MyModel::Create(CreateGroundModelName(), "block", SceneType::Test);
-	if (!model_) {
+	groundInstancedModel_ = MyInstancedModel::GetOrCreate(
+		CreateGroundModelName(),
+		"block",
+		SceneType::Test,
+		MadoEngine::Render::RenderLayer::Default);
+	if (!groundInstancedModel_) {
 		return;
 	}
 
-	model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
-	model_->SetPosition({ transform_.translate.x, blockSize.y * static_cast<float>(height_), transform_.translate.z });
-	model_->SetScale({ blockSize.x / 2.0f, blockSize.y / 2.0f * static_cast<float>(height_), blockSize.z / 2.0f });
-	model_->SetVisible(isModelDraw_);
-	model_->SetTexture("blockTexture2");
+	groundInstancedModel_->SetTexture("blockTexture2");
+
+	InstancedModel::InstanceDesc instanceDesc;
+	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_), transform_.translate.z };
+	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f * static_cast<float>(height_), blockSize.z / 2.0f };
+	instanceDesc.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	instanceDesc.isVisible = isModelDraw_;
+	groundInstanceHandle_ = groundInstancedModel_->AddInstance(instanceDesc);
 }
 
 void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 
-	slopeModel_ = MyModel::Create(CreateSlopeModelName(), GetSlopeModelName(slopeDirection_), SceneType::Test);
-	if (!slopeModel_) {
+	slopeInstancedModel_ = MyInstancedModel::GetOrCreate(
+		CreateSlopeModelName(),
+		GetSlopeModelName(slopeDirection_),
+		SceneType::Test,
+		MadoEngine::Render::RenderLayer::Default);
+	if (!slopeInstancedModel_) {
 		return;
 	}
 
-	slopeModel_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
-	slopeModel_->SetPosition({ transform_.translate.x, blockSize.y * static_cast<float>(height_ + 1), transform_.translate.z });
-	slopeModel_->SetScale({ blockSize.x / 2.0f, blockSize.y / 2.0f, blockSize.z / 2.0f });
-	slopeModel_->SetVisible(isModelDraw_);
-	slopeModel_->SetTexture("blockTexture2");
+	slopeInstancedModel_->SetTexture("blockTexture2");
+
+	InstancedModel::InstanceDesc instanceDesc;
+	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_ + 1), transform_.translate.z };
+	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f, blockSize.z / 2.0f };
+	instanceDesc.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	instanceDesc.isVisible = isModelDraw_;
+	slopeInstanceHandle_ = slopeInstancedModel_->AddInstance(instanceDesc);
 }
 
 std::string MapBlock::CreateColliderName() const {
@@ -157,9 +171,9 @@ std::string MapBlock::CreateColliderName() const {
 }
 
 std::string MapBlock::CreateGroundModelName() const {
-	return "mapBlockModel" + std::to_string(z_ * mapWidth_ + x_);
+	return "MapBlock.Ground";
 }
 
 std::string MapBlock::CreateSlopeModelName() const {
-	return "mapSlopeModel" + std::to_string(z_ * mapWidth_ + x_);
+	return "MapBlock." + GetSlopeModelName(slopeDirection_);
 }

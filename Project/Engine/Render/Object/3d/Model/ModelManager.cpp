@@ -72,6 +72,7 @@ void ModelManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* c
 
 void ModelManager::Finalize() {
 	models_.clear();
+	instancedModels_.clear();
 	for (auto& [key, data] : sharedData_) {
 		MadoEngine::ModelResource::Finalize(*data);
 	}
@@ -163,6 +164,59 @@ void ModelManager::Destroy(const std::string& name) {
 	}
 }
 
+InstancedModel* ModelManager::CreateInstanced(const std::string& name, const std::string& modelName, SceneType sceneType) {
+	if (instancedModels_.contains(name)) {
+		Logger::Output("[Engine] インスタンス描画モデルは既に存在します : " + name, Logger::Level::Warning);
+		return instancedModels_.at(name).get();
+	}
+
+	const ModelSharedData* sharedData = FindSharedData(modelName);
+	if (!sharedData) {
+		Logger::Output("[Engine] インスタンス描画モデルのアセットが見つかりません : " + modelName, Logger::Level::Warning);
+		return nullptr;
+	}
+
+	if (sharedData->type != ModelType::Static) {
+		Logger::Output("[Engine] インスタンス描画はStaticモデルのみ対応しています : " + modelName, Logger::Level::Warning);
+		return nullptr;
+	}
+
+	auto model = std::make_unique<InstancedModel>(name);
+	model->Initialize(device_, commandList_, *sharedData);
+	model->SetPSORegistry(psoRegistry_);
+	model->SetSceneType(sceneType);
+
+	InstancedModel* ptr = model.get();
+	instancedModels_.emplace(name, std::move(model));
+
+	Logger::Output("[Engine] インスタンス描画モデルを作成しました : " + name + " アセット : " + modelName, Logger::Level::Application);
+	return ptr;
+}
+
+InstancedModel* ModelManager::GetOrCreateInstanced(const std::string& name, const std::string& modelName, SceneType sceneType) {
+	auto it = instancedModels_.find(name);
+	if (it != instancedModels_.end()) {
+		return it->second.get();
+	}
+
+	return CreateInstanced(name, modelName, sceneType);
+}
+
+InstancedModel* ModelManager::GetInstanced(const std::string& name) const {
+	auto it = instancedModels_.find(name);
+	if (it == instancedModels_.end()) {
+		Logger::Output("[Engine] インスタンス描画モデルが見つかりません : " + name, Logger::Level::Warning);
+		return nullptr;
+	}
+	return it->second.get();
+}
+
+void ModelManager::DestroyInstanced(const std::string& name) {
+	if (instancedModels_.erase(name) > 0) {
+		Logger::Output("[Engine] インスタンス描画モデルを破棄しました : " + name, Logger::Level::Application);
+	}
+}
+
 void ModelManager::DestroyByScene(SceneType sceneType) {
 	if (sceneType == SceneType::None) {
 		Logger::Output("SceneType::Noneは全シーン共通のため、Modelのシーン単位破棄をスキップしました", Logger::Level::Warning);
@@ -170,6 +224,17 @@ void ModelManager::DestroyByScene(SceneType sceneType) {
 	}
 
 	size_t destroyCount = 0;
+	size_t destroyInstancedCount = 0;
+	for (auto it = instancedModels_.begin(); it != instancedModels_.end();) {
+		if (it->second->GetSceneType() == sceneType) {
+			it = instancedModels_.erase(it);
+			++destroyInstancedCount;
+		} else {
+			++it;
+		}
+	}
+	Logger::Output("[Engine] シーン内のインスタンス描画モデルを破棄しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyInstancedCount), Logger::Level::Application);
+
 	for (auto it = models_.begin(); it != models_.end();) {
 		if (it->second->GetSceneType() == sceneType) {
 			it = models_.erase(it);
@@ -236,11 +301,23 @@ const ModelSharedData* ModelManager::FindSharedData(const std::string& modelName
 }
 
 void ModelManager::UpdateAll(SceneType currentSceneType) {
-	if (models_.empty()) {
+	if (models_.empty() && instancedModels_.empty()) {
 		return;
 	}
 
 	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+
+		model->Update();
+	}
+
+	for (auto& [name, model] : instancedModels_) {
 		SceneType modelScene = model->GetSceneType();
 		if (!model->IsVisible()) {
 			continue;
@@ -274,11 +351,26 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render:
 }
 
 void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, MadoEngine::Render::RenderLayerMask layerMask) {
-	if (models_.empty()) {
+	if (models_.empty() && instancedModels_.empty()) {
 		return;
 	}
 
 	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+
+		model->Draw(camera);
+	}
+
+	for (auto& [name, model] : instancedModels_) {
 		SceneType modelScene = model->GetSceneType();
 		if (!model->IsVisible()) {
 			continue;

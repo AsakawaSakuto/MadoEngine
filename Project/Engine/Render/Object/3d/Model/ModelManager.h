@@ -1,4 +1,5 @@
 #pragma once
+#include "InstancedModel.h"
 #include "Model.h"
 #include "Render/Object/RenderLayer.h"
 #include ".SceneManager/SceneType.h"
@@ -24,6 +25,29 @@ public:
 	Model* Create(const std::string& name, const std::string& modelName, SceneType sceneType = SceneType::None);
 	Model* Get(const std::string& name) const;
 	void Destroy(const std::string& name);
+
+	/// @brief インスタンス描画モデルを作成します。
+	/// @param name 作成するインスタンス描画モデルの名前です。
+	/// @param modelName 使用するモデルアセット名です。
+	/// @param sceneType 描画を許可するシーン種別です。
+	/// @return 作成したインスタンス描画モデルです。失敗時はnullptrです。
+	InstancedModel* CreateInstanced(const std::string& name, const std::string& modelName, SceneType sceneType = SceneType::None);
+
+	/// @brief インスタンス描画モデルを取得または作成します。
+	/// @param name 取得または作成するインスタンス描画モデルの名前です。
+	/// @param modelName 使用するモデルアセット名です。
+	/// @param sceneType 描画を許可するシーン種別です。
+	/// @return 取得または作成したインスタンス描画モデルです。失敗時はnullptrです。
+	InstancedModel* GetOrCreateInstanced(const std::string& name, const std::string& modelName, SceneType sceneType = SceneType::None);
+
+	/// @brief インスタンス描画モデルを取得します。
+	/// @param name 取得対象のインスタンス描画モデル名です。
+	/// @return 取得したインスタンス描画モデルです。見つからない場合はnullptrです。
+	InstancedModel* GetInstanced(const std::string& name) const;
+
+	/// @brief インスタンス描画モデルを破棄します。
+	/// @param name 破棄対象のインスタンス描画モデル名です。
+	void DestroyInstanced(const std::string& name);
 
 	/// @brief 指定したシーンに属するModelインスタンスをすべて破棄する
 	/// @param sceneType 破棄対象のシーン種別
@@ -86,6 +110,7 @@ private:
 	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>> sharedData_;
 	std::unordered_map<std::string, std::string> aliases_;
 	std::unordered_map<std::string, std::unique_ptr<Model>> models_;
+	std::unordered_map<std::string, std::unique_ptr<InstancedModel>> instancedModels_;
 };
 
 } // namespace MadoEngine

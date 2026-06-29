@@ -33,6 +33,7 @@ VertexShaderOutput main(SkinningVertexShaderInput input)
     output.texcoord = input.texcoord;
     output.normal = normalize(mul(skinned.normal, (float3x3) gTransformationMatrix.WorldInverseTranspose));
     output.worldPosition = mul(skinned.position, gTransformationMatrix.World).xyz;
+    output.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
     return output;
 }

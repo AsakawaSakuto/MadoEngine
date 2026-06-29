@@ -24,7 +24,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     const float kSpecularIntensity = 0.18f;
     const float kEnvironmentReflectionIntensity = 0.12f;
 
-    float3 albedo = gMaterial.color.rgb * textureColor.rgb;
+    float3 albedo = gMaterial.color.rgb * input.color.rgb * textureColor.rgb;
     float3 N = normalize(input.normal);
     float3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
 
@@ -50,11 +50,11 @@ PixelShaderOutput main(VertexShaderOutput input)
 
         float3 ambient = albedo * kAmbientIntensity;
         output.color.rgb = saturate(ambient + lightContribution.diffuse + lightContribution.specular + environmentReflection);
-        output.color.a = gMaterial.color.a * textureColor.a;
+        output.color.a = gMaterial.color.a * input.color.a * textureColor.a;
     }
     else
     {
-        output.color = gMaterial.color * textureColor;
+        output.color = gMaterial.color * input.color * textureColor;
     }
 
     if (output.color.a <= 0.0f)

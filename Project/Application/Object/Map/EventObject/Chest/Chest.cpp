@@ -2,7 +2,10 @@
 
 Chest::~Chest() {
 	MyCollider::RemoveCollider(colliderName_);
-	MyModel::Destroy(modelName_);
+	HideInstancedDraw();
+	if (model_) {
+		MyModel::Destroy(modelName_);
+	}
 }
 
 void Chest::Initialize(const InitializeDesc& desc) {
@@ -19,15 +22,33 @@ void Chest::Initialize(const InitializeDesc& desc) {
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
-	model_ = MyModel::Create(modelName_, "Chest", SceneType::Test);
+	InstancedModel* normalBatch = MyInstancedModel::GetOrCreate(
+		"Chest.Normal",
+		"Chest",
+		SceneType::Test,
+		MadoEngine::Render::RenderLayer::MapEventObject);
+	InstancedModel* outlineBatch = MyInstancedModel::GetOrCreate(
+		"Chest.Outline",
+		"Chest",
+		SceneType::Test,
+		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
-	if (model_) {
-		model_->SetPosition(transform_.translate);
-		model_->SetRotation(transform_.rotate);
-		model_->SetScale({ 0.75f,0.75f ,0.75f });
-		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::MapEventObject);
-		model_->SetTexture("box");
-		model_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	if (normalBatch && outlineBatch) {
+		normalBatch->SetTexture("box");
+		outlineBatch->SetTexture("box");
+
+		InstancedModel::InstanceDesc normalInstance;
+		normalInstance.transform = transform_;
+		normalInstance.transform.scale = { 0.75f, 0.75f, 0.75f };
+		normalInstance.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		normalInstance.isVisible = true;
+
+		InstancedModel::InstanceDesc outlineInstance = normalInstance;
+		outlineInstance.isVisible = false;
+
+		uint32_t normalHandle = normalBatch->AddInstance(normalInstance);
+		uint32_t outlineHandle = outlineBatch->AddInstance(outlineInstance);
+		SetInstancedDraw(normalBatch, normalHandle, outlineBatch, outlineHandle);
 	}
 }
 
