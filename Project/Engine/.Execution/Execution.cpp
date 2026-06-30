@@ -113,8 +113,10 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::TextManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::ModelManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
-		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
-		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
+
+		// Sprite/Textの座標系は実ウィンドウサイズではなく基準解像度に固定する
+		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
+		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 
 		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 50000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
@@ -231,8 +233,10 @@ namespace MadoEngine
 
 		renderWidth_ = width;
 		renderHeight_ = height;
-		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
-		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(renderWidth_), static_cast<float>(renderHeight_));
+
+		// リサイズ時も2D座標系は基準解像度のまま維持する
+		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
+		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 		Logger::Output(
 			"描画サイズを更新しました: " +
 			std::to_string(renderWidth_) + "x" + std::to_string(renderHeight_),

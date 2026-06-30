@@ -101,7 +101,7 @@ void Jar::Update(float deltaTime) {
 	MyDebugLine::AddShape(std::get<AABB>(colliderShape_), { 0.0f, 0.0f, 0.0f, 1.0f });
 }
 
-bool Jar::Interact(Player& player) {
+bool Jar::Interact(Player::Base& player) {
 	const int rewardAmount = CalculateRewardAmount(size_);
 	if (type_ == JarType::Exp) {
 		player.AddExp(rewardAmount);

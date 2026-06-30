@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <string>
 
-class Player;
+namespace Player {
+	class Base;
+}
 
 class Enemy : public IGameObject {
 public:
@@ -22,7 +24,7 @@ public:
 
 	/// @brief Playerを追跡するための参照先を設定します。
 	/// @param player 追跡対象のPlayerです。
-	void SetTargetPlayer(const Player* player) { targetPlayer_ = player; }
+	void SetTargetPlayer(Player::Base* player) { targetPlayer_ = player; }
 
 	/// @brief 地形との当たり判定後にEnemyの状態を更新します。
 	void ResolveAfterCollision();
@@ -60,7 +62,7 @@ private:
 
 	uint32_t enemyId_ = 0;
 	ColliderShape hitAABB_;
-	const Player* targetPlayer_ = nullptr;
+	Player::Base* targetPlayer_ = nullptr;
 	std::string movementColliderName_;
 	std::string hitColliderName_;
 	std::string modelName_;

@@ -62,5 +62,5 @@ private:
 	SceneType sceneType_ = SceneType::None;
 
 	// 画面全体へ引き伸ばして描画するかのフラグ
-	bool isFitToScreen_ = true;
+	bool isFitToScreen_ = false;
 };

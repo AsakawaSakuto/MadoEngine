@@ -102,6 +102,9 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
+    <ClCompile Include="Application\UI\Player\ExpGauge.cpp" />
+    <ClCompile Include="Application\UI\Player\HealthGauge.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Enemy\Enemy.h" />
@@ -557,10 +560,22 @@
     <ClInclude Include="Engine\Render\Object\2d\Text\Text.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\2d\Gauge\Gauge.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Text\TextManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Text\TextTextureGenerator.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextFont.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\Player\ExpGauge.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\Player\HealthGauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

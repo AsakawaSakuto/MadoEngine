@@ -153,6 +153,8 @@
     <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
+    <ClCompile Include="Application\UI\Player\ExpGauge.cpp" />
+    <ClCompile Include="Application\UI\Player\HealthGauge.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -183,6 +185,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
@@ -271,6 +274,8 @@
     <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Application\Object\Player\PlayerStatus.h" />
+    <ClInclude Include="Application\UI\Player\ExpGauge.h" />
+    <ClInclude Include="Application\UI\Player\HealthGauge.h" />
     <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\AudioType.h" />
@@ -313,6 +318,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\TextEditorUI.h" />
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Gauge\Gauge.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h" />

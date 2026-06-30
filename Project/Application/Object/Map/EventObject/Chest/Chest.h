@@ -2,6 +2,10 @@
 #include "../MapEventObjectBase.h"
 #include "ChestType.h"
 
+namespace Player {
+	class Base;
+}
+
 class Chest : public MapEventObjectBase {
 public:
 	struct InitializeDesc {
@@ -25,7 +29,7 @@ public:
 	/// @brief Chestに相互作用した時の処理を実行します。
 	/// @param player 相互作用したPlayerです。
 	/// @return ChestをMapから削除するためtrueを返します。
-	bool Interact(Player& player) override;
+	bool Interact(Player::Base& player) override;
 
 private:
 	ChestType type_ = ChestType::Normal;

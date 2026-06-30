@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <vector>
 #include <d3d12.h>
 
 namespace MadoEngine {
@@ -93,6 +94,7 @@ private:
 
 	// Sprite管理マップ（識別名 → unique_ptr）
 	std::unordered_map<std::string, std::unique_ptr<Sprite>> sprites_;
+	std::vector<std::string> drawOrder_;
 };
 
 } // namespace MadoEngine

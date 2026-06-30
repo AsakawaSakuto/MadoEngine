@@ -182,7 +182,7 @@ void Map::Initialize(uint32_t seed) {
 	GenerateChests();
 }
 
-void Map::Update(Player& player) {
+void Map::Update(Player::Base& player) {
 
 	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {
 		isModelDraw_ = !isModelDraw_;
@@ -369,7 +369,7 @@ void Map::GenerateChests() {
 	Logger::Output("Map : Chestを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
 }
 
-void Map::UpdateEventObjects(Player& player) {
+void Map::UpdateEventObjects(Player::Base& player) {
 	MapEventObjectBase* hitObject = nullptr;
 
 	for (std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
@@ -395,7 +395,7 @@ void Map::UpdateEventObjects(Player& player) {
 	HandleEventObjectInteraction(player);
 }
 
-void Map::HandleEventObjectInteraction(Player& player) {
+void Map::HandleEventObjectInteraction(Player::Base& player) {
 	if (!currentHitEventObject_ || !MyInput::Trigger("Interact")) {
 		return;
 	}

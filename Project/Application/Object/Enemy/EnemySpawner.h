@@ -5,14 +5,16 @@
 #include <memory>
 #include <vector>
 
-class Player;
+namespace Player {
+	class Base;
+}
 
 class EnemySpawner {
 public:
 	/// @brief EnemySpawnerを初期化します。
 	/// @param player 生成と追跡の基準になるPlayerです。
 	/// @param sceneType Enemyを所属させるシーン種別です。
-	void Initialize(Player* player, SceneType sceneType);
+	void Initialize(Player::Base* player, SceneType sceneType);
 
 	/// @brief Enemyの生成と更新を行います。
 	/// @param deltaTime デルタタイムです。
@@ -36,7 +38,7 @@ private:
 	/// @brief 削除対象になったEnemyを破棄します。
 	void RemoveDeadEnemies();
 
-	Player* player_ = nullptr;
+	Player::Base* player_ = nullptr;
 	SceneType sceneType_ = SceneType::None;
 	std::vector<std::unique_ptr<Enemy>> enemies_;
 	float spawnInterval_ = 0.25f;

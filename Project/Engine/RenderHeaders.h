@@ -7,6 +7,7 @@
 #include "Render/Object/2d/Sprite/Sprite.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
 #include "Render/Object/2d/Sprite/MySprite.h"
+#include "Render/Object/2d/Gauge/Gauge.h"
 #include "Render/Object/2d/Text/Text.h"
 #include "Render/Object/2d/Text/TextManager.h"
 #include "Render/Object/2d/Text/MyText.h"

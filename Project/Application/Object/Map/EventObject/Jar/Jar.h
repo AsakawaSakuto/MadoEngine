@@ -26,7 +26,7 @@ public:
 	/// @brief Jarを取得した時の処理を実行します。
 	/// @param player 取得するPlayerです。
 	/// @return JarをMapから削除するためtrueを返します。
-	bool Interact(Player& player) override;
+	bool Interact(Player::Base& player) override;
 
 private:
 	JarType type_ = JarType::Money;

@@ -59,7 +59,7 @@ void Chest::Update(float deltaTime) {
 	MyDebugLine::AddShape(std::get<AABB>(colliderShape_), { 0.0f, 0.0f, 0.0f, 1.0f });
 }
 
-bool Chest::Interact(Player& player) {
+bool Chest::Interact(Player::Base& player) {
 	(void)player;
 
 	return true;

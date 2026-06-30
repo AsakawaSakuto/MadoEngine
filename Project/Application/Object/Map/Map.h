@@ -6,7 +6,9 @@
 #include <memory>
 #include <vector>
 
-class Player;
+namespace Player {
+	class Base;
+}
 
 /// @brief Map全体を管理するクラスです。
 class Map {
@@ -17,7 +19,7 @@ public:
 
 	/// @brief Mapを更新します。
 	/// @param player 相互作用の対象になるPlayerです。
-	void Update(Player& player);
+	void Update(Player::Base& player);
 
 	/// @brief Map調整用のImGuiを描画します。
 	void DrawImGui();
@@ -36,11 +38,11 @@ private:
 
 	/// @brief Map上のイベントオブジェクトを更新します。
 	/// @param player 相互作用するPlayerです。
-	void UpdateEventObjects(Player& player);
+	void UpdateEventObjects(Player::Base& player);
 
 	/// @brief Playerとイベントオブジェクトの相互作用を処理します。
 	/// @param player 相互作用するPlayerです。
-	void HandleEventObjectInteraction(Player& player);
+	void HandleEventObjectInteraction(Player::Base& player);
 
 	/// @brief 地形生成用の高さ設定を有効範囲に補正します。
 	void ClampHeightSettings();

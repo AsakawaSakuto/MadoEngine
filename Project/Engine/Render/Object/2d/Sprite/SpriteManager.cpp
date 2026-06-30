@@ -1,6 +1,7 @@
 #include "SpriteManager.h"
 #include "Utility/Logger/Logger.h"
 #include "Shader/RootSignatureManager.h"
+#include <algorithm>
 #include <cassert>
 
 namespace MadoEngine {
@@ -26,6 +27,7 @@ void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* 
 
 void SpriteManager::Finalize() {
 	sprites_.clear();
+	drawOrder_.clear();
 	sharedGeometry_.Finalize();
 	Logger::Output("全リソースを解放しました", Logger::Level::Engine);
 }
@@ -53,6 +55,7 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 
 	Sprite* ptr = sprite.get();
 	sprites_.emplace(name, std::move(sprite));
+	drawOrder_.push_back(name);
 
 	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneType == SceneType::None ? "全シーン" : SceneTypeToString(sceneType)), Logger::Level::Application);
 	return ptr;
@@ -69,6 +72,7 @@ Sprite* SpriteManager::Get(const std::string& name) const {
 
 void SpriteManager::Destroy(const std::string& name) {
 	if (sprites_.erase(name) > 0) {
+		drawOrder_.erase(std::remove(drawOrder_.begin(), drawOrder_.end(), name), drawOrder_.end());
 		Logger::Output("Spriteを破棄しました : " + name, Logger::Level::Application);
 	}
 }
@@ -80,9 +84,16 @@ void SpriteManager::DestroyByScene(SceneType sceneType) {
 	}
 
 	size_t destroyCount = 0;
-	for (auto it = sprites_.begin(); it != sprites_.end();) {
-		if (it->second->GetSceneType() == sceneType) {
-			it = sprites_.erase(it);
+	for (auto it = drawOrder_.begin(); it != drawOrder_.end();) {
+		auto spriteIt = sprites_.find(*it);
+		if (spriteIt == sprites_.end()) {
+			it = drawOrder_.erase(it);
+			continue;
+		}
+
+		if (spriteIt->second->GetSceneType() == sceneType) {
+			sprites_.erase(spriteIt);
+			it = drawOrder_.erase(it);
 			++destroyCount;
 		} else {
 			++it;
@@ -96,7 +107,10 @@ void SpriteManager::UpdateAll(SceneType currentSceneType) {
 
 	if (sprites_.empty()) { return; }
 
-	for (auto& [name, sprite] : sprites_) {
+	for (const std::string& name : drawOrder_) {
+		auto it = sprites_.find(name);
+		if (it == sprites_.end()) { continue; }
+		Sprite* sprite = it->second.get();
 
 		SceneType spriteScene = sprite->GetSceneType();
 		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
@@ -121,7 +135,11 @@ void SpriteManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render
 	// 全スプライト共通のステートをループ外で1回だけ設定する
 	bool isStateSet = false;
 
-	for (auto& [name, sprite] : sprites_) {
+	for (const std::string& name : drawOrder_) {
+		auto it = sprites_.find(name);
+		if (it == sprites_.end()) { continue; }
+		Sprite* sprite = it->second.get();
+
 		SceneType spriteScene = sprite->GetSceneType();
 		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
 		if (!sprite->IsVisible()) { continue; }

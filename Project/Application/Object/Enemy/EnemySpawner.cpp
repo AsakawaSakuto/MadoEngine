@@ -9,7 +9,7 @@ namespace {
 	constexpr float kSpawnHeightOffset = 1.0f;
 }
 
-void EnemySpawner::Initialize(Player* player, SceneType sceneType) {
+void EnemySpawner::Initialize(Player::Base* player, SceneType sceneType) {
 	player_ = player;
 	sceneType_ = sceneType;
 	spawnTimer_ = 0.0f;

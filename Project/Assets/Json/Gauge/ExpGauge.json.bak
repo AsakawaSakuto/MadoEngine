@@ -1,0 +1,28 @@
+{
+    "backgroundColor": [
+        0.20000000298023224,
+        0.20000000298023224,
+        0.20000000298023224,
+        1.0
+    ],
+    "currentValue": 100.0,
+    "direction": "Right",
+    "drawBackground": true,
+    "gaugeColor": [
+        0.0,
+        0.9581396579742432,
+        1.0,
+        1.0
+    ],
+    "maxValue": 100.0,
+    "name": "ExpGauge",
+    "position": [
+        0.0,
+        680.0
+    ],
+    "size": [
+        640.0,
+        20.0
+    ],
+    "visible": true
+}

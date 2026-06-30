@@ -4,6 +4,8 @@
 #include "Object/Map/Map.h"
 #include "Object/Enemy/EnemySpawner.h"
 #include "Utility/Light/LightManager.h"
+#include "UI/Player/ExpGauge.h"
+#include "UI/Player/HealthGauge.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -37,11 +39,15 @@ private:
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 
-	std::unique_ptr<Player> player_;
+	std::unique_ptr<Player::Base> player_;
+
+	std::unique_ptr<Player::ExpGauge> expGauge_;
+	std::unique_ptr<Player::HealthGauge> healthGauge_;
 
 	std::unique_ptr<Map> map_;
 
 	std::unique_ptr<EnemySpawner> enemySpawner_;
+
 
 	Sprite* fadeSprite_ = nullptr;
 	GameTimer fadeOutTimer_;

@@ -15,9 +15,15 @@ void Test::Initialize() {
 
 	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
 
-	player_ = std::make_unique<Player>();
+	player_ = std::make_unique<Player::Base>();
 	player_->Initialize();
 	player_->SetCamera(&tpsCamera_);
+
+	expGauge_ = std::make_unique<Player::ExpGauge>();
+	expGauge_->Initialize();
+
+	healthGauge_ = std::make_unique<Player::HealthGauge>();
+	healthGauge_->Initialize();
 
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapSlope, true);
@@ -32,8 +38,9 @@ void Test::Initialize() {
 	enemySpawner_ = std::make_unique<EnemySpawner>();
 	enemySpawner_->Initialize(player_.get(), SceneType::Test);
 
-	fadeSprite_ = MySprite::Create("testFade", "black128x72", SceneType::Test);
+	fadeSprite_ = MySprite::Create("testFade", "black2x2", SceneType::Test);
 	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
+	fadeSprite_->SetFitToScreen(true);
 
 	fadeOutTimer_.Start(2.0f);
 }
@@ -50,6 +57,10 @@ SceneType Test::Update(float dt) {
 	debugCamera_.Update(dt);
 
 	player_->Update(dt);
+
+	auto status = player_->GetStatus();
+	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
+	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
 
 	map_->Update(*player_);
 
@@ -95,6 +106,9 @@ void Test::DrawImGui() {
 	ImGui::Text("map seed : %u", map_->GetSeed());
 
 	ImGui::End();
+
+	expGauge_->DrawImGui();
+	healthGauge_->DrawImGui();
 
 #endif // USE_IMGUI
 }

@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <string>
 
-class Player;
+namespace Player {
+	class Base;
+}
 
 /// @brief Map上でPlayerと相互作用できるイベントオブジェクトの基底クラスです。
 class MapEventObjectBase : public IGameObject {
@@ -21,7 +23,7 @@ public:
 	/// @brief Playerが相互作用した時の処理を実行します。
 	/// @param player 相互作用するPlayerです。
 	/// @return 相互作用後にMapから削除する場合はtrueを返します。
-	virtual bool Interact(Player& player) = 0;
+	virtual bool Interact(Player::Base& player) = 0;
 
 protected:
 	/// @brief Collider登録名を設定します。
