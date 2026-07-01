@@ -51,7 +51,11 @@ private:
 
 	Sprite* fadeSprite_ = nullptr;
 	MadoEngine::Text* playerHealthText_ = nullptr;
+	MadoEngine::Text* enemyCountText_ = nullptr;
+	MadoEngine::Text* fpsText_ = nullptr;
 	GameTimer fadeOutTimer_;
+	float fpsSampleTime_ = 0.0f;
+	int fpsSampleFrameCount_ = 0;
 
 	bool useDebugCamera_ = false;
 };

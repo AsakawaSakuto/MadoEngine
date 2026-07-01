@@ -216,6 +216,7 @@
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
     <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
+    <ClCompile Include="Engine\Utility\Collider\StaticBVH.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
@@ -375,6 +376,7 @@
     <ClInclude Include="Engine\Utility\Collider\CollisionTag.h" />
     <ClInclude Include="Engine\Utility\Collider\MyCollider.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape.h" />
+    <ClInclude Include="Engine\Utility\Collider\StaticBVH.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\AABB.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Circle.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Line.h" />

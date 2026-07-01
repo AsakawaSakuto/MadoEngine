@@ -5,6 +5,7 @@ namespace MyCollider {
 
 	using CollisionCallback = ColliderManager::CollisionCallback;
 	using CollisionPairSetting = ColliderManager::CollisionPairSetting;
+	using ProfileStats = ColliderManager::ProfileStats;
 
 	/// @brief コライダーを登録する
 	/// @param name 識別名（例: "Enemy_0001"）
@@ -146,6 +147,19 @@ namespace MyCollider {
 	inline void Update() {
 		ColliderManager::GetInstance().Update();
 	}
+
+	/// @brief Collider処理の統計情報を取得します。
+	/// @return 直近のCollider処理統計です。
+	inline const ProfileStats& GetProfileStats() {
+		return ColliderManager::GetInstance().GetProfileStats();
+	}
+
+#ifdef USE_IMGUI
+	/// @brief Collider処理の統計情報をImGuiへ表示します。
+	inline void DrawImGui() {
+		ColliderManager::GetInstance().DrawImGui();
+	}
+#endif // USE_IMGUI
 
 	inline void RemoveColliderAll() {
 		ColliderManager::GetInstance().RemoveColliderAll();

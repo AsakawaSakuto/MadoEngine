@@ -36,7 +36,7 @@ namespace Player {
 		float maxSlideSpeed_ = 25.0f; // スライディングの最大速度
 		float slideFriction_ = 2.0f; // スライディング中の摩擦
 		float jumpMoveBoostSpeed_ = 3.0f; // ジャンプ時の水平初速
-		int   jumpCount_ = 10; // ジャンプ可能回数
+		int   jumpCount_ = 1000; // ジャンプ可能回数
 	};
 
 	/// @brief プレイヤーの動作状態を表す列挙型

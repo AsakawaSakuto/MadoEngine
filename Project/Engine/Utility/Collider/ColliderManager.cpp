@@ -1,6 +1,14 @@
 #include "ColliderManager.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
+#include <chrono>
+#include <cfloat>
+#include <cmath>
+#include <type_traits>
+
+#ifdef USE_IMGUI
+#include "ImGuiHeaders.h"
+#endif // USE_IMGUI
 
 // pShape から実体を取得してコピーを作るように変更
 static ColliderShape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
@@ -534,6 +542,66 @@ const std::vector<std::string>* ColliderManager::FindColliderNames(CollisionTag 
     return &it->second;
 }
 
+/// @brief 最小最大座標から検索用AABBを作成します。
+/// @param min 最小座標です。
+/// @param max 最大座標です。
+/// @return 作成したAABBです。
+static AABB MakeWorldBounds(const Vector3& min, const Vector3& max) {
+    AABB bounds;
+    bounds.center = { 0.0f, 0.0f, 0.0f };
+    bounds.min = min;
+    bounds.max = max;
+    return bounds;
+}
+
+/// @brief AABBの交差判定を行います。
+/// @param a AABBです。
+/// @param b AABBです。
+/// @return 交差していればtrueを返します。
+static bool IsBoundsIntersect(const AABB& a, const AABB& b) {
+    const Vector3 aMin = a.GetMinWorld();
+    const Vector3 aMax = a.GetMaxWorld();
+    const Vector3 bMin = b.GetMinWorld();
+    const Vector3 bMax = b.GetMaxWorld();
+
+    return aMin.x <= bMax.x && aMax.x >= bMin.x &&
+        aMin.y <= bMax.y && aMax.y >= bMin.y &&
+        aMin.z <= bMax.z && aMax.z >= bMin.z;
+}
+
+/// @brief OBBの外接AABBを作成します。
+/// @param obb 対象OBBです。
+/// @return 外接AABBです。
+static AABB MakeOBBBounds(const OBB& obb) {
+    Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
+    Vector3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+    for (int x = 0; x < 2; ++x) {
+        for (int y = 0; y < 2; ++y) {
+            for (int z = 0; z < 2; ++z) {
+                const Vector3 local = {
+                    x == 0 ? obb.min.x : obb.max.x,
+                    y == 0 ? obb.min.y : obb.max.y,
+                    z == 0 ? obb.min.z : obb.max.z
+                };
+                const Vector3 world = {
+                    obb.center.x + obb.orientation[0].x * local.x + obb.orientation[1].x * local.y + obb.orientation[2].x * local.z,
+                    obb.center.y + obb.orientation[0].y * local.x + obb.orientation[1].y * local.y + obb.orientation[2].y * local.z,
+                    obb.center.z + obb.orientation[0].z * local.x + obb.orientation[1].z * local.y + obb.orientation[2].z * local.z
+                };
+                min.x = std::min(min.x, world.x);
+                min.y = std::min(min.y, world.y);
+                min.z = std::min(min.z, world.z);
+                max.x = std::max(max.x, world.x);
+                max.y = std::max(max.y, world.y);
+                max.z = std::max(max.z, world.z);
+            }
+        }
+    }
+
+    return MakeWorldBounds(min, max);
+}
+
 /// @brief タグ別索引へコライダー名を追加します。
 /// @param tag 追加先の衝突タグです。
 /// @param name 追加するコライダー名です。
@@ -582,6 +650,7 @@ void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag
 
     m_colliders[name] = info;
     AddColliderNameToTag(tag, name);
+    MarkStaticTerrainBVHDirtyIfNeeded(tag);
 #ifdef _DEBUG
     Logger::Output("コライダー登録 : " + name + " (タグ : " + CollisionTagToString(tag) + ")", Logger::Level::Application);
 #endif
@@ -590,8 +659,10 @@ void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag
 void ColliderManager::RemoveCollider(const std::string& name) {
     auto it = m_colliders.find(name);
     if (it != m_colliders.end()) {
+        const CollisionTag removedTag = it->second.tag;
         RemoveColliderNameFromTag(it->second.tag, name);
         m_colliders.erase(it);
+        MarkStaticTerrainBVHDirtyIfNeeded(removedTag);
         Logger::Output("コライダー削除 : " + name, Logger::Level::Application);
     } else {
         Logger::Output("コライダー削除失敗 : " + name + " が見つかりません", Logger::Level::Warning);
@@ -601,6 +672,10 @@ void ColliderManager::RemoveCollider(const std::string& name) {
 void ColliderManager::RemoveColliderAll() {
     m_colliders.clear();
     m_colliderNamesByTag.clear();
+    staticTerrainBVH_.Clear();
+    staticTerrainEntries_.clear();
+    bvhQueryResults_.clear();
+    isStaticTerrainBVHDirty_ = true;
     Logger::Output("すべてのコライダーを削除しました", Logger::Level::Application);
 }
 
@@ -643,11 +718,138 @@ void ColliderManager::SyncPositions() {
 }
 
 bool ColliderManager::CheckVariantCollision(const ColliderShape& shapeA, const ColliderShape& shapeB) {
+    ++profileStats_.narrowPhaseCount;
+    const bool isSphereSlope =
+        (std::holds_alternative<Sphere>(shapeA) && std::holds_alternative<Slope>(shapeB)) ||
+        (std::holds_alternative<Slope>(shapeA) && std::holds_alternative<Sphere>(shapeB));
+    if (isSphereSlope) {
+        ++profileStats_.sphereSlopeNarrowPhaseCount;
+    }
+
     return std::visit([](auto&& typeA, auto&& typeB) -> bool {
         if constexpr (requires { Collision::IsHit(typeA, typeB); }) return Collision::IsHit(typeA, typeB);
         else if constexpr (requires { Collision::IsHit(typeB, typeA); }) return Collision::IsHit(typeB, typeA);
         else return false;
         }, shapeA, shapeB);
+}
+
+bool ColliderManager::TryGetColliderBounds(const ColliderInfo& info, AABB& outBounds) const {
+    if (!info.pShape) {
+        return false;
+    }
+
+    ColliderShape syncedShape = GetSyncedShape(info);
+    return std::visit([&outBounds](auto&& shape) -> bool {
+        using ShapeType = std::decay_t<decltype(shape)>;
+        if constexpr (std::is_same_v<ShapeType, AABB>) {
+            outBounds = MakeWorldBounds(shape.GetMinWorld(), shape.GetMaxWorld());
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, Sphere>) {
+            const Vector3 radius = { shape.radius, shape.radius, shape.radius };
+            outBounds = MakeWorldBounds(shape.center - radius, shape.center + radius);
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, Slope>) {
+            outBounds = MakeWorldBounds(shape.GetMinWorld(), shape.GetMaxWorld());
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, OBB>) {
+            outBounds = MakeOBBBounds(shape);
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, OvalSphere>) {
+            const Vector3 radius = {
+                std::abs(shape.radius.x),
+                std::abs(shape.radius.y),
+                std::abs(shape.radius.z)
+            };
+            outBounds = MakeWorldBounds(shape.center - radius, shape.center + radius);
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, Circle>) {
+            const Vector3 radius = { shape.radius, shape.radius, shape.radius };
+            outBounds = MakeWorldBounds(shape.center - radius, shape.center + radius);
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, Segment>) {
+            const Vector3 end = shape.origin + shape.diff;
+            outBounds = MakeWorldBounds(
+                {
+                    std::min(shape.origin.x, end.x),
+                    std::min(shape.origin.y, end.y),
+                    std::min(shape.origin.z, end.z)
+                },
+                {
+                    std::max(shape.origin.x, end.x),
+                    std::max(shape.origin.y, end.y),
+                    std::max(shape.origin.z, end.z)
+                }
+            );
+            return true;
+        } else if constexpr (std::is_same_v<ShapeType, Line>) {
+            outBounds = MakeWorldBounds(
+                {
+                    std::min(shape.start.x, shape.end.x),
+                    std::min(shape.start.y, shape.end.y),
+                    std::min(shape.start.z, shape.end.z)
+                },
+                {
+                    std::max(shape.start.x, shape.end.x),
+                    std::max(shape.start.y, shape.end.y),
+                    std::max(shape.start.z, shape.end.z)
+                }
+            );
+            return true;
+        } else {
+            return false;
+        }
+    }, syncedShape);
+}
+
+bool ColliderManager::IsStaticTerrainTag(CollisionTag tag) const {
+    return tag == CollisionTag::MapBlock || tag == CollisionTag::MapSlope;
+}
+
+bool ColliderManager::ShouldUseStaticTerrainBVH(CollisionTag tagA, CollisionTag tagB) const {
+    return IsStaticTerrainTag(tagA) != IsStaticTerrainTag(tagB);
+}
+
+void ColliderManager::MarkStaticTerrainBVHDirtyIfNeeded(CollisionTag tag) {
+    if (IsStaticTerrainTag(tag)) {
+        isStaticTerrainBVHDirty_ = true;
+    }
+}
+
+void ColliderManager::RebuildStaticTerrainBVHIfNeeded() {
+    if (!isStaticTerrainBVHDirty_) {
+        return;
+    }
+
+    staticTerrainEntries_.clear();
+    staticTerrainEntries_.reserve(m_colliders.size());
+
+    for (const auto& [name, info] : m_colliders) {
+        if (!IsStaticTerrainTag(info.tag)) {
+            continue;
+        }
+
+        AABB bounds;
+        if (!TryGetColliderBounds(info, bounds)) {
+            continue;
+        }
+
+        StaticBVH::Entry entry;
+        entry.colliderName = name;
+        entry.bounds = bounds;
+        staticTerrainEntries_.push_back(entry);
+    }
+
+    staticTerrainBVH_.Build(staticTerrainEntries_);
+    profileStats_.staticBVHColliderCount = static_cast<uint32_t>(staticTerrainBVH_.GetEntryCount());
+    profileStats_.staticBVHNodeCount = static_cast<uint32_t>(staticTerrainBVH_.GetNodeCount());
+    isStaticTerrainBVHDirty_ = false;
+}
+
+void ColliderManager::QueryStaticTerrainBVH(const AABB& bounds, std::vector<const std::string*>& outCandidates) {
+    RebuildStaticTerrainBVHIfNeeded();
+    staticTerrainBVH_.Query(bounds, outCandidates);
+    ++profileStats_.bvhQueryCount;
+    profileStats_.bvhCandidateCount += static_cast<uint32_t>(outCandidates.size());
 }
 
 /// @brief 前回座標から現在座標への移動で連続衝突しているか判定する
@@ -965,6 +1167,57 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
             return IsSphereTouchingSlopeTop(sphere, slope, *(playerInfo.pPosition), sphere.radius * 0.25f, 0.05f, 0.08f);
         };
 
+        if (IsStaticTerrainTag(targetTag)) {
+            AABB queryBounds;
+            if (TryGetColliderBounds(playerInfo, queryBounds)) {
+                // 接地判定ではSphere下端がAABB上面より少し上にある状態も候補に含めます。
+                queryBounds.min.y -= 0.08f;
+                QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+                for (const std::string* candidateName : bvhQueryResults_) {
+                    if (!candidateName || *candidateName == name) continue;
+                    auto otherIt = m_colliders.find(*candidateName);
+                    if (otherIt == m_colliders.end()) continue;
+
+                    const ColliderInfo& otherInfo = otherIt->second;
+                    if (otherInfo.tag != targetTag) continue;
+                    if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+
+                    if (std::holds_alternative<Slope>(*(otherInfo.pShape))) {
+                        ++profileStats_.narrowPhaseCount;
+                        ++profileStats_.sphereSlopeNarrowPhaseCount;
+                        if (checkSlopeGround(std::get<Slope>(*(otherInfo.pShape)))) {
+                            return true;
+                        }
+                        continue;
+                    }
+                    if (!std::holds_alternative<AABB>(*(otherInfo.pShape))) continue;
+
+                    auto& boxAABB = std::get<AABB>(*(otherInfo.pShape));
+                    Vector3 bMin = boxAABB.GetMinWorld();
+                    Vector3 bMax = boxAABB.GetMaxWorld();
+
+                    ++profileStats_.narrowPhaseCount;
+                    float closestX = std::clamp(playerInfo.pPosition->x, bMin.x, bMax.x);
+                    float closestZ = std::clamp(playerInfo.pPosition->z, bMin.z, bMax.z);
+
+                    float dx = playerInfo.pPosition->x - closestX;
+                    float dz = playerInfo.pPosition->z - closestZ;
+                    float distSqXZ = dx * dx + dz * dz;
+
+                    if (distSqXZ <= sphere.radius * sphere.radius) {
+                        if (playerInfo.pPosition->y >= bMax.y - 0.05f) {
+                            float bottomY = playerInfo.pPosition->y - sphere.radius;
+                            if (bottomY <= bMax.y + 0.05f) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+        }
+
         for (const auto& otherName : *targetNames) {
             if (otherName == name) continue;
             auto otherIt = m_colliders.find(otherName);
@@ -1050,6 +1303,32 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
 
     const auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
 
+    if (IsStaticTerrainTag(targetTag)) {
+        AABB queryBounds;
+        if (TryGetColliderBounds(playerInfo, queryBounds)) {
+            QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+            for (const std::string* candidateName : bvhQueryResults_) {
+                if (!candidateName || *candidateName == name) continue;
+                auto otherIt = m_colliders.find(*candidateName);
+                if (otherIt == m_colliders.end()) continue;
+
+                const ColliderInfo& otherInfo = otherIt->second;
+                if (otherInfo.tag != targetTag) continue;
+                if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+                if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
+
+                const auto& slope = std::get<Slope>(*(otherInfo.pShape));
+                ++profileStats_.narrowPhaseCount;
+                ++profileStats_.sphereSlopeNarrowPhaseCount;
+                if (IsSphereTouchingSlopeTop(sphere, slope, *(playerInfo.pPosition), sphere.radius * 0.25f, 0.05f, 0.08f)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
         auto otherIt = m_colliders.find(otherName);
@@ -1109,6 +1388,51 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     bool foundSlope = false;
     float bestCenterY = 0.0f;
     float bestSurfaceY = -FLT_MAX;
+
+    if (IsStaticTerrainTag(targetTag)) {
+        AABB queryBounds;
+        if (TryGetColliderBounds(playerInfo, queryBounds)) {
+            QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+            for (const std::string* candidateName : bvhQueryResults_) {
+                if (!candidateName || *candidateName == name) continue;
+                auto otherIt = m_colliders.find(*candidateName);
+                if (otherIt == m_colliders.end()) continue;
+
+                const ColliderInfo& otherInfo = otherIt->second;
+                if (otherInfo.tag != targetTag) continue;
+                if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+                if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
+
+                Slope slope = std::get<Slope>(*(otherInfo.pShape));
+                slope.center = *(otherInfo.pPosition);
+                ++profileStats_.narrowPhaseCount;
+                ++profileStats_.sphereSlopeNarrowPhaseCount;
+                if (!Collision::Detail::IsInsideSlopeXZ(slope, center)) {
+                    continue;
+                }
+
+                float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
+                float targetCenterY = CalcSlopeTopSupportCenterY(sphere, slope, center);
+                float snapDownDistance = center.y - targetCenterY;
+                if (snapDownDistance < 0.0f || snapDownDistance > maxSnapDownDistance) {
+                    continue;
+                }
+
+                if (!foundSlope || surfaceY > bestSurfaceY) {
+                    foundSlope = true;
+                    bestSurfaceY = surfaceY;
+                    bestCenterY = targetCenterY;
+                }
+            }
+
+            if (!foundSlope) {
+                return false;
+            }
+
+            outCenterY = bestCenterY;
+            return true;
+        }
+    }
 
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
@@ -1189,6 +1513,45 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
     bool foundSlope = false;
     float bestSurfaceY = -FLT_MAX;
     Vector3 bestNormal = { 0.0f, 1.0f, 0.0f };
+
+    if (IsStaticTerrainTag(targetTag)) {
+        AABB queryBounds;
+        if (TryGetColliderBounds(playerInfo, queryBounds)) {
+            QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+            for (const std::string* candidateName : bvhQueryResults_) {
+                if (!candidateName || *candidateName == name) continue;
+                auto otherIt = m_colliders.find(*candidateName);
+                if (otherIt == m_colliders.end()) continue;
+
+                const ColliderInfo& otherInfo = otherIt->second;
+                if (otherInfo.tag != targetTag) continue;
+                if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+                if (!std::holds_alternative<Slope>(*(otherInfo.pShape))) continue;
+
+                Slope slope = std::get<Slope>(*(otherInfo.pShape));
+                slope.center = *(otherInfo.pPosition);
+                ++profileStats_.narrowPhaseCount;
+                ++profileStats_.sphereSlopeNarrowPhaseCount;
+                if (!IsSphereTouchingSlopeTop(sphere, slope, center, sphere.radius * 0.25f, 0.05f, 0.08f)) {
+                    continue;
+                }
+
+                float surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, center);
+                if (!foundSlope || surfaceY > bestSurfaceY) {
+                    foundSlope = true;
+                    bestSurfaceY = surfaceY;
+                    bestNormal = Collision::Detail::GetSlopeTopNormal(slope);
+                }
+            }
+
+            if (!foundSlope) {
+                return false;
+            }
+
+            outNormal = bestNormal;
+            return true;
+        }
+    }
 
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
@@ -1320,8 +1683,133 @@ bool ColliderManager::IsHitTags(CollisionTag tagA, CollisionTag tagB) {
     return false;
 }
 
+void ColliderManager::ProcessCollisionPair(ColliderInfo& a, ColliderInfo& b, const CollisionRule& rule) {
+    if (!a.pShape || !b.pShape) {
+        return;
+    }
+
+    bool isHit = CheckVariantCollision(*(a.pShape), *(b.pShape));
+    bool isSweptHit = false;
+    float hitTime = 1.0f;
+    if (!isHit && rule.enableCCD) {
+        isSweptHit = CheckSweptCollision(a, b, hitTime);
+        if (isSweptHit && rule.enableResolve) {
+            ApplySweptCollision(a, b, hitTime);
+        }
+    }
+
+    if (!isHit && !isSweptHit) {
+        return;
+    }
+
+    if (a.onHit) a.onHit(b.tag, b.actorName);
+    if (b.onHit) b.onHit(a.tag, a.actorName);
+    if (rule.enableResolve) {
+        ResolveOverlap(a, b);
+        SyncColliderShapePosition(a);
+        SyncColliderShapePosition(b);
+    }
+}
+
+void ColliderManager::ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynamicList, CollisionTag staticTag, const CollisionRule& rule) {
+    for (ColliderInfo* dynamicInfo : dynamicList) {
+        if (!dynamicInfo || !dynamicInfo->pShape) {
+            continue;
+        }
+
+        AABB queryBounds;
+        if (!TryGetColliderBounds(*dynamicInfo, queryBounds)) {
+            continue;
+        }
+
+        QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+        for (const std::string* candidateName : bvhQueryResults_) {
+            if (!candidateName || *candidateName == dynamicInfo->actorName) {
+                continue;
+            }
+
+            auto candidateIt = m_colliders.find(*candidateName);
+            if (candidateIt == m_colliders.end()) {
+                continue;
+            }
+
+            ColliderInfo& staticInfo = candidateIt->second;
+            if (staticInfo.tag != staticTag) {
+                continue;
+            }
+
+            ProcessCollisionPair(*dynamicInfo, staticInfo, rule);
+        }
+    }
+}
+
 void ColliderManager::Update() {
-    SyncPositions();
+    {
+        const auto updateStartTime = std::chrono::high_resolution_clock::now();
+        const uint32_t previousStaticColliderCount = profileStats_.staticBVHColliderCount;
+        const uint32_t previousStaticNodeCount = profileStats_.staticBVHNodeCount;
+        profileStats_ = {};
+        profileStats_.staticBVHColliderCount = previousStaticColliderCount;
+        profileStats_.staticBVHNodeCount = previousStaticNodeCount;
+
+        SyncPositions();
+        RebuildStaticTerrainBVHIfNeeded();
+
+        std::unordered_map<CollisionTag, std::vector<ColliderInfo*>> groups;
+        for (auto& [name, info] : m_colliders) {
+            groups[info.tag].push_back(&info);
+        }
+
+        for (auto& [tagA, pairsMap] : m_matrix) {
+            for (auto& [tagB, rule] : pairsMap) {
+                if (!rule.isRegistered) {
+                    continue;
+                }
+                if (static_cast<int>(tagA) > static_cast<int>(tagB)) {
+                    continue;
+                }
+
+                auto itA = groups.find(tagA);
+                auto itB = groups.find(tagB);
+                if (itA == groups.end() || itB == groups.end()) {
+                    continue;
+                }
+
+                auto& listA = itA->second;
+                auto& listB = itB->second;
+
+                if (tagA == tagB) {
+                    for (size_t i = 0; i < listA.size(); ++i) {
+                        for (size_t j = i + 1; j < listA.size(); ++j) {
+                            ProcessCollisionPair(*listA[i], *listA[j], rule);
+                        }
+                    }
+                    continue;
+                }
+
+                if (ShouldUseStaticTerrainBVH(tagA, tagB)) {
+                    if (IsStaticTerrainTag(tagA)) {
+                        ProcessStaticTerrainPair(listB, tagA, rule);
+                    } else {
+                        ProcessStaticTerrainPair(listA, tagB, rule);
+                    }
+                    continue;
+                }
+
+                for (ColliderInfo* pA : listA) {
+                    for (ColliderInfo* pB : listB) {
+                        ProcessCollisionPair(*pA, *pB, rule);
+                    }
+                }
+            }
+        }
+
+        StorePreviousPositions();
+        const auto updateEndTime = std::chrono::high_resolution_clock::now();
+        profileStats_.updateTimeMs = std::chrono::duration<double, std::milli>(updateEndTime - updateStartTime).count();
+    }
+
+#if 0
 
     // タグ別にコライダーをグループ化
     std::unordered_map<CollisionTag, std::vector<ColliderInfo*>> groups;
@@ -1347,28 +1835,7 @@ void ColliderManager::Update() {
                 // 同タグ間（例: Enemy vs Enemy）
                 for (size_t i = 0; i < listA.size(); ++i) {
                     for (size_t j = i + 1; j < listA.size(); ++j) {
-                        ColliderInfo& a = *listA[i];
-                        ColliderInfo& b = *listA[j];
-                        if (!a.pShape || !b.pShape) continue;
-                        bool isHit = CheckVariantCollision(*(a.pShape), *(b.pShape));
-                        bool isSweptHit = false;
-                        float hitTime = 1.0f;
-                        if (!isHit && rule.enableCCD) {
-                            isSweptHit = CheckSweptCollision(a, b, hitTime);
-                            if (isSweptHit && rule.enableResolve) {
-                                ApplySweptCollision(a, b, hitTime);
-                            }
-                        }
-
-                        if (isHit || isSweptHit) {
-                            if (a.onHit) a.onHit(b.tag, b.actorName);
-                            if (b.onHit) b.onHit(a.tag, a.actorName);
-                            if (rule.enableResolve) {
-                                ResolveOverlap(a, b);
-                                SyncColliderShapePosition(a);
-                                SyncColliderShapePosition(b);
-                            }
-                        }
+                        ProcessCollisionPair(*listA[i], *listA[j], rule);
                     }
                 }
             } else {
@@ -1404,4 +1871,24 @@ void ColliderManager::Update() {
     }
 
     StorePreviousPositions();
+#endif
 }
+
+const ColliderManager::ProfileStats& ColliderManager::GetProfileStats() const {
+    return profileStats_;
+}
+
+#ifdef USE_IMGUI
+void ColliderManager::DrawImGui() {
+    ImGui::Begin("Collider");
+    ImGui::Text("Update Time : %.3f ms", profileStats_.updateTimeMs);
+    ImGui::Text("Static BVH Colliders : %u", profileStats_.staticBVHColliderCount);
+    ImGui::Text("Static BVH Nodes : %u", profileStats_.staticBVHNodeCount);
+    ImGui::Separator();
+    ImGui::Text("BVH Query Count : %u", profileStats_.bvhQueryCount);
+    ImGui::Text("BVH Candidate Count : %u", profileStats_.bvhCandidateCount);
+    ImGui::Text("Narrow Phase Count : %u", profileStats_.narrowPhaseCount);
+    ImGui::Text("Sphere vs Slope Count : %u", profileStats_.sphereSlopeNarrowPhaseCount);
+    ImGui::End();
+}
+#endif // USE_IMGUI

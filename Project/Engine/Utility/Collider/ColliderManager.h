@@ -7,6 +7,7 @@
 #include "CollisionFunction.h" 
 #include "CollisionTag.h"
 #include "Shape.h"
+#include "StaticBVH.h"
 #include "Math/Vector3.h"
 
 /// @brief コライダーの管理と衝突判定を担当する
@@ -22,6 +23,17 @@ public:
 	};
 
 	/// @brief コライダーの管理情報
+	/// @brief Collider処理の軽量化確認に使う統計情報です。
+	struct ProfileStats {
+		double updateTimeMs = 0.0;
+		uint32_t bvhQueryCount = 0;
+		uint32_t bvhCandidateCount = 0;
+		uint32_t narrowPhaseCount = 0;
+		uint32_t sphereSlopeNarrowPhaseCount = 0;
+		uint32_t staticBVHColliderCount = 0;
+		uint32_t staticBVHNodeCount = 0;
+	};
+
 	struct ColliderInfo {
 		std::string actorName;         // 固有ID (例: "Enemy_0001")
 		CollisionTag tag;              // グループ (例: CollisionTag::Enemy)
@@ -146,6 +158,15 @@ public:
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();
 
+	/// @brief Collider処理の統計情報を取得します。
+	/// @return 直近のCollider処理統計です。
+	const ProfileStats& GetProfileStats() const;
+
+#ifdef USE_IMGUI
+	/// @brief Collider処理の統計情報をImGuiへ表示します。
+	void DrawImGui();
+#endif // USE_IMGUI
+
 private:
 	ColliderManager() = default;
 	~ColliderManager() = default;
@@ -160,10 +181,23 @@ private:
 	std::unordered_map<std::string, ColliderInfo> m_colliders;
 	std::unordered_map<CollisionTag, std::vector<std::string>> m_colliderNamesByTag;
 	std::unordered_map<CollisionTag, std::unordered_map<CollisionTag, CollisionRule>> m_matrix;
+	StaticBVH staticTerrainBVH_;
+	std::vector<StaticBVH::Entry> staticTerrainEntries_;
+	std::vector<const std::string*> bvhQueryResults_;
+	bool isStaticTerrainBVHDirty_ = true;
+	ProfileStats profileStats_;
 
 	// --- 内部処理 ---
 	void SyncPositions();
 	bool CheckVariantCollision(const ColliderShape& shapeA, const ColliderShape& shapeB);
+	bool TryGetColliderBounds(const ColliderInfo& info, AABB& outBounds) const;
+	bool IsStaticTerrainTag(CollisionTag tag) const;
+	bool ShouldUseStaticTerrainBVH(CollisionTag tagA, CollisionTag tagB) const;
+	void MarkStaticTerrainBVHDirtyIfNeeded(CollisionTag tag);
+	void RebuildStaticTerrainBVHIfNeeded();
+	void QueryStaticTerrainBVH(const AABB& bounds, std::vector<const std::string*>& outCandidates);
+	void ProcessCollisionPair(ColliderInfo& a, ColliderInfo& b, const CollisionRule& rule);
+	void ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynamicList, CollisionTag staticTag, const CollisionRule& rule);
 
 	/// @brief 指定したタグのコライダー名一覧を取得します。
 	/// @param tag 検索対象の衝突タグです。
