@@ -153,8 +153,9 @@
     <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
-    <ClCompile Include="Application\UI\Player\ExpGauge.cpp" />
-    <ClCompile Include="Application\UI\Player\HealthGauge.cpp" />
+    <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
+    <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
+    <ClCompile Include="Application\UI\Player\PlayerHealthGauge.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -274,8 +275,9 @@
     <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Application\Object\Player\PlayerStatus.h" />
-    <ClInclude Include="Application\UI\Player\ExpGauge.h" />
-    <ClInclude Include="Application\UI\Player\HealthGauge.h" />
+    <ClInclude Include="Application\UI\GameSceneTimer.h" />
+    <ClInclude Include="Application\UI\Player\PlayerExpGauge.h" />
+    <ClInclude Include="Application\UI\Player\PlayerHealthGauge.h" />
     <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\AudioType.h" />

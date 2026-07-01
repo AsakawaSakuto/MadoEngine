@@ -4,8 +4,8 @@
 #include "Object/Map/Map.h"
 #include "Object/Enemy/EnemySpawner.h"
 #include "Utility/Light/LightManager.h"
-#include "UI/Player/ExpGauge.h"
-#include "UI/Player/HealthGauge.h"
+#include "UI/Player/PlayerExpGauge.h"
+#include "UI/Player/PlayerHealthGauge.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -50,6 +50,7 @@ private:
 
 
 	Sprite* fadeSprite_ = nullptr;
+	MadoEngine::Text* playerHealthText_ = nullptr;
 	GameTimer fadeOutTimer_;
 
 	bool useDebugCamera_ = false;

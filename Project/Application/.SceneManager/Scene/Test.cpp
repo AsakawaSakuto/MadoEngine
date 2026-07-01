@@ -1,8 +1,10 @@
 #include "Test.h"
 #include "Input/MyInput.h"
+#include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Logger/Logger.h"
 #include "imguiHeaders.h"
 #include <cmath>
+#include <format>
 
 Test::Test()
 	
@@ -24,6 +26,8 @@ void Test::Initialize() {
 
 	healthGauge_ = std::make_unique<Player::HealthGauge>();
 	healthGauge_->Initialize();
+
+	playerHealthText_ = MyText::Create("PlayerHealthText", "HP : 0 / 0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
 
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapSlope, true);
@@ -58,13 +62,16 @@ SceneType Test::Update(float dt) {
 
 	player_->Update(dt);
 
-	auto status = player_->GetStatus();
-	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
-	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
-
 	map_->Update(*player_);
 
 	enemySpawner_->Update(dt);
+
+	auto status = player_->GetStatus();
+	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
+	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
+	if (playerHealthText_) {
+		playerHealthText_->SetText(std::format("HP : {} / {}", status.currentHealth, status.maxHealth));
+	}
 
 	if (useDebugCamera_) {
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {
@@ -117,7 +124,9 @@ void Test::Finalize() {
 	
 	MyCollider::RemoveColliderAll();
 	MySprite::DestroyByScene(SceneType::Test);
+	MyText::Destroy("PlayerHealthText");
 	MyModel::DestroyByScene(SceneType::Test);
+	playerHealthText_ = nullptr;
 
 	Logger::Output("テストシーンの終了処理を実行しました", Logger::Level::Application);
 }

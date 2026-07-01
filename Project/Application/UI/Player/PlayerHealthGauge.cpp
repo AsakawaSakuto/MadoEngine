@@ -1,10 +1,10 @@
-#include "HealthGauge.h"
+#include "PlayerHealthGauge.h"
 
 namespace Player {
 
 	void HealthGauge::Initialize() {
 		healthGauge_ = std::make_unique<Gauge>();
-		healthGauge_->Initialize("HealthGauge", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
+		healthGauge_->Initialize("PlayerHealthGauge", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
 	}
 
 	void HealthGauge::Update(float currentHealth, float maxHealth) {

@@ -6,6 +6,7 @@
 
 namespace Player {
 
+	/// @brief Playerの基底クラス
 	class Base : public IGameObject {
 	public:
 
@@ -25,7 +26,11 @@ namespace Player {
 		/// @param amount 加算する経験値です。
 		void AddExp(int amount);
 
-		PlayerStatus GetStatus() const { return status_; }
+		/// @brief PlayerのHPを減らします。
+		/// @param damage 減らすHP量です。
+		void TakeDamage(int damage);
+
+		Status GetStatus() const { return status_; }
 
 		void DrawImGui();
 
@@ -35,9 +40,9 @@ namespace Player {
 
 		Camera* camera_ = nullptr;
 
-		PlayerStatus status_;                     // ステータス
-		PlayerStatusMultiplier statusMultiplier_; // ステータスの倍率
-		PlayerController controller_;             // 入力制御
-		PlayerMovement movement_;                 // 移動処理
+		Status status_;                     // ステータス
+		StatusMultiplier statusMultiplier_; // ステータスの倍率
+		Controller controller_;             // 入力制御
+		Movement movement_;                 // 移動処理
 	};
 }

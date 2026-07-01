@@ -15,7 +15,7 @@
             "fontFamily": "Yu Gothic UI",
             "fontSize": 128.0,
             "horizontalAlign": "Left",
-            "layer": "Default",
+            "layer": "UI",
             "lineSpacing": 1.0,
             "name": "Start",
             "position": [
@@ -54,7 +54,7 @@
             "fontFamily": "Yu Gothic UI",
             "fontSize": 128.0,
             "horizontalAlign": "Left",
-            "layer": "Default",
+            "layer": "UI",
             "lineSpacing": 1.0,
             "name": "Setting",
             "position": [
@@ -77,6 +77,45 @@
             "verticalAlign": "Top",
             "visible": true,
             "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontSize": 28.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "PlayerHealthText",
+            "position": [
+                24.0,
+                24.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "screen": "BackBuffer",
+            "size": [
+                320.0,
+                48.0
+            ],
+            "text": "HP : 98 / 100",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": false
         }
     ]
 }

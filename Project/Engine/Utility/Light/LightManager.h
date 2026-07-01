@@ -21,9 +21,9 @@ enum class LightType {
 };
 
 static constexpr uint32_t kInvalidLightIndex = 0xffffffffu;
-static constexpr uint32_t kMaxDirectionalLights = 1;
-static constexpr uint32_t kMaxPointLights = 8;
-static constexpr uint32_t kMaxSpotLights = 8;
+static constexpr uint32_t kMaxDirectionalLights = 4;
+static constexpr uint32_t kMaxPointLights = 64;
+static constexpr uint32_t kMaxSpotLights = 32;
 
 /// @brief LightManager内のライトを参照するハンドル
 struct LightHandle {

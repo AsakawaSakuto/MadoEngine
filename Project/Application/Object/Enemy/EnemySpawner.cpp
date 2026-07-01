@@ -26,7 +26,9 @@ void EnemySpawner::Update(float deltaTime) {
 	spawnTimer_ += deltaTime;
 	while (spawnTimer_ >= spawnInterval_) {
 		spawnTimer_ -= spawnInterval_;
-		SpawnEnemy();
+		if (enemies_.size() <= 10) {
+			SpawnEnemy();
+		}
 	}
 
 	for (std::unique_ptr<Enemy>& enemy : enemies_) {
@@ -38,6 +40,7 @@ void EnemySpawner::Update(float deltaTime) {
 	for (std::unique_ptr<Enemy>& enemy : enemies_) {
 		enemy->ResolveAfterCollision();
 		if (enemy->IsHitPlayer()) {
+			player_->TakeDamage(1);
 			enemy->Kill();
 			Logger::Output("[Engine] EnemyがPlayerに接触したため削除します。", Logger::Level::Debug);
 		}

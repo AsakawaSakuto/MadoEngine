@@ -103,8 +103,9 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
-    <ClCompile Include="Application\UI\Player\ExpGauge.cpp" />
-    <ClCompile Include="Application\UI\Player\HealthGauge.cpp" />
+    <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
+    <ClCompile Include="Application\UI\Player\PlayerHealthGauge.cpp" />
+    <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Enemy\Enemy.h" />
@@ -572,10 +573,13 @@
     <ClInclude Include="Engine\Render\Object\2d\Text\TextFont.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Player\ExpGauge.h">
+    <ClInclude Include="Application\UI\Player\PlayerExpGauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Player\HealthGauge.h">
+    <ClInclude Include="Application\UI\Player\PlayerHealthGauge.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\GameSceneTimer.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

@@ -43,9 +43,17 @@ namespace Player {
 		status_.currentExp += amount;
 	}
 
+	void Base::TakeDamage(int damage) {
+		if (damage <= 0 || status_.currentHealth <= 0) {
+			return;
+		}
+
+		status_.currentHealth = std::max(0, status_.currentHealth - damage);
+	}
+
 	void Base::Update(float deltaTime) {
 		controller_.Update();
-		const PlayerMoveInput& moveInput = controller_.GetMoveInput();
+		const MoveInput& moveInput = controller_.GetMoveInput();
 
 		// 入力移動と重力による落下処理を先に行う。
 		movement_.Update(deltaTime, transform_, camera_, moveInput);
@@ -66,7 +74,7 @@ namespace Player {
 		model_->SetRotation(transform_.rotate);
 		model_->SetScale(transform_.scale);
 
-		if (movement_.GetCurrentMotion() == PlayerMotion::Crouching) {
+		if (movement_.GetCurrentMotion() == Player::Motion::Crouching) {
 			model_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		} else {
 			model_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
@@ -95,7 +103,7 @@ namespace Player {
 		const float horizontalSpeed = std::sqrt(horizontalVelocityX * horizontalVelocityX + horizontalVelocityZ * horizontalVelocityZ);
 		const float jumpMoveBoostSpeed = std::sqrt(jumpMoveVelocity.x * jumpMoveVelocity.x + jumpMoveVelocity.z * jumpMoveVelocity.z);
 		const float currentSpeed = std::sqrt(horizontalSpeed * horizontalSpeed + velocityY * velocityY);
-		PlayerMovementParams& movementParams = movement_.GetParams();
+		MovementParams& movementParams = movement_.GetParams();
 		ImGui::Text("現在の動作: %s", ToMotionText(movement_.GetCurrentMotion()));
 		ImGui::Text("速度: %.2f", currentSpeed);
 		ImGui::Text("水平速度: %.2f", horizontalSpeed);
