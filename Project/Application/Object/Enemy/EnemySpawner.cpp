@@ -26,7 +26,7 @@ void EnemySpawner::Update(float deltaTime) {
 	spawnTimer_ += deltaTime;
 	while (spawnTimer_ >= spawnInterval_) {
 		spawnTimer_ -= spawnInterval_;
-		if (enemies_.size() <= 10) {
+		if (enemies_.size() <= 99) {
 			SpawnEnemy();
 		}
 	}

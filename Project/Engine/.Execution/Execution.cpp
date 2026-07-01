@@ -442,7 +442,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
-		MadoEngine::Editor::DrawLoggerEditorUI();
+		//MadoEngine::Editor::DrawLoggerEditorUI();
 
 #else
 		if (!isLayerEffectResolved_) {
@@ -565,7 +565,6 @@ namespace MadoEngine
 		MadoEngine::RootSignatureManager::GetInstance().Finalize();
 
 		psoRegistry_->Finalize();
-
 		Logger::Finalize();
 
 #ifdef USE_IMGUI

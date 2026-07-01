@@ -123,11 +123,11 @@ void SceneManager::DrawImGui() {
 	DrawSceneManagerImGui();
 
 	MadoEngine::Editor::DrawModelGizmoOnGameView(currentScene_->GetCamera(), currentSceneType_, selectedModel_);
-#endif // USE_IMGUI
 
 	if (currentScene_) {
 		currentScene_->DrawImGui();
 	}
+#endif // USE_IMGUI
 }
 
 void SceneManager::DrawSceneManagerImGui() {

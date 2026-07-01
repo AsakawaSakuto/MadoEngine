@@ -5,8 +5,7 @@
 #include "ImGuiHeaders.h"
 #include "SceneType.h"
 
-class IScene
-{
+class IScene {
 public:
 	virtual ~IScene() = default;
 

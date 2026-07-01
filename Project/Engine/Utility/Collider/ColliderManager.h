@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <functional>
 #include <variant>
+#include <vector>
 #include "CollisionFunction.h" 
 #include "CollisionTag.h"
 #include "Shape.h"
@@ -157,11 +158,27 @@ private:
 
 	// 管理データ
 	std::unordered_map<std::string, ColliderInfo> m_colliders;
+	std::unordered_map<CollisionTag, std::vector<std::string>> m_colliderNamesByTag;
 	std::unordered_map<CollisionTag, std::unordered_map<CollisionTag, CollisionRule>> m_matrix;
 
 	// --- 内部処理 ---
 	void SyncPositions();
 	bool CheckVariantCollision(const ColliderShape& shapeA, const ColliderShape& shapeB);
+
+	/// @brief 指定したタグのコライダー名一覧を取得します。
+	/// @param tag 検索対象の衝突タグです。
+	/// @return コライダー名一覧へのポインタを返します。存在しない場合はnullptrを返します。
+	const std::vector<std::string>* FindColliderNames(CollisionTag tag) const;
+
+	/// @brief タグ別索引へコライダー名を追加します。
+	/// @param tag 追加先の衝突タグです。
+	/// @param name 追加するコライダー名です。
+	void AddColliderNameToTag(CollisionTag tag, const std::string& name);
+
+	/// @brief タグ別索引からコライダー名を削除します。
+	/// @param tag 削除対象の衝突タグです。
+	/// @param name 削除するコライダー名です。
+	void RemoveColliderNameFromTag(CollisionTag tag, const std::string& name);
 
 	/// @brief 前回座標から現在座標への移動で連続衝突しているか判定する
 	/// @param a コライダーA

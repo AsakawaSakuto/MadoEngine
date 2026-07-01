@@ -7,6 +7,8 @@ enum class CollisionTag {
 	PlayerHitBox,
 	PlayerMovementSphere,
 	
+	PlayerWeaponHitBox,
+
 	EnemyHitBox,
 	EnemyMovementSphere,
 
