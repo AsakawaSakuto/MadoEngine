@@ -203,17 +203,7 @@ void Model::Update() {
 	}
 
 	cameraData_->worldPosition = camera_.GetPosition();
-
-	worldMatrix_ = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
-	Matrix4x4 cameraMatrix = Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, camera_.GetRotation(), camera_.GetPosition());
-	Matrix4x4 viewMatrix = Matrix::Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = Matrix::MakePerspectiveFov(camera_.GetFovY(), camera_.GetAspectRatio(), camera_.GetNearClip(), camera_.GetFarClip());
-	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, Matrix::Multiply(viewMatrix, projectionMatrix));
-	Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix_));
-
-	switch (type_) {
-	case ModelType::Animated:
-	{
+	if (type_ == ModelType::Animated) {
 		Matrix4x4 localMatrix = rootNode_.localMatrix;
 		auto rootNodeIt = animationData.nodeAnimations.find(rootNode_.name);
 		if (rootNodeIt != animationData.nodeAnimations.end()) {
@@ -223,21 +213,10 @@ void Model::Update() {
 			Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, animationTime_);
 			localMatrix = Matrix::MakeAffineAnimation(scale, rotate, translate);
 		}
-
 		rootNode_.localMatrix = localMatrix;
-		transformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
-		transformationData_->World = Matrix::Multiply(rootNode_.localMatrix, worldMatrix_);
-		break;
-	}
-	case ModelType::Skinning:
-	case ModelType::Static:
-	default:
-		transformationData_->WVP = worldViewProjectionMatrix;
-		transformationData_->World = worldMatrix_;
-		break;
 	}
 
-	transformationData_->WorldInverseTranspose = worldInverseTransposeMatrix;
+	UpdateTransformGpuData(camera_);
 
 	Matrix4x4 scale = Matrix::MakeIdentity();
 	scale.m[0][0] = uvTransform_.scale.x;
@@ -257,6 +236,31 @@ void Model::Update() {
 	materialData_->enableLighting = enableLighting_ ? 1 : 0;
 	materialData_->uvTransformMatrix = scale * rot * trans;
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+}
+
+void Model::UpdateTransformGpuData(const Camera& camera) {
+	if (!transformationData_) {
+		return;
+	}
+
+	worldMatrix_ = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, camera.GetViewProjectionMatrix());
+	Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix_));
+
+	switch (type_) {
+	case ModelType::Animated:
+		transformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
+		transformationData_->World = Matrix::Multiply(rootNode_.localMatrix, worldMatrix_);
+		break;
+	case ModelType::Skinning:
+	case ModelType::Static:
+	default:
+		transformationData_->WVP = worldViewProjectionMatrix;
+		transformationData_->World = worldMatrix_;
+		break;
+	}
+
+	transformationData_->WorldInverseTranspose = worldInverseTransposeMatrix;
 }
 
 /// @brief モデルのワールド空間AABBを計算する
@@ -344,6 +348,8 @@ void Model::Draw(Camera& useCamera) {
 	if (!IsInsideCameraFrustum(useCamera)) {
 		return;
 	}
+
+	UpdateTransformGpuData(useCamera);
 
 	assert(psoRegistry_);
 	commandList_->SetGraphicsRootSignature(

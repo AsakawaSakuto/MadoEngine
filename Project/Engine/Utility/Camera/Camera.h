@@ -4,6 +4,17 @@
 #include "Utility/Camera/Frustum.h"
 #include "Math/Function/MathFunction.h"
 
+/// @brief カメラの振動軸タイプ
+enum class ShakeType {
+	X,
+	Y,
+	Z,
+	XY,
+	XZ,
+	YZ,
+	XYZ
+};
+
 /// @brief カメラクラス
 /// ビュー行列・プロジェクション行列・ビュープロジェクション行列を管理する
 class Camera {
@@ -13,6 +24,12 @@ public:
 
 	/// @brief 更新処理
 	virtual void Update(float deltaTime = 0.0f);
+
+	/// @brief カメラの振動を開始する
+	/// @param power 振動の強さ
+	/// @param duration 振動する時間
+	/// @param type 振動させる軸タイプ
+	void Shake(float power, float duration, ShakeType type);
 
 	// --- Setter ---
 
@@ -91,11 +108,36 @@ protected:
 	float nearClip_ = 0.1f;
 	float farClip_ = 1000.0f;
 
+	float shakePower_ = 0.0f;
+	float shakeDuration_ = 0.0f;
+	float shakeElapsedTime_ = 0.0f;
+	ShakeType shakeType_ = ShakeType::XYZ;
+	Vector3 shakeOffset_ = { 0.0f, 0.0f, 0.0f };
+
 	Matrix4x4 viewMatrix_;
 	Matrix4x4 projectionMatrix_;
 	Matrix4x4 viewProjectionMatrix_;
 
 	Frustum frustum_;
+
+	/// @brief カメラ振動を更新する
+	/// @param deltaTime 前フレームからの経過時間
+	void UpdateShake(float deltaTime);
+
+	/// @brief 指定した軸タイプにX軸が含まれているか判定する
+	/// @param type 振動させる軸タイプ
+	/// @return X軸が含まれている場合true
+	bool HasShakeAxisX(ShakeType type) const;
+
+	/// @brief 指定した軸タイプにY軸が含まれているか判定する
+	/// @param type 振動させる軸タイプ
+	/// @return Y軸が含まれている場合true
+	bool HasShakeAxisY(ShakeType type) const;
+
+	/// @brief 指定した軸タイプにZ軸が含まれているか判定する
+	/// @param type 振動させる軸タイプ
+	/// @return Z軸が含まれている場合true
+	bool HasShakeAxisZ(ShakeType type) const;
 
 	/// @brief フラスタムを更新する
 	void UpdateFrustum();

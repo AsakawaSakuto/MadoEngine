@@ -79,6 +79,10 @@ private:
 	/// @brief LightManagerからGPU送信用ライトデータを作成して定数バッファへ反映する
 	void UpdateLightGpuData();
 
+	/// @brief カメラを反映した変換行列をGPUデータへ更新する
+	/// @param camera 描画に使用するカメラ
+	void UpdateTransformGpuData(const Camera& camera);
+
 	/// @brief モデルのワールド空間AABBを計算する
 	/// @param outMin ワールド空間AABBの最小座標
 	/// @param outMax ワールド空間AABBの最大座標

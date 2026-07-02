@@ -118,9 +118,7 @@ void InstancedModel::Draw(Camera& useCamera) {
 	UpdateLightGpuData();
 	EnsureInstanceResource(instances_.size());
 
-	Matrix4x4 cameraMatrix = Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, camera_.GetRotation(), camera_.GetPosition());
-	Matrix4x4 viewMatrix = Matrix::Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = Matrix::MakePerspectiveFov(camera_.GetFovY(), camera_.GetAspectRatio(), camera_.GetNearClip(), camera_.GetFarClip());
+	Matrix4x4 viewProjectionMatrix = camera_.GetViewProjectionMatrix();
 
 	drawInstanceCount_ = 0;
 	for (const InstanceDesc& instance : instances_) {
@@ -129,7 +127,7 @@ void InstancedModel::Draw(Camera& useCamera) {
 		}
 
 		Matrix4x4 worldMatrix = Matrix::MakeAffine(instance.transform.scale, instance.transform.rotate, instance.transform.translate);
-		Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix, Matrix::Multiply(viewMatrix, projectionMatrix));
+		Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix, viewProjectionMatrix);
 		Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix));
 
 		InstanceForGPU& gpuData = instanceGpuData_[drawInstanceCount_];

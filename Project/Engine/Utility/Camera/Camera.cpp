@@ -1,14 +1,18 @@
 #include "Utility/Camera/Camera.h"
 #include "Math/Function/MatrixFunction.h"
 #include "Math/Function/MathFunction.h"
+#include "Utility/Random.h"
 
 Camera::Camera() {
 	Update(1.0f / 60.0f);
 }
 
 void Camera::Update(float deltaTime) {
+	UpdateShake(deltaTime);
+
 	// ビュー行列の生成（アフィン行列の逆行列）
-	Matrix4x4 affine = Matrix::MakeAffine({ 1.0f,1.0f,1.0f }, rotation_, position_);
+	Vector3 shakePosition = position_ + shakeOffset_;
+	Matrix4x4 affine = Matrix::MakeAffine({ 1.0f,1.0f,1.0f }, rotation_, shakePosition);
 	viewMatrix_ = Matrix::Inverse(affine);
 
 	// プロジェクション行列の生成
@@ -19,6 +23,61 @@ void Camera::Update(float deltaTime) {
 
 	// フラスタム更新
 	UpdateFrustum();
+}
+
+void Camera::Shake(float power, float duration, ShakeType type) {
+	shakePower_ = power;
+	shakeDuration_ = duration;
+	shakeElapsedTime_ = 0.0f;
+	shakeType_ = type;
+	shakeOffset_ = { 0.0f, 0.0f, 0.0f };
+
+	if (shakePower_ <= 0.0f || shakeDuration_ <= 0.0f) {
+		shakePower_ = 0.0f;
+		shakeDuration_ = 0.0f;
+	}
+}
+
+void Camera::UpdateShake(float deltaTime) {
+	if (shakeDuration_ <= 0.0f) {
+		shakeOffset_ = { 0.0f, 0.0f, 0.0f };
+		return;
+	}
+
+	shakeElapsedTime_ += deltaTime;
+	if (shakeElapsedTime_ >= shakeDuration_) {
+		shakePower_ = 0.0f;
+		shakeDuration_ = 0.0f;
+		shakeElapsedTime_ = 0.0f;
+		shakeOffset_ = { 0.0f, 0.0f, 0.0f };
+		return;
+	}
+
+	float rate = 1.0f - (shakeElapsedTime_ / shakeDuration_);
+	float currentPower = shakePower_ * rate;
+
+	shakeOffset_ = { 0.0f, 0.0f, 0.0f };
+	if (HasShakeAxisX(shakeType_)) {
+		shakeOffset_.x = MyRand::GetFloat(-currentPower, currentPower);
+	}
+	if (HasShakeAxisY(shakeType_)) {
+		shakeOffset_.y = MyRand::GetFloat(-currentPower, currentPower);
+	}
+	if (HasShakeAxisZ(shakeType_)) {
+		shakeOffset_.z = MyRand::GetFloat(-currentPower, currentPower);
+	}
+}
+
+bool Camera::HasShakeAxisX(ShakeType type) const {
+	return type == ShakeType::X || type == ShakeType::XY || type == ShakeType::XZ || type == ShakeType::XYZ;
+}
+
+bool Camera::HasShakeAxisY(ShakeType type) const {
+	return type == ShakeType::Y || type == ShakeType::XY || type == ShakeType::YZ || type == ShakeType::XYZ;
+}
+
+bool Camera::HasShakeAxisZ(ShakeType type) const {
+	return type == ShakeType::Z || type == ShakeType::XZ || type == ShakeType::YZ || type == ShakeType::XYZ;
 }
 
 void Camera::UpdateFrustum() {
