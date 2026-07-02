@@ -1,4 +1,27 @@
 {
-    "lights": [],
+    "lights": [
+        {
+            "data": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "intensity": 0.5,
+                "useHalfLambert": true
+            },
+            "enabled": true,
+            "layerMask": 1,
+            "name": "Direction Light 1",
+            "scene": "None",
+            "type": "Directional"
+        }
+    ],
     "version": 1
 }

@@ -90,9 +90,9 @@ struct SpotLight
     uint useLight;
 };
 
-#define MAX_DIRECTIONAL_LIGHTS 4
-#define MAX_POINT_LIGHTS 64
-#define MAX_SPOT_LIGHTS 32
+#define MAX_DIRECTIONAL_LIGHTS 1
+#define MAX_POINT_LIGHTS 8
+#define MAX_SPOT_LIGHTS 8
 
 struct LightGpuData
 {

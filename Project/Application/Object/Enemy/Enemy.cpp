@@ -4,14 +4,14 @@
 #include <cmath>
 
 namespace {
-	constexpr float kDirectionEpsilon = 1e-5f;    // 方向ベクトルの長さがこの値以下の場合は正規化を行わない
-	constexpr float kSlopeSnapDistance = 1.0f;    // Slopeの中心Y座標にスナップする距離の閾値
-	constexpr float kDeleteGroundY = 0.0f;        // このY座標以下に落下した場合は削除対象とする
-	constexpr float kSideClimbSpeed = 5.0f;       // 側面上昇補助の速度
-	constexpr float kMaxSideClimbHeight = 100.0f; // 側面上昇補助の最大上昇量
-	constexpr float kBlockedProgressRate = 0.35f; // 側面で止められた場合の前進量の減衰率
-	constexpr float kSideClimbCrestGraceTime = 0.25f;
-	constexpr float kSideClimbCrestSpeedScale = 0.6f;
+	constexpr float kDirectionEpsilon = 1e-5f;        // 方向ベクトルの長さがこの値以下の場合は正規化を行わない
+	constexpr float kSlopeSnapDistance = 1.0f;        // Slopeの中心Y座標にスナップする距離の閾値
+	constexpr float kDeleteGroundY = 0.0f;            // このY座標以下に落下した場合は削除対象とする
+	constexpr float kSideClimbSpeed = 5.0f;           // 側面上昇補助の速度
+	constexpr float kMaxSideClimbHeight = 100.0f;     // 側面上昇補助の最大上昇量
+	constexpr float kBlockedProgressRate = 0.35f;     // 側面で止められた場合の前進量の減衰率
+	constexpr float kSideClimbCrestGraceTime = 0.25f; // 側面上昇補助の頂点での猶予時間
+	constexpr float kSideClimbCrestSpeedScale = 0.6f; // 側面上昇補助の頂点での速度倍率
 
 	/// @brief 水平方向の長さの2乗を取得します。
 	/// @param value 対象のベクトルです。
