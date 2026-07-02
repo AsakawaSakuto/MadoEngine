@@ -46,7 +46,7 @@ void Enemy::Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType
 	MyCollider::RegisterCollider(movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
 	MyCollider::RegisterCollider(hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
 
-	model_ = MyModel::Create(modelName_, "cube", sceneType);
+	model_ = MyModel::Create(modelName_, "enemy", sceneType); // cube
 	if (model_) {
 		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 		model_->SetTexture("white16x16");
