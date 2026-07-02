@@ -80,9 +80,9 @@ SceneType Test::Update(float dt) {
 	tpsCamera_.SetTargetPosition(player_->GetPosition());
 	tpsCamera_.Update(dt);
 
-	if (MyInput::GetKeybord()->IsTrigger(DIK_0)) {
-		tpsCamera_.Shake(0.3f, 3.5f, ShakeType::X);
-	}
+	//if (MyInput::GetKeybord()->IsTrigger(DIK_0)) {
+	//	tpsCamera_.Shake(0.3f, 3.5f, ShakeType::X);
+	//}
 
 	debugCamera_.Update(dt);
 

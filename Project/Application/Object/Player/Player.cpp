@@ -43,12 +43,12 @@ namespace Player {
 		status_.currentExp += amount;
 	}
 
-	void Base::TakeDamage(int damage) {
+	void Base::TakeDamage(float damage) {
 		if (damage <= 0 || status_.currentHealth <= 0) {
 			return;
 		}
 
-		status_.currentHealth = std::max(0, status_.currentHealth - damage);
+		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
 	}
 
 	void Base::Update(float deltaTime) {
@@ -118,7 +118,7 @@ namespace Player {
 		ImGui::DragFloat("斜面スライド加速度", &movementParams.slopeSlideAcceleration_, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("最大スライド速度", &movementParams.maxSlideSpeed_, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("スライド摩擦", &movementParams.slideFriction_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragInt("ジャンプ回数", &movementParams.jumpCount_, 1, 0, 10);
+		ImGui::DragFloat("ジャンプ回数", &movementParams.jumpCount_, 1.0f, 0.0f, 1000.0f);
 		ImGui::DragFloat("ジャンプ横初速", &movementParams.jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
 		ImGui::End();
 

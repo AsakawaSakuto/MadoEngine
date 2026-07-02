@@ -28,7 +28,7 @@ namespace Player {
 
 		/// @brief PlayerのHPを減らします。
 		/// @param damage 減らすHP量です。
-		void TakeDamage(int damage);
+		void TakeDamage(float damage);
 
 		Status GetStatus() const { return status_; }
 

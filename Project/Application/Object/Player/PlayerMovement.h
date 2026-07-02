@@ -104,7 +104,7 @@ namespace Player {
 		float slopeSnapDistance_ = 1.0f;     // Slopeに足が届いているとみなす距離
 		float jumpMoveBoostFriction_ = 0.0f; // ジャンプ時の水平初速に対する摩擦
 		float slideReleaseFriction_ = 10.0f; // スライディング解除時の摩擦
-		int remainingJumpCount_ = 0;         // 残りジャンプ回数
+		float remainingJumpCount_ = 0.0f;    // 残りジャンプ回数
 
 		Player::MovementParams movementParams_; // 移動に関するパラメータ
 

@@ -4,9 +4,14 @@
 #include <cmath>
 
 namespace {
-	constexpr float kDirectionEpsilon = 1e-5f;
-	constexpr float kSlopeSnapDistance = 1.0f;
-	constexpr float kDeleteGroundY = 0.0f;
+	constexpr float kDirectionEpsilon = 1e-5f;    // 方向ベクトルの長さがこの値以下の場合は正規化を行わない
+	constexpr float kSlopeSnapDistance = 1.0f;    // Slopeの中心Y座標にスナップする距離の閾値
+	constexpr float kDeleteGroundY = 0.0f;        // このY座標以下に落下した場合は削除対象とする
+	constexpr float kSideClimbSpeed = 5.0f;       // 側面上昇補助の速度
+	constexpr float kMaxSideClimbHeight = 100.0f; // 側面上昇補助の最大上昇量
+	constexpr float kBlockedProgressRate = 0.35f; // 側面で止められた場合の前進量の減衰率
+	constexpr float kSideClimbCrestGraceTime = 0.25f;
+	constexpr float kSideClimbCrestSpeedScale = 0.6f;
 
 	/// @brief 水平方向の長さの2乗を取得します。
 	/// @param value 対象のベクトルです。
@@ -52,13 +57,18 @@ void Enemy::Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType
 }
 
 void Enemy::Update(float deltaTime) {
+	lastDeltaTime_ = deltaTime;
+	lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
+	lastMoveStartPosition_ = transform_.translate;
+
 	if (!isActive_ || !targetPlayer_) {
 		return;
 	}
 
 	const Vector3 direction = GetDirectionToPlayer();
-	transform_.translate.x += direction.x * moveSpeed_ * deltaTime;
-	transform_.translate.z += direction.z * moveSpeed_ * deltaTime;
+	lastDesiredHorizontalMove_ = { direction.x * moveSpeed_ * deltaTime, 0.0f, direction.z * moveSpeed_ * deltaTime };
+	transform_.translate.x += lastDesiredHorizontalMove_.x;
+	transform_.translate.z += lastDesiredHorizontalMove_.z;
 
 	if (!isGrounded_) {
 		velocityY_ -= gravity_ * deltaTime;
@@ -99,6 +109,8 @@ void Enemy::ResolveAfterCollision() {
 			transform_.translate.y = slopeCenterY;
 		}
 	}
+
+	ApplySideClimbAssist(lastDeltaTime_, isGroundContact, isSlopeGroundContact);
 
 	UpdateModelTransform();
 }
@@ -152,6 +164,79 @@ Vector3 Enemy::GetDirectionToPlayer() const {
 
 	const float invLength = 1.0f / std::sqrt(lengthSq);
 	return { direction.x * invLength, 0.0f, direction.z * invLength };
+}
+
+void Enemy::ApplySideClimbAssist(float deltaTime, bool isGroundContact, bool isSlopeGroundContact) {
+	const bool isSideBlocked = IsSideBlockedThisFrame();
+	const bool canStartClimb = isGroundContact || isSlopeGroundContact;
+	const bool hasDesiredMove = GetHorizontalLengthSq(lastDesiredHorizontalMove_) > kDirectionEpsilon;
+	const bool canContinueToCrest =
+		isSideClimbing_ &&
+		!canStartClimb &&
+		hasDesiredMove &&
+		sideClimbCrestTimer_ < kSideClimbCrestGraceTime;
+
+	if (!isSideBlocked && !canContinueToCrest) {
+		ResetSideClimbAssist();
+		return;
+	}
+
+	if (isSideBlocked && !canStartClimb && !isSideClimbing_) {
+		ResetSideClimbAssist();
+		return;
+	}
+
+	if (!isSideClimbing_) {
+		isSideClimbing_ = true;
+		sideClimbBaseY_ = transform_.translate.y;
+		sideClimbAmount_ = 0.0f;
+	}
+
+	if (isSideBlocked) {
+		sideClimbCrestTimer_ = 0.0f;
+	} else {
+		sideClimbCrestTimer_ += deltaTime;
+	}
+
+	sideClimbAmount_ = std::max(sideClimbAmount_, transform_.translate.y - sideClimbBaseY_);
+	const float remainClimbHeight = kMaxSideClimbHeight - sideClimbAmount_;
+	if (remainClimbHeight <= 0.0f) {
+		velocityY_ = 0.0f;
+		return;
+	}
+
+	const float climbSpeed = isSideBlocked ? kSideClimbSpeed : kSideClimbSpeed * kSideClimbCrestSpeedScale;
+	const float climbStep = std::min(climbSpeed * deltaTime, remainClimbHeight);
+	transform_.translate.y += climbStep;
+	sideClimbAmount_ += climbStep;
+	velocityY_ = 0.0f;
+	isGrounded_ = true;
+}
+
+void Enemy::ResetSideClimbAssist() {
+	isSideClimbing_ = false;
+	sideClimbBaseY_ = transform_.translate.y;
+	sideClimbAmount_ = 0.0f;
+	sideClimbCrestTimer_ = 0.0f;
+}
+
+bool Enemy::IsSideBlockedThisFrame() const {
+	const float desiredLengthSq = GetHorizontalLengthSq(lastDesiredHorizontalMove_);
+	if (desiredLengthSq <= kDirectionEpsilon) {
+		return false;
+	}
+
+	const float desiredLength = std::sqrt(desiredLengthSq);
+	const Vector3 actualHorizontalMove = {
+		transform_.translate.x - lastMoveStartPosition_.x,
+		0.0f,
+		transform_.translate.z - lastMoveStartPosition_.z
+	};
+	const float actualProgress =
+		(actualHorizontalMove.x * lastDesiredHorizontalMove_.x + actualHorizontalMove.z * lastDesiredHorizontalMove_.z) /
+		desiredLength;
+
+	return actualProgress < desiredLength * kBlockedProgressRate;
 }
 
 void Enemy::UpdateModelTransform() {

@@ -4,17 +4,17 @@ namespace Player {
 
 	/// @brief プレイヤーの現在ステータスを管理する構造体
 	struct Status {
-		int maxHealth = 100;      // 最大体力
-		int currentHealth = 100;  // 現在の体力
+		float maxHealth = 100.0f;      // 最大体力
+		float currentHealth = 100.0f;  // 現在の体力
 
-		int maxShield = 0;        // 最大シールド
-		int currentShield = 0;    // 現在のシールド
+		float maxShield = 0.0f;        // 最大シールド
+		float currentShield = 0.0f;    // 現在のシールド
 
-		int level = 1;            // レベル
-		int currentExp = 0;       // 現在の経験値
-		int expToNextLevel = 100; // 次のレベルまでの経験値
+		int level = 1;                 // レベル
+		float currentExp = 0;          // 現在の経験値
+		float expToNextLevel = 100;    // 次のレベルまでの経験値
 
-		int currentMoney = 0;     // 所持金
+		float currentMoney = 0;        // 所持金
 	};
 
 	/// @brief プレイヤーの獲得量や与ダメージの倍率を管理する構造体
@@ -36,7 +36,7 @@ namespace Player {
 		float maxSlideSpeed_ = 25.0f;          // スライディングの最大速度
 		float slideFriction_ = 2.0f;           // スライディング中の摩擦
 		float jumpMoveBoostSpeed_ = 3.0f;      // ジャンプ時の水平初速
-		int   jumpCount_ = 1000;			   // ジャンプ可能回数
+		float jumpCount_ = 1000.0f;			   // ジャンプ可能回数
 	};
 
 	/// @brief プレイヤーの動作状態を表す列挙型

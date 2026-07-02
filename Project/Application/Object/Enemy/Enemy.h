@@ -57,6 +57,19 @@ private:
 	/// @return 正規化済みの水平方向です。
 	Vector3 GetDirectionToPlayer() const;
 
+	/// @brief 側面で詰まったEnemyを少しずつ上へ補助します。
+	/// @param deltaTime 1フレームの経過時間です。
+	/// @param isGroundContact AABB地面に接地していればtrueです。
+	/// @param isSlopeGroundContact Slope地面に接地していればtrueです。
+	void ApplySideClimbAssist(float deltaTime, bool isGroundContact, bool isSlopeGroundContact);
+
+	/// @brief 側面上昇補助の状態を初期化します。
+	void ResetSideClimbAssist();
+
+	/// @brief 今回の移動が側面で止められたか判定します。
+	/// @return 側面で前進量が落ちていればtrueを返します。
+	bool IsSideBlockedThisFrame() const;
+
 	/// @brief Modelの座標と回転を反映します。
 	void UpdateModelTransform();
 
@@ -69,7 +82,14 @@ private:
 	float moveSpeed_ = 3.0f;
 	float gravity_ = 30.0f;
 	float velocityY_ = 0.0f;
+	float lastDeltaTime_ = 0.0f;
+	float sideClimbBaseY_ = 0.0f;
+	float sideClimbAmount_ = 0.0f;
+	float sideClimbCrestTimer_ = 0.0f;
+	Vector3 lastMoveStartPosition_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
 	bool isGrounded_ = false;
+	bool isSideClimbing_ = false;
 	bool isActive_ = true;
 	bool isReleased_ = false;
 };

@@ -277,6 +277,7 @@
     <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Application\Object\Player\PlayerStatus.h" />
+    <ClInclude Include="Application\Object\Weapon\WeaponStatus.h" />
     <ClInclude Include="Application\UI\GameSceneTimer.h" />
     <ClInclude Include="Application\UI\Player\PlayerExpGauge.h" />
     <ClInclude Include="Application\UI\Player\PlayerHealthGauge.h" />
