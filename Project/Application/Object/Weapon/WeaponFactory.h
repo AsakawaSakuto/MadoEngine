@@ -2,6 +2,7 @@
 
 namespace Weapon {
 
-	class Inventory {
+	class Factory {
+
 	};
 }

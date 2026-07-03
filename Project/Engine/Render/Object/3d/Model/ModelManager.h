@@ -75,19 +75,23 @@ public:
 	void UpdateAll(SceneType currentSceneType);
 	void DrawAll(SceneType currentSceneType);
 	void DrawAll(SceneType currentSceneType, Camera& camera);
+
 	/// @brief 指定した描画レイヤーのModelのみを描画する
 	/// @param currentSceneType 現在のシーン種別
 	/// @param layer 描画対象のレイヤー
 	void DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer);
+
 	/// @brief 指定した描画レイヤーのModelのみを描画する
 	/// @param currentSceneType 現在のシーン種別
 	/// @param camera 使用するカメラ
 	/// @param layer 描画対象のレイヤー
 	void DrawLayer(SceneType currentSceneType, Camera& camera, MadoEngine::Render::RenderLayer layer);
+
 	/// @brief 指定したレイヤーマスクに含まれるModelを描画する
 	/// @param currentSceneType 現在のシーン種別
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask);
+
 	/// @brief 指定したレイヤーマスクに含まれるModelを描画する
 	/// @param currentSceneType 現在のシーン種別
 	/// @param camera 使用するカメラ

@@ -32,16 +32,16 @@ private:
 	void SpawnEnemy();
 
 	/// @brief Player周辺の生成位置を作成します。
-	/// @return Enemyの生成位置です。
+	/// @return Enemyの生成位置です
 	Vector3 CreateSpawnPosition() const;
 
-	/// @brief 削除対象になったEnemyを破棄します。
+	/// @brief 削除対象になったEnemyを破棄します
 	void RemoveDeadEnemies();
 
 	Player::Base* player_ = nullptr;
 	SceneType sceneType_ = SceneType::None;
 	std::vector<std::unique_ptr<Enemy>> enemies_;
-	float spawnInterval_ = 0.1f;
+	float spawnInterval_ = 0.01f;
 	float spawnTimer_ = 0.0f;
 	float minSpawnRadius_ = 8.0f;
 	float maxSpawnRadius_ = 14.0f;

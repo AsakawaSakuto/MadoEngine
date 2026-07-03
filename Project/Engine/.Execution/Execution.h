@@ -103,7 +103,7 @@ namespace MadoEngine
 		/// @brief ゲームループを継続するかどうかを取得
 		bool IsRunning();
 
-		/// @brief アプリケーションを終了するフラグを設定
+		/// @brief アプリケーションを停止するフラグを取得
 		bool IsStopApplication() const { return isStopApplication_; }
 
 		/// @brief 1フレームの経過時間を取得する
