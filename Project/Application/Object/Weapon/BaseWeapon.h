@@ -1,10 +1,18 @@
 #pragma once
 #include "IWeapon.h"
+#include "InstanceCreate.h"
+#include "UtilityHeaders.h"
 
 namespace Weapon {
 	
-	class BaseWeapon : public IWeapon {
+	class BaseWeapon {
 	public:
+		void Initialize();
+
+		void Update(float deltaTime);
+
+		void CreateInstance(float deltaTime);
+
 		Type GetType() const { return type_; }
 
 		int GetUpgradeLevel() const { return upgradeLevel; }
@@ -22,5 +30,8 @@ namespace Weapon {
 		int upgradeLevel = 0; // 武器のアップグレードレベル
 		int killCount = 0;    // 武器のキル数
 		int slotIndex = -1;   // 武器のスロットインデックス
+
+		GameTimer intervalTimer_;
+		GameTimer cooldownTimer_;
 	};
 }

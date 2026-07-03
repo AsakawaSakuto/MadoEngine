@@ -110,7 +110,6 @@
     <ClCompile Include="Application\Object\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\Object\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\Object\Weapon\Instance\Pistol.cpp" />
-    <ClCompile Include="Application\Object\Weapon\WeaponFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Enemy\Enemy.h" />
@@ -612,7 +611,7 @@
     <ClInclude Include="Application\Object\Weapon\Instance\Pistol.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\WeaponFactory.h">
+    <ClInclude Include="Application\Object\Weapon\InstanceCreate.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

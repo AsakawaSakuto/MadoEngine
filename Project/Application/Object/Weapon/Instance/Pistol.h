@@ -4,8 +4,9 @@
 namespace Weapon {
 	class Pistol : public IWeapon {
 	public:
-		void Update(float deltaTime) override {
-			
-		}
+
+		void Initialize() override;
+
+		void Update(float deltaTime) override;
 	};
 }

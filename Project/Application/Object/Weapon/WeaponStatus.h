@@ -7,7 +7,7 @@ namespace Weapon {
 		float damage = 10.0f;        // 武器のダメージ量
 								     
 		float shotMaxCount = 1.0f;   // 武器の最大射撃数
-		float shotNowCount = 0.0f;   // 武器の現在射撃数
+		int   shotNowCount = 0;      // 武器の現在射撃数
 		float shotInterval = 1.0f;   // 武器の射撃間隔
 		float shotCooldown = 1.0f;   // 武器の射撃クールダウン
 
