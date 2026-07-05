@@ -109,7 +109,8 @@
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
     <ClCompile Include="Application\Object\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\Object\Weapon\WeaponInventory.cpp" />
-    <ClCompile Include="Application\Object\Weapon\Instance\Pistol.cpp" />
+    <ClCompile Include="Application\Object\Weapon\Projectile\ProjectileManager.cpp" />
+    <ClCompile Include="Application\Object\Weapon\Projectile\Pistol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Object\Enemy\Enemy.h" />
@@ -608,10 +609,13 @@
     <ClInclude Include="Application\Object\Item\ItemStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\Instance\Pistol.h">
+    <ClInclude Include="Application\Object\Weapon\Projectile\IProjectile.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\InstanceCreate.h">
+    <ClInclude Include="Application\Object\Weapon\Projectile\ProjectileManager.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Object\Weapon\Projectile\Pistol.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

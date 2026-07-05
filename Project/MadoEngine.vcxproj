@@ -154,7 +154,8 @@
     <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
     <ClCompile Include="Application\Object\Weapon\BaseWeapon.cpp" />
-    <ClCompile Include="Application\Object\Weapon\Instance\Pistol.cpp" />
+    <ClCompile Include="Application\Object\Weapon\Projectile\Pistol.cpp" />
+    <ClCompile Include="Application\Object\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\Object\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
@@ -282,10 +283,11 @@
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Application\Object\Player\PlayerStatus.h" />
     <ClInclude Include="Application\Object\Rarity.h" />
-    <ClInclude Include="Application\Object\Weapon\InstanceCreate.h" />
-    <ClInclude Include="Application\Object\Weapon\Instance\Pistol.h" />
     <ClInclude Include="Application\Object\Weapon\IWeapon.h" />
     <ClInclude Include="Application\Object\Weapon\BaseWeapon.h" />
+    <ClInclude Include="Application\Object\Weapon\Projectile\IProjectile.h" />
+    <ClInclude Include="Application\Object\Weapon\Projectile\Pistol.h" />
+    <ClInclude Include="Application\Object\Weapon\Projectile\ProjectileManager.h" />
     <ClInclude Include="Application\Object\Weapon\WeaponInventory.h" />
     <ClInclude Include="Application\Object\Weapon\WeaponStatus.h" />
     <ClInclude Include="Application\UI\GameSceneTimer.h" />

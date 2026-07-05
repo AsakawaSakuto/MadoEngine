@@ -1,7 +1,7 @@
 #pragma once
 #include "IWeapon.h"
-#include "InstanceCreate.h"
 #include "UtilityHeaders.h"
+#include "Projectile/ProjectileManager.h"
 
 namespace Weapon {
 	
@@ -11,7 +11,7 @@ namespace Weapon {
 
 		void Update(float deltaTime);
 
-		void CreateInstance(float deltaTime);
+		void CreateProjectile(float deltaTime);
 
 		Type GetType() const { return type_; }
 

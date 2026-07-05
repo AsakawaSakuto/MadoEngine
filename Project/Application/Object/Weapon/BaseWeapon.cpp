@@ -19,11 +19,11 @@ namespace Weapon {
 
 	void BaseWeapon::Update(float deltaTime) {
 		
-		CreateInstance(deltaTime);
+		CreateProjectile(deltaTime);
 
 	}
 
-	void BaseWeapon::CreateInstance(float deltaTime) {
+	void BaseWeapon::CreateProjectile(float deltaTime) {
 
 		// クールタイムが終了している場合射撃を開始する
 		if (cooldownTimer_.IsFinished()) {
@@ -37,7 +37,7 @@ namespace Weapon {
 		if (intervalTimer_.IsFinished()) {
 			defaultStatus_.shotNowCount++;
 
-			// 射撃処理をここに追加する
+			Projectile::ProjectileManager::GetInstance().AddProjectile(type_);
 
 			// 最大射撃数に達した場合、射撃数をリセットしてクールダウンを開始する
 			if (defaultStatus_.shotNowCount >= static_cast<int>(defaultStatus_.shotMaxCount)) {
