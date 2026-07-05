@@ -3,7 +3,6 @@
 namespace Projectile {
 	namespace {
 		constexpr float kMoveSpeed = 5.0f;
-		constexpr float kDirectionEpsilon = 1e-5f;
 	}
 	
 	void Pistol::Initialize(InitializeContext context) {
@@ -16,15 +15,7 @@ namespace Projectile {
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
 
 		const Vector3 toTarget = targetPosition - ownerPosition;
-		if (toTarget.LengthSq() > kDirectionEpsilon) {
-			moveDirection_ = toTarget.Normalized();
-		} else {
-			moveDirection_ = { 0.0f, 0.0f, 0.0f };
-		}
-
-		if (model_) {
-			model_->SetTransform(transform_);
-		}
+		moveDirection_ = toTarget.Normalized();
 
 		AABB hitbox;
 		hitbox.min = { -0.5f, -0.5f, -0.5f };

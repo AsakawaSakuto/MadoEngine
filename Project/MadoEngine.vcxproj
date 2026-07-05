@@ -284,7 +284,6 @@
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Application\Object\Player\PlayerStatus.h" />
     <ClInclude Include="Application\Object\Rarity.h" />
-    <ClInclude Include="Application\Object\Weapon\IWeapon.h" />
     <ClInclude Include="Application\Object\Weapon\BaseWeapon.h" />
     <ClInclude Include="Application\Object\Weapon\Projectile\Entity\Rock.h" />
     <ClInclude Include="Application\Object\Weapon\Projectile\IProjectile.h" />

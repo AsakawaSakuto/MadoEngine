@@ -33,6 +33,10 @@ public:
 	/// @return Playerと接触していればtrueを返します。
 	bool IsHitPlayer() const;
 
+	/// @brief PlayerのProjectileと接触しているか判定します。
+	/// @return PlayerのProjectileと接触していればtrueを返します。
+	bool IsHitPlayerProjectile() const;
+
 	/// @brief Enemyの有効状態を取得します。
 	/// @return 有効であればtrueを返します。
 	bool IsActive() const { return isActive_; }

@@ -2,18 +2,18 @@
 
 namespace Weapon {
 
-	void BaseWeapon::Initialize() {
+	void BaseWeapon::Initialize(Type type, int slotIndex) {
 		// 武器の初期化処理
 		defaultStatus_ = DefaultStatus();
 		specialStatus_ = SpecialStatus();
 
-		type_ = Type::Pistol;
-		weaponName_ = "Pistol";
+		slotIndex_ = slotIndex;
+		type_ = type;
+		weaponName_ = WeaponTypeToString(type_);
 
-		upgradeLevel = 0;
-		killCount = 0;
-		slotIndex = -1;
-		projectileCount = 0;
+		upgradeLevel_ = 0;
+		killCount_ = 0;
+		projectileCount_ = 0;
 
 		intervalTimer_.Start(defaultStatus_.shotInterval, true);
 		cooldownTimer_.Start(defaultStatus_.shotCooldown, false);
@@ -38,11 +38,11 @@ namespace Weapon {
 		// 最大数射撃数に達していない場合、射撃間隔が終了したら射撃を行う
 		if (intervalTimer_.IsFinished()) {
 			defaultStatus_.shotNowCount++;
-			projectileCount++;
+			projectileCount_++;
 
 			Projectile::InitializeContext context;
 			context.projectileName = weaponName_;
-			context.projectileCount = projectileCount;
+			context.projectileCount = projectileCount_;
 			context.ownerPosition = ownerPosition;
 			context.targetPosition = targetPosition;
 

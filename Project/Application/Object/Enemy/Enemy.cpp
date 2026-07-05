@@ -123,6 +123,14 @@ bool Enemy::IsHitPlayer() const {
 	return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerHitBox);
 }
 
+bool Enemy::IsHitPlayerProjectile() const {
+	if (!isActive_) {
+		return false;
+	}
+
+	return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerProjectileHitBox);
+}
+
 void Enemy::Release() {
 	if (isReleased_) {
 		return;

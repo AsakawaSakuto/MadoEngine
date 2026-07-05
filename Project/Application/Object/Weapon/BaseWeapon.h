@@ -1,5 +1,4 @@
 #pragma once
-#include "IWeapon.h"
 #include "UtilityHeaders.h"
 #include "Projectile/ProjectileManager.h"
 #include <string>
@@ -8,7 +7,7 @@ namespace Weapon {
 	
 	class BaseWeapon {
 	public:
-		void Initialize();
+		void Initialize(Type type, int slotIndex);
 
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
@@ -16,9 +15,9 @@ namespace Weapon {
 
 		Type GetType() const { return type_; }
 
-		int GetUpgradeLevel() const { return upgradeLevel; }
+		int GetUpgradeLevel() const { return upgradeLevel_; }
 
-		int GetKillCount() const { return killCount; }
+		int GetKillCount() const { return killCount_; }
 
 	private:
 		// 武器のステータス
@@ -28,10 +27,10 @@ namespace Weapon {
 		// 武器の種類
 		Type type_ = Type::None;
 
-		int upgradeLevel = 0;    // 武器のアップグレードレベル
-		int killCount = 0;       // 武器のキル数
-		int slotIndex = -1;      // 武器のスロットインデックス
-		int projectileCount = 0; // 武器の発射数
+		int upgradeLevel_ = 0;    // 武器のアップグレードレベル
+		int killCount_ = 0;       // 武器のキル数
+		int slotIndex_ = -1;      // 武器のスロットインデックス
+		int projectileCount_ = 0; // 武器の発射数
 
 		GameTimer intervalTimer_;
 		GameTimer cooldownTimer_;

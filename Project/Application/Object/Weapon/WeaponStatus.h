@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace Weapon {
 	
@@ -34,4 +35,13 @@ namespace Weapon {
 		Pistol,
 		Rock,
 	};
+
+	inline std::string WeaponTypeToString(Type type) {
+		switch (type) {
+		case Type::None:   return "None";
+		case Type::Pistol: return "Pistol";
+		case Type::Rock:   return "Rock";
+		default:           return "Unknown";
+		}
+	}
 }

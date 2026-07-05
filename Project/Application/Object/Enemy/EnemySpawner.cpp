@@ -39,6 +39,12 @@ void EnemySpawner::Update(float deltaTime) {
 
 	for (std::unique_ptr<Enemy>& enemy : enemies_) {
 		enemy->ResolveAfterCollision();
+		if (enemy->IsHitPlayerProjectile()) {
+			enemy->Kill();
+			Logger::Output("[Debug] EnemyがPlayerのProjectileに接触したため削除します。", Logger::Level::Debug);
+			continue;
+		}
+
 		if (enemy->IsHitPlayer()) {
 			player_->TakeDamage(1);
 			enemy->Kill();
