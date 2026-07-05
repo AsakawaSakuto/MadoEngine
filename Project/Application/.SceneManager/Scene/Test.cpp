@@ -55,6 +55,8 @@ void Test::Initialize() {
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
 
+	MyCollider::RegisterCollisionPair(CollisionTag::EnemyHitBox, CollisionTag::PlayerProjectileHitBox, false);
+
 	map_ = std::make_unique<Map>();
 	map_->Initialize(MyRand::CreateSeed());
 	
@@ -97,7 +99,7 @@ SceneType Test::Update(float dt) {
 
 	Projectile::ProjectileManager::GetInstance().Update(dt);
 
-	weaponInventory_->Update(dt);
+	weaponInventory_->Update(dt, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
 
 	auto status = player_->GetStatus();
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));

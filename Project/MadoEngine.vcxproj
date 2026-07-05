@@ -290,6 +290,7 @@
     <ClInclude Include="Application\Object\Weapon\Projectile\IProjectile.h" />
     <ClInclude Include="Application\Object\Weapon\Projectile\Entity\Pistol.h" />
     <ClInclude Include="Application\Object\Weapon\Projectile\ProjectileManager.h" />
+    <ClInclude Include="Application\Object\Weapon\Projectile\ProjectileStatus.h" />
     <ClInclude Include="Application\Object\Weapon\WeaponInventory.h" />
     <ClInclude Include="Application\Object\Weapon\WeaponStatus.h" />
     <ClInclude Include="Application\UI\GameSceneTimer.h" />

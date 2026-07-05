@@ -1,4 +1,5 @@
 #include "WeaponInventory.h"
+#include "Projectile/ProjectileManager.h"
 
 namespace Weapon {
 	
@@ -10,10 +11,10 @@ namespace Weapon {
 		}
 	}
 
-	void Inventory::Update(float deltaTime) {
+	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
 		for (auto& weapon : weapons_) {
 			if (weapon) {
-				weapon->Update(deltaTime);
+				weapon->Update(deltaTime, ownerPosition, targetPosition);
 			}
 		}
 	}

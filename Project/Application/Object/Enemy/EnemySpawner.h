@@ -27,6 +27,15 @@ public:
 	/// @return 生存しているEnemy数です。
 	std::size_t GetEnemyCount() const { return enemies_.size(); }
 
+	/// @brief Playerに最も近いEnemyの座標を取得します。
+	/// @param outPosition 最も近いEnemyの座標を受け取る変数です。
+	/// @return 取得できた場合はtrueを返します。
+	bool TryGetNearestEnemyPosition(Vector3& outPosition) const;
+
+	/// @brief Playerに最も近いEnemyの座標を取得します。
+	/// @return 最も近いEnemyの座標です。Enemyが存在しない場合はゼロ座標を返します。
+	Vector3 GetNearestEnemyPosition() const;
+
 private:
 	/// @brief Enemyを1体生成します。
 	void SpawnEnemy();

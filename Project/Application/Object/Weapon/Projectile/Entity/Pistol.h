@@ -6,12 +6,13 @@ namespace Projectile {
 	class Pistol : public IProjectile {
 	public:
 
-		void Initialize(const std::string& entityName, int projectileCount) override;
+		void Initialize(InitializeContext context) override;
 
 		void Update(float deltaTime) override;
 
 	private:
 
 		Model* model_ = nullptr;
+		Vector3 moveDirection_ = { 0.0f, 0.0f, 0.0f };
 	};
 }

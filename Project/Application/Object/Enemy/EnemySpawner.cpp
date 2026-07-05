@@ -54,6 +54,39 @@ void EnemySpawner::Clear() {
 	spawnTimer_ = 0.0f;
 }
 
+bool EnemySpawner::TryGetNearestEnemyPosition(Vector3& outPosition) const {
+	if (!player_) {
+		return false;
+	}
+
+	const Vector3 playerPosition = player_->GetPosition();
+	float nearestDistanceSq = 0.0f;
+	bool foundEnemy = false;
+
+	for (const std::unique_ptr<Enemy>& enemy : enemies_) {
+		if (!enemy || !enemy->IsActive()) {
+			continue;
+		}
+
+		const Vector3 enemyPosition = enemy->GetPosition();
+		const Vector3 toEnemy = enemyPosition - playerPosition;
+		const float distanceSq = toEnemy.LengthSq();
+		if (!foundEnemy || distanceSq < nearestDistanceSq) {
+			nearestDistanceSq = distanceSq;
+			outPosition = enemyPosition;
+			foundEnemy = true;
+		}
+	}
+
+	return foundEnemy;
+}
+
+Vector3 EnemySpawner::GetNearestEnemyPosition() const {
+	Vector3 nearestEnemyPosition = { 0.0f, 0.0f, 0.0f };
+	TryGetNearestEnemyPosition(nearestEnemyPosition);
+	return nearestEnemyPosition;
+}
+
 void EnemySpawner::SpawnEnemy() {
 	std::unique_ptr<Enemy> enemy = std::make_unique<Enemy>();
 	enemy->Initialize(nextEnemyId_++, CreateSpawnPosition(), sceneType_);

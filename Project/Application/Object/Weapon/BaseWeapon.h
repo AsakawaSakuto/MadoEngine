@@ -10,9 +10,9 @@ namespace Weapon {
 	public:
 		void Initialize();
 
-		void Update(float deltaTime);
+		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
-		void CreateProjectile(float deltaTime);
+		void CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
 		Type GetType() const { return type_; }
 

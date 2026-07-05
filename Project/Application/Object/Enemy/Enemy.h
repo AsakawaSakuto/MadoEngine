@@ -37,6 +37,10 @@ public:
 	/// @return 有効であればtrueを返します。
 	bool IsActive() const { return isActive_; }
 
+	/// @brief Enemyの現在座標を取得します。
+	/// @return Enemyの現在座標を返します。
+	Vector3 GetPosition() const { return transform_.translate; }
+
 	/// @brief Enemyを削除対象にします。
 	void Kill() { isActive_ = false; }
 

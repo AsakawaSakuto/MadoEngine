@@ -13,17 +13,17 @@ namespace Projectile {
 		}
 	}
 
-	void ProjectileManager::AddProjectile(Weapon::Type type, const std::string& entityName, int projectileCount) {
+	void ProjectileManager::AddProjectile(Weapon::Type type, InitializeContext context) {
 		switch (type) {
 		case Weapon::Type::Pistol: {
 			auto pistol = std::make_unique<Pistol>();
-			pistol->Initialize(entityName, projectileCount);
+			pistol->Initialize(context);
 			projectiles.push_back(std::move(pistol));
 			break;
 		}
 		case Weapon::Type::Rock: {
 			auto rock = std::make_unique<Rock>();
-			rock->Initialize(entityName, projectileCount);
+			rock->Initialize(context);
 			projectiles.push_back(std::move(rock));
 			break;
 		}

@@ -5,7 +5,7 @@ namespace Projectile {
 
 	class Rock : public IProjectile {
 	public:
-		void Initialize(const std::string& entityName, int projectileCount) override;
+		void Initialize(InitializeContext context) override;
 
 		void Update(float deltaTime) override;
 
