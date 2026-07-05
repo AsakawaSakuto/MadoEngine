@@ -1,8 +1,6 @@
 #pragma once
-#include "Pistol.h"
-#include "../WeaponStatus.h"
-#include <vector>
-#include <memory>
+#include "Entity/Pistol.h"
+#include "Entity/Rock.h"
 
 namespace Projectile {
 
@@ -13,7 +11,7 @@ namespace Projectile {
 
 		void Update(float deltaTime);
 
-		void AddProjectile(Weapon::Type type);
+		void AddProjectile(Weapon::Type type, const std::string& entityName, int projectileCount);
 
 	private:
 		std::vector<std::unique_ptr<IProjectile>> projectiles;

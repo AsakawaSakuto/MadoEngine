@@ -61,6 +61,9 @@ void Test::Initialize() {
 	enemySpawner_ = std::make_unique<EnemySpawner>();
 	enemySpawner_->Initialize(player_.get(), SceneType::Test);
 
+	weaponInventory_ = std::make_unique<Weapon::Inventory>();
+	weaponInventory_->Initialize();
+
 	fadeSprite_ = MySprite::Create("testFade", "black2x2", SceneType::Test);
 	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
 	fadeSprite_->SetFitToScreen(true);
@@ -91,6 +94,10 @@ SceneType Test::Update(float dt) {
 	map_->Update(*player_);
 
 	enemySpawner_->Update(dt);
+
+	Projectile::ProjectileManager::GetInstance().Update(dt);
+
+	weaponInventory_->Update(dt);
 
 	auto status = player_->GetStatus();
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));

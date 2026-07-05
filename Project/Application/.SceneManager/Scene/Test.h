@@ -6,6 +6,8 @@
 #include "Utility/Light/LightManager.h"
 #include "UI/Player/PlayerExpGauge.h"
 #include "UI/Player/PlayerHealthGauge.h"
+#include "Object/Weapon/WeaponInventory.h"
+#include "Object/Weapon/Projectile/ProjectileManager.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -48,6 +50,7 @@ private:
 
 	std::unique_ptr<EnemySpawner> enemySpawner_;
 
+	std::unique_ptr<Weapon::Inventory> weaponInventory_;
 
 	Sprite* fadeSprite_ = nullptr;
 	MadoEngine::Text* playerHealthText_ = nullptr;

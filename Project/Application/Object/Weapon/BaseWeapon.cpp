@@ -7,7 +7,7 @@ namespace Weapon {
 		defaultStatus_ = DefaultStatus();
 		specialStatus_ = SpecialStatus();
 
-		type_ = Type::None;
+		type_ = Type::Pistol;
 
 		upgradeLevel = 0;
 		killCount = 0;
@@ -36,8 +36,9 @@ namespace Weapon {
 		// 最大数射撃数に達していない場合、射撃間隔が終了したら射撃を行う
 		if (intervalTimer_.IsFinished()) {
 			defaultStatus_.shotNowCount++;
+			projectileCount++;
 
-			Projectile::ProjectileManager::GetInstance().AddProjectile(type_);
+			Projectile::ProjectileManager::GetInstance().AddProjectile(type_, weaponName_, projectileCount);
 
 			// 最大射撃数に達した場合、射撃数をリセットしてクールダウンを開始する
 			if (defaultStatus_.shotNowCount >= static_cast<int>(defaultStatus_.shotMaxCount)) {

@@ -32,5 +32,6 @@ namespace Weapon {
 	enum class Type {
 		None,
 		Pistol,
+		Rock,
 	};
 }
