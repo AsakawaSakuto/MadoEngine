@@ -33,20 +33,32 @@ void Test::Initialize() {
 
 	playerHealthText_ = MyText::Create("PlayerHealthText", "HP : 0 / 0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
+	fpsText_ = MyText::Create("FpsText", "FPS : 0.0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
+
+#ifdef RELEASE
 	if (enemyCountText_) {
 		enemyCountText_->SetPosition({ 60.0f, 110.0f });
 		enemyCountText_->SetFontSize(28.0f);
 		enemyCountText_->SetAreaSize({ 360.0f, 40.0f });
 		enemyCountText_->SetWordWrap(false);
 	}
-
-	fpsText_ = MyText::Create("FpsText", "FPS : 0.0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
 	if (fpsText_) {
 		fpsText_->SetPosition({ 60.0f, 145.0f });
 		fpsText_->SetFontSize(28.0f);
 		fpsText_->SetAreaSize({ 240.0f, 40.0f });
 		fpsText_->SetWordWrap(false);
 	}
+#endif // RELEASE
+
+	AABB mapLimitBox;
+	MapLimit mapLimit;
+	mapLimitBox.min = mapLimit.min;
+	mapLimitBox.max = mapLimit.max;
+	mapLimitBox.center = { 0.0f,0.0f,0.0f };
+	mapLimitBoxPos_ = mapLimitBox.center;
+	mapLimitBox_ = mapLimitBox;
+	MyCollider::RegisterCollider("MapLimitBox", CollisionTag::MapLimitBox, &mapLimitBox_, &mapLimitBoxPos_, 1.0f);
+	MyCollider::RegisterCollisionPair(CollisionTag::MapLimitBox, CollisionTag::PlayerProjectileHitBox, false);
 
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapBlock, true);
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapSlope, true);
@@ -77,6 +89,8 @@ void Test::Initialize() {
 
 SceneType Test::Update(float dt) {
 	
+	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
+
 	fadeOutTimer_.Update(dt);
 	if (fadeOutTimer_.IsActive()) {
 		fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, fadeOutTimer_.GetReverseProgress() });

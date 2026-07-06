@@ -1,4 +1,5 @@
 #include "ProjectileManager.h"
+#include <algorithm>
 
 namespace Projectile {
 
@@ -11,6 +12,13 @@ namespace Projectile {
 		for (auto& projectile : projectiles) {
 			projectile->Update(deltaTime);
 		}
+
+		projectiles.erase(
+			std::remove_if(projectiles.begin(), projectiles.end(), [](const std::unique_ptr<IProjectile>& projectile) {
+				return projectile->IsDead();
+			}),
+			projectiles.end()
+		);
 	}
 
 	void ProjectileManager::AddProjectile(Weapon::Type type, InitializeDesc context) {

@@ -1,14 +1,23 @@
 #include "Pistol.h"
+#include "../../../Map/MapLimit.h"
 #include <cmath>
 
 namespace Projectile {
 	namespace {
-		constexpr float kMoveSpeed = 5.0f;
+		constexpr float kMoveSpeed = 25.0f;
 		constexpr float kDirectionEpsilon = 0.0001f;
+	}
+
+	Pistol::~Pistol() {
+		if (!objectName_.empty()) {
+			MyCollider::RemoveCollider(objectName_);
+			MyModel::Destroy(objectName_);
+		}
 	}
 	
 	void Pistol::Initialize(InitializeDesc context) {
-		model_ = MyModel::Create(context.projectileName + std::to_string(context.projectileCount), context.projectileName, SceneType::Test);
+		objectName_ = context.projectileName + std::to_string(context.projectileCount);
+		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
 
 		ownerPosition = context.ownerPosition;
 		targetPosition = context.targetPosition;
@@ -29,12 +38,17 @@ namespace Projectile {
 		hitbox.min = { -0.5f, -0.5f, -0.5f };
 		hitbox.max = { 0.5f, 0.5f, 0.5f };
 		hitbox_ = hitbox;
-		MyCollider::RegisterCollider(context.projectileName + std::to_string(context.projectileCount), CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
+		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 	}
 
 	void Pistol::Update(float deltaTime) {
 
 		transform_.translate += moveDirection_ * kMoveSpeed * deltaTime;
+
+		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
+			isDead_ = true;
+			return;
+		}
 
 		if (model_) {
 			model_->SetTransform(transform_);

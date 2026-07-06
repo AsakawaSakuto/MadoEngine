@@ -2,6 +2,7 @@
 #include ".SceneManager/IScene.h"
 #include "Object/Player/Player.h"
 #include "Object/Map/Map.h"
+#include "Object/Map/MapLimit.h"
 #include "Object/Enemy/EnemySpawner.h"
 #include "Utility/Light/LightManager.h"
 #include "UI/Player/PlayerExpGauge.h"
@@ -40,6 +41,9 @@ private:
 	
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
+
+	ColliderShape mapLimitBox_;
+	Vector3 mapLimitBoxPos_;
 
 	std::unique_ptr<Player::Base> player_;
 

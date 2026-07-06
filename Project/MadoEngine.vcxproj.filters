@@ -625,5 +625,8 @@
     <ClInclude Include="Application\Object\Map\MapLimit.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Object\StatusEffect.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

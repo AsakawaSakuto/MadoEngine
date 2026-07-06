@@ -12,6 +12,8 @@ enum class CollisionTag {
 	EnemyHitBox,
 	EnemyMovementSphere,
 
+	MapLimitBox,
+
 	MapBlock,
 	MapSlope,
 
@@ -28,8 +30,12 @@ inline std::string CollisionTagToString(CollisionTag tag) {
 	case CollisionTag::PlayerHitBox:         return "PlayerHitBox";
 	case CollisionTag::PlayerMovementSphere: return "PlayerMovementSphere";
 
+	case CollisionTag::PlayerProjectileHitBox: return "PlayerProjectileHitBox";
+
 	case CollisionTag::EnemyHitBox:         return "EnemyHitBox";
 	case CollisionTag::EnemyMovementSphere: return "EnemyMovementSphere";
+
+	case CollisionTag::MapLimitBox: return "MapLimitBox";
 
 	case CollisionTag::MapBlock: return "MapBlock";
 	case CollisionTag::MapSlope: return "MapSlope";

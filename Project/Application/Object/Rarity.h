@@ -2,8 +2,12 @@
 
 // @brief アイテムのレアリティや武器のアップグレードレアリティを表す列挙型
 enum class Rarity {
-	Uncommon, // 緑
-	Rare,     // 青
-	Epic,     // 紫
-	Legendary // 赤
+	Uncommon,  // 緑
+	Rare,      // 青
+	Epic,      // 紫
+	Legendary, // 黄
+
+	Unique,    // 赤
+
+	Count
 };

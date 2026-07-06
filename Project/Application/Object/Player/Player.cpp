@@ -58,9 +58,9 @@ namespace Player {
 		// 入力移動と重力による落下処理を先に行う。
 		movement_.Update(deltaTime, transform_, camera_, moveInput);
 
-		transform_.translate.x = std::clamp(transform_.translate.x, mapLimit_.minX, mapLimit_.maxX);
-		transform_.translate.y = std::clamp(transform_.translate.y, 0.0f, 100.0f);
-		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.minZ, mapLimit_.maxZ);
+		transform_.translate.x = std::clamp(transform_.translate.x, mapLimit_.min.x, mapLimit_.max.x);
+		transform_.translate.y = std::clamp(transform_.translate.y, mapLimit_.min.y, mapLimit_.max.y);
+		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
 		// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する。
 		MyCollider::Update();

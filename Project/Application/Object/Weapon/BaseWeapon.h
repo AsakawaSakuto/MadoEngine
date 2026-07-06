@@ -27,8 +27,10 @@ namespace Weapon {
 		// 武器の種類
 		Type type_ = Type::None;
 
+		int killCount_ = 0;        // 武器の総キル数
+		float damageCount_ = 0.0f; // 武器の総ダメージ量
+
 		int upgradeLevel_ = 0;    // 武器のアップグレードレベル
-		int killCount_ = 0;       // 武器のキル数
 		int slotIndex_ = -1;      // 武器のスロットインデックス
 		int projectileCount_ = 0; // 武器の発射数
 
