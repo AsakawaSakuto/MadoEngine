@@ -130,6 +130,14 @@ void SceneManager::DrawImGui() {
 #endif // USE_IMGUI
 }
 
+Camera SceneManager::GetCurrentCamera() const {
+	if (!currentScene_) {
+		return {};
+	}
+
+	return currentScene_->GetCamera();
+}
+
 void SceneManager::DrawSceneManagerImGui() {
 #ifdef USE_IMGUI
 	ImGui::SetNextWindowSize(ImVec2(280.0f, 220.0f), ImGuiCond_FirstUseEver);

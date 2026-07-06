@@ -23,8 +23,12 @@ namespace MadoEngine::Render {
 			HashCombine(seed, static_cast<int>(desc.fillMode));
 			HashCombine(seed, static_cast<int>(desc.topology));
 			HashCombine(seed, static_cast<int>(desc.inputLayout));
+			HashCombine(seed, desc.renderTargetCount);
 			HashCombine(seed, static_cast<int>(desc.rtvFormat));
 			HashCombine(seed, static_cast<int>(desc.dsvFormat));
+			HashCombine(seed, desc.depthBias);
+			HashCombine(seed, desc.depthBiasClamp);
+			HashCombine(seed, desc.slopeScaledDepthBias);
 			HashCombine(seed, desc.vsKey);
 			HashCombine(seed, desc.psKey);
 			HashCombine(seed, desc.rootSigKey);
@@ -41,8 +45,12 @@ namespace MadoEngine::Render {
 				   lhs.fillMode    == rhs.fillMode     &&
 				   lhs.topology    == rhs.topology     &&
 				   lhs.inputLayout == rhs.inputLayout  &&
+				   lhs.renderTargetCount == rhs.renderTargetCount &&
 				   lhs.rtvFormat   == rhs.rtvFormat    &&
 				   lhs.dsvFormat   == rhs.dsvFormat    &&
+				   lhs.depthBias   == rhs.depthBias    &&
+				   lhs.depthBiasClamp == rhs.depthBiasClamp &&
+				   lhs.slopeScaledDepthBias == rhs.slopeScaledDepthBias &&
 				   lhs.vsKey       == rhs.vsKey        &&
 				   lhs.psKey       == rhs.psKey        &&
 				   lhs.rootSigKey  == rhs.rootSigKey;

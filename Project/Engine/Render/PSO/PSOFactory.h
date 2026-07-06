@@ -47,7 +47,13 @@ namespace MadoEngine::Render {
 		/// @param cull カリングモード
 		/// @param fill フィルモード
 		/// @return 組み立て済みのD3D12_RASTERIZER_DESC
-		static D3D12_RASTERIZER_DESC BuildRasterizerDesc(CullMode cull, FillMode fill);
+		static D3D12_RASTERIZER_DESC BuildRasterizerDesc(
+			CullMode cull,
+			FillMode fill,
+			int depthBias,
+			float depthBiasClamp,
+			float slopeScaledDepthBias
+		);
 	};
 
 } // namespace MadoEngine::Render

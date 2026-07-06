@@ -157,6 +157,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> transformationResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> shadowGpuDataResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> lightGpuDataResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 

@@ -41,6 +41,13 @@ struct ModelTransformationMatrix {
 	Matrix4x4 WorldInverseTranspose;          // ワールド行列の逆行列の転置（法線変換用）
 };
 
+struct ModelShadowGpuData {
+	Matrix4x4 lightViewProjection = Matrix::MakeIdentity(); // ライト視点のビュー射影行列
+	Vector4 shadowMapInfo = { 2048.0f, 2048.0f, 0.002f, 0.0f }; // x:幅 y:高さ z:深度比較バイアス w:未使用
+	uint32_t useShadow = 0; // 影を受ける場合は1
+	float padding[3] = {};
+};
+
 struct ModelSubMesh {
 	uint32_t indexStart;    // インデックスバッファ内の開始位置
 	uint32_t indexCount;    // インデックスの数

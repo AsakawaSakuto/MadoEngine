@@ -64,11 +64,21 @@ namespace MadoEngine::Render {
 		psoDesc.DepthStencilState = BuildDepthStencilDesc(desc.depthMode);
 
 		// ラスタライザー
-		psoDesc.RasterizerState = BuildRasterizerDesc(desc.cullMode, desc.fillMode);
+		psoDesc.RasterizerState = BuildRasterizerDesc(
+			desc.cullMode,
+			desc.fillMode,
+			desc.depthBias,
+			desc.depthBiasClamp,
+			desc.slopeScaledDepthBias
+		);
 
 		// RTV / DSV フォーマット
-		psoDesc.NumRenderTargets = 1;
-		psoDesc.RTVFormats[0]    = desc.rtvFormat;
+		psoDesc.NumRenderTargets = desc.renderTargetCount;
+		if (desc.renderTargetCount > 0) {
+			psoDesc.RTVFormats[0] = desc.rtvFormat;
+		} else {
+			psoDesc.BlendState = {};
+		}
 		psoDesc.DSVFormat        = desc.dsvFormat;
 
 		// トポロジー
@@ -89,7 +99,9 @@ namespace MadoEngine::Render {
 
 		// ShaderManagerから取得する
 		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance().Get(desc.vsKey);
-		psoDesc.PS             = MadoEngine::ShaderManager::GetInstance().Get(desc.psKey);
+		psoDesc.PS             = desc.psKey.empty()
+			? D3D12_SHADER_BYTECODE{ nullptr, 0 }
+			: MadoEngine::ShaderManager::GetInstance().Get(desc.psKey);
 		psoDesc.pRootSignature = MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey);
 
 		return psoDesc;
@@ -214,16 +226,22 @@ namespace MadoEngine::Render {
 		return desc;
 	}
 
-	D3D12_RASTERIZER_DESC PSOFactory::BuildRasterizerDesc(CullMode cull, FillMode fill) {
+	D3D12_RASTERIZER_DESC PSOFactory::BuildRasterizerDesc(
+		CullMode cull,
+		FillMode fill,
+		int depthBias,
+		float depthBiasClamp,
+		float slopeScaledDepthBias
+	) {
 		D3D12_RASTERIZER_DESC desc{};
 		desc.DepthClipEnable          = TRUE;
 		desc.MultisampleEnable        = FALSE;
 		desc.AntialiasedLineEnable    = FALSE;
 		desc.ForcedSampleCount        = 0;
 		desc.ConservativeRaster       = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-		desc.DepthBias                = D3D12_DEFAULT_DEPTH_BIAS;
-		desc.DepthBiasClamp           = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-		desc.SlopeScaledDepthBias     = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+		desc.DepthBias                = depthBias;
+		desc.DepthBiasClamp           = depthBiasClamp;
+		desc.SlopeScaledDepthBias     = slopeScaledDepthBias;
 		desc.FrontCounterClockwise    = FALSE;
 
 		switch (cull) {

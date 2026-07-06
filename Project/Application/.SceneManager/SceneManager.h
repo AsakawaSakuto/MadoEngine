@@ -52,6 +52,14 @@ public:
 	/// @brief 現在のシーンのImGuiを描画します
 	void DrawImGui();
 
+	/// @brief 現在のシーン種別を取得する
+	/// @return 現在のシーン種別
+	SceneType GetCurrentSceneType() const { return currentSceneType_; }
+
+	/// @brief 現在のシーンカメラを取得する
+	/// @return 現在のシーンカメラ
+	Camera GetCurrentCamera() const;
+
 	/// @brief 保留中のシーン遷移を適用します
 	void ApplyPendingSceneChange();
 

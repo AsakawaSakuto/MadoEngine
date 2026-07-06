@@ -210,6 +210,7 @@
     <ClCompile Include="Engine\Render\Screen\RenderTexture.cpp" />
     <ClCompile Include="Engine\Render\Screen\RenderTargetManager.cpp" />
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
+    <ClCompile Include="Engine\Render\Shadow\ShadowMap.cpp" />
     <ClCompile Include="Engine\Shader\RootSignatureManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Triangle\Triangle.cpp" />
@@ -371,6 +372,7 @@
     <ClInclude Include="Engine\Render\Screen\RenderTexture.h" />
     <ClInclude Include="Engine\Render\Screen\RenderTargetManager.h" />
     <ClInclude Include="Engine\Render\Screen\ViewportScissor.h" />
+    <ClInclude Include="Engine\Render\Shadow\ShadowMap.h" />
     <ClInclude Include="Engine\Shader\RootSignatureManager.h" />
     <ClInclude Include="Engine\RenderHeaders.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />

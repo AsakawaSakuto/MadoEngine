@@ -31,3 +31,4 @@
 #include "Render/Screen/RenderTexture.h"
 #include "Render/Screen/RenderTargetManager.h"
 #include "Render/Screen/ViewportScissor.h"
+#include "Render/Shadow/ShadowMap.h"

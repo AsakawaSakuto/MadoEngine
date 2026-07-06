@@ -16,6 +16,38 @@ public:
 	void Update() override;
 	void Draw(Camera& useCamera) override;
 
+	/// @brief シャドウマップ生成用にモデルを描画する
+	/// @param lightViewProjection ライト視点のビュー射影行列
+	void DrawShadow(const Matrix4x4& lightViewProjection);
+
+	/// @brief 他の3Dオブジェクトに影を落とすかを設定する
+	/// @param enabled trueの場合はシャドウマップへ深度を書き込む
+	void SetCastShadow(bool enabled) { castShadow_ = enabled; }
+
+	/// @brief 他の3Dオブジェクトに影を落とすかを取得する
+	/// @return 影を落とす場合はtrue
+	bool CanCastShadow() const { return castShadow_; }
+
+	/// @brief 他の3Dオブジェクトから影を受けるかを設定する
+	/// @param enabled trueの場合は通常描画時にシャドウマップを参照する
+	void SetReceiveShadow(bool enabled) { receiveShadow_ = enabled; }
+
+	/// @brief 他の3Dオブジェクトから影を受けるかを取得する
+	/// @return 影を受ける場合はtrue
+	bool CanReceiveShadow() const { return receiveShadow_; }
+
+	/// @brief 通常描画で参照するシャドウマップ情報を設定する
+	/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドル
+	/// @param lightViewProjection ライト視点のビュー射影行列
+	/// @param width シャドウマップの幅
+	/// @param height シャドウマップの高さ
+	void SetShadowMap(
+		D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
+		const Matrix4x4& lightViewProjection,
+		uint32_t width,
+		uint32_t height
+	);
+
 	/// @brief モデルのライティング有効状態を設定する
 	/// @param enabled trueの場合はライト計算を行う
 	void SetLightingEnabled(bool enabled);
@@ -94,6 +126,13 @@ private:
 	/// @return 視錐台内、または視錐台と交差している場合はtrue
 	bool IsInsideCameraFrustum(const Camera& camera) const;
 
+	/// @brief シャドウ描画用の変換行列をGPUバッファへ更新する
+	/// @param lightViewProjection ライト視点のビュー射影行列
+	void UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection);
+
+	/// @brief 通常描画用のシャドウ情報をGPUバッファへ反映する
+	void UpdateReceiveShadowGpuData();
+
 	ModelType type_ = ModelType::Static;
 	const ModelSharedData* sharedData_ = nullptr;
 	std::unique_ptr<ModelSharedData> ownedSharedData_;
@@ -115,6 +154,7 @@ private:
 
 	ModelMaterial* materialData_ = nullptr;
 	ModelTransformationMatrix* transformationData_ = nullptr;
+	ModelShadowGpuData* shadowGpuData_ = nullptr;
 	LightGpuData* lightGpuData_ = nullptr;
 	CameraForGPU* cameraData_ = nullptr;
 
@@ -122,4 +162,10 @@ private:
 	SceneType sceneType_ = SceneType::None;
 	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);
 	bool enableFrustumCulling_ = true;
+	bool castShadow_ = true;
+	bool receiveShadow_ = true;
+	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrvHandle_ = {};
+	Matrix4x4 shadowLightViewProjection_ = Matrix::MakeIdentity();
+	uint32_t shadowMapWidth_ = 2048;
+	uint32_t shadowMapHeight_ = 2048;
 };
