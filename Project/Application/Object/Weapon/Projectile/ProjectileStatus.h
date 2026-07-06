@@ -5,7 +5,7 @@
 
 namespace Projectile {
 	
-	struct  InitializeContext {
+	struct  InitializeDesc {
 		std::string projectileName;
 		int projectileCount;
 		Vector3 ownerPosition;

@@ -13,7 +13,7 @@ namespace Projectile {
 
 		void Update(float deltaTime);
 
-		void AddProjectile(Weapon::Type type, InitializeContext context);
+		void AddProjectile(Weapon::Type type, InitializeDesc context);
 
 	private:
 		std::vector<std::unique_ptr<IProjectile>> projectiles;

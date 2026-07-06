@@ -1,11 +1,13 @@
 #include "Pistol.h"
+#include <cmath>
 
 namespace Projectile {
 	namespace {
 		constexpr float kMoveSpeed = 5.0f;
+		constexpr float kDirectionEpsilon = 0.0001f;
 	}
 	
-	void Pistol::Initialize(InitializeContext context) {
+	void Pistol::Initialize(InitializeDesc context) {
 		model_ = MyModel::Create(context.projectileName + std::to_string(context.projectileCount), context.projectileName, SceneType::Test);
 
 		ownerPosition = context.ownerPosition;
@@ -16,6 +18,12 @@ namespace Projectile {
 
 		const Vector3 toTarget = targetPosition - ownerPosition;
 		moveDirection_ = toTarget.Normalized();
+		const float horizontalLength = std::sqrt(moveDirection_.x * moveDirection_.x + moveDirection_.z * moveDirection_.z);
+		if (moveDirection_.LengthSq() > kDirectionEpsilon * kDirectionEpsilon) {
+			transform_.rotate.x = std::atan2(-moveDirection_.y, horizontalLength);
+			transform_.rotate.y = std::atan2(moveDirection_.x, moveDirection_.z);
+			transform_.rotate.z = 0.0f;
+		}
 
 		AABB hitbox;
 		hitbox.min = { -0.5f, -0.5f, -0.5f };

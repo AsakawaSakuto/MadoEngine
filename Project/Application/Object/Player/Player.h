@@ -3,6 +3,7 @@
 #include "PlayerController.h"
 #include "PlayerMovement.h"
 #include "PlayerStatus.h"
+#include "../Map/MapLimit.h"
 
 namespace Player {
 
@@ -44,5 +45,7 @@ namespace Player {
 		StatusMultiplier statusMultiplier_; // ステータスの倍率
 		Controller controller_;             // 入力制御
 		Movement movement_;                 // 移動処理
+
+		MapLimit mapLimit_; // Mapの制限範囲
 	};
 }

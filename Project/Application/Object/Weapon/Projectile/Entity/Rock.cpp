@@ -2,7 +2,7 @@
 
 namespace Projectile {
 
-	void Rock::Initialize(InitializeContext context) {
+	void Rock::Initialize(InitializeDesc context) {
 		
 	}
 

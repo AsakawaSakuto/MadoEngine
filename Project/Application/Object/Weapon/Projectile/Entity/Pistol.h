@@ -6,7 +6,7 @@ namespace Projectile {
 	class Pistol : public IProjectile {
 	public:
 
-		void Initialize(InitializeContext context) override;
+		void Initialize(InitializeDesc context) override;
 
 		void Update(float deltaTime) override;
 

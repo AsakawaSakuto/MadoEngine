@@ -11,7 +11,7 @@ namespace Projectile {
 
 	class IProjectile {
 	public:
-		virtual void Initialize(InitializeContext context) = 0;
+		virtual void Initialize(InitializeDesc context) = 0;
 
 		virtual void Update(float deltaTime) = 0;
 

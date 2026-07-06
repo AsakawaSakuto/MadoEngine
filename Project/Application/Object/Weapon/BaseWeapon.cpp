@@ -40,7 +40,7 @@ namespace Weapon {
 			defaultStatus_.shotNowCount++;
 			projectileCount_++;
 
-			Projectile::InitializeContext context;
+			Projectile::InitializeDesc context;
 			context.projectileName = weaponName_;
 			context.projectileCount = projectileCount_;
 			context.ownerPosition = ownerPosition;

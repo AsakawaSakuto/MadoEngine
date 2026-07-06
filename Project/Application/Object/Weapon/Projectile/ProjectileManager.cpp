@@ -13,7 +13,7 @@ namespace Projectile {
 		}
 	}
 
-	void ProjectileManager::AddProjectile(Weapon::Type type, InitializeContext context) {
+	void ProjectileManager::AddProjectile(Weapon::Type type, InitializeDesc context) {
 		switch (type) {
 		case Weapon::Type::Pistol: {
 			auto pistol = std::make_unique<Pistol>();
