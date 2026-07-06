@@ -13,6 +13,45 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
+            "fontSize": 36.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "FpsText",
+            "position": [
+                36.0,
+                150.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "screen": "BackBuffer",
+            "size": [
+                240.0,
+                40.0
+            ],
+            "text": "FPS : 61.3",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": false
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
             "fontSize": 128.0,
             "horizontalAlign": "Left",
             "layer": "UI",
@@ -111,7 +150,46 @@
                 320.0,
                 48.0
             ],
-            "text": "HP : 80 / 100",
+            "text": "HP : 0 / 100",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": false
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontSize": 36.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "EnemyCountText",
+            "position": [
+                36.0,
+                110.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "screen": "BackBuffer",
+            "size": [
+                360.0,
+                40.0
+            ],
+            "text": "Enemy : 27",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

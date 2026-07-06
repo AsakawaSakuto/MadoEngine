@@ -91,14 +91,14 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 28.0,
+            "fontSize": 34.5,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "PlayerHealthText",
             "position": [
-                24.0,
-                24.0
+                60.0,
+                62.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -111,7 +111,7 @@
                 320.0,
                 48.0
             ],
-            "text": "HP : 98 / 100",
+            "text": "HP : 80 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
