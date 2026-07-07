@@ -19,9 +19,10 @@ public:
 	InstancedModel(std::string objectName);
 	~InstancedModel() override;
 
-	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) override;
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
+
 	void Update() override;
+
 	void Draw(Camera& useCamera) override;
 
 	/// @brief シャドウマップへインスタンスモデルの深度を書き込みます。

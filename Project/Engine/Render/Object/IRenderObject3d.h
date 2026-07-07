@@ -17,11 +17,6 @@ public:
 	/// @brief デストラクタ
 	virtual ~IRenderObject3d() = default;
 
-	/// @brief 初期化処理（派生クラスでオーバーライド）
-	/// @param device D3D12デバイス
-	/// @param commandList グラフィクスコマンドリスト
-	virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) = 0;
-
 	/// @brief 更新処理（派生クラスでオーバーライド）
 	virtual void Update() = 0;
 

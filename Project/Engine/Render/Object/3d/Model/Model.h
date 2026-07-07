@@ -11,10 +11,10 @@ public:
 	
 	Model(std::string objectName);
 
-	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) override;
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
 
 	void Update() override;
+
 	void Draw(Camera& useCamera) override;
 
 	/// @brief シャドウマップ生成用にモデルを描画する

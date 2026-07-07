@@ -103,12 +103,6 @@ Model::Model(std::string objectName) {
 	isVisible_ = true;
 }
 
-void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) {
-	ownedSharedData_ = std::make_unique<ModelSharedData>();
-	MadoEngine::ModelResource::Initialize(*ownedSharedData_, device, modelPath);
-	Initialize(device, commandList, *ownedSharedData_);
-}
-
 void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData) {
 	assert(device);
 	assert(commandList);
