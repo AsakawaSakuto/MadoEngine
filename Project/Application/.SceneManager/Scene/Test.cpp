@@ -168,7 +168,7 @@ void Test::DrawImGui() {
 
 	player_->DrawImGui();
 
-	weaponInventory_->DrawImGui();
+	//weaponInventory_->DrawImGui();
 
 	map_->DrawImGui();
 
@@ -188,6 +188,24 @@ void Test::DrawImGui() {
 	healthGauge_->DrawImGui();
 
 #endif // USE_IMGUI
+}
+
+Vector3 Test::GetShadowFocusPosition() const {
+	if (!player_) {
+		return sceneCamera_.GetPosition();
+	}
+
+	return player_->GetPosition();
+}
+
+bool Test::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
+	if (!player_) {
+		outPosition = {};
+		return false;
+	}
+
+	outPosition = player_->GetModelPosition();
+	return true;
 }
 
 void Test::Finalize() {

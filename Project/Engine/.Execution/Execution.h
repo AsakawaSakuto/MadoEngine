@@ -10,6 +10,7 @@
 #include "RenderHeaders.h"
 #include "Render/PostEffectManager.h"
 #include "UtilityHeaders.h"
+#include ".SceneManager/SceneType.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #include "Render/ImGui/ImGuiManager.h"
@@ -28,7 +29,12 @@ namespace MadoEngine
 		void Update();
 
 		/// @brief 描画前処理
-		void PreDraw();
+		/// @param currentSceneType 現在のシーン種別
+		/// @param shadowFocusPosition シャドウマップの中心へ置くワールド座標
+		void PreDraw(
+			SceneType currentSceneType,
+			const Vector3& shadowFocusPosition
+		);
 
 		/// @brief LayerEffectPassを登録する
 		/// @param desc LayerEffectPassの生成設定
@@ -117,6 +123,14 @@ namespace MadoEngine
 		/// @brief ウィンドウリサイズ要求を描画リソースへ反映する
 		void HandleResize();
 
+		/// @brief 通常3D描画前にシャドウマップを生成してModelへ設定する
+		/// @param currentSceneType 現在のシーン種別
+		/// @param shadowFocusPosition シャドウマップの中心へ置くワールド座標
+		void RenderShadowMap(
+			SceneType currentSceneType,
+			const Vector3& shadowFocusPosition
+		);
+
 		/// @brief 指定したSRVを現在の描画先へポストエフェクト描画する
 		/// @param inputSrv 入力テクスチャのGPU SRVハンドル
 		/// @param desc 使用するPSO設定
@@ -175,6 +189,7 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 
 		std::unique_ptr<MadoEngine::Render::RenderTargetManager> renderTargetManager_;
+		std::unique_ptr<MadoEngine::Render::ShadowMap> shadowMap_;
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
 		MadoEngine::Render::PSODesc compositeDesc_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> postEffectDefaultParameterResource_;
@@ -188,6 +203,8 @@ namespace MadoEngine
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
+
 #endif
+
 	};
 }

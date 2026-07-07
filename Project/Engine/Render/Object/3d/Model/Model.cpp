@@ -1,5 +1,6 @@
 #include "Model.h"
 #include "Core/View/SRVManager.h"
+#include "Render/Shadow/ShadowMap.h"
 #include "Shader/RootSignatureManager.h"
 #include "../Animation/AnimationFunction.h"
 #include <algorithm>
@@ -8,6 +9,21 @@
 #include <cmath>
 
 namespace {
+
+	constexpr UINT kModelRootMaterial = 0;
+	constexpr UINT kModelRootTransform = 1;
+	constexpr UINT kModelRootTexture = 2;
+	constexpr UINT kModelRootCamera = 3;
+	constexpr UINT kModelRootEnvironment = 4;
+	constexpr UINT kModelRootLight = 5;
+	constexpr UINT kModelRootShadow = 6;
+	constexpr UINT kModelRootShadowMap = 7;
+	constexpr UINT kSkinningRootPalette = 4;
+	constexpr UINT kSkinningRootEnvironment = 5;
+	constexpr UINT kSkinningRootLight = 6;
+	constexpr UINT kSkinningRootShadow = 7;
+	constexpr UINT kSkinningRootShadowMap = 8;
+	constexpr float kShadowCompareBias = 0.00005f;
 
 	/// @brief 平行光源の方向を正規化する
 	/// @param direction 正規化する方向
@@ -67,6 +83,17 @@ namespace {
 		outDistance = tMin;
 		return true;
 	}
+
+	/// @brief スキニングモデル用のシャドウマップ生成PSO設定を作成します。
+	/// @return スキニングモデル用のシャドウマップ生成PSO設定です。
+	MadoEngine::Render::PSODesc CreateSkinningShadowPSODesc() {
+		MadoEngine::Render::PSODesc desc = MadoEngine::Render::ShadowMap::CreatePSODesc();
+		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkiningModel;
+		desc.vsKey = "Object3d/Shadow/SkinningShadowMap.VS";
+		desc.rootSigKey = "SkinningModel.RootSig";
+		return desc;
+	}
+
 
 } // namespace
 
@@ -135,6 +162,18 @@ void Model::SetReceiveLightMask(LightLayerMask receiveLightMask) {
 	UpdateLightGpuData();
 }
 
+void Model::SetShadowMap(
+	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
+	const Matrix4x4& lightViewProjection,
+	uint32_t width,
+	uint32_t height) {
+	shadowMapSrvHandle_ = shadowMapSrv;
+	shadowLightViewProjection_ = lightViewProjection;
+	shadowMapWidth_ = width;
+	shadowMapHeight_ = height;
+	UpdateReceiveShadowGpuData();
+}
+
 void Model::InitializeInstanceResources() {
 	assert(sharedData_);
 
@@ -167,6 +206,14 @@ void Model::InitializeInstanceResources() {
 	transformationData_->WVP = Matrix::MakeIdentity();
 	transformationData_->World = Matrix::MakeIdentity();
 	transformationData_->WorldInverseTranspose = Matrix::MakeIdentity();
+
+	shadowTransformationData_ = CreateMappedBuffer<ModelTransformationMatrix>(device_.Get(), shadowTransformationResource_);
+	shadowTransformationData_->WVP = Matrix::MakeIdentity();
+	shadowTransformationData_->World = Matrix::MakeIdentity();
+	shadowTransformationData_->WorldInverseTranspose = Matrix::MakeIdentity();
+
+	shadowGpuData_ = CreateMappedBuffer<ModelShadowGpuData>(device_.Get(), shadowGpuDataResource_);
+	UpdateReceiveShadowGpuData();
 
 	cameraData_ = CreateMappedBuffer<CameraForGPU>(device_.Get(), cameraResource_);
 
@@ -263,6 +310,47 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 	transformationData_->WorldInverseTranspose = worldInverseTransposeMatrix;
 }
 
+/// @brief シャドウ描画用の変換行列をGPUバッファへ更新する
+/// @param lightViewProjection ライト視点のビュー射影行列
+void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection) {
+	if (!shadowTransformationData_) {
+		return;
+	}
+
+	worldMatrix_ = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, lightViewProjection);
+
+	switch (type_) {
+	case ModelType::Animated:
+		shadowTransformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
+		shadowTransformationData_->World = Matrix::Multiply(rootNode_.localMatrix, worldMatrix_);
+		break;
+	case ModelType::Skinning:
+	case ModelType::Static:
+	default:
+		shadowTransformationData_->WVP = worldViewProjectionMatrix;
+		shadowTransformationData_->World = worldMatrix_;
+		break;
+	}
+
+	shadowTransformationData_->WorldInverseTranspose = Matrix::MakeIdentity();
+}
+
+void Model::UpdateReceiveShadowGpuData() {
+	if (!shadowGpuData_) {
+		return;
+	}
+
+	shadowGpuData_->lightViewProjection = shadowLightViewProjection_;
+	shadowGpuData_->shadowMapInfo = {
+		static_cast<float>(shadowMapWidth_),
+		static_cast<float>(shadowMapHeight_),
+		kShadowCompareBias,
+		0.0f
+	};
+	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
+}
+
 /// @brief モデルのワールド空間AABBを計算する
 /// @param outMin ワールド空間AABBの最小座標
 /// @param outMax ワールド空間AABBの最大座標
@@ -335,6 +423,7 @@ bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float
 	return IntersectRayAABB(rayOrigin, rayDirection, worldMin, worldMax, maxDistance, outDistance);
 }
 
+
 void Model::Draw(Camera& useCamera) {
 	if (!sharedData_ || !isVisible_) {
 		return;
@@ -369,24 +458,35 @@ void Model::Draw(Camera& useCamera) {
 	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	commandList_->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootConstantBufferView(1, transformationResource_->GetGPUVirtualAddress());
-	commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
-	commandList_->SetGraphicsRootConstantBufferView(3, cameraResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(kModelRootMaterial, materialResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(kModelRootTransform, transformationResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootDescriptorTable(kModelRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
+	commandList_->SetGraphicsRootConstantBufferView(kModelRootCamera, cameraResource_->GetGPUVirtualAddress());
 
-	const UINT environmentRootIndex = (type_ == ModelType::Skinning) ? 5u : 4u;
-	const UINT lightGpuDataRootIndex = (type_ == ModelType::Skinning) ? 6u : 5u;
+	const UINT environmentRootIndex = (type_ == ModelType::Skinning) ? kSkinningRootEnvironment : kModelRootEnvironment;
+	const UINT lightGpuDataRootIndex = (type_ == ModelType::Skinning) ? kSkinningRootLight : kModelRootLight;
 	UpdateLightGpuData();
 	commandList_->SetGraphicsRootConstantBufferView(lightGpuDataRootIndex, lightGpuDataResource_->GetGPUVirtualAddress());
 
 	if (type_ == ModelType::Skinning) {
-		commandList_->SetGraphicsRootDescriptorTable(4, skinClusterData_.paletteSrvHandle.second);
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinClusterData_.paletteSrvHandle.second);
 	}
 
 	if (useEnvironmentMap_) {
 		commandList_->SetGraphicsRootDescriptorTable(environmentRootIndex, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(environmentMapIndex_));
 	} else {
 		commandList_->SetGraphicsRootDescriptorTable(environmentRootIndex, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
+	}
+
+	UpdateReceiveShadowGpuData();
+	const D3D12_GPU_DESCRIPTOR_HANDLE fallbackSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_);
+	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = shadowMapSrvHandle_.ptr != 0 ? shadowMapSrvHandle_ : fallbackSrv;
+	if (type_ == ModelType::Skinning) {
+		commandList_->SetGraphicsRootConstantBufferView(kSkinningRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootShadowMap, shadowSrv);
+	} else {
+		commandList_->SetGraphicsRootConstantBufferView(kModelRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootDescriptorTable(kModelRootShadowMap, shadowSrv);
 	}
 
 	if (!sharedData_->modelData.subMeshes.empty()) {
@@ -396,7 +496,52 @@ void Model::Draw(Camera& useCamera) {
 				texIndex = textureIndices_[subMesh.materialIndex];
 			}
 
-			commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(texIndex));
+			commandList_->SetGraphicsRootDescriptorTable(kModelRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(texIndex));
+			commandList_->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
+		}
+	} else {
+		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), 1, 0, 0, 0);
+	}
+}
+
+/// @brief シャドウマップ生成用にモデルを描画する
+/// @param lightViewProjection ライト視点のビュー射影行列
+void Model::DrawShadow(const Matrix4x4& lightViewProjection) {
+	if (!sharedData_ || !isVisible_ || !castShadow_) {
+		return;
+	}
+
+	assert(psoRegistry_);
+	UpdateShadowTransformGpuData(lightViewProjection);
+
+	const MadoEngine::Render::PSODesc shadowPsoDesc = type_ == ModelType::Skinning
+		? CreateSkinningShadowPSODesc()
+		: MadoEngine::Render::ShadowMap::CreatePSODesc();
+	commandList_->SetGraphicsRootSignature(
+		MadoEngine::RootSignatureManager::GetInstance().Get(shadowPsoDesc.rootSigKey));
+	commandList_->SetPipelineState(psoRegistry_->Get(shadowPsoDesc));
+
+	if (type_ == ModelType::Skinning) {
+		D3D12_VERTEX_BUFFER_VIEW vbvs[] = {
+			sharedData_->vertexBufferView,
+			skinClusterData_.influenceBufferView
+		};
+		commandList_->IASetVertexBuffers(0, _countof(vbvs), vbvs);
+	} else {
+		commandList_->IASetVertexBuffers(0, 1, &sharedData_->vertexBufferView);
+	}
+
+	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	if (type_ == ModelType::Skinning) {
+		commandList_->SetGraphicsRootConstantBufferView(kModelRootTransform, shadowTransformationResource_->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinClusterData_.paletteSrvHandle.second);
+	} else {
+		commandList_->SetGraphicsRootConstantBufferView(0, shadowTransformationResource_->GetGPUVirtualAddress());
+	}
+
+	if (!sharedData_->modelData.subMeshes.empty()) {
+		for (const auto& subMesh : sharedData_->modelData.subMeshes) {
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 		}
 	} else {

@@ -25,7 +25,10 @@ void Terminal::Run() {
 			sceneManager_->Update(execution_->GetDeltaTime());
 		}
 
-		execution_->PreDraw();
+		execution_->PreDraw(
+			sceneManager_->GetCurrentSceneType(),
+			sceneManager_->GetShadowFocusPosition()
+		);
 
 		const MadoEngine::Render::RenderLayerMask layerEffectTargetMask = execution_->GetEnabledLayerEffectTargetMask();
 		if (layerEffectTargetMask != 0) {

@@ -2,10 +2,48 @@
 #include "Utility/Json/JsonHeaders.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
+#include <cmath>
 
 namespace {
 
 const std::string kEmptyLightName;
+constexpr float kMinLightDirectionLengthSq = 0.000001f;
+
+/// @brief ライト方向として使用できる有限値か確認する
+/// @param direction 確認する方向ベクトル
+/// @return 有限値のみで構成されている場合はtrue
+bool IsFiniteDirection(const Vector3& direction) {
+	return std::isfinite(direction.x) && std::isfinite(direction.y) && std::isfinite(direction.z);
+}
+
+/// @brief ライト方向を正規化する
+/// @param direction 正規化する方向ベクトル
+/// @return 正規化済みの方向ベクトル
+Vector3 NormalizeLightDirection(const Vector3& direction) {
+	if (!IsFiniteDirection(direction)) {
+		return { 0.0f, -1.0f, 0.0f };
+	}
+
+	const float lengthSq = direction.LengthSq();
+	if (lengthSq <= kMinLightDirectionLengthSq) {
+		return { 0.0f, -1.0f, 0.0f };
+	}
+
+	const float invLength = 1.0f / std::sqrt(lengthSq);
+	return { direction.x * invLength, direction.y * invLength, direction.z * invLength };
+}
+
+/// @brief 平行光源の方向を正規化する
+/// @param light 正規化対象の平行光源
+void NormalizeDirectionalLight(DirectionalLight& light) {
+	light.direction = NormalizeLightDirection(light.direction);
+}
+
+/// @brief スポットライトの方向を正規化する
+/// @param light 正規化対象のスポットライト
+void NormalizeSpotLight(SpotLight& light) {
+	light.direction = NormalizeLightDirection(light.direction);
+}
 
 /// @brief シーン種別の表示名を取得する
 /// @param sceneType 表示するシーン種別
@@ -145,6 +183,7 @@ DirectionalLight DirectionalLightFromJson(const nlohmann::json& json) {
 	light.direction = json.contains("direction") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction) : light.direction;
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
 	light.useHalfLambert = MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(json, "useHalfLambert", light.useHalfLambert != 0) ? 1u : 0u;
+	NormalizeDirectionalLight(light);
 	return light;
 }
 
@@ -182,6 +221,7 @@ SpotLight SpotLightFromJson(const nlohmann::json& json) {
 	light.decay = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "decay", light.decay);
 	light.cosAngle = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "cosAngle", light.cosAngle);
 	light.cosFalloffStart = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "cosFalloffStart", light.cosFalloffStart);
+	NormalizeSpotLight(light);
 	return light;
 }
 
@@ -199,6 +239,7 @@ LightHandle LightManager::CreateDirectionalLight(
 	LightLayerMask layerMask) {
 	DirectionalLightEntry entry;
 	entry.light = light;
+	NormalizeDirectionalLight(entry.light);
 	entry.meta.name = name;
 	entry.meta.sceneType = sceneType;
 	entry.meta.layerMask = layerMask;
@@ -229,6 +270,7 @@ LightHandle LightManager::CreateSpotLight(
 	LightLayerMask layerMask) {
 	SpotLightEntry entry;
 	entry.light = light;
+	NormalizeSpotLight(entry.light);
 	entry.meta.name = name;
 	entry.meta.sceneType = sceneType;
 	entry.meta.layerMask = layerMask;
@@ -604,7 +646,9 @@ bool LightManager::SetDirectionalLight(LightHandle handle, const DirectionalLigh
 		return false;
 	}
 
-	*targetLight = light;
+	DirectionalLight normalizedLight = light;
+	NormalizeDirectionalLight(normalizedLight);
+	*targetLight = normalizedLight;
 	AdvanceRevision();
 	return true;
 }
@@ -626,7 +670,9 @@ bool LightManager::SetSpotLight(LightHandle handle, const SpotLight& light) {
 		return false;
 	}
 
-	*targetLight = light;
+	SpotLight normalizedLight = light;
+	NormalizeSpotLight(normalizedLight);
+	*targetLight = normalizedLight;
 	AdvanceRevision();
 	return true;
 }

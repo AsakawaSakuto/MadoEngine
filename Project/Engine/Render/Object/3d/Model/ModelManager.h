@@ -12,6 +12,7 @@ namespace MadoEngine {
 
 class ModelManager {
 public:
+
 	static ModelManager& GetInstance();
 
 	ModelManager(const ModelManager&) = delete;
@@ -75,6 +76,22 @@ public:
 	void UpdateAll(SceneType currentSceneType);
 	void DrawAll(SceneType currentSceneType);
 	void DrawAll(SceneType currentSceneType, Camera& camera);
+	void DrawShadowMap(SceneType currentSceneType, const Matrix4x4& lightViewProjection);
+	void DrawShadowMapLayer(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayer layer);
+
+	/// @brief 通常描画で使用するシャドウマップ情報を対象Modelへ設定する
+	/// @param currentSceneType 現在のシーン種別
+	/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドル
+	/// @param lightViewProjection ライト視点のビュー射影行列
+	/// @param width シャドウマップの幅
+	/// @param height シャドウマップの高さ
+	void SetShadowMap(
+		SceneType currentSceneType,
+		D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
+		const Matrix4x4& lightViewProjection,
+		uint32_t width,
+		uint32_t height
+	);
 
 	/// @brief 指定した描画レイヤーのModelのみを描画する
 	/// @param currentSceneType 現在のシーン種別
@@ -97,6 +114,23 @@ public:
 	/// @param camera 使用するカメラ
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawLayerMask(SceneType currentSceneType, Camera& camera, MadoEngine::Render::RenderLayerMask layerMask);
+	void DrawShadowMapLayerMask(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayerMask layerMask);
+
+	/// @brief 通常描画で使用するシャドウマップ情報を指定LayerMaskのModelへ設定する
+	/// @param currentSceneType 現在のシーン種別
+	/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドル
+	/// @param lightViewProjection ライト視点のビュー射影行列
+	/// @param width シャドウマップの幅
+	/// @param height シャドウマップの高さ
+	/// @param layerMask 設定対象の描画レイヤーマスク
+	void SetShadowMapLayerMask(
+		SceneType currentSceneType,
+		D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
+		const Matrix4x4& lightViewProjection,
+		uint32_t width,
+		uint32_t height,
+		MadoEngine::Render::RenderLayerMask layerMask
+	);
 
 private:
 	ModelManager() = default;

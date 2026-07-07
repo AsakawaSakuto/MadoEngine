@@ -52,6 +52,23 @@ public:
 	/// @brief 現在のシーンのImGuiを描画します
 	void DrawImGui();
 
+	/// @brief 現在のシーン種別を取得する
+	/// @return 現在のシーン種別
+	SceneType GetCurrentSceneType() const { return currentSceneType_; }
+
+	/// @brief 現在のシーンカメラを取得する
+	/// @return 現在のシーンカメラ
+	Camera GetCurrentCamera() const;
+
+	/// @brief 現在のシーンがシャドウマップ生成で注視したい座標を取得します。
+	/// @return シャドウマップの注視点です。
+	Vector3 GetShadowFocusPosition() const;
+
+	/// @brief 現在のシーンからシャドウマップ確認用の対象座標を取得します。
+	/// @param outPosition 対象のワールド座標を受け取る変数です。
+	/// @return 対象座標を取得できた場合はtrueを返します。
+	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const;
+
 	/// @brief 保留中のシーン遷移を適用します
 	void ApplyPendingSceneChange();
 

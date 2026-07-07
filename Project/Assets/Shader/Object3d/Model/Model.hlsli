@@ -105,6 +105,14 @@ struct LightGpuData
     SpotLight spotLights[MAX_SPOT_LIGHTS];
 };
 
+struct ShadowGpuData
+{
+    float4x4 lightViewProjection;
+    float4 shadowMapInfo;
+    uint useShadow;
+    float3 padding;
+};
+
 struct LightContribution
 {
     float3 diffuse;

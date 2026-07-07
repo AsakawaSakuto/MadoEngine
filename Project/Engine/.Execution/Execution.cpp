@@ -106,6 +106,9 @@ namespace MadoEngine
 		layerDepthStencilBuffer_ = std::make_unique<MadoEngine::Core::DepthStencilBuffer>();
 		layerDepthStencilBuffer_->Initialize(dxDevice_.get(), dsvManager_, srvManager_, renderWidth_, renderHeight_);
 
+		shadowMap_ = std::make_unique<MadoEngine::Render::ShadowMap>();
+		shadowMap_->Initialize(dxDevice_.get(), dsvManager_, srvManager_);
+
 		// ViewportScissor の初期化
 		viewportScissor_ = std::make_unique<MadoEngine::Render::ViewportScissor>();
 		viewportScissor_->UpdateSize(renderWidth_, renderHeight_);
@@ -280,7 +283,9 @@ namespace MadoEngine
 		return postEffectManager_;
 	}
 
-	void EngineExecution::PreDraw()
+	void EngineExecution::PreDraw(
+		SceneType currentSceneType,
+		const Vector3& shadowFocusPosition)
 	{
 		isSceneColorEnded_ = false;
 		isLayerEffectChainResolved_ = false;
@@ -301,6 +306,11 @@ namespace MadoEngine
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
 
+		RenderShadowMap(
+			currentSceneType,
+			shadowFocusPosition
+		);
+
 		// オフスクリーンRTへ描画する
 		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
@@ -309,6 +319,47 @@ namespace MadoEngine
 		commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		viewportScissor_->Apply(commandManager_->GetCommandList());
+	}
+
+	void EngineExecution::RenderShadowMap(
+		SceneType currentSceneType,
+		const Vector3& shadowFocusPosition) {
+		assert(shadowMap_ && "ShadowMapが未初期化です");
+
+
+		const std::vector<DirectionalLight> directionalLights =
+			LightManager::GetInstance().GetFilteredDirectionalLights(
+				currentSceneType,
+				ToLightLayerMask(LightLayer::World)
+			);
+
+		if (directionalLights.empty() || directionalLights[0].useLight == 0) {
+			MadoEngine::ModelManager::GetInstance().SetShadowMap(
+				currentSceneType,
+				{},
+				Matrix::MakeIdentity(),
+				shadowMap_->GetWidth(),
+				shadowMap_->GetHeight()
+			);
+			return;
+		}
+
+		auto* commandList = commandManager_->GetCommandList();
+		shadowMap_->UpdateLightViewProjection(directionalLights[0], shadowFocusPosition);
+		shadowMap_->Begin(commandList);
+		MadoEngine::ModelManager::GetInstance().DrawShadowMap(
+			currentSceneType,
+			shadowMap_->GetLightViewProjectionMatrix()
+		);
+		shadowMap_->End(commandList);
+
+		MadoEngine::ModelManager::GetInstance().SetShadowMap(
+			currentSceneType,
+			shadowMap_->GetSRVGPUHandle(),
+			shadowMap_->GetLightViewProjectionMatrix(),
+			shadowMap_->GetWidth(),
+			shadowMap_->GetHeight()
+		);
 	}
 
 	void EngineExecution::EndSceneColorRender() {
@@ -437,6 +488,7 @@ namespace MadoEngine
 		ImGui::Text("DeltaTime: %.4f ms", deltaTime_->GetDeltaTime() * 1000.0);
 		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
+
 
 		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
 		MadoEngine::Editor::DrawAudioManagerUI();

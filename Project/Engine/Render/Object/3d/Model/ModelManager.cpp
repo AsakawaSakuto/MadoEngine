@@ -338,6 +338,30 @@ void ModelManager::DrawAll(SceneType currentSceneType, Camera& camera) {
 	DrawLayerMask(currentSceneType, camera, MadoEngine::Render::kAllRenderLayers);
 }
 
+void ModelManager::DrawShadowMap(SceneType currentSceneType, const Matrix4x4& lightViewProjection) {
+	DrawShadowMapLayerMask(currentSceneType, lightViewProjection, MadoEngine::Render::kAllRenderLayers);
+}
+
+void ModelManager::DrawShadowMapLayer(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayer layer) {
+	DrawShadowMapLayerMask(currentSceneType, lightViewProjection, MadoEngine::Render::ToRenderLayerMask(layer));
+}
+
+void ModelManager::SetShadowMap(
+	SceneType currentSceneType,
+	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
+	const Matrix4x4& lightViewProjection,
+	uint32_t width,
+	uint32_t height) {
+	SetShadowMapLayerMask(
+		currentSceneType,
+		shadowMapSrv,
+		lightViewProjection,
+		width,
+		height,
+		MadoEngine::Render::kAllRenderLayers
+	);
+}
+
 void ModelManager::DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer) {
 	DrawLayerMask(currentSceneType, activeCamera_, MadoEngine::Render::ToRenderLayerMask(layer));
 }
@@ -383,6 +407,84 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Mad
 		}
 
 		model->Draw(camera);
+	}
+}
+
+void ModelManager::DrawShadowMapLayerMask(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayerMask layerMask) {
+	if (models_.empty() && instancedModels_.empty()) {
+		return;
+	}
+
+	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+		if (!model->CanCastShadow()) {
+			continue;
+		}
+
+		model->DrawShadow(lightViewProjection);
+	}
+
+	for (auto& [name, model] : instancedModels_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+		if (!model->CanCastShadow()) {
+			continue;
+		}
+
+		model->DrawShadow(lightViewProjection);
+	}
+}
+
+void ModelManager::SetShadowMapLayerMask(
+	SceneType currentSceneType,
+	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
+	const Matrix4x4& lightViewProjection,
+	uint32_t width,
+	uint32_t height,
+	MadoEngine::Render::RenderLayerMask layerMask) {
+	if (models_.empty() && instancedModels_.empty()) {
+		return;
+	}
+
+	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+
+		model->SetShadowMap(shadowMapSrv, lightViewProjection, width, height);
+	}
+
+	for (auto& [name, model] : instancedModels_) {
+		SceneType modelScene = model->GetSceneType();
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+
+		model->SetShadowMap(shadowMapSrv, lightViewProjection, width, height);
 	}
 }
 

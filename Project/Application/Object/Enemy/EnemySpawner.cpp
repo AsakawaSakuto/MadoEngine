@@ -26,7 +26,7 @@ void EnemySpawner::Update(float deltaTime) {
 	spawnTimer_ += deltaTime;
 	while (spawnTimer_ >= spawnInterval_) {
 		spawnTimer_ -= spawnInterval_;
-		if (enemies_.size() <= 9999) {
+		if (enemies_.size() <= 99) {
 			SpawnEnemy();
 		}
 	}
@@ -49,6 +49,10 @@ void EnemySpawner::Update(float deltaTime) {
 			player_->TakeDamage(1);
 			enemy->Kill();
 			Logger::Output("[Engine] EnemyがPlayerに接触したため削除します。", Logger::Level::Debug);
+		}
+
+		if (MyInput::GetKeybord()->IsTrigger(DIK_7)) {
+			enemy->Kill();
 		}
 	}
 

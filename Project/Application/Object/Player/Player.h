@@ -17,6 +17,10 @@ namespace Player {
 
 		Vector3 GetPosition() const { return transform_.translate; }
 
+		/// @brief Playerの描画Model座標を取得します。
+		/// @return PlayerのModelワールド座標です。
+		Vector3 GetModelPosition() const;
+
 		void SetCamera(Camera* camera) { camera_ = camera; }
 
 		/// @brief 所持金を加算します。
