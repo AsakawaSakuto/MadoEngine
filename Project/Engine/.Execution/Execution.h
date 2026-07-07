@@ -213,6 +213,8 @@ namespace MadoEngine
 		Vector3 shadowDebugTargetNdc_ = {};
 		bool hasShadowDebugTargetPosition_ = false;
 		bool isShadowDebugTargetInLightClip_ = false;
+		float shadowOrthoSize_ = 60.0f;
+		int shadowDebugViewMode_ = 0;
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;

@@ -58,7 +58,7 @@ struct ModelSubMesh {
 struct ModelBounds {
     Vector3 min = {};
     Vector3 max = {};
-    bool isValid = false;
+	bool isValid = false; // AABBが有効かどうかのフラグ
 };
 
 struct ModelNode {

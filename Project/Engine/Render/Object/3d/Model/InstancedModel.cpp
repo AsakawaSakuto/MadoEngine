@@ -1,4 +1,5 @@
 #include "InstancedModel.h"
+#include "Model.h"
 #include "Core/View/SRVManager.h"
 #include "Render/Shadow/ShadowMap.h"
 #include "Shader/RootSignatureManager.h"
@@ -19,7 +20,7 @@ constexpr UINT kInstancedRootEnvironment = 4;
 constexpr UINT kInstancedRootLight = 5;
 constexpr UINT kInstancedRootShadow = 6;
 constexpr UINT kInstancedRootShadowMap = 7;
-constexpr float kInstancedShadowCompareBias = 0.002f;
+constexpr float kInstancedShadowCompareBias = 0.00005f;
 
 /// @brief 指定値以上の2の累乗を取得します。
 /// @param value 必要な要素数です。
@@ -53,6 +54,10 @@ InstancedModel::~InstancedModel() {
 	if (instanceSrvIndex_ != UINT32_MAX) {
 		MadoEngine::Core::SRVManager::GetInstance().Free(instanceSrvIndex_);
 		instanceSrvIndex_ = UINT32_MAX;
+	}
+	if (shadowInstanceSrvIndex_ != UINT32_MAX) {
+		MadoEngine::Core::SRVManager::GetInstance().Free(shadowInstanceSrvIndex_);
+		shadowInstanceSrvIndex_ = UINT32_MAX;
 	}
 }
 
@@ -102,7 +107,9 @@ void InstancedModel::InitializeInstanceResources() {
 	UpdateReceiveShadowGpuData();
 
 	instanceSrvIndex_ = MadoEngine::Core::SRVManager::GetInstance().Allocate();
+	shadowInstanceSrvIndex_ = MadoEngine::Core::SRVManager::GetInstance().Allocate();
 	EnsureInstanceResource(kInitialInstanceCapacity);
+	EnsureShadowInstanceResource(kInitialInstanceCapacity);
 }
 
 /// @brief 通常描画で参照するシャドウマップ情報を設定します。
@@ -157,7 +164,8 @@ void InstancedModel::Draw(Camera& useCamera) {
 	UpdateLightGpuData();
 
 	Matrix4x4 viewProjectionMatrix = camera_.GetViewProjectionMatrix();
-	BuildInstanceGpuData(viewProjectionMatrix);
+	EnsureInstanceResource(instances_.size());
+	drawInstanceCount_ = BuildInstanceGpuData(viewProjectionMatrix, instanceGpuData_);
 
 	if (drawInstanceCount_ == 0) {
 		return;
@@ -205,8 +213,9 @@ void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection) {
 		return;
 	}
 
-	BuildInstanceGpuData(lightViewProjection);
-	if (drawInstanceCount_ == 0) {
+	EnsureShadowInstanceResource(instances_.size());
+	shadowDrawInstanceCount_ = BuildInstanceGpuData(lightViewProjection, shadowInstanceGpuData_);
+	if (shadowDrawInstanceCount_ == 0) {
 		return;
 	}
 
@@ -217,14 +226,14 @@ void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection) {
 	commandList_->IASetVertexBuffers(0, 1, &sharedData_->vertexBufferView);
 	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList_->SetGraphicsRootDescriptorTable(kInstancedRootInstance, MadoEngine::Core::SRVManager::GetInstance().GetGPUHandle(instanceSrvIndex_));
+	commandList_->SetGraphicsRootDescriptorTable(kInstancedRootInstance, MadoEngine::Core::SRVManager::GetInstance().GetGPUHandle(shadowInstanceSrvIndex_));
 
 	if (!sharedData_->modelData.subMeshes.empty()) {
 		for (const auto& subMesh : sharedData_->modelData.subMeshes) {
-			commandList_->DrawIndexedInstanced(subMesh.indexCount, static_cast<UINT>(drawInstanceCount_), subMesh.indexStart, 0, 0);
+			commandList_->DrawIndexedInstanced(subMesh.indexCount, static_cast<UINT>(shadowDrawInstanceCount_), subMesh.indexStart, 0, 0);
 		}
 	} else {
-		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), static_cast<UINT>(drawInstanceCount_), 0, 0, 0);
+		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), static_cast<UINT>(shadowDrawInstanceCount_), 0, 0, 0);
 	}
 }
 
@@ -287,10 +296,34 @@ void InstancedModel::EnsureInstanceResource(size_t requiredCount) {
 
 /// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新します。
 /// @param viewProjectionMatrix 変換に使用するビュー射影行列です。
-void InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix) {
-	EnsureInstanceResource(instances_.size());
 
-	drawInstanceCount_ = 0;
+/// @brief シャドウ描画用のインスタンスGPUデータ領域を確保します。
+/// @param requiredCount 必要なインスタンス数です。
+void InstancedModel::EnsureShadowInstanceResource(size_t requiredCount) {
+	if (requiredCount <= shadowInstanceCapacity_) {
+		return;
+	}
+
+	shadowInstanceCapacity_ = CalculateCapacity(requiredCount);
+	shadowInstanceGpuData_ = CreateMappedBuffer<InstanceForGPU>(device_.Get(), shadowInstanceResource_, shadowInstanceCapacity_);
+	MadoEngine::Core::SRVManager::GetInstance().CreateStructuredBufferSRV(
+		shadowInstanceResource_.Get(),
+		shadowInstanceSrvIndex_,
+		static_cast<uint32_t>(shadowInstanceCapacity_),
+		sizeof(InstanceForGPU)
+	);
+}
+
+/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新します。
+/// @param viewProjectionMatrix 変換に使用するビュー射影行列です。
+/// @param outputData 書き込み先のGPUデータです。
+/// @return 描画対象のインスタンス数です。
+size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData) {
+	if (!outputData) {
+		return 0;
+	}
+
+	size_t drawCount = 0;
 	for (const InstanceDesc& instance : instances_) {
 		if (!instance.isVisible) {
 			continue;
@@ -300,13 +333,14 @@ void InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix)
 		Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix, viewProjectionMatrix);
 		Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix));
 
-		InstanceForGPU& gpuData = instanceGpuData_[drawInstanceCount_];
+		InstanceForGPU& gpuData = outputData[drawCount];
 		gpuData.WVP = worldViewProjectionMatrix;
 		gpuData.World = worldMatrix;
 		gpuData.WorldInverseTranspose = worldInverseTransposeMatrix;
 		gpuData.color = instance.color;
-		++drawInstanceCount_;
+		++drawCount;
 	}
+	return drawCount;
 }
 
 void InstancedModel::UpdateLightGpuData() {
@@ -328,7 +362,7 @@ void InstancedModel::UpdateReceiveShadowGpuData() {
 		static_cast<float>(shadowMapWidth_),
 		static_cast<float>(shadowMapHeight_),
 		kInstancedShadowCompareBias,
-		0.0f
+		static_cast<float>(Model::GetShadowDebugViewMode())
 	};
 	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
 }

@@ -12,6 +12,21 @@ namespace MadoEngine {
 
 class ModelManager {
 public:
+	/// @brief シャドウマップ生成時のPlayer判定状態です。
+	struct ShadowDebugModelState {
+		std::string name = "Player";
+		bool found = false;
+		bool visible = false;
+		bool sceneMatched = false;
+		bool layerMatched = false;
+		bool castShadow = false;
+		bool drawShadowCalled = false;
+		Model::ShadowVertexDebugInfo vertexDebugInfo = {};
+		SceneType sceneType = SceneType::None;
+		MadoEngine::Render::RenderLayer renderLayer = MadoEngine::Render::RenderLayer::Default;
+		ModelType modelType = ModelType::Static;
+	};
+
 	static ModelManager& GetInstance();
 
 	ModelManager(const ModelManager&) = delete;
@@ -77,6 +92,10 @@ public:
 	void DrawAll(SceneType currentSceneType, Camera& camera);
 	void DrawShadowMap(SceneType currentSceneType, const Matrix4x4& lightViewProjection);
 	void DrawShadowMapLayer(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayer layer);
+
+	/// @brief 直近のシャドウマップ生成時にPlayerが描画対象へ入ったかを取得します。
+	/// @return Playerのシャドウ描画判定状態です。
+	const ShadowDebugModelState& GetShadowDebugPlayerState() const { return shadowDebugPlayerState_; }
 
 	/// @brief 通常描画で使用するシャドウマップ情報を対象Modelへ設定する
 	/// @param currentSceneType 現在のシーン種別
@@ -148,6 +167,7 @@ private:
 	std::unordered_map<std::string, std::string> aliases_;
 	std::unordered_map<std::string, std::unique_ptr<Model>> models_;
 	std::unordered_map<std::string, std::unique_ptr<InstancedModel>> instancedModels_;
+	ShadowDebugModelState shadowDebugPlayerState_;
 };
 
 } // namespace MadoEngine

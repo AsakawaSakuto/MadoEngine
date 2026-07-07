@@ -8,6 +8,21 @@
 
 class Model : public IRenderObject3d {
 public:
+	/// @brief シャドウ頂点出力の確認情報です。
+	struct ShadowVertexDebugInfo {
+		bool calculated = false;
+		bool isSkinning = false;
+		bool paletteSrvValid = false;
+		bool shadowNdcIntersectsClip = false;
+		uint32_t vertexCount = 0;
+		uint32_t influenceVertexCount = 0;
+		uint32_t paletteCount = 0;
+		uint32_t zeroWeightVertexCount = 0;
+		uint32_t invalidJointIndexCount = 0;
+		Vector3 shadowNdcMin = {};
+		Vector3 shadowNdcMax = {};
+	};
+	
 	Model(std::string objectName);
 
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) override;
@@ -47,6 +62,22 @@ public:
 		uint32_t width,
 		uint32_t height
 	);
+
+	/// @brief ShadowFactor確認表示の有効状態を設定します。
+	/// @param enabled trueの場合は通常描画を影係数のグレースケール表示にします。
+	static void SetShadowFactorDebugMode(bool enabled);
+
+	/// @brief ShadowFactor確認表示が有効か取得します。
+	/// @return 有効な場合はtrueを返します。
+	static bool IsShadowFactorDebugMode();
+
+	/// @brief シャドウ確認表示モードを設定します。
+	/// @param mode 0は通常表示、1以降は確認表示です。
+	static void SetShadowDebugViewMode(uint32_t mode);
+
+	/// @brief シャドウ確認表示モードを取得します。
+	/// @return 現在の確認表示モードです。
+	static uint32_t GetShadowDebugViewMode();
 
 	/// @brief モデルのライティング有効状態を設定する
 	/// @param enabled trueの場合はライト計算を行う
@@ -105,6 +136,12 @@ public:
 
 	const ModelSharedData* GetSharedData() const { return sharedData_; }
 
+	/// @brief シャドウ頂点出力の確認情報を作成します。
+	/// @param lightViewProjection ライト視点のビュー射影行列です。
+	/// @param outInfo 確認情報を受け取る変数です。
+	/// @return 確認情報を作成できた場合はtrueを返します。
+	bool BuildShadowVertexDebugInfo(const Matrix4x4& lightViewProjection, ShadowVertexDebugInfo& outInfo) const;
+
 private:
 	void InitializeInstanceResources();
 
@@ -154,9 +191,11 @@ private:
 
 	ModelMaterial* materialData_ = nullptr;
 	ModelTransformationMatrix* transformationData_ = nullptr;
+	ModelTransformationMatrix* shadowTransformationData_ = nullptr;
 	ModelShadowGpuData* shadowGpuData_ = nullptr;
 	LightGpuData* lightGpuData_ = nullptr;
 	CameraForGPU* cameraData_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> shadowTransformationResource_;
 
 	ModelNode rootNode_;
 	SceneType sceneType_ = SceneType::None;
@@ -168,4 +207,5 @@ private:
 	Matrix4x4 shadowLightViewProjection_ = Matrix::MakeIdentity();
 	uint32_t shadowMapWidth_ = 2048;
 	uint32_t shadowMapHeight_ = 2048;
+	static uint32_t shadowDebugViewMode_;
 };

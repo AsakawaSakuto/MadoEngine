@@ -50,6 +50,10 @@ void EnemySpawner::Update(float deltaTime) {
 			enemy->Kill();
 			Logger::Output("[Engine] EnemyがPlayerに接触したため削除します。", Logger::Level::Debug);
 		}
+
+		if (MyInput::GetKeybord()->IsTrigger(DIK_7)) {
+			enemy->Kill();
+		}
 	}
 
 	RemoveDeadEnemies();

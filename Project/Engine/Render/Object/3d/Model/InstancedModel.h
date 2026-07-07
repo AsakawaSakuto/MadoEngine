@@ -99,7 +99,8 @@ private:
 
 	void InitializeInstanceResources();
 	void EnsureInstanceResource(size_t requiredCount);
-	void BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix);
+	void EnsureShadowInstanceResource(size_t requiredCount);
+	size_t BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData);
 	void UpdateLightGpuData();
 	void UpdateReceiveShadowGpuData();
 	bool IsValidHandle(uint32_t handle) const;
@@ -113,12 +114,17 @@ private:
 	LightGpuData* lightGpuData_ = nullptr;
 	ModelShadowGpuData* shadowGpuData_ = nullptr;
 	InstanceForGPU* instanceGpuData_ = nullptr;
+	InstanceForGPU* shadowInstanceGpuData_ = nullptr;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> instanceResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> shadowInstanceResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> shadowGpuDataResource_;
 	uint32_t instanceSrvIndex_ = UINT32_MAX;
+	uint32_t shadowInstanceSrvIndex_ = UINT32_MAX;
 	size_t instanceCapacity_ = 0;
+	size_t shadowInstanceCapacity_ = 0;
 	size_t drawInstanceCount_ = 0;
+	size_t shadowDrawInstanceCount_ = 0;
 
 	SceneType sceneType_ = SceneType::None;
 	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);

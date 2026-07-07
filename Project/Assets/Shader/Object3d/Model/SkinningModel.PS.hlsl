@@ -67,6 +67,50 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+    if (gShadowGpuData.shadowMapInfo.w > 0.5f)
+    {
+        float debugMode = gShadowGpuData.shadowMapInfo.w;
+        float4 lightClipPosition = mul(float4(input.worldPosition, 1.0f), gShadowGpuData.lightViewProjection);
+        if (lightClipPosition.w <= 0.0f)
+        {
+            output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+            return output;
+        }
+
+        float3 lightNdcPosition = lightClipPosition.xyz / lightClipPosition.w;
+        float2 shadowTexcoord = float2(
+            lightNdcPosition.x * 0.5f + 0.5f,
+            -lightNdcPosition.y * 0.5f + 0.5f);
+        if (shadowTexcoord.x < 0.0f || shadowTexcoord.x > 1.0f ||
+            shadowTexcoord.y < 0.0f || shadowTexcoord.y > 1.0f ||
+            lightNdcPosition.z < 0.0f || lightNdcPosition.z > 1.0f)
+        {
+            output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+            return output;
+        }
+
+        float receiverDepth = lightNdcPosition.z - gShadowGpuData.shadowMapInfo.z;
+        float mapDepth = gShadowMap.SampleLevel(gSampler, shadowTexcoord, 0.0f);
+        if (debugMode < 1.5f)
+        {
+            float shadowFactor = CalculateShadowFactor(input.worldPosition);
+            output.color = float4(shadowFactor.xxx, 1.0f);
+        }
+        else if (debugMode < 2.5f)
+        {
+            output.color = float4(mapDepth.xxx, 1.0f);
+        }
+        else if (debugMode < 3.5f)
+        {
+            float lit = receiverDepth <= mapDepth ? 1.0f : 0.0f;
+            output.color = float4(lit.xxx, 1.0f);
+        }
+        else
+        {
+            output.color = float4(saturate(receiverDepth).xxx, 1.0f);
+        }
+        return output;
+    }
 
     const float kAmbientIntensity = 0.18f;
     const float kSpecularIntensity = 0.18f;

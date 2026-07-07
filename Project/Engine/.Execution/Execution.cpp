@@ -308,6 +308,7 @@ namespace MadoEngine
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
 
+		Model::SetShadowDebugViewMode(static_cast<uint32_t>(shadowDebugViewMode_));
 		RenderShadowMap(
 			currentSceneType,
 			shadowFocusPosition,
@@ -357,6 +358,7 @@ namespace MadoEngine
 		}
 
 		auto* commandList = commandManager_->GetCommandList();
+		shadowMap_->SetOrthographicSize(shadowOrthoSize_, shadowOrthoSize_);
 		shadowMap_->UpdateLightViewProjection(directionalLights[0], shadowFocusPosition);
 		if (hasShadowDebugTargetPosition_) {
 			shadowDebugTargetNdc_ = Matrix::Transform(
@@ -560,19 +562,36 @@ namespace MadoEngine
 			shadowMap_->GetWidth(),
 			shadowMap_->GetHeight()
 		);
+		ImGui::SliderFloat("Shadow Ortho Size", &shadowOrthoSize_, 20.0f, 200.0f, "%.1f");
+		ImGui::Text(
+			"Ortho: %.1f x %.1f / Texel: %.4f",
+			shadowMap_->GetOrthoWidth(),
+			shadowMap_->GetOrthoHeight(),
+			shadowMap_->GetOrthoWidth() / static_cast<float>(shadowMap_->GetWidth())
+		);
 		ImGui::Text(
 			"Focus: (%.3f, %.3f, %.3f)",
 			shadowFocusPosition_.x,
 			shadowFocusPosition_.y,
 			shadowFocusPosition_.z
 		);
+		const char* shadowDebugViewItems[] = {
+			"Off",
+			"SampleCmp Factor",
+			"Raw ShadowMap Depth",
+			"Manual Compare",
+			"Receiver Depth"
+		};
+		if (ImGui::Combo("Shadow Debug View", &shadowDebugViewMode_, shadowDebugViewItems, _countof(shadowDebugViewItems))) {
+			Model::SetShadowDebugViewMode(static_cast<uint32_t>(shadowDebugViewMode_));
+		}
 
+		const ImVec4 okColor = ImVec4(0.25f, 0.85f, 0.35f, 1.0f);
+		const ImVec4 outColor = ImVec4(1.0f, 0.35f, 0.25f, 1.0f);
 		if (hasShadowDebugTargetPosition_) {
 			const bool isXInside = shadowDebugTargetNdc_.x >= -1.0f && shadowDebugTargetNdc_.x <= 1.0f;
 			const bool isYInside = shadowDebugTargetNdc_.y >= -1.0f && shadowDebugTargetNdc_.y <= 1.0f;
 			const bool isZInside = shadowDebugTargetNdc_.z >= 0.0f && shadowDebugTargetNdc_.z <= 1.0f;
-			const ImVec4 okColor = ImVec4(0.25f, 0.85f, 0.35f, 1.0f);
-			const ImVec4 outColor = ImVec4(1.0f, 0.35f, 0.25f, 1.0f);
 
 			ImGui::Text(
 				"Player Model: (%.3f, %.3f, %.3f)",
@@ -598,6 +617,80 @@ namespace MadoEngine
 			ImGui::TextUnformatted("Player Model: none");
 		}
 
+		const MadoEngine::ModelManager::ShadowDebugModelState& playerShadowState =
+			MadoEngine::ModelManager::GetInstance().GetShadowDebugPlayerState();
+		const std::string modelTypeText = MadoEngine::ModelResource::ModelTypeToString(playerShadowState.modelType);
+		ImGui::Separator();
+		ImGui::TextUnformatted("Player Shadow Target");
+		ImGui::TextColored(
+			playerShadowState.drawShadowCalled ? okColor : outColor,
+			"DrawShadow Called: %s",
+			playerShadowState.drawShadowCalled ? "YES" : "NO"
+		);
+		ImGui::TextColored(playerShadowState.found ? okColor : outColor, "Found: %s", playerShadowState.found ? "YES" : "NO");
+		if (playerShadowState.found) {
+			ImGui::Text("ModelType: %s", modelTypeText.c_str());
+			ImGui::Text("RenderLayer: %s", MadoEngine::Render::GetRenderLayerName(playerShadowState.renderLayer));
+			ImGui::Text("SceneType: %d", static_cast<int>(playerShadowState.sceneType));
+			ImGui::TextColored(playerShadowState.visible ? okColor : outColor, "Visible: %s", playerShadowState.visible ? "YES" : "NO");
+			ImGui::TextColored(playerShadowState.sceneMatched ? okColor : outColor, "Scene Match: %s", playerShadowState.sceneMatched ? "YES" : "NO");
+			ImGui::TextColored(playerShadowState.layerMatched ? okColor : outColor, "Layer Match: %s", playerShadowState.layerMatched ? "YES" : "NO");
+			ImGui::TextColored(playerShadowState.castShadow ? okColor : outColor, "CastShadow: %s", playerShadowState.castShadow ? "YES" : "NO");
+			const Model::ShadowVertexDebugInfo& vertexDebugInfo = playerShadowState.vertexDebugInfo;
+			ImGui::TextColored(vertexDebugInfo.calculated ? okColor : outColor, "Shadow Vertex Debug: %s", vertexDebugInfo.calculated ? "OK" : "NO");
+			if (vertexDebugInfo.calculated) {
+				ImGui::Text(
+					"Shadow NDC Min: (%.3f, %.3f, %.3f)",
+					vertexDebugInfo.shadowNdcMin.x,
+					vertexDebugInfo.shadowNdcMin.y,
+					vertexDebugInfo.shadowNdcMin.z
+				);
+				ImGui::Text(
+					"Shadow NDC Max: (%.3f, %.3f, %.3f)",
+					vertexDebugInfo.shadowNdcMax.x,
+					vertexDebugInfo.shadowNdcMax.y,
+					vertexDebugInfo.shadowNdcMax.z
+				);
+				const float playerShadowPixelWidth =
+					(vertexDebugInfo.shadowNdcMax.x - vertexDebugInfo.shadowNdcMin.x) * 0.5f *
+					static_cast<float>(shadowMap_->GetWidth());
+				const float playerShadowPixelHeight =
+					(vertexDebugInfo.shadowNdcMax.y - vertexDebugInfo.shadowNdcMin.y) * 0.5f *
+					static_cast<float>(shadowMap_->GetHeight());
+				ImGui::Text(
+					"Shadow Pixel Size: %.1f x %.1f px",
+					playerShadowPixelWidth,
+					playerShadowPixelHeight
+				);
+				ImGui::TextColored(
+					vertexDebugInfo.shadowNdcIntersectsClip ? okColor : outColor,
+					"Shadow NDC Clip Intersect: %s",
+					vertexDebugInfo.shadowNdcIntersectsClip ? "YES" : "NO"
+				);
+				ImGui::Text("Vertex Count: %u", vertexDebugInfo.vertexCount);
+				if (vertexDebugInfo.isSkinning) {
+					ImGui::TextColored(
+						vertexDebugInfo.paletteSrvValid ? okColor : outColor,
+						"Palette SRV: %s",
+						vertexDebugInfo.paletteSrvValid ? "VALID" : "INVALID"
+					);
+					ImGui::Text("Palette Count: %u", vertexDebugInfo.paletteCount);
+					ImGui::Text("Influence Vertices: %u", vertexDebugInfo.influenceVertexCount);
+					ImGui::TextColored(
+						vertexDebugInfo.zeroWeightVertexCount == 0 ? okColor : outColor,
+						"Zero Weight Vertices: %u",
+						vertexDebugInfo.zeroWeightVertexCount
+					);
+					ImGui::TextColored(
+						vertexDebugInfo.invalidJointIndexCount == 0 ? okColor : outColor,
+						"Invalid Joint Indices: %u",
+						vertexDebugInfo.invalidJointIndexCount
+					);
+				}
+			}
+		}
+		ImGui::Separator();
+
 		ImGui::TextUnformatted("R32_FLOAT depth preview");
 
 		ImVec2 availableSize = ImGui::GetContentRegionAvail();
@@ -610,6 +703,40 @@ namespace MadoEngine
 			static_cast<ImTextureID>(shadowMap_->GetSRVGPUHandle().ptr),
 			ImVec2(imageEdge, imageEdge)
 		);
+		const MadoEngine::ModelManager::ShadowDebugModelState& overlayShadowState =
+			MadoEngine::ModelManager::GetInstance().GetShadowDebugPlayerState();
+		const Model::ShadowVertexDebugInfo& overlayVertexDebugInfo = overlayShadowState.vertexDebugInfo;
+		if (overlayVertexDebugInfo.calculated) {
+			const ImVec2 imageMin = ImGui::GetItemRectMin();
+			const ImVec2 imageMax = ImGui::GetItemRectMax();
+			const auto ndcToImage = [&](const Vector3& ndc) {
+				const float u = ndc.x * 0.5f + 0.5f;
+				const float v = -ndc.y * 0.5f + 0.5f;
+				return ImVec2(
+					imageMin.x + u * (imageMax.x - imageMin.x),
+					imageMin.y + v * (imageMax.y - imageMin.y)
+				);
+			};
+
+			const ImVec2 p0 = ndcToImage(overlayVertexDebugInfo.shadowNdcMin);
+			const ImVec2 p1 = ndcToImage(overlayVertexDebugInfo.shadowNdcMax);
+			const ImVec2 rectMin((std::min)(p0.x, p1.x), (std::min)(p0.y, p1.y));
+			const ImVec2 rectMax((std::max)(p0.x, p1.x), (std::max)(p0.y, p1.y));
+			ImDrawList* drawList = ImGui::GetWindowDrawList();
+			drawList->AddRect(rectMin, rectMax, IM_COL32(255, 64, 64, 255), 0.0f, 0, 2.0f);
+			drawList->AddLine(
+				ImVec2(rectMin.x, (rectMin.y + rectMax.y) * 0.5f),
+				ImVec2(rectMax.x, (rectMin.y + rectMax.y) * 0.5f),
+				IM_COL32(255, 64, 64, 255),
+				1.0f
+			);
+			drawList->AddLine(
+				ImVec2((rectMin.x + rectMax.x) * 0.5f, rectMin.y),
+				ImVec2((rectMin.x + rectMax.x) * 0.5f, rectMax.y),
+				IM_COL32(255, 64, 64, 255),
+				1.0f
+			);
+		}
 		ImGui::End();
 	}
 #endif // USE_IMGUI

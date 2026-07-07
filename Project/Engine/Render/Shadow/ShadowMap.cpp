@@ -97,10 +97,10 @@ namespace MadoEngine::Render {
 		);
 		viewportScissor_.UpdateSize(kShadowMapWidth, kShadowMapHeight);
 		lightProjectionMatrix_ = Matrix::MakeOrthographic(
-			-kShadowOrthoWidth * 0.5f,
-			kShadowOrthoHeight * 0.5f,
-			kShadowOrthoWidth * 0.5f,
-			-kShadowOrthoHeight * 0.5f,
+			-shadowOrthoWidth_ * 0.5f,
+			shadowOrthoHeight_ * 0.5f,
+			shadowOrthoWidth_ * 0.5f,
+			-shadowOrthoHeight_ * 0.5f,
 			kShadowNearClip,
 			kShadowFarClip
 		);
@@ -176,14 +176,22 @@ namespace MadoEngine::Render {
 
 		lightViewMatrix_ = MakeLookAtLH(lightPosition, focusPosition, { 0.0f, 1.0f, 0.0f });
 		lightProjectionMatrix_ = Matrix::MakeOrthographic(
-			-kShadowOrthoWidth * 0.5f,
-			kShadowOrthoHeight * 0.5f,
-			kShadowOrthoWidth * 0.5f,
-			-kShadowOrthoHeight * 0.5f,
+			-shadowOrthoWidth_ * 0.5f,
+			shadowOrthoHeight_ * 0.5f,
+			shadowOrthoWidth_ * 0.5f,
+			-shadowOrthoHeight_ * 0.5f,
 			kShadowNearClip,
 			kShadowFarClip
 		);
 		lightViewProjectionMatrix_ = Matrix::Multiply(lightViewMatrix_, lightProjectionMatrix_);
+	}
+
+	/// @brief シャドウマップの直交投影範囲を設定する
+	/// @param width 直交投影の幅
+	/// @param height 直交投影の高さ
+	void ShadowMap::SetOrthographicSize(float width, float height) {
+		shadowOrthoWidth_ = width < 1.0f ? 1.0f : width;
+		shadowOrthoHeight_ = height < 1.0f ? 1.0f : height;
 	}
 
 	/// @brief シャドウマップSRVのGPUディスクリプタハンドルを取得する
