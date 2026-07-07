@@ -21,6 +21,8 @@ namespace {
 	constexpr UINT kSkinningRootPalette = 4;
 	constexpr UINT kSkinningRootEnvironment = 5;
 	constexpr UINT kSkinningRootLight = 6;
+	constexpr UINT kSkinningRootShadow = 7;
+	constexpr UINT kSkinningRootShadowMap = 8;
 	constexpr float kShadowCompareBias = 0.002f;
 
 	/// @brief 平行光源の方向を正規化する
@@ -80,6 +82,16 @@ namespace {
 
 		outDistance = tMin;
 		return true;
+	}
+
+	/// @brief スキニングモデル用のシャドウマップ生成PSO設定を作成します。
+	/// @return スキニングモデル用のシャドウマップ生成PSO設定です。
+	MadoEngine::Render::PSODesc CreateSkinningShadowPSODesc() {
+		MadoEngine::Render::PSODesc desc = MadoEngine::Render::ShadowMap::CreatePSODesc();
+		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkiningModel;
+		desc.vsKey = "Object3d/Shadow/SkinningShadowMap.VS";
+		desc.rootSigKey = "SkinningModel.RootSig";
+		return desc;
 	}
 
 } // namespace
@@ -300,8 +312,21 @@ void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection) {
 	}
 
 	worldMatrix_ = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
-	transformationData_->WVP = Matrix::Multiply(worldMatrix_, lightViewProjection);
-	transformationData_->World = worldMatrix_;
+	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, lightViewProjection);
+
+	switch (type_) {
+	case ModelType::Animated:
+		transformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
+		transformationData_->World = Matrix::Multiply(rootNode_.localMatrix, worldMatrix_);
+		break;
+	case ModelType::Skinning:
+	case ModelType::Static:
+	default:
+		transformationData_->WVP = worldViewProjectionMatrix;
+		transformationData_->World = worldMatrix_;
+		break;
+	}
+
 	transformationData_->WorldInverseTranspose = Matrix::MakeIdentity();
 }
 
@@ -446,10 +471,13 @@ void Model::Draw(Camera& useCamera) {
 		commandList_->SetGraphicsRootDescriptorTable(environmentRootIndex, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
 	}
 
-	if (type_ != ModelType::Skinning) {
-		UpdateReceiveShadowGpuData();
-		const D3D12_GPU_DESCRIPTOR_HANDLE fallbackSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_);
-		const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = shadowMapSrvHandle_.ptr != 0 ? shadowMapSrvHandle_ : fallbackSrv;
+	UpdateReceiveShadowGpuData();
+	const D3D12_GPU_DESCRIPTOR_HANDLE fallbackSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_);
+	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = shadowMapSrvHandle_.ptr != 0 ? shadowMapSrvHandle_ : fallbackSrv;
+	if (type_ == ModelType::Skinning) {
+		commandList_->SetGraphicsRootConstantBufferView(kSkinningRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootShadowMap, shadowSrv);
+	} else {
 		commandList_->SetGraphicsRootConstantBufferView(kModelRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
 		commandList_->SetGraphicsRootDescriptorTable(kModelRootShadowMap, shadowSrv);
 	}
@@ -476,22 +504,34 @@ void Model::DrawShadow(const Matrix4x4& lightViewProjection) {
 		return;
 	}
 
-	if (type_ != ModelType::Static) {
-		return;
-	}
-
 	assert(psoRegistry_);
 	UpdateShadowTransformGpuData(lightViewProjection);
 
-	const MadoEngine::Render::PSODesc shadowPsoDesc = MadoEngine::Render::ShadowMap::CreatePSODesc();
+	const MadoEngine::Render::PSODesc shadowPsoDesc = type_ == ModelType::Skinning
+		? CreateSkinningShadowPSODesc()
+		: MadoEngine::Render::ShadowMap::CreatePSODesc();
 	commandList_->SetGraphicsRootSignature(
 		MadoEngine::RootSignatureManager::GetInstance().Get(shadowPsoDesc.rootSigKey));
 	commandList_->SetPipelineState(psoRegistry_->Get(shadowPsoDesc));
 
-	commandList_->IASetVertexBuffers(0, 1, &sharedData_->vertexBufferView);
+	if (type_ == ModelType::Skinning) {
+		D3D12_VERTEX_BUFFER_VIEW vbvs[] = {
+			sharedData_->vertexBufferView,
+			skinClusterData_.influenceBufferView
+		};
+		commandList_->IASetVertexBuffers(0, _countof(vbvs), vbvs);
+	} else {
+		commandList_->IASetVertexBuffers(0, 1, &sharedData_->vertexBufferView);
+	}
+
 	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList_->SetGraphicsRootConstantBufferView(0, transformationResource_->GetGPUVirtualAddress());
+	if (type_ == ModelType::Skinning) {
+		commandList_->SetGraphicsRootConstantBufferView(kModelRootTransform, transformationResource_->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinClusterData_.paletteSrvHandle.second);
+	} else {
+		commandList_->SetGraphicsRootConstantBufferView(0, transformationResource_->GetGPUVirtualAddress());
+	}
 
 	if (!sharedData_->modelData.subMeshes.empty()) {
 		for (const auto& subMesh : sharedData_->modelData.subMeshes) {

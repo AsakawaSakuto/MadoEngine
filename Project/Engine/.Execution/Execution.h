@@ -29,7 +29,16 @@ namespace MadoEngine
 		void Update();
 
 		/// @brief 描画前処理
-		void PreDraw(SceneType currentSceneType, const Camera& camera);
+		/// @param currentSceneType 現在のシーン種別
+		/// @param shadowFocusPosition シャドウマップの中心へ置くワールド座標
+		/// @param hasShadowDebugTargetPosition シャドウ確認用の対象座標を取得できたかどうか
+		/// @param shadowDebugTargetPosition シャドウ確認用の対象ワールド座標
+		void PreDraw(
+			SceneType currentSceneType,
+			const Vector3& shadowFocusPosition,
+			bool hasShadowDebugTargetPosition,
+			const Vector3& shadowDebugTargetPosition
+		);
 
 		/// @brief LayerEffectPassを登録する
 		/// @param desc LayerEffectPassの生成設定
@@ -120,8 +129,15 @@ namespace MadoEngine
 
 		/// @brief 通常3D描画前にシャドウマップを生成してModelへ設定する
 		/// @param currentSceneType 現在のシーン種別
-		/// @param camera 現在のシーンカメラ
-		void RenderShadowMap(SceneType currentSceneType, const Camera& camera);
+		/// @param shadowFocusPosition シャドウマップの中心へ置くワールド座標
+		/// @param hasShadowDebugTargetPosition シャドウ確認用の対象座標を取得できたかどうか
+		/// @param shadowDebugTargetPosition シャドウ確認用の対象ワールド座標
+		void RenderShadowMap(
+			SceneType currentSceneType,
+			const Vector3& shadowFocusPosition,
+			bool hasShadowDebugTargetPosition,
+			const Vector3& shadowDebugTargetPosition
+		);
 
 		/// @brief 指定したSRVを現在の描画先へポストエフェクト描画する
 		/// @param inputSrv 入力テクスチャのGPU SRVハンドル
@@ -192,9 +208,20 @@ namespace MadoEngine
 		bool isSceneColorEnded_ = false;
 		bool isLayerEffectChainResolved_ = false;
 		bool isLayerEffectResolved_ = false;
+		Vector3 shadowFocusPosition_ = {};
+		Vector3 shadowDebugTargetPosition_ = {};
+		Vector3 shadowDebugTargetNdc_ = {};
+		bool hasShadowDebugTargetPosition_ = false;
+		bool isShadowDebugTargetInLightClip_ = false;
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
+
+		/// @brief シャドウマップ確認用のImGuiウィンドウを描画します。
+		void DrawShadowMapDebugWindow();
+		bool isShadowMapDebugVisible_ = true;
 #endif
+
+		bool isShadowMapRenderedThisFrame_ = false;
 	};
 }

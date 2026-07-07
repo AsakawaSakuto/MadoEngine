@@ -23,6 +23,7 @@ namespace Player {
 		model_ = MyModel::Create("Player", "walk", SceneType::Test);
 		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 		model_->SetTexture("white16x16");
+		model_->SetCastShadow(true);
 
 		movement_.Initialize();
 	}
@@ -70,7 +71,7 @@ namespace Player {
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, moveInput);
 		movement_.UpdateModelTransform(deltaTime, transform_, model_, isSlopeGroundContact);
 
-		model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+		//model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
 		model_->SetRotation(transform_.rotate);
 		model_->SetScale(transform_.scale);
 
@@ -88,6 +89,16 @@ namespace Player {
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
 		MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
+	}
+
+	/// @brief Playerの描画Model座標を取得します。
+	/// @return PlayerのModelワールド座標です。
+	Vector3 Base::GetModelPosition() const {
+		if (model_) {
+			return model_->GetPosition();
+		}
+
+		return transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f };
 	}
 
 	void Base::DrawImGui() {

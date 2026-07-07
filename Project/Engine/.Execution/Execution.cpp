@@ -283,7 +283,11 @@ namespace MadoEngine
 		return postEffectManager_;
 	}
 
-	void EngineExecution::PreDraw(SceneType currentSceneType, const Camera& camera)
+	void EngineExecution::PreDraw(
+		SceneType currentSceneType,
+		const Vector3& shadowFocusPosition,
+		bool hasShadowDebugTargetPosition,
+		const Vector3& shadowDebugTargetPosition)
 	{
 		isSceneColorEnded_ = false;
 		isLayerEffectChainResolved_ = false;
@@ -304,7 +308,12 @@ namespace MadoEngine
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
 
-		RenderShadowMap(currentSceneType, camera);
+		RenderShadowMap(
+			currentSceneType,
+			shadowFocusPosition,
+			hasShadowDebugTargetPosition,
+			shadowDebugTargetPosition
+		);
 
 		// オフスクリーンRTへ描画する
 		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
@@ -316,8 +325,19 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 	}
 
-	void EngineExecution::RenderShadowMap(SceneType currentSceneType, const Camera& camera) {
+	void EngineExecution::RenderShadowMap(
+		SceneType currentSceneType,
+		const Vector3& shadowFocusPosition,
+		bool hasShadowDebugTargetPosition,
+		const Vector3& shadowDebugTargetPosition) {
 		assert(shadowMap_ && "ShadowMapが未初期化です");
+
+		isShadowMapRenderedThisFrame_ = false;
+		shadowFocusPosition_ = shadowFocusPosition;
+		hasShadowDebugTargetPosition_ = hasShadowDebugTargetPosition;
+		shadowDebugTargetPosition_ = shadowDebugTargetPosition;
+		shadowDebugTargetNdc_ = {};
+		isShadowDebugTargetInLightClip_ = false;
 
 		const std::vector<DirectionalLight> directionalLights =
 			LightManager::GetInstance().GetFilteredDirectionalLights(
@@ -337,13 +357,24 @@ namespace MadoEngine
 		}
 
 		auto* commandList = commandManager_->GetCommandList();
-		shadowMap_->UpdateLightViewProjection(directionalLights[0], camera.GetPosition());
+		shadowMap_->UpdateLightViewProjection(directionalLights[0], shadowFocusPosition);
+		if (hasShadowDebugTargetPosition_) {
+			shadowDebugTargetNdc_ = Matrix::Transform(
+				shadowDebugTargetPosition_,
+				shadowMap_->GetLightViewProjectionMatrix()
+			);
+			isShadowDebugTargetInLightClip_ =
+				shadowDebugTargetNdc_.x >= -1.0f && shadowDebugTargetNdc_.x <= 1.0f &&
+				shadowDebugTargetNdc_.y >= -1.0f && shadowDebugTargetNdc_.y <= 1.0f &&
+				shadowDebugTargetNdc_.z >= 0.0f && shadowDebugTargetNdc_.z <= 1.0f;
+		}
 		shadowMap_->Begin(commandList);
 		MadoEngine::ModelManager::GetInstance().DrawShadowMap(
 			currentSceneType,
 			shadowMap_->GetLightViewProjectionMatrix()
 		);
 		shadowMap_->End(commandList);
+		isShadowMapRenderedThisFrame_ = true;
 
 		MadoEngine::ModelManager::GetInstance().SetShadowMap(
 			currentSceneType,
@@ -481,6 +512,8 @@ namespace MadoEngine
 		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
 
+		DrawShadowMapDebugWindow();
+
 		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
@@ -507,6 +540,79 @@ namespace MadoEngine
 		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_), postEffectCopyDesc_);
 #endif // USE_IMGUI
 	}
+
+#ifdef USE_IMGUI
+	void EngineExecution::DrawShadowMapDebugWindow() {
+		if (!isShadowMapDebugVisible_) {
+			return;
+		}
+
+		ImGui::Begin("Shadow Map Debug", &isShadowMapDebugVisible_);
+
+		if (!shadowMap_ || !isShadowMapRenderedThisFrame_) {
+			ImGui::TextUnformatted("Shadow map is not rendered.");
+			ImGui::End();
+			return;
+		}
+
+		ImGui::Text(
+			"Size: %u x %u",
+			shadowMap_->GetWidth(),
+			shadowMap_->GetHeight()
+		);
+		ImGui::Text(
+			"Focus: (%.3f, %.3f, %.3f)",
+			shadowFocusPosition_.x,
+			shadowFocusPosition_.y,
+			shadowFocusPosition_.z
+		);
+
+		if (hasShadowDebugTargetPosition_) {
+			const bool isXInside = shadowDebugTargetNdc_.x >= -1.0f && shadowDebugTargetNdc_.x <= 1.0f;
+			const bool isYInside = shadowDebugTargetNdc_.y >= -1.0f && shadowDebugTargetNdc_.y <= 1.0f;
+			const bool isZInside = shadowDebugTargetNdc_.z >= 0.0f && shadowDebugTargetNdc_.z <= 1.0f;
+			const ImVec4 okColor = ImVec4(0.25f, 0.85f, 0.35f, 1.0f);
+			const ImVec4 outColor = ImVec4(1.0f, 0.35f, 0.25f, 1.0f);
+
+			ImGui::Text(
+				"Player Model: (%.3f, %.3f, %.3f)",
+				shadowDebugTargetPosition_.x,
+				shadowDebugTargetPosition_.y,
+				shadowDebugTargetPosition_.z
+			);
+			ImGui::Text(
+				"Player Light NDC: (%.3f, %.3f, %.3f)",
+				shadowDebugTargetNdc_.x,
+				shadowDebugTargetNdc_.y,
+				shadowDebugTargetNdc_.z
+			);
+			ImGui::TextColored(
+				isShadowDebugTargetInLightClip_ ? okColor : outColor,
+				"Inside Light Clip: %s",
+				isShadowDebugTargetInLightClip_ ? "OK" : "OUT"
+			);
+			ImGui::TextColored(isXInside ? okColor : outColor, "X [-1, 1]: %s", isXInside ? "OK" : "OUT");
+			ImGui::TextColored(isYInside ? okColor : outColor, "Y [-1, 1]: %s", isYInside ? "OK" : "OUT");
+			ImGui::TextColored(isZInside ? okColor : outColor, "Z [0, 1]: %s", isZInside ? "OK" : "OUT");
+		} else {
+			ImGui::TextUnformatted("Player Model: none");
+		}
+
+		ImGui::TextUnformatted("R32_FLOAT depth preview");
+
+		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+		float imageEdge = (std::min)(availableSize.x, availableSize.y);
+		if (imageEdge < 64.0f) {
+			imageEdge = 256.0f;
+		}
+
+		ImGui::Image(
+			static_cast<ImTextureID>(shadowMap_->GetSRVGPUHandle().ptr),
+			ImVec2(imageEdge, imageEdge)
+		);
+		ImGui::End();
+	}
+#endif // USE_IMGUI
 
 	void EngineExecution::DrawPostEffect(
 		D3D12_GPU_DESCRIPTOR_HANDLE inputSrv,

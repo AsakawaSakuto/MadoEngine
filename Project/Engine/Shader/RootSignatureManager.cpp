@@ -379,7 +379,14 @@ namespace MadoEngine {
 			environmentRange.RegisterSpace = 0;
 			environmentRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-			D3D12_ROOT_PARAMETER rootParams[7]{};
+			D3D12_DESCRIPTOR_RANGE shadowMapRange{};
+			shadowMapRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			shadowMapRange.NumDescriptors = 1;
+			shadowMapRange.BaseShaderRegister = 3;
+			shadowMapRange.RegisterSpace = 0;
+			shadowMapRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[9]{};
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 			rootParams[0].Descriptor.ShaderRegister = 0;
 			rootParams[0].Descriptor.RegisterSpace = 0;
@@ -415,26 +422,45 @@ namespace MadoEngine {
 			rootParams[6].Descriptor.RegisterSpace = 0;
 			rootParams[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-			D3D12_STATIC_SAMPLER_DESC staticSampler{};
-			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-			staticSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-			staticSampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-			staticSampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-			staticSampler.MipLODBias = 0.0f;
-			staticSampler.MaxAnisotropy = 0;
-			staticSampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-			staticSampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-			staticSampler.MinLOD = 0.0f;
-			staticSampler.MaxLOD = D3D12_FLOAT32_MAX;
-			staticSampler.ShaderRegister = 0;
-			staticSampler.RegisterSpace = 0;
-			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+			rootParams[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[7].Descriptor.ShaderRegister = 7;
+			rootParams[7].Descriptor.RegisterSpace = 0;
+			rootParams[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[8].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[8].DescriptorTable.pDescriptorRanges = &shadowMapRange;
+			rootParams[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC staticSamplers[2]{};
+			staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			staticSamplers[0].MipLODBias = 0.0f;
+			staticSamplers[0].MaxAnisotropy = 0;
+			staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			staticSamplers[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			staticSamplers[0].MinLOD = 0.0f;
+			staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;
+			staticSamplers[0].ShaderRegister = 0;
+			staticSamplers[0].RegisterSpace = 0;
+			staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			staticSamplers[1] = staticSamplers[0];
+			staticSamplers[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+			staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+			staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+			staticSamplers[1].ShaderRegister = 1;
 
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
 			rootSigDesc.NumParameters = _countof(rootParams);
 			rootSigDesc.pParameters = rootParams;
-			rootSigDesc.NumStaticSamplers = 1;
-			rootSigDesc.pStaticSamplers = &staticSampler;
+			rootSigDesc.NumStaticSamplers = _countof(staticSamplers);
+			rootSigDesc.pStaticSamplers = staticSamplers;
 			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 			MadoEngine::RootSignatureManager::GetInstance().Register("SkinningModel.RootSig", rootSigDesc);

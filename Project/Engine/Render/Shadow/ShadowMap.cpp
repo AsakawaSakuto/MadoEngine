@@ -151,7 +151,7 @@ namespace MadoEngine::Render {
 		PSODesc desc{};
 		desc.blendMode = BlendMode::None;
 		desc.depthMode = DepthMode::ReadWrite;
-		desc.cullMode = CullMode::Back;
+		desc.cullMode = CullMode::None;
 		desc.fillMode = FillMode::Solid;
 		desc.topology = TopologyType::Triangle;
 		desc.inputLayout = InputLayoutType::StaticModel;

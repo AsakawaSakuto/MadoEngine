@@ -138,6 +138,23 @@ Camera SceneManager::GetCurrentCamera() const {
 	return currentScene_->GetCamera();
 }
 
+Vector3 SceneManager::GetShadowFocusPosition() const {
+	if (!currentScene_) {
+		return {};
+	}
+
+	return currentScene_->GetShadowFocusPosition();
+}
+
+bool SceneManager::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
+	if (!currentScene_) {
+		outPosition = {};
+		return false;
+	}
+
+	return currentScene_->TryGetShadowDebugTargetPosition(outPosition);
+}
+
 void SceneManager::DrawSceneManagerImGui() {
 #ifdef USE_IMGUI
 	ImGui::SetNextWindowSize(ImVec2(280.0f, 220.0f), ImGuiCond_FirstUseEver);
