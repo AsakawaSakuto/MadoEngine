@@ -1,5 +1,4 @@
 #include "InstancedModel.h"
-#include "Model.h"
 #include "Core/View/SRVManager.h"
 #include "Render/Shadow/ShadowMap.h"
 #include "Shader/RootSignatureManager.h"
@@ -362,7 +361,7 @@ void InstancedModel::UpdateReceiveShadowGpuData() {
 		static_cast<float>(shadowMapWidth_),
 		static_cast<float>(shadowMapHeight_),
 		kInstancedShadowCompareBias,
-		static_cast<float>(Model::GetShadowDebugViewMode())
+		0.0f
 	};
 	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
 }

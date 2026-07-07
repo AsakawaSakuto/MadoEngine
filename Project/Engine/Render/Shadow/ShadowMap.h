@@ -23,8 +23,8 @@ namespace MadoEngine::Render {
 	public:
 		static constexpr uint32_t kShadowMapWidth = 2048;          // シャドウマップの幅
 		static constexpr uint32_t kShadowMapHeight = 2048;         // シャドウマップの高さ
-		static constexpr float kDefaultShadowOrthoWidth = 60.0f;    // シャドウマップの既定の直交投影幅
-		static constexpr float kDefaultShadowOrthoHeight = 60.0f;   // シャドウマップの既定の直交投影高さ
+		static constexpr float kShadowOrthoWidth = 60.0f;          // シャドウマップの直交投影幅
+		static constexpr float kShadowOrthoHeight = 60.0f;         // シャドウマップの直交投影高さ
 		static constexpr float kShadowNearClip = 0.1f;             // シャドウマップの近クリップ距離
 		static constexpr float kShadowFarClip = 1000.0f;           // シャドウマップの遠クリップ距離
 		static constexpr int kShadowDepthBias = 0;                 // シャドウマップの深度バイアス
@@ -66,11 +66,6 @@ namespace MadoEngine::Render {
 		/// @param focusPosition ライトが注視するワールド座標
 		void UpdateLightViewProjection(const DirectionalLight& directionalLight, Vector3 focusPosition = { 0.0f, 0.0f, 0.0f });
 
-		/// @brief シャドウマップの直交投影範囲を設定する
-		/// @param width 直交投影の幅
-		/// @param height 直交投影の高さ
-		void SetOrthographicSize(float width, float height);
-
 		/// @brief ライトビュー行列を取得する
 		/// @return ライトビュー行列
 		const Matrix4x4& GetLightViewMatrix() const { return lightViewMatrix_; }
@@ -99,22 +94,12 @@ namespace MadoEngine::Render {
 		/// @return シャドウマップの高さ
 		uint32_t GetHeight() const { return kShadowMapHeight; }
 
-		/// @brief 直交投影の幅を取得する
-		/// @return 直交投影の幅
-		float GetOrthoWidth() const { return shadowOrthoWidth_; }
-
-		/// @brief 直交投影の高さを取得する
-		/// @return 直交投影の高さ
-		float GetOrthoHeight() const { return shadowOrthoHeight_; }
-
 	private:
 		MadoEngine::Core::DepthStencilBuffer depthBuffer_;
 		ViewportScissor viewportScissor_;
 		Matrix4x4 lightViewMatrix_ = {};
 		Matrix4x4 lightProjectionMatrix_ = {};
 		Matrix4x4 lightViewProjectionMatrix_ = {};
-		float shadowOrthoWidth_ = kDefaultShadowOrthoWidth;
-		float shadowOrthoHeight_ = kDefaultShadowOrthoHeight;
 		bool isInitialized_ = false;
 	};
 

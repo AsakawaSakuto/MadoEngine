@@ -94,38 +94,6 @@ namespace {
 		return desc;
 	}
 
-	/// @brief 4次元ベクトルを行列で変換します。
-	/// @param v 変換する4次元ベクトルです。
-	/// @param m 変換に使用する行列です。
-	/// @return 変換後の4次元ベクトルです。
-	Vector4 TransformVector4(const Vector4& v, const Matrix4x4& m) {
-		return {
-			v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0] + v.w * m.m[3][0],
-			v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1] + v.w * m.m[3][1],
-			v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2] + v.w * m.m[3][2],
-			v.x * m.m[0][3] + v.y * m.m[1][3] + v.z * m.m[2][3] + v.w * m.m[3][3]
-		};
-	}
-
-	/// @brief Clip座標をNDCへ変換します。
-	/// @param clip Clip座標です。
-	/// @param outNdc NDCの出力先です。
-	/// @return 変換できた場合はtrueを返します。
-	bool TryPerspectiveDivide(const Vector4& clip, Vector3& outNdc) {
-		if (std::abs(clip.w) <= 0.000001f) {
-			return false;
-		}
-
-		outNdc = {
-			clip.x / clip.w,
-			clip.y / clip.w,
-			clip.z / clip.w
-		};
-		return
-			std::isfinite(outNdc.x) &&
-			std::isfinite(outNdc.y) &&
-			std::isfinite(outNdc.z);
-	}
 
 } // namespace
 
@@ -133,32 +101,6 @@ Model::Model(std::string objectName) {
 	objectName_ = objectName;
 	color_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 	isVisible_ = true;
-}
-
-uint32_t Model::shadowDebugViewMode_ = 0;
-
-/// @brief ShadowFactor確認表示の有効状態を設定します。
-/// @param enabled trueの場合は通常描画を影係数のグレースケール表示にします。
-void Model::SetShadowFactorDebugMode(bool enabled) {
-	SetShadowDebugViewMode(enabled ? 1u : 0u);
-}
-
-/// @brief ShadowFactor確認表示が有効か取得します。
-/// @return 有効な場合はtrueを返します。
-bool Model::IsShadowFactorDebugMode() {
-	return shadowDebugViewMode_ != 0;
-}
-
-/// @brief シャドウ確認表示モードを設定します。
-/// @param mode 0は通常表示、1以降は確認表示です。
-void Model::SetShadowDebugViewMode(uint32_t mode) {
-	shadowDebugViewMode_ = mode;
-}
-
-/// @brief シャドウ確認表示モードを取得します。
-/// @return 現在の確認表示モードです。
-uint32_t Model::GetShadowDebugViewMode() {
-	return shadowDebugViewMode_;
 }
 
 void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string modelPath) {
@@ -404,7 +346,7 @@ void Model::UpdateReceiveShadowGpuData() {
 		static_cast<float>(shadowMapWidth_),
 		static_cast<float>(shadowMapHeight_),
 		kShadowCompareBias,
-		static_cast<float>(shadowDebugViewMode_)
+		0.0f
 	};
 	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
 }
@@ -481,101 +423,6 @@ bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float
 	return IntersectRayAABB(rayOrigin, rayDirection, worldMin, worldMax, maxDistance, outDistance);
 }
 
-/// @brief シャドウ頂点出力の確認情報を作成します。
-/// @param lightViewProjection ライト視点のビュー射影行列です。
-/// @param outInfo 確認情報を受け取る変数です。
-/// @return 確認情報を作成できた場合はtrueを返します。
-bool Model::BuildShadowVertexDebugInfo(const Matrix4x4& lightViewProjection, ShadowVertexDebugInfo& outInfo) const {
-	outInfo = ShadowVertexDebugInfo{};
-	if (!sharedData_) {
-		return false;
-	}
-
-	const std::vector<ModelVertexData>& vertices = sharedData_->modelData.vertices;
-	if (vertices.empty()) {
-		return false;
-	}
-
-	outInfo.calculated = true;
-	outInfo.isSkinning = type_ == ModelType::Skinning;
-	outInfo.vertexCount = static_cast<uint32_t>(vertices.size());
-	outInfo.paletteCount = static_cast<uint32_t>(skinClusterData_.mappedPalette.size());
-	outInfo.paletteSrvValid = skinClusterData_.paletteSrvHandle.second.ptr != 0;
-
-	Matrix4x4 worldMatrix = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
-	Matrix4x4 shadowWvp = Matrix::Multiply(worldMatrix, lightViewProjection);
-	if (type_ == ModelType::Animated) {
-		shadowWvp = Matrix::Multiply(rootNode_.localMatrix, shadowWvp);
-	}
-
-	Vector3 ndcMin = { FLT_MAX, FLT_MAX, FLT_MAX };
-	Vector3 ndcMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	bool hasValidNdc = false;
-
-	for (size_t vertexIndex = 0; vertexIndex < vertices.size(); ++vertexIndex) {
-		Vector4 position = vertices[vertexIndex].position;
-
-		if (type_ == ModelType::Skinning) {
-			if (vertexIndex >= skinClusterData_.mappedInfluence.size()) {
-				++outInfo.zeroWeightVertexCount;
-				continue;
-			}
-
-			const VertexInfluence& influence = skinClusterData_.mappedInfluence[vertexIndex];
-			Vector4 skinnedPosition = {};
-			float weightSum = 0.0f;
-			for (uint32_t influenceIndex = 0; influenceIndex < kNumMaxInfluence; ++influenceIndex) {
-				const float weight = influence.weights[influenceIndex];
-				if (weight <= 0.0f) {
-					continue;
-				}
-
-				weightSum += weight;
-				const int32_t jointIndex = influence.jointIndices[influenceIndex];
-				if (jointIndex < 0 || static_cast<size_t>(jointIndex) >= skinClusterData_.mappedPalette.size()) {
-					++outInfo.invalidJointIndexCount;
-					continue;
-				}
-
-				skinnedPosition += TransformVector4(position, skinClusterData_.mappedPalette[jointIndex].skeletonSpaceMatrix) * weight;
-			}
-
-			if (weightSum <= 0.0f) {
-				++outInfo.zeroWeightVertexCount;
-			} else {
-				++outInfo.influenceVertexCount;
-			}
-			skinnedPosition.w = 1.0f;
-			position = skinnedPosition;
-		}
-
-		Vector3 ndc;
-		if (!TryPerspectiveDivide(TransformVector4(position, shadowWvp), ndc)) {
-			continue;
-		}
-
-		hasValidNdc = true;
-		ndcMin.x = (std::min)(ndcMin.x, ndc.x);
-		ndcMin.y = (std::min)(ndcMin.y, ndc.y);
-		ndcMin.z = (std::min)(ndcMin.z, ndc.z);
-		ndcMax.x = (std::max)(ndcMax.x, ndc.x);
-		ndcMax.y = (std::max)(ndcMax.y, ndc.y);
-		ndcMax.z = (std::max)(ndcMax.z, ndc.z);
-	}
-
-	if (!hasValidNdc) {
-		outInfo.calculated = false;
-		return false;
-	}
-
-	outInfo.shadowNdcMin = ndcMin;
-	outInfo.shadowNdcMax = ndcMax;
-	outInfo.shadowNdcIntersectsClip =
-		ndcMax.x >= -1.0f && ndcMin.x <= 1.0f &&
-		ndcMax.y >= -1.0f && ndcMin.y <= 1.0f &&
-		ndcMax.z >= 0.0f && ndcMin.z <= 1.0f;
-	return true;
-}
 
 void Model::Draw(Camera& useCamera) {
 	if (!sharedData_ || !isVisible_) {

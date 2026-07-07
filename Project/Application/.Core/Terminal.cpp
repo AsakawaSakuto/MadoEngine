@@ -25,14 +25,9 @@ void Terminal::Run() {
 			sceneManager_->Update(execution_->GetDeltaTime());
 		}
 
-		Vector3 shadowDebugTargetPosition = {};
-		const bool hasShadowDebugTargetPosition =
-			sceneManager_->TryGetShadowDebugTargetPosition(shadowDebugTargetPosition);
 		execution_->PreDraw(
 			sceneManager_->GetCurrentSceneType(),
-			sceneManager_->GetShadowFocusPosition(),
-			hasShadowDebugTargetPosition,
-			shadowDebugTargetPosition
+			sceneManager_->GetShadowFocusPosition()
 		);
 
 		const MadoEngine::Render::RenderLayerMask layerEffectTargetMask = execution_->GetEnabledLayerEffectTargetMask();

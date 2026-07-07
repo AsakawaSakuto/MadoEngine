@@ -411,31 +411,12 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Mad
 }
 
 void ModelManager::DrawShadowMapLayerMask(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayerMask layerMask) {
-	shadowDebugPlayerState_ = ShadowDebugModelState{};
-
 	if (models_.empty() && instancedModels_.empty()) {
 		return;
 	}
 
 	for (auto& [name, model] : models_) {
 		SceneType modelScene = model->GetSceneType();
-		const bool isShadowDebugPlayer = name == shadowDebugPlayerState_.name;
-		if (isShadowDebugPlayer) {
-			shadowDebugPlayerState_.found = true;
-			shadowDebugPlayerState_.visible = model->IsVisible();
-			shadowDebugPlayerState_.sceneMatched = !(modelScene != SceneType::None && modelScene != currentSceneType);
-			shadowDebugPlayerState_.renderLayer = model->GetRenderLayer();
-			shadowDebugPlayerState_.layerMatched = model->IsRenderLayerIncluded(layerMask);
-			shadowDebugPlayerState_.castShadow = model->CanCastShadow();
-			shadowDebugPlayerState_.sceneType = modelScene;
-			if (const ModelSharedData* sharedData = model->GetSharedData()) {
-				shadowDebugPlayerState_.modelType = sharedData->type;
-			}
-		}
-
-		if (!shadowDebugPlayerState_.visible && isShadowDebugPlayer) {
-			continue;
-		}
 		if (!model->IsVisible()) {
 			continue;
 		}
@@ -449,10 +430,6 @@ void ModelManager::DrawShadowMapLayerMask(SceneType currentSceneType, const Matr
 			continue;
 		}
 
-		if (isShadowDebugPlayer) {
-			shadowDebugPlayerState_.drawShadowCalled = true;
-			model->BuildShadowVertexDebugInfo(lightViewProjection, shadowDebugPlayerState_.vertexDebugInfo);
-		}
 		model->DrawShadow(lightViewProjection);
 	}
 
