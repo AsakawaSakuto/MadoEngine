@@ -140,6 +140,8 @@
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="Application\Object\Enemy\EnemySpawner.cpp" />
+    <ClCompile Include="Application\Object\Item\BaseItem.cpp" />
+    <ClCompile Include="Application\Object\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\Object\Map\EventObject\MapEventObjectBase.cpp" />
@@ -263,6 +265,8 @@
     <ClInclude Include="Application\Object\Enemy\Enemy.h" />
     <ClInclude Include="Application\Object\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\Object\Enemy\EnemyStatus.h" />
+    <ClInclude Include="Application\Object\Item\BaseItem.h" />
+    <ClInclude Include="Application\Object\Item\ItemInventry.h" />
     <ClInclude Include="Application\Object\Item\ItemStatus.h" />
     <ClInclude Include="Application\Object\Map\EventObject\Chest\Chest.h" />
     <ClInclude Include="Application\Object\Map\EventObject\Chest\ChestType.h" />
