@@ -411,11 +411,29 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Mad
 }
 
 void ModelManager::DrawShadowMapLayerMask(SceneType currentSceneType, const Matrix4x4& lightViewProjection, MadoEngine::Render::RenderLayerMask layerMask) {
-	if (models_.empty()) {
+	if (models_.empty() && instancedModels_.empty()) {
 		return;
 	}
 
 	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (!model->IsVisible()) {
+			continue;
+		}
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+		if (!model->CanCastShadow()) {
+			continue;
+		}
+
+		model->DrawShadow(lightViewProjection);
+	}
+
+	for (auto& [name, model] : instancedModels_) {
 		SceneType modelScene = model->GetSceneType();
 		if (!model->IsVisible()) {
 			continue;
@@ -441,11 +459,23 @@ void ModelManager::SetShadowMapLayerMask(
 	uint32_t width,
 	uint32_t height,
 	MadoEngine::Render::RenderLayerMask layerMask) {
-	if (models_.empty()) {
+	if (models_.empty() && instancedModels_.empty()) {
 		return;
 	}
 
 	for (auto& [name, model] : models_) {
+		SceneType modelScene = model->GetSceneType();
+		if (modelScene != SceneType::None && modelScene != currentSceneType) {
+			continue;
+		}
+		if (!model->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
+
+		model->SetShadowMap(shadowMapSrv, lightViewProjection, width, height);
+	}
+
+	for (auto& [name, model] : instancedModels_) {
 		SceneType modelScene = model->GetSceneType();
 		if (modelScene != SceneType::None && modelScene != currentSceneType) {
 			continue;
