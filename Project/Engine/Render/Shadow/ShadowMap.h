@@ -21,15 +21,15 @@ namespace MadoEngine::Render {
 	/// @details 深度専用テクスチャをDSVとして書き込み、通常描画ではSRVとして参照できるようにする。
 	class ShadowMap {
 	public:
-		static constexpr uint32_t kShadowMapWidth = 2048;          // シャドウマップの幅
-		static constexpr uint32_t kShadowMapHeight = 2048;         // シャドウマップの高さ
-		static constexpr float kShadowOrthoWidth = 60.0f;          // シャドウマップの直交投影幅
-		static constexpr float kShadowOrthoHeight = 60.0f;         // シャドウマップの直交投影高さ
+		static constexpr uint32_t kShadowMapWidth =  1024 * 5;         // シャドウマップの幅
+		static constexpr uint32_t kShadowMapHeight = 1024 * 5;         // シャドウマップの高さ
+		static constexpr float kShadowOrthoWidth =   250.0f;       // シャドウマップの直交投影幅
+		static constexpr float kShadowOrthoHeight =  250.0f;       // シャドウマップの直交投影高さ
 		static constexpr float kShadowNearClip = 0.1f;             // シャドウマップの近クリップ距離
 		static constexpr float kShadowFarClip = 1000.0f;           // シャドウマップの遠クリップ距離
-		static constexpr int kShadowDepthBias = 0;                 // シャドウマップの深度バイアス
+		static constexpr int kShadowDepthBias = 1000;              // シャドウマップの深度バイアス
 		static constexpr float kShadowDepthBiasClamp = 0.0;        // シャドウマップの深度バイアスクランプ
-		static constexpr float kShadowSlopeScaledDepthBias = 0.0f; // シャドウマップの傾斜スケール深度バイアス
+		static constexpr float kShadowSlopeScaledDepthBias = 1.5f; // シャドウマップの傾斜スケール深度バイアス
 
 		ShadowMap();
 		~ShadowMap() = default;

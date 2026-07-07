@@ -131,6 +131,7 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 	}
 
 	groundInstancedModel_->SetTexture("blockTexture2");
+	//groundInstancedModel_->SetReceiveShadow(false);
 
 	InstancedModel::InstanceDesc instanceDesc;
 	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_), transform_.translate.z };

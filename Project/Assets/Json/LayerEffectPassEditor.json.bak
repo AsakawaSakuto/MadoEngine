@@ -1,7 +1,7 @@
 {
     "layerPasses": [
         {
-            "effectShaderKey": "PostEffect/Outline.PS",
+            "effectShaderKey": "PostEffect/DepthOutline.PS",
             "enabled": true,
             "ignoreDepthForMask": true,
             "key": "LayerEffectPass_2",
@@ -11,15 +11,15 @@
                 "ColorB": 1.0,
                 "ColorG": 1.0,
                 "ColorR": 1.0,
-                "DepthSensitivity": 1.0,
-                "EdgeThreshold": 9.999999747378752e-05,
+                "DepthSensitivity": 80.0,
+                "EdgeThreshold": 0.004999999888241291,
                 "Intensity": 1.0,
                 "Thickness": 1.0
             },
             "targetLayerMask": 16
         },
         {
-            "effectShaderKey": "PostEffect/Outline.PS",
+            "effectShaderKey": "PostEffect/DepthOutline.PS",
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_3",
@@ -29,10 +29,24 @@
                 "ColorB": 1.0,
                 "ColorG": 1.0,
                 "ColorR": 1.0,
-                "DepthSensitivity": 1.0,
-                "EdgeThreshold": 0.0,
+                "DepthSensitivity": 80.0,
+                "EdgeThreshold": 0.004999999888241291,
                 "Intensity": 1.0,
-                "Thickness": 1.0
+                "Thickness": 1.5
+            },
+            "targetLayerMask": 8
+        },
+        {
+            "effectShaderKey": "PostEffect/Bloom.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_5",
+            "name": "MapObjectBloom",
+            "parameters": {
+                "Intensity": 1.0,
+                "Radius": 3.5,
+                "SoftKnee": 1.0,
+                "Threshold": 0.5
             },
             "targetLayerMask": 8
         }
@@ -45,20 +59,6 @@
             "key": "ScreenEffectPass_1",
             "name": "Screen Effect",
             "parameters": {},
-            "targetLayerMask": 255
-        },
-        {
-            "effectShaderKey": "PostEffect/Bloom.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_2",
-            "name": "Screen Effect 2",
-            "parameters": {
-                "Intensity": 3.0,
-                "Radius": 5.0,
-                "SoftKnee": 0.0,
-                "Threshold": 0.8500000238418579
-            },
             "targetLayerMask": 255
         }
     ],
