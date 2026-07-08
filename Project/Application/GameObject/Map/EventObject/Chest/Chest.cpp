@@ -13,7 +13,7 @@ void Chest::Initialize(const InitializeDesc& desc) {
 	modelName_ = desc.modelName;
 	SetColliderName(desc.colliderName);
 	transform_.translate = desc.position;
-	//transform_.rotate = desc.rotation;
+	transform_.rotate = desc.rotation;
 
 	AABB aabb{};
 	aabb.min = { -2.0f, 0.0f, -2.0f };
@@ -36,9 +36,6 @@ void Chest::Initialize(const InitializeDesc& desc) {
 	if (normalBatch && outlineBatch) {
 		normalBatch->SetTexture("box");
 		outlineBatch->SetTexture("box");
-
-		normalBatch->SetUseBillboard(true);
-		outlineBatch->SetUseBillboard(true);
 
 		InstancedModel::InstanceDesc normalInstance;
 		normalInstance.transform = transform_;

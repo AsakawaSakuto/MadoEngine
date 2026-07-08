@@ -8,6 +8,7 @@ enum class LightLayer : uint32_t {
 	Enemy,
 	Effect,
 	UI,
+
 	Count,
 	None = 0xffffffffu,
 	All = 0xfffffffeu,

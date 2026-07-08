@@ -7,7 +7,7 @@ namespace DropObject {
 	class Base : public IGameObject {
 	public:
 		
-		void Initialize(Type type, const Vector3& position);
+		void Initialize(Type type, const Vector3& position, int index);
 
 		void Update(float deltaTime) override;
 

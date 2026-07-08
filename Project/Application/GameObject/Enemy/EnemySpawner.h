@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include "../DropObject/DropObjectManager.h"
+
 namespace Player {
 	class Base;
 }

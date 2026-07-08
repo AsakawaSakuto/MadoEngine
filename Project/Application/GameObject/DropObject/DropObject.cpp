@@ -2,12 +2,13 @@
 
 namespace DropObject {
 
-	void Base::Initialize(Type type, const Vector3& position) {
+	void Base::Initialize(Type type, const Vector3& position, int index) {
 		type_ = type;
 		transform_.translate = position;
+		transform_.scale = { 0.5f, 0.5f, 0.5f };
 		isActive_ = false;
 
-		model_ = MyModel::Create("DropObject", "Plane", SceneType::Test);
+		model_ = MyModel::Create("DropObject" + std::to_string(index), "Plane", SceneType::Test);
 
 		std::string textureName;
 		switch (type_) {
@@ -21,6 +22,9 @@ namespace DropObject {
 
 		model_->SetTexture(textureName);
 		model_->SetUseBillboard(true);
+		model_->SetCastShadow(false);
+		model_->SetReceiveShadow(false);
+		model_->SetTransform(transform_);
 	}
 
 	void Base::Update(float deltaTime) {
