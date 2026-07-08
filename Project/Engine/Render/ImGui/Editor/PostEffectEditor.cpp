@@ -108,6 +108,21 @@ namespace MadoEngine::Editor {
             { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kDepthOfFieldInitialValues[] = {
+            300.0f, 120.0f, 8.0f, 1.0f,
+            0.1f, 1000.0f, 1.0f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kDepthOfFieldParameters[] = {
+            { "FocusDistance", "焦点距離", 0 * kFloatSize, 0.0f, 5000.0f, 1.0f },
+            { "FocusRange", "焦点幅", 1 * kFloatSize, 0.001f, 5000.0f, 1.0f },
+            { "BlurRadius", "ぼかし半径", 2 * kFloatSize, 0.0f, 32.0f, 0.1f },
+            { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "NearClip", "NearClip", 4 * kFloatSize, 0.001f, 100.0f, 0.01f },
+            { "FarClip", "FarClip", 5 * kFloatSize, 1.0f, 10000.0f, 1.0f },
+            { "ForegroundStrength", "手前ぼけ強度", 6 * kFloatSize, 0.0f, 4.0f, 0.01f },
+            { "BackgroundStrength", "奥ぼけ強度", 7 * kFloatSize, 0.0f, 4.0f, 0.01f },
+        };
+
         const float kLensDistortionInitialValues[] = {
             0.18f, 0.04f, 1.0f, 1.0f,
             0.5f, 0.5f, 0.0f, 0.0f
@@ -294,6 +309,7 @@ namespace MadoEngine::Editor {
             { "BoxFilter", "PostEffect/BoxFilter.PS", kBoxFilterInitialValues, CountOf(kBoxFilterInitialValues), kBoxFilterParameters, CountOf(kBoxFilterParameters) },
             { "ChromaticAberration", "PostEffect/ChromaticAberration.PS", kChromaticAberrationInitialValues, CountOf(kChromaticAberrationInitialValues), kChromaticAberrationParameters, CountOf(kChromaticAberrationParameters) },
             { "ColorFilter", "PostEffect/ColorFilter.PS", kColorFilterInitialValues, CountOf(kColorFilterInitialValues), kColorFilterParameters, CountOf(kColorFilterParameters) },
+            { "DepthOfField", "PostEffect/DepthOfField.PS", kDepthOfFieldInitialValues, CountOf(kDepthOfFieldInitialValues), kDepthOfFieldParameters, CountOf(kDepthOfFieldParameters) },
             { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },
             { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
             { "GaussianFilter", "PostEffect/GaussianFilter.PS", kGaussianFilterInitialValues, CountOf(kGaussianFilterInitialValues), kGaussianFilterParameters, CountOf(kGaussianFilterParameters) },
