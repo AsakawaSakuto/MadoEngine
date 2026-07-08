@@ -217,6 +217,23 @@ void Model::InitializeInstanceResources() {
 	UpdateLightGpuData();
 }
 
+Matrix4x4 Model::MakeWorldMatrix(const Camera* billboardCamera) const {
+	if (!usebillbord_ || !billboardCamera) {
+		return Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	}
+
+	Matrix4x4 scaleMatrix = Matrix::MakeScale(transform_.scale);
+	Matrix4x4 rotateMatrix = Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, transform_.rotate, { 0.0f, 0.0f, 0.0f });
+	Matrix4x4 billboardMatrix = Matrix::Inverse(billboardCamera->GetViewMatrix());
+	billboardMatrix.m[3][0] = 0.0f;
+	billboardMatrix.m[3][1] = 0.0f;
+	billboardMatrix.m[3][2] = 0.0f;
+	billboardMatrix.m[3][3] = 1.0f;
+
+	Matrix4x4 translateMatrix = Matrix::MakeTranslate(transform_.translate);
+	return Matrix::Multiply(Matrix::Multiply(Matrix::Multiply(scaleMatrix, rotateMatrix), billboardMatrix), translateMatrix);
+}
+
 void Model::UpdateLightGpuData() {
 	if (!lightGpuData_) {
 		return;
@@ -284,7 +301,7 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 		return;
 	}
 
-	worldMatrix_ = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	worldMatrix_ = MakeWorldMatrix(&camera);
 	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, camera.GetViewProjectionMatrix());
 	Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix_));
 
@@ -306,12 +323,12 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 
 /// @brief シャドウ描画用の変換行列をGPUバッファへ更新する
 /// @param lightViewProjection ライト視点のビュー射影行列
-void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection) {
+void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection, const Camera* billboardCamera) {
 	if (!shadowTransformationData_) {
 		return;
 	}
 
-	worldMatrix_ = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	worldMatrix_ = MakeWorldMatrix(billboardCamera);
 	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, lightViewProjection);
 
 	switch (type_) {
@@ -349,13 +366,13 @@ void Model::UpdateReceiveShadowGpuData() {
 /// @param outMin ワールド空間AABBの最小座標
 /// @param outMax ワールド空間AABBの最大座標
 /// @return 計算できた場合はtrue
-bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax) const {
+bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* billboardCamera) const {
 	if (!sharedData_ || !sharedData_->modelData.bounds.isValid) {
 		return false;
 	}
 
 	const ModelBounds& bounds = sharedData_->modelData.bounds;
-	Matrix4x4 cullingMatrix = Matrix::MakeAffine(transform_.scale, transform_.rotate, transform_.translate);
+	Matrix4x4 cullingMatrix = MakeWorldMatrix(billboardCamera);
 	if (type_ == ModelType::Animated) {
 		cullingMatrix = Matrix::Multiply(rootNode_.localMatrix, cullingMatrix);
 	}
@@ -396,7 +413,7 @@ bool Model::IsInsideCameraFrustum(const Camera& camera) const {
 
 	Vector3 worldMin;
 	Vector3 worldMax;
-	if (!CalculateWorldAABB(worldMin, worldMax)) {
+	if (!CalculateWorldAABB(worldMin, worldMax, &camera)) {
 		return true;
 	}
 
@@ -501,12 +518,22 @@ void Model::Draw(Camera& useCamera) {
 /// @brief シャドウマップ生成用にモデルを描画する
 /// @param lightViewProjection ライト視点のビュー射影行列
 void Model::DrawShadow(const Matrix4x4& lightViewProjection) {
+	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	DrawShadowInternal(lightViewProjection, billboardCamera);
+}
+
+void Model::DrawShadow(const Matrix4x4& lightViewProjection, const Camera& billboardCamera) {
+	camera_ = billboardCamera;
+	DrawShadowInternal(lightViewProjection, &billboardCamera);
+}
+
+void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camera* billboardCamera) {
 	if (!sharedData_ || !isVisible_ || !castShadow_) {
 		return;
 	}
 
 	assert(psoRegistry_);
-	UpdateShadowTransformGpuData(lightViewProjection);
+	UpdateShadowTransformGpuData(lightViewProjection, billboardCamera);
 
 	const MadoEngine::Render::PSODesc shadowPsoDesc = type_ == ModelType::Skinning
 		? CreateSkinningShadowPSODesc()

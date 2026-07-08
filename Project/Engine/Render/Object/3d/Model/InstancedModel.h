@@ -29,6 +29,19 @@ public:
 	/// @param lightViewProjection ライト視点のビュー射影行列です。
 	void DrawShadow(const Matrix4x4& lightViewProjection);
 
+	/// @brief シャドウマップ生成用にインスタンシングモデルを描画する
+	/// @param lightViewProjection ライト視点のビュープロジェクション行列
+	/// @param billboardCamera ビルボードの向きに使用するカメラ
+	void DrawShadow(const Matrix4x4& lightViewProjection, const Camera& billboardCamera);
+
+	/// @brief ビルボード行列を使用するかを設定する
+	/// @param enabled trueの場合はカメラ向きのビルボード行列を使用する
+	void SetUseBillboard(bool enabled) { usebillbord_ = enabled; }
+
+	/// @brief ビルボード行列を使用するかを取得する
+	/// @return 使用する場合はtrue
+	bool IsUseBillboard() const { return usebillbord_; }
+
 	/// @brief 他の3DObjectへ影を書き込むかを設定します。
 	/// @param enabled 影を書き込む場合はtrueです。
 	void SetCastShadow(bool enabled) { castShadow_ = enabled; }
@@ -101,7 +114,23 @@ private:
 	void InitializeInstanceResources();
 	void EnsureInstanceResource(size_t requiredCount);
 	void EnsureShadowInstanceResource(size_t requiredCount);
-	size_t BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData);
+	/// @brief 現在のインスタンスTransformからワールド行列を作成する
+	/// @param transform ワールド行列へ変換するTransform
+	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	/// @return 作成したワールド行列
+	Matrix4x4 MakeWorldMatrix(const Transform3D& transform, const Camera* billboardCamera) const;
+
+	/// @brief シャドウマップ生成用の共通描画処理を行う
+	/// @param lightViewProjection ライト視点のビュープロジェクション行列
+	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	void DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camera* billboardCamera);
+
+	/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新する
+	/// @param viewProjectionMatrix 変換に使用するビュー射影行列
+	/// @param outputData 書き込み先のGPUデータ
+	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	/// @return 描画対象のインスタンス数
+	size_t BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData, const Camera* billboardCamera = nullptr);
 	void UpdateLightGpuData();
 	void UpdateReceiveShadowGpuData();
 	bool IsValidHandle(uint32_t handle) const;
@@ -135,6 +164,7 @@ private:
 	uint32_t shadowMapHeight_ = 2048;
 	bool enableLighting_ = true;
 	bool useEnvironmentMap_ = false;
+	bool usebillbord_ = false;
 	bool castShadow_ = true;
 	bool receiveShadow_ = true;
 	uint32_t environmentMapIndex_ = 0;

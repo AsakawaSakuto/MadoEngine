@@ -21,6 +21,19 @@ public:
 	/// @param lightViewProjection ライト視点のビュー射影行列
 	void DrawShadow(const Matrix4x4& lightViewProjection);
 
+	/// @brief シャドウマップ生成用にモデルを描画する
+	/// @param lightViewProjection ライト視点のビュープロジェクション行列
+	/// @param billboardCamera ビルボードの向きに使用するカメラ
+	void DrawShadow(const Matrix4x4& lightViewProjection, const Camera& billboardCamera);
+
+	/// @brief ビルボード行列を使用するかを設定する
+	/// @param enabled trueの場合はカメラ向きのビルボード行列を使用する
+	void SetUseBillboard(bool enabled) { usebillbord_ = enabled; }
+
+	/// @brief ビルボード行列を使用するかを取得する
+	/// @return 使用する場合はtrue
+	bool IsUseBillboard() const { return usebillbord_; }
+
 	/// @brief 他の3Dオブジェクトに影を落とすかを設定する
 	/// @param enabled trueの場合はシャドウマップへ深度を書き込む
 	void SetCastShadow(bool enabled) { castShadow_ = enabled; }
@@ -109,6 +122,16 @@ public:
 private:
 	void InitializeInstanceResources();
 
+	/// @brief 現在のTransformからワールド行列を作成する
+	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	/// @return 作成したワールド行列
+	Matrix4x4 MakeWorldMatrix(const Camera* billboardCamera) const;
+
+	/// @brief シャドウマップ生成用の共通描画処理を行う
+	/// @param lightViewProjection ライト視点のビュープロジェクション行列
+	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	void DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camera* billboardCamera);
+
 	/// @brief LightManagerからGPU送信用ライトデータを作成して定数バッファへ反映する
 	void UpdateLightGpuData();
 
@@ -120,7 +143,7 @@ private:
 	/// @param outMin ワールド空間AABBの最小座標
 	/// @param outMax ワールド空間AABBの最大座標
 	/// @return 計算できた場合はtrue
-	bool CalculateWorldAABB(Vector3& outMin, Vector3& outMax) const;
+	bool CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* billboardCamera = nullptr) const;
 
 	/// @brief モデルがカメラの視錐台内にあるか判定する
 	/// @param camera 判定に使用するカメラ
@@ -129,7 +152,7 @@ private:
 
 	/// @brief シャドウ描画用の変換行列をGPUバッファへ更新する
 	/// @param lightViewProjection ライト視点のビュー射影行列
-	void UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection);
+	void UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection, const Camera* billboardCamera = nullptr);
 
 	/// @brief 通常描画用のシャドウ情報をGPUバッファへ反映する
 	void UpdateReceiveShadowGpuData();
@@ -165,6 +188,7 @@ private:
 	SceneType sceneType_ = SceneType::None;
 	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);
 	bool enableFrustumCulling_ = true;
+	bool usebillbord_ = false;
 	bool castShadow_ = true;
 	bool receiveShadow_ = true;
 	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrvHandle_ = {};

@@ -78,6 +78,14 @@ namespace MadoEngine::Editor {
             { "SoftKnee", "ソフトニー", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kBinarizeInitialValues[] = {
+            0.5f, 1.0f, 0.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kBinarizeParameters[] = {
+            { "Threshold", "しきい値", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Intensity", "適用率", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
         const float kBoxFilterInitialValues[] = {
             1.0f, 1.0f, 0.0f, 0.0f
         };
@@ -221,6 +229,7 @@ namespace MadoEngine::Editor {
 
         const PostEffectDefinition kPostEffectDefinitions[] = {
             { "CopyImage", "PostEffect/CopyImage.PS", nullptr, 0, nullptr, 0 },
+            { "Binarize", "PostEffect/Binarize.PS", kBinarizeInitialValues, CountOf(kBinarizeInitialValues), kBinarizeParameters, CountOf(kBinarizeParameters) },
             { "Bloom", "PostEffect/Bloom.PS", kBloomInitialValues, CountOf(kBloomInitialValues), kBloomParameters, CountOf(kBloomParameters) },
             { "BoxFilter", "PostEffect/BoxFilter.PS", kBoxFilterInitialValues, CountOf(kBoxFilterInitialValues), kBoxFilterParameters, CountOf(kBoxFilterParameters) },
             { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },

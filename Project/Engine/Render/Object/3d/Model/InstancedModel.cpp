@@ -105,6 +105,27 @@ void InstancedModel::InitializeInstanceResources() {
 	EnsureShadowInstanceResource(kInitialInstanceCapacity);
 }
 
+/// @brief 現在のインスタンスTransformからワールド行列を作成する
+/// @param transform ワールド行列へ変換するTransform
+/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+/// @return 作成したワールド行列
+Matrix4x4 InstancedModel::MakeWorldMatrix(const Transform3D& transform, const Camera* billboardCamera) const {
+	if (!usebillbord_ || !billboardCamera) {
+		return Matrix::MakeAffine(transform.scale, transform.rotate, transform.translate);
+	}
+
+	Matrix4x4 scaleMatrix = Matrix::MakeScale(transform.scale);
+	Matrix4x4 rotateMatrix = Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, transform.rotate, { 0.0f, 0.0f, 0.0f });
+	Matrix4x4 billboardMatrix = Matrix::Inverse(billboardCamera->GetViewMatrix());
+	billboardMatrix.m[3][0] = 0.0f;
+	billboardMatrix.m[3][1] = 0.0f;
+	billboardMatrix.m[3][2] = 0.0f;
+	billboardMatrix.m[3][3] = 1.0f;
+
+	Matrix4x4 translateMatrix = Matrix::MakeTranslate(transform.translate);
+	return Matrix::Multiply(Matrix::Multiply(Matrix::Multiply(scaleMatrix, rotateMatrix), billboardMatrix), translateMatrix);
+}
+
 /// @brief 通常描画で参照するシャドウマップ情報を設定します。
 /// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドルです。
 /// @param lightViewProjection ライト視点のビュー射影行列です。
@@ -158,7 +179,7 @@ void InstancedModel::Draw(Camera& useCamera) {
 
 	Matrix4x4 viewProjectionMatrix = camera_.GetViewProjectionMatrix();
 	EnsureInstanceResource(instances_.size());
-	drawInstanceCount_ = BuildInstanceGpuData(viewProjectionMatrix, instanceGpuData_);
+	drawInstanceCount_ = BuildInstanceGpuData(viewProjectionMatrix, instanceGpuData_, &camera_);
 
 	if (drawInstanceCount_ == 0) {
 		return;
@@ -202,12 +223,28 @@ void InstancedModel::Draw(Camera& useCamera) {
 /// @brief シャドウマップへインスタンスモデルの深度を書き込みます。
 /// @param lightViewProjection ライト視点のビュー射影行列です。
 void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection) {
+	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	DrawShadowInternal(lightViewProjection, billboardCamera);
+}
+
+/// @brief シャドウマップ生成用にインスタンシングモデルを描画する
+/// @param lightViewProjection ライト視点のビュープロジェクション行列
+/// @param billboardCamera ビルボードの向きに使用するカメラ
+void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection, const Camera& billboardCamera) {
+	camera_ = billboardCamera;
+	DrawShadowInternal(lightViewProjection, &billboardCamera);
+}
+
+/// @brief シャドウマップ生成用の共通描画処理を行う
+/// @param lightViewProjection ライト視点のビュープロジェクション行列
+/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+void InstancedModel::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camera* billboardCamera) {
 	if (!sharedData_ || !isVisible_ || !castShadow_ || instances_.empty()) {
 		return;
 	}
 
 	EnsureShadowInstanceResource(instances_.size());
-	shadowDrawInstanceCount_ = BuildInstanceGpuData(lightViewProjection, shadowInstanceGpuData_);
+	shadowDrawInstanceCount_ = BuildInstanceGpuData(lightViewProjection, shadowInstanceGpuData_, billboardCamera);
 	if (shadowDrawInstanceCount_ == 0) {
 		return;
 	}
@@ -310,8 +347,9 @@ void InstancedModel::EnsureShadowInstanceResource(size_t requiredCount) {
 /// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新します。
 /// @param viewProjectionMatrix 変換に使用するビュー射影行列です。
 /// @param outputData 書き込み先のGPUデータです。
+/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
 /// @return 描画対象のインスタンス数です。
-size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData) {
+size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData, const Camera* billboardCamera) {
 	if (!outputData) {
 		return 0;
 	}
@@ -322,7 +360,7 @@ size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatri
 			continue;
 		}
 
-		Matrix4x4 worldMatrix = Matrix::MakeAffine(instance.transform.scale, instance.transform.rotate, instance.transform.translate);
+		Matrix4x4 worldMatrix = MakeWorldMatrix(instance.transform, billboardCamera);
 		Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix, viewProjectionMatrix);
 		Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix));
 

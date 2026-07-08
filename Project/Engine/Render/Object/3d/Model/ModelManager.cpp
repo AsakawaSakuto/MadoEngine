@@ -379,6 +379,8 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Mad
 		return;
 	}
 
+	activeCamera_ = camera;
+
 	for (auto& [name, model] : models_) {
 		SceneType modelScene = model->GetSceneType();
 		if (!model->IsVisible()) {
@@ -430,7 +432,7 @@ void ModelManager::DrawShadowMapLayerMask(SceneType currentSceneType, const Matr
 			continue;
 		}
 
-		model->DrawShadow(lightViewProjection);
+		model->DrawShadow(lightViewProjection, activeCamera_);
 	}
 
 	for (auto& [name, model] : instancedModels_) {
@@ -448,7 +450,7 @@ void ModelManager::DrawShadowMapLayerMask(SceneType currentSceneType, const Matr
 			continue;
 		}
 
-		model->DrawShadow(lightViewProjection);
+		model->DrawShadow(lightViewProjection, activeCamera_);
 	}
 }
 
