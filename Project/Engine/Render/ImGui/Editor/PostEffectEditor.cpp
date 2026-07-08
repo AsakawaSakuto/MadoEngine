@@ -139,12 +139,17 @@ namespace MadoEngine::Editor {
         };
 
         const float kVignetteInitialValues[] = {
-            0.8f, 0.35f, 2.0f, 0.0f
+            0.8f, 0.35f, 2.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
         };
         const PostEffectFloatParameterDefinition kVignetteParameters[] = {
             { "Intensity", "強度", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
             { "InnerRadius", "内側半径", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
             { "OuterScale", "外側倍率", 2 * kFloatSize, 1.0f, 4.0f, 0.01f },
+            { "ColorR", "色R", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorG", "色G", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorB", "色B", 6 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ColorA", "色A", 7 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
         const float kPixelArtInitialValues[] = {
@@ -262,6 +267,26 @@ namespace MadoEngine::Editor {
             { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kSplitToningInitialValues[] = {
+            0.12f, 0.25f, 0.75f, 0.45f,
+            1.0f, 0.72f, 0.35f, 0.35f,
+            0.0f, 0.2f, 1.0f, 0.75f
+        };
+        const PostEffectFloatParameterDefinition kSplitToningParameters[] = {
+            { "ShadowColorR", "暗部色R", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ShadowColorG", "暗部色G", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ShadowColorB", "暗部色B", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "ShadowAmount", "暗部適用量", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighlightColorR", "明部色R", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighlightColorG", "明部色G", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighlightColorB", "明部色B", 6 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighlightAmount", "明部適用量", 7 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Balance", "分岐位置", 8 * kFloatSize, -1.0f, 1.0f, 0.01f },
+            { "Softness", "なじみ幅", 9 * kFloatSize, 0.001f, 1.0f, 0.001f },
+            { "Intensity", "適用率", 10 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "PreserveLuminance", "輝度保持率", 11 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
         const PostEffectDefinition kPostEffectDefinitions[] = {
             { "CopyImage", "PostEffect/CopyImage.PS", nullptr, 0, nullptr, 0 },
             { "Binarize", "PostEffect/Binarize.PS", kBinarizeInitialValues, CountOf(kBinarizeInitialValues), kBinarizeParameters, CountOf(kBinarizeParameters) },
@@ -281,6 +306,7 @@ namespace MadoEngine::Editor {
             { "RadialBlur", "PostEffect/RadialBlur.PS", kRadialBlurInitialValues, CountOf(kRadialBlurInitialValues), kRadialBlurParameters, CountOf(kRadialBlurParameters) },
             { "Random", "PostEffect/Random.PS", kRandomInitialValues, CountOf(kRandomInitialValues), kRandomParameters, CountOf(kRandomParameters) },
             { "Sepia", "PostEffect/Sepia.PS", nullptr, 0, nullptr, 0 },
+            { "SplitToning", "PostEffect/SplitToning.PS", kSplitToningInitialValues, CountOf(kSplitToningInitialValues), kSplitToningParameters, CountOf(kSplitToningParameters) },
             { "Toon", "PostEffect/Toon.PS", kToonInitialValues, CountOf(kToonInitialValues), kToonParameters, CountOf(kToonParameters) },
             { "Vignette", "PostEffect/Vignette.PS", kVignetteInitialValues, CountOf(kVignetteInitialValues), kVignetteParameters, CountOf(kVignetteParameters) },
         };
