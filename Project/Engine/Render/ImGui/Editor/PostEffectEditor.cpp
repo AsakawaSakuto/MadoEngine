@@ -69,21 +69,34 @@ namespace MadoEngine::Editor {
         constexpr std::size_t kFloatSize = sizeof(float);
 
         const float kBloomInitialValues[] = {
-            0.6f, 0.7f, 4.0f, 0.5f
+            0.6f, 0.7f, 4.0f, 0.5f,
+            1.0f, 1.0f, 1.0f, 1.0f
         };
         const PostEffectFloatParameterDefinition kBloomParameters[] = {
             { "Intensity", "強度", 0 * kFloatSize, 0.0f, 5.0f, 0.01f },
             { "Threshold", "しきい値", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
             { "Radius", "半径", 2 * kFloatSize, 0.0f, 32.0f, 0.1f },
             { "SoftKnee", "ソフトニー", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "BloomColorR", "発光色R", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "BloomColorG", "発光色G", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "BloomColorB", "発光色B", 6 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "BloomColorA", "発光色A", 7 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
         const float kBinarizeInitialValues[] = {
-            0.5f, 1.0f, 0.0f, 0.0f
+            0.5f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 0.0f
         };
         const PostEffectFloatParameterDefinition kBinarizeParameters[] = {
             { "Threshold", "しきい値", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
             { "Intensity", "適用率", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "LowColorR", "低輝度色R", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "LowColorG", "低輝度色G", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "LowColorB", "低輝度色B", 6 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighColorR", "高輝度色R", 8 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighColorG", "高輝度色G", 9 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "HighColorB", "高輝度色B", 10 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
         const float kChromaticAberrationInitialValues[] = {
