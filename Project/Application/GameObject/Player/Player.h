@@ -42,6 +42,7 @@ namespace Player {
 	private:
 
 		ColliderShape hitAABB_;
+		ColliderShape expGetSphere_;
 
 		Camera* camera_ = nullptr;
 

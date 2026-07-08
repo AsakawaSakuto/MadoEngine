@@ -17,8 +17,13 @@ namespace Player {
 		s.radius = 0.5f;
 		colliderShape_ = s;
 
+		Sphere s2;
+		s2.radius = 2.5f;
+		expGetSphere_ = s2;
+
 		MyCollider::RegisterCollider("PlayerMovementSphere", CollisionTag::PlayerMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
+		MyCollider::RegisterCollider("PlayerExpGetSphere", CollisionTag::PlayerDropObjectGetSphere, &expGetSphere_, &transform_.translate, 0.0f);
 
 		model_ = MyModel::Create("Player", "walk", SceneType::Test);
 		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
@@ -71,7 +76,7 @@ namespace Player {
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, moveInput);
 		movement_.UpdateModelTransform(deltaTime, transform_, model_, isSlopeGroundContact);
 
-		//model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+		model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
 		model_->SetRotation(transform_.rotate);
 		model_->SetScale(transform_.scale);
 
@@ -89,6 +94,7 @@ namespace Player {
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
 		MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
+		MyDebugLine::AddShape(std::get<Sphere>(expGetSphere_), Vector4{ 0.0f,0.0f,1.0f,1.0f });
 	}
 
 	/// @brief Playerの描画Model座標を取得します。
