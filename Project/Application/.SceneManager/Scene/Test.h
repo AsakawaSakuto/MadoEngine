@@ -6,6 +6,7 @@
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
+#include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
 #include "UI/Player/PlayerExpGauge.h"
 #include "UI/Player/PlayerHealthGauge.h"

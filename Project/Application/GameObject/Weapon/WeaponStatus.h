@@ -28,20 +28,4 @@ namespace Weapon {
 
 		float speed = 1.0f;            // 武器の弾の速度
 	};
-
-	/// @brief 武器の種類を表す列挙型
-	enum class Type {
-		None,
-		Pistol,
-		Rock,
-	};
-
-	inline std::string WeaponTypeToString(Type type) {
-		switch (type) {
-		case Type::None:   return "None";
-		case Type::Pistol: return "Pistol";
-		case Type::Rock:   return "Rock";
-		default:           return "Unknown";
-		}
-	}
 }

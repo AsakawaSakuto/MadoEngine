@@ -86,6 +86,41 @@ namespace MadoEngine::Editor {
             { "Intensity", "適用率", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
         };
 
+        const float kChromaticAberrationInitialValues[] = {
+            3.0f, 1.0f, 1.0f, 0.0f,
+            0.5f, 0.5f, 0.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kChromaticAberrationParameters[] = {
+            { "OffsetPixels", "ずれ量", 0 * kFloatSize, 0.0f, 32.0f, 0.1f },
+            { "EdgeStrength", "外周強度", 1 * kFloatSize, 0.001f, 4.0f, 0.01f },
+            { "Intensity", "適用率", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "CenterX", "中心X", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "CenterY", "中心Y", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const float kColorFilterInitialValues[] = {
+            1.0f, 0.85f, 0.65f, 1.0f
+        };
+        const PostEffectFloatParameterDefinition kColorFilterParameters[] = {
+            { "FilterColorR", "フィルター色R", 0 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "FilterColorG", "フィルター色G", 1 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "FilterColorB", "フィルター色B", 2 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
+        const float kLensDistortionInitialValues[] = {
+            0.18f, 0.04f, 1.0f, 1.0f,
+            0.5f, 0.5f, 0.0f, 0.0f
+        };
+        const PostEffectFloatParameterDefinition kLensDistortionParameters[] = {
+            { "Distortion", "歪み量", 0 * kFloatSize, -1.0f, 1.0f, 0.001f },
+            { "CubicDistortion", "二次歪み量", 1 * kFloatSize, -1.0f, 1.0f, 0.001f },
+            { "Zoom", "ズーム", 2 * kFloatSize, 0.25f, 4.0f, 0.01f },
+            { "Intensity", "適用率", 3 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "CenterX", "中心X", 4 * kFloatSize, 0.0f, 1.0f, 0.01f },
+            { "CenterY", "中心Y", 5 * kFloatSize, 0.0f, 1.0f, 0.01f },
+        };
+
         const float kBoxFilterInitialValues[] = {
             1.0f, 1.0f, 0.0f, 0.0f
         };
@@ -232,12 +267,15 @@ namespace MadoEngine::Editor {
             { "Binarize", "PostEffect/Binarize.PS", kBinarizeInitialValues, CountOf(kBinarizeInitialValues), kBinarizeParameters, CountOf(kBinarizeParameters) },
             { "Bloom", "PostEffect/Bloom.PS", kBloomInitialValues, CountOf(kBloomInitialValues), kBloomParameters, CountOf(kBloomParameters) },
             { "BoxFilter", "PostEffect/BoxFilter.PS", kBoxFilterInitialValues, CountOf(kBoxFilterInitialValues), kBoxFilterParameters, CountOf(kBoxFilterParameters) },
+            { "ChromaticAberration", "PostEffect/ChromaticAberration.PS", kChromaticAberrationInitialValues, CountOf(kChromaticAberrationInitialValues), kChromaticAberrationParameters, CountOf(kChromaticAberrationParameters) },
+            { "ColorFilter", "PostEffect/ColorFilter.PS", kColorFilterInitialValues, CountOf(kColorFilterInitialValues), kColorFilterParameters, CountOf(kColorFilterParameters) },
             { "Dissolve", "PostEffect/Dissolve.PS", kDissolveInitialValues, CountOf(kDissolveInitialValues), kDissolveParameters, CountOf(kDissolveParameters) },
             { "Fog", "PostEffect/Fog.PS", kFogInitialValues, CountOf(kFogInitialValues), kFogParameters, CountOf(kFogParameters) },
             { "GaussianFilter", "PostEffect/GaussianFilter.PS", kGaussianFilterInitialValues, CountOf(kGaussianFilterInitialValues), kGaussianFilterParameters, CountOf(kGaussianFilterParameters) },
             { "GrayScale", "PostEffect/GrayScale.PS", nullptr, 0, nullptr, 0 },
             { "Invert", "PostEffect/Invert.PS", nullptr, 0, nullptr, 0 },
             { "DepthOutline", "PostEffect/DepthOutline.PS", kOutlineInitialValues, CountOf(kOutlineInitialValues), kOutlineParameters, CountOf(kOutlineParameters) },
+            { "LensDistortion", "PostEffect/LensDistortion.PS", kLensDistortionInitialValues, CountOf(kLensDistortionInitialValues), kLensDistortionParameters, CountOf(kLensDistortionParameters) },
             { "LuminanceOutline", "PostEffect/LuminanceOutline.PS", kLuminanceBasedOutlineInitialValues, CountOf(kLuminanceBasedOutlineInitialValues), kLuminanceBasedOutlineParameters, CountOf(kLuminanceBasedOutlineParameters) },
             { "PixelArt", "PostEffect/PixelArt.PS", kPixelArtInitialValues, CountOf(kPixelArtInitialValues), kPixelArtParameters, CountOf(kPixelArtParameters) },
             { "RadialBlur", "PostEffect/RadialBlur.PS", kRadialBlurInitialValues, CountOf(kRadialBlurInitialValues), kRadialBlurParameters, CountOf(kRadialBlurParameters) },

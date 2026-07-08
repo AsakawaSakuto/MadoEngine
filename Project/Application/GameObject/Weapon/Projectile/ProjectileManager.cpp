@@ -3,12 +3,12 @@
 
 namespace Projectile {
 
-	ProjectileManager& ProjectileManager::GetInstance() {
-		static ProjectileManager instance;
+	Manager& Manager::GetInstance() {
+		static Manager instance;
 		return instance;
 	}
 
-	void ProjectileManager::Update(float deltaTime) {
+	void Manager::Update(float deltaTime) {
 		for (auto& projectile : projectiles) {
 			projectile->Update(deltaTime);
 		}
@@ -21,15 +21,15 @@ namespace Projectile {
 		);
 	}
 
-	void ProjectileManager::AddProjectile(Weapon::Type type, InitializeDesc context) {
+	void Manager::AddProjectile(Projectile::Type type, InitializeDesc context) {
 		switch (type) {
-		case Weapon::Type::Pistol: {
+		case Projectile::Type::Pistol: {
 			auto pistol = std::make_unique<Pistol>();
 			pistol->Initialize(context);
 			projectiles.push_back(std::move(pistol));
 			break;
 		}
-		case Weapon::Type::Rock: {
+		case Projectile::Type::Rock: {
 			auto rock = std::make_unique<Rock>();
 			rock->Initialize(context);
 			projectiles.push_back(std::move(rock));

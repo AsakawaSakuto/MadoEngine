@@ -117,6 +117,7 @@
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObjectManager.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explotion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
@@ -647,6 +648,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\DropObject\DropObjectManager.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Explotion.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

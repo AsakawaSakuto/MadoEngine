@@ -10,14 +10,14 @@ namespace Weapon {
 
 #ifdef USE_IMGUI
 	namespace {
-		constexpr Type kSelectableWeaponTypes[] = {
-			Type::Pistol,
-			Type::Rock,
+		constexpr Projectile::Type kSelectableWeaponTypes[] = {
+			Projectile::Type::Pistol,
+			Projectile::Type::Rock,
 		};
 	}
 #endif // USE_IMGUI
 	
-	void Inventory::Initialize(Type type) {
+	void Inventory::Initialize(Projectile::Type type) {
 		weapons_.clear();
 		weapons_.resize(slotCount_);
 
@@ -32,8 +32,8 @@ namespace Weapon {
 		}
 	}
 
-	void Inventory::AddWeapon(Type type) {
-		if (type == Type::None) {
+	void Inventory::AddWeapon(Projectile::Type type) {
+		if (type == Projectile::Type::None) {
 			return;
 		}
 
@@ -42,7 +42,7 @@ namespace Weapon {
 		}
 
 		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
-			if (!weapons_[slotIndex] || weapons_[slotIndex]->GetType() == Type::None) {
+			if (!weapons_[slotIndex] || weapons_[slotIndex]->GetProjectileType() == Projectile::Type::None) {
 				weapons_[slotIndex] = std::make_unique<BaseWeapon>();
 				weapons_[slotIndex]->Initialize(type, static_cast<int>(slotIndex));
 				return;
@@ -73,7 +73,7 @@ namespace Weapon {
 
 		int weaponCount = 0;
 		for (const auto& weapon : weapons_) {
-			if (weapon && weapon->GetType() != Type::None) {
+			if (weapon && weapon->GetProjectileType() != Projectile::Type::None) {
 				weaponCount++;
 			}
 		}
@@ -83,11 +83,11 @@ namespace Weapon {
 		ImGui::Text("武器スロット: %d / %d", weaponCount, slotCount_);
 		ImGui::Separator();
 
-		const std::string selectedWeaponName = WeaponTypeToString(selectedAddWeaponType_);
+		const std::string selectedWeaponName = ProjectileTypeToString(selectedAddWeaponType_);
 		if (ImGui::BeginCombo("追加する武器", selectedWeaponName.c_str())) {
-			for (const Type weaponType : kSelectableWeaponTypes) {
+			for (const Projectile::Type weaponType : kSelectableWeaponTypes) {
 				const bool isSelected = selectedAddWeaponType_ == weaponType;
-				const std::string weaponName = WeaponTypeToString(weaponType);
+				const std::string weaponName = ProjectileTypeToString(weaponType);
 				if (ImGui::Selectable(weaponName.c_str(), isSelected)) {
 					selectedAddWeaponType_ = weaponType;
 				}
@@ -121,8 +121,8 @@ namespace Weapon {
 				weapon = weapons_[slotIndex].get();
 			}
 
-			if (weapon && weapon->GetType() != Type::None) {
-				const std::string weaponName = WeaponTypeToString(weapon->GetType());
+			if (weapon && weapon->GetProjectileType() != Projectile::Type::None) {
+				const std::string weaponName = ProjectileTypeToString(weapon->GetProjectileType());
 				ImGui::Text("スロット %d: %s  Lv %d  Kill %d",
 					slotIndex + 1,
 					weaponName.c_str(),

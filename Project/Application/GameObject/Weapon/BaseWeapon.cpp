@@ -2,14 +2,14 @@
 
 namespace Weapon {
 
-	void BaseWeapon::Initialize(Type type, int slotIndex) {
+	void BaseWeapon::Initialize(Projectile::Type type, int slotIndex) {
 		// 武器の初期化処理
 		defaultStatus_ = DefaultStatus();
 		specialStatus_ = SpecialStatus();
 
 		slotIndex_ = slotIndex;
 		type_ = type;
-		weaponName_ = WeaponTypeToString(type_);
+		weaponName_ = ProjectileTypeToString(type_);
 
 		upgradeLevel_ = 0;
 		killCount_ = 0;
@@ -46,7 +46,7 @@ namespace Weapon {
 			context.ownerPosition = ownerPosition;
 			context.targetPosition = targetPosition;
 
-			Projectile::ProjectileManager::GetInstance().AddProjectile(type_, context);
+			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 
 			// 最大射撃数に達した場合、射撃数をリセットしてクールダウンを開始する
 			if (defaultStatus_.shotNowCount >= static_cast<int>(defaultStatus_.shotMaxCount)) {

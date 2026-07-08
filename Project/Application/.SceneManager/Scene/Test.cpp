@@ -76,7 +76,7 @@ void Test::Initialize() {
 	enemySpawner_->Initialize(player_.get(), SceneType::Test);
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
-	weaponInventory_->Initialize(Weapon::Type::Pistol);
+	weaponInventory_->Initialize(Projectile::Type::Pistol);
 
 	fadeSprite_ = MySprite::Create("testFade", "black2x2", SceneType::Test);
 	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
@@ -111,7 +111,7 @@ SceneType Test::Update(float dt) {
 
 	enemySpawner_->Update(dt);
 
-	Projectile::ProjectileManager::GetInstance().Update(dt);
+	Projectile::Manager::GetInstance().Update(dt);
 
 	weaponInventory_->Update(dt, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
 
@@ -136,7 +136,7 @@ SceneType Test::Update(float dt) {
 	}
 
 	if (MyInput::GetKeybord()->IsTrigger(DIK_9)) {
-		weaponInventory_->AddWeapon(Weapon::Type::Pistol);
+		weaponInventory_->AddWeapon(Projectile::Type::Pistol);
 	}
 
 	if (useDebugCamera_) {
