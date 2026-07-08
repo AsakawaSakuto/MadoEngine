@@ -11,8 +11,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
-    <ClCompile Include="Application\Object\Enemy\Enemy.cpp" />
-    <ClCompile Include="Application\Object\Enemy\EnemySpawner.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\Enemy.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
@@ -73,11 +73,11 @@
     <ClCompile Include="Engine\Render\Screen\ViewportScissor.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\InstancedModel.cpp" />
-    <ClCompile Include="Application\Object\Player\Player.cpp" />
-    <ClCompile Include="Application\Object\Player\PlayerController.cpp" />
-    <ClCompile Include="Application\Object\Player\PlayerMovement.cpp" />
+    <ClCompile Include="Application\GameObject\Player\Player.cpp" />
+    <ClCompile Include="Application\GameObject\Player\PlayerController.cpp" />
+    <ClCompile Include="Application\GameObject\Player\PlayerMovement.cpp" />
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
-    <ClCompile Include="Application\Object\Map\Map.cpp" />
+    <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
@@ -89,10 +89,10 @@
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
-    <ClCompile Include="Application\Object\Map\MapBlock.cpp" />
-    <ClCompile Include="Application\Object\Map\EventObject\Jar\Jar.cpp" />
-    <ClCompile Include="Application\Object\Map\EventObject\MapEventObjectBase.cpp" />
-    <ClCompile Include="Application\Object\Map\EventObject\Chest\Chest.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
@@ -108,16 +108,20 @@
     <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerHealthGauge.cpp" />
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
-    <ClCompile Include="Application\Object\Weapon\BaseWeapon.cpp" />
-    <ClCompile Include="Application\Object\Weapon\WeaponInventory.cpp" />
-    <ClCompile Include="Application\Object\Weapon\Projectile\ProjectileManager.cpp" />
-    <ClCompile Include="Application\Object\Weapon\Projectile\Entity\Pistol.cpp" />
-    <ClCompile Include="Application\Object\Weapon\Projectile\Entity\Rock.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Rock.cpp" />
+    <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
+    <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
+    <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
+    <ClCompile Include="Application\GameObject\DropObject\DropObjectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\Object\Enemy\Enemy.h" />
-    <ClInclude Include="Application\Object\Enemy\EnemySpawner.h" />
-    <ClInclude Include="Application\Object\Map\EventObject\MapEventObjectBase.h" />
+    <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
@@ -426,13 +430,13 @@
     <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Player\Player.h">
+    <ClInclude Include="Application\GameObject\Player\Player.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Player\PlayerController.h">
+    <ClInclude Include="Application\GameObject\Player\PlayerController.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Player\PlayerMovement.h">
+    <ClInclude Include="Application\GameObject\Player\PlayerMovement.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\.SceneManager\CommonData.h">
@@ -456,13 +460,13 @@
     <ClInclude Include="Engine\Audio\AudioType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\Map.h">
+    <ClInclude Include="Application\GameObject\Map\Map.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\MapBlockType.h">
+    <ClInclude Include="Application\GameObject\Map\MapBlockType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\IGameObject.h">
+    <ClInclude Include="Application\GameObject\IGameObject.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h">
@@ -503,7 +507,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationFunction.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Player\PlayerStatus.h">
+    <ClInclude Include="Application\GameObject\Player\PlayerStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Json\JsonHeaders.h">
@@ -521,19 +525,19 @@
     <ClInclude Include="Engine\Utility\Json\Core\JsonSerializer.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\MapBlock.h">
+    <ClInclude Include="Application\GameObject\Map\MapBlock.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\EventObject\Jar\Jar.h">
+    <ClInclude Include="Application\GameObject\Map\EventObject\Jar\Jar.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\EventObject\Jar\JarType.h">
+    <ClInclude Include="Application\GameObject\Map\EventObject\Jar\JarType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\EventObject\Chest\Chest.h">
+    <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\EventObject\Chest\ChestType.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
@@ -591,43 +595,58 @@
     <ClInclude Include="Application\UI\GameSceneTimer.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Enemy\EnemyStatus.h">
+    <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\WeaponStatus.h">
+    <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\BaseWeapon.h">
+    <ClInclude Include="Application\GameObject\Weapon\BaseWeapon.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Rarity.h">
+    <ClInclude Include="Application\GameObject\Rarity.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\WeaponInventory.h">
+    <ClInclude Include="Application\GameObject\Weapon\WeaponInventory.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Item\ItemStatus.h">
+    <ClInclude Include="Application\GameObject\Item\ItemStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\Projectile\IProjectile.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\IProjectile.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\Projectile\ProjectileManager.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\Projectile\Entity\Pistol.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\Projectile\Entity\Rock.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Rock.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Weapon\Projectile\ProjectileStatus.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\Map\MapLimit.h">
+    <ClInclude Include="Application\GameObject\Map\MapLimit.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Object\StatusEffect.h">
+    <ClInclude Include="Application\GameObject\StatusEffect.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Item\BaseItem.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Item\ItemInventry.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\DropObject\DropObject.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\DropObject\DropObjectStatus.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\DropObject\DropObjectManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

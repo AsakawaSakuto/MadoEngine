@@ -1,5 +1,5 @@
 #include "EnemySpawner.h"
-#include "Object/Player/Player.h"
+#include "GameObject/Player/Player.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>

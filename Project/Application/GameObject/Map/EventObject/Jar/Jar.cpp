@@ -1,5 +1,5 @@
 #include "Jar.h"
-#include "Object/Player/Player.h"
+#include "GameObject/Player/Player.h"
 
 namespace {
 

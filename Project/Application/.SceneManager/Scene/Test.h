@@ -1,14 +1,14 @@
 #pragma once
 #include ".SceneManager/IScene.h"
-#include "Object/Player/Player.h"
-#include "Object/Map/Map.h"
-#include "Object/Map/MapLimit.h"
-#include "Object/Enemy/EnemySpawner.h"
+#include "GameObject/Player/Player.h"
+#include "GameObject/Map/Map.h"
+#include "GameObject/Map/MapLimit.h"
+#include "GameObject/Enemy/EnemySpawner.h"
+#include "GameObject/Weapon/WeaponInventory.h"
+#include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "Utility/Light/LightManager.h"
 #include "UI/Player/PlayerExpGauge.h"
 #include "UI/Player/PlayerHealthGauge.h"
-#include "Object/Weapon/WeaponInventory.h"
-#include "Object/Weapon/Projectile/ProjectileManager.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移

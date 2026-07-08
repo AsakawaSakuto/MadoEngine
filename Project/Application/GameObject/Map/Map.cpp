@@ -1,7 +1,7 @@
 #include "Map.h"
-#include "Object/Map/EventObject/Chest/Chest.h"
-#include "Object/Map/EventObject/Jar/Jar.h"
-#include "Object/Player/Player.h"
+#include "GameObject/Map/EventObject/Chest/Chest.h"
+#include "GameObject/Map/EventObject/Jar/Jar.h"
+#include "GameObject/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
 #include <algorithm>
 #include <cmath>

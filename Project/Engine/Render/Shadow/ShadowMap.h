@@ -21,8 +21,8 @@ namespace MadoEngine::Render {
 	/// @details 深度専用テクスチャをDSVとして書き込み、通常描画ではSRVとして参照できるようにする。
 	class ShadowMap {
 	public:
-		static constexpr uint32_t kShadowMapWidth =  1024 * 5;         // シャドウマップの幅
-		static constexpr uint32_t kShadowMapHeight = 1024 * 5;         // シャドウマップの高さ
+		static constexpr uint32_t kShadowMapWidth =  1024 * 5;     // シャドウマップの幅
+		static constexpr uint32_t kShadowMapHeight = 1024 * 5;     // シャドウマップの高さ
 		static constexpr float kShadowOrthoWidth =   250.0f;       // シャドウマップの直交投影幅
 		static constexpr float kShadowOrthoHeight =  250.0f;       // シャドウマップの直交投影高さ
 		static constexpr float kShadowNearClip = 0.1f;             // シャドウマップの近クリップ距離
