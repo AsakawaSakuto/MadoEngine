@@ -39,6 +39,17 @@ namespace MadoEngine {
 		/// @param gameViewSRV ゲーム画面オフスクリーンテクスチャのSRV GPUハンドル
 		void DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV);
 
+		/// @brief ImGuiのスタイルカラー編集ウィンドウを描画します。
+		void DrawStyleColorEditorUI();
+
+		/// @brief ImGuiのスタイルカラーをJsonへ保存します。
+		/// @return 保存できた場合はtrueを返します。
+		bool SaveStyleColors() const;
+
+		/// @brief ImGuiのスタイルカラーをJsonから読み込みます。
+		/// @return 読み込めた場合はtrueを返します。
+		bool LoadStyleColors();
+
 		/// @brief ImGuiを終了し全リソースを解放する
 		void Finalize();
 
@@ -52,6 +63,9 @@ namespace MadoEngine {
 		static void SrvFreeCallback(ImGui_ImplDX12_InitInfo* info,
 									D3D12_CPU_DESCRIPTOR_HANDLE cpu,
 									D3D12_GPU_DESCRIPTOR_HANDLE gpu);
+
+		/// @brief 既定のImGuiスタイルカラーを適用します。
+		void ApplyDefaultStyleColors();
 
 		Core::SRVManager* srvManager_ = nullptr;
 		std::vector<uint32_t> allocatedSrvIndices_; // ImGuiが確保したSRVスロットの追跡用

@@ -494,6 +494,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
+		imguiManager_->DrawStyleColorEditorUI();
 		//MadoEngine::Editor::DrawLoggerEditorUI();
 
 #else

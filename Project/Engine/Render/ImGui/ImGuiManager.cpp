@@ -3,9 +3,68 @@
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/View/SRVManager.h"
+#include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include <cassert>
 #include<filesystem>
+
+namespace {
+
+	struct ImGuiStyleColorItem {
+		ImGuiCol index;
+		const char* jsonKey;
+		const char* label;
+		ImVec4 defaultColor;
+	};
+
+	constexpr const char* kStyleColorJsonPath = "Assets/Json/ImGuiStyleColors.json";
+
+	const ImGuiStyleColorItem kEditableStyleColors[] = {
+		{ ImGuiCol_WindowBg, "WindowBg", "背景 WindowBg", ImVec4(0.08f, 0.09f, 0.11f, 1.0f) },
+		{ ImGuiCol_TitleBg, "TitleBg", "非アクティブTitleBar", ImVec4(0.10f, 0.12f, 0.16f, 1.0f) },
+		{ ImGuiCol_TitleBgActive, "TitleBgActive", "アクティブTitleBar", ImVec4(0.18f, 0.22f, 0.30f, 1.0f) },
+		{ ImGuiCol_MenuBarBg, "MenuBarBg", "MenuBar", ImVec4(0.12f, 0.14f, 0.18f, 1.0f) },
+		{ ImGuiCol_Tab, "Tab", "Tab", ImVec4(0.12f, 0.15f, 0.20f, 1.0f) },
+		{ ImGuiCol_TabHovered, "TabHovered", "TabHovered", ImVec4(0.25f, 0.32f, 0.42f, 1.0f) },
+		{ ImGuiCol_TabActive, "TabActive", "TabActive", ImVec4(0.18f, 0.24f, 0.34f, 1.0f) },
+		{ ImGuiCol_Header, "Header", "Header Selectable等", ImVec4(0.16f, 0.20f, 0.28f, 1.0f) },
+		{ ImGuiCol_FrameBg, "FrameBg", "FrameBg Input/Slider背景", ImVec4(0.10f, 0.12f, 0.16f, 1.0f) },
+		{ ImGuiCol_Button, "Button", "Button", ImVec4(0.18f, 0.22f, 0.30f, 1.0f) },
+		{ ImGuiCol_ButtonHovered, "ButtonHovered", "ButtonHovered", ImVec4(0.25f, 0.32f, 0.42f, 1.0f) },
+	};
+
+	/// @brief ImGuiカラーをJson配列へ変換します。
+	/// @param color 変換するImGuiカラー
+	/// @return RGBA順のJson配列
+	nlohmann::json ToJsonColor(const ImVec4& color) {
+		return nlohmann::json::array({ color.x, color.y, color.z, color.w });
+	}
+
+	/// @brief Json配列からImGuiカラーを読み取ります。
+	/// @param json 読み取り元のJson値
+	/// @param outColor 読み取ったカラーの出力先
+	/// @return 読み取りに成功した場合はtrue
+	bool TryReadJsonColor(const nlohmann::json& json, ImVec4& outColor) {
+		if (!json.is_array() || json.size() < 4) {
+			return false;
+		}
+
+		for (size_t i = 0; i < 4; ++i) {
+			if (!json[i].is_number()) {
+				return false;
+			}
+		}
+
+		outColor = ImVec4(
+			json[0].get<float>(),
+			json[1].get<float>(),
+			json[2].get<float>(),
+			json[3].get<float>()
+		);
+		return true;
+	}
+
+} // namespace
 
 namespace MadoEngine {
 
@@ -55,6 +114,7 @@ namespace MadoEngine {
 		colors[ImGuiCol_FrameBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // Input/Slider背景
 		colors[ImGuiCol_Button] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f);
 		colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
+		LoadStyleColors();
 
 		ImGui_ImplWin32_Init(hwnd);
 
@@ -107,6 +167,91 @@ namespace MadoEngine {
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
+	}
+
+	/// @brief 既定のImGuiスタイルカラーを適用します。
+	void ImGuiManager::ApplyDefaultStyleColors() {
+		ImVec4* colors = ImGui::GetStyle().Colors;
+
+		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
+			colors[item.index] = item.defaultColor;
+		}
+	}
+
+	/// @brief ImGuiのスタイルカラーをJsonへ保存します。
+	/// @return 保存できた場合はtrueを返します。
+	bool ImGuiManager::SaveStyleColors() const {
+		nlohmann::json root;
+		nlohmann::json colorsJson = nlohmann::json::object();
+		const ImVec4* colors = ImGui::GetStyle().Colors;
+
+		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
+			colorsJson[item.jsonKey] = ToJsonColor(colors[item.index]);
+		}
+
+		root["colors"] = colorsJson;
+		return Json::JsonFile::Save(kStyleColorJsonPath, root, 4, true);
+	}
+
+	/// @brief ImGuiのスタイルカラーをJsonから読み込みます。
+	/// @return 読み込めた場合はtrueを返します。
+	bool ImGuiManager::LoadStyleColors() {
+		if (!Json::JsonFile::Exists(kStyleColorJsonPath)) {
+			return false;
+		}
+
+		nlohmann::json root;
+		if (!Json::JsonFile::Load(kStyleColorJsonPath, root)) {
+			return false;
+		}
+
+		const nlohmann::json* colorsJson = &root;
+		if (root.contains("colors") && root["colors"].is_object()) {
+			colorsJson = &root["colors"];
+		}
+
+		bool loaded = false;
+		ImVec4* colors = ImGui::GetStyle().Colors;
+		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
+			const auto it = colorsJson->find(item.jsonKey);
+			if (it == colorsJson->end()) {
+				continue;
+			}
+
+			ImVec4 color;
+			if (TryReadJsonColor(*it, color)) {
+				colors[item.index] = color;
+				loaded = true;
+			}
+		}
+
+		return loaded;
+	}
+
+	/// @brief ImGuiのスタイルカラー編集ウィンドウを描画します。
+	void ImGuiManager::DrawStyleColorEditorUI() {
+		ImGui::Begin("ImGui Style Color");
+
+		if (ImGui::Button("保存")) {
+			SaveStyleColors();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("読み込み")) {
+			LoadStyleColors();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("初期色に戻す")) {
+			ApplyDefaultStyleColors();
+		}
+
+		ImGui::Text("保存先: %s", kStyleColorJsonPath);
+		ImGui::Separator();
+		ImVec4* colors = ImGui::GetStyle().Colors;
+		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
+			ImGui::ColorEdit4(item.label, &colors[item.index].x, ImGuiColorEditFlags_AlphaBar);
+		}
+
+		ImGui::End();
 	}
 
 	void ImGuiManager::DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV) {
