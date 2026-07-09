@@ -15,25 +15,25 @@ namespace Player {
 
 		void Update(float deltaTime) override;
 
-		/// @brief Playerのワールド座標を取得します。
+		/// @brief Playerのワールド座標を取得する
 		Vector3 GetPosition() const { return transform_.translate; }
 
-		/// @brief Playerの描画Model座標を取得します。
-		/// @return PlayerのModelワールド座標です。
+		/// @brief Playerの描画Model座標を取得する
+		/// @return PlayerのModelワールド座標
 		Vector3 GetModelPosition() const;
 
 		void SetCamera(Camera* camera) { camera_ = camera; }
 
-		/// @brief 所持金を加算します。
-		/// @param amount 加算する所持金です。
+		/// @brief 所持金を加算する
+		/// @param amount 加算する所持金
 		void AddMoney(int amount);
 
-		/// @brief 経験値を加算します。
-		/// @param amount 加算する経験値です。
+		/// @brief 経験値を加算
+		/// @param amount 加算する経験値
 		void AddExp(int amount);
 
-		/// @brief PlayerのHPを減らします。
-		/// @param damage 減らすHP量です。
+		/// @brief PlayerのHPを減らす
+		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
 
 		Status GetStatus() const { return status_; }
@@ -42,7 +42,7 @@ namespace Player {
 
 	private:
 
-		/// @brief 経験値が上限に達している場合にレベルアップします。
+		/// @brief 経験値が上限に達している場合にレベルアップする
 		void ProcessLevelUp();
 
 		ColliderShape hitAABB_;
