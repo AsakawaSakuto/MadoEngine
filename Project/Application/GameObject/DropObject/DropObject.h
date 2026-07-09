@@ -46,5 +46,7 @@ namespace DropObject {
 		Vector3 targetPosition_ = { 0.0f, 0.0f, 0.0f };
 		std::string colliderName_;
 		std::string modelName_;
+
+		GameTimer backTimer_;
 	};
 }

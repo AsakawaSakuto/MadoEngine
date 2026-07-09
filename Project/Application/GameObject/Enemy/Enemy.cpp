@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "GameObject/Player/Player.h"
+#include "GameObject/DropObject/DropObjectManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -135,6 +136,8 @@ void Enemy::Release() {
 	if (isReleased_) {
 		return;
 	}
+
+	DropObject::Manager::GetInstance().Spawn(DropObject::Type::Exp, transform_.translate);
 
 	if (!movementColliderName_.empty()) {
 		MyCollider::RemoveCollider(movementColliderName_);

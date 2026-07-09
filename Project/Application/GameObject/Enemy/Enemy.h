@@ -9,76 +9,76 @@ namespace Player {
 
 class Enemy : public IGameObject {
 public:
-	/// @brief Enemyを破棄します。
+	/// @brief Enemyを破棄
 	~Enemy() override;
 
-	/// @brief Enemyを初期化します。
-	/// @param enemyId Enemyの識別番号です。
-	/// @param spawnPosition 生成位置です。
-	/// @param sceneType 所属するシーン種別です。
+	/// @brief Enemyを初期化
+	/// @param enemyId Enemyの識別番号
+	/// @param spawnPosition 生成位置
+	/// @param sceneType 所属するシーン種別
 	void Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType sceneType);
 
-	/// @brief Enemyの移動処理を更新します。
-	/// @param deltaTime デルタタイムです。
+	/// @brief Enemyの移動処理を更新
+	/// @param deltaTime デルタタイム
 	void Update(float deltaTime) override;
 
-	/// @brief Playerを追跡するための参照先を設定します。
-	/// @param player 追跡対象のPlayerです。
+	/// @brief Playerを追跡するための参照先を設定
+	/// @param player 追跡対象のPlayer
 	void SetTargetPlayer(Player::Base* player) { targetPlayer_ = player; }
 
-	/// @brief 地形との当たり判定後にEnemyの状態を更新します。
+	/// @brief 地形との当たり判定後にEnemyの状態を更新
 	void ResolveAfterCollision();
 
-	/// @brief PlayerのAABBと接触しているか判定します。
-	/// @return Playerと接触していればtrueを返します。
+	/// @brief PlayerのAABBと接触しているか判定する
+	/// @return Playerと接触していればtrueを返す
 	bool IsHitPlayer() const;
 
-	/// @brief PlayerのProjectileと接触しているか判定します。
-	/// @return PlayerのProjectileと接触していればtrueを返します。
+	/// @brief PlayerのProjectileと接触しているか判定する
+	/// @return PlayerのProjectileと接触していればtrueを返す
 	bool IsHitPlayerProjectile() const;
 
-	/// @brief Enemyの有効状態を取得します。
-	/// @return 有効であればtrueを返します。
+	/// @brief Enemyの有効状態を取得
+	/// @return 有効であればtrueを返す
 	bool IsActive() const { return isActive_; }
 
-	/// @brief Enemyの現在座標を取得します。
-	/// @return Enemyの現在座標を返します。
+	/// @brief Enemyの現在座標を取得
+	/// @return Enemyの現在座標
 	Vector3 GetPosition() const { return transform_.translate; }
 
-	/// @brief Enemyを削除対象にします。
+	/// @brief Enemyを削除対象にする
 	void Kill() { isActive_ = false; }
 
 private:
-	/// @brief ColliderとModelを破棄します。
+	/// @brief ColliderとModelを破棄する
 	void Release();
 
-	/// @brief Collider登録名を作成します。
-	/// @param prefix 登録名の先頭文字列です。
-	/// @return Collider登録名を返します。
+	/// @brief Collider登録名を作成
+	/// @param prefix 登録名の先頭文字列
+	/// @return Collider登録名を返す
 	std::string CreateColliderName(const std::string& prefix) const;
 
-	/// @brief Model登録名を作成します。
-	/// @return Model登録名を返します。
+	/// @brief Model登録名を作成
+	/// @return Model登録名を返す
 	std::string CreateModelName() const;
 
-	/// @brief Playerへ向かう水平方向を取得します。
-	/// @return 正規化済みの水平方向です。
+	/// @brief Playerへ向かう水平方向を取得
+	/// @return 正規化済みの水平方向
 	Vector3 GetDirectionToPlayer() const;
 
-	/// @brief 側面で詰まったEnemyを少しずつ上へ補助します。
-	/// @param deltaTime 1フレームの経過時間です。
-	/// @param isGroundContact AABB地面に接地していればtrueです。
-	/// @param isSlopeGroundContact Slope地面に接地していればtrueです。
+	/// @brief 側面で詰まったEnemyを少しずつ上へ補助する
+	/// @param deltaTime 1フレームの経過時間
+	/// @param isGroundContact AABB地面に接地していればtrue
+	/// @param isSlopeGroundContact Slope地面に接地していればtrue
 	void ApplySideClimbAssist(float deltaTime, bool isGroundContact, bool isSlopeGroundContact);
 
-	/// @brief 側面上昇補助の状態を初期化します。
+	/// @brief 側面上昇補助の状態を初期化
 	void ResetSideClimbAssist();
 
-	/// @brief 今回の移動が側面で止められたか判定します。
-	/// @return 側面で前進量が落ちていればtrueを返します。
+	/// @brief 今回の移動が側面で止められたか判定する
+	/// @return 側面で前進量が落ちていればtrueを返す
 	bool IsSideBlockedThisFrame() const;
 
-	/// @brief Modelの座標と回転を反映します。
+	/// @brief Modelの座標と回転を反映する
 	void UpdateModelTransform();
 
 	uint32_t enemyId_ = 0;

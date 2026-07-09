@@ -52,7 +52,6 @@ void EnemySpawner::Update(float deltaTime) {
 		}
 
 		if (MyInput::GetKeybord()->IsTrigger(DIK_7)) {
-			DropObject::Manager::GetInstance().Spawn(DropObject::Type::Exp, enemy->GetPosition());
 			enemy->Kill();
 		}
 	}

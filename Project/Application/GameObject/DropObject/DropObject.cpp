@@ -64,18 +64,32 @@ namespace DropObject {
 		}
 
 		if (isMoving_) {
-			Vector3 toTarget = targetPosition_ - transform_.translate;
-			const float distance = toTarget.Length();
-			if (distance <= kArriveDistance) {
-				transform_.translate = targetPosition_;
+			if (backTimer_.IsActive()) {
+				Vector3 toTarget = targetPosition_ - transform_.translate;
+				const float distance = toTarget.Length();
+				if (distance <= kArriveDistance) {
+					transform_.translate = targetPosition_;
+				} else {
+					const float moveDistance = std::min(kMoveSpeed * deltaTime, distance);
+					transform_.translate -= toTarget / distance * moveDistance;
+				}
 			} else {
-				const float moveDistance = std::min(kMoveSpeed * deltaTime, distance);
-				transform_.translate += toTarget / distance * moveDistance;
+				Vector3 toTarget = targetPosition_ - transform_.translate;
+				const float distance = toTarget.Length();
+				if (distance <= kArriveDistance) {
+					transform_.translate = targetPosition_;
+				} else {
+					const float moveDistance = std::min(kMoveSpeed * deltaTime, distance);
+					transform_.translate += toTarget / distance * moveDistance;
+				}
 			}
 		}
 
 		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerDropObjectGetSphere)) {
-			isMoving_ = true;
+			if (!isMoving_) {
+				isMoving_ = true;
+				backTimer_.Start(0.2f);
+			}
 		}
 
 		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerHitBox)) {
@@ -86,6 +100,8 @@ namespace DropObject {
 			model_->SetPosition(transform_.translate);
 			model_->SetScale(transform_.scale);
 		}
+
+		backTimer_.Update(deltaTime);
 	}
 
 	void Base::Release() {
