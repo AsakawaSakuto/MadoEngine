@@ -6,6 +6,7 @@
 
 namespace {
 	constexpr float kDirectionEpsilon = 1e-5f;        // 方向ベクトルの長さがこの値以下の場合は正規化を行わない
+	constexpr float kRotationEpsilon = 1e-5f;         // 回転計算でゼロ長ベクトルとして扱う閾値
 	constexpr float kSlopeSnapDistance = 1.0f;        // Slopeの中心Y座標にスナップする距離の閾値
 	constexpr float kDeleteGroundY = 0.0f;            // このY座標以下に落下した場合は削除対象とする
 	constexpr float kSideClimbSpeed = 5.0f;           // 側面上昇補助の速度
@@ -19,6 +20,78 @@ namespace {
 	/// @return XZ平面での長さの2乗です。
 	float GetHorizontalLengthSq(const Vector3& value) {
 		return value.x * value.x + value.z * value.z;
+	}
+
+	/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返します。
+	/// @param value 正規化するベクトルです。
+	/// @param fallback 代替として使用するベクトルです。
+	/// @return 正規化済み、または代替のベクトルです。
+	Vector3 NormalizeOrFallback(const Vector3& value, const Vector3& fallback) {
+		const float lengthSq = value.LengthSq();
+		if (lengthSq < kRotationEpsilon) {
+			return fallback;
+		}
+
+		const float invLength = 1.0f / std::sqrt(lengthSq);
+		return value * invLength;
+	}
+
+	/// @brief 水平Yawから前方向ベクトルを作成します。
+	/// @param yaw 水平Yaw角度です。
+	/// @return XZ平面上の前方向です。
+	Vector3 CreateHorizontalForward(float yaw) {
+		return { std::sin(yaw), 0.0f, std::cos(yaw) };
+	}
+
+	/// @brief 水平Yawから右方向ベクトルを作成します。
+	/// @param yaw 水平Yaw角度です。
+	/// @return XZ平面上の右方向です。
+	Vector3 CreateHorizontalRight(float yaw) {
+		return { std::cos(yaw), 0.0f, -std::sin(yaw) };
+	}
+
+	/// @brief 回転行列の各軸からEuler角を復元します。
+	/// @param right ローカルX軸のワールド方向です。
+	/// @param up ローカルY軸のワールド方向です。
+	/// @param forward ローカルZ軸のワールド方向です。
+	/// @return 復元したEuler角です。
+	Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& forward) {
+		Vector3 euler = {};
+		const float sinY = std::clamp(-right.z, -1.0f, 1.0f);
+		euler.y = std::asin(sinY);
+
+		const float cosY = std::cos(euler.y);
+		if (std::abs(cosY) > kRotationEpsilon) {
+			euler.x = std::atan2(up.z, forward.z);
+			euler.z = std::atan2(right.y, right.x);
+			return euler;
+		}
+
+		euler.x = std::atan2(up.x * sinY, up.y);
+		euler.z = 0.0f;
+		return euler;
+	}
+
+	/// @brief Slope法線と向きに沿ったModel回転を作成します。
+	/// @param faceYaw Enemyが向いている水平Yaw角度です。
+	/// @param slopeNormal Slope上面の法線です。
+	/// @return Slopeに沿ったModel回転です。
+	Vector3 CreateSlopeAlignedRotation(float faceYaw, const Vector3& slopeNormal) {
+		const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
+		const Vector3 desiredForward = CreateHorizontalForward(faceYaw);
+
+		Vector3 forward = desiredForward - up * Math::Dot(desiredForward, up);
+		if (forward.LengthSq() < kRotationEpsilon) {
+			const Vector3 horizontalRight = CreateHorizontalRight(faceYaw);
+			forward = Math::Cross(horizontalRight, up);
+		}
+		forward = NormalizeOrFallback(forward, { 0.0f, 0.0f, 1.0f });
+
+		Vector3 right = Math::Cross(up, forward);
+		right = NormalizeOrFallback(right, CreateHorizontalRight(faceYaw));
+		forward = NormalizeOrFallback(Math::Cross(right, up), forward);
+
+		return ExtractEulerXYZ(right, up, forward);
 	}
 }
 
@@ -86,7 +159,8 @@ void Enemy::Update(float deltaTime) {
 	}
 
 	if (GetHorizontalLengthSq(direction) > kDirectionEpsilon) {
-		transform_.rotate.y = std::atan2(direction.x, direction.z);
+		faceYaw_ = std::atan2(direction.x, direction.z);
+		transform_.rotate.y = faceYaw_;
 	}
 }
 
@@ -113,7 +187,7 @@ void Enemy::ResolveAfterCollision() {
 
 	ApplySideClimbAssist(lastDeltaTime_, isGroundContact, isSlopeGroundContact);
 
-	UpdateModelTransform();
+	UpdateModelTransform(isSlopeGroundContact);
 }
 
 bool Enemy::IsHitPlayer() const {
@@ -250,10 +324,20 @@ bool Enemy::IsSideBlockedThisFrame() const {
 	return actualProgress < desiredLength * kBlockedProgressRate;
 }
 
-void Enemy::UpdateModelTransform() {
+void Enemy::UpdateModelTransform(bool isSlopeGroundContact) {
 	if (!model_) {
 		return;
 	}
+
+	Vector3 targetGroundNormal = { 0.0f, 1.0f, 0.0f };
+	Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
+	if (isSlopeGroundContact && MyCollider::TryGetSlopeGroundNormal(movementColliderName_, CollisionTag::MapSlope, slopeNormal)) {
+		targetGroundNormal = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
+	}
+
+	const float normalT = std::clamp(1.0f - std::exp(-modelGroundNormalFollowSpeed_ * lastDeltaTime_), 0.0f, 1.0f);
+	currentGroundNormal_ = NormalizeOrFallback(Math::Lerp(currentGroundNormal_, targetGroundNormal, normalT), targetGroundNormal);
+	transform_.rotate = CreateSlopeAlignedRotation(faceYaw_, currentGroundNormal_);
 
 	model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
 	model_->SetRotation(transform_.rotate);

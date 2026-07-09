@@ -78,8 +78,9 @@ private:
 	/// @return 側面で前進量が落ちていればtrueを返す
 	bool IsSideBlockedThisFrame() const;
 
-	/// @brief Modelの座標と回転を反映する
-	void UpdateModelTransform();
+	/// @brief Modelの座標と回転を接地状態に合わせて反映します。
+	/// @param isSlopeGroundContact Slopeに接地していればtrueです。
+	void UpdateModelTransform(bool isSlopeGroundContact = false);
 
 	uint32_t enemyId_ = 0;
 	ColliderShape hitAABB_;
@@ -94,8 +95,11 @@ private:
 	float sideClimbBaseY_ = 0.0f;
 	float sideClimbAmount_ = 0.0f;
 	float sideClimbCrestTimer_ = 0.0f;
+	float faceYaw_ = 0.0f;
+	float modelGroundNormalFollowSpeed_ = 16.0f;
 	Vector3 lastMoveStartPosition_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
 	bool isGrounded_ = false;
 	bool isSideClimbing_ = false;
 	bool isActive_ = true;
