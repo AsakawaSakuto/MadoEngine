@@ -3,6 +3,10 @@
 #include "DropObjectStatus.h"
 #include <string>
 
+namespace Player {
+	class Base;
+}
+
 namespace DropObject {
 	
 	class Base : public IGameObject {
@@ -21,6 +25,11 @@ namespace DropObject {
 		/// @param deltaTime 1フレームの経過時間です
 		void Update(float deltaTime) override;
 
+		/// @brief Playerとの衝突判定を含めてDropObjectを更新します。
+		/// @param deltaTime 1フレームの経過時間です。
+		/// @param player 経験値を受け取るPlayerです。
+		void Update(float deltaTime, Player::Base& player);
+
 		/// @brief 移動状態を設定します
 		/// @param isMoving trueの場合、TargetPositionへ向かいます
 		void SetMoving(bool isMoving) { isMoving_ = isMoving; }
@@ -37,6 +46,15 @@ namespace DropObject {
 
 		/// @brief ColliderとModelを破棄します
 		void Release();
+
+		/// @brief Player参照を指定してDropObjectを更新します。
+		/// @param deltaTime 1フレームの経過時間です。
+		/// @param player 経験値を受け取るPlayerです。nullptrの場合は経験値加算を行いません。
+		void UpdateInternal(float deltaTime, Player::Base* player);
+
+		/// @brief Playerへ経験値を渡してDropObjectを取得済みにします。
+		/// @param player 経験値を受け取るPlayerです。
+		void CollectExp(Player::Base& player);
 
 		Type type_ = Type::Exp;
 		bool isMoving_ = false;

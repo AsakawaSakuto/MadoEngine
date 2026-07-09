@@ -1,4 +1,5 @@
 #include "DropObjectManager.h"
+#include "GameObject/Player/Player.h"
 #include <algorithm>
 
 namespace DropObject {
@@ -8,10 +9,12 @@ namespace DropObject {
 		return instance;
 	}
 
-	void Manager::Update(float deltaTime, const Vector3& targetPosition) {
+	void Manager::Update(float deltaTime, Player::Base& player) {
+		const Vector3 targetPosition = player.GetPosition();
+
 		for (auto& dropObject : dropObjects_) {
 			dropObject->SetTargetPosition(targetPosition);
-			dropObject->Update(deltaTime);
+			dropObject->Update(deltaTime, player);
 		}
 
 		dropObjects_.erase(

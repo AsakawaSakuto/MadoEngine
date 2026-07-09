@@ -3,6 +3,10 @@
 #include <memory>
 #include <vector>
 
+namespace Player {
+	class Base;
+}
+
 namespace DropObject {
 	
 	class Manager {
@@ -12,8 +16,8 @@ namespace DropObject {
 
 		/// @brief DropObjectを更新します
 		/// @param deltaTime 1フレームの経過時間
-		/// @param targetPosition DropObjectが向かう座標
-		void Update(float deltaTime, const Vector3& targetPosition);
+		/// @param player 経験値を受け取るPlayerです。
+		void Update(float deltaTime, Player::Base& player);
 
 		/// @brief DropObjectを生成します
 		/// @param type DropObjectの種類

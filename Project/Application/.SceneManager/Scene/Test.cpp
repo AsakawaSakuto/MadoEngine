@@ -116,7 +116,7 @@ SceneType Test::Update(float dt) {
 
 	Projectile::Manager::GetInstance().Update(dt);
 
-	DropObject::Manager::GetInstance().Update(dt, player_->GetPosition());
+	DropObject::Manager::GetInstance().Update(dt, *player_);
 
 	weaponInventory_->Update(dt, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
 

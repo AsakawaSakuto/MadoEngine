@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
 
@@ -47,6 +48,21 @@ namespace Player {
 		}
 
 		status_.currentExp += amount;
+		ProcessLevelUp();
+	}
+
+	void Base::ProcessLevelUp() {
+		if (status_.expToNextLevel <= 0.0f) {
+			Logger::Output("[Engine] Playerの必要経験値が不正なため、レベルアップ処理をスキップしました。", Logger::Level::Warning);
+			return;
+		}
+
+		while (status_.currentExp >= status_.expToNextLevel) {
+			status_.currentExp -= status_.expToNextLevel;
+			status_.level++;
+			status_.expToNextLevel += 25.0f;
+			Logger::Output("[Engine] Playerのレベルが" + std::to_string(status_.level) + "に上がりました。", Logger::Level::Application);
+		}
 	}
 
 	void Base::TakeDamage(float damage) {

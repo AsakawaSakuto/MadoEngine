@@ -1,4 +1,5 @@
 #include "DropObject.h"
+#include "GameObject/Player/Player.h"
 #include <algorithm>
 
 namespace DropObject {
@@ -6,6 +7,7 @@ namespace DropObject {
 	namespace {
 		constexpr float kMoveSpeed = 12.0f;
 		constexpr float kArriveDistance = 0.05f;
+		constexpr int kExpAmount = 10;
 	}
 
 	Base::~Base() {
@@ -59,25 +61,35 @@ namespace DropObject {
 	}
 
 	void Base::Update(float deltaTime) {
+		UpdateInternal(deltaTime, nullptr);
+	}
+
+	void Base::Update(float deltaTime, Player::Base& player) {
+		UpdateInternal(deltaTime, &player);
+	}
+
+	void Base::UpdateInternal(float deltaTime, Player::Base* player) {
 		if (!isAlive_) {
 			return;
 		}
 
+		Vector3 targetPosition = player->GetPosition();
+
 		if (isMoving_) {
 			if (backTimer_.IsActive()) {
-				Vector3 toTarget = targetPosition_ - transform_.translate;
+				Vector3 toTarget = targetPosition - transform_.translate;
 				const float distance = toTarget.Length();
 				if (distance <= kArriveDistance) {
-					transform_.translate = targetPosition_;
+					transform_.translate = targetPosition;
 				} else {
 					const float moveDistance = std::min(kMoveSpeed * deltaTime, distance);
 					transform_.translate -= toTarget / distance * moveDistance;
 				}
 			} else {
-				Vector3 toTarget = targetPosition_ - transform_.translate;
+				Vector3 toTarget = targetPosition - transform_.translate;
 				const float distance = toTarget.Length();
 				if (distance <= kArriveDistance) {
-					transform_.translate = targetPosition_;
+					transform_.translate = targetPosition;
 				} else {
 					const float moveDistance = std::min(kMoveSpeed * deltaTime, distance);
 					transform_.translate += toTarget / distance * moveDistance;
@@ -93,6 +105,11 @@ namespace DropObject {
 		}
 
 		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerHitBox)) {
+			if (player && type_ == Type::Exp) {
+				CollectExp(*player);
+				return;
+			}
+
 			isAlive_ = false;
 		}
 
@@ -102,6 +119,15 @@ namespace DropObject {
 		}
 
 		backTimer_.Update(deltaTime);
+	}
+
+	void Base::CollectExp(Player::Base& player) {
+		if (!isAlive_) {
+			return;
+		}
+
+		player.AddExp(kExpAmount);
+		isAlive_ = false;
 	}
 
 	void Base::Release() {

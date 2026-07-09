@@ -42,6 +42,9 @@ namespace Player {
 
 	private:
 
+		/// @brief 経験値が上限に達している場合にレベルアップします。
+		void ProcessLevelUp();
+
 		ColliderShape hitAABB_;
 		ColliderShape expGetSphere_;
 
