@@ -489,6 +489,7 @@ namespace MadoEngine
 		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
 
+		//ImGui::ShowDemoWindow();
 
 		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
 		MadoEngine::Editor::DrawAudioManagerUI();

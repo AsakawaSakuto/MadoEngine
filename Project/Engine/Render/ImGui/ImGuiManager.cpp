@@ -6,6 +6,7 @@
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include <cassert>
+#include <cstring>
 #include<filesystem>
 
 namespace {
@@ -13,24 +14,75 @@ namespace {
 	struct ImGuiStyleColorItem {
 		ImGuiCol index;
 		const char* jsonKey;
+		const char* category;
 		const char* label;
-		ImVec4 defaultColor;
 	};
 
 	constexpr const char* kStyleColorJsonPath = "Assets/Json/ImGuiStyleColors.json";
 
 	const ImGuiStyleColorItem kEditableStyleColors[] = {
-		{ ImGuiCol_WindowBg, "WindowBg", "背景 WindowBg", ImVec4(0.08f, 0.09f, 0.11f, 1.0f) },
-		{ ImGuiCol_TitleBg, "TitleBg", "非アクティブTitleBar", ImVec4(0.10f, 0.12f, 0.16f, 1.0f) },
-		{ ImGuiCol_TitleBgActive, "TitleBgActive", "アクティブTitleBar", ImVec4(0.18f, 0.22f, 0.30f, 1.0f) },
-		{ ImGuiCol_MenuBarBg, "MenuBarBg", "MenuBar", ImVec4(0.12f, 0.14f, 0.18f, 1.0f) },
-		{ ImGuiCol_Tab, "Tab", "Tab", ImVec4(0.12f, 0.15f, 0.20f, 1.0f) },
-		{ ImGuiCol_TabHovered, "TabHovered", "TabHovered", ImVec4(0.25f, 0.32f, 0.42f, 1.0f) },
-		{ ImGuiCol_TabActive, "TabActive", "TabActive", ImVec4(0.18f, 0.24f, 0.34f, 1.0f) },
-		{ ImGuiCol_Header, "Header", "Header Selectable等", ImVec4(0.16f, 0.20f, 0.28f, 1.0f) },
-		{ ImGuiCol_FrameBg, "FrameBg", "FrameBg Input/Slider背景", ImVec4(0.10f, 0.12f, 0.16f, 1.0f) },
-		{ ImGuiCol_Button, "Button", "Button", ImVec4(0.18f, 0.22f, 0.30f, 1.0f) },
-		{ ImGuiCol_ButtonHovered, "ButtonHovered", "ButtonHovered", ImVec4(0.25f, 0.32f, 0.42f, 1.0f) },
+		{ ImGuiCol_Text, "Text", "基本", "通常文字" },
+		{ ImGuiCol_TextDisabled, "TextDisabled", "基本", "無効文字" },
+		{ ImGuiCol_TextLink, "TextLink", "基本", "リンク文字" },
+		{ ImGuiCol_TextSelectedBg, "TextSelectedBg", "基本", "選択文字背景" },
+		{ ImGuiCol_WindowBg, "WindowBg", "背景", "ウィンドウ背景" },
+		{ ImGuiCol_ChildBg, "ChildBg", "背景", "子ウィンドウ背景" },
+		{ ImGuiCol_PopupBg, "PopupBg", "背景", "ポップアップ背景" },
+		{ ImGuiCol_Border, "Border", "枠線", "枠線" },
+		{ ImGuiCol_BorderShadow, "BorderShadow", "枠線", "枠線の影" },
+		{ ImGuiCol_Separator, "Separator", "枠線", "区切り線" },
+		{ ImGuiCol_SeparatorHovered, "SeparatorHovered", "枠線", "区切り線ホバー" },
+		{ ImGuiCol_SeparatorActive, "SeparatorActive", "枠線", "区切り線アクティブ" },
+		{ ImGuiCol_FrameBg, "FrameBg", "入力", "入力背景" },
+		{ ImGuiCol_FrameBgHovered, "FrameBgHovered", "入力", "入力背景ホバー" },
+		{ ImGuiCol_FrameBgActive, "FrameBgActive", "入力", "入力背景アクティブ" },
+		{ ImGuiCol_InputTextCursor, "InputTextCursor", "入力", "テキストカーソル" },
+		{ ImGuiCol_CheckMark, "CheckMark", "入力", "チェックマーク" },
+		{ ImGuiCol_SliderGrab, "SliderGrab", "入力", "スライダーつまみ" },
+		{ ImGuiCol_SliderGrabActive, "SliderGrabActive", "入力", "スライダーつまみアクティブ" },
+		{ ImGuiCol_Button, "Button", "ボタン", "ボタン" },
+		{ ImGuiCol_ButtonHovered, "ButtonHovered", "ボタン", "ボタンホバー" },
+		{ ImGuiCol_ButtonActive, "ButtonActive", "ボタン", "ボタンアクティブ" },
+		{ ImGuiCol_Header, "Header", "ヘッダー", "ヘッダー" },
+		{ ImGuiCol_HeaderHovered, "HeaderHovered", "ヘッダー", "ヘッダーホバー" },
+		{ ImGuiCol_HeaderActive, "HeaderActive", "ヘッダー", "ヘッダーアクティブ" },
+		{ ImGuiCol_TitleBg, "TitleBg", "タイトル", "タイトル背景" },
+		{ ImGuiCol_TitleBgActive, "TitleBgActive", "タイトル", "タイトル背景アクティブ" },
+		{ ImGuiCol_TitleBgCollapsed, "TitleBgCollapsed", "タイトル", "タイトル背景折りたたみ" },
+		{ ImGuiCol_MenuBarBg, "MenuBarBg", "タイトル", "メニューバー背景" },
+		{ ImGuiCol_Tab, "Tab", "タブ", "タブ" },
+		{ ImGuiCol_TabHovered, "TabHovered", "タブ", "タブホバー" },
+		{ ImGuiCol_TabSelected, "TabSelected", "タブ", "選択タブ" },
+		{ ImGuiCol_TabSelectedOverline, "TabSelectedOverline", "タブ", "選択タブ上線" },
+		{ ImGuiCol_TabDimmed, "TabDimmed", "タブ", "非フォーカスタブ" },
+		{ ImGuiCol_TabDimmedSelected, "TabDimmedSelected", "タブ", "非フォーカス選択タブ" },
+		{ ImGuiCol_TabDimmedSelectedOverline, "TabDimmedSelectedOverline", "タブ", "非フォーカス選択タブ上線" },
+		{ ImGuiCol_ScrollbarBg, "ScrollbarBg", "スクロールバー", "スクロールバー背景" },
+		{ ImGuiCol_ScrollbarGrab, "ScrollbarGrab", "スクロールバー", "スクロールバーつまみ" },
+		{ ImGuiCol_ScrollbarGrabHovered, "ScrollbarGrabHovered", "スクロールバー", "スクロールバーつまみホバー" },
+		{ ImGuiCol_ScrollbarGrabActive, "ScrollbarGrabActive", "スクロールバー", "スクロールバーつまみアクティブ" },
+		{ ImGuiCol_ResizeGrip, "ResizeGrip", "リサイズ", "リサイズつまみ" },
+		{ ImGuiCol_ResizeGripHovered, "ResizeGripHovered", "リサイズ", "リサイズつまみホバー" },
+		{ ImGuiCol_ResizeGripActive, "ResizeGripActive", "リサイズ", "リサイズつまみアクティブ" },
+		{ ImGuiCol_DockingPreview, "DockingPreview", "ドッキング", "ドッキングプレビュー" },
+		{ ImGuiCol_DockingEmptyBg, "DockingEmptyBg", "ドッキング", "空ドック背景" },
+		{ ImGuiCol_TableHeaderBg, "TableHeaderBg", "テーブル", "テーブルヘッダー背景" },
+		{ ImGuiCol_TableBorderStrong, "TableBorderStrong", "テーブル", "テーブル外枠線" },
+		{ ImGuiCol_TableBorderLight, "TableBorderLight", "テーブル", "テーブル内枠線" },
+		{ ImGuiCol_TableRowBg, "TableRowBg", "テーブル", "テーブル行背景" },
+		{ ImGuiCol_TableRowBgAlt, "TableRowBgAlt", "テーブル", "テーブル交互行背景" },
+		{ ImGuiCol_PlotLines, "PlotLines", "プロット", "プロット線" },
+		{ ImGuiCol_PlotLinesHovered, "PlotLinesHovered", "プロット", "プロット線ホバー" },
+		{ ImGuiCol_PlotHistogram, "PlotHistogram", "プロット", "ヒストグラム" },
+		{ ImGuiCol_PlotHistogramHovered, "PlotHistogramHovered", "プロット", "ヒストグラムホバー" },
+		{ ImGuiCol_TreeLines, "TreeLines", "その他", "ツリー線" },
+		{ ImGuiCol_DragDropTarget, "DragDropTarget", "その他", "ドラッグ先枠" },
+		{ ImGuiCol_DragDropTargetBg, "DragDropTargetBg", "その他", "ドラッグ先背景" },
+		{ ImGuiCol_UnsavedMarker, "UnsavedMarker", "その他", "未保存マーカー" },
+		{ ImGuiCol_NavCursor, "NavCursor", "その他", "ナビカーソル" },
+		{ ImGuiCol_NavWindowingHighlight, "NavWindowingHighlight", "その他", "ナビウィンドウ強調" },
+		{ ImGuiCol_NavWindowingDimBg, "NavWindowingDimBg", "その他", "ナビウィンドウ暗転背景" },
+		{ ImGuiCol_ModalWindowDimBg, "ModalWindowDimBg", "その他", "モーダル暗転背景" },
 	};
 
 	/// @brief ImGuiカラーをJson配列へ変換します。
@@ -98,22 +150,7 @@ namespace MadoEngine {
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-
-		ImGuiStyle& style = ImGui::GetStyle();
-		ImVec4* colors = style.Colors;
-
-		colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.09f, 0.11f, 1.0f); // 背景
-		colors[ImGuiCol_TitleBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // 非アクティブTitleBar
-		colors[ImGuiCol_TitleBgActive] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f); // アクティブTitleBar
-		colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.14f, 0.18f, 1.0f); // MenuBar
-		colors[ImGuiCol_Tab] = ImVec4(0.12f, 0.15f, 0.20f, 1.0f); // Tab
-		colors[ImGuiCol_TabHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
-		colors[ImGuiCol_TabActive] = ImVec4(0.18f, 0.24f, 0.34f, 1.0f);
-		colors[ImGuiCol_Header] = ImVec4(0.16f, 0.20f, 0.28f, 1.0f); // Selectable等
-		colors[ImGuiCol_FrameBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // Input/Slider背景
-		colors[ImGuiCol_Button] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f);
-		colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
+		ApplyDefaultStyleColors();
 		LoadStyleColors();
 
 		ImGui_ImplWin32_Init(hwnd);
@@ -171,11 +208,20 @@ namespace MadoEngine {
 
 	/// @brief 既定のImGuiスタイルカラーを適用します。
 	void ImGuiManager::ApplyDefaultStyleColors() {
+		ImGui::StyleColorsDark();
 		ImVec4* colors = ImGui::GetStyle().Colors;
 
-		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
-			colors[item.index] = item.defaultColor;
-		}
+		colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.09f, 0.11f, 1.0f); // 背景
+		colors[ImGuiCol_TitleBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // 非アクティブTitleBar
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f); // アクティブTitleBar
+		colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.14f, 0.18f, 1.0f); // MenuBar
+		colors[ImGuiCol_Tab] = ImVec4(0.12f, 0.15f, 0.20f, 1.0f); // Tab
+		colors[ImGuiCol_TabHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
+		colors[ImGuiCol_TabSelected] = ImVec4(0.18f, 0.24f, 0.34f, 1.0f);
+		colors[ImGuiCol_Header] = ImVec4(0.16f, 0.20f, 0.28f, 1.0f); // Selectable等
+		colors[ImGuiCol_FrameBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // Input/Slider背景
+		colors[ImGuiCol_Button] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
 	}
 
 	/// @brief ImGuiのスタイルカラーをJsonへ保存します。
@@ -214,12 +260,17 @@ namespace MadoEngine {
 		ImVec4* colors = ImGui::GetStyle().Colors;
 		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
 			const auto it = colorsJson->find(item.jsonKey);
-			if (it == colorsJson->end()) {
+			auto oldTabActiveIt = colorsJson->end();
+			if (std::strcmp(item.jsonKey, "TabSelected") == 0) {
+				oldTabActiveIt = colorsJson->find("TabActive");
+			}
+			if (it == colorsJson->end() && oldTabActiveIt == colorsJson->end()) {
 				continue;
 			}
 
+			const nlohmann::json& colorJson = it != colorsJson->end() ? *it : *oldTabActiveIt;
 			ImVec4 color;
-			if (TryReadJsonColor(*it, color)) {
+			if (TryReadJsonColor(colorJson, color)) {
 				colors[item.index] = color;
 				loaded = true;
 			}
@@ -247,8 +298,28 @@ namespace MadoEngine {
 		ImGui::Text("保存先: %s", kStyleColorJsonPath);
 		ImGui::Separator();
 		ImVec4* colors = ImGui::GetStyle().Colors;
+
+		const char* currentCategory = nullptr;
+		bool isCategoryOpen = false;
 		for (const ImGuiStyleColorItem& item : kEditableStyleColors) {
-			ImGui::ColorEdit4(item.label, &colors[item.index].x, ImGuiColorEditFlags_AlphaBar);
+			if (currentCategory == nullptr || std::strcmp(currentCategory, item.category) != 0) {
+				if (isCategoryOpen) {
+					ImGui::TreePop();
+				}
+
+				currentCategory = item.category;
+				isCategoryOpen = ImGui::TreeNodeEx(currentCategory, ImGuiTreeNodeFlags_DefaultOpen);
+			}
+
+			if (isCategoryOpen) {
+				ImGui::PushID(item.jsonKey);
+				ImGui::ColorEdit4(item.label, &colors[item.index].x, ImGuiColorEditFlags_AlphaBar);
+				ImGui::PopID();
+			}
+		}
+
+		if (isCategoryOpen) {
+			ImGui::TreePop();
 		}
 
 		ImGui::End();

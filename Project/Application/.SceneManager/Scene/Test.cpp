@@ -173,7 +173,7 @@ void Test::DrawImGui() {
 
 	player_->DrawImGui();
 
-	//weaponInventory_->DrawImGui();
+	weaponInventory_->DrawImGui();
 
 	map_->DrawImGui();
 
