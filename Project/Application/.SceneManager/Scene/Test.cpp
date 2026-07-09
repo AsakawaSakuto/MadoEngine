@@ -215,6 +215,7 @@ bool Test::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 
 void Test::Finalize() {
 	
+	DropObject::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
 	MySprite::DestroyByScene(SceneType::Test);
 	MyText::Destroy("PlayerHealthText");

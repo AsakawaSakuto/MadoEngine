@@ -1,4 +1,5 @@
 #include "DropObjectManager.h"
+#include <algorithm>
 
 namespace DropObject {
 
@@ -12,6 +13,15 @@ namespace DropObject {
 			dropObject->SetTargetPosition(targetPosition);
 			dropObject->Update(deltaTime);
 		}
+
+		dropObjects_.erase(
+			std::remove_if(
+				dropObjects_.begin(),
+				dropObjects_.end(),
+				[](const std::unique_ptr<Base>& dropObject) {
+					return !dropObject || !dropObject->IsAlive();
+				}),
+			dropObjects_.end());
 	}
 
 	void Manager::Spawn(Type type, const Vector3& position) {
@@ -19,5 +29,10 @@ namespace DropObject {
 		newDropObject->Initialize(type, position, spawnCount_);
 		dropObjects_.push_back(std::move(newDropObject));
 		spawnCount_++;
+	}
+
+	void Manager::Clear() {
+		dropObjects_.clear();
+		spawnCount_ = 0;
 	}
 }
