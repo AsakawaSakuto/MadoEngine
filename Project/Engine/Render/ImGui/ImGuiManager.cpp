@@ -41,6 +41,21 @@ namespace MadoEngine {
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
 
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4* colors = style.Colors;
+
+		colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.09f, 0.11f, 1.0f); // 背景
+		colors[ImGuiCol_TitleBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // 非アクティブTitleBar
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f); // アクティブTitleBar
+		colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.14f, 0.18f, 1.0f); // MenuBar
+		colors[ImGuiCol_Tab] = ImVec4(0.12f, 0.15f, 0.20f, 1.0f); // Tab
+		colors[ImGuiCol_TabHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
+		colors[ImGuiCol_TabActive] = ImVec4(0.18f, 0.24f, 0.34f, 1.0f);
+		colors[ImGuiCol_Header] = ImVec4(0.16f, 0.20f, 0.28f, 1.0f); // Selectable等
+		colors[ImGuiCol_FrameBg] = ImVec4(0.10f, 0.12f, 0.16f, 1.0f); // Input/Slider背景
+		colors[ImGuiCol_Button] = ImVec4(0.18f, 0.22f, 0.30f, 1.0f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
+
 		ImGui_ImplWin32_Init(hwnd);
 
 		// ドッキング機能・マルチビューポート（ウィンドウ外ドラッグ）を有効化
@@ -56,7 +71,7 @@ namespace MadoEngine {
 		initInfo.Device = device->GetDevice();
 		initInfo.CommandQueue = commandManager->GetCommandQueue();
 		initInfo.NumFramesInFlight = static_cast<int>(bufferCount);
-		initInfo.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		initInfo.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		initInfo.DSVFormat = DXGI_FORMAT_UNKNOWN;
 		initInfo.SrvDescriptorHeap = srvManager_->GetDescriptorHeap();
 		initInfo.SrvDescriptorAllocFn = &ImGuiManager::SrvAllocCallback;

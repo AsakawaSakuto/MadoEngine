@@ -43,6 +43,10 @@
             "key": "LayerEffectPass_5",
             "name": "MapObjectBloom",
             "parameters": {
+                "BloomColorA": 1.0,
+                "BloomColorB": 1.0,
+                "BloomColorG": 1.0,
+                "BloomColorR": 1.0,
                 "Intensity": 1.0,
                 "Radius": 3.5,
                 "SoftKnee": 1.0,
@@ -63,7 +67,7 @@
         },
         {
             "effectShaderKey": "PostEffect/Fog.PS",
-            "enabled": true,
+            "enabled": false,
             "ignoreDepthForMask": false,
             "key": "ScreenEffectPass_2",
             "name": "Fog",

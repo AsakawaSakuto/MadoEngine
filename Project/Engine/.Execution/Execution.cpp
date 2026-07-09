@@ -137,7 +137,7 @@ namespace MadoEngine
 		MadoEngine::Render::RenderTargetManager::Desc postEffectDesc{};
 		postEffectDesc.width = renderWidth_;
 		postEffectDesc.height = renderHeight_;
-		postEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		postEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		postEffectDesc.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderTargetManager_->Create(kPostEffectResultTarget, postEffectDesc);
 		renderTargetManager_->Create(kPostEffectWorkTarget, postEffectDesc);
@@ -152,7 +152,7 @@ namespace MadoEngine
 		MadoEngine::Render::RenderTargetManager::Desc layerEffectDesc{};
 		layerEffectDesc.width = renderWidth_;
 		layerEffectDesc.height = renderHeight_;
-		layerEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		layerEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		layerEffectDesc.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 		renderTargetManager_->Create(kLayerEffectResultTarget, layerEffectDesc);
 		renderTargetManager_->Create(kLayerEffectWorkTarget, layerEffectDesc);
@@ -163,7 +163,7 @@ namespace MadoEngine
 		postEffectCopyDesc_.fillMode = MadoEngine::Render::FillMode::Solid;
 		postEffectCopyDesc_.topology = MadoEngine::Render::TopologyType::Triangle;
 		postEffectCopyDesc_.inputLayout = MadoEngine::Render::InputLayoutType::None;
-		postEffectCopyDesc_.rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		postEffectCopyDesc_.rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		postEffectCopyDesc_.dsvFormat = DXGI_FORMAT_UNKNOWN;
 		postEffectCopyDesc_.vsKey = "PostEffect/CopyImage.VS";
 		postEffectCopyDesc_.psKey = "PostEffect/CopyImage.PS";

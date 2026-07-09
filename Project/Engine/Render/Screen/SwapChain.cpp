@@ -169,7 +169,7 @@ namespace MadoEngine::Screen {
 			Logger::Output("バックバッファ " + std::to_string(i) + " を取得しました", Logger::Level::Engine);
 
 			if (rtvManager_ != nullptr) {
-				rtvManager_->CreateRenderTargetView(backBuffers_[i].Get(), backBufferRTVIndices_[i]);
+				rtvManager_->CreateRenderTargetView(backBuffers_[i].Get(), backBufferRTVIndices_[i], DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
 			}
 		}
 
