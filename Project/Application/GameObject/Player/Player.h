@@ -15,6 +15,7 @@ namespace Player {
 
 		void Update(float deltaTime) override;
 
+		/// @brief Playerのワールド座標を取得します。
 		Vector3 GetPosition() const { return transform_.translate; }
 
 		/// @brief Playerの描画Model座標を取得します。

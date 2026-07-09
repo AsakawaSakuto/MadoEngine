@@ -60,6 +60,26 @@
             "name": "Screen Effect",
             "parameters": {},
             "targetLayerMask": 255
+        },
+        {
+            "effectShaderKey": "PostEffect/Fog.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "ScreenEffectPass_2",
+            "name": "Fog",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 0.7400000095367432,
+                "ColorG": 0.6800000071525574,
+                "ColorR": 0.5799999833106995,
+                "Density": 1.0,
+                "EndDistance": 150.0,
+                "FarClip": 1000.0,
+                "HeightStrength": 0.0,
+                "NearClip": 0.10000000149011612,
+                "StartDistance": 50.0
+            },
+            "targetLayerMask": 255
         }
     ],
     "version": 1

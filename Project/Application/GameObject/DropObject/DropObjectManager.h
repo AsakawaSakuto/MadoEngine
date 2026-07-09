@@ -11,13 +11,13 @@ namespace DropObject {
 		static Manager& GetInstance();
 
 		/// @brief DropObjectを更新します
-		/// @param deltaTime 1フレームの経過時間です
-		/// @param targetPosition DropObjectが向かう座標です
+		/// @param deltaTime 1フレームの経過時間
+		/// @param targetPosition DropObjectが向かう座標
 		void Update(float deltaTime, const Vector3& targetPosition);
 
 		/// @brief DropObjectを生成します
-		/// @param type DropObjectの種類です
-		/// @param position 生成位置です
+		/// @param type DropObjectの種類
+		/// @param position 生成位置
 		void Spawn(Type type, const Vector3& position);
 
 		/// @brief すべてのDropObjectを削除します
