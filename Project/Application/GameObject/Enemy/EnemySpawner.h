@@ -52,6 +52,9 @@ private:
 	Player::Base* player_ = nullptr;
 	SceneType sceneType_ = SceneType::None;
 	std::vector<std::unique_ptr<Enemy>> enemies_;
+
+	int spawnLimit_ = 499;
+
 	float spawnInterval_ = 0.1f;
 	float spawnTimer_ = 0.0f;
 	float minSpawnRadius_ = 8.0f;
