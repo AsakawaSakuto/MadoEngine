@@ -16,16 +16,20 @@ namespace Projectile {
 	/// @brief 武器の種類を表す列挙型
 	enum class Type {
 		None,
+		Axe,
+		FireBall,
 		Pistol,
 		Rock,
 	};
 
 	inline std::string ProjectileTypeToString(Type type) {
 		switch (type) {
-		case Type::None:   return "None";
-		case Type::Pistol: return "Pistol";
-		case Type::Rock:   return "Rock";
-		default:           return "Unknown";
+		case Type::None:     return "None";
+		case Type::Axe:      return "Axe";
+		case Type::FireBall: return "FireBall";
+		case Type::Pistol:   return "Pistol";
+		case Type::Rock:     return "Rock";
+		default:             return "Unknown";
 		}
 	}
 }

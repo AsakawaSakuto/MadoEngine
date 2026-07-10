@@ -158,7 +158,9 @@
     <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Axe.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explotion.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Rock.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
@@ -298,7 +300,9 @@
     <ClInclude Include="Application\GameObject\Rarity.h" />
     <ClInclude Include="Application\GameObject\StatusEffect.h" />
     <ClInclude Include="Application\GameObject\Weapon\BaseWeapon.h" />
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Axe.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Explotion.h" />
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Rock.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\IProjectile.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.h" />

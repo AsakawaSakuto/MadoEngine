@@ -1,6 +1,8 @@
 #pragma once
 #include "Entity/Pistol.h"
 #include "Entity/Rock.h"
+#include "Entity/Axe.h"
+#include "Entity/FireBall.h"
 #include <memory>
 #include <vector>
 

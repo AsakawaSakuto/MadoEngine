@@ -1,4 +1,4 @@
-#include "Rock.h"
+#include "FireBall.h"
 #include "../../../Map/MapLimit.h"
 #include <cmath>
 
@@ -8,14 +8,14 @@ namespace Projectile {
 		constexpr float kDirectionEpsilon = 0.0001f;
 	}
 
-	Rock::~Rock() {
+	FireBall::~FireBall() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
 			MyModel::Destroy(objectName_);
 		}
 	}
 
-	void Rock::Initialize(InitializeDesc context) {
+	void FireBall::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + std::to_string(context.projectileCount);
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
 
@@ -41,7 +41,7 @@ namespace Projectile {
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 	}
 
-	void Rock::Update(float deltaTime) {
+	void FireBall::Update(float deltaTime) {
 
 		transform_.translate += moveDirection_ * kMoveSpeed * deltaTime;
 

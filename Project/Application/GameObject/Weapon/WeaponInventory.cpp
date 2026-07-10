@@ -13,6 +13,8 @@ namespace Weapon {
 		constexpr Projectile::Type kSelectableWeaponTypes[] = {
 			Projectile::Type::Pistol,
 			Projectile::Type::Rock,
+			Projectile::Type::FireBall,
+			Projectile::Type::Axe,
 		};
 	}
 #endif // USE_IMGUI
