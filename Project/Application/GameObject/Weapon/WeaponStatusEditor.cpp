@@ -40,8 +40,7 @@ namespace Weapon {
 			ImGui::SetNextItemWidth(120.0f);
 			ImGui::DragFloat("値", &value.value, 0.01f, -999999.0f, 999999.0f, "%.2f");
 			ImGui::SameLine();
-			ImGui::SetNextItemWidth(100.0f);
-			ImGui::DragInt("最大Lv", &value.maxLevel, 1.0f, 0, 999);
+			ImGui::Checkbox("選択肢に表示", &value.isSelected);
 			ImGui::PopID();
 		}
 #endif // USE_IMGUI
