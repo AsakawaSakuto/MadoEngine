@@ -3,10 +3,6 @@
 namespace Weapon {
 
 	void BaseWeapon::Initialize(Projectile::Type type, int slotIndex) {
-		// 武器の初期化処理
-		defaultStatus_ = DefaultStatus();
-		specialStatus_ = SpecialStatus();
-
 		slotIndex_ = slotIndex;
 		type_ = type;
 		weaponName_ = ProjectileTypeToString(type_);
@@ -15,8 +11,8 @@ namespace Weapon {
 		killCount_ = 0;
 		projectileCount_ = 0;
 
-		intervalTimer_.Start(defaultStatus_.shotInterval, true);
-		cooldownTimer_.Start(defaultStatus_.shotCooldown, false);
+		intervalTimer_.Start(shotIntervalTime_, true);
+		cooldownTimer_.Start(status_.shotCooldown.value, false);
 	}
 
 	void BaseWeapon::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
@@ -30,14 +26,14 @@ namespace Weapon {
 		// クールタイムが終了している場合射撃を開始する
 		if (cooldownTimer_.IsFinished()) {
 			if (!intervalTimer_.IsActive()) {
-				intervalTimer_.Start(defaultStatus_.shotInterval, true);
+				intervalTimer_.Start(shotIntervalTime_, true);
 				cooldownTimer_.Reset();
 			}
 		}
 
 		// 最大数射撃数に達していない場合、射撃間隔が終了したら射撃を行う
 		if (intervalTimer_.IsFinished()) {
-			defaultStatus_.shotNowCount++;
+			shotNowCount_++;
 			projectileCount_++;
 
 			Projectile::InitializeDesc context;
@@ -49,10 +45,10 @@ namespace Weapon {
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 
 			// 最大射撃数に達した場合、射撃数をリセットしてクールダウンを開始する
-			if (defaultStatus_.shotNowCount >= static_cast<int>(defaultStatus_.shotMaxCount)) {
-				defaultStatus_.shotNowCount = 0;
+			if (shotNowCount_ >= static_cast<int>(status_.shotMaxCount.value)) {
+				shotNowCount_ = 0;
 				intervalTimer_.Reset();
-				cooldownTimer_.Start(defaultStatus_.shotCooldown, false);
+				cooldownTimer_.Start(status_.shotCooldown.value, false);
 			}
 		}
 
