@@ -4,6 +4,9 @@
 #include <cmath>
 
 namespace Player {
+	namespace {
+		constexpr float kShadowGroundOffset = 0.01f;
+	}
 
 	void Base::Initialize() {
 		transform_.translate = { 0.0f, 100.0f, 0.0f };
@@ -29,7 +32,16 @@ namespace Player {
 		model_ = MyModel::Create("Player", "walk", SceneType::Test);
 		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 		model_->SetTexture("white16x16");
-		model_->SetCastShadow(true);
+		model_->SetCastShadow(false);
+
+		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
+		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Test);
+		shadowModel_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
+		shadowModel_->SetTexture("white16x16");
+		shadowModel_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		shadowModel_->SetCastShadow(false);
+		shadowModel_->SetReceiveShadow(false);
+		shadowModel_->SetLightingEnabled(false);
 
 		movement_.Initialize();
 	}
@@ -96,6 +108,8 @@ namespace Player {
 		model_->SetRotation(transform_.rotate);
 		model_->SetScale(transform_.scale);
 
+		UpdateShadowTransform();
+
 		if (movement_.GetCurrentMotion() == Player::Motion::Crouching) {
 			model_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		} else {
@@ -111,6 +125,44 @@ namespace Player {
 		MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(expGetSphere_), Vector4{ 0.0f,0.0f,1.0f,1.0f });
+	}
+
+	/// @brief Player直下の地面へ影の描画座標を更新します。
+	void Base::UpdateShadowTransform() {
+		if (!shadowModel_) {
+			return;
+		}
+
+		const float maxGroundDistance = mapLimit_.max.y - mapLimit_.min.y;
+		float groundY = 0.0f;
+		float surfaceY = 0.0f;
+		bool foundGround = false;
+
+		if (MyCollider::TryGetGroundSurfaceY(transform_.translate, CollisionTag::MapBlock, surfaceY, maxGroundDistance)) {
+			groundY = surfaceY;
+			foundGround = true;
+		}
+
+		if (MyCollider::TryGetGroundSurfaceY(transform_.translate, CollisionTag::MapSlope, surfaceY, maxGroundDistance) &&
+			(!foundGround || surfaceY > groundY)) {
+			groundY = surfaceY;
+			foundGround = true;
+		}
+
+		shadowModel_->SetVisible(foundGround);
+		if (!foundGround) {
+			return;
+		}
+
+		shadowTransform_.translate = {
+			transform_.translate.x,
+			groundY,
+			transform_.translate.z
+		};
+		
+		shadowModel_->SetPosition(shadowTransform_.translate);
+		shadowModel_->SetRotation(transform_.rotate);
+		shadowModel_->SetScale(shadowTransform_.scale);
 	}
 
 	/// @brief Playerの描画Model座標を取得します。

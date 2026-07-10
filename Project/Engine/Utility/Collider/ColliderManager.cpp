@@ -1366,6 +1366,106 @@ bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag ta
     return false;
 }
 
+/// @brief 指定座標の直下にある地表面のY座標を取得します。
+/// @param origin 地表面を探す基準座標です。
+/// @param targetTag 地面として扱う対象タグです。
+/// @param outSurfaceY 見つかった地表面のY座標です。
+/// @param maxDistance 下方向に探索する最大距離です。
+/// @return 地表面が見つかった場合はtrueを返します。
+bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance) {
+    if (maxDistance < 0.0f) {
+        return false;
+    }
+
+    const auto* targetNames = FindColliderNames(targetTag);
+    if (!targetNames) {
+        return false;
+    }
+
+    bool foundSurface = false;
+    float bestSurfaceY = -FLT_MAX;
+
+    const auto evaluateCollider = [&](const ColliderInfo& colliderInfo) {
+        if (!colliderInfo.pShape || !colliderInfo.pPosition) {
+            return;
+        }
+
+        float surfaceY = 0.0f;
+        if (std::holds_alternative<AABB>(*(colliderInfo.pShape))) {
+            AABB ground = std::get<AABB>(*(colliderInfo.pShape));
+            ground.center = *(colliderInfo.pPosition);
+            const Vector3 worldMin = ground.GetMinWorld();
+            const Vector3 worldMax = ground.GetMaxWorld();
+            if (origin.x < worldMin.x || origin.x > worldMax.x ||
+                origin.z < worldMin.z || origin.z > worldMax.z) {
+                return;
+            }
+
+            surfaceY = worldMax.y;
+        } else if (std::holds_alternative<Slope>(*(colliderInfo.pShape))) {
+            Slope slope = std::get<Slope>(*(colliderInfo.pShape));
+            slope.center = *(colliderInfo.pPosition);
+            if (!Collision::Detail::IsInsideSlopeXZ(slope, origin)) {
+                return;
+            }
+
+            surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, origin);
+        } else {
+            return;
+        }
+
+        const float distance = origin.y - surfaceY;
+        if (distance < 0.0f || distance > maxDistance) {
+            return;
+        }
+
+        if (!foundSurface || surfaceY > bestSurfaceY) {
+            foundSurface = true;
+            bestSurfaceY = surfaceY;
+        }
+    };
+
+    if (IsStaticTerrainTag(targetTag)) {
+        RebuildStaticTerrainBVHIfNeeded();
+
+        constexpr float kGroundQueryHalfWidth = 0.001f;
+        AABB queryBounds;
+        queryBounds.center = origin;
+        queryBounds.min = { -kGroundQueryHalfWidth, -maxDistance, -kGroundQueryHalfWidth };
+        queryBounds.max = { kGroundQueryHalfWidth, 0.0f, kGroundQueryHalfWidth };
+        QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+
+        for (const std::string* candidateName : bvhQueryResults_) {
+            if (!candidateName) {
+                continue;
+            }
+
+            auto colliderIt = m_colliders.find(*candidateName);
+            if (colliderIt == m_colliders.end() || colliderIt->second.tag != targetTag) {
+                continue;
+            }
+
+            evaluateCollider(colliderIt->second);
+        }
+    } else {
+        for (const auto& targetName : *targetNames) {
+            auto colliderIt = m_colliders.find(targetName);
+            if (colliderIt == m_colliders.end()) {
+                continue;
+            }
+
+            evaluateCollider(colliderIt->second);
+        }
+    }
+
+    if (!foundSurface) {
+        return false;
+    }
+
+    outSurfaceY = bestSurfaceY;
+    return true;
+}
+
 /// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得します。
 /// @param name Sphereコライダーの識別名です。
 /// @param targetTag Slopeとして扱うタグです。

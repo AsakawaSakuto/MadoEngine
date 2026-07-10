@@ -105,6 +105,16 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(selfTag, targetTag);
 	}
 
+	/// @brief 指定座標の直下にある地表面のY座標を取得します。
+	/// @param origin 地表面を探す基準座標です。
+	/// @param targetTag 地面として扱う対象タグです。
+	/// @param outSurfaceY 見つかった地表面のY座標です。
+	/// @param maxDistance 下方向に探索する最大距離です。
+	/// @return 地表面が見つかった場合はtrueを返します。
+	inline bool TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance) {
+		return ColliderManager::GetInstance().TryGetGroundSurfaceY(origin, targetTag, outSurfaceY, maxDistance);
+	}
+
 	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ

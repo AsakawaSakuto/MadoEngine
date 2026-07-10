@@ -45,10 +45,16 @@ namespace Player {
 		/// @brief 経験値が上限に達している場合にレベルアップする
 		void ProcessLevelUp();
 
+		/// @brief Player直下の地面へ影の描画座標を更新します。
+		void UpdateShadowTransform();
+
 		ColliderShape hitAABB_;
 		ColliderShape expGetSphere_;
 
 		Camera* camera_ = nullptr;
+
+		Model* shadowModel_ = nullptr; // 影モデル
+		Transform3D shadowTransform_;  // 影Transform
 
 		Status status_;                     // ステータス
 		StatusMultiplier statusMultiplier_; // ステータスの倍率
