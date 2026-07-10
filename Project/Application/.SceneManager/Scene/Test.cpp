@@ -80,6 +80,7 @@ void Test::Initialize() {
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
 	weaponInventory_->Initialize(Projectile::Type::Pistol);
+	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 
 	fadeSprite_ = MySprite::Create("testFade", "black2x2", SceneType::Test);
 	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
@@ -169,11 +170,12 @@ void Test::DrawImGui() {
 
 	tpsCamera_.DrawImGui();
 
-	debugCamera_.DrawImGui();
+	//debugCamera_.DrawImGui();
 
 	player_->DrawImGui();
 
 	weaponInventory_->DrawImGui();
+	weaponStatusEditor_->DrawImGui();
 
 	map_->DrawImGui();
 
@@ -189,8 +191,8 @@ void Test::DrawImGui() {
 
 	ImGui::End();
 
-	expGauge_->DrawImGui();
-	healthGauge_->DrawImGui();
+	//expGauge_->DrawImGui();
+	//healthGauge_->DrawImGui();
 
 #endif // USE_IMGUI
 }

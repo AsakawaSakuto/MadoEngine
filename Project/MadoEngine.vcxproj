@@ -165,6 +165,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Rock.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerHealthGauge.cpp" />
@@ -310,6 +311,7 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileStatus.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponInventory.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h" />
+    <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\UI\GameSceneTimer.h" />
     <ClInclude Include="Application\UI\Player\PlayerExpGauge.h" />
     <ClInclude Include="Application\UI\Player\PlayerHealthGauge.h" />

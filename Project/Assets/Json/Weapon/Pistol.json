@@ -1,0 +1,49 @@
+{
+    "name": "Pistol",
+    "upgradeStatus": {
+        "bounceCount": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "criticalChance": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "criticalDamage": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "damage": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "knockbackPower": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "lifeTime": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "penetrationCount": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "shotCooldown": {
+            "maxLevel": 99,
+            "value": 0.05000000074505806
+        },
+        "shotMaxCount": {
+            "maxLevel": 99,
+            "value": 10.0
+        },
+        "size": {
+            "maxLevel": 99,
+            "value": 1.0
+        },
+        "speed": {
+            "maxLevel": 99,
+            "value": 1.0
+        }
+    }
+}

@@ -110,6 +110,7 @@
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Rock.cpp" />
@@ -613,6 +614,7 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponInventory.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Item\ItemStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

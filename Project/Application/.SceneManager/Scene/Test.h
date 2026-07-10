@@ -5,6 +5,7 @@
 #include "GameObject/Map/MapLimit.h"
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
+#include "GameObject/Weapon/WeaponStatusEditor.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
@@ -65,6 +66,7 @@ private:
 	std::unique_ptr<EnemySpawner> enemySpawner_;
 
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
+	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
 
 	Sprite* fadeSprite_ = nullptr;
 	MadoEngine::Text* playerHealthText_ = nullptr;

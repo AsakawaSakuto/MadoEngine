@@ -1,15 +1,29 @@
 #include "BaseWeapon.h"
+#include "Utility/Json/Core/JsonFile.h"
+#include "Utility/Logger/Logger.h"
 
 namespace Weapon {
 
 	void BaseWeapon::Initialize(Projectile::Type type, int slotIndex) {
 		slotIndex_ = slotIndex;
 		type_ = type;
+		status_ = UpgradeStatus{};
 		weaponName_ = ProjectileTypeToString(type_);
 
 		upgradeLevel_ = 0;
 		killCount_ = 0;
 		projectileCount_ = 0;
+
+		// 武器のステータスをJsonから読み込む
+		nlohmann::json json;
+		MadoEngine::Json::JsonFile::Load("Assets/Json/Weapon/" + weaponName_ + ".json", json);
+		
+		const nlohmann::json* statusJson = &json;
+		if (json.is_object() && json.contains("upgradeStatus")) {
+			statusJson = &json.at("upgradeStatus");
+		}
+
+		UpgradeStatusFromJson(*statusJson, status_);
 
 		intervalTimer_.Start(shotIntervalTime_, true);
 		cooldownTimer_.Start(status_.shotCooldown.value, false);

@@ -8,16 +8,17 @@
 
 namespace Weapon {
 
-#ifdef USE_IMGUI
 	namespace {
+#ifdef USE_IMGUI
 		constexpr Projectile::Type kSelectableWeaponTypes[] = {
 			Projectile::Type::Pistol,
 			Projectile::Type::Rock,
 			Projectile::Type::FireBall,
 			Projectile::Type::Axe,
 		};
-	}
 #endif // USE_IMGUI
+
+	}
 	
 	void Inventory::Initialize(Projectile::Type type) {
 		weapons_.clear();

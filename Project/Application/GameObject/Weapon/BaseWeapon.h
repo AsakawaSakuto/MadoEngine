@@ -21,6 +21,7 @@ namespace Weapon {
 		int GetKillCount() const { return killCount_; }
 
 	private:
+		
 		// 武器のステータス
 		UpgradeStatus status_;
 		
