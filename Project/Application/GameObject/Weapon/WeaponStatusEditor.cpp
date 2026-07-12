@@ -36,11 +36,17 @@ namespace Weapon {
 		void DrawUpgradeValueImGui(const char* label, UpgradeValue& value) {
 			ImGui::PushID(label);
 			ImGui::TextUnformatted(label);
-			ImGui::SameLine(160.0f);
 			ImGui::SetNextItemWidth(120.0f);
-			ImGui::DragFloat("値", &value.value, 0.01f, -999999.0f, 999999.0f, "%.2f");
+			ImGui::DragFloat("現在の初期値", &value.value, 0.01f, -999999.0f, 999999.0f, "%.3f");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(120.0f);
+			ImGui::DragFloat("固定加算値", &value.fixedAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(120.0f);
+			ImGui::DragFloat("レアリティ上昇幅", &value.rarityAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
 			ImGui::SameLine();
 			ImGui::Checkbox("選択肢に表示", &value.isSelected);
+			ImGui::Separator();
 			ImGui::PopID();
 		}
 #endif // USE_IMGUI
@@ -77,7 +83,11 @@ namespace Weapon {
 			statusJson = &json.at("upgradeStatus");
 		}
 
-		UpgradeStatusFromJson(*statusJson, editingStatus_);
+		if (!UpgradeStatusFromJson(*statusJson, editingStatus_)) {
+			Logger::Output("[Assets] 武器初期ステータスJsonに不正な値があります: " + filePath, Logger::Level::Error);
+			return false;
+		}
+
 		Logger::Output("[Assets] 武器初期ステータスをJsonから読み込みました: " + filePath, Logger::Level::Assets);
 		return true;
 	}

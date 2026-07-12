@@ -6,6 +6,7 @@
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
 #include "GameObject/Weapon/WeaponStatusEditor.h"
+#include "GameObject/Weapon/WeaponUpgradeSystem.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
@@ -49,6 +50,11 @@ public:
 	/// @return Player座標を取得できた場合はtrueを返します。
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
+	/// @brief 武器アップグレードの選択入力を更新します。
+	void UpdateWeaponUpgradeInput();
+
+	/// @brief 武器アップグレード確認用のImGuiを描画します。
+	void DrawWeaponUpgradeImGui();
 	
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
@@ -67,6 +73,7 @@ private:
 
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
 	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
+	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
 
 	Sprite* fadeSprite_ = nullptr;
 	MadoEngine::Text* playerHealthText_ = nullptr;
@@ -75,6 +82,8 @@ private:
 	GameTimer fadeOutTimer_;
 	float fpsSampleTime_ = 0.0f;
 	int fpsSampleFrameCount_ = 0;
+	std::size_t selectedUpgradeChoiceIndex_ = 0;
+	std::uint64_t selectedUpgradeGeneration_ = 0;
 
 	bool useDebugCamera_ = false;
 };

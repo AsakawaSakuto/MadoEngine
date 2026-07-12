@@ -1,29 +1,116 @@
 #pragma once
+#include "../Rarity.h"
+#include <array>
+#include <cmath>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <utility>
+
 namespace Weapon {
 
-	/// @brief 武器のアップグレード値を管理する構造体
-	struct UpgradeValue {
-		float value = 0.0f;      // 加算される値
-		bool isSelected = false; // 選択肢に出るかどうか
+	/// @brief 武器の強化対象ステータスを表す列挙型です。
+	enum class UpgradeStatType {
+		None,
+		Damage,
+		ShotMaxCount,
+		ShotCooldown,
+		CriticalChance,
+		CriticalDamage,
+		Size,
+		BounceCount,
+		PenetrationCount,
+		KnockbackPower,
+		LifeTime,
+		Speed,
+		Count,
 	};
 
-	/// @brief 武器のアップグレードしたステータスを管理する構造体
-	struct UpgradeStatus {
-		UpgradeValue damage           = { 1.0f, true }; // 武器のダメージ量
-		UpgradeValue shotMaxCount     = { 1.0f, true }; // 武器の最大射撃数
-		UpgradeValue shotCooldown     = { 1.0f, true }; // 武器の射撃クールダウン
-		UpgradeValue criticalChance   = { 1.0f, true }; // 武器のクリティカル率
-		UpgradeValue criticalDamage   = { 1.0f, true }; // 武器のクリティカルダメージ倍率
-		UpgradeValue size             = { 1.0f, true }; // 武器のサイズ
-		UpgradeValue bounceCount      = { 1.0f, true }; // 武器の跳弾回数
-		UpgradeValue penetrationCount = { 1.0f, true }; // 武器の貫通回数
-		UpgradeValue knockbackPower   = { 1.0f, true }; // 武器のノックバック力
-		UpgradeValue lifeTime         = { 1.0f, true }; // 武器の弾の寿命
-		UpgradeValue speed            = { 1.0f, true }; // 武器の弾の速度
+	// 抽選対象の強化ステータスを一か所で管理します。
+	inline constexpr std::array<UpgradeStatType, 11> kUpgradeStatTypes = {
+		UpgradeStatType::Damage,
+		UpgradeStatType::ShotMaxCount,
+		UpgradeStatType::ShotCooldown,
+		UpgradeStatType::CriticalChance,
+		UpgradeStatType::CriticalDamage,
+		UpgradeStatType::Size,
+		UpgradeStatType::BounceCount,
+		UpgradeStatType::PenetrationCount,
+		UpgradeStatType::KnockbackPower,
+		UpgradeStatType::LifeTime,
+		UpgradeStatType::Speed,
 	};
+
+	/// @brief 武器の現在値と強化設定を管理する構造体です。
+	struct UpgradeValue {
+		float value = 0.0f;          // 現在値
+		float fixedAddValue = 0.0f;  // 強化時の固定加算値
+		float rarityAddValue = 0.0f; // レアリティ値ごとの上昇幅
+		bool isSelected = false;     // 選択肢に出るかどうか
+	};
+
+	/// @brief 武器の強化ステータスを管理する構造体です。
+	struct UpgradeStatus {
+		UpgradeValue damage           = { 1.0f, 1.0f, 0.5f, true };     // 武器のダメージ量
+		UpgradeValue shotMaxCount     = { 1.0f, 1.0f, 1.0f, true };     // 武器の最大射撃数
+		UpgradeValue shotCooldown     = { 1.0f, -0.05f, -0.01f, true }; // 武器の射撃クールダウン
+		UpgradeValue criticalChance   = { 1.0f, 0.02f, 0.01f, true };   // 武器のクリティカル率
+		UpgradeValue criticalDamage   = { 1.0f, 0.1f, 0.05f, true };    // 武器のクリティカルダメージ倍率
+		UpgradeValue size             = { 1.0f, 0.05f, 0.025f, true };  // 武器のサイズ
+		UpgradeValue bounceCount      = { 1.0f, 1.0f, 1.0f, true };     // 武器の跳弾回数
+		UpgradeValue penetrationCount = { 1.0f, 1.0f, 1.0f, true };     // 武器の貫通回数
+		UpgradeValue knockbackPower   = { 1.0f, 0.25f, 0.1f, true };    // 武器のノックバック力
+		UpgradeValue lifeTime         = { 1.0f, 0.2f, 0.1f, true };     // 武器の弾の寿命
+		UpgradeValue speed            = { 1.0f, 0.5f, 0.25f, true };    // 武器の弾の速度
+	};
+
+	/// @brief 強化ステータスの日本語表示名を取得します。
+	/// @param type 表示名を取得する強化ステータスです。
+	/// @return 強化ステータスの日本語表示名です。
+	inline const char* UpgradeStatTypeToDisplayName(UpgradeStatType type) {
+		switch (type) {
+		case UpgradeStatType::Damage:           return "ダメージ量";
+		case UpgradeStatType::ShotMaxCount:     return "最大射撃数";
+		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン";
+		case UpgradeStatType::CriticalChance:   return "クリティカル率";
+		case UpgradeStatType::CriticalDamage:   return "クリティカル倍率";
+		case UpgradeStatType::Size:             return "サイズ";
+		case UpgradeStatType::BounceCount:      return "跳弾回数";
+		case UpgradeStatType::PenetrationCount: return "貫通回数";
+		case UpgradeStatType::KnockbackPower:   return "ノックバック力";
+		case UpgradeStatType::LifeTime:         return "弾の寿命";
+		case UpgradeStatType::Speed:            return "弾の速度";
+		default:                                return "なし";
+		}
+	}
+
+	/// @brief 指定した強化ステータスの設定を取得します。
+	/// @param status 参照する武器ステータスです。
+	/// @param type 取得する強化ステータスです。
+	/// @return 設定が存在する場合はconstポインターを、存在しない場合はnullptrを返します。
+	inline const UpgradeValue* FindUpgradeValue(const UpgradeStatus& status, UpgradeStatType type) {
+		switch (type) {
+		case UpgradeStatType::Damage:           return &status.damage;
+		case UpgradeStatType::ShotMaxCount:     return &status.shotMaxCount;
+		case UpgradeStatType::ShotCooldown:     return &status.shotCooldown;
+		case UpgradeStatType::CriticalChance:   return &status.criticalChance;
+		case UpgradeStatType::CriticalDamage:   return &status.criticalDamage;
+		case UpgradeStatType::Size:             return &status.size;
+		case UpgradeStatType::BounceCount:      return &status.bounceCount;
+		case UpgradeStatType::PenetrationCount: return &status.penetrationCount;
+		case UpgradeStatType::KnockbackPower:   return &status.knockbackPower;
+		case UpgradeStatType::LifeTime:         return &status.lifeTime;
+		case UpgradeStatType::Speed:            return &status.speed;
+		default:                                return nullptr;
+		}
+	}
+
+	/// @brief レアリティが武器強化の抽選対象か確認します。
+	/// @param rarity 確認するレアリティです。
+	/// @return UncommonからLegendaryの場合はtrueを返します。
+	inline bool IsWeaponUpgradeRarity(Rarity rarity) {
+		const int rarityValue = static_cast<int>(rarity);
+		return rarityValue >= static_cast<int>(Rarity::Uncommon) &&
+			rarityValue <= static_cast<int>(Rarity::Legendary);
+	}
 
 	/// @brief アップグレード値をJsonへ変換します。
 	/// @param value 変換するアップグレード値です。
@@ -31,6 +118,8 @@ namespace Weapon {
 	inline nlohmann::json UpgradeValueToJson(const UpgradeValue& value) {
 		return {
 			{ "value", value.value },
+			{ "fixedAddValue", value.fixedAddValue },
+			{ "rarityAddValue", value.rarityAddValue },
 			{ "isSelected", value.isSelected },
 		};
 	}
@@ -38,13 +127,47 @@ namespace Weapon {
 	/// @brief Jsonからアップグレード値を読み込みます。
 	/// @param json 読み込み元のJsonです。
 	/// @param value 読み込み先のアップグレード値です。
-	inline void UpgradeValueFromJson(const nlohmann::json& json, UpgradeValue& value) {
+	/// @return 有効な値を読み込めた場合はtrueを返します。
+	inline bool UpgradeValueFromJson(const nlohmann::json& json, UpgradeValue& value) {
 		if (!json.is_object()) {
-			return;
+			return false;
 		}
 
-		value.value = json.value("value", value.value);
-		value.isSelected = json.value("isSelected", value.isSelected);
+		UpgradeValue parsedValue = value;
+		auto readFiniteFloat = [&json](const char* key, float& destination) {
+			if (!json.contains(key)) {
+				return true;
+			}
+
+			const nlohmann::json& source = json.at(key);
+			if (!source.is_number()) {
+				return false;
+			}
+
+			const float parsed = source.get<float>();
+			if (!std::isfinite(parsed)) {
+				return false;
+			}
+
+			destination = parsed;
+			return true;
+		};
+
+		if (!readFiniteFloat("value", parsedValue.value) ||
+			!readFiniteFloat("fixedAddValue", parsedValue.fixedAddValue) ||
+			!readFiniteFloat("rarityAddValue", parsedValue.rarityAddValue)) {
+			return false;
+		}
+
+		if (json.contains("isSelected")) {
+			if (!json.at("isSelected").is_boolean()) {
+				return false;
+			}
+			parsedValue.isSelected = json.at("isSelected").get<bool>();
+		}
+
+		value = parsedValue;
+		return true;
 	}
 
 	/// @brief 武器の初期ステータスをJsonへ変換します。
@@ -69,21 +192,35 @@ namespace Weapon {
 	/// @brief Jsonから武器の初期ステータスを読み込みます。
 	/// @param json 読み込み元のJsonです。
 	/// @param status 読み込み先の初期ステータスです。
-	inline void UpgradeStatusFromJson(const nlohmann::json& json, UpgradeStatus& status) {
+	/// @return 有効なステータスを読み込めた場合はtrueを返します。
+	inline bool UpgradeStatusFromJson(const nlohmann::json& json, UpgradeStatus& status) {
 		if (!json.is_object()) {
-			return;
+			return false;
 		}
 
-		UpgradeValueFromJson(json.value("damage", nlohmann::json::object()), status.damage);
-		UpgradeValueFromJson(json.value("shotMaxCount", nlohmann::json::object()), status.shotMaxCount);
-		UpgradeValueFromJson(json.value("shotCooldown", nlohmann::json::object()), status.shotCooldown);
-		UpgradeValueFromJson(json.value("criticalChance", nlohmann::json::object()), status.criticalChance);
-		UpgradeValueFromJson(json.value("criticalDamage", nlohmann::json::object()), status.criticalDamage);
-		UpgradeValueFromJson(json.value("size", nlohmann::json::object()), status.size);
-		UpgradeValueFromJson(json.value("bounceCount", nlohmann::json::object()), status.bounceCount);
-		UpgradeValueFromJson(json.value("penetrationCount", nlohmann::json::object()), status.penetrationCount);
-		UpgradeValueFromJson(json.value("knockbackPower", nlohmann::json::object()), status.knockbackPower);
-		UpgradeValueFromJson(json.value("lifeTime", nlohmann::json::object()), status.lifeTime);
-		UpgradeValueFromJson(json.value("speed", nlohmann::json::object()), status.speed);
+		UpgradeStatus parsedStatus = status;
+		auto readValue = [&json](const char* key, UpgradeValue& destination) {
+			if (!json.contains(key)) {
+				return true;
+			}
+			return UpgradeValueFromJson(json.at(key), destination);
+		};
+
+		if (!readValue("damage", parsedStatus.damage) ||
+			!readValue("shotMaxCount", parsedStatus.shotMaxCount) ||
+			!readValue("shotCooldown", parsedStatus.shotCooldown) ||
+			!readValue("criticalChance", parsedStatus.criticalChance) ||
+			!readValue("criticalDamage", parsedStatus.criticalDamage) ||
+			!readValue("size", parsedStatus.size) ||
+			!readValue("bounceCount", parsedStatus.bounceCount) ||
+			!readValue("penetrationCount", parsedStatus.penetrationCount) ||
+			!readValue("knockbackPower", parsedStatus.knockbackPower) ||
+			!readValue("lifeTime", parsedStatus.lifeTime) ||
+			!readValue("speed", parsedStatus.speed)) {
+			return false;
+		}
+
+		status = parsedStatus;
+		return true;
 	}
 }

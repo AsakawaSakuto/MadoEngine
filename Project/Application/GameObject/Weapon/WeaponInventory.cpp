@@ -1,5 +1,6 @@
 #include "WeaponInventory.h"
 #include "Projectile/ProjectileManager.h"
+#include "Utility/Logger/Logger.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
@@ -7,24 +8,15 @@
 #include <string>
 
 namespace Weapon {
-
-	namespace {
-#ifdef USE_IMGUI
-		constexpr Projectile::Type kSelectableWeaponTypes[] = {
-			Projectile::Type::Pistol,
-			Projectile::Type::Rock,
-			Projectile::Type::FireBall,
-			Projectile::Type::Axe,
-		};
-#endif // USE_IMGUI
-
-	}
 	
 	void Inventory::Initialize(Projectile::Type type) {
 		weapons_.clear();
 		weapons_.resize(slotCount_);
+		revision_ = 0;
 
-		AddWeapon(type);
+		if (!AddWeapon(type)) {
+			Logger::Output("[Application] 初期武器の追加に失敗しました。", Logger::Level::Error);
+		}
 	}
 
 	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
@@ -35,9 +27,20 @@ namespace Weapon {
 		}
 	}
 
-	void Inventory::AddWeapon(Projectile::Type type) {
-		if (type == Projectile::Type::None) {
-			return;
+	bool Inventory::AddWeapon(Projectile::Type type) {
+		if (!Projectile::IsPlayableWeaponType(type)) {
+			Logger::Output("[Application] 無効な武器種類は追加できません。", Logger::Level::Warning);
+			return false;
+		}
+
+		if (HasWeapon(type)) {
+			Logger::Output("[Application] 同じ種類の武器は重複して装備できません: " + ProjectileTypeToString(type), Logger::Level::Warning);
+			return false;
+		}
+
+		if (!HasEmptySlot()) {
+			Logger::Output("[Application] 武器スロットに空きがないため武器を追加できません。", Logger::Level::Warning);
+			return false;
 		}
 
 		if (weapons_.size() < static_cast<std::size_t>(slotCount_)) {
@@ -46,11 +49,66 @@ namespace Weapon {
 
 		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
 			if (!weapons_[slotIndex] || weapons_[slotIndex]->GetProjectileType() == Projectile::Type::None) {
-				weapons_[slotIndex] = std::make_unique<BaseWeapon>();
-				weapons_[slotIndex]->Initialize(type, static_cast<int>(slotIndex));
-				return;
+				auto weapon = std::make_unique<BaseWeapon>();
+				if (!weapon->Initialize(type, static_cast<int>(slotIndex))) {
+					Logger::Output("[Application] 武器の初期化に失敗したため追加を中止しました: " + ProjectileTypeToString(type), Logger::Level::Error);
+					return false;
+				}
+
+				weapons_[slotIndex] = std::move(weapon);
+				++revision_;
+				return true;
 			}
 		}
+
+		return false;
+	}
+
+	bool Inventory::HasWeapon(Projectile::Type type) const {
+		return GetWeapon(type) != nullptr;
+	}
+
+	bool Inventory::HasEmptySlot() const {
+		if (weapons_.size() < static_cast<std::size_t>(slotCount_)) {
+			return true;
+		}
+
+		for (const auto& weapon : weapons_) {
+			if (!weapon || weapon->GetProjectileType() == Projectile::Type::None) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	std::size_t Inventory::GetWeaponCount() const {
+		std::size_t weaponCount = 0;
+		for (const auto& weapon : weapons_) {
+			if (weapon && weapon->GetProjectileType() != Projectile::Type::None) {
+				++weaponCount;
+			}
+		}
+
+		return weaponCount;
+	}
+
+	BaseWeapon* Inventory::GetWeapon(Projectile::Type type) {
+		return const_cast<BaseWeapon*>(static_cast<const Inventory*>(this)->GetWeapon(type));
+	}
+
+	const BaseWeapon* Inventory::GetWeapon(Projectile::Type type) const {
+		if (type == Projectile::Type::None) {
+			return nullptr;
+		}
+
+		for (const auto& weapon : weapons_) {
+			if (weapon && weapon->GetProjectileType() == type) {
+				return weapon.get();
+			}
+		}
+
+		return nullptr;
 	}
 
 	void Inventory::RemoveWeapon(int slotIndex) {
@@ -63,7 +121,10 @@ namespace Weapon {
 			return;
 		}
 
-		weapons_[weaponIndex].reset();
+		if (weapons_[weaponIndex]) {
+			weapons_[weaponIndex].reset();
+			++revision_;
+		}
 	}
 
 	void Inventory::DrawImGui() {
@@ -74,12 +135,7 @@ namespace Weapon {
 			weapons_.resize(slotCount_);
 		}
 
-		int weaponCount = 0;
-		for (const auto& weapon : weapons_) {
-			if (weapon && weapon->GetProjectileType() != Projectile::Type::None) {
-				weaponCount++;
-			}
-		}
+		const int weaponCount = static_cast<int>(GetWeaponCount());
 
 		ImGui::Begin("武器インベントリ");
 
@@ -88,7 +144,7 @@ namespace Weapon {
 
 		const std::string selectedWeaponName = ProjectileTypeToString(selectedAddWeaponType_);
 		if (ImGui::BeginCombo("追加する武器", selectedWeaponName.c_str())) {
-			for (const Projectile::Type weaponType : kSelectableWeaponTypes) {
+			for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {
 				const bool isSelected = selectedAddWeaponType_ == weaponType;
 				const std::string weaponName = ProjectileTypeToString(weaponType);
 				if (ImGui::Selectable(weaponName.c_str(), isSelected)) {
@@ -101,17 +157,17 @@ namespace Weapon {
 			ImGui::EndCombo();
 		}
 
-		const bool canAddWeapon = weaponCount < slotCount_;
+		const bool canAddWeapon = HasEmptySlot() && !HasWeapon(selectedAddWeaponType_);
 		if (!canAddWeapon) {
 			ImGui::BeginDisabled();
 		}
-		if (ImGui::Button("武器を追加")) {
-			AddWeapon(selectedAddWeaponType_);
+		if (ImGui::Button("武器を追加") && !AddWeapon(selectedAddWeaponType_)) {
+			Logger::Output("[Debug] ImGuiからの武器追加は拒否されました。", Logger::Level::Debug);
 		}
 		if (!canAddWeapon) {
 			ImGui::EndDisabled();
 			ImGui::SameLine();
-			ImGui::TextDisabled("空きスロットがありません");
+			ImGui::TextDisabled(HasWeapon(selectedAddWeaponType_) ? "装備済みです" : "空きスロットがありません");
 		}
 
 		ImGui::Separator();

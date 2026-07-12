@@ -38,6 +38,10 @@ namespace Player {
 
 		Status GetStatus() const { return status_; }
 
+		/// @brief 現在のPlayerレベルを取得します。
+		/// @return 現在のPlayerレベルです。
+		int GetLevel() const { return status_.level; }
+
 		void DrawImGui();
 
 	private:
