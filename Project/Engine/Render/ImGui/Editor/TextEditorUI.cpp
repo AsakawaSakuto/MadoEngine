@@ -147,9 +147,13 @@ namespace {
 
 } // namespace
 
+#endif // USE_IMGUI
+
 bool LoadTextEditorJson() {
 	return TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
 }
+
+#ifdef USE_IMGUI
 
 void DrawTextManagerEditorUI() {
 	TextManager& manager = TextManager::GetInstance();

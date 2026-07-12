@@ -387,9 +387,13 @@ namespace MadoEngine::Editor {
 
     } // namespace
 
+#endif // USE_IMGUI
+
     bool LoadLightEditorJson() {
         return LightManager::GetInstance().LoadFromJson();
     }
+
+#ifdef USE_IMGUI
 
     void DrawLightManagerEditorUI() {
         LightManager& lightManager = LightManager::GetInstance();

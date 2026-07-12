@@ -111,6 +111,7 @@ SceneType Test::Update(float dt) {
 		deltaTime = 0.0f;
 	} else {
 		deltaTime = dt;
+		player_->Update(deltaTime);
 	}
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
@@ -128,8 +129,6 @@ SceneType Test::Update(float dt) {
 	//}
 
 	debugCamera_.Update(deltaTime);
-
-	player_->Update(deltaTime);
 
 	map_->Update(*player_);
 

@@ -186,13 +186,13 @@ namespace MadoEngine
 
 		postEffectManager_.Initialize(postEffectCopyDesc_, dxDevice_->GetDevice());
 
-#ifdef USE_IMGUI
-		// ImGuiManagerの初期化
 		MadoEngine::Editor::LoadAudioEditorJson();
 		MadoEngine::Editor::LoadLightEditorJson();
 		MadoEngine::Editor::LoadTextEditorJson();
 		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager_);
 
+#ifdef USE_IMGUI
+		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
 #endif // USE_IMGUI

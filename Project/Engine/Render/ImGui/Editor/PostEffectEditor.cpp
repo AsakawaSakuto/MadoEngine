@@ -11,8 +11,6 @@
 
 namespace MadoEngine::Editor {
 
-#ifdef USE_IMGUI 
-
     namespace {
         /// @brief 固定配列の要素数を取得する
         /// @tparam T 配列要素の型
@@ -600,6 +598,8 @@ namespace MadoEngine::Editor {
             return true;
         }
 
+#ifdef USE_IMGUI
+
         /// @brief 重複しないPassキーを作成する。
         /// @param postEffectManager 重複確認に使用する管理クラス。
         /// @param prefix Passキーの接頭辞。
@@ -947,6 +947,8 @@ namespace MadoEngine::Editor {
             ImGui::PopID();
         }
 
+#endif // USE_IMGUI
+
     } // namespace
 
     bool LoadLayerEffectPassEditorJson(Render::PostEffectManager& postEffectManager) {
@@ -956,6 +958,8 @@ namespace MadoEngine::Editor {
     bool LoadLayerEffectPassEditorJsonFromFile(Render::PostEffectManager& postEffectManager) {
         return LoadLayerEffectPassEditorJson(postEffectManager);
     }
+
+#ifdef USE_IMGUI
 
     void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager) {
         static LayerEffectPassListType selectedListType = LayerEffectPassListType::Layer;

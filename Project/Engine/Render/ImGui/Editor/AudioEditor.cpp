@@ -14,8 +14,6 @@
 
 namespace MadoEngine::Editor {
 
-#ifdef USE_IMGUI 
-
     namespace {
 
         const std::filesystem::path kAudioEditorJsonPath = "Assets/Json/AudioEditor.json";
@@ -158,6 +156,8 @@ namespace MadoEngine::Editor {
     bool LoadAudioEditorJson() {
         return LoadAudioEditorVolumeJson();
     }
+
+#ifdef USE_IMGUI
 
     void DrawAudioManagerUI() {
         //auto audioManager = AudioManager::GetInstance();
