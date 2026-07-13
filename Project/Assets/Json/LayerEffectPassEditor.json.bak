@@ -84,6 +84,28 @@
                 "StartDistance": 50.0
             },
             "targetLayerMask": 255
+        },
+        {
+            "effectShaderKey": "PostEffect/SplitToning.PS",
+            "enabled": false,
+            "ignoreDepthForMask": false,
+            "key": "ScreenEffectPass_3",
+            "name": "Screen Effect 3",
+            "parameters": {
+                "Balance": 0.05000000074505806,
+                "HighlightAmount": 1.0,
+                "HighlightColorB": 0.0,
+                "HighlightColorG": 1.0,
+                "HighlightColorR": 0.15813958644866943,
+                "Intensity": 1.0,
+                "PreserveLuminance": 0.5,
+                "ShadowAmount": 0.5,
+                "ShadowColorB": 0.8186046481132507,
+                "ShadowColorG": 0.3774224817752838,
+                "ShadowColorR": 0.2627149820327759,
+                "Softness": 0.10000000149011612
+            },
+            "targetLayerMask": 255
         }
     ],
     "version": 1

@@ -12,6 +12,7 @@
 #include "Utility/Light/LightManager.h"
 #include "UI/Player/PlayerExpGauge.h"
 #include "UI/Player/PlayerHealthGauge.h"
+#include "UI/Weapon/WeaponUpgradeUI.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -50,12 +51,6 @@ public:
 	/// @return Player座標を取得できた場合はtrueを返します。
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
-	/// @brief 武器アップグレードの選択入力を更新します。
-	void UpdateWeaponUpgradeInput();
-
-	/// @brief 武器アップグレード確認用のImGuiを描画します。
-	void DrawWeaponUpgradeImGui();
-	
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 
@@ -74,6 +69,7 @@ private:
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
 	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
 	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
+	Weapon::UpgradeUI weaponUpgradeUI_;
 
 	Sprite* fadeSprite_ = nullptr;
 	MadoEngine::Text* playerHealthText_ = nullptr;
@@ -82,8 +78,5 @@ private:
 	GameTimer fadeOutTimer_;
 	float fpsSampleTime_ = 0.0f;
 	int fpsSampleFrameCount_ = 0;
-	std::size_t selectedUpgradeChoiceIndex_ = 0;
-	std::uint64_t selectedUpgradeGeneration_ = 0;
-
 	bool useDebugCamera_ = false;
 };

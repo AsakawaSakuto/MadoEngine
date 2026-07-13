@@ -9,16 +9,16 @@
                     1.0
                 ],
                 "direction": [
-                    -0.5,
-                    -1.0,
-                    0.30000001192092896
+                    -0.4319342076778412,
+                    -0.8638684153556824,
+                    0.2591605484485626
                 ],
                 "intensity": 0.5,
                 "useHalfLambert": true
             },
             "enabled": true,
             "layerMask": 1,
-            "name": "Direction Light 1",
+            "name": "DirectionalLight",
             "scene": "None",
             "type": "Directional"
         }
