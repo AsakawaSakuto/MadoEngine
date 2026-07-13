@@ -16,9 +16,9 @@ namespace Weapon {
 
 		// Uniqueを含めず、武器強化専用の抽選テーブルを明示します。
 		constexpr std::array<RarityWeight, 4> kRarityWeights = {
-			RarityWeight{ Rarity::Uncommon, 60 },
-			RarityWeight{ Rarity::Rare, 25 },
-			RarityWeight{ Rarity::Epic, 10 },
+			RarityWeight{ Rarity::Uncommon,  60 },
+			RarityWeight{ Rarity::Rare,      25 },
+			RarityWeight{ Rarity::Epic,      10 },
 			RarityWeight{ Rarity::Legendary, 5 },
 		};
 

@@ -5,17 +5,6 @@
 
 namespace Weapon {
 	namespace {
-		/// @brief 武器種類に対応するJsonファイル名を取得します。
-		/// @param type ファイル名を取得する武器種類です。
-		/// @return 拡張子を除くJsonファイル名です。
-		std::string GetWeaponJsonFileName(Projectile::Type type) {
-			if (type == Projectile::Type::FireBall) {
-				return "Fireball";
-			}
-
-			return ProjectileTypeToString(type);
-		}
-
 		/// @brief 指定した強化ステータスの変更可能な設定を取得します。
 		/// @param status 参照する武器ステータスです。
 		/// @param type 取得する強化ステータスです。
@@ -46,7 +35,7 @@ namespace Weapon {
 
 		UpgradeStatus loadedStatus{};
 		const std::string weaponName = ProjectileTypeToString(type);
-		const std::string jsonPath = "Assets/Json/Weapon/" + GetWeaponJsonFileName(type) + ".json";
+		const std::string jsonPath = "Assets/Json/Weapon/" + Projectile::ProjectileTypeToJsonFileName(type) + ".json";
 
 		// 武器のステータスをJsonから読み込みます。
 		nlohmann::json json;

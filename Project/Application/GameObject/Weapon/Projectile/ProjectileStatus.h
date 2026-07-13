@@ -17,10 +17,13 @@ namespace Projectile {
 	/// @brief 武器の種類を表す列挙型
 	enum class Type {
 		None,
+
 		Axe,
 		FireBall,
 		Pistol,
 		Rock,
+
+		Explosion, // 爆発で使用される、武器ではない
 	};
 
 	// ゲームロジックで使用できる武器を一か所で管理します。
@@ -45,6 +48,17 @@ namespace Projectile {
 		}
 	}
 
+	/// @brief 武器種類に対応するJsonファイル名を取得します。
+	/// @param type ファイル名を取得する武器種類です。
+	/// @return 拡張子を除くJsonファイル名です。
+	inline std::string ProjectileTypeToJsonFileName(Type type) {
+		if (type == Type::FireBall) {
+			return "Fireball";
+		}
+
+		return ProjectileTypeToString(type);
+	}
+
 	/// @brief 武器種類がゲームで使用可能か確認します。
 	/// @param type 確認する武器種類です。
 	/// @return 使用可能な武器種類の場合はtrueを返します。
@@ -63,11 +77,12 @@ namespace Projectile {
 	/// @return 武器種類の日本語表示名です。
 	inline const char* ProjectileTypeToDisplayName(Type type) {
 		switch (type) {
-		case Type::Axe:      return "斧";
-		case Type::FireBall: return "ファイアボール";
-		case Type::Pistol:   return "ピストル";
-		case Type::Rock:     return "岩";
-		default:             return "不明な武器";
+		case Type::None:     return "None";
+		case Type::Axe:      return "Axe";
+		case Type::FireBall: return "FireBall";
+		case Type::Pistol:   return "Pistol";
+		case Type::Rock:     return "Rock";
+		default:             return "Unknown";
 		}
 	}
 }

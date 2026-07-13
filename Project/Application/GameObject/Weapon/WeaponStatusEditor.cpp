@@ -1,4 +1,5 @@
 #include "WeaponStatusEditor.h"
+#include "Projectile/ProjectileStatus.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #ifdef USE_IMGUI
@@ -30,23 +31,31 @@ namespace Weapon {
 		}
 
 #ifdef USE_IMGUI
-		/// @brief アップグレード値のImGui編集欄を描画します。
+		/// @brief アップグレード値のImGuiテーブル行を描画します。
 		/// @param label 表示名です。
 		/// @param value 編集するアップグレード値です。
-		void DrawUpgradeValueImGui(const char* label, UpgradeValue& value) {
+		void DrawUpgradeValueTableRow(const char* label, UpgradeValue& value) {
 			ImGui::PushID(label);
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
 			ImGui::TextUnformatted(label);
-			ImGui::SetNextItemWidth(120.0f);
-			ImGui::DragFloat("現在の初期値", &value.value, 0.01f, -999999.0f, 999999.0f, "%.3f");
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(120.0f);
-			ImGui::DragFloat("固定加算値", &value.fixedAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(120.0f);
-			ImGui::DragFloat("レアリティ上昇幅", &value.rarityAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
-			ImGui::SameLine();
-			ImGui::Checkbox("選択肢に表示", &value.isSelected);
-			ImGui::Separator();
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::DragFloat("##InitialValue", &value.value, 0.01f, -999999.0f, 999999.0f, "%.3f");
+
+			ImGui::TableSetColumnIndex(2);
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::DragFloat("##FixedAddValue", &value.fixedAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
+
+			ImGui::TableSetColumnIndex(3);
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::DragFloat("##RarityAddValue", &value.rarityAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
+
+			ImGui::TableSetColumnIndex(4);
+			ImGui::Checkbox("##IsSelected", &value.isSelected);
 			ImGui::PopID();
 		}
 #endif // USE_IMGUI
@@ -102,8 +111,30 @@ namespace Weapon {
 
 		ImGui::Begin("武器初期ステータス");
 
+		const char* selectedWeaponDisplayName = statusName_;
+		for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {
+			if (Projectile::ProjectileTypeToJsonFileName(weaponType) == statusName_) {
+				selectedWeaponDisplayName = Projectile::ProjectileTypeToDisplayName(weaponType);
+				break;
+			}
+		}
+
 		ImGui::SetNextItemWidth(220.0f);
-		ImGui::InputText("名前", statusName_, sizeof(statusName_));
+		if (ImGui::BeginCombo("調整する武器", selectedWeaponDisplayName)) {
+			for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {
+				const std::string jsonName = Projectile::ProjectileTypeToJsonFileName(weaponType);
+				const bool isSelected = jsonName == statusName_;
+				if (ImGui::Selectable(Projectile::ProjectileTypeToDisplayName(weaponType), isSelected)) {
+					strncpy_s(statusName_, sizeof(statusName_), jsonName.c_str(), _TRUNCATE);
+					LoadOrCreateJson();
+				}
+
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
 		ImGui::SameLine();
 		if (ImGui::Button("保存")) {
 			SaveToJson();
@@ -114,17 +145,34 @@ namespace Weapon {
 		}
 
 		ImGui::Separator();
-		DrawUpgradeValueImGui("ダメージ量", editingStatus_.damage);
-		DrawUpgradeValueImGui("最大射撃数", editingStatus_.shotMaxCount);
-		DrawUpgradeValueImGui("射撃クールダウン", editingStatus_.shotCooldown);
-		DrawUpgradeValueImGui("クリティカル率", editingStatus_.criticalChance);
-		DrawUpgradeValueImGui("クリティカル倍率", editingStatus_.criticalDamage);
-		DrawUpgradeValueImGui("サイズ", editingStatus_.size);
-		DrawUpgradeValueImGui("跳弾回数", editingStatus_.bounceCount);
-		DrawUpgradeValueImGui("貫通回数", editingStatus_.penetrationCount);
-		DrawUpgradeValueImGui("ノックバック力", editingStatus_.knockbackPower);
-		DrawUpgradeValueImGui("弾の寿命", editingStatus_.lifeTime);
-		DrawUpgradeValueImGui("弾の速度", editingStatus_.speed);
+
+		constexpr ImGuiTableFlags tableFlags =
+			ImGuiTableFlags_Borders |
+			ImGuiTableFlags_RowBg |
+			ImGuiTableFlags_Resizable |
+			ImGuiTableFlags_SizingStretchProp;
+		if (ImGui::BeginTable("WeaponInitialStatusTable", 5, tableFlags, ImVec2(-1.0f, 0.0f))) {
+			ImGui::TableSetupColumn("ステータス", ImGuiTableColumnFlags_WidthFixed, 160.0f);
+			ImGui::TableSetupColumn("初期値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("固定加算値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("上昇幅", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("選択肢に表示", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+			ImGui::TableHeadersRow();
+
+			DrawUpgradeValueTableRow("ダメージ量", editingStatus_.damage);
+			DrawUpgradeValueTableRow("最大射撃数", editingStatus_.shotMaxCount);
+			DrawUpgradeValueTableRow("射撃クールダウン", editingStatus_.shotCooldown);
+			DrawUpgradeValueTableRow("クリティカル率", editingStatus_.criticalChance);
+			DrawUpgradeValueTableRow("クリティカル倍率", editingStatus_.criticalDamage);
+			DrawUpgradeValueTableRow("サイズ", editingStatus_.size);
+			DrawUpgradeValueTableRow("跳弾回数", editingStatus_.bounceCount);
+			DrawUpgradeValueTableRow("貫通回数", editingStatus_.penetrationCount);
+			DrawUpgradeValueTableRow("ノックバック力", editingStatus_.knockbackPower);
+			DrawUpgradeValueTableRow("弾の寿命", editingStatus_.lifeTime);
+			DrawUpgradeValueTableRow("弾の速度", editingStatus_.speed);
+
+			ImGui::EndTable();
+		}
 
 		ImGui::End();
 

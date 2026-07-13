@@ -10,6 +10,7 @@ namespace Weapon {
 	/// @brief 武器の強化対象ステータスを表す列挙型です。
 	enum class UpgradeStatType {
 		None,
+
 		Damage,
 		ShotMaxCount,
 		ShotCooldown,
@@ -21,6 +22,7 @@ namespace Weapon {
 		KnockbackPower,
 		LifeTime,
 		Speed,
+
 		Count,
 	};
 
@@ -49,17 +51,17 @@ namespace Weapon {
 
 	/// @brief 武器の強化ステータスを管理する構造体です。
 	struct UpgradeStatus {
-		UpgradeValue damage           = { 1.0f, 1.0f, 0.5f, true };     // 武器のダメージ量
-		UpgradeValue shotMaxCount     = { 1.0f, 1.0f, 1.0f, true };     // 武器の最大射撃数
-		UpgradeValue shotCooldown     = { 1.0f, -0.05f, -0.01f, true }; // 武器の射撃クールダウン
-		UpgradeValue criticalChance   = { 1.0f, 0.02f, 0.01f, true };   // 武器のクリティカル率
-		UpgradeValue criticalDamage   = { 1.0f, 0.1f, 0.05f, true };    // 武器のクリティカルダメージ倍率
-		UpgradeValue size             = { 1.0f, 0.05f, 0.025f, true };  // 武器のサイズ
-		UpgradeValue bounceCount      = { 1.0f, 1.0f, 1.0f, true };     // 武器の跳弾回数
-		UpgradeValue penetrationCount = { 1.0f, 1.0f, 1.0f, true };     // 武器の貫通回数
-		UpgradeValue knockbackPower   = { 1.0f, 0.25f, 0.1f, true };    // 武器のノックバック力
-		UpgradeValue lifeTime         = { 1.0f, 0.2f, 0.1f, true };     // 武器の弾の寿命
-		UpgradeValue speed            = { 1.0f, 0.5f, 0.25f, true };    // 武器の弾の速度
+		UpgradeValue damage           = { 1.0f, 1.0f, 0.1f, true }; // 武器のダメージ量
+		UpgradeValue shotMaxCount     = { 1.0f, 1.0f, 0.1f, true }; // 武器の最大射撃数
+		UpgradeValue shotCooldown     = { 1.0f, 1.0f,-0.1f, true }; // 武器の射撃クールダウン
+		UpgradeValue criticalChance   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカル率
+		UpgradeValue criticalDamage   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカルダメージ倍率
+		UpgradeValue size             = { 1.0f, 1.0f, 0.1f, true }; // 武器のサイズ
+		UpgradeValue bounceCount      = { 1.0f, 1.0f, 0.1f, true }; // 武器の跳弾回数
+		UpgradeValue penetrationCount = { 1.0f, 1.0f, 0.1f, true }; // 武器の貫通回数
+		UpgradeValue knockbackPower   = { 1.0f, 1.0f, 0.1f, true }; // 武器のノックバック力
+		UpgradeValue lifeTime         = { 1.0f, 1.0f, 0.1f, true }; // 武器の弾の寿命
+		UpgradeValue speed            = { 1.0f, 1.0f, 0.1f, true }; // 武器の弾の速度
 	};
 
 	/// @brief 強化ステータスの日本語表示名を取得します。
