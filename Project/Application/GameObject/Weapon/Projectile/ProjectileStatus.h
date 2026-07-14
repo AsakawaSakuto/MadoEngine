@@ -11,8 +11,11 @@ namespace Projectile {
 		int projectileCount;
 		Vector3 ownerPosition;
 		Vector3 targetPosition;
-	};
+		float damage = 0.0f;
 
+		float explotionDamageDecreaseRate = 1.0f;
+		float explosionRadius = 0.0f;
+	};
 
 	/// @brief 武器の種類を表す列挙型
 	enum class Type {

@@ -34,6 +34,8 @@ namespace Projectile {
 			transform_.rotate.z = 0.0f;
 		}
 
+		damage_ = context.damage;
+
 		AABB hitbox;
 		hitbox.min = { -0.5f, -0.5f, -0.5f };
 		hitbox.max = { 0.5f, 0.5f, 0.5f };

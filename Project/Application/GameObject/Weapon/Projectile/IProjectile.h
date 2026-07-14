@@ -23,10 +23,12 @@ namespace Projectile {
 		virtual void Update(float deltaTime) = 0;
 
 		/// @brief 削除対象かを取得
-		/// @return 削除対象の場合はtrue
+		/// @return 削除対象の場合はtrueを返す
 		bool IsDead() const { return isDead_; }
 
 	protected:
+
+		float damage_ = 0.0f;
 
 		bool isDead_ = false;
 		Transform3D transform_;
