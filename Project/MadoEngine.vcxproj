@@ -238,6 +238,7 @@
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
     <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Collider\StaticBVH.cpp" />
+    <ClCompile Include="Engine\Utility\Color\GamingColor.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
@@ -439,6 +440,7 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Slope.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
+    <ClInclude Include="Engine\Utility\Color\GamingColor.h" />
     <ClInclude Include="Engine\Utility\Json\JsonHeaders.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h" />
     <ClInclude Include="Engine\Utility\Light\LightLayer.h" />

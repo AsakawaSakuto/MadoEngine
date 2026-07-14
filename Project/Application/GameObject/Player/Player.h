@@ -66,5 +66,7 @@ namespace Player {
 		Movement movement_;                 // 移動処理
 
 		MapLimit mapLimit_; // Mapの制限範囲
+
+		GamingColor gamingColor_; // ゲーミングカラー
 	};
 }

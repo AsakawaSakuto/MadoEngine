@@ -113,7 +113,7 @@ namespace Player {
 		if (movement_.GetCurrentMotion() == Player::Motion::Crouching) {
 			model_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		} else {
-			model_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+			model_->SetColor(gamingColor_.Update(deltaTime, 1.0f));
 		}
 
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {

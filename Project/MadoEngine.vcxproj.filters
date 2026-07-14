@@ -51,6 +51,7 @@
     <ClCompile Include="Engine\Utility\Camera\DebugCamera.cpp" />
     <ClCompile Include="Engine\Utility\Collider\ColliderManager.cpp" />
     <ClCompile Include="Engine\Utility\Collider\StaticBVH.cpp" />
+    <ClCompile Include="Engine\Utility\Color\GamingColor.cpp" />
     <ClCompile Include="Engine\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Utility\Color\GamingColor.h" />
     <ClInclude Include="Engine\Utility\Random.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
