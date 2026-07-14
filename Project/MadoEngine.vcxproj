@@ -281,6 +281,7 @@
     <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h" />
+    <ClInclude Include="Application\GameObject\GameObjectHeaders.h" />
     <ClInclude Include="Application\GameObject\Item\BaseItem.h" />
     <ClInclude Include="Application\GameObject\Item\ItemInventry.h" />
     <ClInclude Include="Application\GameObject\Item\ItemStatus.h" />
@@ -322,6 +323,7 @@
     <ClInclude Include="Application\System\InGameSession\InGamePhase.h" />
     <ClInclude Include="Application\System\InGameSession\InGameSession.h" />
     <ClInclude Include="Application\UI\Player\PlayerIconUI.h" />
+    <ClInclude Include="Application\UI\UIHeaders.h" />
     <ClInclude Include="Application\UI\Weapon\WeaponIconUI.h" />
     <ClInclude Include="Application\UI\Weapon\WeaponUpgradeUI.h" />
     <ClInclude Include="Application\UI\GameSceneTimer.h" />

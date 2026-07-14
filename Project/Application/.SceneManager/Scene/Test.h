@@ -15,6 +15,7 @@
 #include "UI/Player/PlayerHealthGauge.h"
 #include "UI/Weapon/WeaponUpgradeUI.h"
 #include "UI/Weapon/WeaponIconUI.h"
+#include "System/InGameSession/InGameSession.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -84,4 +85,7 @@ private:
 	float fpsSampleTime_ = 0.0f;
 	int fpsSampleFrameCount_ = 0;
 	bool useDebugCamera_ = false;
+
+	// System
+	std::unique_ptr<InGameSession> inGameSession_;
 };

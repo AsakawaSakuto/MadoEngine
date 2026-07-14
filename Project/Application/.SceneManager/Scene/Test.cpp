@@ -99,32 +99,34 @@ void Test::Initialize() {
 
 	playerIconUI_ = std::make_unique<Player::PlayerIconUI>();
 	playerIconUI_->Initialize();
+
+	// System
+	inGameSession_ = std::make_unique<InGameSession>();
+	inGameSession_->Initialize();
 }
 
 SceneType Test::Update(float dt) {
 	
 	float deltaTime;
 
-	if (weaponUpgradeSystem_->IsUpgrading()) {
+	if (inGameSession_->GetCurrentPhase() == InGamePhase::Paused) {
 		deltaTime = 0.0f;
 	} else {
 		deltaTime = dt;
 		player_->Update(deltaTime);
 	}
+	
+	inGameSession_->Update(deltaTime);
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
 
-	fadeOutTimer_.Update(dt);
+	fadeOutTimer_.Update(deltaTime);
 	if (fadeOutTimer_.IsActive()) {
 		fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, fadeOutTimer_.GetReverseProgress() });
 	}
 
 	tpsCamera_.SetTargetPosition(player_->GetPosition());
 	tpsCamera_.Update(deltaTime);
-
-	//if (MyInput::GetKeybord()->IsTrigger(DIK_0)) {
-	//	tpsCamera_.Shake(0.3f, 3.5f, ShakeType::X);
-	//}
 
 	debugCamera_.Update(deltaTime);
 

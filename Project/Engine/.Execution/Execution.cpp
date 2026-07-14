@@ -94,6 +94,8 @@ namespace MadoEngine
 		MyInput::RegisterInput("Interact", { DIK_E }, { GAMEPAD_X });
 		MyInput::RegisterInput("Decision", { DIK_SPACE }, { GAMEPAD_A });
 
+		MyInput::RegisterInput("Pause", { DIK_ESCAPE }, { GAMEPAD_START });
+
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance().Initialize();
 
