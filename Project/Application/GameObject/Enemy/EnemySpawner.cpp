@@ -1,12 +1,18 @@
 #include "EnemySpawner.h"
 #include "GameObject/Player/Player.h"
+#include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
 
+#ifdef USE_IMGUI
+#include "ImGuiHeaders.h"
+#endif // USE_IMGUI
+
 namespace {
 	constexpr float kPi = 3.14159265358979323846f;
 	constexpr float kSpawnHeightOffset = 1.0f;
+	constexpr float kMinSpawnInterval = 0.1f;
 }
 
 void EnemySpawner::Initialize(Player::Base* player, SceneType sceneType) {
@@ -14,6 +20,7 @@ void EnemySpawner::Initialize(Player::Base* player, SceneType sceneType) {
 	sceneType_ = sceneType;
 	spawnTimer_ = 0.0f;
 	nextEnemyId_ = 0;
+	isActive_ = true;
 	enemies_.clear();
 	Logger::Output("[Engine] EnemySpawnerを初期化しました。", Logger::Level::Application);
 }
@@ -23,11 +30,13 @@ void EnemySpawner::Update(float deltaTime) {
 		return;
 	}
 
-	spawnTimer_ += deltaTime;
-	while (spawnTimer_ >= spawnInterval_) {
-		spawnTimer_ -= spawnInterval_;
-		if (enemies_.size() <= spawnLimit_) {
-			SpawnEnemy();
+	if (isActive_) {
+		spawnTimer_ += deltaTime;
+		while (spawnTimer_ >= spawnInterval_) {
+			spawnTimer_ -= spawnInterval_;
+			if (enemies_.size() <= spawnLimit_) {
+				SpawnEnemy();
+			}
 		}
 	}
 
@@ -37,18 +46,25 @@ void EnemySpawner::Update(float deltaTime) {
 
 	MyCollider::Update();
 
+	Projectile::Manager& projectileManager = Projectile::Manager::GetInstance();
+	std::vector<Projectile::HitInfo> projectileHitInfos;
 	for (std::unique_ptr<Enemy>& enemy : enemies_) {
 		enemy->ResolveAfterCollision();
-		if (enemy->IsHitPlayerProjectile()) {
-			enemy->Kill();
-			Logger::Output("[Debug] EnemyがPlayerのProjectileに接触したため削除します。", Logger::Level::Debug);
+
+		projectileManager.CollectHitsAgainst(enemy->GetHitColliderName(), projectileHitInfos);
+		for (const Projectile::HitInfo& hitInfo : projectileHitInfos) {
+			if (enemy->TakeProjectileDamage(hitInfo.projectileId, hitInfo.damage)) {
+				break;
+			}
+		}
+
+		if (!enemy->IsActive()) {
 			continue;
 		}
 
 		if (enemy->IsHitPlayer()) {
 			player_->TakeDamage(1);
 			enemy->Kill();
-			Logger::Output("[Engine] EnemyがPlayerに接触したため削除します。", Logger::Level::Debug);
 		}
 
 		if (MyInput::GetKeybord()->IsTrigger(DIK_7)) {
@@ -57,6 +73,22 @@ void EnemySpawner::Update(float deltaTime) {
 	}
 
 	RemoveDeadEnemies();
+}
+
+void EnemySpawner::DrawImGui() {
+#ifdef USE_IMGUI
+	ImGui::Begin("EnemySpawner");
+	ImGui::Text("Enemy Count : %zu", GetEnemyCount());
+	ImGui::Checkbox("Active", &isActive_);
+	ImGui::DragFloat("生成間隔（秒）", &spawnInterval_, 0.1f, kMinSpawnInterval, 600.0f, "%.1f");
+	spawnInterval_ = std::max(spawnInterval_, kMinSpawnInterval);
+
+	if (ImGui::Button("敵を1体生成") && player_ && enemies_.size() <= spawnLimit_) {
+		SpawnEnemy();
+	}
+
+	ImGui::End();
+#endif // USE_IMGUI
 }
 
 void EnemySpawner::Clear() {

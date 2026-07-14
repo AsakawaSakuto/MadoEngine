@@ -190,9 +190,7 @@ void Test::DrawImGui() {
 
 	map_->DrawImGui();
 
-	ImGui::Begin("EnemySpawner");
-	ImGui::Text("Enemy Count : %zu", enemySpawner_->GetEnemyCount());
-	ImGui::End();
+	enemySpawner_->DrawImGui();
 
 	MyCollider::DrawImGui();
 

@@ -9,9 +9,9 @@ namespace MadoEngine {
 
 namespace {
 
-	/// @brief 水平方向の配置をDirectWriteの値へ変換します。
-	/// @param align Text側の水平配置。
-	/// @return DirectWriteの水平配置。
+	/// @brief 水平方向の配置をDirectWriteの値へ変換
+	/// @param align Text側の水平配置
+	/// @return DirectWriteの水平配置
 	DWRITE_TEXT_ALIGNMENT ToDWriteTextAlignment(TextHorizontalAlign align) {
 		switch (align) {
 		case TextHorizontalAlign::Center:
@@ -24,9 +24,9 @@ namespace {
 		}
 	}
 
-	/// @brief 垂直方向の配置をDirectWriteの値へ変換します。
-	/// @param align Text側の垂直配置。
-	/// @return DirectWriteの垂直配置。
+	/// @brief 垂直方向の配置をDirectWriteの値へ変換
+	/// @param align Text側の垂直配置
+	/// @return DirectWriteの垂直配置
 	DWRITE_PARAGRAPH_ALIGNMENT ToDWriteParagraphAlignment(TextVerticalAlign align) {
 		switch (align) {
 		case TextVerticalAlign::Center:
@@ -39,9 +39,9 @@ namespace {
 		}
 	}
 
-	/// @brief HRESULT失敗時にログを出力します。
-	/// @param message 出力するメッセージ。
-	/// @param hr HRESULT。
+	/// @brief HRESULT失敗時にログを出力
+	/// @param message 出力するメッセージ
+	/// @param hr HRESULT
 	void LogIfFailed(const std::string& message, HRESULT hr) {
 		if (FAILED(hr)) {
 			Logger::Output(message + " HRESULT: 0x" + std::format("{:08X}", static_cast<uint32_t>(hr)), Logger::Level::Error);

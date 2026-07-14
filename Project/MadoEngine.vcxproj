@@ -169,6 +169,7 @@
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerIconUI.cpp" />
+    <ClCompile Include="Application\UI\ProjectileDamageView.cpp" />
     <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Weapon\WeaponUpgradeUI.cpp" />
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
@@ -323,6 +324,7 @@
     <ClInclude Include="Application\System\InGameSession\InGamePhase.h" />
     <ClInclude Include="Application\System\InGameSession\InGameSession.h" />
     <ClInclude Include="Application\UI\Player\PlayerIconUI.h" />
+    <ClInclude Include="Application\UI\ProjectileDamageView.h" />
     <ClInclude Include="Application\UI\UIHeaders.h" />
     <ClInclude Include="Application\UI\Weapon\WeaponIconUI.h" />
     <ClInclude Include="Application\UI\Weapon\WeaponUpgradeUI.h" />

@@ -127,6 +127,7 @@
     <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
+    <ClCompile Include="Application\UI\ProjectileDamageView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
@@ -688,6 +689,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\UIHeaders.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\ProjectileDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

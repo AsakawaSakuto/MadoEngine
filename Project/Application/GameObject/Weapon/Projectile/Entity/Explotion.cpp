@@ -15,10 +15,8 @@ namespace Projectile {
 	}
 
 	void Explotion::Initialize(InitializeDesc context) {
-		objectName_ = context.projectileName + std::to_string(context.projectileCount) + "Explotion";
-		
-		ownerPosition = context.ownerPosition;
-		targetPosition = context.targetPosition;
+		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId) + "_Explotion";
+		InitializeCommonProperties(context, objectName_);
 
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };

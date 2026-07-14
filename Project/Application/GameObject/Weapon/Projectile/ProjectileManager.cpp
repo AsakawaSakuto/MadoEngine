@@ -22,6 +22,8 @@ namespace Projectile {
 	}
 
 	void Manager::AddProjectile(Projectile::Type type, InitializeDesc context) {
+		context.projectileId = nextProjectileId_++;
+
 		switch (type) {
 		case Projectile::Type::Pistol: {
 			auto pistol = std::make_unique<Pistol>();
@@ -49,6 +51,26 @@ namespace Projectile {
 		}
 		default:
 			break;
+		}
+	}
+
+	void Manager::CollectHitsAgainst(const std::string& targetColliderName, std::vector<HitInfo>& outHitInfos) const {
+		outHitInfos.clear();
+		if (targetColliderName.empty()) {
+			return;
+		}
+
+		outHitInfos.reserve(projectiles.size());
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
+			if (!projectile || projectile->IsDead() || projectile->GetColliderName().empty()) {
+				continue;
+			}
+
+			if (!MyCollider::IsHitName(targetColliderName, projectile->GetColliderName())) {
+				continue;
+			}
+
+			outHitInfos.push_back({ projectile->GetProjectileId(), projectile->GetDamage() });
 		}
 	}
 }

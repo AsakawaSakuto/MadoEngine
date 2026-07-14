@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cstdint>
 #include <string>
 #include "../WeaponStatus.h"
 #include "MathHeaders.h"
@@ -7,13 +8,13 @@
 namespace Projectile {
 	
 	struct  InitializeDesc {
+		std::uint64_t projectileId = 0;
 		std::string projectileName;
 		int projectileCount;
 		Vector3 ownerPosition;
 		Vector3 targetPosition;
-		float damage = 0.0f;
-
-		float explotionDamageDecreaseRate = 1.0f;
+		float damage = 10.0f;
+		float explotionDamageDecreaseRate = 10.0f;
 		float explosionRadius = 0.0f;
 	};
 

@@ -16,11 +16,9 @@ namespace Projectile {
 	}
 
 	void Rock::Initialize(InitializeDesc context) {
-		objectName_ = context.projectileName + std::to_string(context.projectileCount);
+		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
+		InitializeCommonProperties(context, objectName_);
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
-
-		ownerPosition = context.ownerPosition;
-		targetPosition = context.targetPosition;
 
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
@@ -33,8 +31,6 @@ namespace Projectile {
 			transform_.rotate.y = std::atan2(moveDirection_.x, moveDirection_.z);
 			transform_.rotate.z = 0.0f;
 		}
-
-		damage_ = context.damage;
 
 		AABB hitbox;
 		hitbox.min = { -0.5f, -0.5f, -0.5f };

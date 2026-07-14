@@ -101,6 +101,8 @@ Enemy::~Enemy() {
 
 void Enemy::Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType sceneType) {
 	enemyId_ = enemyId;
+	status_ = {};
+	projectileDamageCooldowns_.clear();
 	transform_.translate = spawnPosition;
 	transform_.SetAllScale(0.5f);
 
@@ -131,6 +133,8 @@ void Enemy::Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType
 }
 
 void Enemy::Update(float deltaTime) {
+	UpdateProjectileDamageCooldowns(deltaTime);
+
 	lastDeltaTime_ = deltaTime;
 	lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
 	lastMoveStartPosition_ = transform_.translate;
@@ -198,12 +202,40 @@ bool Enemy::IsHitPlayer() const {
 	return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerHitBox);
 }
 
-bool Enemy::IsHitPlayerProjectile() const {
-	if (!isActive_) {
+bool Enemy::TakeProjectileDamage(std::uint64_t projectileId, float damage) {
+	if (!isActive_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
 		return false;
 	}
 
-	return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerProjectileHitBox);
+	if (projectileDamageCooldowns_.contains(projectileId)) {
+		return false;
+	}
+
+	status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
+	projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
+
+	if (status_.currentHealth > 0.0f) {
+		return false;
+	}
+
+	Kill();
+	return true;
+}
+
+void Enemy::UpdateProjectileDamageCooldowns(float deltaTime) {
+	if (deltaTime <= 0.0f) {
+		return;
+	}
+
+	for (auto iterator = projectileDamageCooldowns_.begin(); iterator != projectileDamageCooldowns_.end();) {
+		iterator->second -= deltaTime;
+		if (iterator->second <= 0.0f) {
+			iterator = projectileDamageCooldowns_.erase(iterator);
+			continue;
+		}
+
+		++iterator;
+	}
 }
 
 void Enemy::Release() {

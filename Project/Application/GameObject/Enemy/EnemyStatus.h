@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Enemy {
+namespace EnemyData {
 
 	/// @brief Enemyの現在ステータスを管理する構造体
 	struct Status {

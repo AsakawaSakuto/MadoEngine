@@ -1,6 +1,6 @@
 #pragma once
 
-/// @brief Textで選択可能なフォント種別です。
+/// @brief Textで選択可能なフォント種別
 enum class TextFontFamilyType {
 	YuGothicUI,
 	Meiryo,

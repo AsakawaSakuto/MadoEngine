@@ -26,9 +26,33 @@ namespace Projectile {
 		/// @return 削除対象の場合はtrueを返す
 		bool IsDead() const { return isDead_; }
 
-	protected:
+		/// @brief Projectileの識別番号を取得
+		/// @return Projectileの識別番号
+		std::uint64_t GetProjectileId() const { return projectileId_; }
 
-		float damage_ = 0.0f;
+		/// @brief Projectileのダメージ量を取得
+		/// @return Projectileのダメージ量
+		float GetDamage() const { return damage_; }
+
+		/// @brief Projectileのコライダー名を取得
+		/// @return Projectileのコライダー名
+		const std::string& GetColliderName() const { return colliderName_; }
+
+	protected:
+		/// @brief Projectile共通情報を初期化
+		/// @param context Projectileの初期化情報
+		/// @param colliderName Projectileのコライダー名
+		void InitializeCommonProperties(const InitializeDesc& context, const std::string& colliderName) {
+			projectileId_ = context.projectileId;
+			damage_ = context.damage;
+			colliderName_ = colliderName;
+			ownerPosition = context.ownerPosition;
+			targetPosition = context.targetPosition;
+		}
+
+		std::uint64_t projectileId_ = 0;
+		float damage_ = 10.0f;
+		std::string colliderName_;
 
 		bool isDead_ = false;
 		Transform3D transform_;

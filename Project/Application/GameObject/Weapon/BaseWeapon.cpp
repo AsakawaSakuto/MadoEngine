@@ -165,6 +165,7 @@ namespace Weapon {
 			context.projectileCount = projectileCount_;
 			context.ownerPosition = ownerPosition;
 			context.targetPosition = targetPosition;
+			context.damage = status_.damage.value;
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 

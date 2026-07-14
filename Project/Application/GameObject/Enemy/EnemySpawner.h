@@ -22,6 +22,9 @@ public:
 	/// @param deltaTime デルタタイム
 	void Update(float deltaTime);
 
+	/// @brief EnemySpawnerのデバッグ用ImGuiを描画
+	void DrawImGui();
+
 	/// @brief すべてのEnemyを削除
 	void Clear();
 
@@ -55,9 +58,10 @@ private:
 
 	int spawnLimit_ = 499;
 
-	float spawnInterval_ = 0.1f;
+	float spawnInterval_ = 10.0f;
 	float spawnTimer_ = 0.0f;
 	float minSpawnRadius_ = 8.0f;
 	float maxSpawnRadius_ = 14.0f;
 	uint32_t nextEnemyId_ = 0;
+	bool isActive_ = true;
 };

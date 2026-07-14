@@ -1,5 +1,6 @@
 #include "FireBall.h"
 #include "../../../Map/MapLimit.h"
+#include "../ProjectileManager.h"
 #include <cmath>
 
 namespace Projectile {
@@ -16,11 +17,9 @@ namespace Projectile {
 	}
 
 	void FireBall::Initialize(InitializeDesc context) {
-		objectName_ = context.projectileName + std::to_string(context.projectileCount);
+		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
+		InitializeCommonProperties(context, objectName_);
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
-
-		ownerPosition = context.ownerPosition;
-		targetPosition = context.targetPosition;
 
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
@@ -34,8 +33,6 @@ namespace Projectile {
 			transform_.rotate.z = 0.0f;
 		}
 
-		damage_ = context.damage;
-
 		AABB hitbox;
 		hitbox.min = { -0.5f, -0.5f, -0.5f };
 		hitbox.max = { 0.5f, 0.5f, 0.5f };
@@ -48,6 +45,7 @@ namespace Projectile {
 		transform_.translate += moveDirection_ * kMoveSpeed * deltaTime;
 
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
+			Projectile::Manager::GetInstance().AddProjectile(Type::Explosion, {});
 			isDead_ = true;
 			return;
 		}

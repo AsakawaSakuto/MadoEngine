@@ -25,7 +25,7 @@ enum class TextVerticalAlign {
 	Bottom,
 };
 
-/// @brief DirectWriteで生成するTextテクスチャの設定です。
+/// @brief DirectWriteで生成するTextテクスチャの設定
 struct TextTextureDesc {
 	std::wstring text = L"Text";
 	std::wstring fontFamily = L"Yu Gothic UI";
@@ -38,31 +38,31 @@ struct TextTextureDesc {
 	bool wordWrap = true;
 };
 
-/// @brief DirectWriteで描画した文字列をRGBAピクセルへ変換した結果です。
+/// @brief DirectWriteで描画した文字列をRGBAピクセルへ変換した結果
 struct TextTexturePixels {
 	std::vector<uint8_t> pixels;
 	uint32_t width = 1;
 	uint32_t height = 1;
 };
 
-/// @brief DirectWrite、Direct2D、WICを使ってText用のRGBAテクスチャデータを生成します。
+/// @brief DirectWrite、Direct2D、WICを使ってText用のRGBAテクスチャデータを生成
 class TextTextureGenerator {
 public:
-	/// @brief シングルトンインスタンスを取得します。
-	/// @return TextTextureGeneratorのインスタンス。
+	/// @brief シングルトンインスタンスを取得
+	/// @return TextTextureGeneratorのインスタンス
 	static TextTextureGenerator& GetInstance();
 
-	/// @brief DirectWrite関連リソースを初期化します。
-	/// @return 初期化に成功した場合はtrue。
+	/// @brief DirectWrite関連リソースを初期化
+	/// @return 初期化に成功した場合はtrue
 	bool Initialize();
 
-	/// @brief DirectWrite関連リソースを解放します。
+	/// @brief DirectWrite関連リソースを解放
 	void Finalize();
 
-	/// @brief Text設定からRGBAピクセルを生成します。
-	/// @param desc 生成に使用するText設定。
-	/// @param outPixels 生成されたRGBAピクセル。
-	/// @return 生成に成功した場合はtrue。
+	/// @brief Text設定からRGBAピクセルを生成
+	/// @param desc 生成に使用するText設定
+	/// @param outPixels 生成されたRGBAピクセル
+	/// @return 生成に成功した場合はtrue
 	bool Generate(const TextTextureDesc& desc, TextTexturePixels& outPixels);
 
 private:
@@ -72,22 +72,22 @@ private:
 	TextTextureGenerator(const TextTextureGenerator&) = delete;
 	TextTextureGenerator& operator=(const TextTextureGenerator&) = delete;
 
-	/// @brief TextLayoutから必要なテクスチャサイズを計算します。
-	/// @param textLayout 計測対象のTextLayout。
-	/// @param requestedSize JsonやEditorから指定された表示領域。
-	/// @param outWidth 出力するテクスチャ幅。
-	/// @param outHeight 出力するテクスチャ高さ。
+	/// @brief TextLayoutから必要なテクスチャサイズを計算
+	/// @param textLayout 計測対象のTextLayout
+	/// @param requestedSize JsonやEditorから指定された表示領域
+	/// @param outWidth 出力するテクスチャ幅
+	/// @param outHeight 出力するテクスチャ高さ
 	void ResolveTextureSize(
 		IDWriteTextLayout* textLayout,
 		const Vector2& requestedSize,
 		uint32_t& outWidth,
 		uint32_t& outHeight) const;
 
-	/// @brief WICのPBGRAピクセルをSprite描画向けのストレートRGBAへ変換します。
-	/// @param premultipliedBGRA WICから取得したPBGRAピクセル。
-	/// @param width ピクセル幅。
-	/// @param height ピクセル高さ。
-	/// @param outRGBA 変換後のRGBAピクセル。
+	/// @brief WICのPBGRAピクセルをSprite描画向けのストレートRGBAへ変換
+	/// @param premultipliedBGRA WICから取得したPBGRAピクセル
+	/// @param width ピクセル幅
+	/// @param height ピクセル高さ
+	/// @param outRGBA 変換後のRGBAピクセル
 	bool ConvertPremultipliedBgraToRgba(
 		const std::vector<uint8_t>& premultipliedBGRA,
 		uint32_t width,

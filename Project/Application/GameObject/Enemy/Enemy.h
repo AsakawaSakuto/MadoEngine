@@ -1,7 +1,9 @@
 #pragma once
 #include "../IGameObject.h"
+#include "EnemyStatus.h"
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 
 namespace Player {
 	class Base;
@@ -33,9 +35,11 @@ public:
 	/// @return Playerと接触していればtrueを返す
 	bool IsHitPlayer() const;
 
-	/// @brief PlayerのProjectileと接触しているか判定する
-	/// @return PlayerのProjectileと接触していればtrueを返す
-	bool IsHitPlayerProjectile() const;
+	/// @brief Projectileからのダメージを適用
+	/// @param projectileId Projectileの識別番号
+	/// @param damage 適用するダメージ量
+	/// @return このダメージでEnemyが倒された場合はtrueを返す
+	bool TakeProjectileDamage(std::uint64_t projectileId, float damage);
 
 	/// @brief Enemyの有効状態を取得
 	/// @return 有効であればtrueを返す
@@ -45,10 +49,22 @@ public:
 	/// @return Enemyの現在座標
 	Vector3 GetPosition() const { return transform_.translate; }
 
+	/// @brief Enemyの当たり判定用コライダー名を取得
+	/// @return Enemyの当たり判定用コライダー名
+	const std::string& GetHitColliderName() const { return hitColliderName_; }
+
+	/// @brief Enemyの現在HPを取得
+	/// @return Enemyの現在HP
+	float GetCurrentHealth() const { return status_.currentHealth; }
+
 	/// @brief Enemyを削除対象にする
 	void Kill() { isActive_ = false; }
 
 private:
+	/// @brief Projectileごとの再ダメージ待機時間を更新
+	/// @param deltaTime 前フレームからの経過時間
+	void UpdateProjectileDamageCooldowns(float deltaTime);
+
 	/// @brief ColliderとModelを破棄する
 	void Release();
 
@@ -83,6 +99,7 @@ private:
 	void UpdateModelTransform(bool isSlopeGroundContact = false);
 
 	uint32_t enemyId_ = 0;
+	EnemyData::Status status_;
 	ColliderShape hitAABB_;
 	Player::Base* targetPlayer_ = nullptr;
 	std::string movementColliderName_;
@@ -97,9 +114,11 @@ private:
 	float sideClimbCrestTimer_ = 0.0f;
 	float faceYaw_ = 0.0f;
 	float modelGroundNormalFollowSpeed_ = 16.0f;
+	float projectileDamageInterval_ = 0.2f;
 	Vector3 lastMoveStartPosition_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
+	std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
 	bool isGrounded_ = false;
 	bool isSideClimbing_ = false;
 	bool isActive_ = true;
