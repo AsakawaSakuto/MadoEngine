@@ -4,4 +4,5 @@
 #include "Render/ImGui/Editor/LightEditor.h"
 #include "Render/ImGui/Editor/LoggerEditor.h"
 #include "Render/ImGui/Editor/PostEffectEditor.h"
+#include "Render/ImGui/Editor/SpriteEditor.h"
 #include "Render/ImGui/Editor/TextEditorUI.h"

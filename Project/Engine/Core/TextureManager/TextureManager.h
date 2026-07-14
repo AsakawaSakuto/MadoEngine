@@ -3,6 +3,7 @@
 #include <wrl/client.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include <cstdint>
 #include "DirectXTex/DirectXTex.h"
 #include "Math/Vector2.h"
@@ -50,6 +51,10 @@ namespace MadoEngine {
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @return テクスチャインデックス（見つからない場合は UINT32_MAX）
         uint32_t GetTextureIndex(const std::string& fileName) const;
+
+        /// @brief 登録済みテクスチャ名の一覧を取得する
+        /// @return 名前順に並べたテクスチャ名の一覧
+        std::vector<std::string> GetTextureNames() const;
 
         /// @brief RGBAピクセルを動的テクスチャとして登録または更新します。
         /// @param key 登録キー。

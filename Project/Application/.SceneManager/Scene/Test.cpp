@@ -93,6 +93,12 @@ void Test::Initialize() {
 	fadeOutTimer_.Start(2.0f);
 	fpsSampleTime_ = 0.0f;
 	fpsSampleFrameCount_ = 0;
+
+	weaponIconUI_ = std::make_unique<Weapon::WeaponIconUI>();
+	weaponIconUI_->Initialize(4);
+
+	playerIconUI_ = std::make_unique<Player::PlayerIconUI>();
+	playerIconUI_->Initialize();
 }
 
 SceneType Test::Update(float dt) {
@@ -135,6 +141,8 @@ SceneType Test::Update(float dt) {
 	weaponUpgradeUI_.UpdateInput(*weaponUpgradeSystem_, *weaponInventory_);
 
 	weaponInventory_->Update(deltaTime, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
+
+	weaponIconUI_->Update(*weaponInventory_);
 
 	auto status = player_->GetStatus();
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));

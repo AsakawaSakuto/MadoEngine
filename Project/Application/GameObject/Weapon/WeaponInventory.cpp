@@ -111,6 +111,14 @@ namespace Weapon {
 		return nullptr;
 	}
 
+	const BaseWeapon* Inventory::GetWeaponAtSlot(std::size_t slotIndex) const {
+		if (slotIndex >= weapons_.size()) {
+			return nullptr;
+		}
+
+		return weapons_[slotIndex].get();
+	}
+
 	void Inventory::RemoveWeapon(int slotIndex) {
 		if (slotIndex < 0) {
 			return;

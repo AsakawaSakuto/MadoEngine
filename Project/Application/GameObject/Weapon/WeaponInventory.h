@@ -42,6 +42,11 @@ namespace Weapon {
 		/// @return 所持している武器へのconstポインターです。未所持の場合はnullptrを返します。
 		const BaseWeapon* GetWeapon(Projectile::Type type) const;
 
+		/// @brief 指定したスロットに装備されている武器を取得します。
+		/// @param slotIndex 取得する武器スロットの番号です。
+		/// @return 装備中の武器へのconstポインターです。空きスロットまたは範囲外の場合はnullptrを返します。
+		const BaseWeapon* GetWeaponAtSlot(std::size_t slotIndex) const;
+
 		/// @brief 武器構成の変更番号を取得します。
 		/// @return 武器の追加または削除ごとに増える変更番号です。
 		std::uint64_t GetRevision() const { return revision_; }

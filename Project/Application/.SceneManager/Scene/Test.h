@@ -11,8 +11,10 @@
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
 #include "UI/Player/PlayerExpGauge.h"
+#include "UI/Player/PlayerIconUI.h"
 #include "UI/Player/PlayerHealthGauge.h"
 #include "UI/Weapon/WeaponUpgradeUI.h"
+#include "UI/Weapon/WeaponIconUI.h"
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -66,10 +68,13 @@ private:
 
 	std::unique_ptr<EnemySpawner> enemySpawner_;
 
+	std::unique_ptr<Player::PlayerIconUI> playerIconUI_;
+
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
 	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
 	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
 	Weapon::UpgradeUI weaponUpgradeUI_;
+	std::unique_ptr<Weapon::WeaponIconUI> weaponIconUI_;
 
 	Sprite* fadeSprite_ = nullptr;
 	MadoEngine::Text* playerHealthText_ = nullptr;

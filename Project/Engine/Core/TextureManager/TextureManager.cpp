@@ -1,6 +1,7 @@
 #include "TextureManager.h"
 #include <filesystem>
 #include <cassert>
+#include <algorithm>
 #include "Utility/Logger/Logger.h"
 
 namespace MadoEngine {
@@ -99,6 +100,17 @@ namespace MadoEngine {
             return UINT32_MAX;
         }
         return it->second.index;
+    }
+
+    std::vector<std::string> TextureManager::GetTextureNames() const {
+        std::vector<std::string> names;
+        names.reserve(textures_.size());
+        for (const auto& [name, texture] : textures_) {
+            (void)texture;
+            names.push_back(name);
+        }
+        std::sort(names.begin(), names.end());
+        return names;
     }
 
     uint32_t TextureManager::RegisterOrUpdateRGBA(

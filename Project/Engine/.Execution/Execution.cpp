@@ -188,6 +188,7 @@ namespace MadoEngine
 
 		MadoEngine::Editor::LoadAudioEditorJson();
 		MadoEngine::Editor::LoadLightEditorJson();
+		MadoEngine::Editor::LoadSpriteEditorJson();
 		MadoEngine::Editor::LoadTextEditorJson();
 		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager_);
 
@@ -494,6 +495,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
+		MadoEngine::Editor::DrawSpriteManagerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
 		//MadoEngine::Editor::DrawLoggerEditorUI();

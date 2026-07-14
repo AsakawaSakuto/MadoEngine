@@ -25,6 +25,27 @@ public:
 	/// @brief 描画
 	void Draw() override;
 
+	/// @brief 使用するテクスチャを変更する
+	/// @param textureName 変更先のテクスチャ名
+	/// @return 変更に成功した場合はtrue
+	bool SetTexture(const std::string& textureName);
+
+	/// @brief 使用中のテクスチャ名を取得する
+	/// @return 使用中のテクスチャ名
+	const std::string& GetTextureName() const { return textureName_; }
+
+	/// @brief テクスチャのピクセルサイズを取得する
+	/// @return テクスチャのピクセルサイズ
+	const Vector2& GetTextureSize() const { return size_; }
+
+	/// @brief アンカーポイントを設定する
+	/// @param anchorPoint 左上を0、右下を1とするアンカーポイント
+	void SetAnchorPoint(const Vector2& anchorPoint);
+
+	/// @brief アンカーポイントを取得する
+	/// @return 現在のアンカーポイント
+	const Vector2& GetAnchorPoint() const { return anchorPoint_; }
+
 	/// @brief 描画対象シーンをセットする
 	/// @param sceneType 描画を許可するシーンの種類（SceneType::None の場合は全シーンで描画）
 	void SetSceneType(SceneType sceneType) { sceneType_ = sceneType; }
@@ -41,10 +62,18 @@ public:
 	/// @return 画面全体へ引き伸ばす場合はtrue
 	bool IsFitToScreen() const { return isFitToScreen_; }
 
+	/// @brief JsonからSprite設定を復元する
+	/// @param json 復元元のJson
+	void FromJson(const nlohmann::json& json);
+
+	/// @brief Sprite設定をJsonへ変換する
+	/// @return Sprite設定を格納したJson
+	nlohmann::json ToJson() const;
+
 private:
 
 	/// @brief マテリアル・変換行列・PSOの共通初期化処理
-	void InitializeCommonResources(const std::string& textureName);
+	void InitializeCommonResources();
 
 	// 実際に描画で使うVBV/IBVへのポインタ
 	// SpriteManager経由: sharedGeo のバッファを指す
@@ -56,7 +85,6 @@ private:
 	SpriteTransformationMatrix* transformationData_ = nullptr;
 
 	Vector2     anchorPoint_ = { 0.0f, 0.0f };
-	AnchorPoint anchorType_ = AnchorPoint::TopLeft;
 
 	// 描画対象シーン（SceneType::None は全シーンで描画）
 	SceneType sceneType_ = SceneType::None;

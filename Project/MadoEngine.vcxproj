@@ -167,6 +167,8 @@
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
+    <ClCompile Include="Application\UI\Player\PlayerIconUI.cpp" />
+    <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Weapon\WeaponUpgradeUI.cpp" />
     <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
@@ -198,6 +200,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\SpriteEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
@@ -315,6 +318,8 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
+    <ClInclude Include="Application\UI\Player\PlayerIconUI.h" />
+    <ClInclude Include="Application\UI\Weapon\WeaponIconUI.h" />
     <ClInclude Include="Application\UI\Weapon\WeaponUpgradeUI.h" />
     <ClInclude Include="Application\UI\GameSceneTimer.h" />
     <ClInclude Include="Application\UI\Player\PlayerExpGauge.h" />
@@ -358,6 +363,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\LoggerEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\SpriteEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\TextEditorUI.h" />
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.h" />

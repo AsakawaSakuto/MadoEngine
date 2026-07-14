@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <d3d12.h>
+#include <filesystem>
 
 namespace MadoEngine {
 
@@ -46,6 +47,11 @@ public:
 	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
 	Sprite* Create(const std::string& name, const std::string& textureName, SceneType sceneType = SceneType::None);
 
+	/// @brief JsonからSpriteを生成して管理対象へ登録する
+	/// @param json Sprite設定を格納したJson
+	/// @return 生成または更新したSprite、失敗した場合はnullptr
+	Sprite* CreateFromJson(const nlohmann::json& json);
+
 	/// @brief 識別名でSpriteを取得する
 	/// @param name Spriteの識別名
 	/// @return Spriteのポインタ（存在しない場合はnullptr）
@@ -75,6 +81,28 @@ public:
 	/// @param currentSceneType 現在のシーン種別
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask);
+
+	/// @brief 管理中のSprite一覧をJsonへ変換する
+	/// @return Sprite一覧を格納したJson
+	nlohmann::json ToJson() const;
+
+	/// @brief JsonからSprite一覧を復元する
+	/// @param json 復元元のJson
+	void FromJson(const nlohmann::json& json);
+
+	/// @brief Sprite一覧をJsonファイルへ保存する
+	/// @param filePath 保存先のファイルパス
+	/// @return 保存に成功した場合はtrue
+	bool SaveToFile(const std::filesystem::path& filePath) const;
+
+	/// @brief JsonファイルからSprite一覧を読み込む
+	/// @param filePath 読み込み元のファイルパス
+	/// @return 読み込みに成功した場合はtrue
+	bool LoadFromFile(const std::filesystem::path& filePath);
+
+	/// @brief 管理中のSprite名一覧を取得する
+	/// @return 描画順に並んだSprite名一覧
+	std::vector<std::string> GetNames() const;
 
 private:
 

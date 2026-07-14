@@ -1,5 +1,6 @@
 #include "SpriteManager.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Json/Core/JsonFile.h"
 #include "Shader/RootSignatureManager.h"
 #include <algorithm>
 #include <cassert>
@@ -46,6 +47,14 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
 		return sprites_.at(name).get();
 	}
+	if (name.empty()) {
+		Logger::Output("名前が空のSpriteは生成できません", Logger::Level::Warning);
+		return nullptr;
+	}
+	if (TextureManager::GetInstance().GetTextureIndex(textureName) == UINT32_MAX) {
+		Logger::Output("存在しないテクスチャのSpriteは生成できません : " + textureName, Logger::Level::Warning);
+		return nullptr;
+	}
 
 	auto sprite = std::make_unique<Sprite>(name);
 	sprite->Initialize(device_, commandList_, textureName, sharedGeometry_);
@@ -59,6 +68,23 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 
 	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneType == SceneType::None ? "全シーン" : SceneTypeToString(sceneType)), Logger::Level::Application);
 	return ptr;
+}
+
+Sprite* SpriteManager::CreateFromJson(const nlohmann::json& json) {
+	if (!json.is_object()) {
+		Logger::Output("Sprite Jsonの要素がオブジェクトではありません", Logger::Level::Warning);
+		return nullptr;
+	}
+
+	const std::string name = json.value("name", "Sprite");
+	const std::string textureName = json.value("texture", "");
+	Sprite* sprite = Create(name, textureName);
+	if (!sprite) {
+		return nullptr;
+	}
+
+	sprite->FromJson(json);
+	return sprite;
 }
 
 Sprite* SpriteManager::Get(const std::string& name) const {
@@ -160,6 +186,64 @@ void SpriteManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render
 		// 各スプライト固有の描画（CBV/SRVバインドとドローコール）
 		sprite->Draw();
 	}
+}
+
+nlohmann::json SpriteManager::ToJson() const {
+	nlohmann::json sprites = nlohmann::json::array();
+	for (const std::string& name : drawOrder_) {
+		auto it = sprites_.find(name);
+		if (it == sprites_.end()) {
+			continue;
+		}
+		sprites.push_back(it->second->ToJson());
+	}
+
+	return {
+		{ "sprites", sprites },
+	};
+}
+
+void SpriteManager::FromJson(const nlohmann::json& json) {
+	const nlohmann::json* spriteArray = nullptr;
+	if (json.is_array()) {
+		spriteArray = &json;
+	} else if (json.contains("sprites") && json.at("sprites").is_array()) {
+		spriteArray = &json.at("sprites");
+	}
+
+	if (!spriteArray) {
+		Logger::Output("Sprite Jsonにsprites配列がありません", Logger::Level::Warning);
+		return;
+	}
+
+	for (const nlohmann::json& spriteJson : *spriteArray) {
+		try {
+			CreateFromJson(spriteJson);
+		}
+		catch (const nlohmann::json::exception& exception) {
+			Logger::Output(
+				"Sprite Jsonの要素を読み込めませんでした : " + std::string(exception.what()),
+				Logger::Level::Error);
+		}
+	}
+}
+
+bool SpriteManager::SaveToFile(const std::filesystem::path& filePath) const {
+	return Json::JsonFile::Save(filePath, ToJson(), 4, true);
+}
+
+bool SpriteManager::LoadFromFile(const std::filesystem::path& filePath) {
+	nlohmann::json json;
+	if (!Json::JsonFile::Load(filePath, json)) {
+		return false;
+	}
+
+	FromJson(json);
+	return true;
+}
+
+std::vector<std::string> SpriteManager::GetNames() const {
+	return drawOrder_;
 }
 
 } // namespace MadoEngine

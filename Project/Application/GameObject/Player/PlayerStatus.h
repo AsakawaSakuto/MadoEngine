@@ -67,4 +67,28 @@ namespace Player {
 		}
 	}
 
+	/// @brief プレイヤーのタイプを表す列挙型
+	enum Type {
+		Gunman, 
+		Traveler,
+		Warrior,
+		Wizard,
+
+		Count
+	};
+
+	inline const char* ToTypeText(Player::Type type) {
+		switch (type) {
+		case Player::Type::Gunman:
+			return "Gunman";
+		case Player::Type::Traveler:
+			return "Traveler";
+		case Player::Type::Warrior:
+			return "Warrior";
+		case Player::Type::Wizard:
+			return "Wizard";
+		default:
+			return "Unknown";
+		}
+	}
 }
