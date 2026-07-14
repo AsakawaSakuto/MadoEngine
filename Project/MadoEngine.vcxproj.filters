@@ -126,6 +126,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.cpp" />
     <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerIconUI.cpp" />
+    <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
@@ -675,6 +676,12 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Player\PlayerIconUI.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\System\InGameSession\InGameSession.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\System\InGameSession\InGamePhase.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

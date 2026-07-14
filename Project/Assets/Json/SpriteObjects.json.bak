@@ -9,7 +9,7 @@
                 1.0,
                 1.0,
                 1.0,
-                0.0
+                0.9821134209632874
             ],
             "fitToScreen": true,
             "layer": "Default",
@@ -53,6 +53,426 @@
             ],
             "scene": "Title",
             "texture": "uvChecker",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PlayerExpGauge1",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                640.0,
+                16.0
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                0.0,
+                0.9581396579742432,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PlayerExpGauge2",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.0,
+                16.0
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Sprite2D",
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PlayerHealthGauge1",
+            "position": [
+                30.0,
+                62.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                128.0,
+                25.0
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PlayerHealthGauge2",
+            "position": [
+                30.0,
+                62.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                112.63999938964844,
+                25.0
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.00027829408645629883
+            ],
+            "fitToScreen": true,
+            "layer": "Default",
+            "name": "testFade",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "black2x2",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponFrame0",
+            "position": [
+                32.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "IconFrame",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponIcon0",
+            "position": [
+                32.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "Pistol",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponFrame1",
+            "position": [
+                96.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "IconFrame",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponIcon1",
+            "position": [
+                96.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "None",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponFrame2",
+            "position": [
+                160.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "IconFrame",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponIcon2",
+            "position": [
+                160.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "None",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponFrame3",
+            "position": [
+                224.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "IconFrame",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "weaponIcon3",
+            "position": [
+                224.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "None",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "PlayerIcon",
+            "position": [
+                32.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "Gunman",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "PlayerIconFrame",
+            "position": [
+                32.0,
+                200.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "IconFrame",
             "type": "Sprite2D",
             "visible": true
         }
