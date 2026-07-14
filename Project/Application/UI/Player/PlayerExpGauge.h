@@ -3,8 +3,7 @@
 
 namespace Player {
 
-	class ExpGauge
-	{
+	class ExpGauge {
 	public:
 
 		void Initialize();

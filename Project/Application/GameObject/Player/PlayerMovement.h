@@ -12,44 +12,44 @@ namespace Player {
 		/// @brief 移動状態を初期化します。
 		void Initialize();
 
-		/// @brief 入力と重力をもとに移動を更新します。
-		/// @param deltaTime 1フレームの経過時間です。
-		/// @param transform 更新対象のTransformです。
-		/// @param camera 移動方向の基準にするCameraです。
-		/// @param input Playerの移動操作入力です。
+		/// @brief 入力と重力をもとに移動を更新
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
+		/// @param camera 移動方向の基準にするCamera
+		/// @param input Playerの移動操作入力
 		void Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input);
 
-		/// @brief 接地状態を移動処理へ反映します。
-		/// @param isGroundContact 通常地面に接地していればtrueです。
-		/// @param isSlopeGroundContact 坂に接地していればtrueです。
-		/// @param input Playerの移動操作入力です。
+		/// @brief 接地状態を移動処理へ反映
+		/// @param isGroundContact 通常地面に接地していればtrue
+		/// @param isSlopeGroundContact 坂に接地していればtrue
+		/// @param input Playerの移動操作入力
 		void SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input);
 
-		/// @brief PlayerのModel座標と回転を接地状態に合わせて更新します。
-		/// @param deltaTime 1フレームの経過時間です。
-		/// @param transform 更新対象のTransformです。
-		/// @param model 更新対象のModelです。
-		/// @param isSlopeGroundContact 坂に接地していればtrueです。
+		/// @brief PlayerのModel座標と回転を接地状態に合わせて更新
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
+		/// @param model 更新対象のModel
+		/// @param isSlopeGroundContact 坂に接地していればtrue
 		void UpdateModelTransform(float deltaTime, Transform3D& transform, Model* model, bool isSlopeGroundContact);
 
-		/// @brief 現在の動作状態を取得します。
-		/// @return 現在の動作状態です。
+		/// @brief 現在の動作状態を取得
+		/// @return 現在の動作状態
 		Player::Motion GetCurrentMotion() const { return currentMotion_; }
 
-		/// @brief Y方向速度を取得します。
-		/// @return Y方向速度です。
+		/// @brief Y方向速度を取得
+		/// @return Y方向速度
 		float GetVelocityY() const { return velocityY_; }
 
-		/// @brief スライディング速度を取得します。
-		/// @return スライディング速度です。
+		/// @brief スライディング速度を取得
+		/// @return スライディング速度
 		Vector3 GetSlideVelocity() const { return slideVelocity_; }
 
-		/// @brief ジャンプ時の水平初速を取得します。
-		/// @return ジャンプ時の水平初速です。
+		/// @brief ジャンプ時の水平初速を取得
+		/// @return ジャンプ時の水平初速
 		Vector3 GetJumpMoveVelocity() const { return jumpMoveVelocity_; }
 
-		/// @brief 移動パラメータを取得します。
-		/// @return 移動パラメータです。
+		/// @brief 移動パラメータを取得
+		/// @return 移動パラメータ
 		Player::MovementParams& GetParams() { return movementParams_; }
 
 	private:
@@ -58,37 +58,37 @@ namespace Player {
 
 		void Jump(float deltaTime, Transform3D& transform, const MoveInput& input);
 
-		/// @brief Slope上を移動しているときに足元を斜面へ追従させます。
-		/// @param deltaTime 1フレームの経過時間です。
-		/// @param transform 更新対象のTransformです。
+		/// @brief Slope上を移動しているときに足元を斜面へ追従
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
 		void ApplySlopeGroundSnap(float deltaTime, Transform3D& transform);
 
-		/// @brief ジャンプ時に加えた水平初速を反映します。
-		/// @param deltaTime 1フレームの経過時間です。
-		/// @param transform 更新対象のTransformです。
+		/// @brief ジャンプ時に加えた水平初速を反映
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
 		void ApplyJumpMoveBoost(float deltaTime, Transform3D& transform);
 
-		/// @brief 移動入力中のジャンプに水平初速を加えます。
-		/// @param input Playerの移動操作入力です。
+		/// @brief 移動入力中のジャンプに水平初速を加える
+		/// @param input Playerの移動操作入力
 		void AddJumpMoveBoost(const MoveInput& input);
 
-		/// @brief Crouching中のスライディング速度を更新します。
-		/// @param deltaTime 1フレームの経過時間です。
-		/// @param transform 更新対象のTransformです。
-		/// @param isCrouching Crouching入力が押されていればtrueです。
-		/// @param isCrouchingStarted このフレームでCrouching入力が押され始めたらtrueです。
-		/// @param moveDir 入力から計算した水平移動方向です。
-		/// @param hasMoveInput 移動入力があればtrueです。
+		/// @brief Crouching中のスライディング速度を更新
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
+		/// @param isCrouching Crouching入力が押されていればtrue
+		/// @param isCrouchingStarted このフレームでCrouching入力が押され始めたらtrue
+		/// @param moveDir 入力から計算した水平移動方向
+		/// @param hasMoveInput 移動入力があればtrue
 		void UpdateSliding(float deltaTime, Transform3D& transform, bool isCrouching, bool isCrouchingStarted, const Vector3& moveDir, bool hasMoveInput);
 
-		/// @brief 現在接地しているSlopeの下り方向を取得します。
-		/// @param outDownDirection 下り方向の出力先です。
-		/// @return Slopeの下り方向を取得できればtrueです。
+		/// @brief 現在接地しているSlopeの下り方向を取得
+		/// @param outDownDirection 下り方向の出力先
+		/// @return Slopeの下り方向を取得できればtrue
 		bool TryGetSlopeDownDirection(Vector3& outDownDirection) const;
 
-		/// @brief 水平スライディング速度に摩擦を適用します。
-		/// @param deltaTime 1フレームの経過時間です。
-		/// @param friction 減速量です。
+		/// @brief 水平スライディング速度に摩擦を適用
+		/// @param deltaTime 1フレームの経過時間
+		/// @param friction 減速量
 		void ApplySlideFriction(float deltaTime, float friction);
 
 	private:

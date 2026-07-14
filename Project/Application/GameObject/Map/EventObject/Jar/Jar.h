@@ -15,17 +15,17 @@ public:
 
 	~Jar();
 
-	/// @brief 設定付きでJarを初期化します。
-	/// @param desc 初期化に使用する設定です。
+	/// @brief 設定付きでJarを初期化
+	/// @param desc 初期化に使用する設定
 	void Initialize(const InitializeDesc& desc);
 
-	/// @brief Jarを更新します。
-	/// @param deltaTime 前フレームからの経過時間です。
+	/// @brief Jarを更新
+	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;
 
-	/// @brief Jarを取得した時の処理を実行します。
-	/// @param player 取得するPlayerです。
-	/// @return JarをMapから削除するためtrueを返します。
+	/// @brief Jarを取得した時の処理を実行
+	/// @param player 取得するPlayer
+	/// @return JarをMapから削除するためtrueを返す
 	bool Interact(Player::Base& player) override;
 
 private:

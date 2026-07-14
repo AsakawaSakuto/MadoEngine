@@ -18,17 +18,17 @@ public:
 
 	~Chest();
 
-	/// @brief 設定付きでChestを初期化します。
-	/// @param desc 初期化に使用する設定です。
+	/// @brief 設定付きでChestを初期化
+	/// @param desc 初期化に使用する設定
 	void Initialize(const InitializeDesc& desc);
 
-	/// @brief Chestを更新します。
-	/// @param deltaTime 前フレームからの経過時間です。
+	/// @brief Chestを更新
+	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;
 
-	/// @brief Chestに相互作用した時の処理を実行します。
-	/// @param player 相互作用したPlayerです。
-	/// @return ChestをMapから削除するためtrueを返します。
+	/// @brief Chestに相互作用した時の処理を実行
+	/// @param player 相互作用したPlayer
+	/// @return ChestをMapから削除するためtrueを返す
 	bool Interact(Player::Base& player) override;
 
 private:

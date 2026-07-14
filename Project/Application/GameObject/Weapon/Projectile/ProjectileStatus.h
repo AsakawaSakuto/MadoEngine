@@ -26,7 +26,7 @@ namespace Projectile {
 		Explosion, // 爆発で使用される、武器ではない
 	};
 
-	// ゲームロジックで使用できる武器を一か所で管理します。
+	// ゲームロジックで使用できる武器を一か所で管理
 	inline constexpr std::array<Type, 4> kPlayableWeaponTypes = {
 		Type::Pistol,
 		Type::Rock,
@@ -34,9 +34,9 @@ namespace Projectile {
 		Type::Axe,
 	};
 
-	/// @brief 武器種類をリソース名へ変換します。
-	/// @param type 変換する武器種類です。
-	/// @return 武器のリソース名です。
+	/// @brief 武器種類をリソース名へ変換
+	/// @param type 変換する武器種類
+	/// @return 武器のリソース名
 	inline std::string ProjectileTypeToString(Type type) {
 		switch (type) {
 		case Type::None:     return "None";
@@ -48,9 +48,9 @@ namespace Projectile {
 		}
 	}
 
-	/// @brief 武器種類に対応するJsonファイル名を取得します。
-	/// @param type ファイル名を取得する武器種類です。
-	/// @return 拡張子を除くJsonファイル名です。
+	/// @brief 武器種類に対応するJsonファイル名を取得
+	/// @param type ファイル名を取得する武器種類
+	/// @return 拡張子を除くJsonファイル名
 	inline std::string ProjectileTypeToJsonFileName(Type type) {
 		if (type == Type::FireBall) {
 			return "Fireball";
@@ -59,9 +59,9 @@ namespace Projectile {
 		return ProjectileTypeToString(type);
 	}
 
-	/// @brief 武器種類がゲームで使用可能か確認します。
-	/// @param type 確認する武器種類です。
-	/// @return 使用可能な武器種類の場合はtrueを返します。
+	/// @brief 武器種類がゲームで使用可能か確認
+	/// @param type 確認する武器種類
+	/// @return 使用可能な武器種類の場合はtrueを返す
 	inline bool IsPlayableWeaponType(Type type) {
 		for (const Type playableType : kPlayableWeaponTypes) {
 			if (playableType == type) {
@@ -72,9 +72,9 @@ namespace Projectile {
 		return false;
 	}
 
-	/// @brief 武器種類の日本語表示名を取得します。
-	/// @param type 表示名を取得する武器種類です。
-	/// @return 武器種類の日本語表示名です。
+	/// @brief 武器種類の日本語表示名を取得
+	/// @param type 表示名を取得する武器種類
+	/// @return 武器種類の日本語表示名
 	inline const char* ProjectileTypeToDisplayName(Type type) {
 		switch (type) {
 		case Type::None:     return "None";

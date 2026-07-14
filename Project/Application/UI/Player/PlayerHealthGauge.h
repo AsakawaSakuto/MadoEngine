@@ -3,8 +3,7 @@
 
 namespace Player {
 
-	class HealthGauge
-	{
+	class HealthGauge {
 	public:
 
 		void Initialize();

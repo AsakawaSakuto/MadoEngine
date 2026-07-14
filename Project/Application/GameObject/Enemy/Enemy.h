@@ -74,12 +74,12 @@ private:
 	/// @brief 側面上昇補助の状態を初期化
 	void ResetSideClimbAssist();
 
-	/// @brief 今回の移動が側面で止められたか判定する
+	/// @brief 今回の移動が側面で止められたか判定
 	/// @return 側面で前進量が落ちていればtrueを返す
 	bool IsSideBlockedThisFrame() const;
 
-	/// @brief Modelの座標と回転を接地状態に合わせて反映します。
-	/// @param isSlopeGroundContact Slopeに接地していればtrueです。
+	/// @brief Modelの座標と回転を接地状態に合わせて反映
+	/// @param isSlopeGroundContact Slopeに接地していればtrue
 	void UpdateModelTransform(bool isSlopeGroundContact = false);
 
 	uint32_t enemyId_ = 0;

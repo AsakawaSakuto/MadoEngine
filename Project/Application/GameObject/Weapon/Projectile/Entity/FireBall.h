@@ -9,11 +9,11 @@ namespace Projectile {
 		/// @brief FireBallのデストラクタ
 		~FireBall() override;
 
-		/// @brief FireBallを初期化する
+		/// @brief FireBallを初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
-		/// @brief FireBallを更新する
+		/// @brief FireBallを更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 

@@ -9,11 +9,11 @@ namespace Projectile {
 		/// @brief Axeのデストラクタ
 		~Axe() override;
 
-		/// @brief Axeを初期化する
+		/// @brief Axeを初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
-		/// @brief Axeを更新する
+		/// @brief Axeを更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 

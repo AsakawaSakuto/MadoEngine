@@ -38,18 +38,18 @@ namespace Player {
 
 		Status GetStatus() const { return status_; }
 
-		/// @brief 現在のPlayerレベルを取得します。
-		/// @return 現在のPlayerレベルです。
+		/// @brief 現在のPlayerレベルを取得
+		/// @return 現在のPlayerレベル
 		int GetLevel() const { return status_.level; }
 
 		void DrawImGui();
 
 	private:
 
-		/// @brief 経験値が上限に達している場合にレベルアップする
+		/// @brief 経験値が上限に達している場合にレベルアップ
 		void ProcessLevelUp();
 
-		/// @brief Player直下の地面へ影の描画座標を更新します。
+		/// @brief Player直下の地面へ影の描画座標を更新
 		void UpdateShadowTransform();
 
 		ColliderShape hitAABB_;

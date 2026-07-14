@@ -7,7 +7,7 @@
 
 namespace Weapon {
 
-	/// @brief 武器の強化対象ステータスを表す列挙型です。
+	/// @brief 武器の強化対象ステータスを表す列挙型
 	enum class UpgradeStatType {
 		None,
 
@@ -26,7 +26,7 @@ namespace Weapon {
 		Count,
 	};
 
-	// 抽選対象の強化ステータスを一か所で管理します。
+	// 抽選対象の強化ステータスを一か所で管理
 	inline constexpr std::array<UpgradeStatType, 11> kUpgradeStatTypes = {
 		UpgradeStatType::Damage,
 		UpgradeStatType::ShotMaxCount,
@@ -41,7 +41,7 @@ namespace Weapon {
 		UpgradeStatType::Speed,
 	};
 
-	/// @brief 武器の現在値と強化設定を管理する構造体です。
+	/// @brief 武器の現在値と強化設定を管理する構造体
 	struct UpgradeValue {
 		float value = 0.0f;          // 現在値
 		float fixedAddValue = 0.0f;  // 強化時の固定加算値
@@ -49,7 +49,7 @@ namespace Weapon {
 		bool isSelected = false;     // 選択肢に出るかどうか
 	};
 
-	/// @brief 武器の強化ステータスを管理する構造体です。
+	/// @brief 武器の強化ステータスを管理する構造体
 	struct UpgradeStatus {
 		UpgradeValue damage           = { 1.0f, 1.0f, 0.1f, true }; // 武器のダメージ量
 		UpgradeValue shotMaxCount     = { 1.0f, 1.0f, 0.1f, true }; // 武器の最大射撃数
@@ -64,9 +64,9 @@ namespace Weapon {
 		UpgradeValue speed            = { 1.0f, 1.0f, 0.1f, true }; // 武器の弾の速度
 	};
 
-	/// @brief 強化ステータスの日本語表示名を取得します。
-	/// @param type 表示名を取得する強化ステータスです。
-	/// @return 強化ステータスの日本語表示名です。
+	/// @brief 強化ステータスの日本語表示名を取得
+	/// @param type 表示名を取得する強化ステータス
+	/// @return 強化ステータスの日本語表示名
 	inline const char* UpgradeStatTypeToDisplayName(UpgradeStatType type) {
 		switch (type) {
 		case UpgradeStatType::Damage:           return "ダメージ量";
@@ -84,10 +84,10 @@ namespace Weapon {
 		}
 	}
 
-	/// @brief 指定した強化ステータスの設定を取得します。
-	/// @param status 参照する武器ステータスです。
-	/// @param type 取得する強化ステータスです。
-	/// @return 設定が存在する場合はconstポインターを、存在しない場合はnullptrを返します。
+	/// @brief 指定した強化ステータスの設定を取得
+	/// @param status 参照する武器ステータス
+	/// @param type 取得する強化ステータス
+	/// @return 設定が存在する場合はconstポインターを、存在しない場合はnullptrを返す
 	inline const UpgradeValue* FindUpgradeValue(const UpgradeStatus& status, UpgradeStatType type) {
 		switch (type) {
 		case UpgradeStatType::Damage:           return &status.damage;
@@ -105,18 +105,18 @@ namespace Weapon {
 		}
 	}
 
-	/// @brief レアリティが武器強化の抽選対象か確認します。
-	/// @param rarity 確認するレアリティです。
-	/// @return UncommonからLegendaryの場合はtrueを返します。
+	/// @brief レアリティが武器強化の抽選対象か確認
+	/// @param rarity 確認するレアリティ
+	/// @return UncommonからLegendaryの場合はtrueを返す
 	inline bool IsWeaponUpgradeRarity(Rarity rarity) {
 		const int rarityValue = static_cast<int>(rarity);
 		return rarityValue >= static_cast<int>(Rarity::Uncommon) &&
 			rarityValue <= static_cast<int>(Rarity::Legendary);
 	}
 
-	/// @brief アップグレード値をJsonへ変換します。
-	/// @param value 変換するアップグレード値です。
-	/// @return 変換後のJsonです。
+	/// @brief アップグレード値をJsonへ変換
+	/// @param value 変換するアップグレード値
+	/// @return 変換後のJson
 	inline nlohmann::json UpgradeValueToJson(const UpgradeValue& value) {
 		return {
 			{ "value", value.value },
@@ -126,10 +126,10 @@ namespace Weapon {
 		};
 	}
 
-	/// @brief Jsonからアップグレード値を読み込みます。
-	/// @param json 読み込み元のJsonです。
-	/// @param value 読み込み先のアップグレード値です。
-	/// @return 有効な値を読み込めた場合はtrueを返します。
+	/// @brief Jsonからアップグレード値を読み込み
+	/// @param json 読み込み元のJson
+	/// @param value 読み込み先のアップグレード値
+	/// @return 有効な値を読み込めた場合はtrueを返す
 	inline bool UpgradeValueFromJson(const nlohmann::json& json, UpgradeValue& value) {
 		if (!json.is_object()) {
 			return false;
@@ -172,9 +172,9 @@ namespace Weapon {
 		return true;
 	}
 
-	/// @brief 武器の初期ステータスをJsonへ変換します。
-	/// @param status 変換する初期ステータスです。
-	/// @return 変換後のJsonです。
+	/// @brief 武器の初期ステータスをJsonへ変換
+	/// @param status 変換する初期ステータス
+	/// @return 変換後のJson
 	inline nlohmann::json UpgradeStatusToJson(const UpgradeStatus& status) {
 		return {
 			{ "damage", UpgradeValueToJson(status.damage) },
@@ -191,10 +191,10 @@ namespace Weapon {
 		};
 	}
 
-	/// @brief Jsonから武器の初期ステータスを読み込みます。
-	/// @param json 読み込み元のJsonです。
-	/// @param status 読み込み先の初期ステータスです。
-	/// @return 有効なステータスを読み込めた場合はtrueを返します。
+	/// @brief Jsonから武器の初期ステータスを読み込み
+	/// @param json 読み込み元のJson
+	/// @param status 読み込み先の初期ステータス
+	/// @return 有効なステータスを読み込めた場合はtrueを返す
 	inline bool UpgradeStatusFromJson(const nlohmann::json& json, UpgradeStatus& status) {
 		if (!json.is_object()) {
 			return false;

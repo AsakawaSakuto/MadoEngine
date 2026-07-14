@@ -36,21 +36,6 @@ void Test::Initialize() {
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
 	fpsText_ = MyText::Create("FpsText", "FPS : 0.0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
 
-#ifdef RELEASE
-	if (enemyCountText_) {
-		enemyCountText_->SetPosition({ 60.0f, 110.0f });
-		enemyCountText_->SetFontSize(28.0f);
-		enemyCountText_->SetAreaSize({ 360.0f, 40.0f });
-		enemyCountText_->SetWordWrap(false);
-	}
-	if (fpsText_) {
-		fpsText_->SetPosition({ 60.0f, 145.0f });
-		fpsText_->SetFontSize(28.0f);
-		fpsText_->SetAreaSize({ 240.0f, 40.0f });
-		fpsText_->SetWordWrap(false);
-	}
-#endif // RELEASE
-
 	AABB mapLimitBox;
 	MapLimit mapLimit;
 	mapLimitBox.min = mapLimit.min;
@@ -103,20 +88,17 @@ void Test::Initialize() {
 	// System
 	inGameSession_ = std::make_unique<InGameSession>();
 	inGameSession_->Initialize();
+
+	MadoEngine::TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
 }
 
 SceneType Test::Update(float dt) {
-	
-	float deltaTime;
+	inGameSession_->Update(dt);
+	const float deltaTime = inGameSession_->IsPlaying() ? dt : 0.0f;
 
-	if (inGameSession_->GetCurrentPhase() == InGamePhase::Paused) {
-		deltaTime = 0.0f;
-	} else {
-		deltaTime = dt;
+	if (inGameSession_->IsPlaying()) {
 		player_->Update(deltaTime);
 	}
-	
-	inGameSession_->Update(deltaTime);
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
 
@@ -130,19 +112,20 @@ SceneType Test::Update(float dt) {
 
 	debugCamera_.Update(deltaTime);
 
-	map_->Update(*player_);
+	if (inGameSession_->IsPlaying()) {
+		map_->Update(*player_);
+		enemySpawner_->Update(deltaTime);
+		Projectile::Manager::GetInstance().Update(deltaTime);
+		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
+		weaponInventory_->Update(deltaTime, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
+	}
 
-	enemySpawner_->Update(deltaTime);
-
-	Projectile::Manager::GetInstance().Update(deltaTime);
-
-	DropObject::Manager::GetInstance().Update(deltaTime, *player_);
-
-	// Mapとドロップ取得による経験値加算が完了してからレベル差分を確認します。
+	// Mapとドロップ取得による経験値加算が完了してからレベル差分を確認する。
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
-	weaponUpgradeUI_.UpdateInput(*weaponUpgradeSystem_, *weaponInventory_);
-
-	weaponInventory_->Update(deltaTime, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
+	if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
+		weaponUpgradeUI_.UpdateInput(*weaponUpgradeSystem_, *weaponInventory_);
+	}
+	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 
 	weaponIconUI_->Update(*weaponInventory_);
 
@@ -166,7 +149,7 @@ SceneType Test::Update(float dt) {
 		}
 	}
 
-	if (MyInput::GetKeybord()->IsTrigger(DIK_9)) {
+	if (inGameSession_->IsPlaying() && MyInput::GetKeybord()->IsTrigger(DIK_9)) {
 		if (!weaponInventory_->AddWeapon(Projectile::Type::Pistol)) {
 			Logger::Output("[Debug] デバッグ操作による武器追加は拒否されました。", Logger::Level::Debug);
 		}

@@ -10,47 +10,47 @@ namespace Player {
 	class Base;
 }
 
-/// @brief Map全体を管理するクラスです。
+/// @brief Map全体を管理するクラス
 class Map {
 public:
-	/// @brief 指定シードでMapを初期化します。
-	/// @param seed Map生成に使用するシード値です。
+	/// @brief 指定シードでMapを初期化
+	/// @param seed Map生成に使用するシード値
 	void Initialize(uint32_t seed);
 
-	/// @brief Mapを更新します。
-	/// @param player 相互作用の対象になるPlayerです。
+	/// @brief Mapを更新
+	/// @param player 相互作用の対象になるPlayer
 	void Update(Player::Base& player);
 
-	/// @brief Map調整用のImGuiを描画します。
+	/// @brief Map調整用のImGuiを描画
 	void DrawImGui();
 
-	/// @brief Map生成に使用したシード値を取得します。
-	/// @return uint32_t Map生成に使用したシード値です。
+	/// @brief Map生成に使用したシード値を取得
+	/// @return uint32_t Map生成に使用したシード値
 	uint32_t GetSeed() const;
 
 private:
 	
-	/// @brief Map上にJarをランダム配置します。
+	/// @brief Map上にJarをランダム配置
 	void GenerateJars();
 
-	/// @brief Map上にChestをランダム配置します。
+	/// @brief Map上にChestをランダム配置
 	void GenerateChests();
 
-	/// @brief Map上のイベントオブジェクトを更新します。
-	/// @param player 相互作用するPlayerです。
+	/// @brief Map上のイベントオブジェクトを更新
+	/// @param player 相互作用するPlayer
 	void UpdateEventObjects(Player::Base& player);
 
-	/// @brief Playerとイベントオブジェクトの相互作用を処理します。
+	/// @brief Playerとイベントオブジェクトの相互作用を処理
 	/// @param player 相互作用するPlayerです。
 	void HandleEventObjectInteraction(Player::Base& player);
 
-	/// @brief 地形生成用の高さ設定を有効範囲に補正します。
+	/// @brief 地形生成用の高さ設定を有効範囲に補正
 	void ClampHeightSettings();
 
-	/// @brief 指定座標のブロック高さを取得します。
-	/// @param x Map上のX座標です。
-	/// @param z Map上のZ座標です。
-	/// @return ブロックの高さです。
+	/// @brief 指定座標のブロック高さを取得
+	/// @param x Map上のX座標
+	/// @param z Map上のZ座標
+	/// @return ブロックの高さ
 	uint32_t GetBlockHeight(int x, int z) const;
 
 	std::vector<std::vector<MapBlock>> mapBlocks_;

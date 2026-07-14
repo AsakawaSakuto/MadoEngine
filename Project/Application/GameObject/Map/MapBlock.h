@@ -15,64 +15,64 @@ public:
 		bool isModelDraw = true;
 	};
 
-	/// @brief MapBlockを設定付きで初期化します。
-	/// @param desc 初期化に使用する設定です。
+	/// @brief MapBlockを設定付きで初期化
+	/// @param desc 初期化に使用する設定
 	void Initialize(const InitializeDesc& desc);
 
-	/// @brief MapBlockを更新します。
-	/// @param deltaTime 前フレームからの経過時間です。
+	/// @brief MapBlockを更新
+	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;
 
-	/// @brief モデルの表示状態を設定します。
-	/// @param isVisible 表示する場合はtrueです。
+	/// @brief モデルの表示状態を設定
+	/// @param isVisible 表示する場合はtrue
 	void SetVisible(bool isVisible);
 
-	/// @brief デバッグラインを描画します。
+	/// @brief デバッグラインを描画
 	void DrawDebugLine() const;
 
-	/// @brief ブロックの高さを設定します。
-	/// @param height 設定する高さです。
+	/// @brief ブロックの高さを設定
+	/// @param height 設定する高さ
 	void SetHeight(uint32_t height);
 
-	/// @brief ブロックの高さを取得します。
-	/// @return ブロックの高さです。
+	/// @brief ブロックの高さを取得
+	/// @return ブロックの高さ
 	uint32_t GetHeight() const;
 
-	/// @brief ブロックの種類を取得します。
-	/// @return ブロックの種類です。
+	/// @brief ブロックの種類を取得
+	/// @return ブロックの種類
 	MapBlockType GetType() const;
 
-	/// @brief 坂ブロックの向きを取得します。
-	/// @return 坂ブロックの向きです。
+	/// @brief 坂ブロックの向きを取得
+	/// @return 坂ブロックの向き
 	SlopeDirection GetSlopeDirection() const;
 
 private:
-	/// @brief 通常ブロック用のCollider形状を作成します。
-	/// @param blockSize ブロック共通サイズです。
+	/// @brief 通常ブロック用のCollider形状を作成
+	/// @param blockSize ブロック共通サイズ
 	void CreateGroundShape(const Vector3& blockSize);
 
-	/// @brief 坂ブロック用のCollider形状を作成します。
-	/// @param blockSize ブロック共通サイズです。
+	/// @brief 坂ブロック用のCollider形状を作成
+	/// @param blockSize ブロック共通サイズ
 	void CreateSlopeShape(const Vector3& blockSize);
 
-	/// @brief 通常ブロック用のモデルを作成します。
-	/// @param blockSize ブロック共通サイズです。
+	/// @brief 通常ブロック用のモデルを作成
+	/// @param blockSize ブロック共通サイズ
 	void CreateGroundModel(const Vector3& blockSize);
 
-	/// @brief 坂ブロック用のモデルを作成します。
-	/// @param blockSize ブロック共通サイズです。
+	/// @brief 坂ブロック用のモデルを作成
+	/// @param blockSize ブロック共通サイズ
 	void CreateSlopeModel(const Vector3& blockSize);
 
-	/// @brief Collider登録名を作成します。
-	/// @return Collider登録名です。
+	/// @brief Collider登録名を作成
+	/// @return Collider登録名
 	std::string CreateColliderName() const;
 
-	/// @brief 通常ブロック用のモデル登録名を作成します。
-	/// @return モデル登録名です。
+	/// @brief 通常ブロック用のモデル登録名を作成
+	/// @return モデル登録名
 	std::string CreateGroundModelName() const;
 
-	/// @brief 坂ブロック用のモデル登録名を作成します。
-	/// @return モデル登録名です。
+	/// @brief 坂ブロック用のモデル登録名を作成
+	/// @return モデル登録名
 	std::string CreateSlopeModelName() const;
 
 	int x_ = 0;

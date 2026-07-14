@@ -49,7 +49,7 @@ namespace Player {
 		Count
 	};
 
-	/// @brief PlayerMotionを表示用文字列へ変換する
+	/// @brief PlayerMotionを表示用文字列へ変換
 	/// @param motion 変換するPlayerMotion
 	/// @return 表示用文字列
 	inline const char* ToMotionText(Player::Motion motion) {
