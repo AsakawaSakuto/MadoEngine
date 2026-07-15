@@ -3,10 +3,6 @@
 #include <cmath>
 
 namespace Projectile {
-	namespace {
-		constexpr float kMoveSpeed = 25.0f;
-		constexpr float kDirectionEpsilon = 0.0001f;
-	}
 
 	Axe::~Axe() {
 		if (!objectName_.empty()) {
@@ -20,7 +16,7 @@ namespace Projectile {
 		InitializeCommonProperties(context, objectName_);
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
-		model_->SetTexture("AxeTexture");
+		//model_->SetTexture("AxeTexture");
 
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f * sizeRate_, 0.5f * sizeRate_, 0.5f * sizeRate_ };
@@ -36,6 +32,8 @@ namespace Projectile {
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 
 		isReductionStarted_ = false;
+		disappearsUponCollision_ = false;
+		
 		reductionTimer_.Reset();
 		startTimer_.Start(1.0f, false);
 	}

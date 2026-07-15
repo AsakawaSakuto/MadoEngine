@@ -63,7 +63,9 @@ namespace Projectile {
 		float lifeTime_ = 0.0f;
 		GameTimer lifeTimer_;
 
-		bool isDead_ = false;
+		bool isDead_ = false;                 // 生存フラグ
+		bool disappearsUponCollision_ = true; // 敵との衝突時に消えるかどうか
+
 		Transform3D transform_;
 		ColliderShape hitbox_;
 

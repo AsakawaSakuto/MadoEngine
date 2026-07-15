@@ -2,11 +2,7 @@
 #include <cmath>
 
 namespace Projectile {
-	namespace {
-		constexpr float kMoveSpeed = 25.0f;
-		constexpr float kDirectionEpsilon = 0.0001f;
-	}
-
+	
 	Explosion::~Explosion() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
