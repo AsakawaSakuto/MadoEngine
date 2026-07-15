@@ -123,4 +123,6 @@ private:
 	bool isSideClimbing_ = false;
 	bool isActive_ = true;
 	bool isReleased_ = false;
+
+	GamingColor gamingColor_;
 };

@@ -1,4 +1,4 @@
-#include "Explotion.h"
+#include "Explosion.h"
 #include <cmath>
 
 namespace Projectile {
@@ -7,15 +7,14 @@ namespace Projectile {
 		constexpr float kDirectionEpsilon = 0.0001f;
 	}
 
-	Explotion::~Explotion() {
+	Explosion::~Explosion() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
-			MyModel::Destroy(objectName_);
 		}
 	}
 
-	void Explotion::Initialize(InitializeDesc context) {
-		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId) + "_Explotion";
+	void Explosion::Initialize(InitializeDesc context) {
+		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId) + "_Explosion";
 		InitializeCommonProperties(context, objectName_);
 
 		transform_.translate = ownerPosition;
@@ -28,16 +27,18 @@ namespace Projectile {
 		hitbox.radius = context.explosionRadius;
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
+
+		lifeTime_ = 0.1f;
+		lifeTimer_.Start(lifeTime_, false);
 	}
 
-	void Explotion::Update(float deltaTime) {
+	void Explosion::Update(float deltaTime) {
 
-		deadTime_ += deltaTime;
-
-		if (deadTime_ > deadTimeLimit_) {
+		if (lifeTimer_.IsFinished()) {
 			isDead_ = true;
 		}
 
+		lifeTimer_.Update(deltaTime);
 		MyDebugLine::AddShape(std::get<Sphere>(hitbox_));
 	}
 }

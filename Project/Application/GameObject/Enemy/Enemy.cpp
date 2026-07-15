@@ -135,6 +135,8 @@ void Enemy::Initialize(uint32_t enemyId, const Vector3& spawnPosition, SceneType
 void Enemy::Update(float deltaTime) {
 	UpdateProjectileDamageCooldowns(deltaTime);
 
+	model_->SetColor(gamingColor_.Update(deltaTime, 1.0f));
+
 	lastDeltaTime_ = deltaTime;
 	lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
 	lastMoveStartPosition_ = transform_.translate;

@@ -161,6 +161,7 @@ namespace Weapon {
 
 			DrawUpgradeValueTableRow("ダメージ量", editingStatus_.damage);
 			DrawUpgradeValueTableRow("最大射撃数", editingStatus_.shotMaxCount);
+			DrawUpgradeValueTableRow("射撃間隔", editingStatus_.shotIntervalTime);
 			DrawUpgradeValueTableRow("射撃クールダウン", editingStatus_.shotCooldown);
 			DrawUpgradeValueTableRow("クリティカル率", editingStatus_.criticalChance);
 			DrawUpgradeValueTableRow("クリティカル倍率", editingStatus_.criticalDamage);

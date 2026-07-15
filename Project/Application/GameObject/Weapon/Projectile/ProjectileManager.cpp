@@ -25,6 +25,12 @@ namespace Projectile {
 		context.projectileId = nextProjectileId_++;
 
 		switch (type) {
+		case Projectile::Type::Explosion: {
+			auto explosion = std::make_unique<Explosion>();
+			explosion->Initialize(context);
+			projectiles.push_back(std::move(explosion));
+			break;
+		}
 		case Projectile::Type::Pistol: {
 			auto pistol = std::make_unique<Pistol>();
 			pistol->Initialize(context);

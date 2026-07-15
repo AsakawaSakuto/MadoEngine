@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <optional>
 #include <vector>
 
 namespace MadoEngine::Editor {
@@ -16,6 +17,59 @@ namespace {
 
 	constexpr float kRadiansToDegrees = 57.29577951308232f;
 	constexpr float kDegreesToRadians = 0.017453292519943295f;
+	constexpr float kTexturePreviewMaxSize = 64.0f;
+
+	struct TexturePreviewData {
+		ImTextureID textureId = ImTextureID_Invalid;
+		ImVec2 displaySize{};
+		Vector2 pixelSize{};
+	};
+
+	/// @brief テクスチャプレビューの描画情報を作成する
+	/// @param textureName TextureManagerに登録されているテクスチャ名
+	/// @return 描画情報。テクスチャが見つからない場合はstd::nullopt
+	std::optional<TexturePreviewData> CreateTexturePreviewData(const std::string& textureName) {
+		TextureManager& textureManager = TextureManager::GetInstance();
+		const uint32_t textureIndex = textureManager.GetTextureIndex(textureName);
+		if (textureIndex == UINT32_MAX) {
+			return std::nullopt;
+		}
+
+		const Vector2 pixelSize = textureManager.GetPixelSize(textureName);
+		const float width = (std::max)(1.0f, pixelSize.x);
+		const float height = (std::max)(1.0f, pixelSize.y);
+		const float scale = (std::min)(1.0f, kTexturePreviewMaxSize / (std::max)(width, height));
+		const D3D12_GPU_DESCRIPTOR_HANDLE handle = textureManager.GetSrvHandleGPU(textureIndex);
+
+		return TexturePreviewData{
+			static_cast<ImTextureID>(handle.ptr),
+			{ width * scale, height * scale },
+			pixelSize,
+		};
+	}
+
+	/// @brief 直前のImGui項目にカーソルが重なっている場合にテクスチャプレビューを表示する
+	/// @param textureName プレビュー対象のテクスチャ名
+	void DrawHoveredTexturePreview(const std::string& textureName) {
+		if (textureName.empty() || !ImGui::IsItemHovered()) {
+			return;
+		}
+
+		const std::optional<TexturePreviewData> previewData = CreateTexturePreviewData(textureName);
+		if (!previewData) {
+			return;
+		}
+
+		if (ImGui::BeginTooltip()) {
+			ImGui::Text(
+				"%s (%d x %d)",
+				textureName.c_str(),
+				static_cast<int>(previewData->pixelSize.x),
+				static_cast<int>(previewData->pixelSize.y));
+			ImGui::Image(previewData->textureId, previewData->displaySize);
+			ImGui::EndTooltip();
+		}
+	}
 
 	/// @brief 文字列を固定長バッファへコピーする
 	/// @tparam Size バッファサイズ
@@ -50,7 +104,11 @@ namespace {
 		const std::vector<std::string>& textureNames) {
 		const char* preview = selectedName.empty() ? "テクスチャを選択" : selectedName.c_str();
 		bool isChanged = false;
-		if (ImGui::BeginCombo(label, preview)) {
+		const bool isComboOpen = ImGui::BeginCombo(label, preview);
+		if (!isComboOpen) {
+			DrawHoveredTexturePreview(selectedName);
+		}
+		if (isComboOpen) {
 			for (const std::string& textureName : textureNames) {
 				const bool isSelected = textureName == selectedName;
 				if (ImGui::Selectable(textureName.c_str(), isSelected)) {
@@ -60,6 +118,7 @@ namespace {
 				if (isSelected) {
 					ImGui::SetItemDefaultFocus();
 				}
+				DrawHoveredTexturePreview(textureName);
 			}
 			ImGui::EndCombo();
 		}
@@ -161,21 +220,16 @@ namespace {
 	/// @brief Spriteのテクスチャプレビューを描画する
 	/// @param sprite 表示対象のSprite
 	void DrawTexturePreview(const Sprite& sprite) {
-		const uint32_t textureIndex = TextureManager::GetInstance().GetTextureIndex(sprite.GetTextureName());
-		if (textureIndex == UINT32_MAX) {
+		const std::optional<TexturePreviewData> previewData = CreateTexturePreviewData(sprite.GetTextureName());
+		if (!previewData) {
 			return;
 		}
 
-		const Vector2 textureSize = sprite.GetTextureSize();
-		const float maxPreviewSize = 256.0f;
-		const float width = (std::max)(1.0f, textureSize.x);
-		const float height = (std::max)(1.0f, textureSize.y);
-		const float scale = (std::min)(1.0f, maxPreviewSize / (std::max)(width, height));
-		const ImVec2 previewSize = { width * scale, height * scale };
-		const D3D12_GPU_DESCRIPTOR_HANDLE handle = TextureManager::GetInstance().GetSrvHandleGPU(textureIndex);
-
-		ImGui::Text("プレビュー (%d x %d)", static_cast<int>(textureSize.x), static_cast<int>(textureSize.y));
-		ImGui::Image(static_cast<ImTextureID>(handle.ptr), previewSize);
+		ImGui::Text(
+			"プレビュー (%d x %d)",
+			static_cast<int>(previewData->pixelSize.x),
+			static_cast<int>(previewData->pixelSize.y));
+		ImGui::Image(previewData->textureId, previewData->displaySize);
 	}
 
 	/// @brief Spriteのプロパティ編集UIを描画する

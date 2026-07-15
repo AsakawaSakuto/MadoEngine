@@ -4,12 +4,12 @@
 
 namespace Projectile {
 
-	class Explotion : public IProjectile {
+	class Explosion : public IProjectile {
 	public:
-		/// @brief Explotionのデストラクタ
-		~Explotion() override;
+		/// @brief Explosionのデストラクタ
+		~Explosion() override;
 
-		/// @brief Explotionを初期化
+		/// @brief Explosionを初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
@@ -19,8 +19,6 @@ namespace Projectile {
 
 	private:
 
-		float deadTime_ = 0.0f;
-		float deadTimeLimit_ = 0.5f;
 		std::string objectName_;
 	};
 }

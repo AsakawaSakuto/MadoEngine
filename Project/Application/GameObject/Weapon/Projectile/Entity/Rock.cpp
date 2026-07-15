@@ -41,7 +41,7 @@ namespace Projectile {
 
 	void Rock::Update(float deltaTime) {
 
-		transform_.translate += moveDirection_ * kMoveSpeed * deltaTime;
+		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
 
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
 			isDead_ = true;

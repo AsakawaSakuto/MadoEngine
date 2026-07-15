@@ -8,14 +8,19 @@
 namespace Projectile {
 	
 	struct  InitializeDesc {
-		std::uint64_t projectileId = 0;
-		std::string projectileName;
-		int projectileCount;
-		Vector3 ownerPosition;
-		Vector3 targetPosition;
-		float damage = 10.0f;
-		float explotionDamageDecreaseRate = 10.0f;
-		float explosionRadius = 0.0f;
+		std::uint64_t projectileId = 0; // 投射物の一意なID
+		std::string projectileName;     // 投射物の名前
+		int projectileCount;            // 投射物の生成順序番号
+		Vector3 ownerPosition;          // 投射物の生成元の座標
+		Vector3 targetPosition;         // 投射物の目標座標
+
+		float damage = 10.0f;           // 投射物のダメージ量
+		float moveSpeed = 10.0f;        // 投射物の移動速度
+		float sizeRate = 1.0f;          // 投射物のサイズ倍率
+		float lifeTime = 5.0f;          // 投射物の寿命
+
+		float explotionDamageDecreaseRate = 10.0f; // 爆発ダメージの減衰率（1.0fで減衰なし、0.0fで爆発ダメージなし）
+		float explosionRadius = 1.0f;              // 爆発の半径
 	};
 
 	/// @brief 武器の種類を表す列挙型

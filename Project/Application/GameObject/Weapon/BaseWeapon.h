@@ -59,12 +59,10 @@ namespace Weapon {
 		int killCount_ = 0;        // 武器の総キル数
 		float damageCount_ = 0.0f; // 武器の総ダメージ量
 
-		int   shotNowCount_ = 0;  // 武器の現在射撃数
+		int shotNowCount_ = 0;  // 武器の現在射撃数
 		int upgradeLevel_ = 0;    // 武器のアップグレードレベル
 		int slotIndex_ = -1;      // 武器のスロットインデックス
 		int projectileCount_ = 0; // 武器の発射数
-
-		const float shotIntervalTime_ = 0.25f; // 武器のデフォルト射撃間隔
 
 		GameTimer intervalTimer_;
 		GameTimer cooldownTimer_;

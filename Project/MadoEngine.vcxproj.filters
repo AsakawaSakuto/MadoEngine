@@ -122,7 +122,7 @@
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObjectManager.cpp" />
-    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explotion.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Axe.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.cpp" />
     <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
@@ -666,7 +666,7 @@
     <ClInclude Include="Application\GameObject\DropObject\DropObjectManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Explotion.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Axe.h">

@@ -7,10 +7,10 @@
 
 namespace {
 
-/// @brief 最小最大座標からAABBを作成します。
-/// @param min 最小座標です。
-/// @param max 最大座標です。
-/// @return 作成したAABBです。
+/// @brief 最小最大座標からAABBを作成する
+/// @param min 最小座標
+/// @param max 最大座標
+/// @return 作成したAABB
 AABB MakeBounds(const Vector3& min, const Vector3& max) {
 	AABB bounds;
 	bounds.center = { 0.0f, 0.0f, 0.0f };
@@ -19,10 +19,10 @@ AABB MakeBounds(const Vector3& min, const Vector3& max) {
 	return bounds;
 }
 
-/// @brief 2つのAABBを結合します。
-/// @param a AABBです。
-/// @param b AABBです。
-/// @return 2つのAABBを含むAABBです。
+/// @brief 2つのAABBを結合する
+/// @param a AABB
+/// @param b AABB
+/// @return 2つのAABBを含むAABB
 AABB MergeBounds(const AABB& a, const AABB& b) {
 	const Vector3 aMin = a.GetMinWorld();
 	const Vector3 aMax = a.GetMaxWorld();
@@ -43,10 +43,10 @@ AABB MergeBounds(const AABB& a, const AABB& b) {
 	);
 }
 
-/// @brief AABB同士が交差しているか判定します。
-/// @param a AABBです。
-/// @param b AABBです。
-/// @return 交差していればtrueを返します。
+/// @brief AABB同士が交差しているか判定する
+/// @param a AABB
+/// @param b AABB
+/// @return 交差していればtrueを返す
 bool IsIntersectAABB(const AABB& a, const AABB& b) {
 	const Vector3 aMin = a.GetMinWorld();
 	const Vector3 aMax = a.GetMaxWorld();
@@ -58,20 +58,20 @@ bool IsIntersectAABB(const AABB& a, const AABB& b) {
 		aMin.z <= bMax.z && aMax.z >= bMin.z;
 }
 
-/// @brief AABBの中心座標を取得します。
-/// @param bounds 対象AABBです。
-/// @return 中心座標です。
+/// @brief AABBの中心座標を取得する
+/// @param bounds 対象AABB
+/// @return 中心座標
 Vector3 GetBoundsCenter(const AABB& bounds) {
 	const Vector3 min = bounds.GetMinWorld();
 	const Vector3 max = bounds.GetMaxWorld();
 	return (min + max) * 0.5f;
 }
 
-/// @brief 指定範囲のAABBを結合します。
-/// @param entries エントリ配列です。
-/// @param first 開始インデックスです。
-/// @param count エントリ数です。
-/// @return 指定範囲を含むAABBです。
+/// @brief 指定範囲のAABBを結合する
+/// @param entries エントリ配列
+/// @param first 開始インデックス
+/// @param count エントリ数
+/// @return 指定範囲を含むAABB
 AABB CalculateRangeBounds(const std::vector<StaticBVH::Entry>& entries, uint32_t first, uint32_t count) {
 	Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
 	Vector3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
@@ -90,11 +90,11 @@ AABB CalculateRangeBounds(const std::vector<StaticBVH::Entry>& entries, uint32_t
 	return MakeBounds(min, max);
 }
 
-/// @brief AABBの中心分布が最も広い軸を取得します。
-/// @param entries エントリ配列です。
-/// @param first 開始インデックスです。
-/// @param count エントリ数です。
-/// @return 0:X, 1:Y, 2:Zです。
+/// @brief AABBの中心分布が最も広い軸を取得する
+/// @param entries エントリ配列
+/// @param first 開始インデックス
+/// @param count エントリ数
+/// @return 0:X, 1:Y, 2:Z
 int FindLongestCentroidAxis(const std::vector<StaticBVH::Entry>& entries, uint32_t first, uint32_t count) {
 	Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
 	Vector3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };

@@ -1,5 +1,4 @@
 #include "GamingColor.h"
-
 #include <cmath>
 
 Vector4 GamingColor::Update(float deltaTime, float changeTime) {

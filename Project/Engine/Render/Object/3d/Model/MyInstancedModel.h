@@ -3,12 +3,12 @@
 
 namespace MyInstancedModel {
 
-/// @brief インスタンス描画モデルを作成します。
-/// @param name 作成するインスタンス描画モデルの名前です。
-/// @param modelName 使用するモデルアセット名です。
-/// @param sceneType 描画を許可するシーン種別です。
-/// @param layer 設定する描画レイヤーです。
-/// @return 作成したインスタンス描画モデルです。失敗時はnullptrです。
+/// @brief インスタンス描画モデルを作成する
+/// @param name 作成するインスタンス描画モデルの名前
+/// @param modelName 使用するモデルアセット名
+/// @param sceneType 描画を許可するシーン種別
+/// @param layer 設定する描画レイヤー
+/// @return 作成したインスタンス描画モデル。失敗時はnullptr
 inline InstancedModel* Create(
 	const std::string& name,
 	const std::string& modelName,
@@ -22,12 +22,12 @@ inline InstancedModel* Create(
 	return model;
 }
 
-/// @brief インスタンス描画モデルを取得または作成します。
-/// @param name 取得または作成するインスタンス描画モデルの名前です。
-/// @param modelName 使用するモデルアセット名です。
-/// @param sceneType 描画を許可するシーン種別です。
-/// @param layer 設定する描画レイヤーです。
-/// @return 取得または作成したインスタンス描画モデルです。失敗時はnullptrです。
+/// @brief インスタンス描画モデルを取得または作成する
+/// @param name 取得または作成するインスタンス描画モデルの名前
+/// @param modelName 使用するモデルアセット名
+/// @param sceneType 描画を許可するシーン種別
+/// @param layer 設定する描画レイヤー
+/// @return 取得または作成したインスタンス描画モデル。失敗時はnullptr
 inline InstancedModel* GetOrCreate(
 	const std::string& name,
 	const std::string& modelName,
@@ -41,15 +41,15 @@ inline InstancedModel* GetOrCreate(
 	return model;
 }
 
-/// @brief インスタンス描画モデルを取得します。
-/// @param name 取得対象のインスタンス描画モデル名です。
-/// @return 取得したインスタンス描画モデルです。見つからない場合はnullptrです。
+/// @brief インスタンス描画モデルを取得する
+/// @param name 取得対象のインスタンス描画モデル名
+/// @return 取得したインスタンス描画モデルです。見つからない場合はnullptr
 inline InstancedModel* Get(const std::string& name) {
 	return MadoEngine::ModelManager::GetInstance().GetInstanced(name);
 }
 
-/// @brief インスタンス描画モデルを破棄します。
-/// @param name 破棄対象のインスタンス描画モデル名です。
+/// @brief インスタンス描画モデルを破棄する
+/// @param name 破棄対象のインスタンス描画モデル名
 inline void Destroy(const std::string& name) {
 	MadoEngine::ModelManager::GetInstance().DestroyInstanced(name);
 }

@@ -193,7 +193,7 @@ namespace MadoEngine
 		MadoEngine::Editor::LoadSpriteEditorJson();
 		MadoEngine::Editor::LoadTextEditorJson();
 		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager_);
-
+		
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
@@ -500,7 +500,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawSpriteManagerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
-		//MadoEngine::Editor::DrawLoggerEditorUI();
+		MadoEngine::Editor::DrawLoggerEditorUI();
 
 #else
 		if (!isLayerEffectResolved_) {

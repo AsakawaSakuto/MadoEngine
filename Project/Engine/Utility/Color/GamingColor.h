@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Math/Vector4.h"
 
 /// @brief 時間経過に応じて循環するゲーミングカラーを生成するクラス

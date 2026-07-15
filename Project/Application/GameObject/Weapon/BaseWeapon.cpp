@@ -13,6 +13,7 @@ namespace Weapon {
 			switch (type) {
 			case UpgradeStatType::Damage:           return &status.damage;
 			case UpgradeStatType::ShotMaxCount:     return &status.shotMaxCount;
+			case UpgradeStatType::ShotIntervalTime: return &status.shotIntervalTime;
 			case UpgradeStatType::ShotCooldown:     return &status.shotCooldown;
 			case UpgradeStatType::CriticalChance:   return &status.criticalChance;
 			case UpgradeStatType::CriticalDamage:   return &status.criticalDamage;
@@ -64,7 +65,7 @@ namespace Weapon {
 		projectileCount_ = 0;
 		shotNowCount_ = 0;
 
-		intervalTimer_.Start(shotIntervalTime_, true);
+		intervalTimer_.Start(status_.shotIntervalTime.value, true);
 		cooldownTimer_.Start(status_.shotCooldown.value, false);
 		return true;
 	}
@@ -150,7 +151,7 @@ namespace Weapon {
 		// クールタイムが終了している場合射撃を開始する
 		if (cooldownTimer_.IsFinished()) {
 			if (!intervalTimer_.IsActive()) {
-				intervalTimer_.Start(shotIntervalTime_, true);
+				intervalTimer_.Start(status_.shotIntervalTime.value, true);
 				cooldownTimer_.Reset();
 			}
 		}
@@ -166,6 +167,9 @@ namespace Weapon {
 			context.ownerPosition = ownerPosition;
 			context.targetPosition = targetPosition;
 			context.damage = status_.damage.value;
+			context.moveSpeed = status_.speed.value;
+			context.sizeRate = status_.size.value;
+			context.lifeTime = status_.lifeTime.value;
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 

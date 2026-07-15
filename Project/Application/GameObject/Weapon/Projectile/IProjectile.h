@@ -44,15 +44,24 @@ namespace Projectile {
 		/// @param colliderName Projectileのコライダー名
 		void InitializeCommonProperties(const InitializeDesc& context, const std::string& colliderName) {
 			projectileId_ = context.projectileId;
-			damage_ = context.damage;
 			colliderName_ = colliderName;
 			ownerPosition = context.ownerPosition;
 			targetPosition = context.targetPosition;
+
+			damage_ = context.damage;
+			moveSpeed_ = context.moveSpeed;
+			sizeRate_ = context.sizeRate;
+			lifeTime_ = context.lifeTime;
 		}
 
 		std::uint64_t projectileId_ = 0;
-		float damage_ = 10.0f;
 		std::string colliderName_;
+
+		float damage_ = 10.0f;
+		float moveSpeed_ = 25.0f;
+		float sizeRate_ = 1.0f;
+		float lifeTime_ = 0.0f;
+		GameTimer lifeTimer_;
 
 		bool isDead_ = false;
 		Transform3D transform_;

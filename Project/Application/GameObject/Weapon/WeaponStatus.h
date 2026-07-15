@@ -13,6 +13,7 @@ namespace Weapon {
 
 		Damage,
 		ShotMaxCount,
+		ShotIntervalTime,
 		ShotCooldown,
 		CriticalChance,
 		CriticalDamage,
@@ -27,9 +28,10 @@ namespace Weapon {
 	};
 
 	// 抽選対象の強化ステータスを一か所で管理
-	inline constexpr std::array<UpgradeStatType, 11> kUpgradeStatTypes = {
+	inline constexpr std::array<UpgradeStatType, 12> kUpgradeStatTypes = {
 		UpgradeStatType::Damage,
 		UpgradeStatType::ShotMaxCount,
+		UpgradeStatType::ShotIntervalTime,
 		UpgradeStatType::ShotCooldown,
 		UpgradeStatType::CriticalChance,
 		UpgradeStatType::CriticalDamage,
@@ -53,6 +55,7 @@ namespace Weapon {
 	struct UpgradeStatus {
 		UpgradeValue damage           = { 1.0f, 1.0f, 0.1f, true }; // 武器のダメージ量
 		UpgradeValue shotMaxCount     = { 1.0f, 1.0f, 0.1f, true }; // 武器の最大射撃数
+		UpgradeValue shotIntervalTime = { 0.25f, 0.0f, 0.0f, false }; // 武器の射撃間隔
 		UpgradeValue shotCooldown     = { 1.0f, 1.0f,-0.1f, true }; // 武器の射撃クールダウン
 		UpgradeValue criticalChance   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカル率
 		UpgradeValue criticalDamage   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカルダメージ倍率
@@ -71,6 +74,7 @@ namespace Weapon {
 		switch (type) {
 		case UpgradeStatType::Damage:           return "ダメージ量";
 		case UpgradeStatType::ShotMaxCount:     return "最大射撃数";
+		case UpgradeStatType::ShotIntervalTime: return "射撃間隔";
 		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン";
 		case UpgradeStatType::CriticalChance:   return "クリティカル率";
 		case UpgradeStatType::CriticalDamage:   return "クリティカル倍率";
@@ -92,6 +96,7 @@ namespace Weapon {
 		switch (type) {
 		case UpgradeStatType::Damage:           return &status.damage;
 		case UpgradeStatType::ShotMaxCount:     return &status.shotMaxCount;
+		case UpgradeStatType::ShotIntervalTime: return &status.shotIntervalTime;
 		case UpgradeStatType::ShotCooldown:     return &status.shotCooldown;
 		case UpgradeStatType::CriticalChance:   return &status.criticalChance;
 		case UpgradeStatType::CriticalDamage:   return &status.criticalDamage;
@@ -179,6 +184,7 @@ namespace Weapon {
 		return {
 			{ "damage", UpgradeValueToJson(status.damage) },
 			{ "shotMaxCount", UpgradeValueToJson(status.shotMaxCount) },
+			{ "shotIntervalTime", UpgradeValueToJson(status.shotIntervalTime) },
 			{ "shotCooldown", UpgradeValueToJson(status.shotCooldown) },
 			{ "criticalChance", UpgradeValueToJson(status.criticalChance) },
 			{ "criticalDamage", UpgradeValueToJson(status.criticalDamage) },
@@ -210,6 +216,7 @@ namespace Weapon {
 
 		if (!readValue("damage", parsedStatus.damage) ||
 			!readValue("shotMaxCount", parsedStatus.shotMaxCount) ||
+			!readValue("shotIntervalTime", parsedStatus.shotIntervalTime) ||
 			!readValue("shotCooldown", parsedStatus.shotCooldown) ||
 			!readValue("criticalChance", parsedStatus.criticalChance) ||
 			!readValue("criticalDamage", parsedStatus.criticalDamage) ||

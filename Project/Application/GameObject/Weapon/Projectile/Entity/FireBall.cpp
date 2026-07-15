@@ -42,10 +42,16 @@ namespace Projectile {
 
 	void FireBall::Update(float deltaTime) {
 
-		transform_.translate += moveDirection_ * kMoveSpeed * deltaTime;
+		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
 
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
-			Projectile::Manager::GetInstance().AddProjectile(Type::Explosion, {});
+			Projectile::InitializeDesc context;
+			context.projectileName = objectName_;
+			context.ownerPosition = transform_.translate;
+			context.damage = damage_;
+			context.explotionDamageDecreaseRate = 0.75f;
+			context.explosionRadius = 1.0f;
+			Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
 			isDead_ = true;
 			return;
 		}
