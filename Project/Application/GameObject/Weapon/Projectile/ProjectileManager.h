@@ -10,8 +10,16 @@
 #include <vector>
 
 namespace Projectile {
+	/// @brief Projectileとの衝突判定に使用するEnemy情報
+	struct EnemyTargetInfo {
+		std::uint32_t enemyId = 0;
+		std::string colliderName;
+		Vector3 position = { 0.0f, 0.0f, 0.0f };
+	};
+
 	/// @brief Enemyとの衝突時に渡すProjectileの攻撃情報
 	struct HitInfo {
+		std::uint32_t enemyId = 0;
 		std::uint64_t projectileId = 0;
 		float damage = 0.0f;
 	};
@@ -31,10 +39,12 @@ namespace Projectile {
 		/// @param context Projectileの初期化情報
 		void AddProjectile(Projectile::Type type, InitializeDesc context);
 
-		/// @brief 指定コライダーに接触しているProjectileの攻撃情報を収集
-		/// @param targetColliderName 接触対象のコライダー名
-		/// @param outHitInfos 接触中のProjectile攻撃情報
-		void CollectHitsAgainst(const std::string& targetColliderName, std::vector<HitInfo>& outHitInfos) const;
+		/// @brief Enemyに接触しているProjectileの攻撃情報を収集して衝突時の挙動を更新
+		/// @param enemyTargets 衝突対象となるEnemy情報
+		/// @param outHitInfos 新しく接触したProjectileの攻撃情報
+		void CollectHitsAgainst(
+			const std::vector<EnemyTargetInfo>& enemyTargets,
+			std::vector<HitInfo>& outHitInfos);
 
 	private:
 		std::vector<std::unique_ptr<IProjectile>> projectiles;

@@ -4,6 +4,7 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
+#include <unordered_map>
 
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
@@ -47,17 +48,34 @@ void EnemySpawner::Update(float deltaTime) {
 	MyCollider::Update();
 
 	Projectile::Manager& projectileManager = Projectile::Manager::GetInstance();
-	std::vector<Projectile::HitInfo> projectileHitInfos;
+	std::vector<Projectile::EnemyTargetInfo> enemyTargets;
+	enemyTargets.reserve(enemies_.size());
+	std::unordered_map<std::uint32_t, Enemy*> enemiesById;
+	enemiesById.reserve(enemies_.size());
 	for (std::unique_ptr<Enemy>& enemy : enemies_) {
 		enemy->ResolveAfterCollision();
-
-		projectileManager.CollectHitsAgainst(enemy->GetHitColliderName(), projectileHitInfos);
-		for (const Projectile::HitInfo& hitInfo : projectileHitInfos) {
-			if (enemy->TakeProjectileDamage(hitInfo.projectileId, hitInfo.damage)) {
-				break;
-			}
+		if (!enemy->IsActive()) {
+			continue;
 		}
 
+		enemiesById.emplace(enemy->GetEnemyId(), enemy.get());
+		enemyTargets.push_back({
+			enemy->GetEnemyId(),
+			enemy->GetHitColliderName(),
+			enemy->GetPosition()
+		});
+	}
+
+	std::vector<Projectile::HitInfo> projectileHitInfos;
+	projectileManager.CollectHitsAgainst(enemyTargets, projectileHitInfos);
+	for (const Projectile::HitInfo& hitInfo : projectileHitInfos) {
+		const auto enemyIterator = enemiesById.find(hitInfo.enemyId);
+		if (enemyIterator != enemiesById.end()) {
+			enemyIterator->second->TakeProjectileDamage(hitInfo.projectileId, hitInfo.damage);
+		}
+	}
+
+	for (std::unique_ptr<Enemy>& enemy : enemies_) {
 		if (!enemy->IsActive()) {
 			continue;
 		}

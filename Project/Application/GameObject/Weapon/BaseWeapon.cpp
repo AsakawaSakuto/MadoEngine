@@ -1,10 +1,26 @@
 #include "BaseWeapon.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
+#include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace Weapon {
 	namespace {
+		/// @brief 浮動小数点の強化値をProjectile用の回数へ変換
+		/// @param value 変換する強化値
+		/// @return 0以上の整数回数
+		int ConvertToProjectileCount(float value) {
+			if (!std::isfinite(value) || value <= 0.0f) {
+				return 0;
+			}
+
+			const double clampedValue = std::min(
+				static_cast<double>(value),
+				static_cast<double>(std::numeric_limits<int>::max()));
+			return static_cast<int>(clampedValue);
+		}
+
 		/// @brief 指定した強化ステータスの変更可能な設定を取得します。
 		/// @param status 参照する武器ステータスです。
 		/// @param type 取得する強化ステータスです。
@@ -170,6 +186,8 @@ namespace Weapon {
 			context.moveSpeed = status_.speed.value;
 			context.sizeRate = status_.size.value;
 			context.lifeTime = status_.lifeTime.value;
+			context.bounceCount = ConvertToProjectileCount(status_.bounceCount.value);
+			context.penetrationCount = ConvertToProjectileCount(status_.penetrationCount.value);
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 

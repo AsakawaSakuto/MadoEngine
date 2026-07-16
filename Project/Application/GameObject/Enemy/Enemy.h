@@ -45,6 +45,10 @@ public:
 	/// @return 有効であればtrueを返す
 	bool IsActive() const { return isActive_; }
 
+	/// @brief Enemyの識別番号を取得
+	/// @return Enemyの識別番号
+	std::uint32_t GetEnemyId() const { return enemyId_; }
+
 	/// @brief Enemyの現在座標を取得
 	/// @return Enemyの現在座標
 	Vector3 GetPosition() const { return transform_.translate; }

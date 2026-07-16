@@ -18,6 +18,8 @@ namespace Projectile {
 		float moveSpeed = 10.0f;        // 投射物の移動速度
 		float sizeRate = 1.0f;          // 投射物のサイズ倍率
 		float lifeTime = 5.0f;          // 投射物の寿命
+		int bounceCount = 0;             // 投射物の残り跳弾回数
+		int penetrationCount = 0;        // 投射物の残り貫通回数
 
 		float explotionDamageDecreaseRate = 10.0f; // 爆発ダメージの減衰率（1.0fで減衰なし、0.0fで爆発ダメージなし）
 		float explosionRadius = 1.0f;              // 爆発の半径

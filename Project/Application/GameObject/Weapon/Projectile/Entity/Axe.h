@@ -20,7 +20,6 @@ namespace Projectile {
 	private:
 
 		Model* model_ = nullptr;
-		Vector3 moveDirection_ = { 0.0f, 0.0f, 0.0f };
 		std::string objectName_;
 
 		GameTimer startTimer_;

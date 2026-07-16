@@ -23,6 +23,7 @@ namespace Projectile {
 		hitbox.radius = context.explosionRadius;
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
+		disappearsUponCollision_ = false;
 
 		lifeTime_ = 0.1f;
 		lifeTimer_.Start(lifeTime_, false);
