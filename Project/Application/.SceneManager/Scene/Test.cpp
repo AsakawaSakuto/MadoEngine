@@ -1,4 +1,5 @@
 #include "Test.h"
+#include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Logger/Logger.h"
@@ -54,6 +55,7 @@ void Test::Initialize() {
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
 
 	MyCollider::RegisterCollisionPair(CollisionTag::EnemyHitBox, CollisionTag::PlayerProjectileHitBox, false);
+	MyCollider::RegisterCollisionPair(CollisionTag::EnemyHitBox, CollisionTag::PlayerHitBox, false);
 
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerDropObjectGetSphere, CollisionTag::DropObjectHitBox, false);
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::DropObjectHitBox, false);
@@ -61,8 +63,10 @@ void Test::Initialize() {
 	map_ = std::make_unique<Map>();
 	map_->Initialize(MyRand::CreateSeed());
 	
-	enemySpawner_ = std::make_unique<EnemySpawner>();
-	enemySpawner_->Initialize(player_.get(), SceneType::Test);
+	enemyManager_ = std::make_unique<Enemy::Manager>();
+	enemyManager_->Initialize(player_.get());
+	enemySpawner_ = std::make_unique<Enemy::Spawner>();
+	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Test);
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
 	weaponInventory_->Initialize(Projectile::Type::Pistol);
@@ -98,6 +102,17 @@ SceneType Test::Update(float dt) {
 
 	if (inGameSession_->IsPlaying()) {
 		player_->Update(deltaTime);
+		enemySpawner_->Update(deltaTime);
+		enemyManager_->Update(deltaTime);
+		Projectile::Manager::GetInstance().Update(deltaTime);
+
+		// 全GameObjectの移動後にColliderを一度だけ更新してから衝突を解決する。
+		MyCollider::Update();
+		player_->ResolveAfterCollision();
+		enemyManager_->ResolveAfterCollision();
+		map_->Update(*player_);
+		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
+		weaponInventory_->Update(deltaTime, player_->GetPosition(), enemyManager_->GetNearestEnemyPosition());
 	}
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
@@ -111,14 +126,6 @@ SceneType Test::Update(float dt) {
 	tpsCamera_.Update(deltaTime);
 
 	debugCamera_.Update(deltaTime);
-
-	if (inGameSession_->IsPlaying()) {
-		map_->Update(*player_);
-		enemySpawner_->Update(deltaTime);
-		Projectile::Manager::GetInstance().Update(deltaTime);
-		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
-		weaponInventory_->Update(deltaTime, player_->GetPosition(), enemySpawner_->GetNearestEnemyPosition());
-	}
 
 	// Mapとドロップ取得による経験値加算が完了してからレベル差分を確認する。
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
@@ -136,7 +143,7 @@ SceneType Test::Update(float dt) {
 		playerHealthText_->SetText(std::format("HP : {} / {}", status.currentHealth, status.maxHealth));
 	}
 	if (enemyCountText_) {
-		enemyCountText_->SetText(std::format("Enemy : {}", enemySpawner_->GetEnemyCount()));
+		enemyCountText_->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));
 	}
 	if (fpsText_) {
 		fpsSampleTime_ += dt;
@@ -225,7 +232,13 @@ bool Test::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 }
 
 void Test::Finalize() {
-	
+	if (enemySpawner_) {
+		enemySpawner_->Clear();
+	}
+	if (enemyManager_) {
+		enemyManager_->Clear();
+	}
+
 	DropObject::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
 	MySprite::DestroyByScene(SceneType::Test);

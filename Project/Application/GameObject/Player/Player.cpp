@@ -86,23 +86,27 @@ namespace Player {
 	}
 
 	void Base::Update(float deltaTime) {
+		lastDeltaTime_ = std::max(0.0f, deltaTime);
 		controller_.Update();
-		const MoveInput& moveInput = controller_.GetMoveInput();
+		lastMoveInput_ = controller_.GetMoveInput();
 
-		// 入力移動と重力による落下処理を先に行う。
-		movement_.Update(deltaTime, transform_, camera_, moveInput);
+		// 全Colliderを更新する前に入力移動と重力による落下を反映する。
+		movement_.Update(lastDeltaTime_, transform_, camera_, lastMoveInput_);
 
 		transform_.translate.x = std::clamp(transform_.translate.x, mapLimit_.min.x, mapLimit_.max.x);
 		transform_.translate.y = std::clamp(transform_.translate.y, mapLimit_.min.y, mapLimit_.max.y);
 		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
-		// 移動後の位置で押し戻しを行い、描画位置にも解決後の座標を反映する。
-		MyCollider::Update();
+		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
+			transform_.translate = { 0.0f, 100.0f, 0.0f };
+		}
+	}
 
+	void Base::ResolveAfterCollision() {
 		const bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
-		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, moveInput);
-		movement_.UpdateModelTransform(deltaTime, transform_, model_, isSlopeGroundContact);
+		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, lastMoveInput_);
+		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model_, isSlopeGroundContact);
 
 		model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
 		model_->SetRotation(transform_.rotate);
@@ -113,11 +117,7 @@ namespace Player {
 		if (movement_.GetCurrentMotion() == Player::Motion::Crouching) {
 			model_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		} else {
-			model_->SetColor(gamingColor_.Update(deltaTime, 1.0f));
-		}
-
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
-			transform_.translate = { 0.0f, 100.0f, 0.0f };
+			model_->SetColor(gamingColor_.Update(lastDeltaTime_, 1.0f));
 		}
 
 		// デバッグ表示

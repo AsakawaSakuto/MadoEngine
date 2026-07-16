@@ -11,7 +11,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\Enemy.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyBase.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
@@ -132,7 +133,8 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyBase.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">

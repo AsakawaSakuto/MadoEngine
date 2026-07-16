@@ -3,6 +3,7 @@
 #include "GameObject/Player/Player.h"
 #include "GameObject/Map/Map.h"
 #include "GameObject/Map/MapLimit.h"
+#include "GameObject/Enemy/EnemyManager.h"
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
 #include "GameObject/Weapon/WeaponStatusEditor.h"
@@ -67,7 +68,8 @@ private:
 
 	std::unique_ptr<Map> map_;
 
-	std::unique_ptr<EnemySpawner> enemySpawner_;
+	std::unique_ptr<Enemy::Manager> enemyManager_;
+	std::unique_ptr<Enemy::Spawner> enemySpawner_;
 
 	std::unique_ptr<Player::PlayerIconUI> playerIconUI_;
 

@@ -11,9 +11,15 @@ namespace Player {
 	class Base : public IGameObject {
 	public:
 
+		/// @brief Playerを初期化する
 		void Initialize();
 
+		/// @brief 入力と移動を更新する
+		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
+
+		/// @brief Collider更新後に接地状態と描画状態を解決する
+		void ResolveAfterCollision();
 
 		/// @brief Playerのワールド座標を取得する
 		Vector3 GetPosition() const { return transform_.translate; }
@@ -64,6 +70,8 @@ namespace Player {
 		StatusMultiplier statusMultiplier_; // ステータスの倍率
 		Controller controller_;             // 入力制御
 		Movement movement_;                 // 移動処理
+		MoveInput lastMoveInput_;            // Collider解決時に使用する直近の移動入力
+		float lastDeltaTime_ = 0.0f;          // Collider解決時に使用する直近の経過時間
 
 		MapLimit mapLimit_; // Mapの制限範囲
 

@@ -1,67 +1,58 @@
 #pragma once
-#include "Enemy.h"
+#include "EnemyManager.h"
+#include "GameObject/Map/MapLimit.h"
 #include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <vector>
-
-#include "../DropObject/DropObjectManager.h"
 
 namespace Player {
 	class Base;
 }
 
-class EnemySpawner {
-public:
-	/// @brief EnemySpawnerを初期化
-	/// @param player 生成と追跡の基準になるPlayer
-	/// @param sceneType Enemyを所属させるシーン種別
-	void Initialize(Player::Base* player, SceneType sceneType);
+namespace Enemy {
 
-	/// @brief Enemyの生成と更新を行う
-	/// @param deltaTime デルタタイム
-	void Update(float deltaTime);
+	/// @brief 時間経過に応じてEnemyの生成要求を発行するクラス
+	class Spawner {
+	public:
+		/// @brief Enemy::Spawnerを初期化する
+		/// @param player 生成位置の基準になるPlayer
+		/// @param enemyManager Enemyの生成要求を登録するManager
+		/// @param sceneType Enemyを所属させるシーン種別
+		void Initialize(Player::Base* player, Manager* enemyManager, SceneType sceneType);
 
-	/// @brief EnemySpawnerのデバッグ用ImGuiを描画
-	void DrawImGui();
+		/// @brief 経過時間を更新し、生成条件を満たしたEnemyをManagerへ登録する
+		/// @param deltaTime 前フレームからの経過時間
+		void Update(float deltaTime);
 
-	/// @brief すべてのEnemyを削除
-	void Clear();
+		/// @brief Enemy::Spawnerのデバッグ用ImGuiを描画する
+		void DrawImGui();
 
-	/// @brief 現在のEnemy数を取得
-	/// @return 生存しているEnemy数
-	std::size_t GetEnemyCount() const { return enemies_.size(); }
+		/// @brief 生成時間と強化時間を初期化する
+		void Clear();
 
-	/// @brief Playerに最も近いEnemyの座標を取得
-	/// @param outPosition 最も近いEnemyの座標を受け取る変数
-	/// @return 取得できた場合はtrueを返す
-	bool TryGetNearestEnemyPosition(Vector3& outPosition) const;
+	private:
+		/// @brief Enemyの生成要求を1件発行する
+		void SpawnEnemy();
 
-	/// @brief Playerに最も近いEnemyの座標を取得
-	/// @return 最も近いEnemyの座標。Enemyが存在しない場合はゼロ座標を返す
-	Vector3 GetNearestEnemyPosition() const;
+		/// @brief Player周辺の生成位置を作成する
+		/// @return Enemyの生成位置
+		Vector3 CreateSpawnPosition() const;
 
-private:
-	/// @brief Enemyを1体生成
-	void SpawnEnemy();
+		/// @brief 現在の経過時間に応じたEnemyステータスを計算する
+		/// @return 新しく生成するEnemyのステータス
+		Data::Status CalculateSpawnStatus() const;
 
-	/// @brief Player周辺の生成位置を作成
-	/// @return Enemyの生成位置
-	Vector3 CreateSpawnPosition() const;
-
-	/// @brief 削除対象になったEnemyを破棄
-	void RemoveDeadEnemies();
-
-	Player::Base* player_ = nullptr;
-	SceneType sceneType_ = SceneType::None;
-	std::vector<std::unique_ptr<Enemy>> enemies_;
-
-	int spawnLimit_ = 499;
-
-	float spawnInterval_ = 10.0f;
-	float spawnTimer_ = 0.0f;
-	float minSpawnRadius_ = 8.0f;
-	float maxSpawnRadius_ = 14.0f;
-	uint32_t nextEnemyId_ = 0;
-	bool isActive_ = true;
-};
+		Player::Base* player_ = nullptr;
+		Manager* enemyManager_ = nullptr;
+		SceneType sceneType_ = SceneType::None;
+		MapLimit mapLimit_;
+		Data::Status baseStatus_;
+		std::size_t spawnLimit_ = 500;
+		float spawnInterval_ = 10.0f;
+		float spawnTimer_ = 0.0f;
+		float elapsedTime_ = 0.0f;
+		float minSpawnRadius_ = 8.0f;
+		float maxSpawnRadius_ = 14.0f;
+		float healthPowerGrowthRatePerMinute_ = 0.1f;
+		float moveSpeedGrowthRatePerMinute_ = 0.02f;
+		bool isActive_ = true;
+	};
+} // namespace Enemy
