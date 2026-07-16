@@ -4,6 +4,10 @@
 #include "Render/Object/IRenderObject2d.h"
 #include ".SceneManager/SceneType.h"
 
+namespace MadoEngine {
+class SpriteManager;
+}
+
 class Sprite : public IRenderObject2d {
 public:
 
@@ -71,6 +75,11 @@ public:
 	nlohmann::json ToJson() const;
 
 private:
+	friend class MadoEngine::SpriteManager;
+
+	/// @brief SpriteManagerが管理する識別名を更新する
+	/// @param objectName 新しい識別名
+	void SetObjectName(const std::string& objectName) { objectName_ = objectName; }
 
 	/// @brief マテリアル・変換行列・PSOの共通初期化処理
 	void InitializeCommonResources();

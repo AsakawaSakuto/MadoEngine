@@ -186,6 +186,17 @@ void Text::ReleaseTexture() {
 	isTextureDirty_ = true;
 }
 
+void Text::SetObjectName(const std::string& objectName) {
+	if (objectName_ == objectName) {
+		return;
+	}
+
+	ReleaseTexture();
+	objectName_ = objectName;
+	textureKey_ = "__Text_" + objectName_;
+	MarkDirty();
+}
+
 void Text::SetText(const std::string& text) {
 	if (text_ == text) {
 		return;

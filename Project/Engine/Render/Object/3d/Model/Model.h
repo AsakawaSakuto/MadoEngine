@@ -7,6 +7,10 @@
 #include <memory>
 #include <string>
 
+namespace MadoEngine {
+class ModelManager;
+}
+
 class Model : public IRenderObject3d, public MadoEngine::Json::IJsonSerializable {
 public:
 	
@@ -134,6 +138,12 @@ public:
 	const ModelSharedData* GetSharedData() const { return sharedData_; }
 
 private:
+	friend class MadoEngine::ModelManager;
+
+	/// @brief ModelManagerが管理する識別名を更新する
+	/// @param objectName 新しい識別名
+	void SetObjectName(const std::string& objectName) { objectName_ = objectName; }
+
 	void InitializeInstanceResources();
 
 	/// @brief 現在のTransformからワールド行列を作成する

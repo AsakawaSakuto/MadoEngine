@@ -58,6 +58,12 @@ public:
 	/// @return Text。存在しない場合はnullptr
 	Text* Get(const std::string& name) const;
 
+	/// @brief Textの識別名を変更する
+	/// @param currentName 現在の識別名
+	/// @param newName 新しい識別名
+	/// @return 変更に成功した場合はtrue
+	bool Rename(const std::string& currentName, const std::string& newName);
+
 	/// @brief Textを破棄
 	/// @param name 破棄するText名
 	void Destroy(const std::string& name);

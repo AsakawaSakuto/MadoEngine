@@ -223,6 +223,50 @@ Model* ModelManager::Get(const std::string& name) const {
 	return it->second.get();
 }
 
+bool ModelManager::Rename(const std::string& currentName, const std::string& newName) {
+	auto currentIt = models_.find(currentName);
+	if (currentIt == models_.end()) {
+		Logger::Output("名前を変更するModelが見つかりません : " + currentName, Logger::Level::Warning);
+		return false;
+	}
+	if (newName.empty()) {
+		Logger::Output("Model名を空文字へ変更できません", Logger::Level::Warning);
+		return false;
+	}
+	if (currentName == newName) {
+		return true;
+	}
+	if (models_.contains(newName)) {
+		Logger::Output("同名のModelが既に存在します : " + newName, Logger::Level::Warning);
+		return false;
+	}
+
+	const bool isEditorManaged = editorManagedModelNames_.erase(currentName) > 0;
+	const bool isPendingDestroy = pendingDestroyModelNames_.erase(currentName) > 0;
+
+	auto modelNode = models_.extract(currentIt);
+	Model* model = modelNode.mapped().get();
+	modelNode.key() = newName;
+	models_.insert(std::move(modelNode));
+
+	auto assetNode = modelAssetNames_.extract(currentName);
+	if (!assetNode.empty()) {
+		assetNode.key() = newName;
+		modelAssetNames_.insert(std::move(assetNode));
+	}
+
+	if (isEditorManaged) {
+		editorManagedModelNames_.emplace(newName);
+	}
+	if (isPendingDestroy) {
+		pendingDestroyModelNames_.emplace(newName);
+	}
+	model->SetObjectName(newName);
+
+	Logger::Output("Model名を変更しました : " + currentName + " -> " + newName, Logger::Level::Application);
+	return true;
+}
+
 void ModelManager::Destroy(const std::string& name) {
 	pendingDestroyModelNames_.erase(name);
 	if (models_.erase(name) > 0) {

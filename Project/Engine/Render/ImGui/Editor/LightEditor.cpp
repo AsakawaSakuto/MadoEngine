@@ -58,7 +58,8 @@ namespace MadoEngine::Editor {
 
         /// @brief Editorからライトを追加する
         /// @param type 追加するライト種別
-        void AddLightFromEditor(LightType type) {
+        /// @return 追加したライトのハンドル。追加できなかった場合は無効なハンドル
+        LightHandle AddLightFromEditor(LightType type) {
             LightManager& lightManager = LightManager::GetInstance();
             static int nextDirectionalLightId = 1;
             static int nextPointLightId = 1;
@@ -69,13 +70,12 @@ namespace MadoEngine::Editor {
                 light.useLight = 1;
                 light.direction = { 0.0f, -1.0f, 0.0f };
                 const std::string name = CreateUniqueLightName(lightManager, "Direction Light ", nextDirectionalLightId);
-                lightManager.CreateDirectionalLight(
+                return lightManager.CreateDirectionalLight(
                     name,
                     light,
                     SceneType::None,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
-                return;
             }
 
             if (type == LightType::Point) {
@@ -84,13 +84,12 @@ namespace MadoEngine::Editor {
                 light.position = { 0.0f, 1.0f, 0.0f };
                 light.radius = 5.0f;
                 const std::string name = CreateUniqueLightName(lightManager, "Point Light ", nextPointLightId);
-                lightManager.CreatePointLight(
+                return lightManager.CreatePointLight(
                     name,
                     light,
                     SceneType::None,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
-                return;
             }
 
             if (type == LightType::Spot) {
@@ -102,13 +101,15 @@ namespace MadoEngine::Editor {
                 light.cosAngle = 0.8f;
                 light.cosFalloffStart = 0.9f;
                 const std::string name = CreateUniqueLightName(lightManager, "Spot Light ", nextSpotLightId);
-                lightManager.CreateSpotLight(
+                return lightManager.CreateSpotLight(
                     name,
                     light,
                     SceneType::None,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
             }
+
+            return {};
         }
 
         /// @brief SceneTypeの選択表示名を取得する
@@ -417,15 +418,24 @@ namespace MadoEngine::Editor {
         ImGui::Begin("Light Editor");
 
         if (ImGui::Button("Direction追加")) {
-            AddLightFromEditor(LightType::Directional);
+            const LightHandle createdHandle = AddLightFromEditor(LightType::Directional);
+            if (createdHandle.IsValid()) {
+                selectedHandle = createdHandle;
+            }
         }
         ImGui::SameLine();
         if (ImGui::Button("Point追加")) {
-            AddLightFromEditor(LightType::Point);
+            const LightHandle createdHandle = AddLightFromEditor(LightType::Point);
+            if (createdHandle.IsValid()) {
+                selectedHandle = createdHandle;
+            }
         }
         ImGui::SameLine();
         if (ImGui::Button("Spot追加")) {
-            AddLightFromEditor(LightType::Spot);
+            const LightHandle createdHandle = AddLightFromEditor(LightType::Spot);
+            if (createdHandle.IsValid()) {
+                selectedHandle = createdHandle;
+            }
         }
         ImGui::SameLine();
         if (ImGui::Button("保存")) {

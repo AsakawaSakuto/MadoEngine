@@ -116,6 +116,34 @@ Text* TextManager::Get(const std::string& name) const {
 	return it->second.text.get();
 }
 
+bool TextManager::Rename(const std::string& currentName, const std::string& newName) {
+	auto currentIt = texts_.find(currentName);
+	if (currentIt == texts_.end()) {
+		Logger::Output("名前を変更するTextが見つかりません : " + currentName, Logger::Level::Warning);
+		return false;
+	}
+	if (newName.empty()) {
+		Logger::Output("Text名を空文字へ変更できません", Logger::Level::Warning);
+		return false;
+	}
+	if (currentName == newName) {
+		return true;
+	}
+	if (texts_.contains(newName)) {
+		Logger::Output("同名のTextが既に存在します : " + newName, Logger::Level::Warning);
+		return false;
+	}
+
+	auto node = texts_.extract(currentIt);
+	Text* text = node.mapped().text.get();
+	node.key() = newName;
+	texts_.insert(std::move(node));
+	text->SetObjectName(newName);
+
+	Logger::Output("Text名を変更しました : " + currentName + " -> " + newName, Logger::Level::Application);
+	return true;
+}
+
 void TextManager::Destroy(const std::string& name) {
 	auto it = texts_.find(name);
 	if (it != texts_.end()) {

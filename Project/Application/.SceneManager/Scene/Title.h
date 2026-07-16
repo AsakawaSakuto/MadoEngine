@@ -34,4 +34,6 @@ private:
 	Sprite* fadeSprite_ = nullptr;
 
 	GameTimer fadeInTimer_;
+
+	DebugCamera debugCamera_;
 };

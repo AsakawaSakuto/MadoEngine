@@ -385,6 +385,15 @@ void DrawSpriteManagerEditorUI() {
 		selectedSprite = manager.Get(selectedName);
 	}
 	if (selectedSprite) {
+		std::array<char, 128> nameBuffer{};
+		CopyToBuffer(nameBuffer, selectedName);
+		if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
+			const std::string newName = nameBuffer.data();
+			if (!newName.empty() && manager.Rename(selectedName, newName)) {
+				selectedName = newName;
+			}
+		}
+
 		DrawSpriteProperties(*selectedSprite, textureNames);
 	} else {
 		ImGui::TextDisabled("Spriteを選択してください。");

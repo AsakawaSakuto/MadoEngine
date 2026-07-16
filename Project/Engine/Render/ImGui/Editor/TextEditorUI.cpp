@@ -237,6 +237,16 @@ void DrawTextManagerEditorUI() {
 			editingName = selectedName;
 		}
 
+		std::array<char, 128> nameBuffer{};
+		CopyToBuffer(nameBuffer, selectedName);
+		if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
+			const std::string newName = nameBuffer.data();
+			if (!newName.empty() && manager.Rename(selectedName, newName)) {
+				selectedName = newName;
+				editingName = newName;
+			}
+		}
+
 		if (ImGui::InputTextMultiline("本文", textBuffer.data(), textBuffer.size(), ImVec2(-1.0f, 120.0f))) {
 			selectedText->SetText(textBuffer.data());
 		}

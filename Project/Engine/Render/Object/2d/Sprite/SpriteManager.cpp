@@ -119,6 +119,35 @@ Sprite* SpriteManager::Get(const std::string& name) const {
 	return it->second.sprite.get();
 }
 
+bool SpriteManager::Rename(const std::string& currentName, const std::string& newName) {
+	auto currentIt = sprites_.find(currentName);
+	if (currentIt == sprites_.end()) {
+		Logger::Output("名前を変更するSpriteが見つかりません : " + currentName, Logger::Level::Warning);
+		return false;
+	}
+	if (newName.empty()) {
+		Logger::Output("Sprite名を空文字へ変更できません", Logger::Level::Warning);
+		return false;
+	}
+	if (currentName == newName) {
+		return true;
+	}
+	if (sprites_.contains(newName)) {
+		Logger::Output("同名のSpriteが既に存在します : " + newName, Logger::Level::Warning);
+		return false;
+	}
+
+	auto node = sprites_.extract(currentIt);
+	Sprite* sprite = node.mapped().sprite.get();
+	node.key() = newName;
+	sprites_.insert(std::move(node));
+	sprite->SetObjectName(newName);
+	std::replace(drawOrder_.begin(), drawOrder_.end(), currentName, newName);
+
+	Logger::Output("Sprite名を変更しました : " + currentName + " -> " + newName, Logger::Level::Application);
+	return true;
+}
+
 void SpriteManager::Destroy(const std::string& name) {
 	if (sprites_.erase(name) > 0) {
 		drawOrder_.erase(std::remove(drawOrder_.begin(), drawOrder_.end(), name), drawOrder_.end());

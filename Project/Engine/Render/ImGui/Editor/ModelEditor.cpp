@@ -319,6 +319,15 @@ void DrawModelManagerEditorUI() {
 		selectedModel = manager.Get(selectedName);
 	}
 	if (selectedModel) {
+		std::array<char, 128> nameBuffer{};
+		CopyToBuffer(nameBuffer, selectedName);
+		if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
+			const std::string newName = nameBuffer.data();
+			if (!newName.empty() && manager.Rename(selectedName, newName)) {
+				selectedName = newName;
+			}
+		}
+
 		DrawModelProperties(*selectedModel, manager.GetModelAssetName(selectedName));
 	} else {
 		ImGui::TextDisabled("Modelを選択してください。");
