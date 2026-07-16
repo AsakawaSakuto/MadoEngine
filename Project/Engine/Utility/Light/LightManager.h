@@ -3,6 +3,7 @@
 #include "LightLayer.h"
 #include "PointLight.h"
 #include "SpotLight.h"
+#include "Utility/EditorManagementMode.h"
 #include ".SceneManager/SceneType.h"
 #include <array>
 #include <cstddef>
@@ -43,6 +44,7 @@ struct LightMetaData {
 	std::string name;
 	SceneType sceneType = SceneType::None;
 	LightLayerMask layerMask = ToLightLayerMask(LightLayer::World);
+	MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly;
 	bool enabled = true;
 };
 
@@ -94,36 +96,42 @@ public:
 	/// @param light 登録する平行光源
 	/// @param sceneType ライトを使用するシーン
 	/// @param layerMask ライトの影響先レイヤーマスク
+	/// @param managementMode ライトの管理方法
 	/// @return 登録したライトのハンドル
 	LightHandle CreateDirectionalLight(
 		const std::string& name,
 		const DirectionalLight& light,
 		SceneType sceneType = SceneType::None,
-		LightLayerMask layerMask = ToLightLayerMask(LightLayer::World));
+		LightLayerMask layerMask = ToLightLayerMask(LightLayer::World),
+		MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly);
 
 	/// @brief 点光源を登録する
 	/// @param name ライト名
 	/// @param light 登録する点光源
 	/// @param sceneType ライトを使用するシーン
 	/// @param layerMask ライトの影響先レイヤーマスク
+	/// @param managementMode ライトの管理方法
 	/// @return 登録したライトのハンドル
 	LightHandle CreatePointLight(
 		const std::string& name,
 		const PointLight& light,
 		SceneType sceneType = SceneType::None,
-		LightLayerMask layerMask = ToLightLayerMask(LightLayer::World));
+		LightLayerMask layerMask = ToLightLayerMask(LightLayer::World),
+		MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly);
 
 	/// @brief スポットライトを登録する
 	/// @param name ライト名
 	/// @param light 登録するスポットライト
 	/// @param sceneType ライトを使用するシーン
 	/// @param layerMask ライトの影響先レイヤーマスク
+	/// @param managementMode ライトの管理方法
 	/// @return 登録したライトのハンドル
 	LightHandle CreateSpotLight(
 		const std::string& name,
 		const SpotLight& light,
 		SceneType sceneType = SceneType::None,
-		LightLayerMask layerMask = ToLightLayerMask(LightLayer::World));
+		LightLayerMask layerMask = ToLightLayerMask(LightLayer::World),
+		MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly);
 
 	/// @brief ライト名からハンドルを取得する
 	/// @param name 検索するライト名
@@ -141,6 +149,18 @@ public:
 	/// @brief 登録済みスポットライトのハンドル一覧を取得する
 	/// @return 登録済みスポットライトのハンドル配列
 	std::vector<LightHandle> GetSpotLightHandles() const;
+
+	/// @brief Editor管理対象の平行光源ハンドル一覧を取得する
+	/// @return Editor管理対象の平行光源ハンドル配列
+	std::vector<LightHandle> GetEditorManagedDirectionalLightHandles() const;
+
+	/// @brief Editor管理対象の点光源ハンドル一覧を取得する
+	/// @return Editor管理対象の点光源ハンドル配列
+	std::vector<LightHandle> GetEditorManagedPointLightHandles() const;
+
+	/// @brief Editor管理対象のスポットライトハンドル一覧を取得する
+	/// @return Editor管理対象のスポットライトハンドル配列
+	std::vector<LightHandle> GetEditorManagedSpotLightHandles() const;
 
 	/// @brief ハンドルが現在も有効か確認する
 	/// @param handle 確認するハンドル
@@ -170,14 +190,14 @@ public:
 	/// @brief 登録済みライトをすべて削除する
 	void Clear();
 
-	/// @brief 登録済みライトをJsonファイルへ保存する
+	/// @brief Editor管理対象のライトをJsonファイルへ保存する
 	/// @param filePath 保存先のJsonファイルパス
 	/// @return 保存に成功した場合はtrue
 	bool SaveToJson(const std::filesystem::path& filePath = kDefaultLightJsonPath) const;
 
-	/// @brief Jsonファイルからライトを読み込む
+	/// @brief JsonファイルからEditor管理対象のライトを読み込む
 	/// @param filePath 読み込み元のJsonファイルパス
-	/// @return 読み込みに成功した場合はtrue
+	/// @return 実行時専用ライトを維持して読み込みに成功した場合はtrue
 	bool LoadFromJson(const std::filesystem::path& filePath = kDefaultLightJsonPath);
 
 	/// @brief ライトの有効状態を設定する
@@ -406,12 +426,24 @@ private:
 	template <typename TSlot>
 	void ClearSlots(std::vector<TSlot>& slots);
 
+	/// @brief Editor管理対象のライトをすべて削除する
+	void ClearEditorManagedLights();
+
+	/// @brief ライトスロット配列からEditor管理対象を無効化して世代を進める
+	/// @param slots 無効化するライトスロット配列
+	template <typename TSlot>
+	void ClearEditorManagedSlots(std::vector<TSlot>& slots);
+
 	/// @brief ライトスロット配列から有効なハンドル一覧を取得する
 	/// @param slots 検索対象のライトスロット配列
 	/// @param type ライト種別
+	/// @param editorManagedOnly Editor管理対象のみに絞り込む場合はtrue
 	/// @return 有効なハンドル配列
 	template <typename TSlot>
-	std::vector<LightHandle> GetActiveHandles(const std::vector<TSlot>& slots, LightType type) const;
+	std::vector<LightHandle> GetActiveHandles(
+		const std::vector<TSlot>& slots,
+		LightType type,
+		bool editorManagedOnly = false) const;
 
 	/// @brief ライトが抽出条件に一致するか判定する
 	/// @param meta 判定するライトの共通メタ情報

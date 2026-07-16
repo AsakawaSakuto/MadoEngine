@@ -3,7 +3,27 @@
 
 namespace MySprite {
 
-	/// @brief 描画レイヤーを指定してSpriteを作成する
+	/// @brief 管理方法と描画レイヤーを指定してSpriteを作成する
+	/// @param name Spriteの識別名
+	/// @param textureName 使用するテクスチャ名
+	/// @param sceneType 描画を許可するシーンの種類
+	/// @param managementMode Spriteの管理方法
+	/// @param layer 設定する描画レイヤー
+	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
+	inline Sprite* Create(
+		const std::string& name,
+		const std::string& textureName,
+		SceneType sceneType,
+		MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly,
+		MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default) {
+		Sprite* sprite = MadoEngine::SpriteManager::GetInstance().Create(name, textureName, sceneType, managementMode);
+		if (sprite) {
+			sprite->SetRenderLayer(layer);
+		}
+		return sprite;
+	}
+
+	/// @brief 従来の引数順で描画レイヤーを指定して実行時専用Spriteを作成する
 	/// @param name Spriteの識別名
 	/// @param textureName 使用するテクスチャ名
 	/// @param sceneType 描画を許可するシーンの種類
@@ -13,13 +33,8 @@ namespace MySprite {
 		const std::string& name,
 		const std::string& textureName,
 		SceneType sceneType,
-		MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default)
-	{
-		Sprite* sprite = MadoEngine::SpriteManager::GetInstance().Create(name, textureName, sceneType);
-		if (sprite) {
-			sprite->SetRenderLayer(layer);
-		}
-		return sprite;
+		MadoEngine::Render::RenderLayer layer) {
+		return Create(name, textureName, sceneType, MadoEngine::EditorManagementMode::RuntimeOnly, layer);
 	}
 
 	/// @brief 識別名でSpriteを取得する

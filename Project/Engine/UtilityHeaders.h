@@ -2,6 +2,7 @@
 #include "Audio/MyAudio.h"
 #include "Input/MyInput.h"
 #include "Utility/Random.h"
+#include "Utility/EditorManagementMode.h"
 #include "Utility/Color/GamingColor.h"
 #include "Utility/Easing/Easing.h"
 #include "Utility/GameTimer/GameTimer.h"

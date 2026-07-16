@@ -33,9 +33,9 @@ void Test::Initialize() {
 	healthGauge_ = std::make_unique<Player::HealthGauge>();
 	healthGauge_->Initialize();
 
-	playerHealthText_ = MyText::Create("PlayerHealthText", "HP : 0 / 0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
-	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
-	fpsText_ = MyText::Create("FpsText", "FPS : 0.0", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
+	playerHealthText_ = MyText::Create("PlayerHealthText", "HP : 0 / 0", SceneType::Test, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
+	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0",      SceneType::Test, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
+	fpsText_ = MyText::Create("FpsText", "FPS : 0.0",                    SceneType::Test, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 
 	AABB mapLimitBox;
 	MapLimit mapLimit;

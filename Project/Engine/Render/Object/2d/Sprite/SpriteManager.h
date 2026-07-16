@@ -1,6 +1,7 @@
 #pragma once
 #include "Sprite.h"
 #include "SpriteSharedGeometry.h"
+#include "Utility/EditorManagementMode.h"
 #include "Render/Object/RenderLayer.h"
 #include ".SceneManager/SceneType.h"
 #include <unordered_map>
@@ -44,10 +45,15 @@ public:
 	/// @param name Spriteの識別名
 	/// @param textureName 使用するテクスチャ名
 	/// @param sceneType 描画を許可するシーンの種類（SceneType::None の場合は全シーンで描画）
+	/// @param managementMode Spriteの管理方法
 	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
-	Sprite* Create(const std::string& name, const std::string& textureName, SceneType sceneType = SceneType::None);
+	Sprite* Create(
+		const std::string& name,
+		const std::string& textureName,
+		SceneType sceneType = SceneType::None,
+		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly);
 
-	/// @brief JsonからSpriteを生成して管理対象へ登録する
+	/// @brief JsonからSpriteを生成してEditor管理対象へ登録する
 	/// @param json Sprite設定を格納したJson
 	/// @return 生成または更新したSprite、失敗した場合はnullptr
 	Sprite* CreateFromJson(const nlohmann::json& json);
@@ -82,20 +88,20 @@ public:
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask);
 
-	/// @brief 管理中のSprite一覧をJsonへ変換する
-	/// @return Sprite一覧を格納したJson
+	/// @brief Editor管理対象のSprite一覧をJsonへ変換する
+	/// @return Editor管理対象のSprite一覧を格納したJson
 	nlohmann::json ToJson() const;
 
-	/// @brief JsonからSprite一覧を復元する
+	/// @brief JsonからEditor管理対象のSprite一覧を復元する
 	/// @param json 復元元のJson
 	void FromJson(const nlohmann::json& json);
 
-	/// @brief Sprite一覧をJsonファイルへ保存する
+	/// @brief Editor管理対象のSprite一覧をJsonファイルへ保存する
 	/// @param filePath 保存先のファイルパス
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
-	/// @brief JsonファイルからSprite一覧を読み込む
+	/// @brief JsonファイルからEditor管理対象のSprite一覧を読み込む
 	/// @param filePath 読み込み元のファイルパス
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
@@ -104,7 +110,15 @@ public:
 	/// @return 描画順に並んだSprite名一覧
 	std::vector<std::string> GetNames() const;
 
+	/// @brief Editor管理対象のSprite名一覧を取得する
+	/// @return 描画順に並んだEditor管理対象のSprite名一覧
+	std::vector<std::string> GetEditorManagedNames() const;
+
 private:
+	struct SpriteEntry {
+		std::unique_ptr<Sprite> sprite;
+		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+	};
 
 	SpriteManager()  = default;
 	~SpriteManager() = default;
@@ -120,8 +134,8 @@ private:
 	float screenWidth_ = 1280.0f;
 	float screenHeight_ = 720.0f;
 
-	// Sprite管理マップ（識別名 → unique_ptr）
-	std::unordered_map<std::string, std::unique_ptr<Sprite>> sprites_;
+	// Sprite管理マップ（識別名 → Spriteと管理方法）
+	std::unordered_map<std::string, SpriteEntry> sprites_;
 	std::vector<std::string> drawOrder_;
 };
 

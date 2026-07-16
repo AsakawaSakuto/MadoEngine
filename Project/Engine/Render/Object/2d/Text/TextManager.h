@@ -1,6 +1,7 @@
 #pragma once
 #include "Render/Object/2d/Text/Text.h"
 #include "Render/Object/2d/Sprite/SpriteSharedGeometry.h"
+#include "Utility/EditorManagementMode.h"
 #include "Render/PSO/PSORegistry.h"
 #include ".SceneManager/SceneType.h"
 #include <filesystem>
@@ -40,10 +41,14 @@ public:
 	/// @brief Textを作成して管理下へ登録
 	/// @param name Textの識別名
 	/// @param sceneType 描画対象Scene
+	/// @param managementMode Textの管理方法
 	/// @return 作成または取得されたText
-	Text* Create(const std::string& name, SceneType sceneType = SceneType::None);
+	Text* Create(
+		const std::string& name,
+		SceneType sceneType = SceneType::None,
+		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly);
 
-	/// @brief JsonからTextを作成して管理下へ登録
+	/// @brief JsonからTextを作成してEditor管理対象へ登録
 	/// @param json Text設定Json
 	/// @return 作成または復元されたText
 	Text* CreateFromJson(const nlohmann::json& json);
@@ -82,20 +87,20 @@ public:
 	/// @param targetScreen 描画対象Screen。空文字列の場合はScreenで絞り込みません
 	void DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask, const std::string& targetScreen = "");
 
-	/// @brief 管理下のTextをJsonへ変換
-	/// @return Text一覧を含むJson
+	/// @brief Editor管理対象のTextをJsonへ変換
+	/// @return Editor管理対象のText一覧を含むJson
 	nlohmann::json ToJson() const;
 
-	/// @brief JsonからText一覧を復元
+	/// @brief JsonからEditor管理対象のText一覧を復元
 	/// @param json 復元元Json
 	void FromJson(const nlohmann::json& json);
 
-	/// @brief Text一覧をJsonファイルへ保存
+	/// @brief Editor管理対象のText一覧をJsonファイルへ保存
 	/// @param filePath 保存先パス
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
-	/// @brief Text一覧をJsonファイルから読み込み
+	/// @brief Editor管理対象のText一覧をJsonファイルから読み込み
 	/// @param filePath 読み込み元パス
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
@@ -104,7 +109,16 @@ public:
 	/// @return Text名一覧
 	std::vector<std::string> GetNames() const;
 
+	/// @brief Editor管理対象のText名一覧を取得
+	/// @return 名前順に並んだEditor管理対象のText名一覧
+	std::vector<std::string> GetEditorManagedNames() const;
+
 private:
+	struct TextEntry {
+		std::unique_ptr<Text> text;
+		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+	};
+
 	TextManager() = default;
 	~TextManager() = default;
 
@@ -114,7 +128,7 @@ private:
 	SpriteSharedGeometry sharedGeometry_;
 	float screenWidth_ = 1280.0f;
 	float screenHeight_ = 720.0f;
-	std::unordered_map<std::string, std::unique_ptr<Text>> texts_;
+	std::unordered_map<std::string, TextEntry> texts_;
 };
 
 } // namespace MadoEngine

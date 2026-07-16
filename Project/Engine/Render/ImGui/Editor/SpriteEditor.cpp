@@ -321,7 +321,11 @@ void DrawSpriteManagerEditorUI() {
 		ImGui::BeginDisabled();
 	}
 	if (ImGui::Button("追加")) {
-		Sprite* created = manager.Create(createName.data(), createTextureName);
+		Sprite* created = manager.Create(
+			createName.data(),
+			createTextureName,
+			SceneType::None,
+			EditorManagementMode::EditorManaged);
 		if (created) {
 			selectedName = createName.data();
 		}
@@ -348,7 +352,7 @@ void DrawSpriteManagerEditorUI() {
 
 	ImGui::Separator();
 
-	const std::vector<std::string> names = manager.GetNames();
+	const std::vector<std::string> names = manager.GetEditorManagedNames();
 	ImGui::BeginChild("SpriteList", ImVec2(200.0f, 0.0f), true);
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());

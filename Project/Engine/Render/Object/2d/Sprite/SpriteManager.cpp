@@ -36,16 +36,26 @@ void SpriteManager::Finalize() {
 void SpriteManager::SetScreenSize(float width, float height) {
 	screenWidth_ = width;
 	screenHeight_ = height;
-	for (auto& [name, sprite] : sprites_) {
+	for (auto& [name, entry] : sprites_) {
 		(void)name;
-		sprite->SetScreenSize(screenWidth_, screenHeight_);
+		entry.sprite->SetScreenSize(screenWidth_, screenHeight_);
 	}
 }
 
-Sprite* SpriteManager::Create(const std::string& name, const std::string& textureName, SceneType sceneType) {
-	if (sprites_.contains(name)) {
+Sprite* SpriteManager::Create(
+	const std::string& name,
+	const std::string& textureName,
+	SceneType sceneType,
+	EditorManagementMode managementMode) {
+	auto existingIt = sprites_.find(name);
+	if (existingIt != sprites_.end()) {
+		if (existingIt->second.managementMode != managementMode) {
+			Logger::Output("同名のSpriteが異なる管理方法で既に存在します : " + name, Logger::Level::Warning);
+			return nullptr;
+		}
+
 		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
-		return sprites_.at(name).get();
+		return existingIt->second.sprite.get();
 	}
 	if (name.empty()) {
 		Logger::Output("名前が空のSpriteは生成できません", Logger::Level::Warning);
@@ -63,7 +73,7 @@ Sprite* SpriteManager::Create(const std::string& name, const std::string& textur
 	sprite->SetScreenSize(screenWidth_, screenHeight_);
 
 	Sprite* ptr = sprite.get();
-	sprites_.emplace(name, std::move(sprite));
+	sprites_.emplace(name, SpriteEntry{ std::move(sprite), managementMode });
 	drawOrder_.push_back(name);
 
 	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneType == SceneType::None ? "全シーン" : SceneTypeToString(sceneType)), Logger::Level::Application);
@@ -78,7 +88,20 @@ Sprite* SpriteManager::CreateFromJson(const nlohmann::json& json) {
 
 	const std::string name = json.value("name", "Sprite");
 	const std::string textureName = json.value("texture", "");
-	Sprite* sprite = Create(name, textureName);
+	Sprite* sprite = nullptr;
+	auto existingIt = sprites_.find(name);
+	if (existingIt != sprites_.end()) {
+		if (existingIt->second.managementMode == EditorManagementMode::RuntimeOnly) {
+			Logger::Output(
+				"実行時専用Spriteと同名のためJsonの読み込みをスキップしました : " + name,
+				Logger::Level::Warning);
+			return nullptr;
+		}
+		sprite = existingIt->second.sprite.get();
+	} else {
+		sprite = Create(name, textureName, SceneType::None, EditorManagementMode::EditorManaged);
+	}
+
 	if (!sprite) {
 		return nullptr;
 	}
@@ -93,7 +116,7 @@ Sprite* SpriteManager::Get(const std::string& name) const {
 		Logger::Output("Spriteが見つかりません : " + name, Logger::Level::Warning);
 		return nullptr;
 	}
-	return it->second.get();
+	return it->second.sprite.get();
 }
 
 void SpriteManager::Destroy(const std::string& name) {
@@ -117,7 +140,7 @@ void SpriteManager::DestroyByScene(SceneType sceneType) {
 			continue;
 		}
 
-		if (spriteIt->second->GetSceneType() == sceneType) {
+		if (spriteIt->second.sprite->GetSceneType() == sceneType) {
 			sprites_.erase(spriteIt);
 			it = drawOrder_.erase(it);
 			++destroyCount;
@@ -136,7 +159,7 @@ void SpriteManager::UpdateAll(SceneType currentSceneType) {
 	for (const std::string& name : drawOrder_) {
 		auto it = sprites_.find(name);
 		if (it == sprites_.end()) { continue; }
-		Sprite* sprite = it->second.get();
+		Sprite* sprite = it->second.sprite.get();
 
 		SceneType spriteScene = sprite->GetSceneType();
 		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
@@ -164,7 +187,7 @@ void SpriteManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render
 	for (const std::string& name : drawOrder_) {
 		auto it = sprites_.find(name);
 		if (it == sprites_.end()) { continue; }
-		Sprite* sprite = it->second.get();
+		Sprite* sprite = it->second.sprite.get();
 
 		SceneType spriteScene = sprite->GetSceneType();
 		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
@@ -195,7 +218,10 @@ nlohmann::json SpriteManager::ToJson() const {
 		if (it == sprites_.end()) {
 			continue;
 		}
-		sprites.push_back(it->second->ToJson());
+		if (it->second.managementMode != EditorManagementMode::EditorManaged) {
+			continue;
+		}
+		sprites.push_back(it->second.sprite->ToJson());
 	}
 
 	return {
@@ -244,6 +270,22 @@ bool SpriteManager::LoadFromFile(const std::filesystem::path& filePath) {
 
 std::vector<std::string> SpriteManager::GetNames() const {
 	return drawOrder_;
+}
+
+std::vector<std::string> SpriteManager::GetEditorManagedNames() const {
+	std::vector<std::string> names;
+	names.reserve(drawOrder_.size());
+	for (const std::string& name : drawOrder_) {
+		auto it = sprites_.find(name);
+		if (it == sprites_.end()) {
+			continue;
+		}
+		if (it->second.managementMode != EditorManagementMode::EditorManaged) {
+			continue;
+		}
+		names.push_back(name);
+	}
+	return names;
 }
 
 } // namespace MadoEngine

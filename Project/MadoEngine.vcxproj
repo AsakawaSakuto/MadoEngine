@@ -417,6 +417,7 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\Sprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h" />
+    <ClInclude Include="Engine\Utility\EditorManagementMode.h" />
     <ClInclude Include="Engine\Render\Object\RenderLayer.h" />
     <ClInclude Include="Engine\Render\Object\IRenderObject2d.h" />
     <ClInclude Include="Engine\Render\Object\IRenderObject3d.h" />

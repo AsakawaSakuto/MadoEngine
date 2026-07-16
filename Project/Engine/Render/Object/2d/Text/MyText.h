@@ -3,23 +3,28 @@
 
 namespace MyText {
 
-/// @brief Textを作成して管理下に登録
+/// @brief 管理方法と描画レイヤーを指定してTextを作成する
 /// @param name Textの識別名
 /// @param text 表示するUTF-8文字列
 /// @param sceneType 描画対象Scene
+/// @param managementMode Textの管理方法
+/// @param layer 描画Layer
 /// @return 作成されたText。所有権はTextManagerが保持
 inline MadoEngine::Text* Create(
 	const std::string& name,
 	const std::string& text,
-	SceneType sceneType = SceneType::None) {
-	MadoEngine::Text* created = MadoEngine::TextManager::GetInstance().Create(name, sceneType);
+	SceneType sceneType = SceneType::None,
+	MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly,
+	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default) {
+	MadoEngine::Text* created = MadoEngine::TextManager::GetInstance().Create(name, sceneType, managementMode);
 	if (created) {
 		created->SetText(text);
+		created->SetRenderLayer(layer);
 	}
 	return created;
 }
 
-/// @brief Layerを指定してTextを作成
+/// @brief 従来の引数順で描画レイヤーを指定して実行時専用Textを作成する
 /// @param name Textの識別名
 /// @param text 表示するUTF-8文字列
 /// @param sceneType 描画対象Scene
@@ -30,11 +35,7 @@ inline MadoEngine::Text* Create(
 	const std::string& text,
 	SceneType sceneType,
 	MadoEngine::Render::RenderLayer layer) {
-	MadoEngine::Text* created = Create(name, text, sceneType);
-	if (created) {
-		created->SetRenderLayer(layer);
-	}
-	return created;
+	return Create(name, text, sceneType, MadoEngine::EditorManagementMode::RuntimeOnly, layer);
 }
 
 /// @brief 指定名のTextを取得

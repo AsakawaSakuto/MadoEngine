@@ -175,7 +175,10 @@ void DrawTextManagerEditorUI() {
 	ImGui::InputText("New Name", createName.data(), createName.size());
 	ImGui::SameLine();
 	if (ImGui::Button("追加")) {
-		Text* created = manager.Create(createName.data());
+		Text* created = manager.Create(
+			createName.data(),
+			SceneType::None,
+			EditorManagementMode::EditorManaged);
 		if (created) {
 			selectedName = createName.data();
 			editingName.clear();
@@ -198,7 +201,7 @@ void DrawTextManagerEditorUI() {
 
 	ImGui::Separator();
 
-	const std::vector<std::string> names = manager.GetNames();
+	const std::vector<std::string> names = manager.GetEditorManagedNames();
 	ImGui::BeginChild("TextList", ImVec2(180.0f, 0.0f), true);
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());

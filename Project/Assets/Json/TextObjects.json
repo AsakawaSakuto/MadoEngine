@@ -13,131 +13,14 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 36.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "FpsText",
-            "position": [
-                36.0,
-                150.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Test",
-            "screen": "BackBuffer",
-            "size": [
-                240.0,
-                40.0
-            ],
-            "text": "FPS : 61.3",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": false
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 128.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "Start",
-            "position": [
-                200.0,
-                120.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "Start",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 128.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "Setting",
-            "position": [
-                200.0,
-                320.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "Setting",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 34.5,
+            "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "PlayerHealthText",
             "position": [
-                60.0,
-                62.0
+                64.0,
+                64.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -147,14 +30,14 @@
             "scene": "Test",
             "screen": "BackBuffer",
             "size": [
-                320.0,
-                48.0
+                0.0,
+                0.0
             ],
-            "text": "HP : 0 / 100",
+            "text": "HP : 100 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
-            "wordWrap": false
+            "wordWrap": true
         },
         {
             "anchorPoint": [
@@ -169,11 +52,50 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 36.0,
+            "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "EnemyCountText",
+            "position": [
+                36.0,
+                144.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Enemy : 0",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "FpsText",
             "position": [
                 36.0,
                 110.0
@@ -186,14 +108,14 @@
             "scene": "Test",
             "screen": "BackBuffer",
             "size": [
-                360.0,
-                40.0
+                0.0,
+                0.0
             ],
-            "text": "Enemy : 27",
+            "text": "FPS : 59.8",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
-            "wordWrap": false
+            "wordWrap": true
         }
     ]
 }

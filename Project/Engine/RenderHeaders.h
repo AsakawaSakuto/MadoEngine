@@ -1,6 +1,7 @@
 #pragma once
 #include "Render/Screen/WindowsAPI.h"
 #include "Render/Screen/SwapChain.h"
+#include "Utility/EditorManagementMode.h"
 #include "Render/Object/RenderLayer.h"
 #include "Render/Object/IRenderObject2d.h"
 #include "Render/Object/IRenderObject3d.h"

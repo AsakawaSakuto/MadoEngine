@@ -28,9 +28,9 @@ void TextManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* co
 }
 
 void TextManager::Finalize() {
-	for (auto& [name, text] : texts_) {
+	for (auto& [name, entry] : texts_) {
 		(void)name;
-		text->ReleaseTexture();
+		entry.text->ReleaseTexture();
 	}
 	texts_.clear();
 	sharedGeometry_.Finalize();
@@ -45,16 +45,25 @@ void TextManager::Finalize() {
 void TextManager::SetScreenSize(float width, float height) {
 	screenWidth_ = width;
 	screenHeight_ = height;
-	for (auto& [name, text] : texts_) {
+	for (auto& [name, entry] : texts_) {
 		(void)name;
-		text->SetScreenSize(screenWidth_, screenHeight_);
+		entry.text->SetScreenSize(screenWidth_, screenHeight_);
 	}
 }
 
-Text* TextManager::Create(const std::string& name, SceneType sceneType) {
-	if (texts_.contains(name)) {
+Text* TextManager::Create(
+	const std::string& name,
+	SceneType sceneType,
+	EditorManagementMode managementMode) {
+	auto existingIt = texts_.find(name);
+	if (existingIt != texts_.end()) {
+		if (existingIt->second.managementMode != managementMode) {
+			Logger::Output("[Engine] 同名のTextが異なる管理方法で既に存在します: " + name, Logger::Level::Warning);
+			return nullptr;
+		}
+
 		Logger::Output("[Engine] 同名のTextが既に存在します: " + name, Logger::Level::Warning);
-		return texts_.at(name).get();
+		return existingIt->second.text.get();
 	}
 
 	auto text = std::make_unique<Text>(name);
@@ -64,15 +73,33 @@ Text* TextManager::Create(const std::string& name, SceneType sceneType) {
 	text->SetScreenSize(screenWidth_, screenHeight_);
 
 	Text* created = text.get();
-	texts_.emplace(name, std::move(text));
+	texts_.emplace(name, TextEntry{ std::move(text), managementMode });
 
 	Logger::Output("[Engine] Textを作成しました: " + name, Logger::Level::Application);
 	return created;
 }
 
 Text* TextManager::CreateFromJson(const nlohmann::json& json) {
+	if (!json.is_object()) {
+		Logger::Output("[Engine] Text Jsonの要素がオブジェクトではありません。", Logger::Level::Warning);
+		return nullptr;
+	}
+
 	const std::string name = json.value("name", "Text");
-	Text* text = Create(name);
+	Text* text = nullptr;
+	auto existingIt = texts_.find(name);
+	if (existingIt != texts_.end()) {
+		if (existingIt->second.managementMode == EditorManagementMode::RuntimeOnly) {
+			Logger::Output(
+				"[Engine] 実行時専用Textと同名のためJsonの読み込みをスキップしました: " + name,
+				Logger::Level::Warning);
+			return nullptr;
+		}
+		text = existingIt->second.text.get();
+	} else {
+		text = Create(name, SceneType::None, EditorManagementMode::EditorManaged);
+	}
+
 	if (!text) {
 		return nullptr;
 	}
@@ -86,13 +113,13 @@ Text* TextManager::Get(const std::string& name) const {
 	if (it == texts_.end()) {
 		return nullptr;
 	}
-	return it->second.get();
+	return it->second.text.get();
 }
 
 void TextManager::Destroy(const std::string& name) {
 	auto it = texts_.find(name);
 	if (it != texts_.end()) {
-		it->second->ReleaseTexture();
+		it->second.text->ReleaseTexture();
 		texts_.erase(it);
 		Logger::Output("[Engine] Textを破棄しました: " + name, Logger::Level::Application);
 	}
@@ -106,8 +133,8 @@ void TextManager::DestroyByScene(SceneType sceneType) {
 
 	size_t destroyCount = 0;
 	for (auto it = texts_.begin(); it != texts_.end();) {
-		if (it->second->GetSceneType() == sceneType) {
-			it->second->ReleaseTexture();
+		if (it->second.text->GetSceneType() == sceneType) {
+			it->second.text->ReleaseTexture();
 			it = texts_.erase(it);
 			++destroyCount;
 		} else {
@@ -119,8 +146,9 @@ void TextManager::DestroyByScene(SceneType sceneType) {
 }
 
 void TextManager::UpdateAll(SceneType currentSceneType) {
-	for (auto& [name, text] : texts_) {
+	for (auto& [name, entry] : texts_) {
 		(void)name;
+		Text* text = entry.text.get();
 		const SceneType textScene = text->GetSceneType();
 		if (!text->IsVisible()) { continue; }
 		if (textScene != SceneType::None && textScene != currentSceneType) { continue; }
@@ -139,8 +167,9 @@ void TextManager::DrawLayer(SceneType currentSceneType, Render::RenderLayer laye
 void TextManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask, const std::string& targetScreen) {
 	bool isStateSet = false;
 
-	for (auto& [name, text] : texts_) {
+	for (auto& [name, entry] : texts_) {
 		(void)name;
+		Text* text = entry.text.get();
 		const SceneType textScene = text->GetSceneType();
 		if (!text->IsVisible()) { continue; }
 		if (textScene != SceneType::None && textScene != currentSceneType) { continue; }
@@ -162,9 +191,12 @@ void TextManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerM
 
 nlohmann::json TextManager::ToJson() const {
 	nlohmann::json texts = nlohmann::json::array();
-	for (const auto& [name, text] : texts_) {
+	for (const auto& [name, entry] : texts_) {
 		(void)name;
-		texts.push_back(text->ToJson());
+		if (entry.managementMode != EditorManagementMode::EditorManaged) {
+			continue;
+		}
+		texts.push_back(entry.text->ToJson());
 	}
 
 	return {
@@ -207,8 +239,21 @@ bool TextManager::LoadFromFile(const std::filesystem::path& filePath) {
 std::vector<std::string> TextManager::GetNames() const {
 	std::vector<std::string> names;
 	names.reserve(texts_.size());
-	for (const auto& [name, text] : texts_) {
-		(void)text;
+	for (const auto& [name, entry] : texts_) {
+		(void)entry;
+		names.push_back(name);
+	}
+	std::sort(names.begin(), names.end());
+	return names;
+}
+
+std::vector<std::string> TextManager::GetEditorManagedNames() const {
+	std::vector<std::string> names;
+	names.reserve(texts_.size());
+	for (const auto& [name, entry] : texts_) {
+		if (entry.managementMode != EditorManagementMode::EditorManaged) {
+			continue;
+		}
 		names.push_back(name);
 	}
 	std::sort(names.begin(), names.end());

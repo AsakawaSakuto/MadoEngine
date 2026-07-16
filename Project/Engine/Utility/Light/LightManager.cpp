@@ -236,13 +236,15 @@ LightHandle LightManager::CreateDirectionalLight(
 	const std::string& name,
 	const DirectionalLight& light,
 	SceneType sceneType,
-	LightLayerMask layerMask) {
+	LightLayerMask layerMask,
+	MadoEngine::EditorManagementMode managementMode) {
 	DirectionalLightEntry entry;
 	entry.light = light;
 	NormalizeDirectionalLight(entry.light);
 	entry.meta.name = name;
 	entry.meta.sceneType = sceneType;
 	entry.meta.layerMask = layerMask;
+	entry.meta.managementMode = managementMode;
 	entry.meta.enabled = light.useLight != 0;
 
 	return CreateLight(directionalLights_, LightType::Directional, name, entry);
@@ -252,12 +254,14 @@ LightHandle LightManager::CreatePointLight(
 	const std::string& name,
 	const PointLight& light,
 	SceneType sceneType,
-	LightLayerMask layerMask) {
+	LightLayerMask layerMask,
+	MadoEngine::EditorManagementMode managementMode) {
 	PointLightEntry entry;
 	entry.light = light;
 	entry.meta.name = name;
 	entry.meta.sceneType = sceneType;
 	entry.meta.layerMask = layerMask;
+	entry.meta.managementMode = managementMode;
 	entry.meta.enabled = light.useLight != 0;
 
 	return CreateLight(pointLights_, LightType::Point, name, entry);
@@ -267,13 +271,15 @@ LightHandle LightManager::CreateSpotLight(
 	const std::string& name,
 	const SpotLight& light,
 	SceneType sceneType,
-	LightLayerMask layerMask) {
+	LightLayerMask layerMask,
+	MadoEngine::EditorManagementMode managementMode) {
 	SpotLightEntry entry;
 	entry.light = light;
 	NormalizeSpotLight(entry.light);
 	entry.meta.name = name;
 	entry.meta.sceneType = sceneType;
 	entry.meta.layerMask = layerMask;
+	entry.meta.managementMode = managementMode;
 	entry.meta.enabled = light.useLight != 0;
 
 	return CreateLight(spotLights_, LightType::Spot, name, entry);
@@ -297,6 +303,18 @@ std::vector<LightHandle> LightManager::GetPointLightHandles() const {
 
 std::vector<LightHandle> LightManager::GetSpotLightHandles() const {
 	return GetActiveHandles(spotLights_, LightType::Spot);
+}
+
+std::vector<LightHandle> LightManager::GetEditorManagedDirectionalLightHandles() const {
+	return GetActiveHandles(directionalLights_, LightType::Directional, true);
+}
+
+std::vector<LightHandle> LightManager::GetEditorManagedPointLightHandles() const {
+	return GetActiveHandles(pointLights_, LightType::Point, true);
+}
+
+std::vector<LightHandle> LightManager::GetEditorManagedSpotLightHandles() const {
+	return GetActiveHandles(spotLights_, LightType::Spot, true);
 }
 
 bool LightManager::IsValid(LightHandle handle) const {
@@ -440,13 +458,20 @@ void LightManager::Clear() {
 	Logger::Output("登録済みライトをすべて削除しました。", Logger::Level::Application);
 }
 
+void LightManager::ClearEditorManagedLights() {
+	ClearEditorManagedSlots(directionalLights_);
+	ClearEditorManagedSlots(pointLights_);
+	ClearEditorManagedSlots(spotLights_);
+	AdvanceRevision();
+}
+
 bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
 	nlohmann::json root = nlohmann::json::object();
 	root["version"] = 1;
 	root["lights"] = nlohmann::json::array();
 
 	for (const DirectionalSlot& slot : directionalLights_) {
-		if (!slot.active) {
+		if (!slot.active || slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::EditorManaged) {
 			continue;
 		}
 
@@ -457,7 +482,7 @@ bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
 	}
 
 	for (const PointSlot& slot : pointLights_) {
-		if (!slot.active) {
+		if (!slot.active || slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::EditorManaged) {
 			continue;
 		}
 
@@ -468,7 +493,7 @@ bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
 	}
 
 	for (const SpotSlot& slot : spotLights_) {
-		if (!slot.active) {
+		if (!slot.active || slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::EditorManaged) {
 			continue;
 		}
 
@@ -500,7 +525,7 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		return false;
 	}
 
-	Clear();
+	ClearEditorManagedLights();
 
 	size_t loadCount = 0;
 	for (const nlohmann::json& lightJson : root.at("lights")) {
@@ -534,21 +559,36 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		{
 			DirectionalLight light = DirectionalLightFromJson(dataJson);
 			light.useLight = enabled ? 1u : 0u;
-			handle = CreateDirectionalLight(name, light, sceneType, layerMask);
+			handle = CreateDirectionalLight(
+				name,
+				light,
+				sceneType,
+				layerMask,
+				MadoEngine::EditorManagementMode::EditorManaged);
 			break;
 		}
 		case LightType::Point:
 		{
 			PointLight light = PointLightFromJson(dataJson);
 			light.useLight = enabled ? 1u : 0u;
-			handle = CreatePointLight(name, light, sceneType, layerMask);
+			handle = CreatePointLight(
+				name,
+				light,
+				sceneType,
+				layerMask,
+				MadoEngine::EditorManagementMode::EditorManaged);
 			break;
 		}
 		case LightType::Spot:
 		{
 			SpotLight light = SpotLightFromJson(dataJson);
 			light.useLight = enabled ? 1u : 0u;
-			handle = CreateSpotLight(name, light, sceneType, layerMask);
+			handle = CreateSpotLight(
+				name,
+				light,
+				sceneType,
+				layerMask,
+				MadoEngine::EditorManagementMode::EditorManaged);
 			break;
 		}
 		default:
@@ -799,6 +839,12 @@ LightHandle LightManager::CreateLight(
 
 	auto nameIt = nameToHandle_.find(name);
 	if (nameIt != nameToHandle_.end()) {
+		const LightMetaData* existingMeta = GetMetaData(nameIt->second);
+		if (existingMeta && existingMeta->managementMode != entry.meta.managementMode) {
+			Logger::Output("同名のライトが異なる管理方法で既に登録されています : " + name, Logger::Level::Warning);
+			return {};
+		}
+
 		Logger::Output("同名のライトがすでに登録されています : " + name, Logger::Level::Warning);
 		return nameIt->second;
 	}
@@ -912,13 +958,32 @@ void LightManager::ClearSlots(std::vector<TSlot>& slots) {
 }
 
 template <typename TSlot>
-std::vector<LightHandle> LightManager::GetActiveHandles(const std::vector<TSlot>& slots, LightType type) const {
+void LightManager::ClearEditorManagedSlots(std::vector<TSlot>& slots) {
+	for (TSlot& slot : slots) {
+		if (!slot.active || slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::EditorManaged) {
+			continue;
+		}
+
+		nameToHandle_.erase(slot.entry.meta.name);
+		slot.active = false;
+		++slot.generation;
+	}
+}
+
+template <typename TSlot>
+std::vector<LightHandle> LightManager::GetActiveHandles(
+	const std::vector<TSlot>& slots,
+	LightType type,
+	bool editorManagedOnly) const {
 	std::vector<LightHandle> handles;
 	handles.reserve(slots.size());
 
 	for (uint32_t index = 0; index < static_cast<uint32_t>(slots.size()); ++index) {
 		const TSlot& slot = slots[index];
 		if (!slot.active) {
+			continue;
+		}
+		if (editorManagedOnly && slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::EditorManaged) {
 			continue;
 		}
 
