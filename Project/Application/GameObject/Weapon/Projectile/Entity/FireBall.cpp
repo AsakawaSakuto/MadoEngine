@@ -23,8 +23,9 @@ namespace Projectile {
 		SetMoveDirectionTowards(targetPosition);
 
 		AABB hitbox;
-		hitbox.min = { -0.5f, -0.5f, -0.5f };
-		hitbox.max = { 0.5f, 0.5f, 0.5f };
+		float size = 0.5f;
+		hitbox.min = { -size, -size, -size };
+		hitbox.max = { size, size, size };
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 	}
@@ -56,7 +57,7 @@ namespace Projectile {
 		context.ownerPosition = transform_.translate;
 		context.damage = damage_;
 		context.explotionDamageDecreaseRate = 0.75f;
-		context.explosionRadius = 1.0f;
+		context.explosionRadius = sizeRate_;
 		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
 	}
 
