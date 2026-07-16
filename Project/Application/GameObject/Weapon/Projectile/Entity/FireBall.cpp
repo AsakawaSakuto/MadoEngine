@@ -34,13 +34,7 @@ namespace Projectile {
 		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
 
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
-			Projectile::InitializeDesc context;
-			context.projectileName = objectName_;
-			context.ownerPosition = transform_.translate;
-			context.damage = damage_;
-			context.explotionDamageDecreaseRate = 0.75f;
-			context.explosionRadius = 1.0f;
-			Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
+			SpawnExplosion();
 			isDead_ = true;
 			return;
 		}
@@ -50,6 +44,20 @@ namespace Projectile {
 		}
 
 		MyDebugLine::AddShape(std::get<AABB>(hitbox_));
+	}
+
+	void FireBall::OnEnemyHit() {
+		SpawnExplosion();
+	}
+
+	void FireBall::SpawnExplosion() {
+		Projectile::InitializeDesc context{};
+		context.projectileName = objectName_;
+		context.ownerPosition = transform_.translate;
+		context.damage = damage_;
+		context.explotionDamageDecreaseRate = 0.75f;
+		context.explosionRadius = 1.0f;
+		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
 	}
 
 }

@@ -1,5 +1,6 @@
 #include "ProjectileManager.h"
 #include <algorithm>
+#include <utility>
 
 namespace Projectile {
 	namespace {
@@ -43,11 +44,13 @@ namespace Projectile {
 	}
 
 	void Manager::Update(float deltaTime) {
+		isTraversingProjectiles_ = true;
 		for (auto& projectile : projectiles) {
 			if (projectile && !projectile->IsDead()) {
 				projectile->Update(deltaTime);
 			}
 		}
+		isTraversingProjectiles_ = false;
 
 		projectiles.erase(
 			std::remove_if(projectiles.begin(), projectiles.end(), [](const std::unique_ptr<IProjectile>& projectile) {
@@ -55,9 +58,20 @@ namespace Projectile {
 			}),
 			projectiles.end()
 		);
+
+		FlushPendingProjectiles();
 	}
 
 	void Manager::AddProjectile(Projectile::Type type, InitializeDesc context) {
+		if (isTraversingProjectiles_) {
+			pendingProjectileAddRequests_.push_back({ type, std::move(context) });
+			return;
+		}
+
+		AddProjectileImmediate(type, std::move(context));
+	}
+
+	void Manager::AddProjectileImmediate(Projectile::Type type, InitializeDesc context) {
 		context.projectileId = nextProjectileId_++;
 
 		switch (type) {
@@ -96,6 +110,18 @@ namespace Projectile {
 		}
 	}
 
+	void Manager::FlushPendingProjectiles() {
+		if (pendingProjectileAddRequests_.empty()) {
+			return;
+		}
+
+		std::vector<ProjectileAddRequest> requests = std::move(pendingProjectileAddRequests_);
+		pendingProjectileAddRequests_.clear();
+		for (ProjectileAddRequest& request : requests) {
+			AddProjectileImmediate(request.type, std::move(request.context));
+		}
+	}
+
 	void Manager::CollectHitsAgainst(
 		const std::vector<EnemyTargetInfo>& enemyTargets,
 		std::vector<HitInfo>& outHitInfos) {
@@ -105,6 +131,7 @@ namespace Projectile {
 		}
 
 		outHitInfos.reserve(projectiles.size());
+		isTraversingProjectiles_ = true;
 		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
 			if (!projectile || projectile->IsDead() || projectile->GetColliderName().empty()) {
 				continue;
@@ -127,6 +154,8 @@ namespace Projectile {
 					continue;
 				}
 
+				projectile->OnEnemyHit();
+
 				outHitInfos.push_back({
 					enemyTarget.enemyId,
 					projectile->GetProjectileId(),
@@ -140,5 +169,7 @@ namespace Projectile {
 
 			projectile->EndEnemyCollisionFrame();
 		}
+		isTraversingProjectiles_ = false;
+		FlushPendingProjectiles();
 	}
 }

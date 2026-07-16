@@ -22,6 +22,10 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		virtual void Update(float deltaTime) = 0;
 
+		/// @brief Enemy命中時の固有処理を実行
+		virtual void OnEnemyHit() {
+		}
+
 		/// @brief 削除対象かを取得
 		/// @return 削除対象の場合はtrueを返す
 		bool IsDead() const { return isDead_; }

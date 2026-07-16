@@ -240,7 +240,7 @@ void DrawTextManagerEditorUI() {
 		DrawFontCombo(*selectedText);
 
 		float fontSize = selectedText->GetFontSize();
-		if (ImGui::DragFloat("フォントサイズ", &fontSize, 0.5f, 1.0f, 256.0f)) {
+		if (ImGui::DragFloat("フォントサイズ", &fontSize, 0.5f, 1.0f, 1024.0f)) {
 			selectedText->SetFontSize(fontSize);
 		}
 
@@ -250,7 +250,7 @@ void DrawTextManagerEditorUI() {
 		}
 
 		float characterSpacing = selectedText->GetCharacterSpacing();
-		if (ImGui::DragFloat("文字間", &characterSpacing, 0.1f, -64.0f, 256.0f, "%.1f")) {
+		if (ImGui::DragFloat("文字間", &characterSpacing, 0.1f, -64.0f, 1024.0f, "%.1f")) {
 			selectedText->SetCharacterSpacing(characterSpacing);
 		}
 

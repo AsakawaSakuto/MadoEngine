@@ -17,7 +17,12 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
+		/// @brief Enemy命中時に爆発を生成
+		void OnEnemyHit() override;
+
 	private:
+		/// @brief 現在座標に爆発を生成
+		void SpawnExplosion();
 
 		Model* model_ = nullptr;
 		std::string objectName_;

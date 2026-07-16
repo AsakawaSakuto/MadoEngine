@@ -141,6 +141,7 @@
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObjectManager.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Enemy.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="Application\GameObject\DropObject\DropObjectManager.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObjectStatus.h" />
     <ClInclude Include="Application\GameObject\Enemy\Enemy.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h" />
     <ClInclude Include="Application\GameObject\GameObjectHeaders.h" />
