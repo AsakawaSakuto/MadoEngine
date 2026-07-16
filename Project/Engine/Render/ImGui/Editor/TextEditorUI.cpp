@@ -171,7 +171,7 @@ void DrawTextManagerEditorUI() {
 
 	ImGui::Begin("Text Editor");
 
-	ImGui::SetNextItemWidth(200.0f);
+	ImGui::SetNextItemWidth(180.0f);
 	ImGui::InputText("New Name", createName.data(), createName.size());
 	ImGui::SameLine();
 	if (ImGui::Button("追加")) {

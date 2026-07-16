@@ -2,20 +2,30 @@
 #include "ModelSharedData.h"
 #include "Render/Object/IRenderObject3d.h"
 #include "Utility/Light/LightManager.h"
+#include "Utility/Json/Core/IJsonSerializable.h"
 #include ".SceneManager/SceneType.h"
 #include <memory>
 #include <string>
 
-class Model : public IRenderObject3d {
+class Model : public IRenderObject3d, public MadoEngine::Json::IJsonSerializable {
 public:
 	
 	Model(std::string objectName);
+	~Model() override;
 
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
 
 	void Update() override;
 
 	void Draw(Camera& useCamera) override;
+
+	/// @brief JsonからModelの状態を復元する
+	/// @param json 復元元のJson
+	void FromJson(const nlohmann::json& json) override;
+
+	/// @brief Modelの状態をJsonへ変換する
+	/// @return Modelの状態を格納したJson
+	nlohmann::json ToJson() const override;
 
 	/// @brief シャドウマップ生成用にモデルを描画する
 	/// @param lightViewProjection ライト視点のビュー射影行列
@@ -65,6 +75,10 @@ public:
 	/// @brief モデルのライティング有効状態を設定する
 	/// @param enabled trueの場合はライト計算を行う
 	void SetLightingEnabled(bool enabled);
+
+	/// @brief ライティングが有効かを取得する
+	/// @return 有効な場合はtrue
+	bool IsLightingEnabled() const { return enableLighting_; }
 
 	/// @brief 平行光源を設定する
 	/// @param light モデル描画に使用する平行光源
@@ -174,7 +188,7 @@ private:
 	float animationTime_ = 0.0f;
 	Skeleton skeletonData_;
 	SkinCluster skinClusterData_;
-	uint32_t skinClusterIndex_ = 0;
+	uint32_t skinClusterIndex_ = UINT32_MAX;
 
 	ModelMaterial* materialData_ = nullptr;
 	ModelTransformationMatrix* transformationData_ = nullptr;

@@ -1,0 +1,39 @@
+{
+    "models": [
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Skining/walk.gltf",
+            "name": "Model",
+            "position": [
+                0.0,
+                -1.7000000476837158,
+                0.0
+            ],
+            "receiveLightMask": 0,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -3.054326057434082,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        }
+    ]
+}

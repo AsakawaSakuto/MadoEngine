@@ -1,5 +1,6 @@
 #include "ModelManager.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Json/Core/JsonFile.h"
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -71,7 +72,10 @@ void ModelManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* c
 }
 
 void ModelManager::Finalize() {
+	pendingDestroyModelNames_.clear();
 	models_.clear();
+	modelAssetNames_.clear();
+	editorManagedModelNames_.clear();
 	instancedModels_.clear();
 	for (auto& [key, data] : sharedData_) {
 		MadoEngine::ModelResource::Finalize(*data);
@@ -125,15 +129,32 @@ void ModelManager::LoadModelFile(const std::string& path, ModelType type) {
 	Logger::Output("読み込み完了 " + path + " [" + MadoEngine::ModelResource::ModelTypeToString(sharedData_.at(path)->type) + "]", Logger::Level::Assets);
 }
 
-Model* ModelManager::Create(const std::string& name, const std::string& modelName, SceneType sceneType) {
+Model* ModelManager::Create(
+	const std::string& name,
+	const std::string& modelName,
+	SceneType sceneType,
+	EditorManagementMode managementMode) {
+	if (name.empty()) {
+		Logger::Output("名前が空のModelは作成できません", Logger::Level::Warning);
+		return nullptr;
+	}
+
 	if (models_.contains(name)) {
-		Logger::Output("モデルインスタンスが既に存在します : " + name, Logger::Level::Warning);
+		const bool isEditorManaged = editorManagedModelNames_.contains(name);
+		const bool requestsEditorManaged = managementMode == EditorManagementMode::EditorManaged;
+		if (isEditorManaged != requestsEditorManaged) {
+			Logger::Output("同名のModelが異なる管理方法で既に存在します : " + name, Logger::Level::Warning);
+			return nullptr;
+		}
+
+		Logger::Output("同名のModelが既に存在します : " + name, Logger::Level::Warning);
 		return models_.at(name).get();
 	}
 
-	const ModelSharedData* sharedData = FindSharedData(modelName);
+	const std::string resolvedModelPath = ResolveModelPath(modelName);
+	const ModelSharedData* sharedData = FindSharedData(resolvedModelPath);
 	if (!sharedData) {
-		Logger::Output("モデルアセットが見つかりません : " + modelName, Logger::Level::Warning);
+		Logger::Output("Modelアセットが見つかりません : " + modelName, Logger::Level::Warning);
 		return nullptr;
 	}
 
@@ -144,9 +165,53 @@ Model* ModelManager::Create(const std::string& name, const std::string& modelNam
 
 	Model* ptr = model.get();
 	models_.emplace(name, std::move(model));
+	modelAssetNames_.emplace(name, resolvedModelPath);
+	if (managementMode == EditorManagementMode::EditorManaged) {
+		editorManagedModelNames_.emplace(name);
+	}
 
-	Logger::Output("モデルインスタンスを作成しました : " + name + " アセット : " + modelName + " シーン : " + (sceneType == SceneType::None ? "全て" : SceneTypeToString(sceneType)), Logger::Level::Application);
+	Logger::Output("Modelインスタンスを作成しました : " + name + " アセット : " + resolvedModelPath + " シーン : " + (sceneType == SceneType::None ? "全て" : SceneTypeToString(sceneType)), Logger::Level::Application);
 	return ptr;
+}
+
+Model* ModelManager::CreateFromJson(const nlohmann::json& json) {
+	if (!json.is_object()) {
+		Logger::Output("Model Jsonの要素がオブジェクトではありません", Logger::Level::Warning);
+		return nullptr;
+	}
+
+	const std::string name = json.value("name", "Model");
+	const std::string modelName = json.value("model", "");
+	if (modelName.empty()) {
+		Logger::Output("Model Jsonにmodelが設定されていません : " + name, Logger::Level::Warning);
+		return nullptr;
+	}
+
+	Model* model = nullptr;
+	auto existingIt = models_.find(name);
+	if (existingIt != models_.end()) {
+		if (!editorManagedModelNames_.contains(name)) {
+			Logger::Output("実行時専用Modelと同名のためJsonの読み込みをスキップしました : " + name, Logger::Level::Warning);
+			return nullptr;
+		}
+
+		const std::string resolvedModelPath = ResolveModelPath(modelName);
+		if (GetModelAssetName(name) != resolvedModelPath) {
+			Destroy(name);
+		} else {
+			model = existingIt->second.get();
+		}
+	}
+
+	if (!model) {
+		model = Create(name, modelName, SceneType::None, EditorManagementMode::EditorManaged);
+	}
+	if (!model) {
+		return nullptr;
+	}
+
+	model->FromJson(json);
+	return model;
 }
 
 Model* ModelManager::Get(const std::string& name) const {
@@ -159,9 +224,129 @@ Model* ModelManager::Get(const std::string& name) const {
 }
 
 void ModelManager::Destroy(const std::string& name) {
+	pendingDestroyModelNames_.erase(name);
 	if (models_.erase(name) > 0) {
+		modelAssetNames_.erase(name);
+		editorManagedModelNames_.erase(name);
 		Logger::Output("モデルインスタンスを削除しました : " + name, Logger::Level::Application);
 	}
+}
+
+void ModelManager::RequestDestroy(const std::string& name) {
+	if (!models_.contains(name)) {
+		return;
+	}
+
+	pendingDestroyModelNames_.emplace(name);
+}
+
+void ModelManager::FlushPendingDestroys() {
+	if (pendingDestroyModelNames_.empty()) {
+		return;
+	}
+
+	std::vector<std::string> destroyNames(
+		pendingDestroyModelNames_.begin(),
+		pendingDestroyModelNames_.end());
+	pendingDestroyModelNames_.clear();
+
+	for (const std::string& name : destroyNames) {
+		Destroy(name);
+	}
+}
+
+nlohmann::json ModelManager::ToJson() const {
+	nlohmann::json models = nlohmann::json::array();
+	for (const std::string& name : GetEditorManagedNames()) {
+		auto modelIt = models_.find(name);
+		auto assetIt = modelAssetNames_.find(name);
+		if (modelIt == models_.end() || assetIt == modelAssetNames_.end()) {
+			continue;
+		}
+
+		nlohmann::json modelJson = modelIt->second->ToJson();
+		modelJson["model"] = assetIt->second;
+		models.push_back(std::move(modelJson));
+	}
+
+	return {
+		{ "models", models },
+	};
+}
+
+void ModelManager::FromJson(const nlohmann::json& json) {
+	const nlohmann::json* modelArray = nullptr;
+	if (json.is_array()) {
+		modelArray = &json;
+	} else if (json.contains("models") && json.at("models").is_array()) {
+		modelArray = &json.at("models");
+	}
+
+	if (!modelArray) {
+		Logger::Output("Model Jsonにmodels配列がありません", Logger::Level::Warning);
+		return;
+	}
+
+	for (const nlohmann::json& modelJson : *modelArray) {
+		try {
+			CreateFromJson(modelJson);
+		}
+		catch (const nlohmann::json::exception& exception) {
+			Logger::Output(
+				"Model Jsonの要素を読み込めませんでした : " + std::string(exception.what()),
+				Logger::Level::Error);
+		}
+	}
+}
+
+bool ModelManager::SaveToFile(const std::filesystem::path& filePath) const {
+	return Json::JsonFile::Save(filePath, ToJson(), 4, true);
+}
+
+bool ModelManager::LoadFromFile(const std::filesystem::path& filePath) {
+	nlohmann::json json;
+	if (!Json::JsonFile::Load(filePath, json)) {
+		return false;
+	}
+
+	FromJson(json);
+	return true;
+}
+
+std::vector<std::string> ModelManager::GetNames() const {
+	std::vector<std::string> names;
+	names.reserve(models_.size());
+	for (const auto& [name, model] : models_) {
+		(void)model;
+		names.push_back(name);
+	}
+	std::sort(names.begin(), names.end());
+	return names;
+}
+
+std::vector<std::string> ModelManager::GetEditorManagedNames() const {
+	std::vector<std::string> names(editorManagedModelNames_.begin(), editorManagedModelNames_.end());
+	std::sort(names.begin(), names.end());
+	return names;
+}
+
+std::vector<std::string> ModelManager::GetAvailableModelNames() const {
+	std::vector<std::string> names;
+	names.reserve(sharedData_.size());
+	for (const auto& [name, sharedData] : sharedData_) {
+		(void)sharedData;
+		names.push_back(name);
+	}
+	std::sort(names.begin(), names.end());
+	return names;
+}
+
+std::string ModelManager::GetModelAssetName(const std::string& name) const {
+	auto it = modelAssetNames_.find(name);
+	if (it == modelAssetNames_.end()) {
+		return {};
+	}
+	return it->second;
 }
 
 InstancedModel* ModelManager::CreateInstanced(const std::string& name, const std::string& modelName, SceneType sceneType) {
@@ -237,6 +422,9 @@ void ModelManager::DestroyByScene(SceneType sceneType) {
 
 	for (auto it = models_.begin(); it != models_.end();) {
 		if (it->second->GetSceneType() == sceneType) {
+			modelAssetNames_.erase(it->first);
+			editorManagedModelNames_.erase(it->first);
+			pendingDestroyModelNames_.erase(it->first);
 			it = models_.erase(it);
 			++destroyCount;
 		} else {
@@ -298,6 +486,15 @@ const ModelSharedData* ModelManager::FindSharedData(const std::string& modelName
 	}
 
 	return nullptr;
+}
+
+std::string ModelManager::ResolveModelPath(const std::string& modelName) const {
+	auto aliasIt = aliases_.find(modelName);
+	if (aliasIt != aliases_.end()) {
+		return aliasIt->second;
+	}
+
+	return NormalizePath(modelName);
 }
 
 void ModelManager::UpdateAll(SceneType currentSceneType) {

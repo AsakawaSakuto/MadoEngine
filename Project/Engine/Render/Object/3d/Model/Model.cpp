@@ -25,6 +25,39 @@ namespace {
 	constexpr UINT kSkinningRootShadowMap = 8;
 	constexpr float kShadowCompareBias = 0.00005f;
 
+	/// @brief Json配列からVector3を読み込む
+	/// @param json 読み込むJson
+	/// @param fallback 読み込みに失敗した場合の値
+	/// @return 読み込んだVector3
+	Vector3 ReadVector3(const nlohmann::json& json, const Vector3& fallback) {
+		if (!json.is_array() || json.size() < 3) {
+			return fallback;
+		}
+
+		return {
+			json.at(0).get<float>(),
+			json.at(1).get<float>(),
+			json.at(2).get<float>(),
+		};
+	}
+
+	/// @brief Json配列からVector4を読み込む
+	/// @param json 読み込むJson
+	/// @param fallback 読み込みに失敗した場合の値
+	/// @return 読み込んだVector4
+	Vector4 ReadVector4(const nlohmann::json& json, const Vector4& fallback) {
+		if (!json.is_array() || json.size() < 4) {
+			return fallback;
+		}
+
+		return {
+			json.at(0).get<float>(),
+			json.at(1).get<float>(),
+			json.at(2).get<float>(),
+			json.at(3).get<float>(),
+		};
+	}
+
 	/// @brief 平行光源の方向を正規化する
 	/// @param direction 正規化する方向
 	/// @return 正規化済み方向。0ベクトルの場合は下向きを返す
@@ -103,6 +136,13 @@ Model::Model(std::string objectName) {
 	isVisible_ = true;
 }
 
+Model::~Model() {
+	if (skinClusterIndex_ != UINT32_MAX) {
+		MadoEngine::Core::SRVManager::GetInstance().Free(skinClusterIndex_);
+		skinClusterIndex_ = UINT32_MAX;
+	}
+}
+
 void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData) {
 	assert(device);
 	assert(commandList);
@@ -112,6 +152,43 @@ void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 	sharedData_ = &sharedData;
 
 	InitializeInstanceResources();
+}
+
+void Model::FromJson(const nlohmann::json& json) {
+	SetPosition(ReadVector3(json.value("position", nlohmann::json::array()), GetPosition()));
+	SetScale(ReadVector3(json.value("scale", nlohmann::json::array()), GetScale()));
+	SetRotation(ReadVector3(json.value("rotation", nlohmann::json::array()), GetRotation()));
+	SetColor(ReadVector4(json.value("color", nlohmann::json::array()), GetColor()));
+	SetSceneType(SceneTypeFromString(json.value("scene", SceneTypeToString(sceneType_))));
+	SetRenderLayer(MadoEngine::Render::RenderLayerFromString(
+		json.value("layer", MadoEngine::Render::RenderLayerToString(GetRenderLayer()))));
+	SetVisible(json.value("visible", IsVisible()));
+	SetUseBillboard(json.value("billboard", IsUseBillboard()));
+	SetCastShadow(json.value("castShadow", CanCastShadow()));
+	SetReceiveShadow(json.value("receiveShadow", CanReceiveShadow()));
+	SetFrustumCullingEnabled(json.value("frustumCulling", IsFrustumCullingEnabled()));
+	SetLightingEnabled(json.value("lighting", IsLightingEnabled()));
+	SetReceiveLightMask(json.value("receiveLightMask", GetReceiveLightMask()));
+}
+
+nlohmann::json Model::ToJson() const {
+	return {
+		{ "type", "Model3D" },
+		{ "name", objectName_ },
+		{ "position", { transform_.translate.x, transform_.translate.y, transform_.translate.z } },
+		{ "scale", { transform_.scale.x, transform_.scale.y, transform_.scale.z } },
+		{ "rotation", { transform_.rotate.x, transform_.rotate.y, transform_.rotate.z } },
+		{ "color", { color_.x, color_.y, color_.z, color_.w } },
+		{ "scene", SceneTypeToString(sceneType_) },
+		{ "layer", MadoEngine::Render::RenderLayerToString(GetRenderLayer()) },
+		{ "visible", IsVisible() },
+		{ "billboard", IsUseBillboard() },
+		{ "castShadow", CanCastShadow() },
+		{ "receiveShadow", CanReceiveShadow() },
+		{ "frustumCulling", IsFrustumCullingEnabled() },
+		{ "lighting", IsLightingEnabled() },
+		{ "receiveLightMask", GetReceiveLightMask() },
+	};
 }
 
 void Model::SetLightingEnabled(bool enabled) {

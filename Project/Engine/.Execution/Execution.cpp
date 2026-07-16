@@ -190,6 +190,7 @@ namespace MadoEngine
 
 		MadoEngine::Editor::LoadAudioEditorJson();
 		MadoEngine::Editor::LoadLightEditorJson();
+		MadoEngine::Editor::LoadModelEditorJson();
 		MadoEngine::Editor::LoadSpriteEditorJson();
 		MadoEngine::Editor::LoadTextEditorJson();
 		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager_);
@@ -497,6 +498,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
+		MadoEngine::Editor::DrawModelManagerEditorUI();
 		MadoEngine::Editor::DrawSpriteManagerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
@@ -608,6 +610,9 @@ namespace MadoEngine
 
 		// GPU処理完了を待機
 		commandManager_->WaitForGPU();
+
+		// 描画で参照したModelリソースはGPU処理完了後に解放する
+		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();
 	}
 
 	void EngineExecution::Finalize()

@@ -98,6 +98,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\ModelEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\SpriteEditor.cpp" />
@@ -627,6 +628,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\SpriteEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\ModelEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
     <ClInclude Include="Application\UI\Weapon\WeaponUpgradeUI.h" />
