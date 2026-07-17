@@ -203,6 +203,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\ModelEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\ParticleEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\SpriteEditor.cpp" />
@@ -220,6 +221,12 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleSystem3d.cpp" />
     <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
@@ -375,6 +382,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LoggerEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\ModelEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\ParticleEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\SpriteEditor.h" />
@@ -403,6 +411,14 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\MyParticle3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleSystem3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleTypes.h" />
     <ClInclude Include="Engine\Render\LayerEffectPass.h" />
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />

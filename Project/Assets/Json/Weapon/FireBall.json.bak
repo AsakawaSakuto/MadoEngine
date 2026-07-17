@@ -23,7 +23,7 @@
             "fixedAddValue": 1.0,
             "isSelected": true,
             "rarityAddValue": 0.10000000149011612,
-            "value": 200.0
+            "value": 10.0
         },
         "knockbackPower": {
             "fixedAddValue": 1.0,
@@ -65,7 +65,7 @@
             "fixedAddValue": 1.0,
             "isSelected": true,
             "rarityAddValue": 0.10000000149011612,
-            "value": 100.0
+            "value": 2.0
         },
         "speed": {
             "fixedAddValue": 1.0,

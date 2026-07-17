@@ -118,6 +118,11 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::TextManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
 		MadoEngine::ModelManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), psoRegistry_.get());
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().Initialize(
+			dxDevice_->GetDevice(),
+			commandManager_->GetCommandList(),
+			psoRegistry_.get()
+		);
 
 		// Sprite/Textの座標系は実ウィンドウサイズではなく基準解像度に固定する
 		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
@@ -501,6 +506,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawModelManagerEditorUI();
 		MadoEngine::Editor::DrawSpriteManagerEditorUI();
 		MadoEngine::Editor::DrawTextManagerEditorUI();
+		MadoEngine::Editor::DrawParticleSystemEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
 		MadoEngine::Editor::DrawLoggerEditorUI();
 
@@ -623,6 +629,7 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().Finalize();
 		MadoEngine::TextManager::GetInstance().Finalize();
 		MadoEngine::ModelManager::GetInstance().Finalize();
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().Finalize();
 		MadoEngine::TextureManager::GetInstance().Finalize();
 		MadoEngine::ShaderManager::GetInstance().Finalize();
 		MadoEngine::RootSignatureManager::GetInstance().Finalize();

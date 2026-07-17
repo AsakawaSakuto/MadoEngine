@@ -9,7 +9,11 @@ namespace {
 	/// @param filePath 変換するファイルパス
 	/// @return ログに使用する文字列
 	std::string ToLogPath(const std::filesystem::path& filePath) {
-		return filePath.generic_string();
+		const std::u8string value = filePath.generic_u8string();
+		return std::string(
+			reinterpret_cast<const char*>(value.data()),
+			value.size()
+		);
 	}
 
 }

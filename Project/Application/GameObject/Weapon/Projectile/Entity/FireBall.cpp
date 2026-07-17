@@ -59,6 +59,12 @@ namespace Projectile {
 		context.explotionDamageDecreaseRate = 0.75f;
 		context.explosionRadius = sizeRate_;
 		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
+
+		MadoEngine::Particle::PlayDesc desc;
+		desc.transform.translate = transform_.translate;
+		desc.sceneType = SceneType::Test;
+		desc.loopOverride = false;
+		auto handle = MyParticle3d::Play("DefaultExplosion", desc);
 	}
 
 }

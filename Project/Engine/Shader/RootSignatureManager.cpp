@@ -504,6 +504,64 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("ShadowMap.RootSig", rootSigDesc);
 		}
 
+		// Particle3d用 RootSignature
+		// t0: Particle Instance、b0: Camera、t1: Texture、s0: Sampler
+		{
+			D3D12_DESCRIPTOR_RANGE instanceRange{};
+			instanceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			instanceRange.NumDescriptors = 1;
+			instanceRange.BaseShaderRegister = 0;
+			instanceRange.RegisterSpace = 0;
+			instanceRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_DESCRIPTOR_RANGE textureRange{};
+			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			textureRange.NumDescriptors = 1;
+			textureRange.BaseShaderRegister = 1;
+			textureRange.RegisterSpace = 0;
+			textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[3]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[0].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[0].DescriptorTable.pDescriptorRanges = &instanceRange;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[1].Descriptor.ShaderRegister = 0;
+			rootParams[1].Descriptor.RegisterSpace = 0;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[2].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[2].DescriptorTable.pDescriptorRanges = &textureRange;
+			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC sampler{};
+			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.MipLODBias = 0.0f;
+			sampler.MaxAnisotropy = 0;
+			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			sampler.MinLOD = 0.0f;
+			sampler.MaxLOD = D3D12_FLOAT32_MAX;
+			sampler.ShaderRegister = 0;
+			sampler.RegisterSpace = 0;
+			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &sampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("Particle3d.RootSig", rootSigDesc);
+		}
+
 		// PostEffect 用 RootSignature
 		// t0: 入力カラー, t1: シーン深度, t2: マスク深度, t3: エフェクト用テクスチャ, b0: パラメータ, s0: Linear, s1: Point
 		{
