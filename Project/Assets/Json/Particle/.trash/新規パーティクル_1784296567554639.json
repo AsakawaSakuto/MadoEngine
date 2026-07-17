@@ -1,0 +1,127 @@
+{
+    "emitters": [
+        {
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [],
+                "duration": 1.0,
+                "isLoop": false,
+                "maxParticles": 256,
+                "ratePerSecond": 10.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    "min": [
+                        0.0,
+                        1.0,
+                        0.0
+                    ]
+                },
+                "directionMode": "configured",
+                "lifeTime": {
+                    "max": 1.0,
+                    "min": 1.0
+                },
+                "rotation": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 1.0,
+                    "min": 1.0
+                }
+            },
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "renderer": {
+                "blendMode": "add",
+                "sortMode": "none",
+                "texture": "white2x2"
+            },
+            "shape": {
+                "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "type": "point"
+            },
+            "simulationSpace": "world",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        }
+    ],
+    "name": "新規パーティクル",
+    "version": 1
+}

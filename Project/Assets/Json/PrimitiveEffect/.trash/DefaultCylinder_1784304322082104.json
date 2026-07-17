@@ -1,0 +1,207 @@
+{
+    "version": 1,
+    "duration": 2.0,
+    "loop": true,
+    "geometry": {
+        "radialSegments": 48,
+        "heightSegments": 1,
+        "pivot": "bottom",
+        "bottomRadii": {
+            "default": [
+                1.0,
+                1.0
+            ],
+            "keys": [
+                {
+                    "time": 0.0,
+                    "value": [
+                        0.2,
+                        0.2
+                    ],
+                    "easing": "EaseOutQuad"
+                },
+                {
+                    "time": 0.5,
+                    "value": [
+                        1.0,
+                        1.0
+                    ],
+                    "easing": "Linear"
+                }
+            ]
+        },
+        "topRadii": {
+            "default": [
+                1.0,
+                1.0
+            ],
+            "keys": [
+                {
+                    "time": 0.0,
+                    "value": [
+                        0.2,
+                        0.2
+                    ],
+                    "easing": "EaseOutQuad"
+                },
+                {
+                    "time": 0.5,
+                    "value": [
+                        1.0,
+                        1.0
+                    ],
+                    "easing": "Linear"
+                }
+            ]
+        },
+        "height": {
+            "default": 3.0,
+            "keys": []
+        },
+        "startAngleDegrees": {
+            "default": 0.0,
+            "keys": []
+        },
+        "arcAngleDegrees": {
+            "default": 360.0,
+            "keys": [
+                {
+                    "time": 0.0,
+                    "value": 0.0,
+                    "easing": "EaseOutCubic"
+                },
+                {
+                    "time": 0.5,
+                    "value": 360.0,
+                    "easing": "Linear"
+                }
+            ]
+        }
+    },
+    "material": {
+        "textureName": "white2x2",
+        "blendMode": "add",
+        "cullMode": "none",
+        "globalAlpha": {
+            "default": 1.0,
+            "keys": [
+                {
+                    "time": 0.0,
+                    "value": 0.0,
+                    "easing": "EaseOutQuad"
+                },
+                {
+                    "time": 0.2,
+                    "value": 1.0,
+                    "easing": "Linear"
+                },
+                {
+                    "time": 1.6,
+                    "value": 1.0,
+                    "easing": "EaseInQuad"
+                },
+                {
+                    "time": 2.0,
+                    "value": 0.0,
+                    "easing": "Linear"
+                }
+            ]
+        },
+        "bottomFadeRange": {
+            "default": 0.15,
+            "keys": []
+        },
+        "topFadeRange": {
+            "default": 0.15,
+            "keys": []
+        },
+        "uv": {
+            "direction": "topToBottom",
+            "scale": {
+                "default": [
+                    1.0,
+                    1.0
+                ],
+                "keys": []
+            },
+            "offset": {
+                "default": [
+                    0.0,
+                    0.0
+                ],
+                "keys": [
+                    {
+                        "time": 0.0,
+                        "value": [
+                            0.0,
+                            0.0
+                        ],
+                        "easing": "Linear"
+                    },
+                    {
+                        "time": 2.0,
+                        "value": [
+                            0.0,
+                            -1.0
+                        ],
+                        "easing": "Linear"
+                    }
+                ]
+            },
+            "rotationDegrees": {
+                "default": 0.0,
+                "keys": []
+            }
+        },
+        "gradient": [
+            {
+                "position": 0.0,
+                "color": {
+                    "default": [
+                        0.0,
+                        0.25,
+                        1.5,
+                        0.0
+                    ],
+                    "keys": []
+                }
+            },
+            {
+                "position": 0.2,
+                "color": {
+                    "default": [
+                        0.1,
+                        0.7,
+                        2.0,
+                        0.8
+                    ],
+                    "keys": []
+                }
+            },
+            {
+                "position": 0.8,
+                "color": {
+                    "default": [
+                        0.3,
+                        1.0,
+                        2.0,
+                        0.8
+                    ],
+                    "keys": []
+                }
+            },
+            {
+                "position": 1.0,
+                "color": {
+                    "default": [
+                        0.0,
+                        0.25,
+                        1.5,
+                        0.0
+                    ],
+                    "keys": []
+                }
+            }
+        ]
+    }
+}

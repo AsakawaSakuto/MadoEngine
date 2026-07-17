@@ -5,6 +5,7 @@
 #include "Utility/Light/LightManager.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
+#include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
 #include "EditorUIHeaders.h"
 #include <cassert>
 
@@ -86,6 +87,7 @@ void SceneManager::Update(float dt) {
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
 	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
+	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
 }
 
 void SceneManager::Draw() {
@@ -111,6 +113,7 @@ void SceneManager::DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask) 
 	}
 	MadoEngine::ModelManager::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
+	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
 	MadoEngine::SpriteManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
 	MadoEngine::TextManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
 }
@@ -237,6 +240,7 @@ void SceneManager::ChangeScene(SceneType type) {
 #endif // USE_IMGUI
 		currentScene_->Finalize();
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(currentSceneType_);
+		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(currentSceneType_);
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}
 

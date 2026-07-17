@@ -202,7 +202,34 @@ namespace {
 	/// @brief Emitter設定を編集する
 	/// @param emitter 編集対象Emitter
 	void DrawEmitterEditor(EmitterConfig& emitter) {
-		if (ImGui::CollapsingHeader("発生", ImGuiTreeNodeFlags_DefaultOpen)) {
+		static int selectedSettingPage = 0;
+		const char* settingPageNames[] = { "発生", "形状", "動き", "見た目" };
+		const float settingPageButtonWidth =
+			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 3.0f) /
+			static_cast<float>(std::size(settingPageNames));
+		ImGui::PushID("EmitterSettingPageButtons");
+		for (int pageIndex = 0; pageIndex < static_cast<int>(std::size(settingPageNames)); ++pageIndex) {
+			ImGui::PushID(pageIndex);
+			if (pageIndex > 0) {
+				ImGui::SameLine();
+			}
+			const bool isSelectedPage = selectedSettingPage == pageIndex;
+			if (isSelectedPage) {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+			}
+			if (ImGui::Button(settingPageNames[pageIndex], ImVec2(settingPageButtonWidth, 0.0f))) {
+				selectedSettingPage = pageIndex;
+			}
+			if (isSelectedPage) {
+				ImGui::PopStyleColor();
+			}
+			ImGui::PopID();
+		}
+		ImGui::PopID();
+		ImGui::Separator();
+
+		if (selectedSettingPage == 0) {
+			ImGui::SeparatorText("発生数と時間");
 			int maxParticles = static_cast<int>(emitter.emission.maxParticles);
 			if (ImGui::DragInt("最大パーティクル数", &maxParticles, 1.0f, 1, 100000)) {
 				emitter.emission.maxParticles = static_cast<uint32_t>((std::max)(1, maxParticles));
@@ -212,20 +239,38 @@ namespace {
 			ImGui::DragFloat("開始遅延", &emitter.emission.startDelay, 0.01f, 0.0f, FLT_MAX);
 			ImGui::Checkbox("ループ", &emitter.emission.isLoop);
 
+			ImGui::SeparatorText("バースト");
 			int removeBurstIndex = -1;
-			for (int index = 0; index < static_cast<int>(emitter.emission.bursts.size()); ++index) {
-				BurstConfig& burst = emitter.emission.bursts[index];
-				ImGui::PushID(index);
-				ImGui::SeparatorText("バースト");
-				ImGui::DragFloat("発生時刻", &burst.time, 0.01f, 0.0f, FLT_MAX);
-				int burstCount = static_cast<int>(burst.count);
-				if (ImGui::DragInt("発生数", &burstCount, 1.0f, 1, 100000)) {
-					burst.count = static_cast<uint32_t>((std::max)(1, burstCount));
+			const ImGuiTableFlags burstTableFlags =
+				ImGuiTableFlags_BordersInnerV |
+				ImGuiTableFlags_BordersInnerH |
+				ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_SizingStretchProp;
+			if (ImGui::BeginTable("BurstTable", 3, burstTableFlags)) {
+				ImGui::TableSetupColumn("発生時刻", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("発生数", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("操作", ImGuiTableColumnFlags_WidthFixed, 64.0f);
+				ImGui::TableHeadersRow();
+				for (int index = 0; index < static_cast<int>(emitter.emission.bursts.size()); ++index) {
+					BurstConfig& burst = emitter.emission.bursts[index];
+					ImGui::PushID(index);
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					ImGui::DragFloat("##BurstTime", &burst.time, 0.01f, 0.0f, FLT_MAX);
+					ImGui::TableSetColumnIndex(1);
+					int burstCount = static_cast<int>(burst.count);
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					if (ImGui::DragInt("##BurstCount", &burstCount, 1.0f, 1, 100000)) {
+						burst.count = static_cast<uint32_t>((std::max)(1, burstCount));
+					}
+					ImGui::TableSetColumnIndex(2);
+					if (ImGui::SmallButton("削除")) {
+						removeBurstIndex = index;
+					}
+					ImGui::PopID();
 				}
-				if (ImGui::Button("バーストを削除")) {
-					removeBurstIndex = index;
-				}
-				ImGui::PopID();
+				ImGui::EndTable();
 			}
 			if (removeBurstIndex >= 0) {
 				emitter.emission.bursts.erase(emitter.emission.bursts.begin() + removeBurstIndex);
@@ -235,7 +280,8 @@ namespace {
 			}
 		}
 
-		if (ImGui::CollapsingHeader("発生形状", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (selectedSettingPage == 1) {
+			ImGui::SeparatorText("発生形状");
 			DrawShapeEditor(emitter.shape);
 			const char* spaces[] = { "ローカル", "ワールド" };
 			int spaceIndex = emitter.simulationSpace == SimulationSpace::Local ? 0 : 1;
@@ -244,7 +290,8 @@ namespace {
 			}
 		}
 
-		if (ImGui::CollapsingHeader("初期値", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (selectedSettingPage == 2) {
+			ImGui::SeparatorText("初期値");
 			DrawFloatRange("寿命", emitter.initial.lifeTime, 0.01f, 0.001f, FLT_MAX);
 			DrawFloatRange("速度", emitter.initial.speed, 0.01f);
 			DrawVector3Range("進行方向", emitter.initial.direction, 0.01f);
@@ -255,22 +302,21 @@ namespace {
 			if (ImGui::Combo("進行方向の決定方法", &directionMode, directionModes, static_cast<int>(std::size(directionModes)))) {
 				emitter.initial.directionMode = directionMode == 0 ? DirectionMode::Configured : DirectionMode::ShapeOutward;
 			}
-		}
 
-		if (ImGui::CollapsingHeader("移動")) {
+			ImGui::SeparatorText("移動");
 			ImGui::DragFloat3("重力", &emitter.motion.gravity.x, 0.01f);
 			ImGui::DragFloat3("加速度", &emitter.motion.acceleration.x, 0.01f);
 			ImGui::DragFloat("抵抗", &emitter.motion.drag, 0.01f, 0.0f, FLT_MAX);
 		}
 
-		if (ImGui::CollapsingHeader("生存期間による変化")) {
+		if (selectedSettingPage == 3) {
+			ImGui::SeparatorText("生存期間による変化");
 			DrawVector2Range("開始サイズ", emitter.sizeOverLifetime.start, 0.01f);
 			DrawVector2Range("終了サイズ", emitter.sizeOverLifetime.end, 0.01f);
 			DrawColorRange("開始色", emitter.colorOverLifetime.start);
 			DrawColorRange("終了色", emitter.colorOverLifetime.end);
-		}
 
-		if (ImGui::CollapsingHeader("描画", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::SeparatorText("描画");
 			const std::vector<std::string> textureNames = MadoEngine::TextureManager::GetInstance().GetTextureNames();
 			if (ImGui::BeginCombo("テクスチャ", emitter.renderer.textureName.c_str())) {
 				for (const std::string& textureName : textureNames) {
@@ -362,6 +408,11 @@ namespace MadoEngine::Editor {
 			isNameBufferInitialized = true;
 		}
 
+		ImGui::SetNextWindowSize(ImVec2(980.0f, 720.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSizeConstraints(
+			ImVec2(760.0f, 520.0f),
+			ImVec2(FLT_MAX, FLT_MAX)
+		);
 		if (!ImGui::Begin("パーティクルエディター")) {
 			ImGui::End();
 			return;
@@ -373,10 +424,15 @@ namespace MadoEngine::Editor {
 		}
 		std::string selectedAssetName = assetNames.empty() ? std::string{} : assetNames[selectedAssetIndex];
 
-		ImGui::SeparatorText("アセット管理");
-		ImGui::SetNextItemWidth(240.0f);
+		const ImGuiTreeNodeFlags assetCreationHeaderFlags = assetNames.empty()
+			? ImGuiTreeNodeFlags_DefaultOpen
+			: ImGuiTreeNodeFlags_None;
+		if (ImGui::CollapsingHeader("アセットの作成・複製", assetCreationHeaderFlags)) {
+			ImGui::Indent();
+			ImGui::TextUnformatted("新規アセット名");
+			ImGui::SetNextItemWidth((std::max)(180.0f, ImGui::GetContentRegionAvail().x - 210.0f));
 		ImGui::InputText(
-			"新規アセット名",
+			"##NewParticleAssetName",
 			newAssetNameBuffer.data(),
 			newAssetNameBuffer.size()
 		);
@@ -427,6 +483,8 @@ namespace MadoEngine::Editor {
 		} else if (!isNewAssetNameAvailable) {
 			ImGui::TextDisabled("同名のアセットが存在するか、ファイル名に使用できない文字が含まれています。");
 		}
+			ImGui::Unindent();
+		}
 
 		if (assetNames.empty()) {
 			ImGui::TextDisabled("編集するパーティクルアセットを作成してください。");
@@ -434,7 +492,9 @@ namespace MadoEngine::Editor {
 			return;
 		}
 
+		ImGui::SeparatorText("編集中のアセット");
 		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		ImGui::SetNextItemWidth((std::max)(240.0f, ImGui::GetContentRegionAvail().x * 0.5f));
 		selectedAssetName = assetNames[selectedAssetIndex];
 		if (ImGui::BeginCombo("アセット", assetNames[selectedAssetIndex].c_str())) {
 			for (int index = 0; index < static_cast<int>(assetNames.size()); ++index) {
@@ -453,6 +513,8 @@ namespace MadoEngine::Editor {
 			ImGui::EndCombo();
 		}
 
+		if (ImGui::CollapsingHeader("アセット名の変更・削除")) {
+			ImGui::Indent();
 		if (assetRenameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			assetRenameOriginalName = selectedAssetName;
@@ -520,6 +582,8 @@ namespace MadoEngine::Editor {
 			}
 			ImGui::EndPopup();
 		}
+			ImGui::Unindent();
+		}
 
 		if (assetNames.empty()) {
 			ImGui::TextDisabled("パーティクルアセットがありません。新規作成してください。");
@@ -527,13 +591,29 @@ namespace MadoEngine::Editor {
 			return;
 		}
 
-		ImGui::DragFloat3("プレビュー位置", &previewPosition.x, 0.05f);
-		ImGui::Checkbox("発生形状を表示", &showEmitterShape);
-		if (showEmitterShape) {
-			ImGui::SameLine();
-			ImGui::ColorEdit4("表示色", &emitterShapeColor.x, ImGuiColorEditFlags_NoInputs);
+		ImGui::SeparatorText("プレビュー");
+		const ImGuiTableFlags previewTableFlags = ImGuiTableFlags_SizingStretchProp;
+		if (ImGui::BeginTable("PreviewSettings", 2, previewTableFlags)) {
+			ImGui::TableSetupColumn("位置", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+			ImGui::TableSetupColumn("表示", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::DragFloat3("プレビュー位置", &previewPosition.x, 0.05f);
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Checkbox("プレビューをループ", &previewLoop);
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Checkbox("発生形状を表示", &showEmitterShape);
+			if (showEmitterShape) {
+				ImGui::SameLine();
+				ImGui::ColorEdit4("##EmitterShapeColor", &emitterShapeColor.x, ImGuiColorEditFlags_NoInputs);
+				if (ImGui::IsItemHovered()) {
+					ImGui::SetTooltip("発生形状の表示色");
+				}
+			}
+			ImGui::EndTable();
 		}
-		ImGui::Checkbox("プレビューをループ", &previewLoop);
 		if (ImGui::Button("プレビューを再生")) {
 			if (particleSystem.IsAlive(previewHandle)) {
 				particleSystem.Stop(previewHandle, StopMode::Immediate);
@@ -566,8 +646,11 @@ namespace MadoEngine::Editor {
 			renameEmitterIndex = -1;
 		}
 
-		ImGui::Text("再生中のエフェクト数: %zu", particleSystem.GetActiveEffectCount());
-		ImGui::Text("生存パーティクル数: %zu", particleSystem.GetAliveParticleCount());
+		ImGui::Text(
+			"再生中: %zu エフェクト    生存中: %zu パーティクル",
+			particleSystem.GetActiveEffectCount(),
+			particleSystem.GetAliveParticleCount()
+		);
 		ImGui::Separator();
 
 		ParticleEffectAsset* asset = particleSystem.FindEditableAsset(selectedAssetName);
@@ -583,19 +666,27 @@ namespace MadoEngine::Editor {
 		}
 
 		std::vector<EmitterConfig>& emitters = asset->GetEmitters();
-		ImGui::SeparatorText("エミッター管理");
-		ImGui::SetNextItemWidth(240.0f);
+		ImGui::SameLine();
+		ImGui::TextDisabled("%zu エミッター", emitters.size());
+		const float emitterListWidth = std::clamp(
+			ImGui::GetContentRegionAvail().x * 0.28f,
+			240.0f,
+			300.0f
+		);
+		ImGui::BeginChild("EmitterListPane", ImVec2(emitterListWidth, 0.0f), true);
+		ImGui::SeparatorText("エミッター一覧");
+		ImGui::TextUnformatted("新規エミッター名");
+		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputText(
-			"新規エミッター名",
+			"##NewEmitterName",
 			newEmitterNameBuffer.data(),
 			newEmitterNameBuffer.size()
 		);
 		const std::string newEmitterName = newEmitterNameBuffer.data();
 		const bool isNewNameEmpty = newEmitterName.empty();
 		const bool isNewNameDuplicated = IsEmitterNameUsed(emitters, newEmitterName);
-		ImGui::SameLine();
 		ImGui::BeginDisabled(isNewNameEmpty || isNewNameDuplicated);
-		if (ImGui::Button("追加")) {
+		if (ImGui::Button("追加", ImVec2(-FLT_MIN, 0.0f))) {
 			EmitterConfig emitter;
 			emitter.name = newEmitterName;
 			emitters.push_back(std::move(emitter));
@@ -616,25 +707,33 @@ namespace MadoEngine::Editor {
 
 		if (emitters.empty()) {
 			ImGui::TextDisabled("編集するエミッターを追加してください。");
+			ImGui::EndChild();
 			ImGui::End();
 			return;
 		}
 
 		selectedEmitterIndex = std::clamp(selectedEmitterIndex, 0, static_cast<int>(emitters.size()) - 1);
-		if (ImGui::BeginCombo("エミッター", emitters[selectedEmitterIndex].name.c_str())) {
-			for (int index = 0; index < static_cast<int>(emitters.size()); ++index) {
-				const bool isSelected = index == selectedEmitterIndex;
-				if (ImGui::Selectable(emitters[index].name.c_str(), isSelected)) {
-					selectedEmitterIndex = index;
-				}
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
+		ImGui::TextUnformatted("登録済みエミッター");
+		const float emitterListHeight = std::clamp(
+			static_cast<float>(emitters.size()) * ImGui::GetTextLineHeightWithSpacing() + 8.0f,
+			96.0f,
+			220.0f
+		);
+		ImGui::BeginChild("EmitterSelectionList", ImVec2(0.0f, emitterListHeight), true);
+		for (int index = 0; index < static_cast<int>(emitters.size()); ++index) {
+			const bool isSelected = index == selectedEmitterIndex;
+			if (ImGui::Selectable(emitters[index].name.c_str(), isSelected)) {
+				selectedEmitterIndex = index;
 			}
-			ImGui::EndCombo();
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
 		}
+		ImGui::EndChild();
 
-		if (ImGui::Button("複製")) {
+		const float emitterOperationButtonWidth =
+			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+		if (ImGui::Button("複製", ImVec2(emitterOperationButtonWidth, 0.0f))) {
 			EmitterConfig emitter = emitters[selectedEmitterIndex];
 			emitter.name = MakeUniqueEmitterName(emitters, emitter.name + " のコピー");
 			emitters.insert(emitters.begin() + selectedEmitterIndex + 1, std::move(emitter));
@@ -643,7 +742,7 @@ namespace MadoEngine::Editor {
 		}
 		ImGui::SameLine();
 		ImGui::BeginDisabled(emitters.size() <= 1);
-		if (ImGui::Button("削除")) {
+		if (ImGui::Button("削除", ImVec2(emitterOperationButtonWidth, 0.0f))) {
 			ImGui::OpenPopup("エミッター削除確認");
 		}
 		ImGui::EndDisabled();
@@ -679,9 +778,10 @@ namespace MadoEngine::Editor {
 			emitterRenameOriginalName = selectedEmitter.name;
 		}
 
-		ImGui::SetNextItemWidth(240.0f);
+		ImGui::SeparatorText("名前変更");
+		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputText(
-			"エミッター名",
+			"##RenameEmitterName",
 			renameEmitterNameBuffer.data(),
 			renameEmitterNameBuffer.size()
 		);
@@ -693,13 +793,12 @@ namespace MadoEngine::Editor {
 			selectedEmitterIndex
 		);
 		const bool isRenameNameChanged = renameEmitterName != selectedEmitter.name;
-		ImGui::SameLine();
 		ImGui::BeginDisabled(
 			isRenameNameEmpty ||
 			isRenameNameDuplicated ||
 			!isRenameNameChanged
 		);
-		if (ImGui::Button("名前を変更")) {
+		if (ImGui::Button("名前を変更", ImVec2(-FLT_MIN, 0.0f))) {
 			selectedEmitter.name = renameEmitterName;
 			emitterRenameOriginalName = selectedEmitter.name;
 		}
@@ -711,7 +810,13 @@ namespace MadoEngine::Editor {
 			ImGui::TextDisabled("同じ名前のエミッターが存在します。");
 		}
 
+		ImGui::EndChild();
+		ImGui::SameLine();
+		ImGui::BeginChild("EmitterSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::Text("設定: %s", emitters[selectedEmitterIndex].name.c_str());
+		ImGui::Separator();
 		DrawEmitterEditor(emitters[selectedEmitterIndex]);
+		ImGui::EndChild();
 
 		const std::string currentAssetSnapshot = CreateParticleAssetSnapshot(*asset);
 		if (

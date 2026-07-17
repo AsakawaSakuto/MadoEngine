@@ -162,7 +162,10 @@ namespace MadoEngine::Editor {
     void DrawAudioManagerUI() {
         //auto audioManager = AudioManager::GetInstance();
 
-        ImGui::Begin("Audio Editor");
+        if (!ImGui::Begin("Audio Editor")) {
+            ImGui::End();
+            return;
+        }
 
         // ---------------------------------------------------
         // タブシステム (SE / BGM / Voice / Volume)

@@ -20,6 +20,8 @@
 #include "Render/Object/3d/Particle/ParticleEffectAsset.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/Particle/MyParticle3d.h"
+#include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
+#include "Render/Object/3d/PrimitiveEffect/MyPrimitiveEffect3d.h"
 #include "Render/Object/3d/Line/Line.h"
 #include "Render/Object/3d/Line/DebugLineManager.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"

@@ -90,6 +90,10 @@
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectAsset.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
     <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Render\Shadow\ShadowMap.cpp" />
@@ -102,6 +106,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\CylinderEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\ModelEditor.cpp" />
@@ -514,6 +519,13 @@
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectAsset.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\EffectTrack.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\MyPrimitiveEffect3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectTypes.h" />
     <ClInclude Include="Engine\Render\Shadow\ShadowMap.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
@@ -573,6 +585,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\ImGui\Editor\CylinderEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
