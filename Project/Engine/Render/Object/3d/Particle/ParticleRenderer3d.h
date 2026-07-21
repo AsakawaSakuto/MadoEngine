@@ -8,7 +8,7 @@
 #include <limits>
 #include <span>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <wrl/client.h>
 
@@ -116,7 +116,7 @@ namespace MadoEngine::Particle {
 		Vector3 cameraPosition_{};
 		std::vector<ParticleInstanceForGPU> instances_;
 		std::vector<DrawBatch> batches_;
-		std::unordered_map<std::string, uint32_t> textureIndexCache_;
+		std::unordered_set<std::string> missingTextureNames_;
 		bool isInstanceDataDirty_ = false;
 		bool isInitialized_ = false;
 	};

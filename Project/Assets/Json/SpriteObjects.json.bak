@@ -13,7 +13,35 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "TestAxe",
+            "name": "Sprite",
+            "position": [
+                330.0,
+                54.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "texture": "Money",
+            "type": "Sprite2D",
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "Sprite2",
             "position": [
                 0.0,
                 0.0
@@ -23,8 +51,8 @@
                 1.0,
                 1.0
             ],
-            "scene": "Title",
-            "texture": "Axe",
+            "scene": "None",
+            "texture": "Money",
             "type": "Sprite2D",
             "visible": true
         }

@@ -10,10 +10,10 @@ namespace Weapon {
 
 		for (int i = 0; i < slotCount; i++) {
 
-			weaponFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Test);
+			weaponFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
 			weaponFrames_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
 
-			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Test);
+			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);
 			weaponIcons_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
 		}
 	

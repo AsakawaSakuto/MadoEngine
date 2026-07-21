@@ -208,6 +208,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\SpriteEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\TextureSelector.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
     <ClCompile Include="Engine\Render\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
@@ -392,6 +393,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\PostEffectEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\GuizmoEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\SpriteEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\TextureSelector.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\TextEditorUI.h" />
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.h" />

@@ -39,6 +39,14 @@ namespace Enemy {
 		RemoveInactiveEnemies();
 	}
 
+	void Manager::DrawDebugLine() const {
+		for (const std::unique_ptr<Base>& enemy : enemies_) {
+			if (enemy) {
+				enemy->DrawDebugLine();
+			}
+		}
+	}
+
 	void Manager::Clear() {
 		enemies_.clear();
 		nextEnemyId_ = 0;

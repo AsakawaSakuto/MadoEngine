@@ -8,12 +8,18 @@ namespace MadoEngine::Particle {
 	void ParticleEmitterInstance::Initialize(
 		const EmitterConfig& config,
 		uint32_t randomSeed,
-		const std::optional<bool>& loopOverride) {
+		const std::optional<bool>& loopOverride,
+		const Transform3D& emitterTransform) {
 		config_ = config;
 		random_.SetSeed(randomSeed);
 		isLoop_ = loopOverride.value_or(config.emission.isLoop);
 		simulator_.Initialize(config.emission.maxParticles);
 		Reset();
+
+		if (config.emission.startDelay <= 0.0f) {
+			EmitBursts(0.0f, 0.0f, emitterTransform);
+			hasProcessedEmission_ = true;
+		}
 	}
 
 	void ParticleEmitterInstance::Update(float deltaTime, const Transform3D& emitterTransform) {
@@ -142,7 +148,12 @@ namespace MadoEngine::Particle {
 		emitters_.resize(asset_->GetEmitters().size());
 		for (std::size_t index = 0; index < emitters_.size(); ++index) {
 			const uint32_t emitterSeed = MyRand::MakeDerivedSeed(desc.randomSeed, static_cast<uint32_t>(index));
-			emitters_[index].Initialize(asset_->GetEmitters()[index], emitterSeed, desc.loopOverride);
+			emitters_[index].Initialize(
+				asset_->GetEmitters()[index],
+				emitterSeed,
+				desc.loopOverride,
+				desc.transform
+			);
 		}
 	}
 

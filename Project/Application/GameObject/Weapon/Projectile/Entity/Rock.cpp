@@ -14,7 +14,7 @@ namespace Projectile {
 	void Rock::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
-		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
+		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };

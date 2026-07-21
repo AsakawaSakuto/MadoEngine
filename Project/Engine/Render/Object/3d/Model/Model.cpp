@@ -154,6 +154,15 @@ void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 	InitializeInstanceResources();
 }
 
+Vector3 Model::GetVertexPosition(uint32_t vertexIndex) const {
+	if (!sharedData_ || vertexIndex >= sharedData_->modelData.vertices.size()) {
+		return {};
+	}
+
+	const Vector4& position = sharedData_->modelData.vertices[vertexIndex].position;
+	return { position.x, position.y, position.z };
+}
+
 void Model::FromJson(const nlohmann::json& json) {
 	SetPosition(ReadVector3(json.value("position", nlohmann::json::array()), GetPosition()));
 	SetScale(ReadVector3(json.value("scale", nlohmann::json::array()), GetScale()));
@@ -169,10 +178,16 @@ void Model::FromJson(const nlohmann::json& json) {
 	SetFrustumCullingEnabled(json.value("frustumCulling", IsFrustumCullingEnabled()));
 	SetLightingEnabled(json.value("lighting", IsLightingEnabled()));
 	SetReceiveLightMask(json.value("receiveLightMask", GetReceiveLightMask()));
+
+	ResetTexture();
+	const std::string textureName = json.value("texture", "");
+	if (!textureName.empty()) {
+		SetTexture(textureName);
+	}
 }
 
 nlohmann::json Model::ToJson() const {
-	return {
+	nlohmann::json json = {
 		{ "type", "Model3D" },
 		{ "name", objectName_ },
 		{ "position", { transform_.translate.x, transform_.translate.y, transform_.translate.z } },
@@ -189,6 +204,34 @@ nlohmann::json Model::ToJson() const {
 		{ "lighting", IsLightingEnabled() },
 		{ "receiveLightMask", GetReceiveLightMask() },
 	};
+
+	if (HasTextureOverride()) {
+		json["texture"] = textureOverrideName_;
+	}
+
+	return json;
+}
+
+bool Model::SetTexture(const std::string& textureName) {
+	if (!IRenderObject3d::SetTexture(textureName)) {
+		return false;
+	}
+
+	textureOverrideName_ = textureName;
+	return true;
+}
+
+bool Model::ResetTexture() {
+	if (!sharedData_ || sharedData_->textureNames.empty() || sharedData_->textureIndices.empty()) {
+		return false;
+	}
+
+	textureNames_ = sharedData_->textureNames;
+	textureIndices_ = sharedData_->textureIndices;
+	textureName_ = textureNames_.front();
+	textureIndex_ = textureIndices_.front();
+	textureOverrideName_.clear();
+	return true;
 }
 
 void Model::SetLightingEnabled(bool enabled) {
@@ -253,7 +296,8 @@ void Model::InitializeInstanceResources() {
 	rootNode_ = sharedData_->modelData.rootNode;
 	textureNames_ = sharedData_->textureNames;
 	textureIndices_ = sharedData_->textureIndices;
-	if (!textureIndices_.empty()) {
+	if (!textureNames_.empty() && !textureIndices_.empty()) {
+		textureName_ = textureNames_[0];
 		textureIndex_ = textureIndices_[0];
 	}
 

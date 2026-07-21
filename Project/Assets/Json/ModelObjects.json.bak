@@ -12,26 +12,27 @@
             "frustumCulling": true,
             "layer": "Default",
             "lighting": true,
-            "model": "Assets/Model/Skining/walk.gltf",
-            "name": "Model",
+            "model": "Assets/Model/Static/Primitive/Plane.obj",
+            "name": "Model1",
             "position": [
                 0.0,
-                0.022747159004211426,
+                0.05000000074505806,
                 0.0
             ],
             "receiveLightMask": 1,
             "receiveShadow": true,
             "rotation": [
+                1.5707963705062866,
                 0.0,
-                -3.054326057434082,
                 0.0
             ],
             "scale": [
-                1.0,
-                1.0,
+                16.0,
+                16.0,
                 1.0
             ],
             "scene": "None",
+            "texture": "AxeTexture",
             "type": "Model3D",
             "visible": true
         },
@@ -47,26 +48,170 @@
             "frustumCulling": true,
             "layer": "Default",
             "lighting": true,
-            "model": "Assets/Model/Static/Primitive/Plane.obj",
-            "name": "Plane",
+            "model": "Assets/Model/Animation/AnimatedCube.gltf",
+            "name": "Model2",
             "position": [
                 0.0,
+                2.200000047683716,
+                0.0
+            ],
+            "receiveLightMask": 0,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "texture": "box",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Skining/walk.gltf",
+            "name": "Model3",
+            "position": [
+                12.219366073608398,
                 0.0,
                 0.0
             ],
             "receiveLightMask": 1,
             "receiveShadow": true,
             "rotation": [
-                1.5707963705062866,
+                0.0,
                 0.0,
                 0.0
             ],
             "scale": [
-                10.0,
-                10.0,
+                1.0,
+                1.0,
                 1.0
             ],
             "scene": "None",
+            "texture": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Skining/walk.gltf",
+            "name": "Model4",
+            "position": [
+                6.180931091308594,
+                0.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                0.0,
+                1.0,
+                0.986046314239502,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/maxJar.obj",
+            "name": "Model5",
+            "position": [
+                -5.793014049530029,
+                1.032889723777771,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                3.0,
+                3.0,
+                3.0
+            ],
+            "scene": "None",
+            "texture": "white16x16",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Chest.obj",
+            "name": "Model6",
+            "position": [
+                -11.711698532104492,
+                1.1760308742523193,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.5,
+                1.5,
+                1.5
+            ],
+            "scene": "None",
+            "texture": "Chest",
             "type": "Model3D",
             "visible": true
         }

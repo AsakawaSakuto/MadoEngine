@@ -114,6 +114,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\PostEffectEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\GuizmoEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\SpriteEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\TextureSelector.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\EditorHistory.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
@@ -657,6 +658,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\SpriteEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\TextureSelector.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\ModelEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />

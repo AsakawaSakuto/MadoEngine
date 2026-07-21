@@ -52,14 +52,14 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 24.0,
+            "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "EnemyCountText",
             "position": [
-                0.0,
-                0.0
+                36.0,
+                144.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -91,14 +91,14 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 24.0,
+            "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "FpsText",
             "position": [
-                0.0,
-                0.0
+                36.0,
+                110.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -111,7 +111,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.5",
+            "text": "FPS : 59.8",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

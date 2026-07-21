@@ -1,0 +1,106 @@
+{
+    "duration": 0.9810000061988831,
+    "geometry": {
+        "arcAngleDegrees": {
+            "default": 360.0,
+            "keys": []
+        },
+        "bottomRadii": {
+            "default": [
+                1.0,
+                1.0
+            ],
+            "keys": [
+                {
+                    "easing": "Linear",
+                    "time": 1.0,
+                    "value": [
+                        1.0,
+                        1.0
+                    ]
+                }
+            ]
+        },
+        "height": {
+            "default": 1.0,
+            "keys": []
+        },
+        "heightSegments": 1,
+        "pivot": "bottom",
+        "radialSegments": 32,
+        "startAngleDegrees": {
+            "default": 0.0,
+            "keys": []
+        },
+        "topRadii": {
+            "default": [
+                1.0,
+                1.0
+            ],
+            "keys": []
+        }
+    },
+    "loop": true,
+    "material": {
+        "blendMode": "add",
+        "bottomFadeRange": {
+            "default": 0.0,
+            "keys": []
+        },
+        "cullMode": "none",
+        "globalAlpha": {
+            "default": 1.0,
+            "keys": []
+        },
+        "gradient": [
+            {
+                "color": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "position": 0.0
+            }
+        ],
+        "textureName": "uvChecker",
+        "topFadeRange": {
+            "default": 1.0,
+            "keys": []
+        },
+        "uv": {
+            "direction": "topToBottom",
+            "offset": {
+                "default": [
+                    0.5,
+                    0.0
+                ],
+                "keys": [
+                    {
+                        "easing": "Linear",
+                        "time": 1.0,
+                        "value": [
+                            0.5,
+                            0.0
+                        ]
+                    }
+                ]
+            },
+            "rotationDegrees": {
+                "default": 0.0,
+                "keys": []
+            },
+            "scale": {
+                "default": [
+                    1.0,
+                    1.0
+                ],
+                "keys": []
+            }
+        }
+    },
+    "version": 1
+}

@@ -845,10 +845,14 @@ void ColliderManager::RebuildStaticTerrainBVHIfNeeded() {
     isStaticTerrainBVHDirty_ = false;
 }
 
-void ColliderManager::QueryStaticTerrainBVH(const AABB& bounds, std::vector<const std::string*>& outCandidates) {
+void ColliderManager::QueryStaticTerrainBVH(const AABB& bounds, CollisionTag targetTag, std::vector<const std::string*>& outCandidates) {
     RebuildStaticTerrainBVHIfNeeded();
     staticTerrainBVH_.Query(bounds, outCandidates);
     ++profileStats_.bvhQueryCount;
+    const std::vector<std::string>* targetNames = FindColliderNames(targetTag);
+    if (targetNames) {
+        profileStats_.nonBvhQueryCount += static_cast<uint32_t>(targetNames->size());
+    }
     profileStats_.bvhCandidateCount += static_cast<uint32_t>(outCandidates.size());
 }
 
@@ -1172,7 +1176,7 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
             if (TryGetColliderBounds(playerInfo, queryBounds)) {
                 // 接地判定ではSphere下端がAABB上面より少し上にある状態も候補に含めます。
                 queryBounds.min.y -= 0.08f;
-                QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+                QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
                 for (const std::string* candidateName : bvhQueryResults_) {
                     if (!candidateName || *candidateName == name) continue;
                     auto otherIt = m_colliders.find(*candidateName);
@@ -1306,7 +1310,7 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
-            QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+            QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
                 auto otherIt = m_colliders.find(*candidateName);
@@ -1433,7 +1437,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
         queryBounds.center = origin;
         queryBounds.min = { -kGroundQueryHalfWidth, -maxDistance, -kGroundQueryHalfWidth };
         queryBounds.max = { kGroundQueryHalfWidth, 0.0f, kGroundQueryHalfWidth };
-        QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+        QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
 
         for (const std::string* candidateName : bvhQueryResults_) {
             if (!candidateName) {
@@ -1492,7 +1496,7 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
-            QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+            QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
                 auto otherIt = m_colliders.find(*candidateName);
@@ -1617,7 +1621,7 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
-            QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+            QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
                 auto otherIt = m_colliders.find(*candidateName);
@@ -1822,7 +1826,7 @@ void ColliderManager::ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynam
             continue;
         }
 
-        QueryStaticTerrainBVH(queryBounds, bvhQueryResults_);
+        QueryStaticTerrainBVH(queryBounds, staticTag, bvhQueryResults_);
         for (const std::string* candidateName : bvhQueryResults_) {
             if (!candidateName || *candidateName == dynamicInfo->actorName) {
                 continue;
@@ -1986,6 +1990,7 @@ void ColliderManager::DrawImGui() {
     ImGui::Text("Static BVH Nodes : %u", profileStats_.staticBVHNodeCount);
     ImGui::Separator();
     ImGui::Text("BVH Query Count : %u", profileStats_.bvhQueryCount);
+    ImGui::Text("Non-BVH Query Count : %u", profileStats_.nonBvhQueryCount);
     ImGui::Text("BVH Candidate Count : %u", profileStats_.bvhCandidateCount);
     ImGui::Text("Narrow Phase Count : %u", profileStats_.narrowPhaseCount);
     ImGui::Text("Sphere vs Slope Count : %u", profileStats_.sphereSlopeNarrowPhaseCount);

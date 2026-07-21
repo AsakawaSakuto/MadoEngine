@@ -1,6 +1,6 @@
 #include "CylinderEditor.h"
+#include "TextureSelector.h"
 #include "ImGuiHeaders.h"
-#include "Core/TextureManager/TextureManager.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
 #include <algorithm>
 #include <array>
@@ -337,20 +337,8 @@ namespace {
 		bool changed = false;
 		CylinderMaterialModule& material = config.material;
 
-		const std::vector<std::string> textureNames = MadoEngine::TextureManager::GetInstance().GetTextureNames();
-		if (ImGui::BeginCombo("テクスチャ", material.textureName.c_str())) {
-			for (const std::string& textureName : textureNames) {
-				const bool isSelected = textureName == material.textureName;
-				if (ImGui::Selectable(textureName.c_str(), isSelected)) {
-					material.textureName = textureName;
-					changed = true;
-				}
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
+		const MadoEngine::Editor::TextureSelector textureSelector;
+		changed |= textureSelector.Draw("テクスチャ", material.textureName);
 
 		const char* blendModeNames[] = { "通常", "加算", "減算", "乗算", "ブレンドなし" };
 		int blendModeIndex = static_cast<int>(material.blendMode);

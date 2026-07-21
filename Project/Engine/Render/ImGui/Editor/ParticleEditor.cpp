@@ -1,6 +1,6 @@
 #include "ParticleEditor.h"
+#include "TextureSelector.h"
 #include "ImGuiHeaders.h"
-#include "Core/TextureManager/TextureManager.h"
 #include "Render/Object/3d/Particle/ParticleEmitterDebugDrawer3d.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include <algorithm>
@@ -317,19 +317,8 @@ namespace {
 			DrawColorRange("終了色", emitter.colorOverLifetime.end);
 
 			ImGui::SeparatorText("描画");
-			const std::vector<std::string> textureNames = MadoEngine::TextureManager::GetInstance().GetTextureNames();
-			if (ImGui::BeginCombo("テクスチャ", emitter.renderer.textureName.c_str())) {
-				for (const std::string& textureName : textureNames) {
-					const bool isSelected = textureName == emitter.renderer.textureName;
-					if (ImGui::Selectable(textureName.c_str(), isSelected)) {
-						emitter.renderer.textureName = textureName;
-					}
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
+			const MadoEngine::Editor::TextureSelector textureSelector;
+			textureSelector.Draw("テクスチャ", emitter.renderer.textureName);
 
 			const char* blendModes[] = { "通常", "加算", "減算", "乗算", "ブレンドなし" };
 			int blendMode = static_cast<int>(emitter.renderer.blendMode);

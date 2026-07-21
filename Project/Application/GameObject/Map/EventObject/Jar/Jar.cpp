@@ -68,12 +68,12 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	InstancedModel* normalBatch = MyInstancedModel::GetOrCreate(
 		GetJarBatchName(size_, false),
 		GetJarModelAssetName(size_),
-		SceneType::Test,
+		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObject);
 	InstancedModel* outlineBatch = MyInstancedModel::GetOrCreate(
 		GetJarBatchName(size_, true),
 		GetJarModelAssetName(size_),
-		SceneType::Test,
+		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
 	if (normalBatch && outlineBatch) {

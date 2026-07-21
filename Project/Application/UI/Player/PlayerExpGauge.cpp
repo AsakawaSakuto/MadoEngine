@@ -4,7 +4,7 @@ namespace Player {
 
 	void ExpGauge::Initialize() {
 		expGauge_ = std::make_unique<Gauge>();
-		expGauge_->Initialize("PlayerExpGauge", SceneType::Test, MadoEngine::Render::RenderLayer::UI);
+		expGauge_->Initialize("PlayerExpGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
 	}
 
 	void ExpGauge::Update(float currentExp, float maxExp) {

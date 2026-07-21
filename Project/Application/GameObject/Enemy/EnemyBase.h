@@ -42,6 +42,9 @@ namespace Enemy {
 		/// @brief Collider更新後に地形との接触状態を解決する
 		void ResolveAfterCollision();
 
+		/// @brief EnemyのColliderをDebugLineへ登録する
+		void DrawDebugLine() const;
+
 		/// @brief Playerと接触しているか判定する
 		/// @return Playerと接触していればtrueを返す
 		bool IsHitPlayer() const;

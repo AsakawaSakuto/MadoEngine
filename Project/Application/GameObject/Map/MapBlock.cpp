@@ -124,7 +124,7 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 	groundInstancedModel_ = MyInstancedModel::GetOrCreate(
 		CreateGroundModelName(),
 		"block",
-		SceneType::Test,
+		SceneType::Game,
 		MadoEngine::Render::RenderLayer::Default);
 	if (!groundInstancedModel_) {
 		return;
@@ -146,7 +146,7 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 	slopeInstancedModel_ = MyInstancedModel::GetOrCreate(
 		CreateSlopeModelName(),
 		GetSlopeModelName(slopeDirection_),
-		SceneType::Test,
+		SceneType::Game,
 		MadoEngine::Render::RenderLayer::Default);
 	if (!slopeInstancedModel_) {
 		return;

@@ -135,6 +135,28 @@ public:
 	/// @return 有効な場合はtrue
 	bool IsFrustumCullingEnabled() const { return enableFrustumCulling_; }
 
+	/// @brief Modelで使用するテクスチャを上書きする
+	/// @param textureName TextureManagerに登録されているテクスチャ名
+	/// @return テクスチャを変更できた場合はtrue
+	bool SetTexture(const std::string& textureName);
+
+	/// @brief Modelのテクスチャ上書きを解除してアセット既定値へ戻す
+	/// @return アセット既定値へ戻せた場合はtrue
+	bool ResetTexture();
+
+	/// @brief Modelで現在使用している代表テクスチャ名を取得する
+	/// @return 現在使用しているテクスチャ名
+	const std::string& GetTextureName() const { return textureName_; }
+
+	/// @brief Modelのテクスチャが上書きされているかを取得する
+	/// @return 上書きされている場合はtrue
+	bool HasTextureOverride() const { return !textureOverrideName_.empty(); }
+
+	/// @brief 指定した頂点のローカル座標を取得する
+	/// @param vertexIndex 取得する頂点配列のインデックス
+	/// @return 頂点のローカル座標。未初期化または範囲外の場合はゼロベクトル
+	Vector3 GetVertexPosition(uint32_t vertexIndex) const;
+
 	const ModelSharedData* GetSharedData() const { return sharedData_; }
 
 private:
@@ -215,6 +237,7 @@ private:
 	bool usebillbord_ = false;
 	bool castShadow_ = true;
 	bool receiveShadow_ = true;
+	std::string textureOverrideName_;
 	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrvHandle_ = {};
 	Matrix4x4 shadowLightViewProjection_ = Matrix::MakeIdentity();
 	uint32_t shadowMapWidth_ = 2048;

@@ -18,10 +18,12 @@ namespace MadoEngine::Particle {
 		/// @param config 参照するEmitter設定
 		/// @param randomSeed Emitter専用乱数Seed
 		/// @param loopOverride Loop設定の上書き値
+		/// @param emitterTransform Emitterの初期Transform
 		void Initialize(
 			const EmitterConfig& config,
 			uint32_t randomSeed,
-			const std::optional<bool>& loopOverride
+			const std::optional<bool>& loopOverride,
+			const Transform3D& emitterTransform
 		);
 
 		/// @brief Emitterと生存Particleを更新する

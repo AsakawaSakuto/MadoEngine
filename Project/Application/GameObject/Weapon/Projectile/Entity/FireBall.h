@@ -21,10 +21,20 @@ namespace Projectile {
 		void OnEnemyHit() override;
 
 	private:
+		/// @brief FireBallパーティクルのループ再生を開始する
+		void StartParticle();
+
+		/// @brief FireBallパーティクルを現在位置へ追従させる
+		void UpdateParticleTransform();
+
+		/// @brief FireBallパーティクルを即時停止する
+		void StopParticle();
+
 		/// @brief 現在座標に爆発を生成
 		void SpawnExplosion();
 
 		Model* model_ = nullptr;
 		std::string objectName_;
+		MadoEngine::Particle::EffectHandle particleHandle_;
 	};
 }

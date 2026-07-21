@@ -1,0 +1,129 @@
+{
+    "emitters": [
+        {
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        0.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [
+                    {
+                        "count": 64,
+                        "time": 0.0
+                    }
+                ],
+                "duration": 0.0,
+                "isLoop": false,
+                "maxParticles": 256,
+                "ratePerSecond": 0.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        15.0,
+                        15.0,
+                        15.0
+                    ],
+                    "min": [
+                        -15.0,
+                        -15.0,
+                        -15.0
+                    ]
+                },
+                "directionMode": "shapeOutward",
+                "lifeTime": {
+                    "max": 0.3499999940395355,
+                    "min": 0.10000000149011612
+                },
+                "rotation": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 2.5199999809265137,
+                    "min": 2.119999885559082
+                }
+            },
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "renderer": {
+                "blendMode": "normal",
+                "sortMode": "none",
+                "texture": "white2x2"
+            },
+            "shape": {
+                "emitFromSurface": true,
+                "radius": 0.05000000074505806,
+                "type": "sphere"
+            },
+            "simulationSpace": "world",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        0.0,
+                        0.0
+                    ],
+                    "min": [
+                        0.0,
+                        0.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "min": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ]
+                }
+            }
+        }
+    ],
+    "name": "HitEffect",
+    "version": 1
+}

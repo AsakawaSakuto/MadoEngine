@@ -133,7 +133,7 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 
-		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 50000);
+		DebugLineManager::GetInstance().Initialize(dxDevice_->GetDevice(), commandManager_->GetCommandList(), 200000);
 		DebugLineManager::GetInstance().SetPSORegistry(psoRegistry_.get());
 
 		renderTargetManager_ = std::make_unique<MadoEngine::Render::RenderTargetManager>();

@@ -29,6 +29,9 @@ namespace Enemy {
 		/// @brief Collider更新後にEnemyの衝突とダメージを一括解決する
 		void ResolveAfterCollision();
 
+		/// @brief 管理中のEnemyのColliderをDebugLineへ登録する
+		void DrawDebugLine() const;
+
 		/// @brief 管理中のEnemyをすべて破棄する
 		void Clear();
 

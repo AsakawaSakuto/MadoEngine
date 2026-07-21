@@ -73,6 +73,17 @@ namespace Enemy {
 		ApplyModelTransform();
 	}
 
+	void Base::DrawDebugLine() const {
+		if (!isActive_) {
+			return;
+		}
+
+		const Vector4 movementColliderColor = { 0.0f, 1.0f, 0.0f, 1.0f };
+		const Vector4 hitColliderColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+		MyDebugLine::AddShape(colliderShape_, movementColliderColor);
+		MyDebugLine::AddShape(hitAABB_, hitColliderColor);
+	}
+
 	bool Base::IsHitPlayer() const {
 		if (!isActive_) {
 			return false;

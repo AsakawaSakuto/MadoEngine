@@ -29,13 +29,13 @@ namespace Player {
 		MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerExpGetSphere", CollisionTag::PlayerDropObjectGetSphere, &expGetSphere_, &transform_.translate, 0.0f);
 
-		model_ = MyModel::Create("Player", "walk", SceneType::Test);
+		model_ = MyModel::Create("Player", "walk", SceneType::Game);
 		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 		model_->SetTexture("white16x16");
 		model_->SetCastShadow(false);
 
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
-		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Test);
+		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Game);
 		shadowModel_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 		shadowModel_->SetTexture("white16x16");
 		shadowModel_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });

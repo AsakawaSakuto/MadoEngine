@@ -15,7 +15,7 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
-		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Test);
+		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		//model_->SetTexture("AxeTexture");
 
 		transform_.translate = ownerPosition;

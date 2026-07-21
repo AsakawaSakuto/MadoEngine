@@ -25,17 +25,17 @@ void Chest::Initialize(const InitializeDesc& desc) {
 	InstancedModel* normalBatch = MyInstancedModel::GetOrCreate(
 		"Chest.Normal",
 		"Chest",
-		SceneType::Test,
+		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObject);
 	InstancedModel* outlineBatch = MyInstancedModel::GetOrCreate(
 		"Chest.Outline",
 		"Chest",
-		SceneType::Test,
+		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
 	if (normalBatch && outlineBatch) {
-		normalBatch->SetTexture("box");
-		outlineBatch->SetTexture("box");
+		normalBatch-> SetTexture("Chest");
+		outlineBatch->SetTexture("Chest");
 
 		InstancedModel::InstanceDesc normalInstance;
 		normalInstance.transform = transform_;

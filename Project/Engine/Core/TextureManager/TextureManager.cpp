@@ -94,12 +94,23 @@ namespace MadoEngine {
     }
 
     uint32_t TextureManager::GetTextureIndex(const std::string& fileName) const {
-        auto it = textures_.find(fileName);
-        if (it == textures_.end()) {
+        uint32_t textureIndex = UINT32_MAX;
+        if (!TryGetTextureIndex(fileName, textureIndex)) {
             Logger::Output("TextureIndex の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
             return UINT32_MAX;
         }
-        return it->second.index;
+        return textureIndex;
+    }
+
+    bool TextureManager::TryGetTextureIndex(const std::string& fileName, uint32_t& outTextureIndex) const {
+        const auto it = textures_.find(fileName);
+        if (it == textures_.end()) {
+            outTextureIndex = UINT32_MAX;
+            return false;
+        }
+
+        outTextureIndex = it->second.index;
+        return true;
     }
 
     std::vector<std::string> TextureManager::GetTextureNames() const {

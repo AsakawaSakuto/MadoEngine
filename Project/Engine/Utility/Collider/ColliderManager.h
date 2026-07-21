@@ -27,6 +27,7 @@ public:
 	struct ProfileStats {
 		double updateTimeMs = 0.0;
 		uint32_t bvhQueryCount = 0;
+		uint32_t nonBvhQueryCount = 0; // BVHを使用しない場合に必要となる総当たり比較回数
 		uint32_t bvhCandidateCount = 0;
 		uint32_t narrowPhaseCount = 0;
 		uint32_t sphereSlopeNarrowPhaseCount = 0;
@@ -203,7 +204,12 @@ private:
 	bool ShouldUseStaticTerrainBVH(CollisionTag tagA, CollisionTag tagB) const;
 	void MarkStaticTerrainBVHDirtyIfNeeded(CollisionTag tag);
 	void RebuildStaticTerrainBVHIfNeeded();
-	void QueryStaticTerrainBVH(const AABB& bounds, std::vector<const std::string*>& outCandidates);
+
+	/// @brief 静的地形BVHを検索し、BVH使用時と未使用時の検索統計を更新する
+	/// @param bounds 検索範囲
+	/// @param targetTag 総当たり時の比較対象となる静的地形タグ
+	/// @param outCandidates BVH検索で見つかった候補の出力先
+	void QueryStaticTerrainBVH(const AABB& bounds, CollisionTag targetTag, std::vector<const std::string*>& outCandidates);
 	void ProcessCollisionPair(ColliderInfo& a, ColliderInfo& b, const CollisionRule& rule);
 	void ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynamicList, CollisionTag staticTag, const CollisionRule& rule);
 

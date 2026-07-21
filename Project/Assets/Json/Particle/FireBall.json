@@ -1,0 +1,132 @@
+{
+    "emitters": [
+        {
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        0.501960813999176,
+                        0.0,
+                        0.0
+                    ],
+                    "min": [
+                        1.0,
+                        0.501960813999176,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        0.501960813999176,
+                        0.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [
+                    {
+                        "count": 1,
+                        "time": 0.0
+                    }
+                ],
+                "duration": 0.0625,
+                "isLoop": true,
+                "maxParticles": 64,
+                "ratePerSecond": 0.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        0.5,
+                        0.0,
+                        0.5
+                    ],
+                    "min": [
+                        -0.5,
+                        0.0,
+                        -0.5
+                    ]
+                },
+                "directionMode": "configured",
+                "lifeTime": {
+                    "max": 1.0,
+                    "min": 1.0
+                },
+                "rotation": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "renderer": {
+                "blendMode": "normal",
+                "sortMode": "backToFront",
+                "texture": "smork"
+            },
+            "shape": {
+                "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "type": "point"
+            },
+            "simulationSpace": "world",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        2.0,
+                        2.0
+                    ],
+                    "min": [
+                        2.0,
+                        2.0
+                    ]
+                }
+            }
+        }
+    ],
+    "name": "FireBall",
+    "version": 1
+}

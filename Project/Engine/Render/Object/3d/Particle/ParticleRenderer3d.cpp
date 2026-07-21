@@ -91,7 +91,7 @@ namespace MadoEngine::Particle {
 		perViewResource_.Reset();
 		instances_.clear();
 		batches_.clear();
-		textureIndexCache_.clear();
+		missingTextureNames_.clear();
 		instanceCapacity_ = 0;
 		isInstanceDataDirty_ = false;
 		device_ = nullptr;
@@ -132,6 +132,11 @@ namespace MadoEngine::Particle {
 		const Transform3D& emitterTransform,
 		MadoEngine::Render::RenderLayer renderLayer) {
 		if (!isInitialized_ || particles.empty()) {
+			return;
+		}
+
+		const uint32_t textureIndex = ResolveTextureIndex(config.renderer.textureName);
+		if (textureIndex == (std::numeric_limits<uint32_t>::max)()) {
 			return;
 		}
 
@@ -176,7 +181,7 @@ namespace MadoEngine::Particle {
 		DrawBatch batch;
 		batch.firstInstance = static_cast<uint32_t>(instances_.size());
 		batch.instanceCount = static_cast<uint32_t>(submitted.size());
-		batch.textureIndex = ResolveTextureIndex(config.renderer.textureName);
+		batch.textureIndex = textureIndex;
 		batch.blendMode = config.renderer.blendMode;
 		batch.renderLayer = renderLayer;
 		for (const SortableParticleInstance& sortable : submitted) {
@@ -266,15 +271,18 @@ namespace MadoEngine::Particle {
 	}
 
 	uint32_t ParticleRenderer3d::ResolveTextureIndex(const std::string& textureName) {
-		if (const auto found = textureIndexCache_.find(textureName); found != textureIndexCache_.end()) {
-			return found->second;
+		uint32_t textureIndex = (std::numeric_limits<uint32_t>::max)();
+		if (!MadoEngine::TextureManager::GetInstance().TryGetTextureIndex(textureName, textureIndex)) {
+			if (missingTextureNames_.insert(textureName).second) {
+				Logger::Output(
+					"Particleのテクスチャが見つからないため描画をスキップします: " + textureName,
+					Logger::Level::Warning
+				);
+			}
+			return (std::numeric_limits<uint32_t>::max)();
 		}
 
-		uint32_t textureIndex = MadoEngine::TextureManager::GetInstance().GetTextureIndex(textureName);
-		if (textureIndex == (std::numeric_limits<uint32_t>::max)()) {
-			textureIndex = MadoEngine::TextureManager::GetInstance().GetTextureIndex("white2x2");
-		}
-		textureIndexCache_[textureName] = textureIndex;
+		missingTextureNames_.erase(textureName);
 		return textureIndex;
 	}
 

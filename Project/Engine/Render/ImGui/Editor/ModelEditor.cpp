@@ -1,4 +1,5 @@
 #include "ModelEditor.h"
+#include "TextureSelector.h"
 #include "Render/Object/3d/Model/ModelManager.h"
 #include <algorithm>
 #include <array>
@@ -149,6 +150,18 @@ namespace {
 			ImGui::Text("種類: %s", ModelResource::ModelTypeToString(sharedData->type).c_str());
 		}
 		ImGui::Separator();
+
+		ImGui::SeparatorText("テクスチャ");
+		std::string selectedTextureName = model.GetTextureName();
+		const TextureSelector textureSelector(128.0f);
+		if (textureSelector.Draw("使用テクスチャ", selectedTextureName)) {
+			model.SetTexture(selectedTextureName);
+		}
+		if (model.HasTextureOverride() && ImGui::Button("モデル既定に戻す")) {
+			model.ResetTexture();
+		}
+
+		ImGui::SeparatorText("トランスフォーム・描画");
 
 		Vector3 position = model.GetPosition();
 		float positionValues[3] = { position.x, position.y, position.z };
