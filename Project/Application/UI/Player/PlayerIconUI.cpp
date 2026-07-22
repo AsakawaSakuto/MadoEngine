@@ -1,6 +1,6 @@
 #include "PlayerIconUI.h"
 
-namespace Player {
+namespace UI{
 
 	void PlayerIconUI::Initialize(Player::Type type) {
 		

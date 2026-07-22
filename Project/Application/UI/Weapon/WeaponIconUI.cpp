@@ -1,7 +1,7 @@
 #include "WeaponIconUI.h"
 #include "GameObject/Weapon/WeaponInventory.h"
 
-namespace Weapon {
+namespace UI {
 
 	void WeaponIconUI::Initialize(int slotCount) {
 	
@@ -19,11 +19,11 @@ namespace Weapon {
 	
 	}
 
-	void WeaponIconUI::Update(const Inventory& inventory) {
+	void WeaponIconUI::Update(const Weapon::Inventory& inventory) {
 		for (std::size_t slotIndex = 0; slotIndex < weaponIcons_.size(); ++slotIndex) {
 			
 
-			const BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
+			const Weapon::BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
 			const Projectile::Type weaponType = weapon ? weapon->GetProjectileType() : Projectile::Type::None;
 			const std::string textureName = Projectile::ProjectileTypeToString(weaponType);
 

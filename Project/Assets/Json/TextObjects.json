@@ -33,7 +33,46 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 98.98333 / 100",
+            "text": "HP : 96.85 / 100",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontSize": 48.5,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "GamePlayTimerText",
+            "position": [
+                660.0,
+                85.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Time : 08:49",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -72,7 +111,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 0",
+            "text": "Enemy : 1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -111,7 +150,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.3",
+            "text": "FPS : 60.0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

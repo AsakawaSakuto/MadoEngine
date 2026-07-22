@@ -4,11 +4,9 @@
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Logger/Logger.h"
 #include "imguiHeaders.h"
-#include <cmath>
 #include <format>
 
 namespace {
-	constexpr float kFpsTextUpdateInterval = 0.25f;
 	constexpr float kGameSceneTimeLimit = 10.0f * 60.0f;
 	constexpr std::uint32_t kWeaponUpgradeRandomSeed = 0x4d41444fu;
 }
@@ -28,15 +26,16 @@ void Game::Initialize() {
 	player_->Initialize();
 	player_->SetCamera(&tpsCamera_);
 
-	expGauge_ = std::make_unique<Player::ExpGauge>();
+	expGauge_ = std::make_unique<UI::ExpGauge>();
 	expGauge_->Initialize();
 
-	healthGauge_ = std::make_unique<Player::HealthGauge>();
+	healthGauge_ = std::make_unique<UI::HealthGauge>();
 	healthGauge_->Initialize();
 
 	playerHealthText_ = MyText::Create("PlayerHealthText", "HP : 0 / 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
-	fpsText_ = MyText::Create("FpsText", "FPS : 0.0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
+	fpsMeasurementView_.Initialize();
+	gamePlayTimerView_.Initialize();
 
 	AABB mapLimitBox;
 	MapLimit mapLimit;
@@ -67,13 +66,11 @@ void Game::Initialize() {
 	fadeSprite_->SetFitToScreen(true);
 
 	fadeOutTimer_.Start(2.0f);
-	fpsSampleTime_ = 0.0f;
-	fpsSampleFrameCount_ = 0;
 
-	weaponIconUI_ = std::make_unique<Weapon::WeaponIconUI>();
+	weaponIconUI_ = std::make_unique<UI::WeaponIconUI>();
 	weaponIconUI_->Initialize(4);
 
-	playerIconUI_ = std::make_unique<Player::PlayerIconUI>();
+	playerIconUI_ = std::make_unique<UI::PlayerIconUI>();
 	playerIconUI_->Initialize();
 
 	// System
@@ -134,16 +131,8 @@ SceneType Game::Update(float dt) {
 	if (enemyCountText_) {
 		enemyCountText_->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));
 	}
-	if (fpsText_) {
-		fpsSampleTime_ += dt;
-		++fpsSampleFrameCount_;
-		if (fpsSampleTime_ >= kFpsTextUpdateInterval) {
-			const float fps = fpsSampleTime_ > 0.0f ? static_cast<float>(fpsSampleFrameCount_) / fpsSampleTime_ : 0.0f;
-			fpsText_->SetText(std::format("FPS : {:.1f}", fps));
-			fpsSampleTime_ = 0.0f;
-			fpsSampleFrameCount_ = 0;
-		}
-	}
+	fpsMeasurementView_.Update(dt);
+	gamePlayTimerView_.Update(inGameSession_->GetRemainingTime());
 
 	if (inGameSession_->IsPlaying() && MyInput::GetKeybord()->IsTrigger(DIK_9)) {
 		if (!weaponInventory_->AddWeapon(Projectile::Type::Pistol)) {
@@ -233,11 +222,11 @@ void Game::Finalize() {
 	MySprite::DestroyByScene(SceneType::Game);
 	MyText::Destroy("PlayerHealthText");
 	MyText::Destroy("EnemyCountText");
-	MyText::Destroy("FpsText");
+	fpsMeasurementView_.Finalize();
+	gamePlayTimerView_.Finalize();
 	MyModel::DestroyByScene(SceneType::Game);
 	playerHealthText_ = nullptr;
 	enemyCountText_ = nullptr;
-	fpsText_ = nullptr;
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
 }

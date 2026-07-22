@@ -1,6 +1,6 @@
 #include "PlayerExpGauge.h"
 
-namespace Player {
+namespace UI {
 
 	void ExpGauge::Initialize() {
 		expGauge_ = std::make_unique<Gauge>();

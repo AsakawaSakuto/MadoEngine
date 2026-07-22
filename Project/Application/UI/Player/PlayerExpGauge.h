@@ -1,7 +1,7 @@
 #pragma once
 #include "RenderHeaders.h"
 
-namespace Player {
+namespace UI {
 
 	class ExpGauge {
 	public:

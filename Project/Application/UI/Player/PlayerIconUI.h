@@ -2,7 +2,7 @@
 #include <RenderHeaders.h>
 #include "../../GameObject/Player/PlayerStatus.h"
 
-namespace Player {
+namespace UI {
 	
 	/// @brief プレイヤーアイコンの表示を管理するクラス
 	class PlayerIconUI {

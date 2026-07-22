@@ -1,6 +1,6 @@
 #include "PlayerHealthGauge.h"
 
-namespace Player {
+namespace UI {
 
 	void HealthGauge::Initialize() {
 		healthGauge_ = std::make_unique<Gauge>();
