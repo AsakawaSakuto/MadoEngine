@@ -22,7 +22,7 @@ const char* GetTextFontFamilyName(TextFontFamilyType type);
 
 /// @brief フォントファミリー名からTextフォント種別を取得
 /// @param fontFamily DirectWriteフォントファミリー名
-/// @return 対応するフォント種別。候補外の場合はTextFontFamilyType::Count
+/// @return 対応するフォント種別。候補外の場合はTextFontFamilyType::Invalid
 TextFontFamilyType GetTextFontFamilyTypeFromName(const std::string& fontFamily);
 
 /// @brief DirectWriteで生成したテクスチャを2D空間へ描画するTextオブジェクト

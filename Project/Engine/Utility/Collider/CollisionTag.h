@@ -20,8 +20,6 @@ enum class CollisionTag {
 	MapEventObject,
 
 	DropObjectHitBox,
-
-	Count
 };
 
 /// @brief CollisionTag を文字列に変換する

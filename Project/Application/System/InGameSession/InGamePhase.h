@@ -8,6 +8,4 @@ enum class InGamePhase {
 	WaitingUpgrade, // 武器アップグレード選択中
 	WaitingGetItem, // アイテム取得中
 	GameOver,       // ゲームオーバー
-
-	Count
 };

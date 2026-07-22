@@ -14,8 +14,6 @@ namespace Enemy {
 		enum class Type {
 			Normal, // 通常の敵
 			Speed,	// 速度が速い敵
-
-			Count
 		};
 
 		/// @brief 特殊Enemy、倒された際にTypeの報酬を大量に落とす種類を表す列挙型
@@ -23,8 +21,6 @@ namespace Enemy {
 			None,  // 特になし
 			Money, // お金 大量
 			Exp,   // 経験値 大量
-
-			Count
 		};
 	} // namespace Data
 } // namespace Enemy

@@ -23,8 +23,6 @@ namespace Weapon {
 		KnockbackPower,
 		LifeTime,
 		Speed,
-
-		Count,
 	};
 
 	// 抽選対象の強化ステータスを一か所で管理

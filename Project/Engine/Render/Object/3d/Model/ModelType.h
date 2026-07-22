@@ -5,5 +5,5 @@ enum class ModelType {
 	Animated, // アニメーションモデル（スキニングなし）
 	Skinning,  // スキニングモデル（スキニングのみ、アニメーションなし）
 
-	Count
+	Auto // モデルデータから自動判定
 };

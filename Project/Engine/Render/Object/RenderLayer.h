@@ -14,8 +14,6 @@ namespace MadoEngine::Render {
 		Effect,
 		UI,
 		Debug,
-
-		Count,
 	};
 
 	inline constexpr const char* kRenderLayerNames[] = {
@@ -64,7 +62,8 @@ namespace MadoEngine::Render {
 
 	using RenderLayerMask = uint32_t;
 
-	inline constexpr uint32_t kRenderLayerCount = static_cast<uint32_t>(RenderLayer::Count);
+	inline constexpr uint32_t kRenderLayerCount =
+		static_cast<uint32_t>(sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
 
 	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
 

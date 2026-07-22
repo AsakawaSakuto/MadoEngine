@@ -6,7 +6,5 @@ namespace DropObject {
 		Exp,
 		
 		Heal,
-
-		Count
 	};
 }

@@ -12,7 +12,7 @@ enum class ShakeType {
 	XY,
 	XZ,
 	YZ,
-	XYZ
+	XYZ,
 };
 
 /// @brief カメラクラス

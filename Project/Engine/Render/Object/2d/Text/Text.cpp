@@ -68,7 +68,7 @@ TextFontFamilyType GetTextFontFamilyTypeFromName(const std::string& fontFamily) 
 			return definition.type;
 		}
 	}
-	return TextFontFamilyType::Count;
+	return TextFontFamilyType::Invalid;
 }
 
 Text::Text(std::string objectName) {

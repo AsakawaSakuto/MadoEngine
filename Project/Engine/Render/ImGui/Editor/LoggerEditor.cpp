@@ -11,8 +11,7 @@ namespace MadoEngine::Editor {
 
 	namespace {
 
-		constexpr std::size_t kLogLevelCount = static_cast<std::size_t>(Logger::Level::Count);
-		constexpr std::array<Logger::Level, kLogLevelCount> kLogLevels = {
+		constexpr std::array kLogLevels = {
 			Logger::Level::Engine,
 			Logger::Level::Application,
 			Logger::Level::Assets,
@@ -20,6 +19,7 @@ namespace MadoEngine::Editor {
 			Logger::Level::Error,
 			Logger::Level::Debug
 		};
+		constexpr std::size_t kLogLevelCount = kLogLevels.size();
 
 		/// @brief ログレベルの表示名を取得する
 		/// @param level 表示名を取得するログレベル

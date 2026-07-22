@@ -30,7 +30,7 @@ struct ModelSharedData {
 
 namespace MadoEngine::ModelResource {
 
-void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::string& modelPath, ModelType requestedType = ModelType::Count);
+void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::string& modelPath, ModelType requestedType = ModelType::Auto);
 void Finalize(ModelSharedData& data);
 MadoEngine::Render::PSODesc CreatePSODesc(ModelType type);
 std::string ModelTypeToString(ModelType type);

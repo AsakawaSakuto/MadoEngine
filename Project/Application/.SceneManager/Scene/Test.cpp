@@ -7,12 +7,6 @@
 #include <cmath>
 #include <format>
 
-namespace {
-	constexpr float kFpsTextUpdateInterval = 0.25f;
-	constexpr float kGameSceneTimeLimit = 10.0f * 60.0f;
-	constexpr std::uint32_t kWeaponUpgradeRandomSeed = 0x4d41444fu;
-}
-
 Test::Test()
 	
 {}

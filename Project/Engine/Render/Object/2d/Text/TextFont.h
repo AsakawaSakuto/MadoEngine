@@ -9,7 +9,8 @@ enum class TextFontFamilyType {
 	SegoeUI,
 	Arial,
 	Consolas,
-	Count,
+
+	Invalid, // 定義済みの候補に一致しない
 };
 
 struct TextFontDefinition {

@@ -29,7 +29,6 @@ namespace System {
 		case InGamePhase::WaitingUpgrade:
 		case InGamePhase::WaitingGetItem:
 		case InGamePhase::GameOver:
-		case InGamePhase::Count:
 			break;
 		}
 

@@ -45,8 +45,6 @@ namespace Player {
 		Walk,      // 歩いている状態 & 走ってる状態
 		Crouching, // しゃがんでいる状態
 		Jump,	   // ジャンプ中の状態
-
-		Count
 	};
 
 	/// @brief PlayerMotionを表示用文字列へ変換
@@ -73,8 +71,6 @@ namespace Player {
 		Traveler,
 		Warrior,
 		Wizard,
-
-		Count
 	};
 
 	inline const char* ToTypeText(Player::Type type) {

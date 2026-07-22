@@ -10,8 +10,6 @@ enum StatusEffectType {
     Freeze,     // 凍結
     Stun,       // 気絶
     Slow,       // 移動速度低下
-
-    Count
 };
 
 /// @brief ステータス異常の情報を管理する構造体

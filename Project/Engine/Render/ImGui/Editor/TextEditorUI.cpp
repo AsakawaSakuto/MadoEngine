@@ -104,13 +104,13 @@ namespace {
 	/// @param text 編集対象Text。
 	void DrawFontCombo(Text& text) {
 		const TextFontFamilyType currentType = GetTextFontFamilyTypeFromName(text.GetFontFamily());
-		const char* preview = currentType == TextFontFamilyType::Count
+		const char* preview = currentType == TextFontFamilyType::Invalid
 			? text.GetFontFamily().c_str()
 			: GetTextFontDisplayName(currentType);
 
 		if (ImGui::BeginCombo("フォント", preview)) {
-			for (int index = 0; index < static_cast<int>(TextFontFamilyType::Count); ++index) {
-				const TextFontFamilyType type = static_cast<TextFontFamilyType>(index);
+			for (const TextFontDefinition& definition : kTextFontDefinitions) {
+				const TextFontFamilyType type = definition.type;
 				const bool selected = type == currentType;
 				if (ImGui::Selectable(GetTextFontDisplayName(type), selected)) {
 					text.SetFontFamily(GetTextFontFamilyName(type));
@@ -120,7 +120,7 @@ namespace {
 				}
 			}
 
-			if (currentType == TextFontFamilyType::Count && !text.GetFontFamily().empty()) {
+			if (currentType == TextFontFamilyType::Invalid && !text.GetFontFamily().empty()) {
 				ImGui::Separator();
 				ImGui::TextDisabled("現在のフォントは候補外です。");
 			}

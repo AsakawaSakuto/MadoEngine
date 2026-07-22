@@ -6,8 +6,6 @@ enum  class AudioType {
 	SE,
 	BGM,
 	Voice,
-
-	Count
 };
 
 inline std::string AudioTypeToString(AudioType type) {

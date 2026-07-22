@@ -15,7 +15,6 @@ namespace Logger {
 		Warning,     // 警告レベルのログ
 		Error,       // エラーレベルのログ
 		Debug,       // デバッグレベルのログ
-		Count,       // ログレベル数
 	};
 
 	/// @brief ImGui表示用に保持するログ情報

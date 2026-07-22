@@ -6,7 +6,7 @@ enum class SlopeDirection {
 	PulsX,
 	MinusX,
 	PulsZ,
-	MinusZ
+	MinusZ,
 };
 
 struct Slope {

@@ -9,14 +9,13 @@ enum class LightLayer : uint32_t {
 	Effect,
 	UI,
 
-	Count,
 	None = 0xffffffffu,
 	All = 0xfffffffeu,
 };
 
 using LightLayerMask = uint32_t;
 
-inline constexpr uint32_t kLightLayerCount = static_cast<uint32_t>(LightLayer::Count);
+inline constexpr uint32_t kLightLayerCount = static_cast<uint32_t>(LightLayer::UI) + 1;
 
 inline constexpr const char* kLightLayerNames[] = {
 	"World",

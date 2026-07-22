@@ -9,6 +9,4 @@ enum class Rarity {
 	Legendary,     // 黄 // 強化の選択肢に出るのはここまで
 			       
 	Unique,        // 赤	 // キャラ専用アイテム用
-
-	Count
 };

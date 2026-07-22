@@ -85,7 +85,7 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 	}
 
 	const ModelType inferredType = InferModelType(outData.modelData, outData.animationData);
-	outData.type = (requestedType == ModelType::Count) ? inferredType : requestedType;
+	outData.type = (requestedType == ModelType::Auto) ? inferredType : requestedType;
 
 	if (outData.type == ModelType::Skinning && outData.modelData.skinClusterData.empty()) {
 		Logger::Output("ModelResource : Skinning data was not found, fallback to " + ModelTypeToString(inferredType) + " : " + outData.path, Logger::Level::Warning);

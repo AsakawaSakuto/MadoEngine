@@ -2,5 +2,5 @@
 
 enum class ChestType {
 	Normal,
-	Free
+	Free,
 };
