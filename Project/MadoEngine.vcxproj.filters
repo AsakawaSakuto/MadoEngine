@@ -124,7 +124,7 @@
     <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerHealthGauge.cpp" />
-    <ClCompile Include="Application\UI\GameSceneTimer.cpp" />
+    <ClCompile Include="Application\UI\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
@@ -143,8 +143,10 @@
     <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
-    <ClCompile Include="Application\UI\ProjectileDamageView.cpp" />
+    <ClCompile Include="Application\UI\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
+    <ClCompile Include="Application\System\Fade\Fade.cpp" />
+    <ClCompile Include="Application\UI\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\EnemyBase.h" />
@@ -639,7 +641,7 @@
     <ClInclude Include="Application\UI\Player\PlayerHealthGauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\GameSceneTimer.h">
+    <ClInclude Include="Application\UI\GamePlayView\GamePlayTimerView\GamePlayTimerView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h">
@@ -729,10 +731,19 @@
     <ClInclude Include="Application\UI\UIHeaders.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\ProjectileDamageView.h">
+    <ClInclude Include="Application\UI\GamePlayView\ProjectileDamageView\ProjectileDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\EditorManagementMode.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\System\Fade\Fade.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\GamePlayView\FpsMeasurementView\FpsMeasurementView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

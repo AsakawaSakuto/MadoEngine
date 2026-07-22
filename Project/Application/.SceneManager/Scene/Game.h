@@ -89,5 +89,5 @@ private:
 	bool useDebugCamera_ = false;
 
 	// System
-	std::unique_ptr<InGameSession> inGameSession_;
+	std::unique_ptr<System::InGameSession> inGameSession_;
 };

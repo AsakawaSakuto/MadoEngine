@@ -57,37 +57,4 @@ public:
 private:
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
-
-	ColliderShape mapLimitBox_;
-	Vector3 mapLimitBoxPos_;
-
-	std::unique_ptr<Player::Base> player_;
-
-	std::unique_ptr<Player::ExpGauge> expGauge_;
-	std::unique_ptr<Player::HealthGauge> healthGauge_;
-
-	std::unique_ptr<Map> map_;
-
-	std::unique_ptr<Enemy::Manager> enemyManager_;
-	std::unique_ptr<Enemy::Spawner> enemySpawner_;
-
-	std::unique_ptr<Player::PlayerIconUI> playerIconUI_;
-
-	std::unique_ptr<Weapon::Inventory> weaponInventory_;
-	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
-	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
-	Weapon::UpgradeUI weaponUpgradeUI_;
-	std::unique_ptr<Weapon::WeaponIconUI> weaponIconUI_;
-
-	Sprite* fadeSprite_ = nullptr;
-	MadoEngine::Text* playerHealthText_ = nullptr;
-	MadoEngine::Text* enemyCountText_ = nullptr;
-	MadoEngine::Text* fpsText_ = nullptr;
-	GameTimer fadeOutTimer_;
-	float fpsSampleTime_ = 0.0f;
-	int fpsSampleFrameCount_ = 0;
-	bool useDebugCamera_ = false;
-
-	// System
-	std::unique_ptr<InGameSession> inGameSession_;
 };

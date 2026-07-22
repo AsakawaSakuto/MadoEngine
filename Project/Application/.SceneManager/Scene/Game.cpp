@@ -9,6 +9,7 @@
 
 namespace {
 	constexpr float kFpsTextUpdateInterval = 0.25f;
+	constexpr float kGameSceneTimeLimit = 10.0f * 60.0f;
 	constexpr std::uint32_t kWeaponUpgradeRandomSeed = 0x4d41444fu;
 }
 
@@ -90,8 +91,8 @@ void Game::Initialize() {
 	playerIconUI_->Initialize();
 
 	// System
-	inGameSession_ = std::make_unique<InGameSession>();
-	inGameSession_->Initialize();
+	inGameSession_ = std::make_unique<System::InGameSession>();
+	inGameSession_->Initialize(kGameSceneTimeLimit);
 
 	MadoEngine::TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
 }
@@ -110,6 +111,7 @@ SceneType Game::Update(float dt) {
 		MyCollider::Update();
 		player_->ResolveAfterCollision();
 		enemyManager_->ResolveAfterCollision();
+
 		map_->Update(*player_);
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
 		weaponInventory_->Update(deltaTime, player_->GetPosition(), enemyManager_->GetNearestEnemyPosition());
