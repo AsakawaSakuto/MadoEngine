@@ -295,6 +295,7 @@
     <ClInclude Include="Application\.Core\Terminal.h" />
     <ClInclude Include="Application\.SceneManager\CommonData.h" />
     <ClInclude Include="Application\.SceneManager\SceneType.h" />
+    <ClInclude Include="Application\ColliderPairRegister.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObject.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObjectManager.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObjectStatus.h" />
@@ -342,6 +343,7 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
+    <ClInclude Include="Application\InputRegister.h" />
     <ClInclude Include="Application\System\Fade\Fade.h" />
     <ClInclude Include="Application\System\InGameSession\InGamePhase.h" />
     <ClInclude Include="Application\System\InGameSession\InGameSession.h" />

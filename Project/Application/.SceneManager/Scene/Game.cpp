@@ -46,21 +46,7 @@ void Game::Initialize() {
 	mapLimitBoxPos_ = mapLimitBox.center;
 	mapLimitBox_ = mapLimitBox;
 	MyCollider::RegisterCollider("MapLimitBox", CollisionTag::MapLimitBox, &mapLimitBox_, &mapLimitBoxPos_, 1.0f);
-	MyCollider::RegisterCollisionPair(CollisionTag::MapLimitBox, CollisionTag::PlayerProjectileHitBox, false);
-
-	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapBlock, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::MapSlope, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::EnemyMovementSphere, CollisionTag::EnemyMovementSphere, true);
-
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock, true);
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, true);
-
-	MyCollider::RegisterCollisionPair(CollisionTag::EnemyHitBox, CollisionTag::PlayerProjectileHitBox, false);
-	MyCollider::RegisterCollisionPair(CollisionTag::EnemyHitBox, CollisionTag::PlayerHitBox, false);
-
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerDropObjectGetSphere, CollisionTag::DropObjectHitBox, false);
-	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::DropObjectHitBox, false);
-
+	
 	map_ = std::make_unique<Map>();
 	map_->Initialize(MyRand::CreateSeed());
 

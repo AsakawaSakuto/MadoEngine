@@ -7,6 +7,8 @@
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
 #include "EditorUIHeaders.h"
+#include "../InputRegister.h"
+#include "../ColliderPairRegister.h"
 #include <cassert>
 
 namespace {
@@ -62,6 +64,10 @@ void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
 
 void SceneManager::Initialize(SceneType initialScene) {
 	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
+
+	// 入力とコライダーの登録
+	RegisterInput();
+	RegisterColliderPair();
 
 	ChangeScene(initialScene);
 
