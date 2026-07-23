@@ -8,6 +8,7 @@ enum class CollisionTag {
 	PlayerMovementSphere,
 	PlayerDropObjectGetSphere,
 	PlayerProjectileHitBox,
+	PlayerAttackRangeSphere,
 
 	EnemyHitBox,
 	EnemyMovementSphere,
@@ -32,6 +33,7 @@ inline std::string CollisionTagToString(CollisionTag tag) {
 	case CollisionTag::PlayerDropObjectGetSphere:    return "PlayerDropObjectGetSphere";
 
 	case CollisionTag::PlayerProjectileHitBox: return "PlayerProjectileHitBox";
+	case CollisionTag::PlayerAttackRangeSphere: return "PlayerAttackRangeSphere";
 
 	case CollisionTag::EnemyHitBox:         return "EnemyHitBox";
 	case CollisionTag::EnemyMovementSphere: return "EnemyMovementSphere";

@@ -58,7 +58,7 @@
     "screenPasses": [
         {
             "effectShaderKey": "PostEffect/Fog.PS",
-            "enabled": false,
+            "enabled": true,
             "ignoreDepthForMask": false,
             "key": "ScreenEffectPass_2",
             "name": "Fog",

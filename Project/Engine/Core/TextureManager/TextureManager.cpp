@@ -218,7 +218,8 @@ namespace MadoEngine {
         DirectX::ScratchImage image;
         HRESULT hr = DirectX::LoadFromWICFile(
             filePath.c_str(),
-            DirectX::WIC_FLAGS_FORCE_SRGB,
+            // 色空間情報を持たない一般的な画像は sRGB として扱う
+            DirectX::WIC_FLAGS_DEFAULT_SRGB,
             nullptr,
             image);
 

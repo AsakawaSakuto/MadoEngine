@@ -60,6 +60,7 @@ namespace Player {
 
 		ColliderShape hitAABB_;
 		ColliderShape expGetSphere_;
+		ColliderShape attackRangeSphere_;
 
 		Camera* camera_ = nullptr;
 

@@ -1,5 +1,5 @@
 {
-    "duration": 3.0,
+    "duration": 1.0,
     "geometry": {
         "arcAngleDegrees": {
             "default": 360.0,
@@ -21,7 +21,23 @@
                 },
                 {
                     "easing": "Linear",
-                    "time": 1.0,
+                    "time": 0.10000000149011612,
+                    "value": [
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "easing": "Linear",
+                    "time": 0.20000000298023224,
+                    "value": [
+                        0.5,
+                        0.5
+                    ]
+                },
+                {
+                    "easing": "Linear",
+                    "time": 0.5,
                     "value": [
                         1.0,
                         1.0
@@ -67,7 +83,23 @@
                 },
                 {
                     "easing": "Linear",
-                    "time": 1.0,
+                    "time": 0.10000000149011612,
+                    "value": [
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "easing": "Linear",
+                    "time": 0.20000000298023224,
+                    "value": [
+                        0.5,
+                        0.5
+                    ]
+                },
+                {
+                    "easing": "Linear",
+                    "time": 0.5,
                     "value": [
                         1.0,
                         1.0

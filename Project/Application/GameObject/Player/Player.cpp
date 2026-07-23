@@ -25,9 +25,14 @@ namespace Player {
 		s2.radius = 2.5f;
 		expGetSphere_ = s2;
 
+		Sphere s3;
+		s3.radius = 50.0f;
+		attackRangeSphere_ = s3;
+
 		MyCollider::RegisterCollider("PlayerMovementSphere", CollisionTag::PlayerMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerExpGetSphere", CollisionTag::PlayerDropObjectGetSphere, &expGetSphere_, &transform_.translate, 0.0f);
+		MyCollider::RegisterCollider("PlayerAttackRangeSphere", CollisionTag::PlayerAttackRangeSphere, &attackRangeSphere_, &transform_.translate, 0.0f);
 
 		model_ = MyModel::Create("Player", "walk", SceneType::Game);
 		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
@@ -125,6 +130,7 @@ namespace Player {
 		MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(expGetSphere_), Vector4{ 0.0f,0.0f,1.0f,1.0f });
+		MyDebugLine::AddShape(std::get<Sphere>(attackRangeSphere_), Vector4{ 1.0f,0.0f,0.0f,1.0f });
 	}
 
 	/// @brief Player直下の地面へ影の描画座標を更新します。

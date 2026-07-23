@@ -19,4 +19,5 @@ void RegisterColliderPair() {
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerDropObjectGetSphere, CollisionTag::DropObjectHitBox, false);
 	MyCollider::RegisterCollisionPair(CollisionTag::PlayerHitBox, CollisionTag::DropObjectHitBox, false);
 
+	MyCollider::RegisterCollisionPair(CollisionTag::PlayerAttackRangeSphere, CollisionTag::EnemyHitBox, false);
 }

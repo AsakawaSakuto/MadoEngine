@@ -11,20 +11,20 @@
                     ],
                     "min": [
                         1.0,
-                        0.501960813999176,
+                        0.0,
                         0.0,
                         0.0
                     ]
                 },
                 "start": {
                     "max": [
-                        1.0,
-                        0.501960813999176,
+                        0.250980406999588,
+                        0.125490203499794,
                         0.0,
                         1.0
                     ],
                     "min": [
-                        1.0,
+                        0.250980406999588,
                         0.0,
                         0.0,
                         1.0
@@ -32,16 +32,11 @@
                 }
             },
             "emission": {
-                "bursts": [
-                    {
-                        "count": 1,
-                        "time": 0.0
-                    }
-                ],
-                "duration": 0.0625,
+                "bursts": [],
+                "duration": 10.0,
                 "isLoop": true,
-                "maxParticles": 64,
-                "ratePerSecond": 0.0,
+                "maxParticles": 128,
+                "ratePerSecond": 32.0,
                 "startDelay": 0.0
             },
             "initial": {
@@ -63,11 +58,11 @@
                 },
                 "directionMode": "configured",
                 "lifeTime": {
-                    "max": 1.0,
-                    "min": 1.0
+                    "max": 0.30000001192092896,
+                    "min": 0.20000000298023224
                 },
                 "rotation": {
-                    "max": 0.0,
+                    "max": 360.0,
                     "min": 0.0
                 },
                 "speed": {
@@ -90,7 +85,7 @@
             },
             "name": "Emitter",
             "renderer": {
-                "blendMode": "normal",
+                "blendMode": "add",
                 "sortMode": "backToFront",
                 "texture": "smork"
             },
@@ -122,6 +117,127 @@
                     "min": [
                         2.0,
                         2.0
+                    ]
+                }
+            }
+        },
+        {
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        0.501960813999176,
+                        0.0,
+                        0.0
+                    ],
+                    "min": [
+                        1.0,
+                        0.501960813999176,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [],
+                "duration": 10.0,
+                "isLoop": true,
+                "maxParticles": 512,
+                "ratePerSecond": 128.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        0.5,
+                        0.0,
+                        0.5
+                    ],
+                    "min": [
+                        -0.5,
+                        0.0,
+                        -0.5
+                    ]
+                },
+                "directionMode": "configured",
+                "lifeTime": {
+                    "max": 0.10000000149011612,
+                    "min": 0.10000000149011612
+                },
+                "rotation": {
+                    "max": 360.0,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter2",
+            "renderer": {
+                "blendMode": "add",
+                "sortMode": "backToFront",
+                "texture": "circle"
+            },
+            "shape": {
+                "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "type": "point"
+            },
+            "simulationSpace": "world",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "min": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ]
+                },
+                "start": {
+                    "max": [
+                        0.5,
+                        0.5
+                    ],
+                    "min": [
+                        0.5,
+                        0.5
                     ]
                 }
             }

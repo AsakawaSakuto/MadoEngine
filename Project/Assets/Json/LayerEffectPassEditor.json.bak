@@ -57,15 +57,6 @@
     ],
     "screenPasses": [
         {
-            "effectShaderKey": "PostEffect/CopyImage.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_1",
-            "name": "Screen Effect",
-            "parameters": {},
-            "targetLayerMask": 255
-        },
-        {
             "effectShaderKey": "PostEffect/Fog.PS",
             "enabled": false,
             "ignoreDepthForMask": false,
