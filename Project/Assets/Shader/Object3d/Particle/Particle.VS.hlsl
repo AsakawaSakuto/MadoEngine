@@ -29,9 +29,14 @@ cbuffer PerView : register(b0)
     float4 gCameraUp;
 };
 
+cbuffer PerBatch : register(b1)
+{
+    uint gFirstInstance;
+};
+
 VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
 {
-    ParticleInstance particle = gParticles[instanceId];
+    ParticleInstance particle = gParticles[gFirstInstance + instanceId];
 
     float sine = 0.0f;
     float cosine = 1.0f;

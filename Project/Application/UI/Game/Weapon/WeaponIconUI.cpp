@@ -1,7 +1,7 @@
 #include "WeaponIconUI.h"
 #include "GameObject/Weapon/WeaponInventory.h"
 
-namespace UI {
+namespace UI::Game {
 
 	void WeaponIconUI::Initialize(int slotCount) {
 	

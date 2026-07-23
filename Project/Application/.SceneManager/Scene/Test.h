@@ -11,11 +11,7 @@
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
-#include "UI/Player/PlayerExpGauge.h"
-#include "UI/Player/PlayerIconUI.h"
-#include "UI/Player/PlayerHealthGauge.h"
-#include "UI/Weapon/WeaponUpgradeUI.h"
-#include "UI/Weapon/WeaponIconUI.h"
+#include "UI/UIHeaders.h"
 #include "System/InGameSession/InGameSession.h"
 
 /// @brief テストシーン

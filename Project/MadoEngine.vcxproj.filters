@@ -122,14 +122,14 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
-    <ClCompile Include="Application\UI\Player\PlayerExpGauge.cpp" />
-    <ClCompile Include="Application\UI\Player\PlayerHealthGauge.cpp" />
-    <ClCompile Include="Application\UI\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
+    <ClCompile Include="Application\UI\Game\Player\PlayerExpGauge.cpp" />
+    <ClCompile Include="Application\UI\Game\Player\PlayerHealthGauge.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
-    <ClCompile Include="Application\UI\Weapon\WeaponUpgradeUI.cpp" />
+    <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeUI.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Rock.cpp" />
@@ -140,13 +140,15 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Axe.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.cpp" />
-    <ClCompile Include="Application\UI\Weapon\WeaponIconUI.cpp" />
-    <ClCompile Include="Application\UI\Player\PlayerIconUI.cpp" />
+    <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
+    <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
-    <ClCompile Include="Application\UI\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\System\Fade\Fade.cpp" />
-    <ClCompile Include="Application\UI\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
+    <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
+    <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\EnemyBase.h" />
@@ -635,13 +637,13 @@
     <ClInclude Include="Engine\Render\Object\2d\Text\TextFont.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Player\PlayerExpGauge.h">
+    <ClInclude Include="Application\UI\Game\Player\PlayerExpGauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Player\PlayerHealthGauge.h">
+    <ClInclude Include="Application\UI\Game\Player\PlayerHealthGauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\GamePlayView\GamePlayTimerView\GamePlayTimerView.h">
+    <ClInclude Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h">
@@ -664,7 +666,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\ModelEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
-    <ClInclude Include="Application\UI\Weapon\WeaponUpgradeUI.h" />
+    <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeUI.h" />
     <ClInclude Include="Application\GameObject\Item\ItemStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
@@ -713,10 +715,10 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Weapon\WeaponIconUI.h">
+    <ClInclude Include="Application\UI\Game\Weapon\WeaponIconUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Player\PlayerIconUI.h">
+    <ClInclude Include="Application\UI\Game\Player\PlayerIconUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\System\InGameSession\InGameSession.h">
@@ -731,7 +733,7 @@
     <ClInclude Include="Application\UI\UIHeaders.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\GamePlayView\ProjectileDamageView\ProjectileDamageView.h">
+    <ClInclude Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h">
@@ -743,13 +745,19 @@
     <ClInclude Include="Application\System\Fade\Fade.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\GamePlayView\FpsMeasurementView\FpsMeasurementView.h">
+    <ClInclude Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\InputRegister.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\ColliderPairRegister.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\TitleSclectIcon.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
   </ItemGroup>

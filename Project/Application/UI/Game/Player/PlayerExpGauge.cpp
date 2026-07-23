@@ -1,20 +1,20 @@
 #include "PlayerExpGauge.h"
 
-namespace UI {
+namespace UI::Game {
 
-	void ExpGauge::Initialize() {
+	void PlayerExpGauge::Initialize() {
 		expGauge_ = std::make_unique<Gauge>();
 		expGauge_->Initialize("PlayerExpGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
 	}
 
-	void ExpGauge::Update(float currentExp, float maxExp) {
+	void PlayerExpGauge::Update(float currentExp, float maxExp) {
 		if (expGauge_) {
 			expGauge_->SetCurrentValue(currentExp);
 			expGauge_->SetMaxValue(maxExp);
 		}
 	}
 
-	void ExpGauge::DrawImGui() {
+	void PlayerExpGauge::DrawImGui() {
 		if (expGauge_) {
 			expGauge_->DrawImGui("ExpGauge");
 		}

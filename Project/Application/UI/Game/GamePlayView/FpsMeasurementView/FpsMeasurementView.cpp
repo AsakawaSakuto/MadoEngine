@@ -8,7 +8,7 @@ namespace {
 	constexpr const char* kTextObjectName = "FpsText";
 }
 
-namespace GamePlayView {
+namespace UI::Game {
 
 	void FpsMeasurementView::Initialize() {
 		fpsText_ = MyText::Create(

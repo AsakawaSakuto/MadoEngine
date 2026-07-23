@@ -9,7 +9,7 @@ namespace {
 	constexpr const char* kTextObjectName = "GamePlayTimerText";
 }
 
-namespace GamePlayView {
+namespace UI::Game {
 
 	void GamePlayTimerView::Initialize() {
 		timerText_ = MyText::Create(

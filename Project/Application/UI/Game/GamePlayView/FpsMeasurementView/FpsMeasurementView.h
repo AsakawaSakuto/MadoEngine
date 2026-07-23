@@ -4,7 +4,7 @@ namespace MadoEngine {
 	class Text;
 }
 
-namespace GamePlayView {
+namespace UI::Game {
 
 	/// @brief FPSを計測してTextへ表示するビュー
 	class FpsMeasurementView {

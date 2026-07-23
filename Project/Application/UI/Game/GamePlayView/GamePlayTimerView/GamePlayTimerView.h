@@ -4,7 +4,7 @@ namespace MadoEngine {
 	class Text;
 }
 
-namespace GamePlayView {
+namespace UI::Game {
 
 	/// @brief ゲームプレイの残り時間をTextへ表示するビュー
 	class GamePlayTimerView {

@@ -60,7 +60,7 @@ namespace Projectile {
 	void FireBall::StartParticle() {
 		MadoEngine::Particle::PlayDesc desc;
 		desc.transform.translate = transform_.translate;
-		desc.sceneType = SceneType::Test;
+		desc.sceneType = SceneType::Game;
 		desc.loopOverride = true;
 		particleHandle_ = MyParticle3d::Play("FireBall", desc);
 	}

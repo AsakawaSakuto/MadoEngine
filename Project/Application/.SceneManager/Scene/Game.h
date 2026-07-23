@@ -11,13 +11,7 @@
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
-#include "UI/Player/PlayerExpGauge.h"
-#include "UI/Player/PlayerIconUI.h"
-#include "UI/Player/PlayerHealthGauge.h"
-#include "UI/Weapon/WeaponUpgradeUI.h"
-#include "UI/Weapon/WeaponIconUI.h"
-#include "UI/GamePlayView/FpsMeasurementView/FpsMeasurementView.h"
-#include "UI/GamePlayView/GamePlayTimerView/GamePlayTimerView.h"
+#include "UI/UIHeaders.h"
 #include "System/InGameSession/InGameSession.h"
 
 /// @brief テストシーン
@@ -74,17 +68,16 @@ private:
 	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
 	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
 	
-	std::unique_ptr<UI::PlayerIconUI> playerIconUI_;
-	std::unique_ptr<UI::ExpGauge> expGauge_;
-	std::unique_ptr<UI::HealthGauge> healthGauge_;
-	std::unique_ptr<UI::WeaponIconUI> weaponIconUI_;
-	Weapon::UpgradeUI weaponUpgradeUI_;
+	std::unique_ptr<UI::Game::PlayerIconUI> playerIconUI_;
+	std::unique_ptr<UI::Game::PlayerExpGauge> expGauge_;
+	std::unique_ptr<UI::Game::PlayerHealthGauge> healthGauge_;
+	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
+	UI::Game::UpgradeUI weaponUpgradeUI_;
 
 	Sprite* fadeSprite_ = nullptr;
-	MadoEngine::Text* playerHealthText_ = nullptr;
 	MadoEngine::Text* enemyCountText_ = nullptr;
-	GamePlayView::FpsMeasurementView fpsMeasurementView_;
-	GamePlayView::GamePlayTimerView gamePlayTimerView_;
+	UI::Game::FpsMeasurementView fpsMeasurementView_;
+	UI::Game::GamePlayTimerView gamePlayTimerView_;
 	GameTimer fadeOutTimer_;
 	bool useDebugCamera_ = false;
 

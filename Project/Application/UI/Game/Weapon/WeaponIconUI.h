@@ -7,7 +7,7 @@ namespace Weapon {
 	class Inventory;
 }
 
-namespace UI {
+namespace UI::Game {
 	
 	/// @brief 武器アイコンの表示を管理するクラス
 	class WeaponIconUI {

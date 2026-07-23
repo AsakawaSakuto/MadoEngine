@@ -10,7 +10,7 @@ Terminal::Terminal(HINSTANCE hInstance)
 	sceneManager_->RegisterScene(SceneType::Title,  []() { return std::make_unique<Title>(); });
 	sceneManager_->RegisterScene(SceneType::Game,   []() { return std::make_unique<Game>(); });
 	sceneManager_->RegisterScene(SceneType::Result, []() { return std::make_unique<Result>(); });
-	sceneManager_->Initialize(SceneType::Title);
+	sceneManager_->Initialize(SceneType::Game);
 }
 
 void Terminal::Run() {

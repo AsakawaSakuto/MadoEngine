@@ -1,9 +1,9 @@
 #pragma once
 #include "RenderHeaders.h"
 
-namespace UI {
+namespace UI::Game {
 
-	class ExpGauge {
+	class PlayerExpGauge {
 	public:
 
 		void Initialize();

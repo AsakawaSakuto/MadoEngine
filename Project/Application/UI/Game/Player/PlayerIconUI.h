@@ -1,8 +1,8 @@
 #pragma once
 #include <RenderHeaders.h>
-#include "../../GameObject/Player/PlayerStatus.h"
+#include "GameObject/Player/PlayerStatus.h"
 
-namespace UI {
+namespace UI::Game {
 	
 	/// @brief プレイヤーアイコンの表示を管理するクラス
 	class PlayerIconUI {

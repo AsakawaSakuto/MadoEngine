@@ -18,6 +18,7 @@ namespace {
 	constexpr UINT kParticleRootInstances = 0;
 	constexpr UINT kParticleRootPerView = 1;
 	constexpr UINT kParticleRootTexture = 2;
+	constexpr UINT kParticleRootFirstInstance = 3;
 
 } // namespace
 
@@ -232,12 +233,17 @@ namespace MadoEngine::Particle {
 				kParticleRootTexture,
 				MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(batch.textureIndex)
 			);
+			commandList_->SetGraphicsRoot32BitConstant(
+				kParticleRootFirstInstance,
+				batch.firstInstance,
+				0
+			);
 			commandList_->DrawIndexedInstanced(
 				6,
 				batch.instanceCount,
 				0,
 				0,
-				batch.firstInstance
+				0
 			);
 		}
 	}

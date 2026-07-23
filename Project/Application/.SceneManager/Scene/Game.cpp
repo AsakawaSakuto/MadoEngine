@@ -26,13 +26,12 @@ void Game::Initialize() {
 	player_->Initialize();
 	player_->SetCamera(&tpsCamera_);
 
-	expGauge_ = std::make_unique<UI::ExpGauge>();
+	expGauge_ = std::make_unique<UI::Game::PlayerExpGauge>();
 	expGauge_->Initialize();
 
-	healthGauge_ = std::make_unique<UI::HealthGauge>();
+	healthGauge_ = std::make_unique<UI::Game::PlayerHealthGauge>();
 	healthGauge_->Initialize();
 
-	playerHealthText_ = MyText::Create("PlayerHealthText", "HP : 0 / 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 	fpsMeasurementView_.Initialize();
 	gamePlayTimerView_.Initialize();
@@ -55,7 +54,7 @@ void Game::Initialize() {
 	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game);
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
-	weaponInventory_->Initialize(Projectile::Type::Pistol);
+	weaponInventory_->Initialize(Projectile::Type::FireBall);
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 	weaponUpgradeSystem_ = std::make_unique<Weapon::UpgradeSystem>();
 	weaponUpgradeSystem_->Initialize(player_->GetLevel(), kWeaponUpgradeRandomSeed);
@@ -67,10 +66,10 @@ void Game::Initialize() {
 
 	fadeOutTimer_.Start(2.0f);
 
-	weaponIconUI_ = std::make_unique<UI::WeaponIconUI>();
+	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
 	weaponIconUI_->Initialize(4);
 
-	playerIconUI_ = std::make_unique<UI::PlayerIconUI>();
+	playerIconUI_ = std::make_unique<UI::Game::PlayerIconUI>();
 	playerIconUI_->Initialize();
 
 	// System
@@ -125,9 +124,6 @@ SceneType Game::Update(float dt) {
 	auto status = player_->GetStatus();
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
 	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
-	if (playerHealthText_) {
-		playerHealthText_->SetText(std::format("HP : {} / {}", status.currentHealth, status.maxHealth));
-	}
 	if (enemyCountText_) {
 		enemyCountText_->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));
 	}
@@ -220,12 +216,10 @@ void Game::Finalize() {
 	DropObject::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
 	MySprite::DestroyByScene(SceneType::Game);
-	MyText::Destroy("PlayerHealthText");
 	MyText::Destroy("EnemyCountText");
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();
 	MyModel::DestroyByScene(SceneType::Game);
-	playerHealthText_ = nullptr;
 	enemyCountText_ = nullptr;
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);

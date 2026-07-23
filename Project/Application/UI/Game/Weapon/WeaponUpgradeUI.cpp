@@ -4,7 +4,7 @@
 #include "Input/MyInput.h"
 #include "ImGuiHeaders.h"
 
-namespace Weapon {
+namespace UI::Game {
 	namespace {
 		constexpr const char* kUpgradeUpAction = "Up";
 		constexpr const char* kUpgradeDownAction = "Down";
@@ -19,10 +19,10 @@ namespace Weapon {
 		MyInput::RegisterInput(kUpgradeDecisionAction, { DIK_SPACE }, { GAMEPAD_A });
 	}
 
-	void UpgradeUI::UpdateInput(UpgradeSystem& upgradeSystem, Inventory& inventory) {
+	void UpgradeUI::UpdateInput(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory) {
 		SynchronizeSelection(upgradeSystem);
 
-		const std::vector<UpgradeChoice>& choices = upgradeSystem.GetChoices();
+		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
 		if (choices.empty()) {
 			return;
 		}
@@ -45,7 +45,7 @@ namespace Weapon {
 		}
 	}
 
-	void UpgradeUI::DrawImGui(UpgradeSystem& upgradeSystem, Inventory& inventory) {
+	void UpgradeUI::DrawImGui(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory) {
 #ifdef USE_IMGUI
 		SynchronizeSelection(upgradeSystem);
 
@@ -54,7 +54,7 @@ namespace Weapon {
 		ImGui::TextDisabled("↑ / W・↓ / S: 選択　Space / A: 決定");
 		ImGui::Separator();
 
-		const std::vector<UpgradeChoice>& choices = upgradeSystem.GetChoices();
+		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
 		if (choices.empty()) {
 			ImGui::TextDisabled(upgradeSystem.IsUpgrading() ? "候補を生成できませんでした" : "レベルアップ待機中");
 			ImGui::End();
@@ -62,7 +62,7 @@ namespace Weapon {
 		}
 
 		for (std::size_t choiceIndex = 0; choiceIndex < choices.size(); ++choiceIndex) {
-			const UpgradeChoice& choice = choices[choiceIndex];
+			const Weapon::UpgradeChoice& choice = choices[choiceIndex];
 			ImGui::PushID(static_cast<int>(choiceIndex));
 			if (choiceIndex == selectedChoiceIndex_) {
 				ImGui::TextColored(
@@ -76,7 +76,7 @@ namespace Weapon {
 			}
 			ImGui::Text("内容: %s", choice.choiceTypeDisplayName.c_str());
 
-			if (choice.choiceType == UpgradeChoiceType::OwnedWeaponUpgrade) {
+			if (choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade) {
 				const auto& color = choice.rarityDisplayColor;
 				ImGui::TextColored(
 					ImVec4(color[0], color[1], color[2], color[3]),
@@ -110,13 +110,13 @@ namespace Weapon {
 #endif // USE_IMGUI
 	}
 
-	void UpgradeUI::SynchronizeSelection(const UpgradeSystem& upgradeSystem) {
+	void UpgradeUI::SynchronizeSelection(const Weapon::UpgradeSystem& upgradeSystem) {
 		if (!upgradeSystem.IsUpgrading()) {
 			ResetSelection();
 			return;
 		}
 
-		const std::vector<UpgradeChoice>& choices = upgradeSystem.GetChoices();
+		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
 		if (choices.empty()) {
 			ResetSelection();
 			return;
