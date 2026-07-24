@@ -1,8 +1,7 @@
 #include "Terminal.h"
 #include <cstddef>
 
-Terminal::Terminal(HINSTANCE hInstance)
-{
+Terminal::Terminal(HINSTANCE hInstance) {
 	execution_ = std::make_unique<MadoEngine::EngineExecution>();
 	execution_->Initialize(hInstance);
 	sceneManager_ = std::make_unique<SceneManager>();
@@ -10,7 +9,7 @@ Terminal::Terminal(HINSTANCE hInstance)
 	sceneManager_->RegisterScene(SceneType::Title,  []() { return std::make_unique<Title>(); });
 	sceneManager_->RegisterScene(SceneType::Game,   []() { return std::make_unique<Game>(); });
 	sceneManager_->RegisterScene(SceneType::Result, []() { return std::make_unique<Result>(); });
-	sceneManager_->Initialize(SceneType::Game);
+	sceneManager_->Initialize(SceneType::Title);
 }
 
 void Terminal::Run() {
@@ -32,7 +31,7 @@ void Terminal::Run() {
 
 		const MadoEngine::Render::RenderLayerMask layerEffectTargetMask = execution_->GetEnabledLayerEffectTargetMask();
 		if (layerEffectTargetMask != 0) {
-			sceneManager_->DrawLayerMask(MadoEngine::Render::kAllRenderLayers);
+			sceneManager_->DrawSceneLayerMask(MadoEngine::Render::kAllRenderLayers);
 			sceneManager_->DrawCurrentScene();
 			execution_->EndSceneColorRender();
 
@@ -45,7 +44,7 @@ void Terminal::Run() {
 
 				const MadoEngine::Render::RenderLayerMask chainLayerMask = layerEffectPass.GetTargetLayerMask();
 				execution_->BeginLayerEffectRender(layerEffectPass);
-				sceneManager_->DrawLayerMask(chainLayerMask);
+				sceneManager_->DrawSceneLayerMask(chainLayerMask);
 				execution_->EndLayerEffectRender();
 
 				execution_->ApplyLayerEffectToChain(layerEffectPass);
@@ -68,9 +67,13 @@ void Terminal::Run() {
 				execution_->CompositeLayerEffectChain();
 			}
 		} else {
-			sceneManager_->DrawLayerMask(MadoEngine::Render::kAllRenderLayers);
+			sceneManager_->DrawSceneLayerMask(MadoEngine::Render::kAllRenderLayers);
 			sceneManager_->DrawCurrentScene();
 		}
+
+		execution_->BeginOverlayRender();
+		sceneManager_->DrawOverlayLayerMask(MadoEngine::Render::kAllRenderLayers);
+		execution_->EndOverlayRender();
 
 		// DockSpaceを先に生成してから、シーンのImGuiウィンドウを作成する
 		execution_->BeginImGuiLayout();

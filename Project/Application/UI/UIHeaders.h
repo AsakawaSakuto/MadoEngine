@@ -8,5 +8,5 @@
 #include "Game/Player/PlayerIconUI.h"
 #include "Game/Weapon/WeaponIconUI.h"
 #include "Game/Weapon/WeaponUpgradeUI.h"
-#include "Title/PlayerSelectIcon/TitleSclectIcon.h"
+#include "Title/PlayerSelectIcon/PLayerSclectIcon.h"
 #include "Title/WeaponSelectIcon/WeaponSelectIcon.h"

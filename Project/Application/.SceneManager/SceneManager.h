@@ -46,6 +46,14 @@ public:
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
 
+	/// @brief 指定したレイヤーマスクに含まれるScene段階の描画対象を描画します
+	/// @param layerMask 描画対象のレイヤーマスク
+	void DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
+
+	/// @brief 指定したレイヤーマスクに含まれるSpriteとTextを描画します
+	/// @param layerMask 描画対象のレイヤーマスク
+	void DrawOverlayLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
+
 	/// @brief 現在のシーン固有の描画処理を実行します
 	void DrawCurrentScene();
 

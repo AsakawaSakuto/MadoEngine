@@ -754,7 +754,7 @@
     <ClInclude Include="Application\ColliderPairRegister.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\TitleSclectIcon.h">
+    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h">

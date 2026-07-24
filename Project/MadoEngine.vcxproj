@@ -352,7 +352,7 @@
     <ClInclude Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerIconUI.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.h" />
-    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\TitleSclectIcon.h" />
+    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h" />
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h" />
     <ClInclude Include="Application\UI\UIHeaders.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponIconUI.h" />

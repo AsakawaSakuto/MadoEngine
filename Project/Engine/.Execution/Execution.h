@@ -93,8 +93,15 @@ namespace MadoEngine
 		/// @brief 対象Layerのエフェクトチェーン結果を現在の合成済み画像へ合成する
 		void CompositeLayerEffectChain();
 
-		/// @brief 画面全体ポストエフェクトを合成済み画像へ適用する
-		void ApplyScreenEffectPasses();
+		/// @brief 指定段階の画面全体ポストエフェクトを合成済み画像へ適用する
+		/// @param stage 適用する画面全体ポストエフェクトの段階
+		void ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage stage);
+
+		/// @brief Scene段階のポストエフェクト結果へSpriteとTextを描画する準備を行う
+		void BeginOverlayRender();
+
+		/// @brief SpriteとTextの描画を終了してFinal段階の入力を確定する
+		void EndOverlayRender();
 
 		/// @brief ImGuiレイアウト開始（DockSpace・GameView生成）
 		/// @brief シーンの DrawImGui() より前に呼ぶこと
@@ -152,6 +159,9 @@ namespace MadoEngine
 		/// @param effectSrv エフェクト結果のGPU SRVハンドル
 		void DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv);
 
+		/// @brief 現在のシーンカラーをポストエフェクト入力として使用可能な状態へ確定する
+		void ResolveCompositeSource();
+
 		/// @brief 次のポストエフェクト合成先RenderTarget名を取得する
 		/// @return 次の合成先RenderTarget名
 		const std::string& GetNextPostEffectOutputName() const;
@@ -197,9 +207,13 @@ namespace MadoEngine
 		std::string currentCompositeSourceName_ = "SceneColor";
 		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
 		std::string currentLayerEffectSourceName_ = "LayerColor";
+		std::string currentOverlayTargetName_;
 		bool isSceneColorEnded_ = false;
 		bool isLayerEffectChainResolved_ = false;
 		bool isLayerEffectResolved_ = false;
+		bool isOverlayRenderActive_ = false;
+		bool isSceneScreenEffectStageApplied_ = false;
+		bool isFinalScreenEffectStageApplied_ = false;
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;

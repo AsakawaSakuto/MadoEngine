@@ -55,7 +55,41 @@ namespace MadoEngine::Editor {
         enum class LayerEffectPassListType {
             Layer,
             Screen,
+            Count,
         };
+
+        constexpr const char* kScreenEffectStageNames[] = {
+            "Scene",
+            "Final",
+        };
+
+        static_assert(
+            CountOf(kScreenEffectStageNames) ==
+            static_cast<std::size_t>(Render::ScreenEffectStage::Count)
+        );
+
+        /// @brief フルスクリーンポストエフェクトの適用段階名を取得する
+        /// @param stage 名前を取得する適用段階
+        /// @return 適用段階名
+        const char* GetScreenEffectStageName(Render::ScreenEffectStage stage) {
+            const std::size_t index = static_cast<std::size_t>(stage);
+            if (index >= CountOf(kScreenEffectStageNames)) {
+                return kScreenEffectStageNames[static_cast<std::size_t>(Render::ScreenEffectStage::Final)];
+            }
+
+            return kScreenEffectStageNames[index];
+        }
+
+        /// @brief 文字列からフルスクリーンポストエフェクトの適用段階を取得する
+        /// @param value 変換する適用段階名
+        /// @return 変換した適用段階。未定義名の場合はFinal
+        Render::ScreenEffectStage ScreenEffectStageFromString(const std::string& value) {
+            if (value == "Scene") {
+                return Render::ScreenEffectStage::Scene;
+            }
+
+            return Render::ScreenEffectStage::Final;
+        }
 
         /// @brief 削除ボタンが押されたPass情報
         struct LayerEffectPassRemoveRequest {
@@ -388,6 +422,7 @@ namespace MadoEngine::Editor {
             passJson["targetLayerMask"] = pass.GetTargetLayerMask();
             passJson["effectShaderKey"] = pass.GetEffectShaderKey();
             passJson["ignoreDepthForMask"] = pass.IsIgnoreDepthForMask();
+            passJson["screenEffectStage"] = GetScreenEffectStageName(pass.GetScreenEffectStage());
             passJson["parameters"] = SerializeLayerEffectPassParameters(pass);
             return passJson;
         }
@@ -409,7 +444,7 @@ namespace MadoEngine::Editor {
         /// @return 保存に成功した場合はtrue。
         bool SaveLayerEffectPassEditorJson(const Render::PostEffectManager& postEffectManager) {
             nlohmann::json root;
-            root["version"] = 1;
+            root["version"] = 2;
             root["layerPasses"] = SerializeLayerEffectPassList(postEffectManager.GetLayerPasses());
             root["screenPasses"] = SerializeLayerEffectPassList(postEffectManager.GetScreenPasses());
 
@@ -491,6 +526,9 @@ namespace MadoEngine::Editor {
             desc.effectShaderKey = passJson.value("effectShaderKey", std::string("PostEffect/CopyImage.PS"));
             desc.enabled = passJson.value("enabled", true);
             desc.ignoreDepthForMask = passJson.value("ignoreDepthForMask", false);
+            desc.screenEffectStage = ScreenEffectStageFromString(
+                passJson.value("screenEffectStage", std::string("Final"))
+            );
 
             if (desc.key.empty()) {
                 desc.key = defaultKey;
@@ -1079,7 +1117,19 @@ namespace MadoEngine::Editor {
                     selectedPass->SetIgnoreDepthForMask(ignoreDepth);
                 }
             } else {
-                ImGui::TextDisabled("Target: Screen");
+                ImGui::Text("Target: Screen");
+
+                int stageIndex = static_cast<int>(selectedPass->GetScreenEffectStage());
+                if (ImGui::Combo(
+                    "Stage",
+                    &stageIndex,
+                    kScreenEffectStageNames,
+                    static_cast<int>(CountOf(kScreenEffectStageNames)))) {
+                    selectedPass->SetScreenEffectStage(
+                        static_cast<Render::ScreenEffectStage>(stageIndex)
+                    );
+                }
+                ImGui::TextDisabled("Scene: Sprite/Textの前  Final: Sprite/Textの後");
             }
 
             constexpr ImGuiTableFlags propertyTableFlags =

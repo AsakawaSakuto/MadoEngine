@@ -11,6 +11,13 @@
 
 namespace MadoEngine::Render {
 
+	/// @brief フルスクリーンポストエフェクトの適用段階
+	enum class ScreenEffectStage : uint32_t {
+		Scene,
+		Final,
+		Count,
+	};
+
 	/// @brief 特定の描画Layerに適用するポストエフェクト設定を管理するクラス
 	class LayerEffectPass {
 	public:
@@ -22,6 +29,7 @@ namespace MadoEngine::Render {
 			std::string effectShaderKey = "PostEffect/CopyImage.PS";
 			bool enabled = true;
 			bool ignoreDepthForMask = false;
+			ScreenEffectStage screenEffectStage = ScreenEffectStage::Final;
 		};
 
 		/// @brief ImGuiで編集するfloatパラメータの設定
@@ -55,6 +63,14 @@ namespace MadoEngine::Render {
 		/// @brief マスク描画時にDepthを無視するか取得する
 		/// @return Depthを無視する場合はtrue
 		bool IsIgnoreDepthForMask() const;
+
+		/// @brief フルスクリーンポストエフェクトの適用段階を設定する
+		/// @param stage 設定する適用段階
+		void SetScreenEffectStage(ScreenEffectStage stage);
+
+		/// @brief フルスクリーンポストエフェクトの適用段階を取得する
+		/// @return 設定されている適用段階
+		ScreenEffectStage GetScreenEffectStage() const;
 
 		/// @brief パス名を設定する
 		/// @param name 設定するパス名

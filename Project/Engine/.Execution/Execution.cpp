@@ -292,9 +292,13 @@ namespace MadoEngine
 		isSceneColorEnded_ = false;
 		isLayerEffectChainResolved_ = false;
 		isLayerEffectResolved_ = false;
+		isOverlayRenderActive_ = false;
+		isSceneScreenEffectStageApplied_ = false;
+		isFinalScreenEffectStageApplied_ = false;
 		currentCompositeSourceName_ = kSceneColorTarget;
 		resolvedPostEffectTargetName_ = kPostEffectResultTarget;
 		currentLayerEffectSourceName_ = kLayerColorTarget;
+		currentOverlayTargetName_.clear();
 
 #ifdef USE_IMGUI
 		// ImGuiフレーム開始
@@ -437,9 +441,18 @@ namespace MadoEngine
 		isLayerEffectResolved_ = true;
 	}
 
-	void EngineExecution::ApplyScreenEffectPasses() {
+	void EngineExecution::ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage stage) {
+		assert(stage < MadoEngine::Render::ScreenEffectStage::Count && "ScreenEffectStageが範囲外です");
+		if (stage == MadoEngine::Render::ScreenEffectStage::Scene && isSceneScreenEffectStageApplied_) {
+			return;
+		}
+		if (stage == MadoEngine::Render::ScreenEffectStage::Final && isFinalScreenEffectStageApplied_) {
+			return;
+		}
+
+		EndSceneColorRender();
 		for (MadoEngine::Render::LayerEffectPass& pass : postEffectManager_.GetScreenPasses()) {
-			if (!pass.IsEnabled()) {
+			if (!pass.IsEnabled() || pass.GetScreenEffectStage() != stage) {
 				continue;
 			}
 
@@ -457,26 +470,68 @@ namespace MadoEngine
 			resolvedPostEffectTargetName_ = outputTargetName;
 			isLayerEffectResolved_ = true;
 		}
+
+		if (stage == MadoEngine::Render::ScreenEffectStage::Scene) {
+			isSceneScreenEffectStageApplied_ = true;
+		} else {
+			isFinalScreenEffectStageApplied_ = true;
+		}
 	}
 
-	void EngineExecution::BeginImGuiLayout()
-	{
-#ifdef USE_IMGUI
-		// オフスクリーンRT: RENDER_TARGET → PIXEL_SHADER_RESOURCE に遷移
-		if (!isLayerEffectResolved_) {
-			EndSceneColorRender();
-			renderTargetManager_->Begin(kPostEffectResultTarget, commandManager_->GetCommandList());
-			viewportScissor_->Apply(commandManager_->GetCommandList());
-			DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(kSceneColorTarget), postEffectCopyDesc_);
-			renderTargetManager_->End(kPostEffectResultTarget, commandManager_->GetCommandList());
-			currentCompositeSourceName_ = kPostEffectResultTarget;
-			resolvedPostEffectTargetName_ = kPostEffectResultTarget;
-			isLayerEffectResolved_ = true;
+	void EngineExecution::BeginOverlayRender() {
+		assert(!isOverlayRenderActive_ && "Overlay描画が既に開始されています");
+		assert(!isFinalScreenEffectStageApplied_ && "Final段階の後にOverlay描画は開始できません");
+
+		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
+		EndSceneColorRender();
+		currentOverlayTargetName_ = GetNextPostEffectOutputName();
+		renderTargetManager_->Begin(currentOverlayTargetName_, commandManager_->GetCommandList());
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		DrawPostEffect(
+			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+			postEffectCopyDesc_
+		);
+		isOverlayRenderActive_ = true;
+	}
+
+	void EngineExecution::EndOverlayRender() {
+		assert(isOverlayRenderActive_ && "Overlay描画が開始されていません");
+
+		renderTargetManager_->End(currentOverlayTargetName_, commandManager_->GetCommandList());
+		currentCompositeSourceName_ = currentOverlayTargetName_;
+		resolvedPostEffectTargetName_ = currentOverlayTargetName_;
+		isLayerEffectResolved_ = true;
+		isOverlayRenderActive_ = false;
+	}
+
+	void EngineExecution::ResolveCompositeSource() {
+		if (isLayerEffectResolved_) {
+			return;
 		}
 
-		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
-		ApplyScreenEffectPasses();
+		EndSceneColorRender();
+		const std::string& outputTargetName = GetNextPostEffectOutputName();
+		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		DrawPostEffect(
+			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+			postEffectCopyDesc_
+		);
+		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+		currentCompositeSourceName_ = outputTargetName;
+		resolvedPostEffectTargetName_ = outputTargetName;
+		isLayerEffectResolved_ = true;
+	}
 
+	void EngineExecution::BeginImGuiLayout() {
+		assert(!isOverlayRenderActive_ && "Overlay描画を終了してからImGuiレイアウトを開始してください");
+
+		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
+		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Final);
+		ResolveCompositeSource();
+
+#ifdef USE_IMGUI
+		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 
@@ -505,19 +560,6 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawLoggerEditorUI();
 
 #else
-		if (!isLayerEffectResolved_) {
-			EndSceneColorRender();
-			renderTargetManager_->Begin(kPostEffectResultTarget, commandManager_->GetCommandList());
-			viewportScissor_->Apply(commandManager_->GetCommandList());
-			DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(kSceneColorTarget), postEffectCopyDesc_);
-			renderTargetManager_->End(kPostEffectResultTarget, commandManager_->GetCommandList());
-			currentCompositeSourceName_ = kPostEffectResultTarget;
-			resolvedPostEffectTargetName_ = kPostEffectResultTarget;
-			isLayerEffectResolved_ = true;
-		}
-
-		ApplyScreenEffectPasses();
-
 		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 		viewportScissor_->Apply(commandManager_->GetCommandList());
