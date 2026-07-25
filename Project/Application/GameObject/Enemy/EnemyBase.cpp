@@ -92,23 +92,27 @@ namespace Enemy {
 		return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerHitBox);
 	}
 
-	bool Base::TakeProjectileDamage(std::uint64_t projectileId, float damage) {
+	ProjectileDamageResult Base::TakeProjectileDamage(std::uint64_t projectileId, float damage) {
+		ProjectileDamageResult result;
 		if (!isActive_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
-			return false;
+			return result;
 		}
 
 		if (projectileDamageCooldowns_.contains(projectileId)) {
-			return false;
+			return result;
 		}
 
+		const float healthBeforeDamage = status_.currentHealth;
 		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
 		projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
-		if (status_.currentHealth > 0.0f) {
-			return false;
+		result.appliedDamage = healthBeforeDamage - status_.currentHealth;
+		result.wasApplied = result.appliedDamage > 0.0f;
+		result.wasKilled = status_.currentHealth <= 0.0f;
+		if (result.wasKilled) {
+			Kill();
 		}
 
-		Kill();
-		return true;
+		return result;
 	}
 
 	void Base::Kill() {

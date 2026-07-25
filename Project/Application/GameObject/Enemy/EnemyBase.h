@@ -20,6 +20,13 @@ namespace Enemy {
 		SceneType sceneType = SceneType::None;
 	};
 
+	/// @brief Enemyへ適用したProjectileダメージの結果
+	struct ProjectileDamageResult {
+		float appliedDamage = 0.0f;
+		bool wasApplied = false;
+		bool wasKilled = false;
+	};
+
 	/// @brief Enemy単体の共通状態と振る舞いを管理する基底クラス
 	class Base : public IGameObject {
 	public:
@@ -52,8 +59,8 @@ namespace Enemy {
 		/// @brief Projectileからのダメージを適用する
 		/// @param projectileId Projectileの識別番号
 		/// @param damage 適用するダメージ量
-		/// @return このダメージでEnemyが倒された場合はtrueを返す
-		bool TakeProjectileDamage(std::uint64_t projectileId, float damage);
+		/// @return 実際に適用されたダメージと死亡状態
+		ProjectileDamageResult TakeProjectileDamage(std::uint64_t projectileId, float damage);
 
 		/// @brief Enemyを死亡状態にして報酬を生成する
 		void Kill();

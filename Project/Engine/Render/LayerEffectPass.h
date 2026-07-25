@@ -15,8 +15,14 @@ namespace MadoEngine::Render {
 	enum class ScreenEffectStage : uint32_t {
 		Scene,
 		Final,
-		Count,
 	};
+
+	/// @brief フルスクリーンポストエフェクトの適用段階が有効か判定する
+	/// @param stage 判定する適用段階
+	/// @return 有効な適用段階の場合はtrue
+	constexpr bool IsValidScreenEffectStage(ScreenEffectStage stage) {
+		return stage == ScreenEffectStage::Scene || stage == ScreenEffectStage::Final;
+	}
 
 	/// @brief 特定の描画Layerに適用するポストエフェクト設定を管理するクラス
 	class LayerEffectPass {

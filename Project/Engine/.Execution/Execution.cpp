@@ -442,7 +442,7 @@ namespace MadoEngine
 	}
 
 	void EngineExecution::ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage stage) {
-		assert(stage < MadoEngine::Render::ScreenEffectStage::Count && "ScreenEffectStageが範囲外です");
+		assert(MadoEngine::Render::IsValidScreenEffectStage(stage) && "ScreenEffectStageが範囲外です");
 		if (stage == MadoEngine::Render::ScreenEffectStage::Scene && isSceneScreenEffectStageApplied_) {
 			return;
 		}
@@ -556,8 +556,9 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawTextManagerEditorUI();
 		MadoEngine::Editor::DrawParticleSystemEditorUI();
 		MadoEngine::Editor::DrawCylinderEffectEditorUI();
+
+		//MadoEngine::Editor::DrawLoggerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
-		MadoEngine::Editor::DrawLoggerEditorUI();
 
 #else
 		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };

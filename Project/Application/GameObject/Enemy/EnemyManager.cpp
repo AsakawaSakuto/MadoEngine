@@ -49,6 +49,7 @@ namespace Enemy {
 
 	void Manager::Clear() {
 		enemies_.clear();
+		projectileDamageEvents_.clear();
 		nextEnemyId_ = 0;
 	}
 
@@ -84,6 +85,12 @@ namespace Enemy {
 		return nearestEnemyPosition;
 	}
 
+	std::vector<ProjectileDamageEvent> Manager::ConsumeProjectileDamageEvents() {
+		std::vector<ProjectileDamageEvent> events;
+		events.swap(projectileDamageEvents_);
+		return events;
+	}
+
 	void Manager::ProcessProjectileHits() {
 		std::vector<Projectile::EnemyTargetInfo> enemyTargets;
 		enemyTargets.reserve(enemies_.size());
@@ -101,11 +108,25 @@ namespace Enemy {
 
 		std::vector<Projectile::HitInfo> projectileHitInfos;
 		Projectile::Manager::GetInstance().CollectHitsAgainst(enemyTargets, projectileHitInfos);
+		projectileDamageEvents_.reserve(projectileDamageEvents_.size() + projectileHitInfos.size());
 		for (const Projectile::HitInfo& hitInfo : projectileHitInfos) {
 			const auto enemyIterator = enemiesById.find(hitInfo.enemyId);
-			if (enemyIterator != enemiesById.end()) {
-				enemyIterator->second->TakeProjectileDamage(hitInfo.projectileId, hitInfo.damage);
+			if (enemyIterator == enemiesById.end()) {
+				continue;
 			}
+
+			Base* enemy = enemyIterator->second;
+			const ProjectileDamageResult damageResult =
+				enemy->TakeProjectileDamage(hitInfo.projectileId, hitInfo.damage);
+			if (!damageResult.wasApplied) {
+				continue;
+			}
+
+			projectileDamageEvents_.push_back({
+				enemy->GetPosition(),
+				hitInfo.damage,
+				damageResult.wasKilled,
+			});
 		}
 	}
 

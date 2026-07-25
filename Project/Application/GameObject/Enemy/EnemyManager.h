@@ -11,6 +11,13 @@ namespace Player {
 
 namespace Enemy {
 
+	/// @brief Projectileによるダメージ表示へ渡すイベント情報
+	struct ProjectileDamageEvent {
+		Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
+		float damage = 0.0f;
+		bool wasKilled = false;
+	};
+
 	/// @brief 生成されたEnemyの所有と一括処理を管理するクラス
 	class Manager {
 	public:
@@ -48,6 +55,10 @@ namespace Enemy {
 		/// @return 最も近いEnemyの座標。Enemyが存在しない場合はゼロ座標を返す
 		Vector3 GetNearestEnemyPosition() const;
 
+		/// @brief 未処理のProjectileダメージイベントを取得してキューを空にする
+		/// @return 発生順に格納されたProjectileダメージイベント
+		std::vector<ProjectileDamageEvent> ConsumeProjectileDamageEvents();
+
 	private:
 		/// @brief ProjectileとEnemyの衝突結果を処理する
 		void ProcessProjectileHits();
@@ -60,6 +71,7 @@ namespace Enemy {
 
 		Player::Base* player_ = nullptr;
 		std::vector<std::unique_ptr<Base>> enemies_;
+		std::vector<ProjectileDamageEvent> projectileDamageEvents_;
 		std::uint32_t nextEnemyId_ = 0;
 	};
 } // namespace Enemy

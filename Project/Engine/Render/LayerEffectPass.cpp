@@ -9,7 +9,7 @@ namespace MadoEngine::Render {
 	void LayerEffectPass::Initialize(const Desc& desc, const PSODesc& basePostEffectDesc, ID3D12Device* device) {
 		assert(!desc.name.empty() && "LayerEffectPass名が空です");
 		assert(!desc.effectShaderKey.empty() && "LayerEffectPassのPixelShaderキーが空です");
-		assert(desc.screenEffectStage < ScreenEffectStage::Count && "ScreenEffectStageが範囲外です");
+		assert(IsValidScreenEffectStage(desc.screenEffectStage) && "ScreenEffectStageが範囲外です");
 		assert(device && "D3D12Deviceが空です");
 
 		desc_ = desc;
@@ -40,7 +40,7 @@ namespace MadoEngine::Render {
 	}
 
 	void LayerEffectPass::SetScreenEffectStage(ScreenEffectStage stage) {
-		assert(stage < ScreenEffectStage::Count && "ScreenEffectStageが範囲外です");
+		assert(IsValidScreenEffectStage(stage) && "ScreenEffectStageが範囲外です");
 		desc_.screenEffectStage = stage;
 	}
 

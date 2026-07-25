@@ -78,6 +78,7 @@ private:
 	MadoEngine::Text* enemyCountText_ = nullptr;
 	UI::Game::FpsMeasurementView fpsMeasurementView_;
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
+	UI::Game::ProjectileDamageView projectileDamageView_;
 	GameTimer fadeOutTimer_;
 	bool useDebugCamera_ = false;
 

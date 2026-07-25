@@ -63,21 +63,18 @@ namespace MadoEngine::Editor {
             "Final",
         };
 
-        static_assert(
-            CountOf(kScreenEffectStageNames) ==
-            static_cast<std::size_t>(Render::ScreenEffectStage::Count)
-        );
-
         /// @brief フルスクリーンポストエフェクトの適用段階名を取得する
         /// @param stage 名前を取得する適用段階
         /// @return 適用段階名
         const char* GetScreenEffectStageName(Render::ScreenEffectStage stage) {
-            const std::size_t index = static_cast<std::size_t>(stage);
-            if (index >= CountOf(kScreenEffectStageNames)) {
-                return kScreenEffectStageNames[static_cast<std::size_t>(Render::ScreenEffectStage::Final)];
+            switch (stage) {
+            case Render::ScreenEffectStage::Scene:
+                return "Scene";
+            case Render::ScreenEffectStage::Final:
+                return "Final";
+            default:
+                return "Final";
             }
-
-            return kScreenEffectStageNames[index];
         }
 
         /// @brief 文字列からフルスクリーンポストエフェクトの適用段階を取得する

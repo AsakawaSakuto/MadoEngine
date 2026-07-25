@@ -35,6 +35,7 @@ void Game::Initialize() {
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 	fpsMeasurementView_.Initialize();
 	gamePlayTimerView_.Initialize();
+	projectileDamageView_.Initialize();
 
 	AABB mapLimitBox;
 	MapLimit mapLimit;
@@ -93,6 +94,10 @@ SceneType Game::Update(float dt) {
 		MyCollider::Update();
 		player_->ResolveAfterCollision();
 		enemyManager_->ResolveAfterCollision();
+		for (const Enemy::ProjectileDamageEvent& event :
+			enemyManager_->ConsumeProjectileDamageEvents()) {
+			projectileDamageView_.Spawn(event.damage, event.worldPosition);
+		}
 
 		map_->Update(*player_);
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
@@ -153,6 +158,7 @@ SceneType Game::Update(float dt) {
 		}
 		sceneCamera_ = tpsCamera_;
 	}
+	projectileDamageView_.Update(deltaTime, sceneCamera_);
 
 	return SceneType::Game;
 }
@@ -178,6 +184,7 @@ void Game::DrawImGui() {
 	map_->DrawImGui();
 
 	enemySpawner_->DrawImGui();
+	projectileDamageView_.DrawImGui();
 
 	MyCollider::DrawImGui();
 
@@ -225,6 +232,7 @@ void Game::Finalize() {
 	MyText::Destroy("EnemyCountText");
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();
+	projectileDamageView_.Finalize();
 	MyModel::DestroyByScene(SceneType::Game);
 	enemyCountText_ = nullptr;
 
