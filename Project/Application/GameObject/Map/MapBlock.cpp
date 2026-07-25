@@ -1,23 +1,24 @@
 #include "MapBlock.h"
+#include <numbers>
 
 namespace {
 
-/// @brief 坂の向きに対応したモデル名を取得します。
+/// @brief 坂の向きに対応するY軸回転角を取得します。
 /// @param direction 坂の向きです。
-/// @return 坂モデル名です。
-std::string GetSlopeModelName(SlopeDirection direction) {
+/// @return Y軸回転角（ラジアン）です。
+float GetSlopeRotationY(SlopeDirection direction) {
 	switch (direction) {
-	case SlopeDirection::PulsX:
-		return "SlopeMinusX";
-	case SlopeDirection::MinusX:
-		return "SlopePlusX";
 	case SlopeDirection::PulsZ:
-		return "SlopeMinusZ";
+		return 0.0f;
+	case SlopeDirection::MinusX:
+		return std::numbers::pi_v<float> * 1.5f;
 	case SlopeDirection::MinusZ:
-		return "SlopePlusZ";
+		return std::numbers::pi_v<float>;
+	case SlopeDirection::PulsX:
+		return std::numbers::pi_v<float> * 0.5f;
 	}
 
-	return "SlopePlusX";
+	return 0.0f;
 }
 
 }
@@ -145,7 +146,7 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 
 	slopeInstancedModel_ = MyInstancedModel::GetOrCreate(
 		CreateSlopeModelName(),
-		GetSlopeModelName(slopeDirection_),
+		"Slope",
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::Default);
 	if (!slopeInstancedModel_) {
@@ -157,7 +158,7 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 	InstancedModel::InstanceDesc instanceDesc;
 	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_ + 1), transform_.translate.z };
 	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f, blockSize.z / 2.0f };
-	instanceDesc.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	instanceDesc.transform.rotate = { 0.0f, GetSlopeRotationY(slopeDirection_), 0.0f };
 	instanceDesc.isVisible = isModelDraw_;
 	slopeInstanceHandle_ = slopeInstancedModel_->AddInstance(instanceDesc);
 }
@@ -176,5 +177,5 @@ std::string MapBlock::CreateGroundModelName() const {
 }
 
 std::string MapBlock::CreateSlopeModelName() const {
-	return "MapBlock." + GetSlopeModelName(slopeDirection_);
+	return "MapBlock.Slope";
 }

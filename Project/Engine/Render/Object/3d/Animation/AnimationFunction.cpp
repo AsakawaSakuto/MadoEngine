@@ -19,8 +19,9 @@ Animation LoadAnimationFile(const std::string& filename, int index)
 	Assimp::Importer importer;
 	std::string filePath = filename;
 
-	// モデルと同じでOK。資料では 0 になってるが、既に使ってるフラグがあればそれでいい
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
+	const aiScene* scene = importer.ReadFile(
+		filePath.c_str(),
+		MadoEngine::ModelImportSettings::kCoordinateSystemPostProcess);
 	if (!scene || scene->mNumAnimations == 0) {
 		return animation;
 	}
@@ -62,12 +63,11 @@ Animation LoadAnimationFile(const std::string& filename, int index)
 			keyframe.time = static_cast<float>(
 				keyAssimp.mTime / ticksPerSecond);  // 秒に変換
 
-			// 右手→左手変換（資料どおり：x反転だけ or x,z反転など、
-			// 自分のモデル読み込みと揃えること）
+			// Assimpで左手系へ変換済み
 			keyframe.value = {
-				-keyAssimp.mValue.x,
-				 keyAssimp.mValue.y,
-				 keyAssimp.mValue.z
+				keyAssimp.mValue.x,
+				keyAssimp.mValue.y,
+				keyAssimp.mValue.z
 			};
 
 			nodeAnimation.translate.keyframes.push_back(keyframe);
@@ -85,14 +85,12 @@ Animation LoadAnimationFile(const std::string& filename, int index)
 			keyframe.time = static_cast<float>(
 				keyAssimp.mTime / ticksPerSecond);
 
-			// Assimp は右手系。自分のエンジンに合わせて変換
 			const aiQuaternion& q = keyAssimp.mValue;
 
-			// 例：Y,Z 反転で右手→左手 にするパターン
 			Quaternion rotate{};
 			rotate.x = q.x;
-			rotate.y = -q.y;
-			rotate.z = -q.z;
+			rotate.y = q.y;
+			rotate.z = q.z;
 			rotate.w = q.w;
 
 			keyframe.value = rotate;

@@ -33,6 +33,8 @@ private:
 	Sprite* wallPaperSprite_ = nullptr;
 	Sprite* fadeSprite_ = nullptr;
 
+	Model* testModel_;
+
 	GameTimer fadeInTimer_;
 
 	DebugCamera debugCamera_;

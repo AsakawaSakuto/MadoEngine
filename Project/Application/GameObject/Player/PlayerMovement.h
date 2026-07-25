@@ -30,7 +30,8 @@ namespace Player {
 		/// @param transform 更新対象のTransform
 		/// @param model 更新対象のModel
 		/// @param isSlopeGroundContact 坂に接地していればtrue
-		void UpdateModelTransform(float deltaTime, Transform3D& transform, Model* model, bool isSlopeGroundContact);
+		/// @param modelYawOffset Modelの正面軸を補正するYaw角度
+		void UpdateModelTransform(float deltaTime, Transform3D& transform, Model* model, bool isSlopeGroundContact, float modelYawOffset);
 
 		/// @brief 現在の動作状態を取得
 		/// @return 現在の動作状態

@@ -17,6 +17,17 @@
 #include <sstream>
 #include <filesystem>
 
+namespace MadoEngine::ModelImportSettings {
+
+inline constexpr unsigned int kCoordinateSystemPostProcess = aiProcess_MakeLeftHanded;
+inline constexpr unsigned int kMeshPostProcess =
+    kCoordinateSystemPostProcess |
+    aiProcess_FlipWindingOrder |
+    aiProcess_FlipUVs |
+    aiProcess_Triangulate;
+
+}
+
 struct ModelVertexData {
 	Vector4 position; // 位置
 	Vector2 texcoord; // UV座標
@@ -73,8 +84,8 @@ struct ModelNode {
         aiQuaternion rotate;
         node->mTransformation.Decompose(scale, rotate, translate);               // assimpの行列からSRTを抽出する関数を利用
         result.transform.scale = { scale.x, scale.y, scale.z };                  // Scaleはそのまま
-        result.transform.rotate = { rotate.x, -rotate.y, -rotate.z, rotate.w };  // x軸を反転、さらに回転方向が逆なので軸を反転させる
-        result.transform.translate = { -translate.x, translate.y, translate.z }; // x軸を反転
+        result.transform.rotate = { rotate.x, rotate.y, rotate.z, rotate.w };
+        result.transform.translate = { translate.x, translate.y, translate.z };
         result.localMatrix = Matrix::MakeAffineAnimation(result.transform.scale, result.transform.rotate, result.transform.translate);
         result.name = node->mName.C_Str(); // Node名を格納
         result.children.resize(node->mNumChildren); // 子供の数だけ確保
@@ -112,10 +123,9 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
     std::string directoryPath = path.parent_path().string();
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filepath.c_str(),
-        aiProcess_FlipWindingOrder |
-        aiProcess_FlipUVs |
-        aiProcess_Triangulate);
+    const aiScene* scene = importer.ReadFile(
+        filepath.c_str(),
+        MadoEngine::ModelImportSettings::kMeshPostProcess);
 
     assert(scene && scene->HasMeshes());
 
@@ -165,9 +175,9 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
             aiVector3D& position = mesh->mVertices[vertexIndex];
             aiVector3D& normal = mesh->mNormals[vertexIndex];
 
-            // 右手系→左手系への変換
-            vertex.position = { -position.x, position.y, position.z, 1.0f };
-            vertex.normal = { -normal.x, normal.y, normal.z };
+            // Assimpで左手系へ変換済み
+            vertex.position = { position.x, position.y, position.z, 1.0f };
+            vertex.normal = { normal.x, normal.y, normal.z };
 
             const Vector3 localPosition = {
                 vertex.position.x,
@@ -233,7 +243,9 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
             aiQuaternion rotate;
             bindPoseMatrixAssimp.Decompose(scale, rotate, translate);
             Matrix4x4 bindPoseMatrix = Matrix::MakeAffineAnimation(
-                { scale.x, scale.y, scale.z }, { rotate.x, -rotate.y, -rotate.z, rotate.w }, { -translate.x, translate.y, translate.z });
+                { scale.x, scale.y, scale.z },
+                { rotate.x, rotate.y, rotate.z, rotate.w },
+                { translate.x, translate.y, translate.z });
             jointWeightData.inverseBindPoseMatrix = Matrix::Inverse(bindPoseMatrix);
 
             for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {

@@ -2,10 +2,12 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 namespace Player {
 	namespace {
 		constexpr float kShadowGroundOffset = 0.01f;
+		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>;
 	}
 
 	void Base::Initialize() {
@@ -111,10 +113,9 @@ namespace Player {
 		const bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, lastMoveInput_);
-		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model_, isSlopeGroundContact);
+		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model_, isSlopeGroundContact, kModelForwardYawOffset);
 
 		model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
-		model_->SetRotation(transform_.rotate);
 		model_->SetScale(transform_.scale);
 
 		UpdateShadowTransform();
@@ -167,7 +168,7 @@ namespace Player {
 		};
 		
 		shadowModel_->SetPosition(shadowTransform_.translate);
-		shadowModel_->SetRotation(transform_.rotate);
+		shadowModel_->SetRotation(model_ ? model_->GetRotation() : transform_.rotate);
 		shadowModel_->SetScale(shadowTransform_.scale);
 	}
 

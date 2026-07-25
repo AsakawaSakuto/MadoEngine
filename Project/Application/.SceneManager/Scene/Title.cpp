@@ -12,6 +12,8 @@ void Title::Initialize() {
 	fadeSprite_ = MySprite::Create("TitleFade", "black2x2", SceneType::Title);
 	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
 	fadeSprite_->SetFitToScreen(true);
+
+	testModel_ = MyModel::Create("testModel", "Suzane", SceneType::Title);
 }
 
 SceneType Title::Update(float dt) {

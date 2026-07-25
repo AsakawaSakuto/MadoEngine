@@ -326,7 +326,7 @@ namespace Player {
 		}
 	}
 
-	void Movement::UpdateModelTransform(float deltaTime, Transform3D& transform, Model* model, bool isSlopeGroundContact) {
+	void Movement::UpdateModelTransform(float deltaTime, Transform3D& transform, Model* model, bool isSlopeGroundContact, float modelYawOffset) {
 		if (!model) {
 			return;
 		}
@@ -340,9 +340,10 @@ namespace Player {
 		const float normalT = std::clamp(1.0f - std::exp(-modelGroundNormalFollowSpeed_ * deltaTime), 0.0f, 1.0f);
 		currentGroundNormal_ = NormalizeOrFallback(Math::Lerp(currentGroundNormal_, targetGroundNormal, normalT), targetGroundNormal);
 		transform.rotate = CreateSlopeAlignedRotation(faceYaw_, currentGroundNormal_);
+		const Vector3 modelRotation = CreateSlopeAlignedRotation(faceYaw_ + modelYawOffset, currentGroundNormal_);
 
 		model->SetPosition(transform.translate);
-		model->SetRotation(transform.rotate);
+		model->SetRotation(modelRotation);
 	}
 
 	void Movement::Jump(float deltaTime, Transform3D& transform, const MoveInput& input) {

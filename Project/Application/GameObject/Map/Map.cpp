@@ -86,10 +86,7 @@ Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize) 
 /// @brief Mapで使用するインスタンス描画バッチを破棄します。
 void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("MapBlock.Ground");
-	MyInstancedModel::Destroy("MapBlock.SlopePlusX");
-	MyInstancedModel::Destroy("MapBlock.SlopeMinusX");
-	MyInstancedModel::Destroy("MapBlock.SlopePlusZ");
-	MyInstancedModel::Destroy("MapBlock.SlopeMinusZ");
+	MyInstancedModel::Destroy("MapBlock.Slope");
 	MyInstancedModel::Destroy("Jar.Small.Normal");
 	MyInstancedModel::Destroy("Jar.Small.Outline");
 	MyInstancedModel::Destroy("Jar.Big.Normal");
