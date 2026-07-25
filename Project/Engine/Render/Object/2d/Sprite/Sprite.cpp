@@ -142,6 +142,19 @@ void Sprite::SetAnchorPoint(const Vector2& anchorPoint) {
 void Sprite::Update() {
 	materialData_->color = color_;
 
+	Matrix4x4 uvScaleMatrix = Matrix::MakeScale({
+		uvTransform_.scale.x,
+		uvTransform_.scale.y,
+		1.0f,
+	});
+	Matrix4x4 uvRotateMatrix = Matrix::MakeRotateZ(uvTransform_.rotate);
+	Matrix4x4 uvTranslateMatrix = Matrix::MakeTranslate({
+		uvTransform_.translate.x,
+		uvTransform_.translate.y,
+		0.0f,
+	});
+	materialData_->uvTransformMatrix = uvScaleMatrix * uvRotateMatrix * uvTranslateMatrix;
+
 	// ユニットクワッド（0〜1）前提のワールド行列
 	//
 	// 変換順:
@@ -202,6 +215,17 @@ void Sprite::FromJson(const nlohmann::json& json) {
 		json.value("layer", MadoEngine::Render::RenderLayerToString(renderLayer_)));
 	isVisible_ = json.value("visible", isVisible_);
 	isFitToScreen_ = json.value("fitToScreen", isFitToScreen_);
+
+	const nlohmann::json& uvTransformJson = json.value("uvTransform", nlohmann::json::object());
+	if (uvTransformJson.is_object()) {
+		uvTransform_.translate = ReadVector2(
+			uvTransformJson.value("translate", nlohmann::json::array()),
+			uvTransform_.translate);
+		uvTransform_.scale = ReadVector2(
+			uvTransformJson.value("scale", nlohmann::json::array()),
+			uvTransform_.scale);
+		uvTransform_.rotate = uvTransformJson.value("rotation", uvTransform_.rotate);
+	}
 }
 
 nlohmann::json Sprite::ToJson() const {
@@ -218,5 +242,10 @@ nlohmann::json Sprite::ToJson() const {
 		{ "layer", MadoEngine::Render::RenderLayerToString(renderLayer_) },
 		{ "visible", isVisible_ },
 		{ "fitToScreen", isFitToScreen_ },
+		{ "uvTransform", {
+			{ "translate", { uvTransform_.translate.x, uvTransform_.translate.y } },
+			{ "scale", { uvTransform_.scale.x, uvTransform_.scale.y } },
+			{ "rotation", uvTransform_.rotate },
+		} },
 	};
 }

@@ -44,4 +44,8 @@ namespace Projectile {
 		MyDebugLine::AddShape(std::get<AABB>(hitbox_));
 	}
 
+	void Rock::OnEnemyHit() {
+		damage_ *= kHitDamageMultiplier;
+	}
+
 }

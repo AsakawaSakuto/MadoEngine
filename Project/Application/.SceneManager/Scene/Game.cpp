@@ -134,6 +134,8 @@ SceneType Game::Update(float dt) {
 
 	auto status = player_->GetStatus();
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
+	expGauge_->IsUpgrade(inGameSession_->IsWaitingUpgradeSelection(), dt);
+
 	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
 	if (enemyCountText_) {
 		enemyCountText_->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));

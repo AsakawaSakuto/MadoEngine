@@ -17,7 +17,11 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
+		/// @brief Enemy命中時にダメージを2倍にする
+		void OnEnemyHit() override;
+
 	private:
+		static constexpr float kHitDamageMultiplier = 2.0f; // 命中時のダメージ倍率
 
 		Model* model_ = nullptr;
 		std::string objectName_;

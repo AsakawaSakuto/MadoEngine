@@ -42,6 +42,38 @@ public:
 	/// @return テクスチャのピクセルサイズ
 	const Vector2& GetTextureSize() const { return size_; }
 
+	/// @brief UV変換全体を設定する
+	/// @param transform UVの拡縮・回転・移動
+	void SetUVTransform(const Transform2D& transform) { uvTransform_ = transform; }
+
+	/// @brief UV変換全体を取得する
+	/// @return 現在のUV変換
+	const Transform2D& GetUVTransform() const { return uvTransform_; }
+
+	/// @brief UVの移動量を設定する
+	/// @param translate UVの移動量
+	void SetUVTranslate(const Vector2& translate) { uvTransform_.translate = translate; }
+
+	/// @brief UVの移動量を取得する
+	/// @return 現在のUV移動量
+	const Vector2& GetUVTranslate() const { return uvTransform_.translate; }
+
+	/// @brief UVの拡縮率を設定する
+	/// @param scale UVの拡縮率
+	void SetUVScale(const Vector2& scale) { uvTransform_.scale = scale; }
+
+	/// @brief UVの拡縮率を取得する
+	/// @return 現在のUV拡縮率
+	const Vector2& GetUVScale() const { return uvTransform_.scale; }
+
+	/// @brief UVの回転角を設定する
+	/// @param rotation 回転角（ラジアン）
+	void SetUVRotation(float rotation) { uvTransform_.rotate = rotation; }
+
+	/// @brief UVの回転角を取得する
+	/// @return 現在の回転角（ラジアン）
+	float GetUVRotation() const { return uvTransform_.rotate; }
+
 	/// @brief アンカーポイントを設定する
 	/// @param anchorPoint 左上を0、右下を1とするアンカーポイント
 	void SetAnchorPoint(const Vector2& anchorPoint);
@@ -94,6 +126,7 @@ private:
 	SpriteTransformationMatrix* transformationData_ = nullptr;
 
 	Vector2     anchorPoint_ = { 0.0f, 0.0f };
+	Transform2D uvTransform_;
 
 	// 描画対象シーン（SceneType::None は全シーンで描画）
 	SceneType sceneType_ = SceneType::None;

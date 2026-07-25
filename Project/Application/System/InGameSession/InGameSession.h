@@ -21,6 +21,10 @@ namespace System {
 		/// @return ゲームプレイ中の場合はtrue
 		bool IsPlaying() const { return currentPhase_ == InGamePhase::Playing; }
 
+		/// @brief 武器アップグレード選択の待機状態であるか確認
+		/// @return 武器アップグレード選択の待機状態の場合はtrue
+		bool IsWaitingUpgradeSelection() const { return currentPhase_ == InGamePhase::WaitingUpgrade; }
+
 		/// @brief 現在のゲーム進行状態を取得
 		/// @return 現在のゲーム進行状態
 		InGamePhase GetCurrentPhase() const { return currentPhase_; }
