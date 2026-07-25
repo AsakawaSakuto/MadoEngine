@@ -24,7 +24,7 @@ namespace DropObject {
 		colliderName_ = "DropObject" + std::to_string(index);
 		modelName_ = "DropObject" + std::to_string(index);
 
-		model_ = MyModel::Create(modelName_, "Plane", SceneType::Test);
+		model_ = MyModel::Create(modelName_, "Plane", SceneType::Game);
 
 		AABB aabb;
 

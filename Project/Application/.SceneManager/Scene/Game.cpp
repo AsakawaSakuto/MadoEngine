@@ -96,7 +96,13 @@ SceneType Game::Update(float dt) {
 
 		map_->Update(*player_);
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
-		weaponInventory_->Update(deltaTime, player_->GetPosition(), enemyManager_->GetNearestEnemyPosition());
+
+		if (MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
+			Vector3 nearestEnemyPosition;
+			if (enemyManager_->TryGetNearestEnemyPosition(nearestEnemyPosition)) {
+				weaponInventory_->Update(deltaTime, player_->GetPosition(), nearestEnemyPosition);
+			}
+		}
 	}
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
