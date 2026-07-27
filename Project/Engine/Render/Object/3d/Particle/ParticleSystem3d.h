@@ -113,6 +113,10 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayerMask layerMask
 		);
 
+		/// @brief Particle描画へ適用するFogパラメータを設定する
+		/// @param parameters 適用するFogパラメータ
+		void SetFogParameters(const ParticleFogParameters& parameters);
+
 		/// @brief 指定Sceneに属するEffectを即時停止する
 		/// @param sceneType 停止対象Scene
 		void ClearScene(SceneType sceneType);

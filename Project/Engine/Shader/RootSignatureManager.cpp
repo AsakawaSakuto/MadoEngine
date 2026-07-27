@@ -505,7 +505,7 @@ namespace MadoEngine {
 		}
 
 		// Particle3d用 RootSignature
-		// t0: Particle Instance、b0: Camera、t1: Texture、b1: Batch先頭Instance、s0: Sampler
+		// t0: Particle Instance、b0: Camera/Fog、t1: Texture、b1: Batch先頭Instance/BlendMode、s0: Sampler
 		{
 			D3D12_DESCRIPTOR_RANGE instanceRange{};
 			instanceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -540,8 +540,8 @@ namespace MadoEngine {
 			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 			rootParams[3].Constants.ShaderRegister = 1;
 			rootParams[3].Constants.RegisterSpace = 0;
-			rootParams[3].Constants.Num32BitValues = 1;
-			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+			rootParams[3].Constants.Num32BitValues = 2;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 			D3D12_STATIC_SAMPLER_DESC sampler{};
 			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;

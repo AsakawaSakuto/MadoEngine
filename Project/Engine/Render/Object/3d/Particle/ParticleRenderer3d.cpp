@@ -20,6 +20,26 @@ namespace {
 	constexpr UINT kParticleRootTexture = 2;
 	constexpr UINT kParticleRootFirstInstance = 3;
 
+	/// @brief BlendModeをParticle Shader用の値へ変換する
+	/// @param blendMode 変換するBlendMode
+	/// @return Particle Shaderへ渡すBlendMode値
+	uint32_t ToParticleShaderBlendMode(MadoEngine::Render::BlendMode blendMode) {
+		switch (blendMode) {
+			case MadoEngine::Render::BlendMode::Normal:
+				return 0;
+			case MadoEngine::Render::BlendMode::Add:
+				return 1;
+			case MadoEngine::Render::BlendMode::Subtract:
+				return 2;
+			case MadoEngine::Render::BlendMode::Multiply:
+				return 3;
+			case MadoEngine::Render::BlendMode::None:
+				return 4;
+		}
+
+		return 0;
+	}
+
 } // namespace
 
 namespace MadoEngine::Particle {
@@ -125,6 +145,7 @@ namespace MadoEngine::Particle {
 			inverseView.m[1][2],
 			0.0f,
 		};
+		mappedPerView_->fog = fogParameters_;
 	}
 
 	void ParticleRenderer3d::Submit(
@@ -233,9 +254,14 @@ namespace MadoEngine::Particle {
 				kParticleRootTexture,
 				MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(batch.textureIndex)
 			);
-			commandList_->SetGraphicsRoot32BitConstant(
-				kParticleRootFirstInstance,
+			const uint32_t perBatchConstants[] = {
 				batch.firstInstance,
+				ToParticleShaderBlendMode(batch.blendMode),
+			};
+			commandList_->SetGraphicsRoot32BitConstants(
+				kParticleRootFirstInstance,
+				_countof(perBatchConstants),
+				perBatchConstants,
 				0
 			);
 			commandList_->DrawIndexedInstanced(
@@ -245,6 +271,13 @@ namespace MadoEngine::Particle {
 				0,
 				0
 			);
+		}
+	}
+
+	void ParticleRenderer3d::SetFogParameters(const ParticleFogParameters& parameters) {
+		fogParameters_ = parameters;
+		if (mappedPerView_) {
+			mappedPerView_->fog = fogParameters_;
 		}
 	}
 

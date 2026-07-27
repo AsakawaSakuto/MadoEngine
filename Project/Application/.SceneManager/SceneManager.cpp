@@ -110,6 +110,7 @@ void SceneManager::DrawLayer(MadoEngine::Render::RenderLayer layer) {
 
 void SceneManager::DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {
 	DrawSceneLayerMask(layerMask);
+	DrawParticleLayerMask(layerMask);
 	DrawOverlayLayerMask(layerMask);
 }
 
@@ -123,8 +124,20 @@ void SceneManager::DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerM
 		MadoEngine::DebugLineManager::GetInstance().Draw(camera);
 	}
 	MadoEngine::ModelManager::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
-	MadoEngine::Particle::ParticleSystem3d::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
+}
+
+void SceneManager::DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {
+	if (!currentScene_) {
+		return;
+	}
+
+	const Camera camera = currentScene_->GetCamera();
+	MadoEngine::Particle::ParticleSystem3d::GetInstance().DrawLayerMask(
+		currentSceneType_,
+		camera,
+		layerMask
+	);
 }
 
 void SceneManager::DrawOverlayLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {

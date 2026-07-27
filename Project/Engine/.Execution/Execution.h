@@ -97,6 +97,12 @@ namespace MadoEngine
 		/// @param stage 適用する画面全体ポストエフェクトの段階
 		void ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage stage);
 
+		/// @brief Scene段階のポストエフェクト結果へ透明オブジェクトを描画する準備を行う
+		void BeginTransparentRender();
+
+		/// @brief 透明オブジェクトの描画を終了する
+		void EndTransparentRender();
+
 		/// @brief Scene段階のポストエフェクト結果へSpriteとTextを描画する準備を行う
 		void BeginOverlayRender();
 
@@ -154,6 +160,9 @@ namespace MadoEngine
 		/// @return Depth無視マスクが必要な場合はtrue
 		bool NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const;
 
+		/// @brief Scene段階のFog設定をParticle描画へ同期する
+		void UpdateParticleFogParameters();
+
 		/// @brief シーンとLayerエフェクト結果を現在の描画先へ合成する
 		/// @param sceneSrv シーンカラーのGPU SRVハンドル
 		/// @param effectSrv エフェクト結果のGPU SRVハンドル
@@ -207,10 +216,12 @@ namespace MadoEngine
 		std::string currentCompositeSourceName_ = "SceneColor";
 		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
 		std::string currentLayerEffectSourceName_ = "LayerColor";
+		std::string currentTransparentTargetName_;
 		std::string currentOverlayTargetName_;
 		bool isSceneColorEnded_ = false;
 		bool isLayerEffectChainResolved_ = false;
 		bool isLayerEffectResolved_ = false;
+		bool isTransparentRenderActive_ = false;
 		bool isOverlayRenderActive_ = false;
 		bool isSceneScreenEffectStageApplied_ = false;
 		bool isFinalScreenEffectStageApplied_ = false;

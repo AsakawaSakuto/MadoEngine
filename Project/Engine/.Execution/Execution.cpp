@@ -13,6 +13,7 @@ namespace {
 	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
 	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
 	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
+	const std::string kFogShaderKey = "PostEffect/Fog.PS";
 
 } // namespace
 
@@ -292,12 +293,14 @@ namespace MadoEngine
 		isSceneColorEnded_ = false;
 		isLayerEffectChainResolved_ = false;
 		isLayerEffectResolved_ = false;
+		isTransparentRenderActive_ = false;
 		isOverlayRenderActive_ = false;
 		isSceneScreenEffectStageApplied_ = false;
 		isFinalScreenEffectStageApplied_ = false;
 		currentCompositeSourceName_ = kSceneColorTarget;
 		resolvedPostEffectTargetName_ = kPostEffectResultTarget;
 		currentLayerEffectSourceName_ = kLayerColorTarget;
+		currentTransparentTargetName_.clear();
 		currentOverlayTargetName_.clear();
 
 #ifdef USE_IMGUI
@@ -478,7 +481,46 @@ namespace MadoEngine
 		}
 	}
 
+	void EngineExecution::BeginTransparentRender() {
+		assert(!isTransparentRenderActive_ && "透明オブジェクト描画が既に開始されています");
+		assert(!isOverlayRenderActive_ && "Overlay描画中に透明オブジェクト描画は開始できません");
+		assert(!isFinalScreenEffectStageApplied_ && "Final段階の後に透明オブジェクト描画は開始できません");
+
+		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
+		EndSceneColorRender();
+
+		currentTransparentTargetName_ = GetNextPostEffectOutputName();
+		ID3D12GraphicsCommandList* commandList = commandManager_->GetCommandList();
+		renderTargetManager_->Begin(currentTransparentTargetName_, commandList);
+		viewportScissor_->Apply(commandList);
+		DrawPostEffect(
+			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+			postEffectCopyDesc_
+		);
+
+		depthStencilBuffer_->Transition(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
+			renderTargetManager_->GetRTVCPUHandle(currentTransparentTargetName_);
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
+		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+		viewportScissor_->Apply(commandList);
+
+		UpdateParticleFogParameters();
+		isTransparentRenderActive_ = true;
+	}
+
+	void EngineExecution::EndTransparentRender() {
+		assert(isTransparentRenderActive_ && "透明オブジェクト描画が開始されていません");
+
+		renderTargetManager_->End(currentTransparentTargetName_, commandManager_->GetCommandList());
+		currentCompositeSourceName_ = currentTransparentTargetName_;
+		resolvedPostEffectTargetName_ = currentTransparentTargetName_;
+		isLayerEffectResolved_ = true;
+		isTransparentRenderActive_ = false;
+	}
+
 	void EngineExecution::BeginOverlayRender() {
+		assert(!isTransparentRenderActive_ && "透明オブジェクト描画を終了してからOverlay描画を開始してください");
 		assert(!isOverlayRenderActive_ && "Overlay描画が既に開始されています");
 		assert(!isFinalScreenEffectStageApplied_ && "Final段階の後にOverlay描画は開始できません");
 
@@ -524,6 +566,7 @@ namespace MadoEngine
 	}
 
 	void EngineExecution::BeginImGuiLayout() {
+		assert(!isTransparentRenderActive_ && "透明オブジェクト描画を終了してからImGuiレイアウトを開始してください");
 		assert(!isOverlayRenderActive_ && "Overlay描画を終了してからImGuiレイアウトを開始してください");
 
 		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
@@ -606,6 +649,56 @@ namespace MadoEngine
 
 	bool EngineExecution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
 		return postEffectManager_.NeedsIgnoreDepthMask(layerMask);
+	}
+
+	void EngineExecution::UpdateParticleFogParameters() {
+		MadoEngine::Particle::ParticleFogParameters parameters{};
+		for (const MadoEngine::Render::LayerEffectPass& pass : postEffectManager_.GetScreenPasses()) {
+			if (!pass.IsEnabled() ||
+				pass.GetScreenEffectStage() != MadoEngine::Render::ScreenEffectStage::Scene ||
+				pass.GetEffectShaderKey() != kFogShaderKey) {
+				continue;
+			}
+
+			auto getParameter = [&pass](const char* key, float fallback) {
+				float value = fallback;
+				pass.TryGetFloatParameter(key, value);
+				return value;
+			};
+
+			parameters.color = {
+				getParameter("ColorR", 0.58f),
+				getParameter("ColorG", 0.68f),
+				getParameter("ColorB", 0.74f),
+				getParameter("ColorA", 1.0f),
+			};
+			if (parameters.color == Vector4{}) {
+				parameters.color = { 0.58f, 0.68f, 0.74f, 1.0f };
+			}
+
+			parameters.distanceParams = {
+				getParameter("StartDistance", 850.0f),
+				getParameter("EndDistance", 1000.0f),
+				getParameter("Density", 1.0f),
+				getParameter("HeightStrength", 0.0f),
+			};
+			if (parameters.distanceParams == Vector4{}) {
+				parameters.distanceParams = { 850.0f, 1000.0f, 1.0f, 0.0f };
+			}
+
+			parameters.cameraParams = {
+				getParameter("NearClip", 0.1f),
+				getParameter("FarClip", 1000.0f),
+				0.0f,
+				0.0f,
+			};
+			if (parameters.cameraParams == Vector4{}) {
+				parameters.cameraParams = { 0.1f, 1000.0f, 0.0f, 0.0f };
+			}
+			parameters.cameraParams.z = 1.0f;
+		}
+
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().SetFogParameters(parameters);
 	}
 
 	void EngineExecution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {

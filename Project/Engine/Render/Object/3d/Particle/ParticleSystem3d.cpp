@@ -499,6 +499,10 @@ namespace MadoEngine::Particle {
 		renderer_.Draw(layerMask);
 	}
 
+	void ParticleSystem3d::SetFogParameters(const ParticleFogParameters& parameters) {
+		renderer_.SetFogParameters(parameters);
+	}
+
 	void ParticleSystem3d::ClearScene(SceneType sceneType) {
 		if (sceneType == SceneType::None) {
 			return;

@@ -14,6 +14,14 @@
 
 namespace MadoEngine::Particle {
 
+	/// @brief Particleへ適用するFogパラメータ
+	struct alignas(16) ParticleFogParameters {
+		Vector4 color = { 0.58f, 0.68f, 0.74f, 1.0f };
+		Vector4 distanceParams = { 850.0f, 1000.0f, 1.0f, 0.0f };
+		Vector4 cameraParams = { 0.1f, 1000.0f, 0.0f, 0.0f };
+	};
+	static_assert(sizeof(ParticleFogParameters) == 48, "Particle Fog ParameterのCPU/GPU Layoutが一致していません。");
+
 	/// @brief CPU Particleをビルボードでインスタンス描画するRenderer
 	class ParticleRenderer3d final {
 	public:
@@ -56,6 +64,10 @@ namespace MadoEngine::Particle {
 		/// @param layerMask 描画対象LayerMask
 		void Draw(MadoEngine::Render::RenderLayerMask layerMask);
 
+		/// @brief Particle描画へ適用するFogパラメータを設定する
+		/// @param parameters 適用するFogパラメータ
+		void SetFogParameters(const ParticleFogParameters& parameters);
+
 		/// @brief 登録済みParticle数を取得する
 		/// @return 登録済みParticle数
 		std::size_t GetPendingInstanceCount() const { return instances_.size(); }
@@ -74,7 +86,9 @@ namespace MadoEngine::Particle {
 			Matrix4x4 viewProjection{};
 			Vector4 cameraRight{};
 			Vector4 cameraUp{};
+			ParticleFogParameters fog{};
 		};
+		static_assert(sizeof(PerViewForGPU) == 144, "Particle PerViewのCPU/GPU Layoutが一致していません。");
 
 		struct DrawBatch {
 			uint32_t firstInstance = 0;
@@ -114,6 +128,7 @@ namespace MadoEngine::Particle {
 		std::size_t instanceCapacity_ = 0;
 
 		Vector3 cameraPosition_{};
+		ParticleFogParameters fogParameters_{};
 		std::vector<ParticleInstanceForGPU> instances_;
 		std::vector<DrawBatch> batches_;
 		std::unordered_set<std::string> missingTextureNames_;

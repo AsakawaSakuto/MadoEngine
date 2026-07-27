@@ -71,6 +71,10 @@ void Terminal::Run() {
 			sceneManager_->DrawCurrentScene();
 		}
 
+		execution_->BeginTransparentRender();
+		sceneManager_->DrawParticleLayerMask(MadoEngine::Render::kAllRenderLayers);
+		execution_->EndTransparentRender();
+
 		execution_->BeginOverlayRender();
 		sceneManager_->DrawOverlayLayerMask(MadoEngine::Render::kAllRenderLayers);
 		execution_->EndOverlayRender();

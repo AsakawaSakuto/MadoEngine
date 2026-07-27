@@ -101,5 +101,4 @@ namespace Projectile {
 		desc.loopOverride = false;
 		auto handle = MyParticle3d::Play("DefaultExplosion", desc);
 	}
-
 }
