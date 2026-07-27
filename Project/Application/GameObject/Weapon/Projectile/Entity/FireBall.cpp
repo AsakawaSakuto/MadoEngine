@@ -97,9 +97,9 @@ namespace Projectile {
 
 		MadoEngine::Particle::PlayDesc desc;
 		desc.transform.translate = transform_.translate;
-		desc.sceneType = SceneType::Test;
+		desc.sceneType = SceneType::Game;
 		desc.loopOverride = false;
-		auto handle = MyParticle3d::Play("HitEffect", desc);
+		auto handle = MyParticle3d::Play("DefaultExplosion", desc);
 	}
 
 }
