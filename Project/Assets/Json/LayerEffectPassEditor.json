@@ -16,6 +16,7 @@
                 "Intensity": 1.0,
                 "Thickness": 1.0
             },
+            "screenEffectStage": "Final",
             "targetLayerMask": 16
         },
         {
@@ -34,6 +35,7 @@
                 "Intensity": 1.0,
                 "Thickness": 1.5
             },
+            "screenEffectStage": "Final",
             "targetLayerMask": 8
         },
         {
@@ -52,13 +54,14 @@
                 "SoftKnee": 1.0,
                 "Threshold": 0.5
             },
+            "screenEffectStage": "Final",
             "targetLayerMask": 8
         }
     ],
     "screenPasses": [
         {
             "effectShaderKey": "PostEffect/Fog.PS",
-            "enabled": true,
+            "enabled": false,
             "ignoreDepthForMask": false,
             "key": "ScreenEffectPass_2",
             "name": "Fog",

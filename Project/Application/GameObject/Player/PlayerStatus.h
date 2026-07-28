@@ -10,11 +10,13 @@ namespace Player {
 		float maxShield = 0.0f;        // 最大シールド
 		float currentShield = 0.0f;    // 現在のシールド
 
-		int level = 1;                 // レベル
 		float currentExp = 0.0f;       // 現在の経験値
 		float expToNextLevel = 100.0f; // 次のレベルまでの経験値
 
 		float currentMoney = 0.0f;     // 所持金
+
+		int level = 1;                 // レベル
+		int chaosLevel = 0;            // カオスレベル
 	};
 
 	/// @brief プレイヤーの獲得量や与ダメージの倍率を管理する構造体

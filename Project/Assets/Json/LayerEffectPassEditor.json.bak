@@ -58,7 +58,7 @@
     "screenPasses": [
         {
             "effectShaderKey": "PostEffect/Fog.PS",
-            "enabled": false,
+            "enabled": true,
             "ignoreDepthForMask": false,
             "key": "ScreenEffectPass_2",
             "name": "Fog",
@@ -74,6 +74,7 @@
                 "NearClip": 0.10000000149011612,
                 "StartDistance": 50.0
             },
+            "screenEffectStage": "Scene",
             "targetLayerMask": 255
         },
         {
@@ -96,8 +97,9 @@
                 "ShadowColorR": 0.2627149820327759,
                 "Softness": 0.10000000149011612
             },
+            "screenEffectStage": "Final",
             "targetLayerMask": 255
         }
     ],
-    "version": 1
+    "version": 2
 }

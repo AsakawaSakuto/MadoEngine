@@ -71,11 +71,13 @@ namespace Player {
 		StatusMultiplier statusMultiplier_; // ステータスの倍率
 		Controller controller_;             // 入力制御
 		Movement movement_;                 // 移動処理
-		MoveInput lastMoveInput_;            // Collider解決時に使用する直近の移動入力
-		float lastDeltaTime_ = 0.0f;          // Collider解決時に使用する直近の経過時間
+		MoveInput lastMoveInput_;           // Collider解決時に使用する直近の移動入力
+		float lastDeltaTime_ = 0.0f;        // Collider解決時に使用する直近の経過時間
 
 		MapLimit mapLimit_; // Mapの制限範囲
 
 		GamingColor gamingColor_; // ゲーミングカラー
+
+		GameTimer regeneTimer_;   // HPの自動回復タイマー
 	};
 }
