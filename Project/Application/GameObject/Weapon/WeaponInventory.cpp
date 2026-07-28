@@ -12,6 +12,7 @@ namespace Weapon {
 	void Inventory::Initialize(Projectile::Type type) {
 		weapons_.clear();
 		weapons_.resize(slotCount_);
+		weaponFiredEvents_.clear();
 		revision_ = 0;
 
 		if (!AddWeapon(type)) {
@@ -20,9 +21,18 @@ namespace Weapon {
 	}
 
 	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
-		for (auto& weapon : weapons_) {
-			if (weapon) {
-				weapon->Update(deltaTime, ownerPosition, targetPosition);
+		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
+			std::unique_ptr<BaseWeapon>& weapon = weapons_[slotIndex];
+			if (!weapon) {
+				continue;
+			}
+
+			weapon->Update(deltaTime, ownerPosition, targetPosition);
+			if (weapon->WasFiredThisFrame()) {
+				weaponFiredEvents_.push_back({
+					slotIndex,
+					weapon->GetProjectileType(),
+				});
 			}
 		}
 	}
@@ -117,6 +127,12 @@ namespace Weapon {
 		}
 
 		return weapons_[slotIndex].get();
+	}
+
+	std::vector<WeaponFiredEvent> Inventory::ConsumeWeaponFiredEvents() {
+		std::vector<WeaponFiredEvent> events;
+		events.swap(weaponFiredEvents_);
+		return events;
 	}
 
 	void Inventory::RemoveWeapon(int slotIndex) {

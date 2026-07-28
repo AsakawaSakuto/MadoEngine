@@ -15,9 +15,15 @@ namespace Weapon {
 		/// @return 初期化に成功した場合はtrueを返す
 		bool Initialize(Projectile::Type type, int slotIndex);
 
+		/// @brief 武器の射撃処理を更新
+		/// @param deltaTime 前フレームからの経過時間
+		/// @param ownerPosition 武器所有者の座標
+		/// @param targetPosition 射撃対象の座標
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
-		void CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
+		/// @brief 直前の更新でProjectileを射出したか確認
+		/// @return Projectileを射出した場合はtrueを返す
+		bool WasFiredThisFrame() const { return wasFiredThisFrame_; }
 
 		Projectile::Type GetProjectileType() const { return type_; }
 
@@ -49,6 +55,11 @@ namespace Weapon {
 		bool ApplyUpgrade(UpgradeStatType statType, Rarity rarity, float expectedAmount, float& outAppliedAmount);
 
 	private:
+		/// @brief 射撃間隔とクールダウンに応じてProjectileを射出
+		/// @param deltaTime 前フレームからの経過時間
+		/// @param ownerPosition 武器所有者の座標
+		/// @param targetPosition 射撃対象の座標
+		void CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 		
 		// 武器のステータス
 		UpgradeStatus status_;
@@ -63,6 +74,7 @@ namespace Weapon {
 		int upgradeLevel_ = 0;    // 武器のアップグレードレベル
 		int slotIndex_ = -1;      // 武器のスロットインデックス
 		int projectileCount_ = 0; // 武器の発射数
+		bool wasFiredThisFrame_ = false;
 
 		GameTimer intervalTimer_;
 		GameTimer cooldownTimer_;

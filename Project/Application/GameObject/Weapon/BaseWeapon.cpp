@@ -80,6 +80,7 @@ namespace Weapon {
 		killCount_ = 0;
 		projectileCount_ = 0;
 		shotNowCount_ = 0;
+		wasFiredThisFrame_ = false;
 
 		intervalTimer_.Start(status_.shotIntervalTime.value, true);
 		cooldownTimer_.Start(status_.shotCooldown.value, false);
@@ -157,13 +158,11 @@ namespace Weapon {
 	}
 
 	void BaseWeapon::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
-		
+		wasFiredThisFrame_ = false;
 		CreateProjectile(deltaTime, ownerPosition, targetPosition);
-
 	}
 
 	void BaseWeapon::CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
-
 		// クールタイムが終了している場合射撃を開始する
 		if (cooldownTimer_.IsFinished()) {
 			if (!intervalTimer_.IsActive()) {
@@ -190,6 +189,7 @@ namespace Weapon {
 			context.penetrationCount = ConvertToProjectileCount(status_.penetrationCount.value);
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
+			wasFiredThisFrame_ = true;
 
 			// 最大射撃数に達した場合、射撃数をリセットしてクールダウンを開始する
 			if (shotNowCount_ >= static_cast<int>(status_.shotMaxCount.value)) {

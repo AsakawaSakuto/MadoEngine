@@ -130,7 +130,11 @@ SceneType Game::Update(float dt) {
 	}
 	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 
-	weaponIconUI_->Update(*weaponInventory_);
+	for (const Weapon::WeaponFiredEvent& event :
+		weaponInventory_->ConsumeWeaponFiredEvents()) {
+		weaponIconUI_->PlayFireAnimation(event.slotIndex);
+	}
+	weaponIconUI_->Update(deltaTime, *weaponInventory_);
 
 	auto status = player_->GetStatus();
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
