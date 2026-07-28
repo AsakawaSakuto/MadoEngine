@@ -125,7 +125,7 @@ namespace Enemy {
 		std::string movementColliderName_;
 		std::string hitColliderName_;
 		std::string modelName_;
-		float projectileDamageInterval_ = 0.2f;
+		float projectileDamageInterval_ = 0.5f; // Projectileからのダメージを受ける間隔（秒）
 		std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
 		bool isActive_ = true;
 		bool isDeathRewardSpawned_ = false;

@@ -99,8 +99,15 @@ namespace {
 		float maximum = 0.0f) {
 		ImGui::PushID(label);
 		ImGui::TextUnformatted(label);
-		ImGui::DragFloat("最小", &range.min, speed, minimum, maximum);
-		ImGui::DragFloat("最大", &range.max, speed, minimum, maximum);
+		if (ImGui::DragFloat("最小", &range.min, speed, minimum, maximum) && range.min > range.max) {
+			range.max = range.min;
+		}
+		if (ImGui::DragFloat("最大", &range.max, speed, minimum, maximum) && range.max < range.min) {
+			range.min = range.max;
+		}
+		if (range.min > range.max) {
+			std::swap(range.min, range.max);
+		}
 		ImGui::PopID();
 	}
 
@@ -111,8 +118,16 @@ namespace {
 	void DrawVector2Range(const char* label, ValueRange<Vector2>& range, float speed) {
 		ImGui::PushID(label);
 		ImGui::TextUnformatted(label);
-		ImGui::DragFloat2("最小", &range.min.x, speed);
-		ImGui::DragFloat2("最大", &range.max.x, speed);
+		if (ImGui::DragFloat2("最小", &range.min.x, speed)) {
+			range.max.x = (std::max)(range.min.x, range.max.x);
+			range.max.y = (std::max)(range.min.y, range.max.y);
+		}
+		if (ImGui::DragFloat2("最大", &range.max.x, speed)) {
+			range.min.x = (std::min)(range.min.x, range.max.x);
+			range.min.y = (std::min)(range.min.y, range.max.y);
+		}
+		if (range.min.x > range.max.x) { std::swap(range.min.x, range.max.x); }
+		if (range.min.y > range.max.y) { std::swap(range.min.y, range.max.y); }
 		ImGui::PopID();
 	}
 
@@ -123,8 +138,19 @@ namespace {
 	void DrawVector3Range(const char* label, ValueRange<Vector3>& range, float speed) {
 		ImGui::PushID(label);
 		ImGui::TextUnformatted(label);
-		ImGui::DragFloat3("最小", &range.min.x, speed);
-		ImGui::DragFloat3("最大", &range.max.x, speed);
+		if (ImGui::DragFloat3("最小", &range.min.x, speed)) {
+			range.max.x = (std::max)(range.min.x, range.max.x);
+			range.max.y = (std::max)(range.min.y, range.max.y);
+			range.max.z = (std::max)(range.min.z, range.max.z);
+		}
+		if (ImGui::DragFloat3("最大", &range.max.x, speed)) {
+			range.min.x = (std::min)(range.min.x, range.max.x);
+			range.min.y = (std::min)(range.min.y, range.max.y);
+			range.min.z = (std::min)(range.min.z, range.max.z);
+		}
+		if (range.min.x > range.max.x) { std::swap(range.min.x, range.max.x); }
+		if (range.min.y > range.max.y) { std::swap(range.min.y, range.max.y); }
+		if (range.min.z > range.max.z) { std::swap(range.min.z, range.max.z); }
 		ImGui::PopID();
 	}
 
@@ -134,8 +160,22 @@ namespace {
 	void DrawColorRange(const char* label, ValueRange<Vector4>& range) {
 		ImGui::PushID(label);
 		ImGui::TextUnformatted(label);
-		ImGui::ColorEdit4("最小", &range.min.x);
-		ImGui::ColorEdit4("最大", &range.max.x);
+		if (ImGui::ColorEdit4("最小", &range.min.x)) {
+			range.max.x = (std::max)(range.min.x, range.max.x);
+			range.max.y = (std::max)(range.min.y, range.max.y);
+			range.max.z = (std::max)(range.min.z, range.max.z);
+			range.max.w = (std::max)(range.min.w, range.max.w);
+		}
+		if (ImGui::ColorEdit4("最大", &range.max.x)) {
+			range.min.x = (std::min)(range.min.x, range.max.x);
+			range.min.y = (std::min)(range.min.y, range.max.y);
+			range.min.z = (std::min)(range.min.z, range.max.z);
+			range.min.w = (std::min)(range.min.w, range.max.w);
+		}
+		if (range.min.x > range.max.x) { std::swap(range.min.x, range.max.x); }
+		if (range.min.y > range.max.y) { std::swap(range.min.y, range.max.y); }
+		if (range.min.z > range.max.z) { std::swap(range.min.z, range.max.z); }
+		if (range.min.w > range.max.w) { std::swap(range.min.w, range.max.w); }
 		ImGui::PopID();
 	}
 
@@ -183,16 +223,30 @@ namespace {
 				ImGui::DragFloat3("終了位置", &value.end.x, 0.01f);
 			} else if constexpr (std::is_same_v<ShapeType, SphereShape>) {
 				ImGui::DragFloat("半径", &value.radius, 0.01f, 0.0f, FLT_MAX);
+				value.radius = (std::max)(0.0f, value.radius);
 				ImGui::Checkbox("表面から発生", &value.emitFromSurface);
 			} else if constexpr (std::is_same_v<ShapeType, BoxShape>) {
 				ImGui::DragFloat3("半サイズ", &value.halfExtents.x, 0.01f, 0.0f, FLT_MAX);
+				value.halfExtents.x = (std::max)(0.0f, value.halfExtents.x);
+				value.halfExtents.y = (std::max)(0.0f, value.halfExtents.y);
+				value.halfExtents.z = (std::max)(0.0f, value.halfExtents.z);
 				ImGui::Checkbox("表面から発生", &value.emitFromSurface);
 			} else if constexpr (std::is_same_v<ShapeType, PlaneShape>) {
 				ImGui::DragFloat2("半サイズ", &value.halfExtents.x, 0.01f, 0.0f, FLT_MAX);
+				value.halfExtents.x = (std::max)(0.0f, value.halfExtents.x);
+				value.halfExtents.y = (std::max)(0.0f, value.halfExtents.y);
 				ImGui::DragFloat3("法線", &value.normal.x, 0.01f);
 			} else {
-				ImGui::DragFloat("内側の半径", &value.innerRadius, 0.01f, 0.0f, FLT_MAX);
-				ImGui::DragFloat("外側の半径", &value.outerRadius, 0.01f, 0.0f, FLT_MAX);
+				if (ImGui::DragFloat("内側の半径", &value.innerRadius, 0.01f, 0.0f, FLT_MAX)) {
+					value.innerRadius = (std::max)(0.0f, value.innerRadius);
+					value.outerRadius = (std::max)(value.innerRadius, value.outerRadius);
+				}
+				if (ImGui::DragFloat("外側の半径", &value.outerRadius, 0.01f, 0.0f, FLT_MAX)) {
+					value.outerRadius = (std::max)(0.0f, value.outerRadius);
+					value.innerRadius = (std::min)(value.innerRadius, value.outerRadius);
+				}
+				value.innerRadius = (std::max)(0.0f, value.innerRadius);
+				value.outerRadius = (std::max)(value.innerRadius, value.outerRadius);
 				ImGui::DragFloat3("法線", &value.normal.x, 0.01f);
 				ImGui::Checkbox("外周から発生", &value.emitFromEdge);
 			}

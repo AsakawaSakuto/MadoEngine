@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cstdint>
 #include <random>
 
@@ -41,11 +42,16 @@ public:
     /// @brief 整数乱数を生成
     /// 
     /// 指定された範囲内で一様分布に従う整数乱数を生成する。
+    /// 最小値と最大値が逆転している場合は、正しい順序へ入れ替えて使用する。
     /// 
     /// @param min 乱数の最小値（この値を含む）
     /// @param max 乱数の最大値（この値を含む）
     /// @return int 生成された乱数値 [min, max]
     int Int(int min, int max) {
+        if (min > max) {
+            std::swap(min, max);
+        }
+
         std::uniform_int_distribution<int> dist(min, max);
         return dist(engine);
     }
@@ -53,11 +59,16 @@ public:
     /// @brief 浮動小数点乱数を生成
     /// 
     /// 指定された範囲内で一様分布に従う浮動小数点乱数を生成する。
+    /// 最小値と最大値が逆転している場合は、正しい順序へ入れ替えて使用する。
     /// 
     /// @param min 乱数の最小値（この値を含む）
     /// @param max 乱数の最大値（この値を含まない）
     /// @return float 生成された乱数値 [min, max)
     float Float(float min, float max) {
+        if (min > max) {
+            std::swap(min, max);
+        }
+
         std::uniform_real_distribution<float> dist(min, max);
         return dist(engine);
     }
