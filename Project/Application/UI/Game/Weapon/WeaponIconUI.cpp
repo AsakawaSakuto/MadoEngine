@@ -21,9 +21,9 @@ namespace UI::Game {
 			weaponIconsBG_[i]->SetColor(Vector4{ 0.1f, 0.1f, 0.1f, 1.0f });
 
 			weaponIconsShotGauge_[i] = MySprite::Create("weaponIconShotGauge" + std::to_string(i), "white2x2", SceneType::Game);
-			weaponIconsShotGauge_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 232.0f });
-			weaponIconsShotGauge_[i]->SetScale(Vector2{ 32.0f, 1.0f });
-			weaponIconsShotGauge_[i]->SetColor(Vector4{ 0.75f, 0.75f, 0.75f, 1.0f });
+			weaponIconsShotGauge_[i]->SetPosition(Vector2{ 104.0f + i * 68.0f, 260.0f });
+			weaponIconsShotGauge_[i]->SetScale(Vector2{ shotGaugeSize_, 0.0f });
+			weaponIconsShotGauge_[i]->SetColor(Vector4{ 0.5f, 0.5f, 0.5f, 1.0f });
 			weaponIconsShotGauge_[i]->SetAnchorPoint(Vector2{ 0.0f, 1.0f });
 
 			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
@@ -55,6 +55,14 @@ namespace UI::Game {
 			if (weaponIcons_[slotIndex]->GetTextureName() != textureName) {
 				weaponIcons_[slotIndex]->SetTexture(textureName);
 			}
+
+			const float shotCooldownProgress = weapon
+				? std::clamp(weapon->GetShotCooldownProgress(), 0.0f, 1.0f)
+				: 0.0f;
+			weaponIconsShotGauge_[slotIndex]->SetScale({
+				shotGaugeSize_,
+				shotGaugeSize_ * shotCooldownProgress,
+			});
 
 			if (!weapon) {
 				animationStates_[slotIndex] = {};

@@ -25,6 +25,12 @@ namespace Weapon {
 		/// @return Projectileを射出した場合はtrueを返す
 		bool WasFiredThisFrame() const { return wasFiredThisFrame_; }
 
+		/// @brief 連射終了後のクールダウン進捗を取得
+		/// @return クールダウン開始を0.0f、終了を1.0fとした進捗。連射中は1.0f
+		float GetShotCooldownProgress() const {
+			return cooldownTimer_.IsActive() ? cooldownTimer_.GetProgress() : 1.0f;
+		}
+
 		Projectile::Type GetProjectileType() const { return type_; }
 
 		int GetUpgradeLevel() const { return upgradeLevel_; }

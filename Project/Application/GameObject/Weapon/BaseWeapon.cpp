@@ -83,7 +83,7 @@ namespace Weapon {
 		wasFiredThisFrame_ = false;
 
 		intervalTimer_.Start(status_.shotIntervalTime.value, true);
-		cooldownTimer_.Start(status_.shotCooldown.value, false);
+		cooldownTimer_.Reset();
 		return true;
 	}
 

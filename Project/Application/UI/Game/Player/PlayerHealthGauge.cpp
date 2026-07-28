@@ -25,7 +25,7 @@ namespace UI::Game {
 		}
 
 		if (healthText_) {
-			healthText_->SetText(std::format("HP : {} / {}", currentHealth, maxHealth));
+			healthText_->SetText(std::format("HP : {} / {}", static_cast<int>(currentHealth), static_cast<int>(maxHealth)));
 		}
 	}
 

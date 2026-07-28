@@ -40,6 +40,7 @@ namespace UI::Game {
 		float fireAnimationDuration_ = 0.15f;    // 発射アニメーションの合計時間（秒）
 		Vector2 startIconScale = { 0.9f, 0.9f }; // 武器アイコンの通常時の拡縮率
 		Vector2 endIconScale = { 1.25f, 1.25f }; // 武器アイコンの発射アニメーション時の拡縮率
+		float shotGaugeSize_ = 28.0f;            // 射撃待機ゲージの最大サイズ
 
 		std::vector<Sprite*> weaponIcons_;
 		std::vector<Sprite*> weaponIconsShotGauge_;
