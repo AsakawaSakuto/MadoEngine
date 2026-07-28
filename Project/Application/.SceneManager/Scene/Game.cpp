@@ -111,7 +111,7 @@ SceneType Game::Update(float dt) {
 	}
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
-	enemyManager_->DrawDebugLine();
+	//enemyManager_->DrawDebugLine();
 
 	fadeOutTimer_.Update(deltaTime);
 	if (fadeOutTimer_.IsActive()) {

@@ -1,8 +1,12 @@
-# MagicaVoxel @ Ephtracy
+# Blender 5.2.0 LTS MTL File: 'None'
+# www.blender.org
 
 newmtl palette
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
 illum 1
-Ka 0.000 0.000 0.000
-Kd 1.000 1.000 1.000
-Ks 0.000 0.000 0.000
 map_Kd Bullet.png

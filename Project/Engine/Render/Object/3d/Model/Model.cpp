@@ -163,6 +163,53 @@ Vector3 Model::GetVertexPosition(uint32_t vertexIndex) const {
 	return { position.x, position.y, position.z };
 }
 
+size_t Model::GetVertexCount() const {
+	if (!sharedData_) {
+		return 0;
+	}
+
+	return sharedData_->modelData.vertices.size();
+}
+
+bool Model::TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition) const {
+	if (!sharedData_ || vertexIndex >= sharedData_->modelData.vertices.size()) {
+		return false;
+	}
+
+	Vector3 localPosition = GetVertexPosition(vertexIndex);
+	if (type_ == ModelType::Skinning &&
+		vertexIndex < skinClusterData_.mappedInfluence.size()) {
+		const VertexInfluence& influence = skinClusterData_.mappedInfluence[vertexIndex];
+		Vector3 skinnedPosition{};
+		for (uint32_t influenceIndex = 0; influenceIndex < kNumMaxInfluence; ++influenceIndex) {
+			const float weight = influence.weights[influenceIndex];
+			const int32_t jointIndex = influence.jointIndices[influenceIndex];
+			if (weight <= 0.0f ||
+				jointIndex < 0 ||
+				static_cast<size_t>(jointIndex) >= skinClusterData_.mappedPalette.size()) {
+				continue;
+			}
+
+			skinnedPosition +=
+				Matrix::Transform(
+					localPosition,
+					skinClusterData_.mappedPalette[static_cast<size_t>(jointIndex)].skeletonSpaceMatrix
+				) * weight;
+		}
+
+		localPosition = skinnedPosition;
+	}
+
+	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	Matrix4x4 worldMatrix = MakeWorldMatrix(billboardCamera);
+	if (type_ == ModelType::Animated) {
+		worldMatrix = Matrix::Multiply(rootNode_.localMatrix, worldMatrix);
+	}
+
+	outPosition = Matrix::Transform(localPosition, worldMatrix);
+	return true;
+}
+
 void Model::FromJson(const nlohmann::json& json) {
 	SetPosition(ReadVector3(json.value("position", nlohmann::json::array()), GetPosition()));
 	SetScale(ReadVector3(json.value("scale", nlohmann::json::array()), GetScale()));

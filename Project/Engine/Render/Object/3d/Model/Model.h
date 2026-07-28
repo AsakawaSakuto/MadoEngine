@@ -8,12 +8,12 @@
 #include <string>
 
 namespace MadoEngine {
-class ModelManager;
+	class ModelManager;
 }
 
 class Model : public IRenderObject3d, public MadoEngine::Json::IJsonSerializable {
 public:
-	
+
 	Model(std::string objectName);
 	~Model() override;
 
@@ -156,6 +156,16 @@ public:
 	/// @param vertexIndex 取得する頂点配列のインデックス
 	/// @return 頂点のローカル座標。未初期化または範囲外の場合はゼロベクトル
 	Vector3 GetVertexPosition(uint32_t vertexIndex) const;
+
+	/// @brief モデルが保持する頂点数を取得する
+	/// @return 頂点数
+	size_t GetVertexCount() const;
+
+	/// @brief 指定した頂点の現在のワールド座標を取得する
+	/// @param vertexIndex 取得する頂点配列のインデックス
+	/// @param outPosition 頂点のワールド座標の出力先
+	/// @return 頂点を取得できた場合はtrue
+	bool TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition) const;
 
 	const ModelSharedData* GetSharedData() const { return sharedData_; }
 
