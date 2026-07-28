@@ -22,6 +22,7 @@ namespace UI::Game {
 
 	private:
 		std::vector<Sprite*> weaponIcons_;
-		std::vector<Sprite*> weaponFrames_;
+		std::vector<Sprite*> weaponIconsBG_;
+		std::vector<Sprite*> weaponIconFrames_;
 	};
 }

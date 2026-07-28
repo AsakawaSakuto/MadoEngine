@@ -13,6 +13,7 @@ namespace UI::Game {
 
 	private:
 		Sprite* playerIcon_;
+		Sprite* playerIconBG_;
 		Sprite* playerIconFrame_;
 	};
 }

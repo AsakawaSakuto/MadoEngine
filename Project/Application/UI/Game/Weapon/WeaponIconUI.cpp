@@ -6,15 +6,20 @@ namespace UI::Game {
 	void WeaponIconUI::Initialize(int slotCount) {
 	
 		weaponIcons_.resize(slotCount);
-		weaponFrames_.resize(slotCount);
+		weaponIconsBG_.resize(slotCount);
+		weaponIconFrames_.resize(slotCount);
 
 		for (int i = 0; i < slotCount; i++) {
 
-			weaponFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
-			weaponFrames_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
+			weaponIconsBG_[i] = MySprite::Create("weaponIconBG" + std::to_string(i), "IconFrameBG", SceneType::Game);
+			weaponIconsBG_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
+
+			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
+			weaponIconFrames_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
 
 			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);
-			weaponIcons_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
+			weaponIcons_[i]->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f });
+			weaponIcons_[i]->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
 		}
 	
 	}
