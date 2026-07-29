@@ -53,6 +53,7 @@ namespace Player {
 		movement_.Initialize();
 
 		weaponModel_ = MyModel::Create("PlayerWeapon", "Weapon", SceneType::Game);
+		weaponTransform_.SetAllScale(0.5f);
 
 		MadoEngine::Particle::PlayDesc desc;
 		desc.transform.translate = model_->GetVertexPosition(218);
@@ -116,18 +117,24 @@ namespace Player {
 			transform_.translate = { 0.0f, 100.0f, 0.0f };
 		}
 
-		weaponTransform_.translate = model_->GetVertexPosition(330);
-		weaponModel_->SetTransform(weaponTransform_);
+		Vector3 weaponPosition;
+		if (model_->TryGetVertexWorldPosition(330, weaponPosition)) {
+			weaponTransform_.translate = weaponPosition;
+			weaponModel_->SetTransform(weaponTransform_);
+		}
 
-		Transform3D particleTransform;
-		particleTransform.translate = model_->GetVertexPosition(218);
-		
-		if (!MyParticle3d::SetTransform(particleHandle_, particleTransform)) {
-			MadoEngine::Particle::PlayDesc desc;
-			desc.transform.translate = model_->GetVertexPosition(218);
-			desc.sceneType = SceneType::Game;
-			desc.loopOverride = true;
-			particleHandle_ = MyParticle3d::Play("Trail", desc);
+		Vector3 particlePosition;
+		if (model_->TryGetVertexWorldPosition(218, particlePosition)) {
+			Transform3D particleTransform;
+			particleTransform.translate = particlePosition;
+
+			if (!MyParticle3d::SetTransform(particleHandle_, particleTransform)) {
+				MadoEngine::Particle::PlayDesc desc;
+				desc.transform = particleTransform;
+				desc.sceneType = SceneType::Game;
+				desc.loopOverride = true;
+				particleHandle_ = MyParticle3d::Play("Trail", desc);
+			}
 		}
 	}
 

@@ -56,6 +56,140 @@
             },
             "screenEffectStage": "Final",
             "targetLayerMask": 8
+        },
+        {
+            "effectShaderKey": "PostEffect/Binarize.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_1",
+            "name": "Sphere1",
+            "parameters": {
+                "HighColorB": 1.0,
+                "HighColorG": 1.0,
+                "HighColorR": 1.0,
+                "Intensity": 1.0,
+                "LowColorB": 0.0,
+                "LowColorG": 0.0,
+                "LowColorR": 0.0,
+                "Threshold": 0.5
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 256
+        },
+        {
+            "effectShaderKey": "PostEffect/BoxFilter.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_4",
+            "name": "Sphere2",
+            "parameters": {
+                "Intensity": 1.0,
+                "Radius": 2.0
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 512
+        },
+        {
+            "effectShaderKey": "PostEffect/ColorFilter.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_6",
+            "name": "Sphere3",
+            "parameters": {
+                "FilterColorB": 0.0,
+                "FilterColorG": 0.0,
+                "FilterColorR": 1.0,
+                "Intensity": 1.0
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 1024
+        },
+        {
+            "effectShaderKey": "PostEffect/GaussianFilter.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_7",
+            "name": "Sphere4",
+            "parameters": {
+                "Intensity": 1.0,
+                "Radius": 2.0,
+                "Sigma": 2.0
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 2048
+        },
+        {
+            "effectShaderKey": "PostEffect/GrayScale.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_8",
+            "name": "Sphere5",
+            "parameters": {},
+            "screenEffectStage": "Final",
+            "targetLayerMask": 4096
+        },
+        {
+            "effectShaderKey": "PostEffect/Invert.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_9",
+            "name": "Sphere6",
+            "parameters": {},
+            "screenEffectStage": "Final",
+            "targetLayerMask": 8192
+        },
+        {
+            "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_10",
+            "name": "Sphere7",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 1.0,
+                "ColorG": 1.0,
+                "ColorR": 1.0,
+                "DepthSensitivity": 80.0,
+                "EdgeThreshold": 0.004999999888241291,
+                "Intensity": 1.0,
+                "Thickness": 1.0
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 16384
+        },
+        {
+            "effectShaderKey": "PostEffect/LuminanceOutline.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_11",
+            "name": "Sphere8",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 0.0,
+                "ColorG": 0.0,
+                "ColorR": 0.0,
+                "EdgeThreshold": 0.05000000074505806,
+                "Intensity": 1.0,
+                "LuminanceSensitivity": 5.0,
+                "Thickness": 1.0
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 32768
+        },
+        {
+            "effectShaderKey": "PostEffect/PixelArt.PS",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_12",
+            "name": "Sphere9",
+            "parameters": {
+                "ColorSteps": 10.0,
+                "Contrast": 1.0,
+                "Intensity": 1.0,
+                "PixelSize": 6.0
+            },
+            "screenEffectStage": "Final",
+            "targetLayerMask": 65536
         }
     ],
     "screenPasses": [
