@@ -19,6 +19,10 @@ namespace {
 
 namespace MadoEngine
 {
+	EngineExecution::~EngineExecution() {
+		Finalize();
+	}
+
 	void EngineExecution::Initialize(HINSTANCE hInstance) {
 
 		CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -78,6 +82,8 @@ namespace MadoEngine
 		// PSORegistryの初期化
 		psoRegistry_ = std::make_unique<MadoEngine::Render::PSORegistry>();
 		psoRegistry_->Initialize(dxDevice_.get(), psoFactory_.get());
+		computePsoRegistry_ = std::make_unique<MadoEngine::Render::ComputePSORegistry>();
+		computePsoRegistry_->Initialize(dxDevice_->GetDevice());
 
 		// DeltaTimeの初期化
 		deltaTime_ = std::make_unique<MadoEngine::DeltaTime>();
@@ -110,7 +116,8 @@ namespace MadoEngine
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().Initialize(
 			dxDevice_->GetDevice(),
 			commandManager_->GetCommandList(),
-			psoRegistry_.get()
+			psoRegistry_.get(),
+			computePsoRegistry_.get()
 		);
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Initialize(
 			dxDevice_->GetDevice(),
@@ -199,6 +206,7 @@ namespace MadoEngine
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
 #endif // USE_IMGUI
+		isInitialized_ = true;
 	}
 
 	void EngineExecution::Update() {
@@ -231,6 +239,9 @@ namespace MadoEngine
 		}
 
 		commandManager_->WaitForGPU();
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().OnGpuFrameCompleted(
+			commandManager_->GetCompletedFenceValue()
+		);
 		swapChain_->Resize(width, height);
 		depthStencilBuffer_->Resize(width, height);
 		layerDepthStencilBuffer_->Resize(width, height);
@@ -314,6 +325,9 @@ namespace MadoEngine
 		// SRV用DescriptorHeapをセット（テクスチャ参照に必須）
 		ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
 		commandManager_->GetCommandList()->SetDescriptorHeaps(1, heaps);
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().RecordGpuSimulation(
+			commandManager_->GetNextFenceValue()
+		);
 
 		RenderShadowMap(
 			currentSceneType,
@@ -746,6 +760,9 @@ namespace MadoEngine
 
 		// GPU処理完了を待機
 		commandManager_->WaitForGPU();
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().OnGpuFrameCompleted(
+			commandManager_->GetCompletedFenceValue()
+		);
 
 		// 描画で参照したModelリソースはGPU処理完了後に解放する
 		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();
@@ -753,6 +770,15 @@ namespace MadoEngine
 
 	void EngineExecution::Finalize()
 	{
+		if (!isInitialized_) {
+			return;
+		}
+		isInitialized_ = false;
+		commandManager_->WaitForGPU();
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().OnGpuFrameCompleted(
+			commandManager_->GetCompletedFenceValue()
+		);
+
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance().Finalize();
 		MadoEngine::InputManager::GetInstance().Finalize();
@@ -761,17 +787,17 @@ namespace MadoEngine
 		MadoEngine::ModelManager::GetInstance().Finalize();
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().Finalize();
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Finalize();
+		computePsoRegistry_->Finalize();
+		psoRegistry_->Finalize();
 		MadoEngine::TextureManager::GetInstance().Finalize();
 		MadoEngine::ShaderManager::GetInstance().Finalize();
 		MadoEngine::RootSignatureManager::GetInstance().Finalize();
-
-		psoRegistry_->Finalize();
-		Logger::Finalize();
 
 #ifdef USE_IMGUI
 		imguiManager_->Finalize();
 #endif // USE_IMGUI
 
+		Logger::Finalize();
 		CoUninitialize();
 	}
 

@@ -39,7 +39,15 @@ namespace MadoEngine::Render {
 		Entry entry{};
 		entry.desc = desc;
 		entry.texture = std::make_unique<RenderTexture>();
-		entry.texture->Initialize(device_, rtvManager_, srvManager_, desc.width, desc.height, desc.format);
+		entry.texture->Initialize(
+			device_,
+			rtvManager_,
+			srvManager_,
+			desc.width,
+			desc.height,
+			desc.format,
+			desc.clearColor
+		);
 
 		RenderTexture* created = entry.texture.get();
 		renderTargets_.emplace(name, std::move(entry));

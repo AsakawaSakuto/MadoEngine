@@ -568,6 +568,137 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("Particle3d.RootSig", rootSigDesc);
 		}
 
+		// GPU Particle描画用 RootSignature
+		// t0: 描画Instance、b0: Camera/Fog、t1: Texture、b1: 先頭Instance/BlendMode、t2: Alive Index、s0: Sampler
+		{
+			D3D12_DESCRIPTOR_RANGE textureRange{};
+			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			textureRange.NumDescriptors = 1;
+			textureRange.BaseShaderRegister = 1;
+			textureRange.RegisterSpace = 0;
+			textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[5]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+			rootParams[0].Descriptor.ShaderRegister = 0;
+			rootParams[0].Descriptor.RegisterSpace = 0;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[1].Descriptor.ShaderRegister = 0;
+			rootParams[1].Descriptor.RegisterSpace = 0;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[2].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[2].DescriptorTable.pDescriptorRanges = &textureRange;
+			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+			rootParams[3].Constants.ShaderRegister = 1;
+			rootParams[3].Constants.RegisterSpace = 0;
+			rootParams[3].Constants.Num32BitValues = 2;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+			rootParams[4].Descriptor.ShaderRegister = 2;
+			rootParams[4].Descriptor.RegisterSpace = 0;
+			rootParams[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			D3D12_STATIC_SAMPLER_DESC sampler{};
+			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			sampler.MipLODBias = 0.0f;
+			sampler.MaxAnisotropy = 0;
+			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			sampler.MinLOD = 0.0f;
+			sampler.MaxLOD = D3D12_FLOAT32_MAX;
+			sampler.ShaderRegister = 0;
+			sampler.RegisterSpace = 0;
+			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &sampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("GpuParticle3d.RootSig", rootSigDesc);
+		}
+
+		// GPU Particle Compute用 RootSignature
+		// u0: State、u1: Draw、t0: Alive Input、u2: Alive Output、u3-u7: Counter/Free/Indirect、b0-b1: Parameter
+		{
+			D3D12_ROOT_PARAMETER rootParams[11]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[0].Descriptor.ShaderRegister = 0;
+			rootParams[0].Descriptor.RegisterSpace = 0;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[1].Descriptor.ShaderRegister = 1;
+			rootParams[1].Descriptor.RegisterSpace = 0;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+			rootParams[2].Descriptor.ShaderRegister = 0;
+			rootParams[2].Descriptor.RegisterSpace = 0;
+			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[3].Descriptor.ShaderRegister = 2;
+			rootParams[3].Descriptor.RegisterSpace = 0;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[4].Descriptor.ShaderRegister = 3;
+			rootParams[4].Descriptor.RegisterSpace = 0;
+			rootParams[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[5].Descriptor.ShaderRegister = 4;
+			rootParams[5].Descriptor.RegisterSpace = 0;
+			rootParams[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[6].Descriptor.ShaderRegister = 5;
+			rootParams[6].Descriptor.RegisterSpace = 0;
+			rootParams[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[7].Descriptor.ShaderRegister = 6;
+			rootParams[7].Descriptor.RegisterSpace = 0;
+			rootParams[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[8].Descriptor.ShaderRegister = 7;
+			rootParams[8].Descriptor.RegisterSpace = 0;
+			rootParams[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[9].Descriptor.ShaderRegister = 0;
+			rootParams[9].Descriptor.RegisterSpace = 0;
+			rootParams[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[10].Descriptor.ShaderRegister = 1;
+			rootParams[10].Descriptor.RegisterSpace = 0;
+			rootParams[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 0;
+			rootSigDesc.pStaticSamplers = nullptr;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("ParticleCompute.RootSig", rootSigDesc);
+		}
+
 		// Cylinder Effect用 RootSignature
 		// t0: Cylinder Instance、b0: Camera、t1: Texture、s0: Sampler
 		{

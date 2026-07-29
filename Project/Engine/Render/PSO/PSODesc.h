@@ -62,7 +62,7 @@ namespace MadoEngine::Render {
 		InputLayoutType inputLayout = InputLayoutType::StaticModel;
 		uint32_t        renderTargetCount = 1;
 		DXGI_FORMAT     rtvFormat   = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		DXGI_FORMAT     dsvFormat   = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		DXGI_FORMAT     dsvFormat   = DXGI_FORMAT_D32_FLOAT;
 		int             depthBias = D3D12_DEFAULT_DEPTH_BIAS;
 		float           depthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
 		float           slopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;

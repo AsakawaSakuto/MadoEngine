@@ -33,10 +33,10 @@
             },
             "emission": {
                 "bursts": [],
-                "duration": 1.0,
+                "duration": 0.009999999776482582,
                 "isLoop": false,
-                "maxParticles": 256,
-                "ratePerSecond": 10.0,
+                "maxParticles": 128,
+                "ratePerSecond": 64.0,
                 "startDelay": 0.0
             },
             "initial": {
@@ -47,12 +47,12 @@
                 "direction": {
                     "max": [
                         0.0,
-                        1.0,
+                        0.0,
                         0.0
                     ],
                     "min": [
                         0.0,
-                        1.0,
+                        0.0,
                         0.0
                     ]
                 },
@@ -66,8 +66,8 @@
                     "min": 0.0
                 },
                 "speed": {
-                    "max": 1.0,
-                    "min": 1.0
+                    "max": 0.0,
+                    "min": 0.0
                 }
             },
             "motion": {
@@ -87,7 +87,7 @@
             "renderer": {
                 "blendMode": "add",
                 "sortMode": "none",
-                "texture": "white2x2"
+                "texture": "circle2"
             },
             "shape": {
                 "offset": [
@@ -101,12 +101,12 @@
             "sizeOverLifetime": {
                 "end": {
                     "max": [
-                        1.0,
-                        1.0
+                        0.0,
+                        0.0
                     ],
                     "min": [
-                        1.0,
-                        1.0
+                        0.0,
+                        0.0
                     ]
                 },
                 "start": {

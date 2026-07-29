@@ -55,7 +55,15 @@ SceneManager::SceneManager()
 	, pendingSceneType_(SceneType::None)
 	, hasPendingSceneChange_(false) {}
 
-SceneManager::~SceneManager() {}
+SceneManager::~SceneManager() {
+	if (!currentScene_) {
+		return;
+	}
+
+	currentScene_->Finalize();
+	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(currentSceneType_);
+	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(currentSceneType_);
+}
 
 void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
 	creators_[type] = std::move(creator);

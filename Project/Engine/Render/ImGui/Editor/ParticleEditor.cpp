@@ -17,6 +17,24 @@ namespace {
 
 	using namespace MadoEngine::Particle;
 
+	/// @brief Particle Backendの日本語表示名を取得する
+	/// @param backend 表示するBackend
+	/// @return 日本語表示名
+	const char* GetParticleBackendDisplayName(ParticleBackend backend) {
+		switch (backend) {
+			case ParticleBackend::Auto:
+				return "自動";
+			case ParticleBackend::Cpu:
+				return "CPU";
+			case ParticleBackend::Gpu:
+				return "GPU";
+			case ParticleBackend::Count:
+				break;
+		}
+
+		return "不明";
+	}
+
 	/// @brief 指定したEmitter名が既に使用されているか確認する
 	/// @param emitters 確認対象のEmitter一覧
 	/// @param name 確認するEmitter名
@@ -256,6 +274,21 @@ namespace {
 	/// @brief Emitter設定を編集する
 	/// @param emitter 編集対象Emitter
 	void DrawEmitterEditor(EmitterConfig& emitter) {
+		const char* backendNames[] = { "自動", "CPU", "GPU" };
+		int backendIndex = std::clamp(
+			static_cast<int>(emitter.backend),
+			static_cast<int>(ParticleBackend::Auto),
+			static_cast<int>(ParticleBackend::Gpu)
+		);
+		if (ImGui::Combo(
+			"バックエンド##EmitterBackend",
+			&backendIndex,
+			backendNames,
+			static_cast<int>(std::size(backendNames)))) {
+			emitter.backend = static_cast<ParticleBackend>(backendIndex);
+		}
+		ImGui::Separator();
+
 		static int selectedSettingPage = 0;
 		const char* settingPageNames[] = { "発生", "形状", "動き", "見た目" };
 		const float settingPageButtonWidth =
@@ -694,6 +727,32 @@ namespace MadoEngine::Editor {
 			particleSystem.GetActiveEffectCount(),
 			particleSystem.GetAliveParticleCount()
 		);
+		if (particleSystem.IsAlive(previewHandle)) {
+			const std::vector<ParticleEmitterRuntimeInfo> runtimeInfo =
+				particleSystem.GetRuntimeInfo(previewHandle);
+			ImGui::SeparatorText("プレビュー実行情報");
+			for (std::size_t emitterIndex = 0; emitterIndex < runtimeInfo.size(); ++emitterIndex) {
+				const ParticleEmitterRuntimeInfo& info = runtimeInfo[emitterIndex];
+				ImGui::PushID(static_cast<int>(emitterIndex));
+				ImGui::Text(
+					"%s: %s / 生存 %u / 最大 %u",
+					info.name.c_str(),
+					GetParticleBackendDisplayName(info.activeBackend),
+					info.aliveParticleCount,
+					info.maxParticleCount
+				);
+				if (info.activeBackend == ParticleBackend::Gpu) {
+					ImGui::TextDisabled(
+						"GPU Buffer: %.2f KiB",
+						static_cast<double>(info.gpuBufferCapacityBytes) / 1024.0
+					);
+				}
+				if (!info.fallbackReason.empty()) {
+					ImGui::TextWrapped("CPUフォールバック: %s", info.fallbackReason.c_str());
+				}
+				ImGui::PopID();
+			}
+		}
 		ImGui::Separator();
 
 		ParticleEffectAsset* asset = particleSystem.FindEditableAsset(selectedAssetName);

@@ -13,7 +13,8 @@ namespace MadoEngine::Render {
 		MadoEngine::Core::SRVManager* srvManager,
 		uint32_t                      width,
 		uint32_t                      height,
-		DXGI_FORMAT                   format)
+		DXGI_FORMAT                   format,
+		const std::array<float, 4>&   clearColor)
 	{
 		assert(device     != nullptr && "DxDevice が nullptr です");
 		assert(rtvManager != nullptr && "RTVManager が nullptr です");
@@ -27,6 +28,7 @@ namespace MadoEngine::Render {
 		width_      = width;
 		height_     = height;
 		format_     = format;
+		clearColor_ = clearColor;
 		rtvIndex_ = rtvManager_->Allocate();
 		srvIndex_ = srvManager_->Allocate();
 
@@ -80,10 +82,10 @@ namespace MadoEngine::Render {
 		// --- クリアカラーの設定 ---
 		D3D12_CLEAR_VALUE clearValue{};
 		clearValue.Format   = format_;
-		clearValue.Color[0] = 0.1f;
-		clearValue.Color[1] = 0.25f;
-		clearValue.Color[2] = 0.5f;
-		clearValue.Color[3] = 1.0f;
+		clearValue.Color[0] = clearColor_[0];
+		clearValue.Color[1] = clearColor_[1];
+		clearValue.Color[2] = clearColor_[2];
+		clearValue.Color[3] = clearColor_[3];
 
 		// --- テクスチャリソースの生成 ---
 		textureResource_.Reset();
@@ -136,8 +138,12 @@ namespace MadoEngine::Render {
 		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &depthStencilHandle);
 
 		// レンダーターゲットのクリア
-		float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		commandList->ClearRenderTargetView(
+			rtvHandle,
+			clearColor_.data(),
+			0,
+			nullptr
+		);
 	}
 
 	void RenderTexture::BeginRender(
@@ -162,8 +168,8 @@ namespace MadoEngine::Render {
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvManager_->GetCPUHandle(rtvIndex_);
 		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, depthStencilHandle);
 
-		float defaultClearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
-		const float* actualClearColor = clearColor != nullptr ? clearColor : defaultClearColor;
+		const float* actualClearColor =
+			clearColor != nullptr ? clearColor : clearColor_.data();
 		commandList->ClearRenderTargetView(rtvHandle, actualClearColor, 0, nullptr);
 	}
 

@@ -31,14 +31,20 @@ namespace MadoEngine::Core {
 
         ID3D12CommandList* commandLists[] = { commandList_.Get() };
         commandQueue_->ExecuteCommandLists(1, commandLists);
+
+        ++fenceValue_;
+        hr = commandQueue_->Signal(fence_.Get(), fenceValue_);
+        assert(SUCCEEDED(hr));
     }
 
     void CommandManager::WaitForGPU() {
-        fenceValue_++;
-        commandQueue_->Signal(fence_.Get(), fenceValue_);
+        if (!fence_ || !fenceEvent_ || fenceValue_ == 0) {
+            return;
+        }
 
         if (fence_->GetCompletedValue() < fenceValue_) {
-            fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
+            const HRESULT hr = fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
+            assert(SUCCEEDED(hr));
             WaitForSingleObject(fenceEvent_, INFINITE);
         }
     }

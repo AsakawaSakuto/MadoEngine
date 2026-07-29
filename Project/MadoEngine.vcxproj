@@ -135,6 +135,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleCommon.hlsli" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleInitialize.CS.hlsl" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleClearCounter.CS.hlsl" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleUpdate.CS.hlsl" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticlePrepareEmit.CS.hlsl" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleEmit.CS.hlsl" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleBuildArgs.CS.hlsl" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticle.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -227,8 +235,11 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterRuntimeFactory.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.cpp" />
@@ -239,6 +250,7 @@
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
     <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
+    <ClCompile Include="Engine\Render\PSO\ComputePSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
@@ -429,9 +441,14 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\GpuParticleTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\IParticleEmitterRuntime.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\MyParticle3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEmitterRuntimeFactory.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.h" />
@@ -446,6 +463,8 @@
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectTypes.h" />
     <ClInclude Include="Engine\Render\LayerEffectPass.h" />
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
+    <ClInclude Include="Engine\Render\PSO\ComputePSODesc.h" />
+    <ClInclude Include="Engine\Render\PSO\ComputePSORegistry.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\PSODescHash.h" />
     <ClInclude Include="Engine\Render\PSO\PSOFactory.h" />

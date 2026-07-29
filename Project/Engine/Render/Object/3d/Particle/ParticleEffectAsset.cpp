@@ -227,6 +227,35 @@ namespace {
 		return value == SimulationSpace::Local ? "local" : "world";
 	}
 
+	/// @brief 文字列からParticle Backendを取得する
+	/// @param value 変換元文字列
+	/// @return 変換したParticle Backend
+	ParticleBackend ParseParticleBackend(const std::string& value) {
+		if (value == "cpu") {
+			return ParticleBackend::Cpu;
+		}
+		if (value == "gpu") {
+			return ParticleBackend::Gpu;
+		}
+		return ParticleBackend::Auto;
+	}
+
+	/// @brief Particle Backendを文字列へ変換する
+	/// @param value 変換するParticle Backend
+	/// @return 変換した文字列
+	const char* ToString(ParticleBackend value) {
+		switch (value) {
+		case ParticleBackend::Cpu:
+			return "cpu";
+		case ParticleBackend::Gpu:
+			return "gpu";
+		case ParticleBackend::Auto:
+		case ParticleBackend::Count:
+		default:
+			return "auto";
+		}
+	}
+
 	/// @brief 文字列からDirectionModeを取得する
 	/// @param value 変換元文字列
 	/// @return 変換したDirectionMode
@@ -443,6 +472,7 @@ namespace MadoEngine::Particle {
 
 			EmitterConfig emitter;
 			emitter.name = ReadString(emitterJson, "name", emitter.name);
+			emitter.backend = ParseParticleBackend(ReadString(emitterJson, "backend", "auto"));
 			emitter.simulationSpace = ParseSimulationSpace(ReadString(emitterJson, "simulationSpace", "world"));
 
 			if (const nlohmann::json* emission = FindValue(emitterJson, "emission")) {
@@ -529,6 +559,7 @@ namespace MadoEngine::Particle {
 		for (const EmitterConfig& emitter : emitters_) {
 			nlohmann::json emitterJson;
 			emitterJson["name"] = emitter.name;
+			emitterJson["backend"] = ToString(emitter.backend);
 			emitterJson["simulationSpace"] = ToString(emitter.simulationSpace);
 			emitterJson["emission"] = {
 				{ "maxParticles", emitter.emission.maxParticles },
@@ -577,7 +608,14 @@ namespace MadoEngine::Particle {
 
 	void ParticleEffectAsset::Validate() {
 		for (EmitterConfig& emitter : emitters_) {
-			emitter.emission.maxParticles = (std::max)(1u, emitter.emission.maxParticles);
+			if (emitter.backend == ParticleBackend::Count) {
+				emitter.backend = ParticleBackend::Auto;
+			}
+			emitter.emission.maxParticles = std::clamp(
+				emitter.emission.maxParticles,
+				1u,
+				kMaximumParticleCountPerEmitter
+			);
 			emitter.emission.ratePerSecond = (std::max)(0.0f, emitter.emission.ratePerSecond);
 			emitter.emission.duration = (std::max)(0.0f, emitter.emission.duration);
 			emitter.emission.startDelay = (std::max)(0.0f, emitter.emission.startDelay);

@@ -1,6 +1,8 @@
 #pragma once
 #include "ParticleEffectInstance.h"
+#include "ParticleEmitterRuntimeFactory.h"
 #include "ParticleRenderer3d.h"
+#include "Render/PSO/ComputePSORegistry.h"
 #include <filesystem>
 #include <memory>
 #include <queue>
@@ -29,7 +31,8 @@ namespace MadoEngine::Particle {
 		void Initialize(
 			ID3D12Device* device,
 			ID3D12GraphicsCommandList* commandList,
-			MadoEngine::Render::PSORegistry* psoRegistry
+			MadoEngine::Render::PSORegistry* psoRegistry,
+			MadoEngine::Render::ComputePSORegistry* computePsoRegistry
 		);
 
 		/// @brief Particle Systemを終了する
@@ -103,6 +106,14 @@ namespace MadoEngine::Particle {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime);
 
+		/// @brief 全GPU EmitterのSimulation Commandを記録する
+		/// @param submissionFenceValue Command提出へ紐付けるFence値
+		void RecordGpuSimulation(uint64_t submissionFenceValue);
+
+		/// @brief Particleが記録したGPU処理の完了を通知する
+		/// @param completedFenceValue GPUが完了済みのFence値
+		void OnGpuFrameCompleted(uint64_t completedFenceValue);
+
 		/// @brief 描画条件に一致するParticleを描画する
 		/// @param sceneType 現在のScene種別
 		/// @param camera 描画に使用するCamera
@@ -147,10 +158,26 @@ namespace MadoEngine::Particle {
 		/// @return 生存Particle総数
 		std::size_t GetAliveParticleCount() const;
 
+		/// @brief Effect内EmitterのRuntime情報を取得する
+		/// @param handle 情報を取得するEffect Handle
+		/// @return Editor表示用Runtime情報
+		std::vector<ParticleEmitterRuntimeInfo> GetRuntimeInfo(EffectHandle handle) const;
+
+		/// @brief GPU Backendを利用できるか取得する
+		/// @return 利用できる場合はtrue
+		bool IsGpuBackendAvailable() const {
+			return runtimeFactory_.IsGpuBackendAvailable();
+		}
+
 	private:
 		struct EffectSlot {
 			std::unique_ptr<ParticleEffectInstance> instance;
 			uint32_t generation = 1;
+		};
+
+		struct RetiredEffectInstance {
+			std::unique_ptr<ParticleEffectInstance> instance;
+			uint64_t fenceValue = 0;
 		};
 
 		ParticleSystem3d() = default;
@@ -171,11 +198,15 @@ namespace MadoEngine::Particle {
 		void ReleaseSlot(uint32_t index);
 
 		ParticleRenderer3d renderer_;
+		ParticleEmitterRuntimeFactory runtimeFactory_;
+		ID3D12GraphicsCommandList* commandList_ = nullptr;
 		std::unordered_map<std::string, std::shared_ptr<ParticleEffectAsset>> assets_;
 		std::unordered_map<std::string, std::filesystem::path> assetPaths_;
 		std::filesystem::path assetDirectoryPath_ = "Assets/Json/Particle";
 		std::vector<EffectSlot> effectSlots_;
+		std::vector<RetiredEffectInstance> retiredEffectInstances_;
 		std::queue<uint32_t> freeSlotIndices_;
+		uint64_t currentSubmissionFenceValue_ = 0;
 		SceneType preparedSceneType_ = SceneType::None;
 		bool isRenderDataPrepared_ = false;
 		bool isInitialized_ = false;

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <d3d12.h>
 #include <wrl/client.h>
 #include <cstdint>
@@ -32,13 +33,15 @@ namespace MadoEngine::Render {
 		/// @param width テクスチャ幅
 		/// @param height テクスチャ高さ
 		/// @param format テクスチャフォーマット（デフォルト: DXGI_FORMAT_R8G8B8A8_UNORM）
+		/// @param clearColor 最適化ClearValueへ使用する色
 		void Initialize(
 			MadoEngine::Core::DxDevice*    device,
 			MadoEngine::Core::RTVManager*  rtvManager,
 			MadoEngine::Core::SRVManager*  srvManager,
 			uint32_t                       width,
 			uint32_t                       height,
-			DXGI_FORMAT                    format = DXGI_FORMAT_R8G8B8A8_UNORM
+			DXGI_FORMAT                    format = DXGI_FORMAT_R8G8B8A8_UNORM,
+			const std::array<float, 4>&    clearColor = { 0.1f, 0.25f, 0.5f, 1.0f }
 		);
 
 		/// @brief レンダーテクスチャをリサイズする
@@ -119,6 +122,7 @@ namespace MadoEngine::Render {
 		uint32_t    width_  = 0;
 		uint32_t    height_ = 0;
 		DXGI_FORMAT format_ = DXGI_FORMAT_R8G8B8A8_UNORM;
+		std::array<float, 4> clearColor_ = { 0.1f, 0.25f, 0.5f, 1.0f };
 
 		// ハンドル取得用にマネージャーの参照を保持する
 		MadoEngine::Core::RTVManager* rtvManager_ = nullptr;

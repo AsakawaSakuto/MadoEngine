@@ -5,9 +5,37 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Particle Shader">
+      <UniqueIdentifier>{6F118F80-B874-47B7-A541-29D58DC09567}</UniqueIdentifier>
+      <Extensions>hlsl;hlsli</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleCommon.hlsli">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleInitialize.CS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleClearCounter.CS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleUpdate.CS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticlePrepareEmit.CS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleEmit.CS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticleBuildArgs.CS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\Particle\GpuParticle.VS.hlsl">
+      <Filter>Particle Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -38,6 +66,7 @@
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\MatrixFunction.cpp" />
     <ClCompile Include="Engine\Math\Function\QuaternionFunction.cpp" />
+    <ClCompile Include="Engine\Render\PSO\ComputePSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ShaderReflector.cpp" />
@@ -84,8 +113,11 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterRuntimeFactory.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.cpp" />
@@ -362,6 +394,12 @@
     <ClInclude Include="Engine\Render\Object\2d\Triangle\Triangle.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\PSO\ComputePSODesc.h">
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\PSO\ComputePSORegistry.h">
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Render\PSO\PSODesc.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
@@ -516,9 +554,14 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\InstancedModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\GpuParticleTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\IParticleEmitterRuntime.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\MyParticle3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEmitterRuntimeFactory.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.h" />

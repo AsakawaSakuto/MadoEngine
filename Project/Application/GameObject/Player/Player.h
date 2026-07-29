@@ -64,6 +64,9 @@ namespace Player {
 
 		Camera* camera_ = nullptr;
 
+		Model* weaponModel_ = nullptr;
+		Transform3D weaponTransform_;
+
 		Model* shadowModel_ = nullptr; // 影モデル
 		Transform3D shadowTransform_;  // 影Transform
 
@@ -79,5 +82,6 @@ namespace Player {
 		GamingColor gamingColor_; // ゲーミングカラー
 
 		GameTimer regeneTimer_;   // HPの自動回復タイマー
+		MadoEngine::Particle::EffectHandle particleHandle_;
 	};
 }

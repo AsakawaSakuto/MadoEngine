@@ -168,9 +168,51 @@ namespace MadoEngine::Particle {
 	void ParticleSystem3d::Initialize(
 		ID3D12Device* device,
 		ID3D12GraphicsCommandList* commandList,
-		MadoEngine::Render::PSORegistry* psoRegistry) {
+		MadoEngine::Render::PSORegistry* psoRegistry,
+		MadoEngine::Render::ComputePSORegistry* computePsoRegistry) {
 		Finalize();
+		commandList_ = commandList;
 		renderer_.Initialize(device, commandList, psoRegistry);
+		bool isGpuBackendAvailable =
+			device != nullptr &&
+			computePsoRegistry != nullptr;
+		if (isGpuBackendAvailable) {
+			D3D12_FEATURE_DATA_SHADER_MODEL shaderModel{};
+			shaderModel.HighestShaderModel = D3D_SHADER_MODEL_6_0;
+			isGpuBackendAvailable = SUCCEEDED(device->CheckFeatureSupport(
+				D3D12_FEATURE_SHADER_MODEL,
+				&shaderModel,
+				sizeof(shaderModel)
+			)) && shaderModel.HighestShaderModel >= D3D_SHADER_MODEL_6_0;
+		}
+		if (isGpuBackendAvailable) {
+			isGpuBackendAvailable = renderer_.IsGpuRenderingAvailable();
+		}
+
+		if (isGpuBackendAvailable) {
+			const char* computeShaderKeys[] = {
+				"Object3d/Particle/GpuParticleInitialize.CS",
+				"Object3d/Particle/GpuParticleClearCounter.CS",
+				"Object3d/Particle/GpuParticleUpdate.CS",
+				"Object3d/Particle/GpuParticlePrepareEmit.CS",
+				"Object3d/Particle/GpuParticleEmit.CS",
+				"Object3d/Particle/GpuParticleBuildArgs.CS",
+			};
+			for (const char* shaderKey : computeShaderKeys) {
+				if (!computePsoRegistry->Get({
+					shaderKey,
+					"ParticleCompute.RootSig",
+				})) {
+					isGpuBackendAvailable = false;
+					break;
+				}
+			}
+		}
+		runtimeFactory_.Initialize(
+			device,
+			computePsoRegistry,
+			isGpuBackendAvailable
+		);
 		isInitialized_ = true;
 		const std::size_t assetCount = LoadAssetsFromDirectory(assetDirectoryPath_);
 		Logger::Output(
@@ -184,10 +226,14 @@ namespace MadoEngine::Particle {
 			freeSlotIndices_.pop();
 		}
 		effectSlots_.clear();
+		retiredEffectInstances_.clear();
 		assets_.clear();
 		assetPaths_.clear();
 		renderer_.Finalize();
+		runtimeFactory_.Initialize(nullptr, nullptr, false);
+		commandList_ = nullptr;
 		preparedSceneType_ = SceneType::None;
+		currentSubmissionFenceValue_ = 0;
 		isRenderDataPrepared_ = false;
 		isInitialized_ = false;
 	}
@@ -408,6 +454,14 @@ namespace MadoEngine::Particle {
 	}
 
 	EffectHandle ParticleSystem3d::Play(const std::string& assetName, const PlayDesc& desc) {
+		if (!isInitialized_) {
+			Logger::Output(
+				"ParticleSystem3dの初期化前または終了後にはParticleを再生できません。",
+				Logger::Level::Warning
+			);
+			return {};
+		}
+
 		const auto found = assets_.find(assetName);
 		if (found == assets_.end()) {
 			Logger::Output("再生するParticle Assetが見つかりません: " + assetName, Logger::Level::Warning);
@@ -430,7 +484,7 @@ namespace MadoEngine::Particle {
 
 		EffectSlot& slot = effectSlots_[slotIndex];
 		slot.instance = std::make_unique<ParticleEffectInstance>();
-		slot.instance->Initialize(found->second, resolvedDesc);
+		slot.instance->Initialize(found->second, resolvedDesc, runtimeFactory_);
 		isRenderDataPrepared_ = false;
 		return { slotIndex, slot.generation };
 	}
@@ -477,6 +531,43 @@ namespace MadoEngine::Particle {
 		}
 	}
 
+	void ParticleSystem3d::RecordGpuSimulation(uint64_t submissionFenceValue) {
+		if (!isInitialized_ || !commandList_) {
+			return;
+		}
+
+		currentSubmissionFenceValue_ = submissionFenceValue;
+		for (EffectSlot& slot : effectSlots_) {
+			if (slot.instance) {
+				slot.instance->RecordGpuSimulation(commandList_, submissionFenceValue);
+			}
+		}
+	}
+
+	void ParticleSystem3d::OnGpuFrameCompleted(uint64_t completedFenceValue) {
+		if (!isInitialized_) {
+			return;
+		}
+
+		renderer_.OnGpuFrameCompleted(completedFenceValue);
+		for (EffectSlot& slot : effectSlots_) {
+			if (slot.instance) {
+				slot.instance->OnGpuFrameCompleted(completedFenceValue);
+			}
+		}
+		for (RetiredEffectInstance& retired : retiredEffectInstances_) {
+			if (retired.fenceValue <= completedFenceValue) {
+				retired.instance->OnGpuFrameCompleted(completedFenceValue);
+			}
+		}
+		std::erase_if(
+			retiredEffectInstances_,
+			[completedFenceValue](const RetiredEffectInstance& retired) {
+				return retired.fenceValue <= completedFenceValue;
+			}
+		);
+	}
+
 	void ParticleSystem3d::DrawLayerMask(
 		SceneType sceneType,
 		const Camera& camera,
@@ -486,7 +577,7 @@ namespace MadoEngine::Particle {
 		}
 
 		if (!isRenderDataPrepared_ || preparedSceneType_ != sceneType) {
-			renderer_.Begin(camera);
+			renderer_.Begin(camera, currentSubmissionFenceValue_);
 			for (const EffectSlot& slot : effectSlots_) {
 				if (!slot.instance || !slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
 					continue;
@@ -564,6 +655,12 @@ namespace MadoEngine::Particle {
 		return count;
 	}
 
+	std::vector<ParticleEmitterRuntimeInfo> ParticleSystem3d::GetRuntimeInfo(
+		EffectHandle handle) const {
+		const ParticleEffectInstance* instance = Resolve(handle);
+		return instance ? instance->GetRuntimeInfo() : std::vector<ParticleEmitterRuntimeInfo>{};
+	}
+
 	ParticleEffectInstance* ParticleSystem3d::Resolve(EffectHandle handle) {
 		if (!handle.HasValue() || handle.index >= effectSlots_.size()) {
 			return nullptr;
@@ -594,7 +691,10 @@ namespace MadoEngine::Particle {
 			return;
 		}
 
-		slot.instance.reset();
+		RetiredEffectInstance retired;
+		retired.instance = std::move(slot.instance);
+		retired.fenceValue = currentSubmissionFenceValue_;
+		retiredEffectInstances_.push_back(std::move(retired));
 		++slot.generation;
 		if (slot.generation == 0) {
 			slot.generation = 1;

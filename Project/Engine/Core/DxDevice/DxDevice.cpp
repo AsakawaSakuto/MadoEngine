@@ -10,6 +10,25 @@
 namespace MadoEngine::Core {
 
     void DxDevice::Initialize() {
+#ifdef _DEBUG
+        // Device生成前にDebug Layerを有効化する
+        Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
+        const HRESULT debugResult = D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+        if (SUCCEEDED(debugResult) && debugController) {
+            debugController->EnableDebugLayer();
+            Logger::Output("D3D12 Debug Layerを有効化しました", Logger::Level::Engine);
+        } else {
+            static bool hasLoggedDebugLayerWarning = false;
+            if (!hasLoggedDebugLayerWarning) {
+                Logger::Output(
+                    "D3D12 Debug Layerを有効化できなかったため、通常動作を継続します",
+                    Logger::Level::Warning
+                );
+                hasLoggedDebugLayerWarning = true;
+            }
+        }
+#endif
+
         // DXGIファクトリーの生成
         HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory_));
         assert(SUCCEEDED(hr));
@@ -47,6 +66,15 @@ namespace MadoEngine::Core {
         }
         assert(device_.Get() != nullptr);
         Logger::Output("D3D12Deviceの生成が完了しました", Logger::Level::Engine);
+
+#ifdef _DEBUG
+        Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
+        if (SUCCEEDED(device_.As(&infoQueue)) && infoQueue) {
+            infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+            infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+            Logger::Output("D3D12 Info Queueの重大エラー中断を有効化しました", Logger::Level::Engine);
+        }
+#endif
     }
 
 }

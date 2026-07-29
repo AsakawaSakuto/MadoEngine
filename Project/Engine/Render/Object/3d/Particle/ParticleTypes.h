@@ -15,6 +15,8 @@
 
 namespace MadoEngine::Particle {
 
+	inline constexpr uint32_t kMaximumParticleCountPerEmitter = 262144;
+
 	template<class T>
 	struct ValueRange {
 		T min{};
@@ -39,6 +41,13 @@ namespace MadoEngine::Particle {
 	enum class StopMode {
 		Finish,
 		Immediate,
+	};
+
+	enum class ParticleBackend {
+		Auto,
+		Cpu,
+		Gpu,
+		Count,
 	};
 
 	struct PointShape {
@@ -151,6 +160,7 @@ namespace MadoEngine::Particle {
 		SizeOverLifetimeModule sizeOverLifetime;
 		ColorOverLifetimeModule colorOverLifetime;
 		ParticleRendererModule renderer;
+		ParticleBackend backend = ParticleBackend::Auto;
 	};
 
 	struct ParticleState {
@@ -187,6 +197,17 @@ namespace MadoEngine::Particle {
 		MadoEngine::Render::RenderLayer renderLayer = MadoEngine::Render::RenderLayer::Effect;
 		std::optional<bool> loopOverride;
 		uint32_t randomSeed = 0;
+		std::optional<ParticleBackend> backendOverride;
+	};
+
+	struct ParticleEmitterRuntimeInfo {
+		std::string name;
+		ParticleBackend requestedBackend = ParticleBackend::Auto;
+		ParticleBackend activeBackend = ParticleBackend::Cpu;
+		uint32_t aliveParticleCount = 0;
+		uint32_t maxParticleCount = 0;
+		uint64_t gpuBufferCapacityBytes = 0;
+		std::string fallbackReason;
 	};
 
 } // namespace MadoEngine::Particle

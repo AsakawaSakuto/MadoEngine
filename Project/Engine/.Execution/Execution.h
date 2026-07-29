@@ -9,6 +9,7 @@
 #include "CoreHeaders.h"
 #include "RenderHeaders.h"
 #include "Render/PostEffectManager.h"
+#include "Render/PSO/ComputePSORegistry.h"
 #include "UtilityHeaders.h"
 #include ".SceneManager/SceneType.h"
 #ifdef USE_IMGUI
@@ -22,6 +23,8 @@ namespace MadoEngine
 	class EngineExecution
 	{
 	public:
+		~EngineExecution();
+
 		/// @brief 初期化処理
 		void Initialize(HINSTANCE hInstance);
 
@@ -180,6 +183,7 @@ namespace MadoEngine
 		const std::string& GetNextLayerEffectOutputName() const;
 
 		bool isStopApplication_ = false;
+		bool isInitialized_ = false;
 		uint32_t renderWidth_ = 0;
 		uint32_t renderHeight_ = 0;
 
@@ -200,6 +204,7 @@ namespace MadoEngine
 
 		std::unique_ptr<MadoEngine::Render::PSOFactory> psoFactory_;
 		std::unique_ptr<MadoEngine::Render::PSORegistry> psoRegistry_;
+		std::unique_ptr<MadoEngine::Render::ComputePSORegistry> computePsoRegistry_;
 
 		std::unique_ptr<MadoEngine::Core::DepthStencilBuffer> depthStencilBuffer_;
 		std::unique_ptr<MadoEngine::Core::DepthStencilBuffer> layerDepthStencilBuffer_;

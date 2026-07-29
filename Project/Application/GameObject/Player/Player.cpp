@@ -51,6 +51,14 @@ namespace Player {
 		shadowModel_->SetLightingEnabled(false);
 
 		movement_.Initialize();
+
+		weaponModel_ = MyModel::Create("PlayerWeapon", "Weapon", SceneType::Game);
+
+		MadoEngine::Particle::PlayDesc desc;
+		desc.transform.translate = model_->GetVertexPosition(218);
+		desc.sceneType = SceneType::Game;
+		desc.loopOverride = true;
+		particleHandle_ = MyParticle3d::Play("Trail", desc);
 	}
 
 	void Base::AddMoney(int amount) {
@@ -106,6 +114,20 @@ namespace Player {
 
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
 			transform_.translate = { 0.0f, 100.0f, 0.0f };
+		}
+
+		weaponTransform_.translate = model_->GetVertexPosition(330);
+		weaponModel_->SetTransform(weaponTransform_);
+
+		Transform3D particleTransform;
+		particleTransform.translate = model_->GetVertexPosition(218);
+		
+		if (!MyParticle3d::SetTransform(particleHandle_, particleTransform)) {
+			MadoEngine::Particle::PlayDesc desc;
+			desc.transform.translate = model_->GetVertexPosition(218);
+			desc.sceneType = SceneType::Game;
+			desc.loopOverride = true;
+			particleHandle_ = MyParticle3d::Play("Trail", desc);
 		}
 	}
 

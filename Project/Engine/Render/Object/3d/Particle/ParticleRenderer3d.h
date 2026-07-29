@@ -1,7 +1,9 @@
 #pragma once
+#include "GpuParticleTypes.h"
 #include "ParticleTypes.h"
 #include "Render/PSO/PSORegistry.h"
 #include "Utility/Camera/Camera.h"
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
@@ -46,7 +48,12 @@ namespace MadoEngine::Particle {
 
 		/// @brief 1回分の描画データ登録を開始する
 		/// @param camera 描画に使用するCamera
-		void Begin(const Camera& camera);
+		/// @param submissionFenceValue Command提出へ紐付けるFence値
+		void Begin(const Camera& camera, uint64_t submissionFenceValue);
+
+		/// @brief 完了済みFence値を描画Frame Resourceへ通知する
+		/// @param completedFenceValue GPUが完了済みのFence値
+		void OnGpuFrameCompleted(uint64_t completedFenceValue);
 
 		/// @brief Emitterの生存Particleを描画データへ登録する
 		/// @param particles 生存Particle
@@ -60,6 +67,16 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		);
 
+		/// @brief GPU Particle Bufferを描画データへ登録する
+		/// @param renderData GPU描画Resource
+		/// @param config Emitter設定
+		/// @param renderLayer 描画Layer
+		void SubmitGpu(
+			const GpuParticleRenderData& renderData,
+			const EmitterConfig& config,
+			MadoEngine::Render::RenderLayer renderLayer
+		);
+
 		/// @brief 登録済みParticleから対象Layerを描画する
 		/// @param layerMask 描画対象LayerMask
 		void Draw(MadoEngine::Render::RenderLayerMask layerMask);
@@ -67,6 +84,10 @@ namespace MadoEngine::Particle {
 		/// @brief Particle描画へ適用するFogパラメータを設定する
 		/// @param parameters 適用するFogパラメータ
 		void SetFogParameters(const ParticleFogParameters& parameters);
+
+		/// @brief GPU Particle描画経路を利用できるか確認する
+		/// @return RootSignature、CommandSignature、PSOを利用できる場合はtrue
+		bool IsGpuRenderingAvailable() const;
 
 		/// @brief 登録済みParticle数を取得する
 		/// @return 登録済みParticle数
@@ -98,9 +119,30 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer = MadoEngine::Render::RenderLayer::Effect;
 		};
 
+		struct GpuDrawBatch {
+			GpuParticleRenderData renderData;
+			uint32_t textureIndex = 0;
+			MadoEngine::Render::BlendMode blendMode = MadoEngine::Render::BlendMode::Add;
+			MadoEngine::Render::RenderLayer renderLayer = MadoEngine::Render::RenderLayer::Effect;
+		};
+
+		struct PerViewFrameResource {
+			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+			PerViewForGPU* mappedData = nullptr;
+			Microsoft::WRL::ComPtr<ID3D12Resource> instanceResource;
+			ParticleInstanceForGPU* mappedInstances = nullptr;
+			uint32_t instanceSrvIndex = (std::numeric_limits<uint32_t>::max)();
+			std::size_t instanceCapacity = 0;
+			uint64_t fenceValue = 0;
+		};
+
 		/// @brief InstanceBuffer容量を必要数以上へ拡張する
+		/// @param frameResourceIndex 更新するFrame Resource Index
 		/// @param requiredCount 必要なInstance数
-		void EnsureInstanceCapacity(std::size_t requiredCount);
+		void EnsureInstanceCapacity(
+			uint32_t frameResourceIndex,
+			std::size_t requiredCount
+		);
 
 		/// @brief テクスチャ名からTextureIndexを取得する
 		/// @param textureName TextureManagerへ登録されている名前
@@ -112,27 +154,36 @@ namespace MadoEngine::Particle {
 		/// @return Particle用PSO設定
 		MadoEngine::Render::PSODesc CreatePSODesc(MadoEngine::Render::BlendMode blendMode) const;
 
+		/// @brief GPU Particle用PSO設定を作成する
+		/// @param blendMode 使用するBlendMode
+		/// @return GPU Particle用PSO設定
+		MadoEngine::Render::PSODesc CreateGpuPSODesc(
+			MadoEngine::Render::BlendMode blendMode
+		) const;
+
 		ID3D12Device* device_ = nullptr;
 		ID3D12GraphicsCommandList* commandList_ = nullptr;
 		MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr;
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-		Microsoft::WRL::ComPtr<ID3D12Resource> instanceResource_;
-		Microsoft::WRL::ComPtr<ID3D12Resource> perViewResource_;
+		Microsoft::WRL::ComPtr<ID3D12CommandSignature> gpuDrawCommandSignature_;
+		static constexpr uint32_t kFrameResourceCount = 3;
+		std::array<PerViewFrameResource, kFrameResourceCount> perViewFrameResources_;
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 		D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
-		ParticleInstanceForGPU* mappedInstances_ = nullptr;
-		PerViewForGPU* mappedPerView_ = nullptr;
-		uint32_t instanceSrvIndex_ = (std::numeric_limits<uint32_t>::max)();
-		std::size_t instanceCapacity_ = 0;
+		uint32_t currentPerViewFrameIndex_ = 0;
+		uint32_t nextPerViewFrameIndex_ = 0;
+		uint64_t completedFenceValue_ = 0;
 
 		Vector3 cameraPosition_{};
 		ParticleFogParameters fogParameters_{};
 		std::vector<ParticleInstanceForGPU> instances_;
 		std::vector<DrawBatch> batches_;
+		std::vector<GpuDrawBatch> gpuBatches_;
 		std::unordered_set<std::string> missingTextureNames_;
 		bool isInstanceDataDirty_ = false;
+		bool hasCurrentPerViewFrame_ = false;
 		bool isInitialized_ = false;
 	};
 

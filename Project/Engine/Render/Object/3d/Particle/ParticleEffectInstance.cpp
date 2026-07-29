@@ -1,5 +1,6 @@
 #include "ParticleEffectInstance.h"
 #include "ParticleRenderer3d.h"
+#include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
 
@@ -9,11 +10,21 @@ namespace MadoEngine::Particle {
 		const EmitterConfig& config,
 		uint32_t randomSeed,
 		const std::optional<bool>& loopOverride,
-		const Transform3D& emitterTransform) {
+		const Transform3D& emitterTransform,
+		const std::optional<ParticleBackend>& backendOverride,
+		const ParticleEmitterRuntimeFactory& runtimeFactory) {
 		config_ = config;
-		random_.SetSeed(randomSeed);
+		requestedBackend_ = backendOverride.value_or(config.backend);
+		if (requestedBackend_ == ParticleBackend::Count) {
+			requestedBackend_ = ParticleBackend::Auto;
+		}
+		runtime_ = runtimeFactory.Create(
+			config,
+			randomSeed,
+			backendOverride,
+			fallbackReason_
+		);
 		isLoop_ = loopOverride.value_or(config.emission.isLoop);
-		simulator_.Initialize(config.emission.maxParticles);
 		Reset();
 
 		if (config.emission.startDelay <= 0.0f) {
@@ -27,7 +38,12 @@ namespace MadoEngine::Particle {
 			return;
 		}
 
-		simulator_.Update(deltaTime, *config_);
+		if (!runtime_) {
+			isEmitting_ = false;
+			return;
+		}
+
+		runtime_->Update(deltaTime, emitterTransform);
 		if (!isEmitting_) {
 			return;
 		}
@@ -55,7 +71,7 @@ namespace MadoEngine::Particle {
 		const uint32_t continuousSpawnCount = static_cast<uint32_t>(spawnAccumulator_);
 		spawnAccumulator_ -= static_cast<float>(continuousSpawnCount);
 		if (continuousSpawnCount > 0) {
-			simulator_.Emit(*config_, emitterTransform, continuousSpawnCount, random_);
+			runtime_->Emit(continuousSpawnCount, emitterTransform);
 		}
 
 		EmitBursts(previousLocalTime, currentLocalTime, emitterTransform);
@@ -68,8 +84,14 @@ namespace MadoEngine::Particle {
 
 	void ParticleEmitterInstance::Stop(StopMode mode) {
 		isEmitting_ = false;
-		if (mode == StopMode::Immediate) {
-			simulator_.Reset();
+		if (runtime_) {
+			runtime_->Stop(mode);
+		}
+	}
+
+	void ParticleEmitterInstance::SetTransform(const Transform3D& emitterTransform) {
+		if (runtime_) {
+			runtime_->SetTransform(emitterTransform);
 		}
 	}
 
@@ -78,22 +100,55 @@ namespace MadoEngine::Particle {
 		spawnAccumulator_ = 0.0f;
 		isEmitting_ = true;
 		hasProcessedEmission_ = false;
-		simulator_.Reset();
+		if (runtime_) {
+			runtime_->Reset();
+		}
+	}
+
+	void ParticleEmitterInstance::RecordGpuSimulation(
+		ID3D12GraphicsCommandList* commandList,
+		uint64_t submissionFenceValue) {
+		if (runtime_) {
+			runtime_->RecordGpuSimulation(commandList, submissionFenceValue);
+		}
+	}
+
+	void ParticleEmitterInstance::OnGpuFrameCompleted(uint64_t completedFenceValue) {
+		if (runtime_) {
+			runtime_->OnGpuFrameCompleted(completedFenceValue);
+		}
 	}
 
 	bool ParticleEmitterInstance::IsFinished() const {
-		return !isEmitting_ && simulator_.GetAliveCount() == 0;
+		return !isEmitting_ && (!runtime_ || runtime_->IsIdle());
 	}
 
 	void ParticleEmitterInstance::SubmitRenderData(
 		ParticleRenderer3d& renderer,
 		const Transform3D& emitterTransform,
 		MadoEngine::Render::RenderLayer renderLayer) const {
-		if (!config_ || simulator_.GetAliveCount() == 0) {
+		if (!config_ || !runtime_) {
 			return;
 		}
 
-		renderer.Submit(simulator_.GetParticles(), *config_, emitterTransform, renderLayer);
+		runtime_->SubmitRenderData(renderer, emitterTransform, renderLayer);
+	}
+
+	ParticleEmitterRuntimeInfo ParticleEmitterInstance::GetRuntimeInfo() const {
+		ParticleEmitterRuntimeInfo info;
+		if (config_) {
+			info.name = config_->name;
+			info.maxParticleCount = config_->emission.maxParticles;
+		}
+		info.requestedBackend = requestedBackend_;
+		info.fallbackReason = fallbackReason_;
+		if (runtime_) {
+			info.activeBackend = runtime_->GetBackend();
+			info.aliveParticleCount = runtime_->GetAliveCount();
+			info.maxParticleCount = runtime_->GetMaxParticleCount();
+			info.gpuBufferCapacityBytes = runtime_->GetGpuBufferCapacityBytes();
+		}
+		return info;
 	}
 
 	void ParticleEmitterInstance::EmitBursts(
@@ -110,7 +165,9 @@ namespace MadoEngine::Particle {
 				const bool isInitialBurst = !hasProcessedEmission_ && burst.time <= 0.0f;
 				const bool crossedBurst = burst.time > clampedPreviousTime && burst.time <= currentLocalTime;
 				if (isInitialBurst || crossedBurst) {
-					simulator_.Emit(*config_, emitterTransform, burst.count, random_);
+					if (runtime_) {
+						runtime_->Emit(burst.count, emitterTransform);
+					}
 				}
 				continue;
 			}
@@ -127,14 +184,17 @@ namespace MadoEngine::Particle {
 				if (eventTime < 0.0f || eventTime > currentLocalTime) {
 					continue;
 				}
-				simulator_.Emit(*config_, emitterTransform, burst.count, random_);
+				if (runtime_) {
+					runtime_->Emit(burst.count, emitterTransform);
+				}
 			}
 		}
 	}
 
 	void ParticleEffectInstance::Initialize(
 		std::shared_ptr<const ParticleEffectAsset> asset,
-		const PlayDesc& desc) {
+		const PlayDesc& desc,
+		const ParticleEmitterRuntimeFactory& runtimeFactory) {
 		asset_ = std::move(asset);
 		transform_ = desc.transform;
 		sceneType_ = desc.sceneType;
@@ -152,7 +212,9 @@ namespace MadoEngine::Particle {
 				asset_->GetEmitters()[index],
 				emitterSeed,
 				desc.loopOverride,
-				desc.transform
+				desc.transform,
+				desc.backendOverride,
+				runtimeFactory
 			);
 		}
 	}
@@ -163,9 +225,30 @@ namespace MadoEngine::Particle {
 		}
 	}
 
+	void ParticleEffectInstance::RecordGpuSimulation(
+		ID3D12GraphicsCommandList* commandList,
+		uint64_t submissionFenceValue) {
+		for (ParticleEmitterInstance& emitter : emitters_) {
+			emitter.RecordGpuSimulation(commandList, submissionFenceValue);
+		}
+	}
+
+	void ParticleEffectInstance::OnGpuFrameCompleted(uint64_t completedFenceValue) {
+		for (ParticleEmitterInstance& emitter : emitters_) {
+			emitter.OnGpuFrameCompleted(completedFenceValue);
+		}
+	}
+
 	void ParticleEffectInstance::Stop(StopMode mode) {
 		for (ParticleEmitterInstance& emitter : emitters_) {
 			emitter.Stop(mode);
+		}
+	}
+
+	void ParticleEffectInstance::SetTransform(const Transform3D& transform) {
+		transform_ = transform;
+		for (ParticleEmitterInstance& emitter : emitters_) {
+			emitter.SetTransform(transform_);
 		}
 	}
 
@@ -194,6 +277,15 @@ namespace MadoEngine::Particle {
 			count += emitter.GetAliveCount();
 		}
 		return count;
+	}
+
+	std::vector<ParticleEmitterRuntimeInfo> ParticleEffectInstance::GetRuntimeInfo() const {
+		std::vector<ParticleEmitterRuntimeInfo> runtimeInfo;
+		runtimeInfo.reserve(emitters_.size());
+		for (const ParticleEmitterInstance& emitter : emitters_) {
+			runtimeInfo.push_back(emitter.GetRuntimeInfo());
+		}
+		return runtimeInfo;
 	}
 
 } // namespace MadoEngine::Particle

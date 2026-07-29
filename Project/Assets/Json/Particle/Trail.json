@@ -1,6 +1,7 @@
 {
     "emitters": [
         {
+            "backend": "auto",
             "colorOverLifetime": {
                 "end": {
                     "max": [
@@ -33,10 +34,10 @@
             },
             "emission": {
                 "bursts": [],
-                "duration": 0.009999999776482582,
-                "isLoop": false,
+                "duration": 10.0,
+                "isLoop": true,
                 "maxParticles": 128,
-                "ratePerSecond": 64.0,
+                "ratePerSecond": 16.0,
                 "startDelay": 0.0
             },
             "initial": {
@@ -87,7 +88,7 @@
             "renderer": {
                 "blendMode": "add",
                 "sortMode": "none",
-                "texture": "circle2"
+                "texture": "circle"
             },
             "shape": {
                 "offset": [
