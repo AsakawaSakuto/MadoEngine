@@ -1,7 +1,10 @@
 #include "TextEditorUI.h"
 #include "Render/Object/2d/Text/TextManager.h"
+#include <algorithm>
 #include <array>
+#include <charconv>
 #include <cstring>
+#include <vector>
 
 namespace MadoEngine::Editor {
 
@@ -17,6 +20,46 @@ namespace {
 	void CopyToBuffer(std::array<char, Size>& buffer, const std::string& text) {
 		buffer.fill('\0');
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
+	}
+
+	/// @brief 追加したText名を基準に次の未使用名を生成する
+	/// @param manager Text名の使用状況を確認するManager
+	/// @param createdName 直前に追加したText名
+	/// @return 末尾の番号を繰り上げた未使用のText名
+	std::string MakeNextAvailableTextName(
+		const TextManager& manager,
+		const std::string& createdName) {
+		size_t suffixStart = createdName.size();
+		while (suffixStart > 0) {
+			const char character = createdName[suffixStart - 1];
+			if (character < '0' || character > '9') {
+				break;
+			}
+			--suffixStart;
+		}
+
+		std::string baseName = createdName.substr(0, suffixStart);
+		uint64_t suffix = 1;
+		if (suffixStart < createdName.size()) {
+			const char* suffixBegin = createdName.data() + suffixStart;
+			const char* suffixEnd = createdName.data() + createdName.size();
+			const std::from_chars_result result = std::from_chars(suffixBegin, suffixEnd, suffix);
+			if (result.ec == std::errc{} && result.ptr == suffixEnd) {
+				++suffix;
+			} else {
+				baseName = createdName;
+				suffix = 1;
+			}
+		}
+
+		const std::vector<std::string> names = manager.GetNames();
+		for (;;) {
+			const std::string candidate = baseName + std::to_string(suffix);
+			if (std::find(names.begin(), names.end(), candidate) == names.end()) {
+				return candidate;
+			}
+			++suffix;
+		}
 	}
 
 	/// @brief RenderLayerを選択するComboを描画します。
@@ -175,12 +218,14 @@ void DrawTextManagerEditorUI() {
 	ImGui::InputText("New Name", createName.data(), createName.size());
 	ImGui::SameLine();
 	if (ImGui::Button("追加")) {
+		const std::string requestedName = createName.data();
 		Text* created = manager.Create(
-			createName.data(),
+			requestedName,
 			SceneType::None,
 			EditorManagementMode::EditorManaged);
 		if (created) {
-			selectedName = createName.data();
+			selectedName = requestedName;
+			CopyToBuffer(createName, MakeNextAvailableTextName(manager, requestedName));
 			editingName.clear();
 		}
 	}

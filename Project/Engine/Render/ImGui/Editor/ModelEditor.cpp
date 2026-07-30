@@ -4,6 +4,7 @@
 #include "Render/Object/3d/Model/ModelManager.h"
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cstring>
 #include <filesystem>
 #include <vector>
@@ -41,6 +42,46 @@ namespace MadoEngine::Editor {
 		void CopyToBuffer(std::array<char, Size>& buffer, const std::string& text) {
 			buffer.fill('\0');
 			strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
+		}
+
+		/// @brief 追加したModel名を基準に次の未使用名を生成する
+		/// @param manager Model名の使用状況を確認するManager
+		/// @param createdName 直前に追加したModel名
+		/// @return 末尾の番号を繰り上げた未使用のModel名
+		std::string MakeNextAvailableModelName(
+			const ModelManager& manager,
+			const std::string& createdName) {
+			size_t suffixStart = createdName.size();
+			while (suffixStart > 0) {
+				const char character = createdName[suffixStart - 1];
+				if (character < '0' || character > '9') {
+					break;
+				}
+				--suffixStart;
+			}
+
+			std::string baseName = createdName.substr(0, suffixStart);
+			uint64_t suffix = 1;
+			if (suffixStart < createdName.size()) {
+				const char* suffixBegin = createdName.data() + suffixStart;
+				const char* suffixEnd = createdName.data() + createdName.size();
+				const std::from_chars_result result = std::from_chars(suffixBegin, suffixEnd, suffix);
+				if (result.ec == std::errc{} && result.ptr == suffixEnd) {
+					++suffix;
+				} else {
+					baseName = createdName;
+					suffix = 1;
+				}
+			}
+
+			const std::vector<std::string> names = manager.GetNames();
+			for (;;) {
+				const std::string candidate = baseName + std::to_string(suffix);
+				if (std::find(names.begin(), names.end(), candidate) == names.end()) {
+					return candidate;
+				}
+				++suffix;
+			}
 		}
 
 		/// @brief Modelアセット選択Comboを描画する
@@ -339,7 +380,7 @@ namespace MadoEngine::Editor {
 		static std::array<char, 128> createName{};
 		static std::string createModelName;
 		static std::string selectedName;
-		static bool isInitialized = true;
+		static bool isInitialized = false;
 		if (!isInitialized) {
 			CopyToBuffer(createName, "Model");
 			if (!modelNames.empty()) {
@@ -360,13 +401,15 @@ namespace MadoEngine::Editor {
 			ImGui::BeginDisabled();
 		}
 		if (ImGui::Button("追加")) {
+			const std::string requestedName = createName.data();
 			Model* created = manager.Create(
-				createName.data(),
+				requestedName,
 				createModelName,
 				SceneType::None,
 				EditorManagementMode::EditorManaged);
 			if (created) {
-				selectedName = createName.data();
+				selectedName = requestedName;
+				CopyToBuffer(createName, MakeNextAvailableModelName(manager, requestedName));
 			}
 		}
 		if (modelNames.empty()) {

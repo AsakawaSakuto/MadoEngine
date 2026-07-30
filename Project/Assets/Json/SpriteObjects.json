@@ -13,7 +13,7 @@
             ],
             "fitToScreen": false,
             "layer": "Sphere1",
-            "name": "Sprite",
+            "name": "MoneyUI",
             "position": [
                 330.0,
                 54.0
@@ -52,7 +52,7 @@
             ],
             "fitToScreen": false,
             "layer": "Sphere1",
-            "name": "Sprite2",
+            "name": "KillUI",
             "position": [
                 440.0,
                 54.0
