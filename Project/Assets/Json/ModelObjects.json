@@ -15,7 +15,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere1",
             "position": [
-                -5.0,
+                -7.5,
                 5.0,
                 0.0
             ],
@@ -45,12 +45,117 @@
                 1.0
             ],
             "frustumCulling": true,
+            "layer": "Sphere10",
+            "lighting": true,
+            "model": "Assets/Model/Static/Primitive/sphere.obj",
+            "name": "Sphere10",
+            "position": [
+                -2.5,
+                -5.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Sphere11",
+            "lighting": true,
+            "model": "Assets/Model/Static/Primitive/sphere.obj",
+            "name": "Sphere11",
+            "position": [
+                2.5,
+                -5.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Sphere12",
+            "lighting": true,
+            "model": "Assets/Model/Static/Primitive/sphere.obj",
+            "name": "Sphere12",
+            "position": [
+                7.5,
+                -5.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
             "layer": "Sphere2",
             "lighting": true,
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere2",
             "position": [
-                0.0,
+                -2.5,
                 5.0,
                 0.0
             ],
@@ -85,7 +190,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere3",
             "position": [
-                5.0,
+                2.5,
                 5.0,
                 0.0
             ],
@@ -120,8 +225,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere4",
             "position": [
-                -5.0,
-                0.0,
+                7.5,
+                5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -155,7 +260,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere5",
             "position": [
-                0.0,
+                -7.5,
                 0.0,
                 0.0
             ],
@@ -190,7 +295,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere6",
             "position": [
-                5.0,
+                -2.5,
                 0.0,
                 0.0
             ],
@@ -225,8 +330,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere7",
             "position": [
-                -5.0,
-                -5.0,
+                2.5,
+                0.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -260,8 +365,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere8",
             "position": [
+                7.5,
                 0.0,
-                -5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -295,7 +400,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere9",
             "position": [
-                5.0,
+                -7.5,
                 -5.0,
                 0.0
             ],

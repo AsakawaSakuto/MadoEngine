@@ -23,6 +23,14 @@ public:
 	/// @param sensitivity ドリー感度（デフォルト: 1.0f）
 	void SetDollySensitivity(float sensitivity) { dollySensitivity_ = sensitivity; }
 
+	/// @brief ターゲット（注視点）を設定する
+	/// @param target 注視点のワールド座標
+	void SetTarget(const Vector3& target) { target_ = target; }
+
+	/// @brief カメラとターゲット間の距離を設定する
+	/// @param distance 距離
+	void SetDistance(float distance) { distance_ = distance; }
+
 	/// @brief ImGui描画処理
 	void DrawImGui();
 private:

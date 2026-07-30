@@ -12,7 +12,7 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Default",
+            "layer": "Sphere1",
             "name": "Sprite",
             "position": [
                 330.0,
@@ -26,6 +26,17 @@
             "scene": "Game",
             "texture": "Money",
             "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
             "visible": true
         },
         {
@@ -40,7 +51,7 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Default",
+            "layer": "Sphere1",
             "name": "Sprite2",
             "position": [
                 440.0,
@@ -54,6 +65,17 @@
             "scene": "Game",
             "texture": "EnemyKill",
             "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
             "visible": true
         }
     ]

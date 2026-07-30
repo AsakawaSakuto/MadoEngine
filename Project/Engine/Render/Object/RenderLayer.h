@@ -24,6 +24,9 @@ namespace MadoEngine::Render {
 		Sphere7,
 		Sphere8,
 		Sphere9,
+		Sphere10,
+		Sphere11,
+		Sphere12,
 	};
 
 	inline constexpr const char* kRenderLayerNames[] = {
@@ -45,6 +48,9 @@ namespace MadoEngine::Render {
 		"Sphere7",
 		"Sphere8",
 		"Sphere9",
+		"Sphere10",
+		"Sphere11",
+		"Sphere12",
 	};
 
 	inline std::string RenderLayerToString(RenderLayer layer) {
@@ -83,6 +89,12 @@ namespace MadoEngine::Render {
 			return "Sphere8";
 		case RenderLayer::Sphere9:
 			return "Sphere9";
+		case RenderLayer::Sphere10:
+			return "Sphere10";
+		case RenderLayer::Sphere11:
+			return "Sphere11";
+		case RenderLayer::Sphere12:
+			return "Sphere12";
 
 		default:
 			return "Default";
@@ -107,6 +119,10 @@ namespace MadoEngine::Render {
 		if (value == "Sphere7") { return RenderLayer::Sphere7; }
 		if (value == "Sphere8") { return RenderLayer::Sphere8; }
 		if (value == "Sphere9") { return RenderLayer::Sphere9; }
+		if (value == "Sphere10") { return RenderLayer::Sphere10; }
+		if (value == "Sphere11") { return RenderLayer::Sphere11; }
+		if (value == "Sphere12") { return RenderLayer::Sphere12; }
+
 		return RenderLayer::Default;
 	}
 

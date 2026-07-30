@@ -301,6 +301,10 @@ namespace MadoEngine
 		SceneType currentSceneType,
 		const Vector3& shadowFocusPosition)
 	{
+#ifdef USE_IMGUI
+		MadoEngine::Editor::ApplyPendingLayerEffectPassEditorOperations(postEffectManager_);
+#endif // USE_IMGUI
+
 		isSceneColorEnded_ = false;
 		isLayerEffectChainResolved_ = false;
 		isLayerEffectResolved_ = false;

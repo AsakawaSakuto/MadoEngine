@@ -2,7 +2,7 @@
     "models": [
         {
             "billboard": false,
-            "castShadow": true,
+            "castShadow": false,
             "color": [
                 1.0,
                 1.0,
@@ -11,12 +11,117 @@
             ],
             "frustumCulling": true,
             "layer": "Sphere1",
-            "lighting": true,
+            "lighting": false,
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere1",
             "position": [
                 -5.0,
                 5.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": false,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Sphere10",
+            "lighting": true,
+            "model": "Assets/Model/Static/Primitive/sphere.obj",
+            "name": "Sphere10",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Sphere11",
+            "lighting": true,
+            "model": "Assets/Model/Static/Primitive/sphere.obj",
+            "name": "Sphere11",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "None",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Sphere12",
+            "lighting": true,
+            "model": "Assets/Model/Static/Primitive/sphere.obj",
+            "name": "Sphere12",
+            "position": [
+                0.0,
+                0.0,
                 0.0
             ],
             "receiveLightMask": 1,

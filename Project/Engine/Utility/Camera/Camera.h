@@ -100,7 +100,7 @@ public:
 	const Frustum& GetFrustum() const { return frustum_; }
 
 protected:
-	Vector3 position_ = { 0.0f, 0.0f, -10.0f };
+	Vector3 position_ = { 0.0f, 0.0f, -30.0f };
 	Vector3 rotation_ = { 0.0f, 0.0f, 0.0f };
 
 	float fovY_ = 0.45f;

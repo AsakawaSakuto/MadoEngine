@@ -19,6 +19,10 @@ bool LoadLayerEffectPassEditorJson(Render::PostEffectManager& postEffectManager)
 
 #ifdef USE_IMGUI
 
+/// @brief 予約されたLayer Effect Pass Editor操作を適用する
+/// @param postEffectManager 適用対象のポストエフェクト管理クラス
+void ApplyPendingLayerEffectPassEditorOperations(Render::PostEffectManager& postEffectManager);
+
 /// @brief Layer Effect Pass Editorを描画する
 /// @param postEffectManager 編集対象のポストエフェクト管理クラス
 void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager);

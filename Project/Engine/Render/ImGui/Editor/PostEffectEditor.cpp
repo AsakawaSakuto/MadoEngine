@@ -8,6 +8,8 @@
 #include <cstring>
 #include <filesystem>
 #include <memory>
+#include <utility>
+#include <vector>
 
 namespace MadoEngine::Editor {
 
@@ -92,8 +94,67 @@ namespace MadoEngine::Editor {
         struct LayerEffectPassRemoveRequest {
             bool isRequested = false;
             LayerEffectPassListType listType = LayerEffectPassListType::Layer;
-            std::size_t index = 0;
+            std::string passKey;
         };
+
+#ifdef USE_IMGUI
+
+        /// @brief 次フレームへ予約するLayerEffectPass Editor操作種別
+        enum class LayerEffectPassEditorOperationType {
+            ChangeEffect,
+            RemovePass,
+            LoadSettings,
+            Count,
+        };
+
+        /// @brief 次フレームへ予約されたLayerEffectPass Editor操作
+        struct LayerEffectPassEditorOperation {
+            LayerEffectPassEditorOperationType type = LayerEffectPassEditorOperationType::ChangeEffect;
+            LayerEffectPassListType listType = LayerEffectPassListType::Layer;
+            std::string passKey;
+            std::string shaderKey;
+            std::filesystem::path filePath;
+        };
+
+        /// @brief 次フレームに適用するLayerEffectPass Editor操作一覧を取得する
+        /// @return 予約操作一覧
+        std::vector<LayerEffectPassEditorOperation>& GetPendingLayerEffectPassEditorOperations() {
+            static std::vector<LayerEffectPassEditorOperation> operations;
+            return operations;
+        }
+
+        /// @brief PostEffect変更を次フレームへ予約する
+        /// @param passKey 変更対象のPassキー
+        /// @param shaderKey 適用するPixelShaderキー
+        void ReservePostEffectChange(const std::string& passKey, const std::string& shaderKey) {
+            LayerEffectPassEditorOperation operation{};
+            operation.type = LayerEffectPassEditorOperationType::ChangeEffect;
+            operation.passKey = passKey;
+            operation.shaderKey = shaderKey;
+            GetPendingLayerEffectPassEditorOperations().push_back(std::move(operation));
+        }
+
+        /// @brief Pass削除を次フレームへ予約する
+        /// @param listType 削除対象のPass配列種別
+        /// @param passKey 削除対象のPassキー
+        void ReservePassRemoval(LayerEffectPassListType listType, const std::string& passKey) {
+            LayerEffectPassEditorOperation operation{};
+            operation.type = LayerEffectPassEditorOperationType::RemovePass;
+            operation.listType = listType;
+            operation.passKey = passKey;
+            GetPendingLayerEffectPassEditorOperations().push_back(std::move(operation));
+        }
+
+        /// @brief Json設定読込を次フレームへ予約する
+        /// @param filePath 読み込むJsonパス
+        void ReserveSettingsLoad(const std::filesystem::path& filePath) {
+            LayerEffectPassEditorOperation operation{};
+            operation.type = LayerEffectPassEditorOperationType::LoadSettings;
+            operation.filePath = filePath;
+            GetPendingLayerEffectPassEditorOperations().push_back(std::move(operation));
+        }
+
+#endif // USE_IMGUI
 
         constexpr std::size_t kFloatSize = sizeof(float);
 
@@ -486,6 +547,65 @@ namespace MadoEngine::Editor {
             }
         }
 
+#ifdef USE_IMGUI
+
+        /// @brief Passキーに完全一致するLayerEffectPassを取得する
+        /// @param postEffectManager 検索対象のポストエフェクト管理クラス
+        /// @param passKey 検索するPassキー
+        /// @return 一致したPass。存在しない場合はnullptr
+        Render::LayerEffectPass* FindLayerEffectPassByKey(
+            Render::PostEffectManager& postEffectManager,
+            const std::string& passKey)
+        {
+            for (Render::LayerEffectPass& pass : postEffectManager.GetLayerPasses()) {
+                if (pass.GetKey() == passKey) {
+                    return &pass;
+                }
+            }
+
+            for (Render::LayerEffectPass& pass : postEffectManager.GetScreenPasses()) {
+                if (pass.GetKey() == passKey) {
+                    return &pass;
+                }
+            }
+
+            return nullptr;
+        }
+
+        /// @brief Passキーに完全一致するLayerEffectPassを削除する
+        /// @param postEffectManager 削除対象のポストエフェクト管理クラス
+        /// @param listType 削除対象のPass配列種別
+        /// @param passKey 削除するPassキー
+        /// @return 削除できた場合はtrue
+        bool RemoveLayerEffectPassByKey(
+            Render::PostEffectManager& postEffectManager,
+            LayerEffectPassListType listType,
+            const std::string& passKey)
+        {
+            if (listType == LayerEffectPassListType::Layer) {
+                std::vector<Render::LayerEffectPass>& passes = postEffectManager.GetLayerPasses();
+                for (std::size_t index = 0; index < passes.size(); ++index) {
+                    if (passes[index].GetKey() == passKey) {
+                        return postEffectManager.RemoveLayerPass(index);
+                    }
+                }
+                return false;
+            }
+
+            if (listType == LayerEffectPassListType::Screen) {
+                std::vector<Render::LayerEffectPass>& passes = postEffectManager.GetScreenPasses();
+                for (std::size_t index = 0; index < passes.size(); ++index) {
+                    if (passes[index].GetKey() == passKey) {
+                        return postEffectManager.RemoveScreenPass(index);
+                    }
+                }
+            }
+
+            return false;
+        }
+
+#endif // USE_IMGUI
+
         /// @brief Jsonから読み込んだパラメータ値をPassへ適用する。
         /// @param pass 適用先のPass。
         /// @param parameters パラメータ値を保持したJson。
@@ -729,7 +849,7 @@ namespace MadoEngine::Editor {
                 for (int index = 0; index < static_cast<int>(CountOf(kPostEffectDefinitions)); ++index) {
                     const bool isSelected = index == currentIndex;
                     if (ImGui::Selectable(kPostEffectDefinitions[index].displayName, isSelected)) {
-                        ApplyPostEffectDefinition(pass, kPostEffectDefinitions[index]);
+                        ReservePostEffectChange(pass.GetKey(), kPostEffectDefinitions[index].shaderKey);
                     }
 
                     if (isSelected) {
@@ -915,12 +1035,10 @@ namespace MadoEngine::Editor {
         /// @brief Layer Effect Pass Editorの1行を描画する
         /// @param pass 編集対象のPass
         /// @param listType Passの所属配列種別
-        /// @param index Pass配列内のindex
         /// @param removeRequest 削除要求の出力先
         void DrawLayerEffectPassEditorRow(
             Render::LayerEffectPass& pass,
             LayerEffectPassListType listType,
-            std::size_t index,
             LayerEffectPassRemoveRequest& removeRequest)
         {
             ImGui::PushID(pass.GetKey().c_str());
@@ -969,7 +1087,7 @@ namespace MadoEngine::Editor {
             if (ImGui::Button("削除")) {
                 removeRequest.isRequested = true;
                 removeRequest.listType = listType;
-                removeRequest.index = index;
+                removeRequest.passKey = pass.GetKey();
             }
 
             ImGui::TableNextRow();
@@ -996,6 +1114,45 @@ namespace MadoEngine::Editor {
 
 #ifdef USE_IMGUI
 
+    void ApplyPendingLayerEffectPassEditorOperations(Render::PostEffectManager& postEffectManager) {
+        std::vector<LayerEffectPassEditorOperation>& pendingOperations =
+            GetPendingLayerEffectPassEditorOperations();
+        if (pendingOperations.empty()) {
+            return;
+        }
+
+        std::vector<LayerEffectPassEditorOperation> operations;
+        operations.swap(pendingOperations);
+
+        for (const LayerEffectPassEditorOperation& operation : operations) {
+            switch (operation.type) {
+            case LayerEffectPassEditorOperationType::ChangeEffect: {
+                Render::LayerEffectPass* pass =
+                    FindLayerEffectPassByKey(postEffectManager, operation.passKey);
+                const PostEffectDefinition* definition =
+                    FindPostEffectDefinition(operation.shaderKey);
+                if (pass && definition) {
+                    ApplyPostEffectDefinition(*pass, *definition);
+                }
+                break;
+            }
+            case LayerEffectPassEditorOperationType::RemovePass:
+                RemoveLayerEffectPassByKey(
+                    postEffectManager,
+                    operation.listType,
+                    operation.passKey
+                );
+                break;
+            case LayerEffectPassEditorOperationType::LoadSettings:
+                LoadLayerEffectPassEditorJsonInternal(postEffectManager, operation.filePath);
+                break;
+            case LayerEffectPassEditorOperationType::Count:
+            default:
+                break;
+            }
+        }
+    }
+
     void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager) {
         static LayerEffectPassListType selectedListType = LayerEffectPassListType::Layer;
         static std::size_t selectedIndex = static_cast<std::size_t>(-1);
@@ -1020,11 +1177,13 @@ namespace MadoEngine::Editor {
         }
         ImGui::SameLine();
         if (ImGui::Button("読込")) {
-            LoadLayerEffectPassEditorJson(postEffectManager);
+            ReserveSettingsLoad(kLayerEffectPassEditorJsonPath);
+            selectedIndex = static_cast<std::size_t>(-1);
         }
         ImGui::SameLine();
         if (ImGui::Button("復元")) {
-            LoadLayerEffectPassEditorJsonInternal(postEffectManager, CreateBackupJsonPath(kLayerEffectPassEditorJsonPath));
+            ReserveSettingsLoad(CreateBackupJsonPath(kLayerEffectPassEditorJsonPath));
+            selectedIndex = static_cast<std::size_t>(-1);
         }
 
         ImGui::Separator();
@@ -1069,7 +1228,7 @@ namespace MadoEngine::Editor {
             if (ImGui::SmallButton("削除")) {
                 removeRequest.isRequested = true;
                 removeRequest.listType = listType;
-                removeRequest.index = index;
+                removeRequest.passKey = pass.GetKey();
             }
             ImGui::PopID();
         };
@@ -1150,17 +1309,8 @@ namespace MadoEngine::Editor {
         ImGui::EndChild();
 
         if (removeRequest.isRequested) {
-            const bool isSelectedRemoved =
-                selectedListType == removeRequest.listType &&
-                selectedIndex == removeRequest.index;
-            if (removeRequest.listType == LayerEffectPassListType::Layer) {
-                postEffectManager.RemoveLayerPass(removeRequest.index);
-            } else {
-                postEffectManager.RemoveScreenPass(removeRequest.index);
-            }
-            if (isSelectedRemoved) {
-                selectedIndex = static_cast<std::size_t>(-1);
-            }
+            ReservePassRemoval(removeRequest.listType, removeRequest.passKey);
+            selectedIndex = static_cast<std::size_t>(-1);
         }
 
         ImGui::End();

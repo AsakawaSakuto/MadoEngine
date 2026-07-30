@@ -13,7 +13,7 @@ void Title::Initialize() {
 	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
 	fadeSprite_->SetFitToScreen(true);
 
-	testModel_ = MyModel::Create("testModel", "Suzane", SceneType::Title);
+	debugCamera_.SetDistance(35.0f);
 }
 
 SceneType Title::Update(float dt) {
@@ -45,6 +45,7 @@ void Title::Draw() {
 
 void Title::DrawImGui() {
 	// タイトルシーンのImGui描画処理
+	debugCamera_.DrawImGui();
 }
 
 void Title::Finalize() {
