@@ -19,7 +19,7 @@ namespace UI::Game {
 		/// @brief 武器アップグレードの選択入力を更新
 		/// @param upgradeSystem 武器アップグレード進行を管理するシステム
 		/// @param inventory 選択結果を適用する武器インベントリ
-		void UpdateInput(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory);
+		void Update(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory);
 
 		/// @brief 武器アップグレード確認用のImGuiを描画
 		/// @param upgradeSystem 表示する武器アップグレードシステム

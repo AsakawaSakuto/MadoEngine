@@ -215,7 +215,7 @@ void DrawTextManagerEditorUI() {
 	ImGui::Begin("Text Editor");
 
 	ImGui::SetNextItemWidth(180.0f);
-	ImGui::InputText("New Name", createName.data(), createName.size());
+	ImGui::InputText("新規名", createName.data(), createName.size());
 	ImGui::SameLine();
 	if (ImGui::Button("追加")) {
 		const std::string requestedName = createName.data();
@@ -229,7 +229,6 @@ void DrawTextManagerEditorUI() {
 			editingName.clear();
 		}
 	}
-	ImGui::SameLine();
 	if (ImGui::Button("保存")) {
 		manager.SaveToFile("Assets/Json/TextObjects.json");
 	}
@@ -259,7 +258,7 @@ void DrawTextManagerEditorUI() {
 		}
 		ImGui::SameLine();
 		if (ImGui::SmallButton("削除")) {
-			manager.Destroy(name);
+			manager.RequestDestroy(name);
 			if (selectedName == name) {
 				selectedName.clear();
 				editingName.clear();

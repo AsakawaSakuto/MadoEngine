@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace MadoEngine {
@@ -67,6 +68,13 @@ public:
 	/// @brief Textを破棄
 	/// @param name 破棄するText名
 	void Destroy(const std::string& name);
+
+	/// @brief GPU処理完了後にTextを削除するよう予約する
+	/// @param name 削除対象のText名
+	void RequestDestroy(const std::string& name);
+
+	/// @brief 予約されたText削除を実行する
+	void FlushPendingDestroys();
 
 	/// @brief Sceneに属するTextを破棄
 	/// @param sceneType 破棄対象Scene
@@ -135,6 +143,7 @@ private:
 	float screenWidth_ = 1280.0f;
 	float screenHeight_ = 720.0f;
 	std::unordered_map<std::string, TextEntry> texts_;
+	std::unordered_set<std::string> pendingDestroyTextNames_;
 };
 
 } // namespace MadoEngine

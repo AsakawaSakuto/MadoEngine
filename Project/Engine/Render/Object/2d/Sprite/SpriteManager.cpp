@@ -27,6 +27,7 @@ void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* 
 }
 
 void SpriteManager::Finalize() {
+	pendingDestroySpriteNames_.clear();
 	sprites_.clear();
 	drawOrder_.clear();
 	sharedGeometry_.Finalize();
@@ -137,18 +138,23 @@ bool SpriteManager::Rename(const std::string& currentName, const std::string& ne
 		return false;
 	}
 
+	const bool isPendingDestroy = pendingDestroySpriteNames_.erase(currentName) > 0;
 	auto node = sprites_.extract(currentIt);
 	Sprite* sprite = node.mapped().sprite.get();
 	node.key() = newName;
 	sprites_.insert(std::move(node));
 	sprite->SetObjectName(newName);
 	std::replace(drawOrder_.begin(), drawOrder_.end(), currentName, newName);
+	if (isPendingDestroy) {
+		pendingDestroySpriteNames_.emplace(newName);
+	}
 
 	Logger::Output("Sprite名を変更しました : " + currentName + " -> " + newName, Logger::Level::Application);
 	return true;
 }
 
 void SpriteManager::Destroy(const std::string& name) {
+	pendingDestroySpriteNames_.erase(name);
 	if (sprites_.erase(name) > 0) {
 		drawOrder_.erase(std::remove(drawOrder_.begin(), drawOrder_.end(), name), drawOrder_.end());
 		Logger::Output("Spriteを破棄しました : " + name, Logger::Level::Application);
@@ -237,6 +243,29 @@ void SpriteManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render
 
 		// 各スプライト固有の描画（CBV/SRVバインドとドローコール）
 		sprite->Draw();
+	}
+}
+
+void SpriteManager::RequestDestroy(const std::string& name) {
+	if (!sprites_.contains(name)) {
+		return;
+	}
+
+	pendingDestroySpriteNames_.emplace(name);
+}
+
+void SpriteManager::FlushPendingDestroys() {
+	if (pendingDestroySpriteNames_.empty()) {
+		return;
+	}
+
+	std::vector<std::string> destroyNames(
+		pendingDestroySpriteNames_.begin(),
+		pendingDestroySpriteNames_.end());
+	pendingDestroySpriteNames_.clear();
+
+	for (const std::string& name : destroyNames) {
+		Destroy(name);
 	}
 }
 

@@ -182,6 +182,7 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.cpp" />
     <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
@@ -364,6 +365,7 @@
     <ClInclude Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerIconUI.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.h" />
+    <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.h" />
     <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h" />
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h" />
     <ClInclude Include="Application\UI\UIHeaders.h" />

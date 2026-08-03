@@ -52,45 +52,6 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 60.0,
-            "horizontalAlign": "Left",
-            "layer": "Sphere1",
-            "lineSpacing": 1.0,
-            "name": "Text3",
-            "position": [
-                410.0,
-                429.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "Push Space or A",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
             "fontSize": 24.0,
             "horizontalAlign": "Left",
             "layer": "UI",
@@ -111,7 +72,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 56.9",
+            "text": "FPS : 60.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -119,80 +80,41 @@
         },
         {
             "anchorPoint": [
-                0.0,
-                0.0
+                0.5,
+                0.5
             ],
             "characterSpacing": 0.0,
             "color": [
-                1.0,
-                1.0,
-                1.0,
+                0.0,
+                0.0,
+                0.0,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 40.0,
+            "fontSize": 38.5,
             "horizontalAlign": "Left",
             "layer": "Sphere1",
             "lineSpacing": 1.0,
-            "name": "Text",
+            "name": "Text4",
             "position": [
-                816.0,
-                60.0
+                684.0,
+                225.0
             ],
             "rotation": 0.0,
             "scale": [
                 1.0,
                 1.0
             ],
-            "scene": "Game",
+            "scene": "None",
             "screen": "BackBuffer",
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "↑ピカピカしたらPushA",
+            "text": "武器名",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 60.0,
-            "horizontalAlign": "Left",
-            "layer": "Sphere1",
-            "lineSpacing": 1.0,
-            "name": "Text2",
-            "position": [
-                484.0,
-                189.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "タイトルシーン",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -268,45 +190,6 @@
                 0.0
             ],
             "text": "Enemy : 5",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 38.5,
-            "horizontalAlign": "Left",
-            "layer": "Sphere1",
-            "lineSpacing": 1.0,
-            "name": "Text4",
-            "position": [
-                677.0,
-                247.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "None",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "武器名\n",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

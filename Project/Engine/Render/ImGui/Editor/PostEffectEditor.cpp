@@ -1171,7 +1171,6 @@ namespace MadoEngine::Editor {
             selectedIndex = postEffectManager.GetScreenPasses().empty() ? static_cast<std::size_t>(-1) : postEffectManager.GetScreenPasses().size() - 1;
         }
 
-        ImGui::SameLine();
         if (ImGui::Button("保存")) {
             SaveLayerEffectPassEditorJson(postEffectManager);
         }

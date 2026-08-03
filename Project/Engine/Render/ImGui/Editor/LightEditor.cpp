@@ -1,5 +1,6 @@
 #include "LightEditor.h"
 #include <array>
+#include <charconv>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -17,6 +18,7 @@ namespace MadoEngine::Editor {
             bool isRequested = false;
             LightHandle handle;
         };
+
         /// @brief ライト種別の表示名を取得する
         /// @param type ライト種別
         /// @return ライト種別の表示名
@@ -33,11 +35,6 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief 重複しないライト名を作成する
-        /// @param lightManager 重複確認に使用するLightManager
-        /// @param prefix ライト名の接頭辞
-        /// @param nextId 次に試すID
-        /// @return 重複しないライト名
         /// @brief LightManager Jsonのバックアップパスを作成する。
         /// @return LightManager Jsonのバックアップパス。
         std::filesystem::path CreateLightManagerBackupJsonPath() {
@@ -46,36 +43,74 @@ namespace MadoEngine::Editor {
             return backupPath;
         }
 
-        std::string CreateUniqueLightName(LightManager& lightManager, const char* prefix, int& nextId) {
-            std::string name;
-            do {
-                name = std::string(prefix) + std::to_string(nextId);
-                ++nextId;
-            } while (lightManager.Find(name).IsValid());
+        /// @brief 文字列を固定長バッファへコピーする
+        /// @tparam Size バッファサイズ
+        /// @param buffer コピー先バッファ
+        /// @param text コピー元文字列
+        template<size_t Size>
+        void CopyToBuffer(std::array<char, Size>& buffer, const std::string& text) {
+            buffer.fill('\0');
+            strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
+        }
 
-            return name;
+        /// @brief 追加したLight名を基準に次の未使用名を生成する
+        /// @param lightManager Light名の使用状況を確認するManager
+        /// @param createdName 直前に追加したLight名
+        /// @return 末尾の番号を繰り上げた未使用のLight名
+        std::string MakeNextAvailableLightName(
+            const LightManager& lightManager,
+            const std::string& createdName) {
+            size_t suffixStart = createdName.size();
+            while (suffixStart > 0) {
+                const char character = createdName[suffixStart - 1];
+                if (character < '0' || character > '9') {
+                    break;
+                }
+                --suffixStart;
+            }
+
+            std::string baseName = createdName.substr(0, suffixStart);
+            uint64_t suffix = 1;
+            if (suffixStart < createdName.size()) {
+                const char* suffixBegin = createdName.data() + suffixStart;
+                const char* suffixEnd = createdName.data() + createdName.size();
+                const std::from_chars_result result = std::from_chars(suffixBegin, suffixEnd, suffix);
+                if (result.ec == std::errc{} && result.ptr == suffixEnd) {
+                    ++suffix;
+                } else {
+                    baseName = createdName;
+                    suffix = 1;
+                }
+            }
+
+            for (;;) {
+                const std::string candidate = baseName + std::to_string(suffix);
+                if (!lightManager.Find(candidate).IsValid()) {
+                    return candidate;
+                }
+                ++suffix;
+            }
         }
 
         /// @brief Editorからライトを追加する
         /// @param type 追加するライト種別
+        /// @param name 追加するライト名
         /// @return 追加したライトのハンドル。追加できなかった場合は無効なハンドル
-        LightHandle AddLightFromEditor(LightType type) {
+        LightHandle AddLightFromEditor(LightType type, const std::string& name) {
             LightManager& lightManager = LightManager::GetInstance();
-            static int nextDirectionalLightId = 1;
-            static int nextPointLightId = 1;
-            static int nextSpotLightId = 1;
+            const bool isNameAlreadyUsed = lightManager.Find(name).IsValid();
 
             if (type == LightType::Directional) {
                 DirectionalLight light{};
                 light.useLight = 1;
                 light.direction = { 0.0f, -1.0f, 0.0f };
-                const std::string name = CreateUniqueLightName(lightManager, "Direction Light ", nextDirectionalLightId);
-                return lightManager.CreateDirectionalLight(
+                const LightHandle createdHandle = lightManager.CreateDirectionalLight(
                     name,
                     light,
                     SceneType::None,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
+                return isNameAlreadyUsed ? LightHandle{} : createdHandle;
             }
 
             if (type == LightType::Point) {
@@ -83,13 +118,13 @@ namespace MadoEngine::Editor {
                 light.useLight = 1;
                 light.position = { 0.0f, 1.0f, 0.0f };
                 light.radius = 5.0f;
-                const std::string name = CreateUniqueLightName(lightManager, "Point Light ", nextPointLightId);
-                return lightManager.CreatePointLight(
+                const LightHandle createdHandle = lightManager.CreatePointLight(
                     name,
                     light,
                     SceneType::None,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
+                return isNameAlreadyUsed ? LightHandle{} : createdHandle;
             }
 
             if (type == LightType::Spot) {
@@ -100,13 +135,13 @@ namespace MadoEngine::Editor {
                 light.distance = 10.0f;
                 light.cosAngle = 0.8f;
                 light.cosFalloffStart = 0.9f;
-                const std::string name = CreateUniqueLightName(lightManager, "Spot Light ", nextSpotLightId);
-                return lightManager.CreateSpotLight(
+                const LightHandle createdHandle = lightManager.CreateSpotLight(
                     name,
                     light,
                     SceneType::None,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
+                return isNameAlreadyUsed ? LightHandle{} : createdHandle;
             }
 
             return {};
@@ -414,30 +449,44 @@ namespace MadoEngine::Editor {
     void DrawLightManagerEditorUI() {
         LightManager& lightManager = LightManager::GetInstance();
         static LightHandle selectedHandle{};
+        static std::array<char, 128> createName{};
+        static bool isInitialized = false;
+        if (!isInitialized) {
+            CopyToBuffer(createName, "Light");
+            isInitialized = true;
+        }
 
         ImGui::Begin("Light Editor");
 
+        ImGui::SetNextItemWidth(180.0f);
+        ImGui::InputText("新規名", createName.data(), createName.size());
+        ImGui::SameLine();
         if (ImGui::Button("Direction追加")) {
-            const LightHandle createdHandle = AddLightFromEditor(LightType::Directional);
+            const std::string requestedName = createName.data();
+            const LightHandle createdHandle = AddLightFromEditor(LightType::Directional, requestedName);
             if (createdHandle.IsValid()) {
                 selectedHandle = createdHandle;
+                CopyToBuffer(createName, MakeNextAvailableLightName(lightManager, requestedName));
             }
         }
         ImGui::SameLine();
         if (ImGui::Button("Point追加")) {
-            const LightHandle createdHandle = AddLightFromEditor(LightType::Point);
+            const std::string requestedName = createName.data();
+            const LightHandle createdHandle = AddLightFromEditor(LightType::Point, requestedName);
             if (createdHandle.IsValid()) {
                 selectedHandle = createdHandle;
+                CopyToBuffer(createName, MakeNextAvailableLightName(lightManager, requestedName));
             }
         }
         ImGui::SameLine();
         if (ImGui::Button("Spot追加")) {
-            const LightHandle createdHandle = AddLightFromEditor(LightType::Spot);
+            const std::string requestedName = createName.data();
+            const LightHandle createdHandle = AddLightFromEditor(LightType::Spot, requestedName);
             if (createdHandle.IsValid()) {
                 selectedHandle = createdHandle;
+                CopyToBuffer(createName, MakeNextAvailableLightName(lightManager, requestedName));
             }
         }
-        ImGui::SameLine();
         if (ImGui::Button("保存")) {
             lightManager.SaveToJson();
         }

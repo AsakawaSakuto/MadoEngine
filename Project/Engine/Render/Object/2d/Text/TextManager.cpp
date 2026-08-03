@@ -28,6 +28,7 @@ void TextManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* co
 }
 
 void TextManager::Finalize() {
+	pendingDestroyTextNames_.clear();
 	for (auto& [name, entry] : texts_) {
 		(void)name;
 		entry.text->ReleaseTexture();
@@ -134,22 +135,50 @@ bool TextManager::Rename(const std::string& currentName, const std::string& newN
 		return false;
 	}
 
+	const bool isPendingDestroy = pendingDestroyTextNames_.erase(currentName) > 0;
 	auto node = texts_.extract(currentIt);
 	Text* text = node.mapped().text.get();
 	node.key() = newName;
 	texts_.insert(std::move(node));
 	text->SetObjectName(newName);
+	if (isPendingDestroy) {
+		pendingDestroyTextNames_.emplace(newName);
+	}
 
 	Logger::Output("Text名を変更しました : " + currentName + " -> " + newName, Logger::Level::Application);
 	return true;
 }
 
 void TextManager::Destroy(const std::string& name) {
+	pendingDestroyTextNames_.erase(name);
 	auto it = texts_.find(name);
 	if (it != texts_.end()) {
 		it->second.text->ReleaseTexture();
 		texts_.erase(it);
 		Logger::Output("[Engine] Textを破棄しました: " + name, Logger::Level::Application);
+	}
+}
+
+void TextManager::RequestDestroy(const std::string& name) {
+	if (!texts_.contains(name)) {
+		return;
+	}
+
+	pendingDestroyTextNames_.emplace(name);
+}
+
+void TextManager::FlushPendingDestroys() {
+	if (pendingDestroyTextNames_.empty()) {
+		return;
+	}
+
+	std::vector<std::string> destroyNames(
+		pendingDestroyTextNames_.begin(),
+		pendingDestroyTextNames_.end());
+	pendingDestroyTextNames_.clear();
+
+	for (const std::string& name : destroyNames) {
+		Destroy(name);
 	}
 }
 

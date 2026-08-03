@@ -126,7 +126,7 @@ SceneType Game::Update(float dt) {
 	// Mapとドロップ取得による経験値加算が完了してからレベル差分を確認する。
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
 	if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
-		weaponUpgradeUI_.UpdateInput(*weaponUpgradeSystem_, *weaponInventory_);
+		weaponUpgradeUI_.Update(*weaponUpgradeSystem_, *weaponInventory_);
 	}
 	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 

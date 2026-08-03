@@ -45,7 +45,7 @@ namespace Player {
 		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Game);
 		shadowModel_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 		shadowModel_->SetTexture("white16x16");
-		shadowModel_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		shadowModel_->SetColor({ 1.0f, 0.0f, 1.0f, 1.0f });
 		shadowModel_->SetCastShadow(false);
 		shadowModel_->SetReceiveShadow(false);
 		shadowModel_->SetLightingEnabled(false);

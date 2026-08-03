@@ -394,9 +394,6 @@ namespace MadoEngine::Editor {
 		ImGui::SetNextItemWidth(180.0f);
 		ImGui::InputText("新規名", createName.data(), createName.size());
 		ImGui::SameLine();
-		ImGui::SetNextItemWidth(180.0f);
-		DrawModelAssetCombo("Modelアセット", createModelName, modelNames);
-		ImGui::SameLine();
 		if (modelNames.empty()) {
 			ImGui::BeginDisabled();
 		}
@@ -414,6 +411,11 @@ namespace MadoEngine::Editor {
 		}
 		if (modelNames.empty()) {
 			ImGui::EndDisabled();
+		}
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(180.0f);
+		DrawModelAssetCombo("Modelアセット", createModelName, modelNames);
+		if (modelNames.empty()) {
 			ImGui::SameLine();
 			ImGui::TextDisabled("利用可能なModelアセットがありません");
 		}

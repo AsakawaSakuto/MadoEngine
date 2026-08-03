@@ -355,9 +355,6 @@ void DrawSpriteManagerEditorUI() {
 	ImGui::SetNextItemWidth(180.0f);
 	ImGui::InputText("新規名", createName.data(), createName.size());
 	ImGui::SameLine();
-	ImGui::SetNextItemWidth(180.0f);
-	DrawTextureCombo("新規テクスチャ", createTextureName, textureNames);
-	ImGui::SameLine();
 	if (textureNames.empty()) {
 		ImGui::BeginDisabled();
 	}
@@ -375,6 +372,11 @@ void DrawSpriteManagerEditorUI() {
 	}
 	if (textureNames.empty()) {
 		ImGui::EndDisabled();
+	}
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(180.0f);
+	DrawTextureCombo("新規テクスチャ", createTextureName, textureNames);
+	if (textureNames.empty()) {
 		ImGui::SameLine();
 		ImGui::TextDisabled("利用可能なテクスチャがありません");
 	}
@@ -409,7 +411,7 @@ void DrawSpriteManagerEditorUI() {
 		}
 		ImGui::SameLine();
 		if (ImGui::SmallButton("削除")) {
-			manager.Destroy(name);
+			manager.RequestDestroy(name);
 			if (selectedName == name) {
 				selectedName.clear();
 			}

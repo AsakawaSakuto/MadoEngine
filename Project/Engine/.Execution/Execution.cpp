@@ -768,7 +768,9 @@ namespace MadoEngine
 			commandManager_->GetCompletedFenceValue()
 		);
 
-		// 描画で参照したModelリソースはGPU処理完了後に解放する
+		// 描画で参照したリソースはGPU処理完了後に解放する
+		MadoEngine::SpriteManager::GetInstance().FlushPendingDestroys();
+		MadoEngine::TextManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();
 	}
 

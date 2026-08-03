@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <d3d12.h>
 #include <filesystem>
@@ -72,6 +73,13 @@ public:
 	/// @brief 指定したSpriteを破棄する
 	/// @param name Spriteの識別名
 	void Destroy(const std::string& name);
+
+	/// @brief GPU処理完了後にSpriteを削除するよう予約する
+	/// @param name 削除対象のSprite名
+	void RequestDestroy(const std::string& name);
+
+	/// @brief 予約されたSprite削除を実行する
+	void FlushPendingDestroys();
 
 	/// @brief 指定したシーンに属するSpriteインスタンスをすべて破棄する
 	/// @param sceneType 破棄対象のシーン種別
@@ -143,6 +151,7 @@ private:
 	// Sprite管理マップ（識別名 → Spriteと管理方法）
 	std::unordered_map<std::string, SpriteEntry> sprites_;
 	std::vector<std::string> drawOrder_;
+	std::unordered_set<std::string> pendingDestroySpriteNames_;
 };
 
 } // namespace MadoEngine

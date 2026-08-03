@@ -19,7 +19,7 @@ namespace UI::Game {
 		MyInput::RegisterInput(kUpgradeDecisionAction, { DIK_SPACE }, { GAMEPAD_A });
 	}
 
-	void UpgradeUI::UpdateInput(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory) {
+	void UpgradeUI::Update(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory) {
 		SynchronizeSelection(upgradeSystem);
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
