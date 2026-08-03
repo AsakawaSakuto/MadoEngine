@@ -15,7 +15,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere1",
             "position": [
-                -5.0,
+                -7.5,
                 5.0,
                 0.0
             ],
@@ -50,8 +50,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere10",
             "position": [
-                0.0,
-                0.0,
+                -2.5,
+                -5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -85,8 +85,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere11",
             "position": [
-                0.0,
-                0.0,
+                2.5,
+                -5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -120,8 +120,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere12",
             "position": [
-                0.0,
-                0.0,
+                7.5,
+                -5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -155,7 +155,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere2",
             "position": [
-                0.0,
+                -2.5,
                 5.0,
                 0.0
             ],
@@ -190,7 +190,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere3",
             "position": [
-                5.0,
+                2.5,
                 5.0,
                 0.0
             ],
@@ -225,8 +225,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere4",
             "position": [
-                -5.0,
-                0.0,
+                7.5,
+                5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -260,7 +260,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere5",
             "position": [
-                0.0,
+                -7.5,
                 0.0,
                 0.0
             ],
@@ -295,7 +295,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere6",
             "position": [
-                5.0,
+                -2.5,
                 0.0,
                 0.0
             ],
@@ -330,8 +330,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere7",
             "position": [
-                -5.0,
-                -5.0,
+                2.5,
+                0.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -365,8 +365,8 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere8",
             "position": [
+                7.5,
                 0.0,
-                -5.0,
                 0.0
             ],
             "receiveLightMask": 1,
@@ -400,7 +400,7 @@
             "model": "Assets/Model/Static/Primitive/sphere.obj",
             "name": "Sphere9",
             "position": [
-                5.0,
+                -7.5,
                 -5.0,
                 0.0
             ],

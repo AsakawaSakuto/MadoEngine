@@ -34,7 +34,7 @@ namespace MadoEngine
 		winDesc_.width = 1280;
 		winDesc_.height = 720;
 		winDesc_.iconPath = "Assets/Texture/.Engine/icon.png";
-		winDesc_.isResizable = true;
+		winDesc_.isResizable = false;
 		winDesc_.isShowMouseCursor = true;
 
 		// ウィンドウの初期化
