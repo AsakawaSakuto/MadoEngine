@@ -169,7 +169,7 @@
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 38.5,
+            "fontSize": 40.0,
             "horizontalAlign": "Left",
             "layer": "Sphere1",
             "lineSpacing": 1.0,
@@ -192,7 +192,7 @@
             "text": "武器名",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         }
     ]

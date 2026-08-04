@@ -115,7 +115,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -154,7 +154,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -193,7 +193,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -232,7 +232,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -247,7 +247,7 @@
             ],
             "fitToScreen": false,
             "layer": "Sphere1",
-            "name": "sprite",
+            "name": "e",
             "position": [
                 570.0,
                 225.0
@@ -271,7 +271,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         }
     ]
 }

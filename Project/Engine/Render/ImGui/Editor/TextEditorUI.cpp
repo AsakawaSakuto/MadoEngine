@@ -62,6 +62,45 @@ namespace {
 		}
 	}
 
+	/// @brief Textのアンカー選択Comboを描画する
+	/// @param text 編集対象のText
+	void DrawAnchorCombo(Text& text) {
+		struct AnchorItem {
+			const char* label;
+			Vector2 point;
+		};
+
+		constexpr AnchorItem anchorItems[] = {
+			{ "左上", { 0.0f, 0.0f } },
+			{ "右上", { 1.0f, 0.0f } },
+			{ "中央", { 0.5f, 0.5f } },
+			{ "左下", { 0.0f, 1.0f } },
+			{ "右下", { 1.0f, 1.0f } },
+		};
+
+		const Vector2 currentPoint = text.GetAnchorPoint();
+		const char* preview = "カスタム";
+		for (const AnchorItem& item : anchorItems) {
+			if (item.point == currentPoint) {
+				preview = item.label;
+				break;
+			}
+		}
+
+		if (ImGui::BeginCombo("アンカー", preview)) {
+			for (const AnchorItem& item : anchorItems) {
+				const bool isSelected = item.point == currentPoint;
+				if (ImGui::Selectable(item.label, isSelected)) {
+					text.SetAnchorPoint(item.point);
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+	}
+
 	/// @brief RenderLayerを選択するComboを描画します。
 	/// @param text 編集対象Text。
 	void DrawRenderLayerCombo(Text& text) {
@@ -317,11 +356,7 @@ void DrawTextManagerEditorUI() {
 			selectedText->SetPosition({ positionValues[0], positionValues[1] });
 		}
 
-		Vector2 anchorPoint = selectedText->GetAnchorPoint();
-		float anchorPointValues[2] = { anchorPoint.x, anchorPoint.y };
-		if (ImGui::DragFloat2("アンカーポイント", anchorPointValues, 0.01f, 0.0f, 1.0f, "%.2f")) {
-			selectedText->SetAnchorPoint({ anchorPointValues[0], anchorPointValues[1] });
-		}
+		DrawAnchorCombo(*selectedText);
 
 		Vector2 areaSize = selectedText->GetAreaSize();
 		float sizeValues[2] = { areaSize.x, areaSize.y };
