@@ -54,6 +54,12 @@ void Game::Initialize() {
 	enemySpawner_ = std::make_unique<Enemy::Spawner>();
 	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game);
 
+	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
+	weaponIconUI_->Initialize(4);
+
+	playerIconUI_ = std::make_unique<UI::Game::PlayerIconUI>();
+	playerIconUI_->Initialize();
+
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
 	weaponInventory_->Initialize(Projectile::Type::FireBall);
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
@@ -66,12 +72,6 @@ void Game::Initialize() {
 	fadeSprite_->SetFitToScreen(true);
 
 	fadeOutTimer_.Start(2.0f);
-
-	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
-	weaponIconUI_->Initialize(4);
-
-	playerIconUI_ = std::make_unique<UI::Game::PlayerIconUI>();
-	playerIconUI_->Initialize();
 
 	// System
 	inGameSession_ = std::make_unique<System::InGameSession>();
@@ -126,7 +126,7 @@ SceneType Game::Update(float dt) {
 	// Mapとドロップ取得による経験値加算が完了してからレベル差分を確認する。
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
 	if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
-		weaponUpgradeUI_.Update(*weaponUpgradeSystem_, *weaponInventory_);
+		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_);
 	}
 	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 
@@ -225,6 +225,8 @@ bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 }
 
 void Game::Finalize() {
+	weaponUpgradeUI_.Finalize();
+
 	if (enemySpawner_) {
 		enemySpawner_->Clear();
 	}

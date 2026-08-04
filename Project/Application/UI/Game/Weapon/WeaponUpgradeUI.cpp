@@ -3,37 +3,53 @@
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
 #include "Input/MyInput.h"
 #include "ImGuiHeaders.h"
+#include <algorithm>
 
 namespace UI::Game {
 	namespace {
-		constexpr const char* kUpgradeUpAction = "Up";
-		constexpr const char* kUpgradeDownAction = "Down";
+		constexpr const char* kUpgradeLeftAction = "Left";
+		constexpr const char* kUpgradeRightAction = "Right";
 		constexpr const char* kUpgradeDecisionAction = "Decision";
 	}
 
 	void UpgradeUI::Initialize() {
+		for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
+			upgradeCards_[cardIndex].Initialize(cardIndex);
+		}
 		ResetSelection();
 
-		MyInput::RegisterInput(kUpgradeUpAction, { DIK_UP, DIK_W }, { GAMEPAD_UP });
-		MyInput::RegisterInput(kUpgradeDownAction, { DIK_DOWN, DIK_S }, { GAMEPAD_DOWN });
+		MyInput::RegisterInput(kUpgradeLeftAction, { DIK_LEFT, DIK_A }, { GAMEPAD_LEFT });
+		MyInput::RegisterInput(kUpgradeRightAction, { DIK_RIGHT, DIK_D }, { GAMEPAD_RIGHT });
 		MyInput::RegisterInput(kUpgradeDecisionAction, { DIK_SPACE }, { GAMEPAD_A });
 	}
 
-	void UpgradeUI::Update(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory) {
+	void UpgradeUI::Finalize() {
+		for (WeaponUpgradeCardUI& card : upgradeCards_) {
+			card.Finalize();
+		}
+		ResetSelection();
+	}
+
+	void UpgradeUI::Update(
+		float deltaTime,
+		Weapon::UpgradeSystem& upgradeSystem,
+		Weapon::Inventory& inventory) {
 		SynchronizeSelection(upgradeSystem);
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
-		if (choices.empty()) {
+		if (visibleChoiceCount_ == 0 || choices.empty()) {
 			return;
 		}
 
-		if (MyInput::Trigger(kUpgradeUpAction)) {
+		if (MyInput::Trigger(kUpgradeLeftAction)) {
 			selectedChoiceIndex_ =
-				(selectedChoiceIndex_ + choices.size() - 1) % choices.size();
-		} else if (MyInput::Trigger(kUpgradeDownAction)) {
+				(selectedChoiceIndex_ + visibleChoiceCount_ - 1) % visibleChoiceCount_;
+		} else if (MyInput::Trigger(kUpgradeRightAction)) {
 			selectedChoiceIndex_ =
-				(selectedChoiceIndex_ + 1) % choices.size();
+				(selectedChoiceIndex_ + 1) % visibleChoiceCount_;
 		}
+
+		UpdateCards(deltaTime);
 
 		if (!MyInput::Trigger(kUpgradeDecisionAction)) {
 			return;
@@ -41,7 +57,8 @@ namespace UI::Game {
 
 		const std::uint64_t generation = choices[selectedChoiceIndex_].generation;
 		if (upgradeSystem.SelectChoice(selectedChoiceIndex_, generation, inventory)) {
-			ResetSelection();
+			SynchronizeSelection(upgradeSystem);
+			UpdateCards(0.0f);
 		}
 	}
 
@@ -126,15 +143,38 @@ namespace UI::Game {
 		if (selectedGeneration_ != currentGeneration) {
 			selectedChoiceIndex_ = 0;
 			selectedGeneration_ = currentGeneration;
+			visibleChoiceCount_ = (std::min)(choices.size(), upgradeCards_.size());
+
+			for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
+				if (cardIndex < visibleChoiceCount_) {
+					upgradeCards_[cardIndex].SetChoice(choices[cardIndex]);
+				} else {
+					upgradeCards_[cardIndex].SetVisible(false);
+				}
+			}
 		}
 
-		if (selectedChoiceIndex_ >= choices.size()) {
+		visibleChoiceCount_ = (std::min)(choices.size(), upgradeCards_.size());
+		if (selectedChoiceIndex_ >= visibleChoiceCount_) {
 			selectedChoiceIndex_ = 0;
+		}
+	}
+
+	void UpgradeUI::UpdateCards(float deltaTime) {
+		for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
+			WeaponUpgradeCardUI& card = upgradeCards_[cardIndex];
+			card.SetSelected(cardIndex < visibleChoiceCount_ && cardIndex == selectedChoiceIndex_);
+			card.Update(deltaTime);
 		}
 	}
 
 	void UpgradeUI::ResetSelection() {
 		selectedChoiceIndex_ = 0;
+		visibleChoiceCount_ = 0;
 		selectedGeneration_ = 0;
+		for (WeaponUpgradeCardUI& card : upgradeCards_) {
+			card.SetSelected(false);
+			card.SetVisible(false);
+		}
 	}
 }

@@ -1,20 +1,69 @@
 #pragma once
 #include <RenderHeaders.h>
-#include <string>
-#include <vector>
+#include <array>
+#include <cstddef>
+
+namespace Weapon {
+
+	struct UpgradeChoice;
+}
 
 namespace UI::Game {
 
-	class UpgradeCardUI {
+	/// @brief 武器アップグレード候補を1枚のカードとして表示するクラス
+	class WeaponUpgradeCardUI {
 	public:
+		/// @brief カードを初期化
+		/// @param cardIndex 左から数えたカード番号
+		void Initialize(std::size_t cardIndex);
 
-		void Initialize();
+		/// @brief カードが所有する描画オブジェクトを破棄
+		void Finalize();
 
+		/// @brief 表示するアップグレード候補を設定
+		/// @param choice 表示対象のアップグレード候補
+		void SetChoice(const Weapon::UpgradeChoice& choice);
+
+		/// @brief カードの選択状態を設定
+		/// @param isSelected 選択中の場合はtrue
+		void SetSelected(bool isSelected);
+
+		/// @brief カードの表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
+		/// @brief 選択中カードの表示演出を更新
+		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime);
 
 	private:
-		int selectedCardIndex_ = 0;
-		std::vector<Sprite*> cardSprite_;
+		enum class CardSpriteType {
+			Border,
+			Background,
+			IconBorder,
+			IconBackground,
+			Count,
+		};
+
+		/// @brief カードの配置を設定
+		void ApplyLayout();
+
+		/// @brief 管理する描画オブジェクトの表示状態を反映
+		void ApplyVisibility();
+
+		static constexpr std::size_t kCardSpriteCount =
+			static_cast<std::size_t>(CardSpriteType::Count);
+
+		std::size_t cardIndex_ = 0;
+		std::array<Sprite*, kCardSpriteCount> cardSprites_{};
 		Sprite* cardIconSprite_ = nullptr;
+		MadoEngine::Text* weaponNameText_ = nullptr; // 武器名とカテゴリを表示するテキスト
+		MadoEngine::Text* categoryText_ = nullptr;   // カテゴリ名とレアリティを表示するテキスト
+		MadoEngine::Text* detailText_ = nullptr;     // ステータス変化量や説明を表示するテキスト
+		MadoEngine::Text* selectionText_ = nullptr;  // 選択中を表示するテキスト
+		float selectedAnimationTime_ = 0.0f;
+		bool isSelected_ = false;
+		bool isVisible_ = false;
+		bool isInitialized_ = false;
 	};
 }

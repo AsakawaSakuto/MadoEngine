@@ -16,21 +16,21 @@ namespace UI::Game {
 		for (int i = 0; i < slotCount; i++) {
 
 			weaponIconsBG_[i] = MySprite::Create("weaponIconBG" + std::to_string(i), "white2x2", SceneType::Game);
-			weaponIconsBG_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
+			weaponIconsBG_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f - 64.0f });
 			weaponIconsBG_[i]->SetScale(Vector2{ 32.0f, 32.0f });
 			weaponIconsBG_[i]->SetColor(Vector4{ 0.1f, 0.1f, 0.1f, 1.0f });
 
 			weaponIconsShotGauge_[i] = MySprite::Create("weaponIconShotGauge" + std::to_string(i), "white2x2", SceneType::Game);
-			weaponIconsShotGauge_[i]->SetPosition(Vector2{ 104.0f + i * 68.0f, 260.0f });
+			weaponIconsShotGauge_[i]->SetPosition(Vector2{ 104.0f + i * 68.0f, 260.0f - 64.0f });
 			weaponIconsShotGauge_[i]->SetScale(Vector2{ shotGaugeSize_, 0.0f });
 			weaponIconsShotGauge_[i]->SetColor(Vector4{ 0.5f, 0.5f, 0.5f, 1.0f });
 			weaponIconsShotGauge_[i]->SetAnchorPoint(Vector2{ 0.0f, 1.0f });
 
 			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
-			weaponIconFrames_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f });
+			weaponIconFrames_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f - 64.0f });
 
 			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);
-			weaponIcons_[i]->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f });
+			weaponIcons_[i]->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f - 64.0f });
 			weaponIcons_[i]->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
 		}
 	
