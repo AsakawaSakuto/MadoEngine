@@ -10,12 +10,6 @@ namespace UI::Game {
 	void PlayerHealthGauge::Initialize() {
 		healthGauge_ = std::make_unique<Gauge>();
 		healthGauge_->Initialize("PlayerHealthGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
-		healthText_ = MyText::Create(
-			kHealthTextObjectName,
-			"HP : 0 / 0",
-			SceneType::Game,
-			MadoEngine::EditorManagementMode::EditorManaged,
-			MadoEngine::Render::RenderLayer::UI);
 	}
 
 	void PlayerHealthGauge::Update(float currentHealth, float maxHealth) {
@@ -24,14 +18,15 @@ namespace UI::Game {
 			healthGauge_->SetMaxValue(maxHealth);
 		}
 
-		if (healthText_) {
-			healthText_->SetText(std::format("HP : {} / {}", static_cast<int>(currentHealth), static_cast<int>(maxHealth)));
+		auto healthTextHandle = MyText::Find(kHealthTextObjectName);
+		MadoEngine::Text* healthText = MyText::TryGet(healthTextHandle);
+		if (healthText) {
+			healthText->SetText(std::format("HP : {} / {}", static_cast<int>(currentHealth), static_cast<int>(maxHealth)));
 		}
 	}
 
 	void PlayerHealthGauge::Finalize() {
-		MyText::Destroy(kHealthTextObjectName);
-		healthText_ = nullptr;
+		
 	}
 
 	void PlayerHealthGauge::DrawImGui() {

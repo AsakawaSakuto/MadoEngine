@@ -42,10 +42,10 @@ namespace UI::Game {
 		Vector2 endIconScale = { 1.25f, 1.25f }; // 武器アイコンの発射アニメーション時の拡縮率
 		float shotGaugeSize_ = 28.0f;            // 射撃待機ゲージの最大サイズ
 
-		std::vector<Sprite*> weaponIcons_;
-		std::vector<Sprite*> weaponIconsShotGauge_;
-		std::vector<Sprite*> weaponIconsBG_;
-		std::vector<Sprite*> weaponIconFrames_;
+		std::vector<MadoEngine::SpriteHandle> weaponIcons_;
+		std::vector<MadoEngine::SpriteHandle> weaponIconsShotGauge_;
+		std::vector<MadoEngine::SpriteHandle> weaponIconsBG_;
+		std::vector<MadoEngine::SpriteHandle> weaponIconFrames_;
 		std::vector<IconAnimationState> animationStates_;
 	};
 }

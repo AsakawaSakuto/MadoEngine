@@ -19,7 +19,7 @@ namespace Projectile {
 
 	private:
 
-		Model* model_ = nullptr;
+		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
 	};
 }

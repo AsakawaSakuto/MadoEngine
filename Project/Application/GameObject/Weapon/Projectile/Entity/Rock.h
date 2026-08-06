@@ -23,7 +23,7 @@ namespace Projectile {
 	private:
 		static constexpr float kHitDamageMultiplier = 2.0f; // 命中時のダメージ倍率
 
-		Model* model_ = nullptr;
+		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
 	};
 }

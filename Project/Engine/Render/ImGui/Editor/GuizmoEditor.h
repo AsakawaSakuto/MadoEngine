@@ -15,14 +15,14 @@ bool DrawTransformGizmoOnGameView(const Camera& camera, Transform3D& transform);
 
 /// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄する
 /// @param selectedModel 現在選択中のModelポインタ
-void ResetModelGizmoOnSceneChange(Model*& selectedModel);
+void ResetModelGizmoOnSceneChange(ModelHandle& selectedModel);
 
 /// @brief Game View上でModelをクリック選択し、選択中ModelのTransformギズモを描画する
 /// @param camera 選択レイとギズモ表示に使用するカメラ
 /// @param sceneType 選択対象のシーン種別
 /// @param selectedModel 選択中Modelのポインタ
 /// @return 選択またはTransformが変更された場合はtrue
-bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, Model*& selectedModel);
+bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, ModelHandle& selectedModel);
 
 #endif // USE_IMGUI
 

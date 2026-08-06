@@ -33,7 +33,7 @@ namespace Projectile {
 		/// @brief 現在座標に爆発を生成
 		void SpawnExplosion();
 
-		Model* model_ = nullptr;
+		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
 		MadoEngine::Particle::EffectHandle particleHandle_;
 	};

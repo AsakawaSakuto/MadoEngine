@@ -1,28 +1,28 @@
 #include "ModelTransformCommand.h"
-#include "Render/Object/3d/Model/Model.h"
+#include "Render/Object/3d/Model/ModelManager.h"
 
 namespace MadoEngine::Editor {
 
-ModelTransformCommand::ModelTransformCommand(Model* target, const TransformSnapshot& before, const TransformSnapshot& after)
+ModelTransformCommand::ModelTransformCommand(ModelHandle target, const TransformSnapshot& before, const TransformSnapshot& after)
 	: target_(target),
 	before_(before),
 	after_(after) {
 }
 
 void ModelTransformCommand::Undo() {
-	if (!target_) {
-		return;
+	if (Model* target = ModelManager::GetInstance().TryGet(target_)) {
+		target->SetTransform(before_.transform);
 	}
-
-	target_->SetTransform(before_.transform);
 }
 
 void ModelTransformCommand::Redo() {
-	if (!target_) {
-		return;
+	if (Model* target = ModelManager::GetInstance().TryGet(target_)) {
+		target->SetTransform(after_.transform);
 	}
+}
 
-	target_->SetTransform(after_.transform);
+bool ModelTransformCommand::IsValid() const {
+	return ModelManager::GetInstance().IsValid(target_);
 }
 
 } // namespace MadoEngine::Editor

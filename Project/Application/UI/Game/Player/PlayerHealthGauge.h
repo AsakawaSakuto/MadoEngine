@@ -20,6 +20,5 @@ namespace UI::Game {
 		void DrawImGui();
 	private:
 		std::unique_ptr<Gauge> healthGauge_;
-		MadoEngine::Text* healthText_ = nullptr;
 	};
 }

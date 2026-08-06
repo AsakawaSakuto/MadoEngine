@@ -39,10 +39,10 @@ namespace Enemy {
 		MyCollider::RegisterCollider(hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
 
 		model_ = MyModel::Create(modelName_, "enemy", desc.sceneType);
-		if (model_) {
-			model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
-			model_->SetTexture("white16x16");
-			model_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
+			model->SetTexture("white16x16");
+			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		}
 
 		ApplyModelTransform();
@@ -51,8 +51,8 @@ namespace Enemy {
 	void Base::Update(float deltaTime) {
 		UpdateProjectileDamageCooldowns(deltaTime);
 
-		if (model_) {
-			model_->SetColor(gamingColor_.Update(deltaTime, 1.0f));
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetColor(gamingColor_.Update(deltaTime, 1.0f));
 		}
 
 		if (!isActive_ || !targetPlayer_) {
@@ -151,13 +151,14 @@ namespace Enemy {
 	}
 
 	void Base::ApplyModelTransform() {
-		if (!model_) {
+		Model* model = MyModel::TryGet(model_);
+		if (!model) {
 			return;
 		}
 
-		model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
-		model_->SetRotation(transform_.rotate);
-		model_->SetScale(transform_.scale);
+		model->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+		model->SetRotation(transform_.rotate);
+		model->SetScale(transform_.scale);
 	}
 
 	void Base::Release() {
@@ -172,8 +173,8 @@ namespace Enemy {
 			MyCollider::RemoveCollider(hitColliderName_);
 		}
 		if (!modelName_.empty()) {
-			MyModel::Destroy(modelName_);
-			model_ = nullptr;
+			MyModel::RequestDestroy(model_);
+			model_ = {};
 		}
 
 		isReleased_ = true;

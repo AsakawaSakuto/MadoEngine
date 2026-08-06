@@ -45,16 +45,17 @@ namespace UI::Game {
 				SceneType::Game,
 				MadoEngine::EditorManagementMode::RuntimeOnly,
 				MadoEngine::Render::RenderLayer::UI);
-			if (!slot.text) {
+			MadoEngine::Text* text = MyText::TryGet(slot.text);
+			if (!text) {
 				continue;
 			}
 
-			slot.text->SetFontFamily("Segoe UI");
-			slot.text->SetFontSize(fontSize_);
-			slot.text->SetAnchorPoint({ 0.5f, 0.5f });
-			slot.text->SetWordWrap(false);
-			slot.text->SetColor(damageTextColor_);
-			slot.text->SetVisible(false);
+			text->SetFontFamily("Segoe UI");
+			text->SetFontSize(fontSize_);
+			text->SetAnchorPoint({ 0.5f, 0.5f });
+			text->SetWordWrap(false);
+			text->SetColor(damageTextColor_);
+			text->SetVisible(false);
 		}
 
 		nextSlotIndex_ = 0;
@@ -67,7 +68,11 @@ namespace UI::Game {
 		}
 
 		DamageTextSlot* slot = AcquireSlot();
-		if (!slot || !slot->text) {
+		if (!slot) {
+			return;
+		}
+		MadoEngine::Text* text = MyText::TryGet(slot->text);
+		if (!text) {
 			return;
 		}
 
@@ -88,18 +93,19 @@ namespace UI::Game {
 		slot->isActive = true;
 		++spawnSequence_;
 
-		slot->text->SetText(FormatDamage(damage));
-		slot->text->SetScale({
+		text->SetText(FormatDamage(damage));
+		text->SetScale({
 			1.0f + initialScaleAddition_,
 			1.0f + initialScaleAddition_,
 		});
-		slot->text->SetColor(damageTextColor_);
-		slot->text->SetVisible(true);
+		text->SetColor(damageTextColor_);
+		text->SetVisible(true);
 	}
 
 	void ProjectileDamageView::Update(float deltaTime, const Camera& camera) {
 		for (DamageTextSlot& slot : slots_) {
-			if (!slot.isActive || !slot.text) {
+			MadoEngine::Text* text = MyText::TryGet(slot.text);
+			if (!slot.isActive || !text) {
 				continue;
 			}
 
@@ -109,7 +115,7 @@ namespace UI::Game {
 
 			if (slot.elapsedTime >= displayLifeTime_) {
 				slot.isActive = false;
-				slot.text->SetVisible(false);
+				text->SetVisible(false);
 				continue;
 			}
 
@@ -117,7 +123,7 @@ namespace UI::Game {
 				slot.worldPosition + Vector3{ 0.0f, slot.verticalOffset, 0.0f };
 			Vector2 screenPosition;
 			if (!WorldToScreen(displayWorldPosition, camera, screenPosition)) {
-				slot.text->SetVisible(false);
+				text->SetVisible(false);
 				continue;
 			}
 
@@ -136,22 +142,21 @@ namespace UI::Game {
 			screenPosition.x += slot.horizontalOffset;
 			screenPosition.y -= riseDistance_ * progress;
 
-			slot.text->SetPosition(screenPosition);
-			slot.text->SetScale({ scale, scale });
-			slot.text->SetColor({
+			text->SetPosition(screenPosition);
+			text->SetScale({ scale, scale });
+			text->SetColor({
 				damageTextColor_.x,
 				damageTextColor_.y,
 				damageTextColor_.z,
 				alpha,
 			});
-			slot.text->SetVisible(true);
+			text->SetVisible(true);
 		}
 	}
 
 	void ProjectileDamageView::Finalize() {
 		for (std::size_t index = 0; index < slots_.size(); ++index) {
 			DamageTextSlot& slot = slots_[index];
-			MyText::Destroy(kTextObjectNamePrefix + std::to_string(index));
 			slot = {};
 		}
 
@@ -209,8 +214,8 @@ namespace UI::Game {
 
 		if (fontSizeChanged) {
 			for (DamageTextSlot& slot : slots_) {
-				if (slot.text) {
-					slot.text->SetFontSize(fontSize_);
+				if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
+					text->SetFontSize(fontSize_);
 				}
 			}
 		}
@@ -223,7 +228,7 @@ namespace UI::Game {
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
 			const std::size_t index = (nextSlotIndex_ + offset) % slots_.size();
 			DamageTextSlot& slot = slots_[index];
-			if (!slot.text || slot.isActive) {
+			if (!MyText::TryGet(slot.text) || slot.isActive) {
 				continue;
 			}
 
@@ -234,7 +239,7 @@ namespace UI::Game {
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
 			const std::size_t index = (nextSlotIndex_ + offset) % slots_.size();
 			DamageTextSlot& slot = slots_[index];
-			if (!slot.text) {
+			if (!MyText::TryGet(slot.text)) {
 				continue;
 			}
 

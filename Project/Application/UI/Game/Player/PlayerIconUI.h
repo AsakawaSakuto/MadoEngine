@@ -12,8 +12,8 @@ namespace UI::Game {
 		void Initialize(Player::Type type = Player::Type::Gunman);
 
 	private:
-		Sprite* playerIcon_;
-		Sprite* playerIconBG_;
-		Sprite* playerIconFrame_;
+		MadoEngine::SpriteHandle playerIcon_{};
+		MadoEngine::SpriteHandle playerIconBG_{};
+		MadoEngine::SpriteHandle playerIconFrame_{};
 	};
 }

@@ -2,6 +2,7 @@
 #include "Math/Vector2.h"
 #include "Math/Vector4.h"
 #include "Render/Object/RenderLayer.h"
+#include "Render/Object/ObjectHandle.h"
 #include ".SceneManager/SceneType.h"
 #include <string>
 
@@ -161,8 +162,8 @@ private:
 	std::string backgroundSpriteName_;
 	std::string gaugeSpriteName_;
 
-	Sprite* backgroundSprite_ = nullptr;
-	Sprite* gaugeSprite_ = nullptr;
+	MadoEngine::SpriteHandle backgroundSprite_{};
+	MadoEngine::SpriteHandle gaugeSprite_{};
 
 	Vector2 position_ = { 0.0f, 0.0f };
 	Vector2 size_ = { 200.0f, 24.0f };

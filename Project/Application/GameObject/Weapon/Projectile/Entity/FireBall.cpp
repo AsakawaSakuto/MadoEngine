@@ -10,7 +10,7 @@ namespace Projectile {
 
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
-			MyModel::Destroy(objectName_);
+			MyModel::RequestDestroy(model_);
 		}
 	}
 
@@ -46,8 +46,8 @@ namespace Projectile {
 			return;
 		}
 
-		if (model_) {
-			model_->SetTransform(transform_);
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTransform(transform_);
 		}
 
 		MyDebugLine::AddShape(std::get<AABB>(hitbox_));

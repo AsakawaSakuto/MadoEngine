@@ -1,55 +1,76 @@
 #pragma once
+
 #include "ModelManager.h"
 
 namespace MyInstancedModel {
 
-/// @brief インスタンス描画モデルを作成する
-/// @param name 作成するインスタンス描画モデルの名前
-/// @param modelName 使用するモデルアセット名
-/// @param sceneType 描画を許可するシーン種別
-/// @param layer 設定する描画レイヤー
-/// @return 作成したインスタンス描画モデル。失敗時はnullptr
-inline InstancedModel* Create(
+/// @brief 描画Layerを指定してInstancedModelを生成する
+/// @param name InstancedModel名
+/// @param modelName Modelアセット名またはパス
+/// @param sceneType 所属Scene
+/// @param layer 描画Layer
+/// @return 生成したInstancedModelのHandle。失敗した場合は無効Handle
+[[nodiscard]] inline MadoEngine::InstancedModelHandle Create(
 	const std::string& name,
 	const std::string& modelName,
 	SceneType sceneType,
-	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default)
-{
-	InstancedModel* model = MadoEngine::ModelManager::GetInstance().CreateInstanced(name, modelName, sceneType);
-	if (model) {
+	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default) {
+	MadoEngine::ModelManager& manager = MadoEngine::ModelManager::GetInstance();
+	const MadoEngine::InstancedModelHandle handle = manager.CreateInstanced(name, modelName, sceneType);
+	if (InstancedModel* model = manager.TryGet(handle)) {
 		model->SetRenderLayer(layer);
 	}
-	return model;
+	return handle;
 }
 
-/// @brief インスタンス描画モデルを取得または作成する
-/// @param name 取得または作成するインスタンス描画モデルの名前
-/// @param modelName 使用するモデルアセット名
-/// @param sceneType 描画を許可するシーン種別
-/// @param layer 設定する描画レイヤー
-/// @return 取得または作成したインスタンス描画モデル。失敗時はnullptr
-inline InstancedModel* GetOrCreate(
+/// @brief 同じ条件のInstancedModelを取得し、存在しない場合だけ生成する
+/// @param name InstancedModel名
+/// @param modelName Modelアセット名またはパス
+/// @param sceneType 所属Scene
+/// @param layer 描画Layer
+/// @return 取得または生成したInstancedModelのHandle。条件不一致または生成失敗時は無効Handle
+[[nodiscard]] inline MadoEngine::InstancedModelHandle GetOrCreate(
 	const std::string& name,
 	const std::string& modelName,
 	SceneType sceneType,
-	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default)
-{
-	InstancedModel* model = MadoEngine::ModelManager::GetInstance().GetOrCreateInstanced(name, modelName, sceneType);
-	if (model) {
+	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default) {
+	MadoEngine::ModelManager& manager = MadoEngine::ModelManager::GetInstance();
+	const MadoEngine::InstancedModelHandle handle = manager.GetOrCreateInstanced(name, modelName, sceneType);
+	if (InstancedModel* model = manager.TryGet(handle)) {
 		model->SetRenderLayer(layer);
 	}
-	return model;
+	return handle;
 }
 
-/// @brief インスタンス描画モデルを取得する
-/// @param name 取得対象のインスタンス描画モデル名
-/// @return 取得したインスタンス描画モデルです。見つからない場合はnullptr
-inline InstancedModel* Get(const std::string& name) {
-	return MadoEngine::ModelManager::GetInstance().GetInstanced(name);
+/// @brief 名前からInstancedModelのHandleを取得する
+/// @param name InstancedModel名
+/// @return 見つかったInstancedModelのHandle。見つからない場合は無効Handle
+[[nodiscard]] inline MadoEngine::InstancedModelHandle Find(const std::string& name) {
+	return MadoEngine::ModelManager::GetInstance().FindInstanced(name);
 }
 
-/// @brief インスタンス描画モデルを破棄する
-/// @param name 破棄対象のインスタンス描画モデル名
+/// @brief 名前からInstancedModelのHandleを取得する互換API
+/// @param name InstancedModel名
+/// @return 見つかったInstancedModelのHandle。見つからない場合は無効Handle
+[[nodiscard]] inline MadoEngine::InstancedModelHandle Get(const std::string& name) {
+	return Find(name);
+}
+
+/// @brief HandleからInstancedModelを一時参照として取得する
+/// @param handle InstancedModelのHandle
+/// @return 有効な場合はInstancedModel、無効な場合はnullptr
+inline InstancedModel* TryGet(MadoEngine::InstancedModelHandle handle) {
+	return MadoEngine::ModelManager::GetInstance().TryGet(handle);
+}
+
+/// @brief Handleを指定してInstancedModelを即時削除する
+/// @param handle 削除対象のHandle
+inline void Destroy(MadoEngine::InstancedModelHandle handle) {
+	MadoEngine::ModelManager::GetInstance().Destroy(handle);
+}
+
+/// @brief 名前を指定してInstancedModelを即時削除する互換API
+/// @param name 削除対象の名前
 inline void Destroy(const std::string& name) {
 	MadoEngine::ModelManager::GetInstance().DestroyInstanced(name);
 }

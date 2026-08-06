@@ -10,8 +10,10 @@ void Title::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
 
 	fadeSprite_ = MySprite::Create("TitleFade", "black2x2", SceneType::Title);
-	fadeSprite_->SetColor({1.0f,1.0f,1.0f,0.0f});
-	fadeSprite_->SetFitToScreen(true);
+	if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
+		fadeSprite->SetColor({1.0f,1.0f,1.0f,0.0f});
+		fadeSprite->SetFitToScreen(true);
+	}
 
 	debugCamera_.SetDistance(35.0f);
 }
@@ -25,7 +27,9 @@ SceneType Title::Update(float dt) {
 	}
 
 	if (fadeInTimer_.IsActive()) {
-		fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, fadeInTimer_.GetProgress() });
+		if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
+			fadeSprite->SetColor({ 1.0f, 1.0f, 1.0f, fadeInTimer_.GetProgress() });
+		}
 	}
     
 	if (fadeInTimer_.IsFinished()) {

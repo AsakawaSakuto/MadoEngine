@@ -50,13 +50,13 @@ namespace DropObject {
 			0.0f
 		);
 
-		if (model_) {
-			model_->SetTexture(textureName);
-			model_->SetUseBillboard(true);
-			model_->SetCastShadow(false);
-			model_->SetReceiveShadow(false);
-			model_->SetLightingEnabled(false);
-			model_->SetTransform(transform_);
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTexture(textureName);
+			model->SetUseBillboard(true);
+			model->SetCastShadow(false);
+			model->SetReceiveShadow(false);
+			model->SetLightingEnabled(false);
+			model->SetTransform(transform_);
 		}
 	}
 
@@ -113,9 +113,9 @@ namespace DropObject {
 			isAlive_ = false;
 		}
 
-		if (model_) {
-			model_->SetPosition(transform_.translate);
-			model_->SetScale(transform_.scale);
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetPosition(transform_.translate);
+			model->SetScale(transform_.scale);
 		}
 
 		backTimer_.Update(deltaTime);
@@ -139,8 +139,8 @@ namespace DropObject {
 			MyCollider::RemoveCollider(colliderName_);
 		}
 		if (!modelName_.empty()) {
-			MyModel::Destroy(modelName_);
-			model_ = nullptr;
+			MyModel::RequestDestroy(model_);
+			model_ = {};
 		}
 
 		isReleased_ = true;

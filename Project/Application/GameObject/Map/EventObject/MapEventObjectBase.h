@@ -36,9 +36,9 @@ protected:
 	/// @param outlineModel 強調表示に使用するインスタンス描画モデルです。
 	/// @param outlineHandle 強調表示のインスタンスハンドルです。
 	void SetInstancedDraw(
-		InstancedModel* normalModel,
+		MadoEngine::InstancedModelHandle normalModel,
 		uint32_t normalHandle,
-		InstancedModel* outlineModel,
+		MadoEngine::InstancedModelHandle outlineModel,
 		uint32_t outlineHandle);
 
 	/// @brief インスタンス描画の表示を解除します。
@@ -46,8 +46,8 @@ protected:
 
 	std::string colliderName_;
 	bool isHighlighted_ = false;
-	InstancedModel* normalInstancedModel_ = nullptr;
-	InstancedModel* outlineInstancedModel_ = nullptr;
+	MadoEngine::InstancedModelHandle normalInstancedModel_{};
+	MadoEngine::InstancedModelHandle outlineInstancedModel_{};
 	uint32_t normalInstanceHandle_ = UINT32_MAX;
 	uint32_t outlineInstanceHandle_ = UINT32_MAX;
 };

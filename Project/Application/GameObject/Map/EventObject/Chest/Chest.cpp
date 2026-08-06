@@ -3,8 +3,8 @@
 Chest::~Chest() {
 	MyCollider::RemoveCollider(colliderName_);
 	HideInstancedDraw();
-	if (model_) {
-		MyModel::Destroy(modelName_);
+	if (model_.IsValid()) {
+		MyModel::RequestDestroy(model_);
 	}
 }
 
@@ -22,17 +22,19 @@ void Chest::Initialize(const InitializeDesc& desc) {
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
-	InstancedModel* normalBatch = MyInstancedModel::GetOrCreate(
+	const MadoEngine::InstancedModelHandle normalBatchHandle = MyInstancedModel::GetOrCreate(
 		"Chest.Normal",
 		"Chest",
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObject);
-	InstancedModel* outlineBatch = MyInstancedModel::GetOrCreate(
+	const MadoEngine::InstancedModelHandle outlineBatchHandle = MyInstancedModel::GetOrCreate(
 		"Chest.Outline",
 		"Chest",
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
+	InstancedModel* normalBatch = MyInstancedModel::TryGet(normalBatchHandle);
+	InstancedModel* outlineBatch = MyInstancedModel::TryGet(outlineBatchHandle);
 	if (normalBatch && outlineBatch) {
 		normalBatch-> SetTexture("Chest");
 		outlineBatch->SetTexture("Chest");
@@ -48,7 +50,7 @@ void Chest::Initialize(const InitializeDesc& desc) {
 
 		uint32_t normalHandle = normalBatch->AddInstance(normalInstance);
 		uint32_t outlineHandle = outlineBatch->AddInstance(outlineInstance);
-		SetInstancedDraw(normalBatch, normalHandle, outlineBatch, outlineHandle);
+		SetInstancedDraw(normalBatchHandle, normalHandle, outlineBatchHandle, outlineHandle);
 	}
 }
 

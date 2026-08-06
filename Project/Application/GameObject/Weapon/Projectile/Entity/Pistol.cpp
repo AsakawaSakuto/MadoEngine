@@ -7,7 +7,7 @@ namespace Projectile {
 	Pistol::~Pistol() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
-			MyModel::Destroy(objectName_);
+			MyModel::RequestDestroy(model_);
 		}
 	}
 	
@@ -15,7 +15,9 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
-		model_->SetTexture("PistolTexture");
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTexture("PistolTexture");
+		}
 
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
@@ -38,8 +40,8 @@ namespace Projectile {
 			return;
 		}
 
-		if (model_) {
-			model_->SetTransform(transform_);
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTransform(transform_);
 		}
 
 		MyDebugLine::AddShape(std::get<AABB>(hitbox_));

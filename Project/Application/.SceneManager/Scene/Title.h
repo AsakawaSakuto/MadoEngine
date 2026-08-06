@@ -30,10 +30,10 @@ public:
 	void DrawImGui() override;
 
 private:
-	Sprite* wallPaperSprite_ = nullptr;
-	Sprite* fadeSprite_ = nullptr;
+	MadoEngine::SpriteHandle wallPaperSprite_{};
+	MadoEngine::SpriteHandle fadeSprite_{};
 
-	Model* testModel_;
+	MadoEngine::ModelHandle testModel_{};
 
 	GameTimer fadeInTimer_;
 

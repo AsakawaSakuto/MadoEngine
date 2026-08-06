@@ -7,7 +7,7 @@ namespace Projectile {
 	Axe::~Axe() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
-			MyModel::Destroy(objectName_);
+			MyModel::RequestDestroy(model_);
 		}
 	}
 
@@ -61,11 +61,11 @@ namespace Projectile {
 
 		transform_.rotate.y += 3.14f * deltaTime; // 回転速度を調整
 
-		if (model_) {
+		if (Model* model = MyModel::TryGet(model_)) {
 			const float reductionProgress = isReductionStarted_ ? reductionTimer_.GetProgress() : 0.0f;
 			const float scaleValue = 0.5f * sizeRate_ * (1.0f - reductionProgress); 
 			transform_.scale = Easing::Lerp(Vector3{ scaleValue,scaleValue,scaleValue }, Vector3{ 0.0f,0.0f,0.0f }, reductionProgress,EaseType::Linear);
-			model_->SetTransform(transform_);
+			model->SetTransform(transform_);
 		}
 
 		lifeTimer_.Update(deltaTime);

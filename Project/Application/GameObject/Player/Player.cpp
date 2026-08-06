@@ -37,29 +37,31 @@ namespace Player {
 		MyCollider::RegisterCollider("PlayerAttackRangeSphere", CollisionTag::PlayerAttackRangeSphere, &attackRangeSphere_, &transform_.translate, 0.0f);
 
 		model_ = MyModel::Create("Player", "walk", SceneType::Game);
-		model_->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
-		model_->SetTexture("white16x16");
-		model_->SetCastShadow(false);
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
+			model->SetTexture("white16x16");
+			model->SetCastShadow(false);
+		}
 
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
 		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Game);
-		shadowModel_->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
-		shadowModel_->SetTexture("white16x16");
-		shadowModel_->SetColor({ 1.0f, 0.0f, 1.0f, 1.0f });
-		shadowModel_->SetCastShadow(false);
-		shadowModel_->SetReceiveShadow(false);
-		shadowModel_->SetLightingEnabled(false);
+		if (Model* shadowModel = MyModel::TryGet(shadowModel_)) {
+			shadowModel->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
+			shadowModel->SetTexture("white16x16");
+			shadowModel->SetColor({ 1.0f, 0.0f, 1.0f, 1.0f });
+			shadowModel->SetCastShadow(false);
+			shadowModel->SetReceiveShadow(false);
+			shadowModel->SetLightingEnabled(false);
+		}
 
 		movement_.Initialize();
 
-		weaponModel_ = MyModel::Create("PlayerWeapon", "Weapon", SceneType::Game);
-		weaponTransform_.SetAllScale(0.5f);
-
 		MadoEngine::Particle::PlayDesc desc;
-		desc.transform.translate = model_->GetVertexPosition(218);
+		if (Model* model = MyModel::TryGet(model_)) {
+			desc.transform.translate = model->GetVertexPosition(218);
+		}
 		desc.sceneType = SceneType::Game;
 		desc.loopOverride = true;
-		particleHandle_ = MyParticle3d::Play("Trail", desc);
 	}
 
 	void Base::AddMoney(int amount) {
@@ -116,43 +118,26 @@ namespace Player {
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
 			transform_.translate = { 0.0f, 100.0f, 0.0f };
 		}
-
-		Vector3 weaponPosition;
-		if (model_->TryGetVertexWorldPosition(330, weaponPosition)) {
-			weaponTransform_.translate = weaponPosition;
-			weaponModel_->SetTransform(weaponTransform_);
-		}
-
-		Vector3 particlePosition;
-		if (model_->TryGetVertexWorldPosition(218, particlePosition)) {
-			Transform3D particleTransform;
-			particleTransform.translate = particlePosition;
-
-			if (!MyParticle3d::SetTransform(particleHandle_, particleTransform)) {
-				MadoEngine::Particle::PlayDesc desc;
-				desc.transform = particleTransform;
-				desc.sceneType = SceneType::Game;
-				desc.loopOverride = true;
-				particleHandle_ = MyParticle3d::Play("Trail", desc);
-			}
-		}
 	}
 
 	void Base::ResolveAfterCollision() {
 		const bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, lastMoveInput_);
-		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model_, isSlopeGroundContact, kModelForwardYawOffset);
+		Model* model = MyModel::TryGet(model_);
+		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model, isSlopeGroundContact, kModelForwardYawOffset);
 
-		model_->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
-		model_->SetScale(transform_.scale);
+		if (model) {
+			model->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+			model->SetScale(transform_.scale);
+		}
 
 		UpdateShadowTransform();
 
-		if (movement_.GetCurrentMotion() == Player::Motion::Crouching) {
-			model_->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-		} else {
-			model_->SetColor(gamingColor_.Update(lastDeltaTime_, 1.0f));
+		if (model && movement_.GetCurrentMotion() == Player::Motion::Crouching) {
+			model->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		} else if (model) {
+			model->SetColor(gamingColor_.Update(lastDeltaTime_, 1.0f));
 		}
 
 		// デバッグ表示
@@ -165,7 +150,8 @@ namespace Player {
 
 	/// @brief Player直下の地面へ影の描画座標を更新します。
 	void Base::UpdateShadowTransform() {
-		if (!shadowModel_) {
+		Model* shadowModel = MyModel::TryGet(shadowModel_);
+		if (!shadowModel) {
 			return;
 		}
 
@@ -185,7 +171,7 @@ namespace Player {
 			foundGround = true;
 		}
 
-		shadowModel_->SetVisible(foundGround);
+		shadowModel->SetVisible(foundGround);
 		if (!foundGround) {
 			return;
 		}
@@ -196,16 +182,20 @@ namespace Player {
 			transform_.translate.z
 		};
 		
-		shadowModel_->SetPosition(shadowTransform_.translate);
-		shadowModel_->SetRotation(model_ ? model_->GetRotation() : transform_.rotate);
-		shadowModel_->SetScale(shadowTransform_.scale);
+		shadowModel->SetPosition(shadowTransform_.translate);
+		if (Model* model = MyModel::TryGet(model_)) {
+			shadowModel->SetRotation(model->GetRotation());
+		} else {
+			shadowModel->SetRotation(transform_.rotate);
+		}
+		shadowModel->SetScale(shadowTransform_.scale);
 	}
 
 	/// @brief Playerの描画Model座標を取得します。
 	/// @return PlayerのModelワールド座標です。
 	Vector3 Base::GetModelPosition() const {
-		if (model_) {
-			return model_->GetPosition();
+		if (Model* model = MyModel::TryGet(model_)) {
+			return model->GetPosition();
 		}
 
 		return transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f };

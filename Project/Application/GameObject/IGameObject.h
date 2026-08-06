@@ -11,7 +11,7 @@ public:
 
 protected:
 
-	Model* model_ = nullptr;
+	MadoEngine::ModelHandle model_{};
 	Transform3D transform_;
 	ColliderShape colliderShape_;
 };

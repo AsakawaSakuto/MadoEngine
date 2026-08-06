@@ -40,8 +40,8 @@ int CalculateRewardAmount(JarSize size) {
 Jar::~Jar() {
 	MyCollider::RemoveCollider(colliderName_);
 	HideInstancedDraw();
-	if (model_) {
-		MyModel::Destroy(modelName_);
+	if (model_.IsValid()) {
+		MyModel::RequestDestroy(model_);
 	}
 }
 
@@ -65,17 +65,19 @@ void Jar::Initialize(const InitializeDesc& desc) {
 		color = { 1.0f, 1.0f, 0.0f, 1.0f };
 	}
 
-	InstancedModel* normalBatch = MyInstancedModel::GetOrCreate(
+	const MadoEngine::InstancedModelHandle normalBatchHandle = MyInstancedModel::GetOrCreate(
 		GetJarBatchName(size_, false),
 		GetJarModelAssetName(size_),
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObject);
-	InstancedModel* outlineBatch = MyInstancedModel::GetOrCreate(
+	const MadoEngine::InstancedModelHandle outlineBatchHandle = MyInstancedModel::GetOrCreate(
 		GetJarBatchName(size_, true),
 		GetJarModelAssetName(size_),
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
+	InstancedModel* normalBatch = MyInstancedModel::TryGet(normalBatchHandle);
+	InstancedModel* outlineBatch = MyInstancedModel::TryGet(outlineBatchHandle);
 	if (normalBatch && outlineBatch) {
 		normalBatch->SetTexture("white16x16");
 		outlineBatch->SetTexture("white16x16");
@@ -90,7 +92,7 @@ void Jar::Initialize(const InitializeDesc& desc) {
 
 		uint32_t normalHandle = normalBatch->AddInstance(normalInstance);
 		uint32_t outlineHandle = outlineBatch->AddInstance(outlineInstance);
-		SetInstancedDraw(normalBatch, normalHandle, outlineBatch, outlineHandle);
+		SetInstancedDraw(normalBatchHandle, normalHandle, outlineBatchHandle, outlineHandle);
 	}
 }
 

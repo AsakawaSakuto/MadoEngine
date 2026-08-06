@@ -74,8 +74,8 @@ private:
 	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
 	UI::Game::UpgradeUI weaponUpgradeUI_;
 
-	Sprite* fadeSprite_ = nullptr;
-	MadoEngine::Text* enemyCountText_ = nullptr;
+	MadoEngine::SpriteHandle fadeSprite_{};
+	MadoEngine::TextHandle enemyCountText_{};
 	UI::Game::FpsMeasurementView fpsMeasurementView_;
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
 	UI::Game::ProjectileDamageView projectileDamageView_;

@@ -7,7 +7,7 @@
 #include <format>
 
 namespace {
-	constexpr float kGameSceneTimeLimit = 10.0f * 60.0f;
+	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
 	constexpr std::uint32_t kWeaponUpgradeRandomSeed = 0x4d41444fu;
 }
 
@@ -68,8 +68,10 @@ void Game::Initialize() {
 	weaponUpgradeUI_.Initialize();
 
 	fadeSprite_ = MySprite::Create("testFade", "black2x2", SceneType::Game);
-	fadeSprite_->SetColor({ 1.0f,1.0f,1.0f,0.0f });
-	fadeSprite_->SetFitToScreen(true);
+	if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
+		fadeSprite->SetColor({ 1.0f,1.0f,1.0f,0.0f });
+		fadeSprite->SetFitToScreen(true);
+	}
 
 	fadeOutTimer_.Start(2.0f);
 
@@ -77,7 +79,17 @@ void Game::Initialize() {
 	inGameSession_ = std::make_unique<System::InGameSession>();
 	inGameSession_->Initialize(kGameSceneTimeLimit);
 
+	auto textHandle = MyText::Find("Text");
+	if (MadoEngine::Text* text = MyText::TryGet(textHandle)) {
+		text->SetColor({ 1.0f,0.0f,0.0f,1.0f });
+	}
+
 	MadoEngine::TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
+
+	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
+	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
+		seedValueText->SetText(std::format("Seed : {}", map_->GetSeed()));
+	}
 }
 
 SceneType Game::Update(float dt) {
@@ -115,7 +127,9 @@ SceneType Game::Update(float dt) {
 
 	fadeOutTimer_.Update(deltaTime);
 	if (fadeOutTimer_.IsActive()) {
-		fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, fadeOutTimer_.GetReverseProgress() });
+		if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
+			fadeSprite->SetColor({ 1.0f, 1.0f, 1.0f, fadeOutTimer_.GetReverseProgress() });
+		}
 	}
 
 	tpsCamera_.SetTargetPosition(player_->GetPosition());
@@ -141,8 +155,10 @@ SceneType Game::Update(float dt) {
 	expGauge_->IsUpgrade(inGameSession_->IsWaitingUpgradeSelection(), dt);
 
 	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
-	if (enemyCountText_) {
-		enemyCountText_->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));
+
+	auto enemyCountHandle = MyText::Find("EnemyCountText");
+	if (MadoEngine::Text* enemyCountText = MyText::TryGet(enemyCountHandle)) {
+		enemyCountText->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));
 	}
 	fpsMeasurementView_.Update(dt);
 	gamePlayTimerView_.Update(inGameSession_->GetRemainingTime());
@@ -236,13 +252,11 @@ void Game::Finalize() {
 
 	DropObject::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
-	MySprite::DestroyByScene(SceneType::Game);
-	MyText::Destroy("EnemyCountText");
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();
 	projectileDamageView_.Finalize();
-	MyModel::DestroyByScene(SceneType::Game);
-	enemyCountText_ = nullptr;
+	enemyCountText_ = {};
+	fadeSprite_ = {};
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
 }

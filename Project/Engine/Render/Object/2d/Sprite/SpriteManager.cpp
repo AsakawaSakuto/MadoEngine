@@ -1,9 +1,10 @@
 #include "SpriteManager.h"
-#include "Utility/Logger/Logger.h"
-#include "Utility/Json/Core/JsonFile.h"
 #include "Shader/RootSignatureManager.h"
+#include "Utility/Json/Core/JsonFile.h"
+#include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cassert>
+#include <utility>
 
 namespace MadoEngine {
 
@@ -12,279 +13,357 @@ SpriteManager& SpriteManager::GetInstance() {
 	return instance;
 }
 
-void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, MadoEngine::Render::PSORegistry* psoRegistry) {
+void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Render::PSORegistry* psoRegistry) {
 	assert(device);
 	assert(commandList);
 	assert(psoRegistry);
 
-	device_      = device;
+	device_ = device;
 	commandList_ = commandList;
 	psoRegistry_ = psoRegistry;
-
 	sharedGeometry_.Initialize(device_);
 
-	Logger::Output("初期化が完了しました（共有ジオメトリバッファ生成済み）", Logger::Level::Engine);
+	Logger::Output("SpriteManagerを初期化しました", Logger::Level::Engine);
 }
 
 void SpriteManager::Finalize() {
-	pendingDestroySpriteNames_.clear();
-	sprites_.clear();
+	pendingDestroyHandles_.clear();
+	nameToHandle_.clear();
 	drawOrder_.clear();
+	freeSlots_.clear();
+	freeSlots_.reserve(slots_.size());
+	for (uint32_t index = 0; index < slots_.size(); ++index) {
+		SpriteSlot& slot = slots_[index];
+		slot.sprite.reset();
+		slot.name.clear();
+		slot.textureName.clear();
+		slot.managementMode = EditorManagementMode::RuntimeOnly;
+		slot.active = false;
+		slot.generation = NextObjectGeneration(slot.generation);
+		freeSlots_.push_back(index);
+	}
 	sharedGeometry_.Finalize();
-	Logger::Output("全リソースを解放しました", Logger::Level::Engine);
+	device_ = nullptr;
+	commandList_ = nullptr;
+	psoRegistry_ = nullptr;
+	Logger::Output("SpriteManagerの全リソースを解放しました", Logger::Level::Engine);
 }
 
 void SpriteManager::SetScreenSize(float width, float height) {
 	screenWidth_ = width;
 	screenHeight_ = height;
-	for (auto& [name, entry] : sprites_) {
-		(void)name;
-		entry.sprite->SetScreenSize(screenWidth_, screenHeight_);
+	for (SpriteSlot& slot : slots_) {
+		if (slot.active) {
+			slot.sprite->SetScreenSize(screenWidth_, screenHeight_);
+		}
 	}
 }
 
-Sprite* SpriteManager::Create(
+SpriteHandle SpriteManager::Create(
 	const std::string& name,
 	const std::string& textureName,
 	SceneType sceneType,
 	EditorManagementMode managementMode) {
-	auto existingIt = sprites_.find(name);
-	if (existingIt != sprites_.end()) {
-		if (existingIt->second.managementMode != managementMode) {
-			Logger::Output("同名のSpriteが異なる管理方法で既に存在します : " + name, Logger::Level::Warning);
-			return nullptr;
-		}
-
-		Logger::Output("同名のSpriteが既に存在します : " + name, Logger::Level::Warning);
-		return existingIt->second.sprite.get();
-	}
-	if (name.empty()) {
-		Logger::Output("名前が空のSpriteは生成できません", Logger::Level::Warning);
-		return nullptr;
-	}
-	if (TextureManager::GetInstance().GetTextureIndex(textureName) == UINT32_MAX) {
-		Logger::Output("存在しないテクスチャのSpriteは生成できません : " + textureName, Logger::Level::Warning);
-		return nullptr;
-	}
-
-	auto sprite = std::make_unique<Sprite>(name);
-	sprite->Initialize(device_, commandList_, textureName, sharedGeometry_);
-	sprite->SetPSORegistry(psoRegistry_);
-	sprite->SetSceneType(sceneType);
-	sprite->SetScreenSize(screenWidth_, screenHeight_);
-
-	Sprite* ptr = sprite.get();
-	sprites_.emplace(name, SpriteEntry{ std::move(sprite), managementMode });
-	drawOrder_.push_back(name);
-
-	Logger::Output("Spriteを生成しました : " + name + " Scene : " + (sceneType == SceneType::None ? "全シーン" : SceneTypeToString(sceneType)), Logger::Level::Application);
-	return ptr;
+	return Create(SpriteCreateDesc{ name, textureName, sceneType, managementMode });
 }
 
-Sprite* SpriteManager::CreateFromJson(const nlohmann::json& json) {
+SpriteHandle SpriteManager::Create(const SpriteCreateDesc& desc) {
+	if (desc.name.empty()) {
+		Logger::Output("名前が空のSpriteは生成できません", Logger::Level::Warning);
+		return {};
+	}
+	if (nameToHandle_.contains(desc.name)) {
+		Logger::Output("同名のSpriteが既に存在するため生成に失敗しました: " + desc.name, Logger::Level::Warning);
+		return {};
+	}
+	if (TextureManager::GetInstance().GetTextureIndex(desc.textureName) == UINT32_MAX) {
+		Logger::Output("存在しないテクスチャを指定したためSpriteの生成に失敗しました: " + desc.textureName, Logger::Level::Warning);
+		return {};
+	}
+
+	auto sprite = std::make_unique<Sprite>(desc.name);
+	sprite->Initialize(device_, commandList_, desc.textureName, sharedGeometry_);
+	sprite->SetPSORegistry(psoRegistry_);
+	sprite->SetSceneType(desc.sceneType);
+	sprite->SetScreenSize(screenWidth_, screenHeight_);
+
+	uint32_t index = 0;
+	if (freeSlots_.empty()) {
+		index = static_cast<uint32_t>(slots_.size());
+		slots_.emplace_back();
+	} else {
+		index = freeSlots_.back();
+		freeSlots_.pop_back();
+	}
+
+	SpriteSlot& slot = slots_[index];
+	slot.sprite = std::move(sprite);
+	slot.name = desc.name;
+	slot.textureName = desc.textureName;
+	slot.managementMode = desc.managementMode;
+	slot.active = true;
+	const SpriteHandle handle{ index, slot.generation };
+	nameToHandle_.emplace(slot.name, handle);
+	drawOrder_.push_back(handle);
+
+	Logger::Output("Spriteを生成しました: " + desc.name, Logger::Level::Application);
+	return handle;
+}
+
+SpriteHandle SpriteManager::FindOrCreate(const SpriteCreateDesc& desc) {
+	const SpriteHandle existing = Find(desc.name);
+	if (!existing.IsValid()) {
+		return Create(desc);
+	}
+
+	const SpriteSlot& slot = slots_[existing.index];
+	if (slot.textureName != desc.textureName ||
+		slot.sprite->GetSceneType() != desc.sceneType ||
+		slot.managementMode != desc.managementMode) {
+		Logger::Output("既存Spriteの生成条件が一致しません: " + desc.name, Logger::Level::Warning);
+		return {};
+	}
+	return existing;
+}
+
+SpriteHandle SpriteManager::CreateFromJson(const nlohmann::json& json) {
 	if (!json.is_object()) {
-		Logger::Output("Sprite Jsonの要素がオブジェクトではありません", Logger::Level::Warning);
-		return nullptr;
+		Logger::Output("SpriteのJSON要素がオブジェクトではありません", Logger::Level::Warning);
+		return {};
 	}
 
 	const std::string name = json.value("name", "Sprite");
 	const std::string textureName = json.value("texture", "");
-	Sprite* sprite = nullptr;
-	auto existingIt = sprites_.find(name);
-	if (existingIt != sprites_.end()) {
-		if (existingIt->second.managementMode == EditorManagementMode::RuntimeOnly) {
-			Logger::Output(
-				"実行時専用Spriteと同名のためJsonの読み込みをスキップしました : " + name,
-				Logger::Level::Warning);
-			return nullptr;
+	SpriteHandle handle = Find(name);
+	if (handle.IsValid()) {
+		SpriteSlot& slot = slots_[handle.index];
+		if (slot.managementMode == EditorManagementMode::RuntimeOnly) {
+			Logger::Output("実行時専用Spriteと同名のためJSON読み込みをスキップしました: " + name, Logger::Level::Warning);
+			return {};
 		}
-		sprite = existingIt->second.sprite.get();
-	} else {
-		sprite = Create(name, textureName, SceneType::None, EditorManagementMode::EditorManaged);
+		if (slot.textureName != textureName) {
+			Destroy(handle);
+			handle = {};
+		}
+	}
+	if (!handle.IsValid()) {
+		handle = Create(name, textureName, SceneType::None, EditorManagementMode::EditorManaged);
 	}
 
+	Sprite* sprite = TryGet(handle);
 	if (!sprite) {
-		return nullptr;
+		return {};
 	}
-
 	sprite->FromJson(json);
-	return sprite;
+	return handle;
 }
 
-Sprite* SpriteManager::Get(const std::string& name) const {
-	auto it = sprites_.find(name);
-	if (it == sprites_.end()) {
-		Logger::Output("Spriteが見つかりません : " + name, Logger::Level::Warning);
+Sprite* SpriteManager::TryGet(SpriteHandle handle) {
+	return const_cast<Sprite*>(std::as_const(*this).TryGet(handle));
+}
+
+const Sprite* SpriteManager::TryGet(SpriteHandle handle) const {
+	if (!handle.IsValid() || handle.index >= slots_.size()) {
 		return nullptr;
 	}
-	return it->second.sprite.get();
+	const SpriteSlot& slot = slots_[handle.index];
+	if (!slot.active || slot.generation != handle.generation) {
+		return nullptr;
+	}
+	return slot.sprite.get();
 }
 
-bool SpriteManager::Rename(const std::string& currentName, const std::string& newName) {
-	auto currentIt = sprites_.find(currentName);
-	if (currentIt == sprites_.end()) {
-		Logger::Output("名前を変更するSpriteが見つかりません : " + currentName, Logger::Level::Warning);
+SpriteHandle SpriteManager::Find(const std::string& name) const {
+	const auto it = nameToHandle_.find(name);
+	return it == nameToHandle_.end() ? SpriteHandle{} : it->second;
+}
+
+bool SpriteManager::IsValid(SpriteHandle handle) const {
+	return TryGet(handle) != nullptr;
+}
+
+Sprite* SpriteManager::Get(const std::string& name) {
+	return TryGet(Find(name));
+}
+
+const Sprite* SpriteManager::Get(const std::string& name) const {
+	return TryGet(Find(name));
+}
+
+bool SpriteManager::Rename(SpriteHandle handle, const std::string& newName) {
+	Sprite* sprite = TryGet(handle);
+	if (!sprite) {
+		Logger::Output("名前を変更するSpriteのHandleが無効です", Logger::Level::Warning);
 		return false;
 	}
 	if (newName.empty()) {
 		Logger::Output("Sprite名を空文字へ変更できません", Logger::Level::Warning);
 		return false;
 	}
-	if (currentName == newName) {
+
+	SpriteSlot& slot = slots_[handle.index];
+	if (slot.name == newName) {
 		return true;
 	}
-	if (sprites_.contains(newName)) {
-		Logger::Output("同名のSpriteが既に存在します : " + newName, Logger::Level::Warning);
+	if (nameToHandle_.contains(newName)) {
+		Logger::Output("同名のSpriteが既に存在します: " + newName, Logger::Level::Warning);
 		return false;
 	}
 
-	const bool isPendingDestroy = pendingDestroySpriteNames_.erase(currentName) > 0;
-	auto node = sprites_.extract(currentIt);
-	Sprite* sprite = node.mapped().sprite.get();
-	node.key() = newName;
-	sprites_.insert(std::move(node));
+	const std::string oldName = slot.name;
+	nameToHandle_.erase(oldName);
+	slot.name = newName;
+	nameToHandle_.emplace(newName, handle);
 	sprite->SetObjectName(newName);
-	std::replace(drawOrder_.begin(), drawOrder_.end(), currentName, newName);
-	if (isPendingDestroy) {
-		pendingDestroySpriteNames_.emplace(newName);
-	}
-
-	Logger::Output("Sprite名を変更しました : " + currentName + " -> " + newName, Logger::Level::Application);
+	Logger::Output("Sprite名を変更しました: " + oldName + " -> " + newName, Logger::Level::Application);
 	return true;
 }
 
-void SpriteManager::Destroy(const std::string& name) {
-	pendingDestroySpriteNames_.erase(name);
-	if (sprites_.erase(name) > 0) {
-		drawOrder_.erase(std::remove(drawOrder_.begin(), drawOrder_.end(), name), drawOrder_.end());
-		Logger::Output("Spriteを破棄しました : " + name, Logger::Level::Application);
+bool SpriteManager::Rename(const std::string& currentName, const std::string& newName) {
+	return Rename(Find(currentName), newName);
+}
+
+bool SpriteManager::Destroy(SpriteHandle handle) {
+	Sprite* sprite = TryGet(handle);
+	if (!sprite) {
+		return false;
+	}
+
+	SpriteSlot& slot = slots_[handle.index];
+	const std::string name = slot.name;
+	pendingDestroyHandles_.erase(
+		std::remove(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle),
+		pendingDestroyHandles_.end());
+	drawOrder_.erase(std::remove(drawOrder_.begin(), drawOrder_.end(), handle), drawOrder_.end());
+	const auto nameIt = nameToHandle_.find(name);
+	if (nameIt != nameToHandle_.end() && nameIt->second == handle) {
+		nameToHandle_.erase(nameIt);
+	}
+	slot.sprite.reset();
+	slot.name.clear();
+	slot.textureName.clear();
+	slot.managementMode = EditorManagementMode::RuntimeOnly;
+	slot.active = false;
+	slot.generation = NextObjectGeneration(slot.generation);
+	freeSlots_.push_back(handle.index);
+
+	Logger::Output("Spriteを削除しました: " + name, Logger::Level::Application);
+	return true;
+}
+
+bool SpriteManager::Destroy(const std::string& name) {
+	return Destroy(Find(name));
+}
+
+void SpriteManager::RequestDestroy(SpriteHandle handle) {
+	if (!IsValid(handle)) {
+		return;
+	}
+	if (std::find(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle) == pendingDestroyHandles_.end()) {
+		pendingDestroyHandles_.push_back(handle);
+	}
+}
+
+void SpriteManager::RequestDestroy(const std::string& name) {
+	RequestDestroy(Find(name));
+}
+
+void SpriteManager::FlushPendingDestroys() {
+	if (pendingDestroyHandles_.empty()) {
+		return;
+	}
+
+	std::vector<SpriteHandle> destroyHandles = std::move(pendingDestroyHandles_);
+	pendingDestroyHandles_.clear();
+	for (SpriteHandle handle : destroyHandles) {
+		Destroy(handle);
 	}
 }
 
 void SpriteManager::DestroyByScene(SceneType sceneType) {
 	if (sceneType == SceneType::None) {
-		Logger::Output("SceneType::Noneは全シーン共通のため、Spriteのシーン単位破棄をスキップしました", Logger::Level::Warning);
+		Logger::Output("SceneType::NoneのSpriteはScene遷移で削除しません", Logger::Level::Warning);
 		return;
 	}
 
-	size_t destroyCount = 0;
-	for (auto it = drawOrder_.begin(); it != drawOrder_.end();) {
-		auto spriteIt = sprites_.find(*it);
-		if (spriteIt == sprites_.end()) {
-			it = drawOrder_.erase(it);
-			continue;
-		}
-
-		if (spriteIt->second.sprite->GetSceneType() == sceneType) {
-			sprites_.erase(spriteIt);
-			it = drawOrder_.erase(it);
-			++destroyCount;
-		} else {
-			++it;
+	std::vector<SpriteHandle> destroyHandles;
+	for (SpriteHandle handle : drawOrder_) {
+		const Sprite* sprite = TryGet(handle);
+		if (sprite && sprite->GetSceneType() == sceneType) {
+			destroyHandles.push_back(handle);
 		}
 	}
-
-	Logger::Output("シーン内のSpriteインスタンスを破棄しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyCount), Logger::Level::Application);
+	for (SpriteHandle handle : destroyHandles) {
+		Destroy(handle);
+	}
+	Logger::Output("Scene内のSpriteを削除しました: " + SceneTypeToString(sceneType) + " 件数: " + std::to_string(destroyHandles.size()), Logger::Level::Application);
 }
 
 void SpriteManager::UpdateAll(SceneType currentSceneType) {
-
-	if (sprites_.empty()) { return; }
-
-	for (const std::string& name : drawOrder_) {
-		auto it = sprites_.find(name);
-		if (it == sprites_.end()) { continue; }
-		Sprite* sprite = it->second.sprite.get();
-
-		SceneType spriteScene = sprite->GetSceneType();
-		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
-		if (!sprite->IsVisible()) { continue; }
-		if (spriteScene != SceneType::None && spriteScene != currentSceneType) { continue; }
-
+	for (SpriteHandle handle : drawOrder_) {
+		Sprite* sprite = TryGet(handle);
+		if (!sprite) {
+			continue;
+		}
+		const SceneType spriteScene = sprite->GetSceneType();
+		if (!sprite->IsVisible()) {
+			continue;
+		}
+		if (spriteScene != SceneType::None && spriteScene != currentSceneType) {
+			continue;
+		}
 		sprite->Update();
 	}
 }
 
 void SpriteManager::DrawAll(SceneType currentSceneType) {
-	DrawLayerMask(currentSceneType, MadoEngine::Render::kAllRenderLayers);
+	DrawLayerMask(currentSceneType, Render::kAllRenderLayers);
 }
 
-void SpriteManager::DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer) {
-	DrawLayerMask(currentSceneType, MadoEngine::Render::ToRenderLayerMask(layer));
+void SpriteManager::DrawLayer(SceneType currentSceneType, Render::RenderLayer layer) {
+	DrawLayerMask(currentSceneType, Render::ToRenderLayerMask(layer));
 }
 
-void SpriteManager::DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask) {
-	if (sprites_.empty()) { return; }
-
-	// 全スプライト共通のステートをループ外で1回だけ設定する
+void SpriteManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask) {
 	bool isStateSet = false;
+	for (SpriteHandle handle : drawOrder_) {
+		Sprite* sprite = TryGet(handle);
+		if (!sprite) {
+			continue;
+		}
+		const SceneType spriteScene = sprite->GetSceneType();
+		if (!sprite->IsVisible()) {
+			continue;
+		}
+		if (spriteScene != SceneType::None && spriteScene != currentSceneType) {
+			continue;
+		}
+		if (!sprite->IsRenderLayerIncluded(layerMask)) {
+			continue;
+		}
 
-	for (const std::string& name : drawOrder_) {
-		auto it = sprites_.find(name);
-		if (it == sprites_.end()) { continue; }
-		Sprite* sprite = it->second.sprite.get();
-
-		SceneType spriteScene = sprite->GetSceneType();
-		// SceneType::None（全シーン共通）または現在のシーンと一致する場合のみ描画
-		if (!sprite->IsVisible()) { continue; }
-		if (spriteScene != SceneType::None && spriteScene != currentSceneType) { continue; }
-		if (!sprite->IsRenderLayerIncluded(layerMask)) { continue; }
-
-		// 最初の有効なスプライトのタイミングで共通ステートを1回だけ設定
 		if (!isStateSet) {
-			commandList_->SetGraphicsRootSignature(
-				MadoEngine::RootSignatureManager::GetInstance().Get(sprite->GetRootSigKey()));
+			commandList_->SetGraphicsRootSignature(RootSignatureManager::GetInstance().Get(sprite->GetRootSigKey()));
 			commandList_->SetPipelineState(psoRegistry_->Get(sprite->GetPSODesc()));
 			commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			commandList_->IASetVertexBuffers(0, 1, &sharedGeometry_.vbv);
 			commandList_->IASetIndexBuffer(&sharedGeometry_.ibv);
 			isStateSet = true;
 		}
-
-		// 各スプライト固有の描画（CBV/SRVバインドとドローコール）
 		sprite->Draw();
-	}
-}
-
-void SpriteManager::RequestDestroy(const std::string& name) {
-	if (!sprites_.contains(name)) {
-		return;
-	}
-
-	pendingDestroySpriteNames_.emplace(name);
-}
-
-void SpriteManager::FlushPendingDestroys() {
-	if (pendingDestroySpriteNames_.empty()) {
-		return;
-	}
-
-	std::vector<std::string> destroyNames(
-		pendingDestroySpriteNames_.begin(),
-		pendingDestroySpriteNames_.end());
-	pendingDestroySpriteNames_.clear();
-
-	for (const std::string& name : destroyNames) {
-		Destroy(name);
 	}
 }
 
 nlohmann::json SpriteManager::ToJson() const {
 	nlohmann::json sprites = nlohmann::json::array();
-	for (const std::string& name : drawOrder_) {
-		auto it = sprites_.find(name);
-		if (it == sprites_.end()) {
+	for (SpriteHandle handle : drawOrder_) {
+		const Sprite* sprite = TryGet(handle);
+		if (!sprite || slots_[handle.index].managementMode != EditorManagementMode::EditorManaged) {
 			continue;
 		}
-		if (it->second.managementMode != EditorManagementMode::EditorManaged) {
-			continue;
-		}
-		sprites.push_back(it->second.sprite->ToJson());
+		sprites.push_back(sprite->ToJson());
 	}
-
-	return {
-		{ "sprites", sprites },
-	};
+	return { { "sprites", sprites } };
 }
 
 void SpriteManager::FromJson(const nlohmann::json& json) {
@@ -294,20 +373,18 @@ void SpriteManager::FromJson(const nlohmann::json& json) {
 	} else if (json.contains("sprites") && json.at("sprites").is_array()) {
 		spriteArray = &json.at("sprites");
 	}
-
 	if (!spriteArray) {
-		Logger::Output("Sprite Jsonにsprites配列がありません", Logger::Level::Warning);
+		Logger::Output("SpriteのJSONにsprites配列がありません", Logger::Level::Warning);
 		return;
 	}
 
 	for (const nlohmann::json& spriteJson : *spriteArray) {
 		try {
-			CreateFromJson(spriteJson);
+			const SpriteHandle handle = CreateFromJson(spriteJson);
+			(void)handle;
 		}
 		catch (const nlohmann::json::exception& exception) {
-			Logger::Output(
-				"Sprite Jsonの要素を読み込めませんでした : " + std::string(exception.what()),
-				Logger::Level::Error);
+			Logger::Output("SpriteのJSON要素を読み込めませんでした: " + std::string(exception.what()), Logger::Level::Error);
 		}
 	}
 }
@@ -321,27 +398,28 @@ bool SpriteManager::LoadFromFile(const std::filesystem::path& filePath) {
 	if (!Json::JsonFile::Load(filePath, json)) {
 		return false;
 	}
-
 	FromJson(json);
 	return true;
 }
 
 std::vector<std::string> SpriteManager::GetNames() const {
-	return drawOrder_;
+	std::vector<std::string> names;
+	names.reserve(drawOrder_.size());
+	for (SpriteHandle handle : drawOrder_) {
+		if (IsValid(handle)) {
+			names.push_back(slots_[handle.index].name);
+		}
+	}
+	return names;
 }
 
 std::vector<std::string> SpriteManager::GetEditorManagedNames() const {
 	std::vector<std::string> names;
 	names.reserve(drawOrder_.size());
-	for (const std::string& name : drawOrder_) {
-		auto it = sprites_.find(name);
-		if (it == sprites_.end()) {
-			continue;
+	for (SpriteHandle handle : drawOrder_) {
+		if (IsValid(handle) && slots_[handle.index].managementMode == EditorManagementMode::EditorManaged) {
+			names.push_back(slots_[handle.index].name);
 		}
-		if (it->second.managementMode != EditorManagementMode::EditorManaged) {
-			continue;
-		}
-		names.push_back(name);
 	}
 	return names;
 }

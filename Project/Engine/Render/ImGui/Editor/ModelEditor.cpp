@@ -379,7 +379,7 @@ namespace MadoEngine::Editor {
 
 		static std::array<char, 128> createName{};
 		static std::string createModelName;
-		static std::string selectedName;
+		static ModelHandle selectedHandle{};
 		static bool isInitialized = false;
 		if (!isInitialized) {
 			CopyToBuffer(createName, "Model");
@@ -399,13 +399,13 @@ namespace MadoEngine::Editor {
 		}
 		if (ImGui::Button("追加")) {
 			const std::string requestedName = createName.data();
-			Model* created = manager.Create(
+			const ModelHandle created = manager.Create(
 				requestedName,
 				createModelName,
 				SceneType::None,
 				EditorManagementMode::EditorManaged);
-			if (created) {
-				selectedName = requestedName;
+			if (created.IsValid()) {
+				selectedHandle = created;
 				CopyToBuffer(createName, MakeNextAvailableModelName(manager, requestedName));
 			}
 		}
@@ -440,19 +440,20 @@ namespace MadoEngine::Editor {
 		ImGui::BeginChild("ModelList", ImVec2(220.0f, 0.0f), true);
 		for (const std::string& name : names) {
 			ImGui::PushID(name.c_str());
-			const bool isSelected = name == selectedName;
+			const ModelHandle handle = manager.Find(name);
+			const bool isSelected = handle == selectedHandle;
 			const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 			const float selectableWidth = (std::max)(
 				1.0f,
 				ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x);
 			if (ImGui::Selectable(name.c_str(), isSelected, 0, ImVec2(selectableWidth, 0.0f))) {
-				selectedName = name;
+				selectedHandle = handle;
 			}
 			ImGui::SameLine();
 			if (ImGui::SmallButton("削除")) {
-				manager.RequestDestroy(name);
-				if (selectedName == name) {
-					selectedName.clear();
+				manager.RequestDestroy(handle);
+				if (selectedHandle == handle) {
+					selectedHandle = {};
 				}
 				ImGui::PopID();
 				break;
@@ -464,21 +465,25 @@ namespace MadoEngine::Editor {
 		ImGui::SameLine();
 
 		ImGui::BeginChild("ModelProperties", ImVec2(0.0f, 0.0f), true);
-		Model* selectedModel = nullptr;
-		if (std::find(names.begin(), names.end(), selectedName) != names.end()) {
-			selectedModel = manager.Get(selectedName);
-		}
+		Model* selectedModel = manager.TryGet(selectedHandle);
 		if (selectedModel) {
+			std::string selectedName;
+			for (const std::string& name : names) {
+				if (manager.Find(name) == selectedHandle) {
+					selectedName = name;
+					break;
+				}
+			}
 			std::array<char, 128> nameBuffer{};
 			CopyToBuffer(nameBuffer, selectedName);
 			if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
 				const std::string newName = nameBuffer.data();
-				if (!newName.empty() && manager.Rename(selectedName, newName)) {
-					selectedName = newName;
+				if (!newName.empty()) {
+					manager.Rename(selectedHandle, newName);
 				}
 			}
 
-			DrawModelProperties(*selectedModel, manager.GetModelAssetName(selectedName));
+			DrawModelProperties(*selectedModel, manager.GetModelAssetName(selectedHandle));
 		} else {
 			ImGui::TextDisabled("Modelを選択してください。");
 		}

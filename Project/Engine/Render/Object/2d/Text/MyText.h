@@ -1,36 +1,38 @@
 #pragma once
+
 #include "TextManager.h"
 
 namespace MyText {
 
-/// @brief 管理方法と描画レイヤーを指定してTextを作成する
-/// @param name Textの識別名
+/// @brief 表示内容と描画Layerを指定してTextを生成する
+/// @param name Text名
 /// @param text 表示するUTF-8文字列
-/// @param sceneType 描画対象Scene
-/// @param managementMode Textの管理方法
+/// @param sceneType 所属Scene
+/// @param managementMode 管理方式
 /// @param layer 描画Layer
-/// @return 作成されたText。所有権はTextManagerが保持
-inline MadoEngine::Text* Create(
+/// @return 生成したTextのHandle。失敗した場合は無効Handle
+[[nodiscard]] inline MadoEngine::TextHandle Create(
 	const std::string& name,
 	const std::string& text,
 	SceneType sceneType = SceneType::None,
 	MadoEngine::EditorManagementMode managementMode = MadoEngine::EditorManagementMode::RuntimeOnly,
 	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default) {
-	MadoEngine::Text* created = MadoEngine::TextManager::GetInstance().Create(name, sceneType, managementMode);
-	if (created) {
+	MadoEngine::TextManager& manager = MadoEngine::TextManager::GetInstance();
+	const MadoEngine::TextHandle handle = manager.Create(name, sceneType, managementMode);
+	if (MadoEngine::Text* created = manager.TryGet(handle)) {
 		created->SetText(text);
 		created->SetRenderLayer(layer);
 	}
-	return created;
+	return handle;
 }
 
-/// @brief 従来の引数順で描画レイヤーを指定して実行時専用Textを作成する
-/// @param name Textの識別名
+/// @brief 描画Layerを指定して実行時専用Textを生成する
+/// @param name Text名
 /// @param text 表示するUTF-8文字列
-/// @param sceneType 描画対象Scene
+/// @param sceneType 所属Scene
 /// @param layer 描画Layer
-/// @return 作成されたText。所有権はTextManagerが保持
-inline MadoEngine::Text* Create(
+/// @return 生成したTextのHandle。失敗した場合は無効Handle
+[[nodiscard]] inline MadoEngine::TextHandle Create(
 	const std::string& name,
 	const std::string& text,
 	SceneType sceneType,
@@ -38,21 +40,41 @@ inline MadoEngine::Text* Create(
 	return Create(name, text, sceneType, MadoEngine::EditorManagementMode::RuntimeOnly, layer);
 }
 
-/// @brief 指定名のTextを取得
-/// @param name Textの識別名
-/// @return Text。存在しない場合はnullptr
-inline MadoEngine::Text* Get(const std::string& name) {
-	return MadoEngine::TextManager::GetInstance().Get(name);
+/// @brief 名前からTextのHandleを取得する
+/// @param name Text名
+/// @return 見つかったTextのHandle。見つからない場合は無効Handle
+[[nodiscard]] inline MadoEngine::TextHandle Find(const std::string& name) {
+	return MadoEngine::TextManager::GetInstance().Find(name);
 }
 
-/// @brief 指定名のTextを破棄
-/// @param name Textの識別名
+/// @brief 名前からTextのHandleを取得する互換API
+/// @param name Text名
+/// @return 見つかったTextのHandle。見つからない場合は無効Handle
+[[nodiscard]] inline MadoEngine::TextHandle Get(const std::string& name) {
+	return Find(name);
+}
+
+/// @brief HandleからTextを一時参照として取得する
+/// @param handle TextのHandle
+/// @return 有効な場合はText、無効な場合はnullptr
+inline MadoEngine::Text* TryGet(MadoEngine::TextHandle handle) {
+	return MadoEngine::TextManager::GetInstance().TryGet(handle);
+}
+
+/// @brief Handleを指定してTextを即時削除する
+/// @param handle 削除対象のHandle
+inline void Destroy(MadoEngine::TextHandle handle) {
+	MadoEngine::TextManager::GetInstance().Destroy(handle);
+}
+
+/// @brief 名前を指定してTextを即時削除する互換API
+/// @param name 削除対象の名前
 inline void Destroy(const std::string& name) {
 	MadoEngine::TextManager::GetInstance().Destroy(name);
 }
 
-/// @brief 指定Sceneに属するTextを破棄
-/// @param sceneType 破棄対象Scene
+/// @brief 指定SceneのTextを一括削除する互換API
+/// @param sceneType 削除対象のScene
 inline void DestroyByScene(SceneType sceneType) {
 	MadoEngine::TextManager::GetInstance().DestroyByScene(sceneType);
 }

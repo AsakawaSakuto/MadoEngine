@@ -349,6 +349,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\ObjectHandle.h" />
     <ClInclude Include="Engine\Render\Object\RenderLayer.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>

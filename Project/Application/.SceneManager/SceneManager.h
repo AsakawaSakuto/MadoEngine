@@ -1,7 +1,7 @@
 #pragma once
 #include "SceneType.h"
 #include "Render/Object/RenderLayer.h"
-#include "Render/Object/3d/Model/Model.h"
+#include "Render/Object/3d/Model/ModelManager.h"
 #include <memory>
 #include <functional>
 #include <map>
@@ -102,5 +102,5 @@ private:
 	SceneType pendingSceneType_;                 // 保留中の遷移先シーン
 	bool hasPendingSceneChange_;                 // シーン遷移が保留中かどうか
 
-	Model* selectedModel_;     // 選択されたモデル
+	MadoEngine::ModelHandle selectedModel_{}; // 選択されたモデル
 };

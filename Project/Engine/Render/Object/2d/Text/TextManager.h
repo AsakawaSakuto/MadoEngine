@@ -1,22 +1,30 @@
 #pragma once
-#include "Render/Object/2d/Text/Text.h"
+
 #include "Render/Object/2d/Sprite/SpriteSharedGeometry.h"
-#include "Utility/EditorManagementMode.h"
+#include "Render/Object/2d/Text/Text.h"
+#include "Render/Object/ObjectHandle.h"
 #include "Render/PSO/PSORegistry.h"
+#include "Utility/EditorManagementMode.h"
 #include ".SceneManager/SceneType.h"
 #include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace MadoEngine {
 
-/// @brief Textの生成、更新、描画、Json保存を管理するシングルトン
+/// @brief Text生成情報
+struct TextCreateDesc {
+	std::string name;
+	SceneType sceneType = SceneType::None;
+	EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+};
+
+/// @brief Textの所有と世代付き参照を管理するManager
 class TextManager {
 public:
-	/// @brief TextManagerのインスタンスを取得
+	/// @brief TextManagerのシングルトンを取得する
 	/// @return TextManagerのインスタンス
 	static TextManager& GetInstance();
 
@@ -25,112 +33,166 @@ public:
 	TextManager(TextManager&&) = delete;
 	TextManager& operator=(TextManager&&) = delete;
 
-	/// @brief TextManagerを初期化
+	/// @brief TextManagerを初期化する
 	/// @param device D3D12デバイス
 	/// @param commandList コマンドリスト
 	/// @param psoRegistry PSOレジストリ
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Render::PSORegistry* psoRegistry);
 
-	/// @brief TextManagerのリソースを解放
+	/// @brief 全Textと共有リソースを解放する
 	void Finalize();
 
-	/// @brief 管理中のTextへスクリーンサイズを設定
+	/// @brief 全Textへスクリーンサイズを設定する
 	/// @param width スクリーン幅
 	/// @param height スクリーン高さ
 	void SetScreenSize(float width, float height);
 
-	/// @brief Textを作成して管理下へ登録
-	/// @param name Textの識別名
-	/// @param sceneType 描画対象Scene
-	/// @param managementMode Textの管理方法
-	/// @return 作成または取得されたText
-	Text* Create(
+	/// @brief Textを生成する
+	/// @param name Text名
+	/// @param sceneType 所属Scene
+	/// @param managementMode 管理方式
+	/// @return 生成したTextのHandle。失敗した場合は無効Handle
+	[[nodiscard]] TextHandle Create(
 		const std::string& name,
 		SceneType sceneType = SceneType::None,
 		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly);
 
-	/// @brief JsonからTextを作成してEditor管理対象へ登録
-	/// @param json Text設定Json
-	/// @return 作成または復元されたText
-	Text* CreateFromJson(const nlohmann::json& json);
+	/// @brief 指定した生成情報からTextを生成する
+	/// @param desc Text生成情報
+	/// @return 生成したTextのHandle。失敗した場合は無効Handle
+	[[nodiscard]] TextHandle Create(const TextCreateDesc& desc);
 
-	/// @brief 指定名のTextを取得
-	/// @param name Textの識別名
-	/// @return Text。存在しない場合はnullptr
-	Text* Get(const std::string& name) const;
+	/// @brief 同じ条件のTextを取得し、存在しない場合だけ生成する
+	/// @param desc Text生成情報
+	/// @return 取得または生成したTextのHandle。条件不一致または生成失敗時は無効Handle
+	[[nodiscard]] TextHandle FindOrCreate(const TextCreateDesc& desc);
 
-	/// @brief Textの識別名を変更する
-	/// @param currentName 現在の識別名
-	/// @param newName 新しい識別名
+	/// @brief JSONからEditor管理Textを生成または更新する
+	/// @param json Text設定
+	/// @return 生成または更新したTextのHandle。失敗した場合は無効Handle
+	[[nodiscard]] TextHandle CreateFromJson(const nlohmann::json& json);
+
+	/// @brief HandleからTextを一時参照として取得する
+	/// @param handle 取得対象のHandle
+	/// @return 有効な場合はText、無効な場合はnullptr
+	Text* TryGet(TextHandle handle);
+
+	/// @brief HandleからTextを読み取り専用の一時参照として取得する
+	/// @param handle 取得対象のHandle
+	/// @return 有効な場合はText、無効な場合はnullptr
+	const Text* TryGet(TextHandle handle) const;
+
+	/// @brief 名前からTextのHandleを検索する
+	/// @param name 検索する名前
+	/// @return 見つかったTextのHandle。見つからない場合は無効Handle
+	[[nodiscard]] TextHandle Find(const std::string& name) const;
+
+	/// @brief Handleが現在のTextを参照しているか確認する
+	/// @param handle 確認するHandle
+	/// @return 有効なTextを参照している場合はtrue
+	[[nodiscard]] bool IsValid(TextHandle handle) const;
+
+	/// @brief 名前からTextを一時参照として取得する互換API
+	/// @param name Text名
+	/// @return 見つかったText。見つからない場合はnullptr
+	Text* Get(const std::string& name);
+
+	/// @brief 名前からTextを読み取り専用の一時参照として取得する互換API
+	/// @param name Text名
+	/// @return 見つかったText。見つからない場合はnullptr
+	const Text* Get(const std::string& name) const;
+
+	/// @brief 名前を変更してもHandleを維持する
+	/// @param handle 名前を変更するTextのHandle
+	/// @param newName 新しい名前
+	/// @return 変更に成功した場合はtrue
+	bool Rename(TextHandle handle, const std::string& newName);
+
+	/// @brief 名前を指定してText名を変更する互換API
+	/// @param currentName 現在の名前
+	/// @param newName 新しい名前
 	/// @return 変更に成功した場合はtrue
 	bool Rename(const std::string& currentName, const std::string& newName);
 
-	/// @brief Textを破棄
-	/// @param name 破棄するText名
-	void Destroy(const std::string& name);
+	/// @brief GPUが対象を使用していないことが保証された時点でTextを即時削除する
+	/// @param handle 削除対象のHandle
+	/// @return 削除できた場合はtrue
+	bool Destroy(TextHandle handle);
 
-	/// @brief GPU処理完了後にTextを削除するよう予約する
-	/// @param name 削除対象のText名
+	/// @brief 名前を指定してTextを即時削除する互換API
+	/// @param name 削除対象の名前
+	/// @return 削除できた場合はtrue
+	bool Destroy(const std::string& name);
+
+	/// @brief 描画中でも安全な時点までTextの削除を延期する
+	/// @param handle 削除対象のHandle
+	void RequestDestroy(TextHandle handle);
+
+	/// @brief 名前を指定してTextの削除を延期する互換API
+	/// @param name 削除対象の名前
 	void RequestDestroy(const std::string& name);
 
-	/// @brief 予約されたText削除を実行する
+	/// @brief 延期されているText削除を安全な時点で実行する
 	void FlushPendingDestroys();
 
-	/// @brief Sceneに属するTextを破棄
-	/// @param sceneType 破棄対象Scene
+	/// @brief 指定Sceneに属するTextを即時削除する
+	/// @param sceneType 削除対象のScene
 	void DestroyByScene(SceneType sceneType);
 
-	/// @brief 管理下のTextを更新
+	/// @brief 現在Sceneで有効な全Textを更新する
 	/// @param currentSceneType 現在のScene
 	void UpdateAll(SceneType currentSceneType);
 
-	/// @brief 管理下のTextを描画
+	/// @brief 現在Sceneで有効な全Textを描画する
 	/// @param currentSceneType 現在のScene
-	/// @param targetScreen 描画対象Screen。空文字列の場合はScreenで絞り込みません
+	/// @param targetScreen 描画対象Screen。空文字の場合は絞り込まない
 	void DrawAll(SceneType currentSceneType, const std::string& targetScreen = "");
 
-	/// @brief 指定LayerのTextを描画
+	/// @brief 指定描画LayerのTextを描画する
 	/// @param currentSceneType 現在のScene
-	/// @param layer 描画対象Layer
-	/// @param targetScreen 描画対象Screen。空文字列の場合はScreenで絞り込みません
+	/// @param layer 描画Layer
+	/// @param targetScreen 描画対象Screen。空文字の場合は絞り込まない
 	void DrawLayer(SceneType currentSceneType, Render::RenderLayer layer, const std::string& targetScreen = "");
 
-	/// @brief 指定LayerMaskに含まれるTextを描画
+	/// @brief 指定描画LayerMaskのTextを描画する
 	/// @param currentSceneType 現在のScene
-	/// @param layerMask 描画対象LayerMask
-	/// @param targetScreen 描画対象Screen。空文字列の場合はScreenで絞り込みません
+	/// @param layerMask 描画LayerMask
+	/// @param targetScreen 描画対象Screen。空文字の場合は絞り込まない
 	void DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask, const std::string& targetScreen = "");
 
-	/// @brief Editor管理対象のTextをJsonへ変換
-	/// @return Editor管理対象のText一覧を含むJson
+	/// @brief Editor管理TextをJSONへ変換する
+	/// @return Text一覧を含むJSON
 	nlohmann::json ToJson() const;
 
-	/// @brief JsonからEditor管理対象のText一覧を復元
-	/// @param json 復元元Json
+	/// @brief JSONからEditor管理Textを復元する
+	/// @param json Text一覧を含むJSON
 	void FromJson(const nlohmann::json& json);
 
-	/// @brief Editor管理対象のText一覧をJsonファイルへ保存
-	/// @param filePath 保存先パス
+	/// @brief Editor管理TextをJSONファイルへ保存する
+	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
-	/// @brief Editor管理対象のText一覧をJsonファイルから読み込み
-	/// @param filePath 読み込み元パス
+	/// @brief JSONファイルからEditor管理Textを読み込む
+	/// @param filePath 読み込み元
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
 
-	/// @brief 管理中のText名一覧を取得
-	/// @return Text名一覧
+	/// @brief Text名一覧を取得する
+	/// @return 名前順のText名一覧
 	std::vector<std::string> GetNames() const;
 
-	/// @brief Editor管理対象のText名一覧を取得
-	/// @return 名前順に並んだEditor管理対象のText名一覧
+	/// @brief Editor管理Text名一覧を取得する
+	/// @return 名前順のEditor管理Text名一覧
 	std::vector<std::string> GetEditorManagedNames() const;
 
 private:
-	struct TextEntry {
+	struct TextSlot {
 		std::unique_ptr<Text> text;
+		std::string name;
 		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+		uint32_t generation = 1;
+		bool active = false;
 	};
 
 	TextManager() = default;
@@ -142,8 +204,10 @@ private:
 	SpriteSharedGeometry sharedGeometry_;
 	float screenWidth_ = 1280.0f;
 	float screenHeight_ = 720.0f;
-	std::unordered_map<std::string, TextEntry> texts_;
-	std::unordered_set<std::string> pendingDestroyTextNames_;
+	std::vector<TextSlot> slots_;
+	std::vector<uint32_t> freeSlots_;
+	std::unordered_map<std::string, TextHandle> nameToHandle_;
+	std::vector<TextHandle> pendingDestroyHandles_;
 };
 
 } // namespace MadoEngine

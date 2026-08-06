@@ -340,7 +340,7 @@ void DrawSpriteManagerEditorUI() {
 
 	static std::array<char, 128> createName{};
 	static std::string createTextureName;
-	static std::string selectedName;
+	static SpriteHandle selectedHandle{};
 	static bool isInitialized = false;
 	if (!isInitialized) {
 		CopyToBuffer(createName, "Sprite");
@@ -360,13 +360,13 @@ void DrawSpriteManagerEditorUI() {
 	}
 	if (ImGui::Button("追加")) {
 		const std::string requestedName = createName.data();
-		Sprite* created = manager.Create(
+		const SpriteHandle created = manager.Create(
 			requestedName,
 			createTextureName,
 			SceneType::None,
 			EditorManagementMode::EditorManaged);
-		if (created) {
-			selectedName = requestedName;
+		if (created.IsValid()) {
+			selectedHandle = created;
 			CopyToBuffer(createName, MakeNextAvailableSpriteName(manager, requestedName));
 		}
 	}
@@ -401,19 +401,20 @@ void DrawSpriteManagerEditorUI() {
 	ImGui::BeginChild("SpriteList", ImVec2(200.0f, 0.0f), true);
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
-		const bool isSelected = name == selectedName;
+		const SpriteHandle handle = manager.Find(name);
+		const bool isSelected = handle == selectedHandle;
 		const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 		const float selectableWidth = (std::max)(
 			1.0f,
 			ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x);
 		if (ImGui::Selectable(name.c_str(), isSelected, 0, ImVec2(selectableWidth, 0.0f))) {
-			selectedName = name;
+			selectedHandle = handle;
 		}
 		ImGui::SameLine();
 		if (ImGui::SmallButton("削除")) {
-			manager.RequestDestroy(name);
-			if (selectedName == name) {
-				selectedName.clear();
+			manager.RequestDestroy(handle);
+			if (selectedHandle == handle) {
+				selectedHandle = {};
 			}
 			ImGui::PopID();
 			break;
@@ -425,17 +426,21 @@ void DrawSpriteManagerEditorUI() {
 	ImGui::SameLine();
 
 	ImGui::BeginChild("SpriteProperties", ImVec2(0.0f, 0.0f), true);
-	Sprite* selectedSprite = nullptr;
-	if (std::find(names.begin(), names.end(), selectedName) != names.end()) {
-		selectedSprite = manager.Get(selectedName);
-	}
+	Sprite* selectedSprite = manager.TryGet(selectedHandle);
 	if (selectedSprite) {
+		std::string selectedName;
+		for (const std::string& name : names) {
+			if (manager.Find(name) == selectedHandle) {
+				selectedName = name;
+				break;
+			}
+		}
 		std::array<char, 128> nameBuffer{};
 		CopyToBuffer(nameBuffer, selectedName);
 		if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
 			const std::string newName = nameBuffer.data();
-			if (!newName.empty() && manager.Rename(selectedName, newName)) {
-				selectedName = newName;
+			if (!newName.empty()) {
+				manager.Rename(selectedHandle, newName);
 			}
 		}
 

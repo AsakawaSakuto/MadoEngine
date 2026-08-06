@@ -60,14 +60,16 @@ void Gauge::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEn
 	backgroundSprite_ = MadoEngine::SpriteManager::GetInstance().Create(backgroundSpriteName_, "white2x2", sceneType_);
 	gaugeSprite_ = MadoEngine::SpriteManager::GetInstance().Create(gaugeSpriteName_, "white2x2", sceneType_);
 
-	if (!backgroundSprite_ || !gaugeSprite_) {
+	Sprite* backgroundSprite = MadoEngine::SpriteManager::GetInstance().TryGet(backgroundSprite_);
+	Sprite* gaugeSprite = MadoEngine::SpriteManager::GetInstance().TryGet(gaugeSprite_);
+	if (!backgroundSprite || !gaugeSprite) {
 		Logger::Output("[Engine] Gauge用Spriteの生成に失敗しました: " + objectName_, Logger::Level::Error);
 		isInitialized_ = false;
 		return;
 	}
 
-	backgroundSprite_->SetFitToScreen(false);
-	gaugeSprite_->SetFitToScreen(false);
+	backgroundSprite->SetFitToScreen(false);
+	gaugeSprite->SetFitToScreen(false);
 	ApplyRenderSettings();
 
 	isInitialized_ = true;
@@ -77,17 +79,10 @@ void Gauge::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEn
 }
 
 void Gauge::Finalize() {
-	if (!backgroundSpriteName_.empty()) {
-		MadoEngine::SpriteManager::GetInstance().Destroy(backgroundSpriteName_);
-	}
-	if (!gaugeSpriteName_.empty()) {
-		MadoEngine::SpriteManager::GetInstance().Destroy(gaugeSpriteName_);
-	}
-
 	backgroundSpriteName_.clear();
 	gaugeSpriteName_.clear();
-	backgroundSprite_ = nullptr;
-	gaugeSprite_ = nullptr;
+	backgroundSprite_ = {};
+	gaugeSprite_ = {};
 	isInitialized_ = false;
 }
 
@@ -270,18 +265,20 @@ void Gauge::ClampValue() {
 }
 
 void Gauge::ApplyBackgroundSprite() {
-	if (!backgroundSprite_) {
+	Sprite* backgroundSprite = MadoEngine::SpriteManager::GetInstance().TryGet(backgroundSprite_);
+	if (!backgroundSprite) {
 		return;
 	}
 
-	backgroundSprite_->SetPosition(position_);
-	backgroundSprite_->SetScale(size_);
-	backgroundSprite_->SetColor(backgroundColor_);
-	backgroundSprite_->SetVisible(isVisible_ && drawBackground_);
+	backgroundSprite->SetPosition(position_);
+	backgroundSprite->SetScale(size_);
+	backgroundSprite->SetColor(backgroundColor_);
+	backgroundSprite->SetVisible(isVisible_ && drawBackground_);
 }
 
 void Gauge::ApplyGaugeSprite() {
-	if (!gaugeSprite_) {
+	Sprite* gaugeSprite = MadoEngine::SpriteManager::GetInstance().TryGet(gaugeSprite_);
+	if (!gaugeSprite) {
 		return;
 	}
 
@@ -306,20 +303,20 @@ void Gauge::ApplyGaugeSprite() {
 		break;
 	}
 
-	gaugeSprite_->SetPosition(gaugePosition);
-	gaugeSprite_->SetScale(gaugeSize);
-	gaugeSprite_->SetColor(gaugeColor_);
-	gaugeSprite_->SetVisible(isVisible_ && ratio > 0.0f);
+	gaugeSprite->SetPosition(gaugePosition);
+	gaugeSprite->SetScale(gaugeSize);
+	gaugeSprite->SetColor(gaugeColor_);
+	gaugeSprite->SetVisible(isVisible_ && ratio > 0.0f);
 }
 
 void Gauge::ApplyRenderSettings() {
-	if (backgroundSprite_) {
-		backgroundSprite_->SetSceneType(sceneType_);
-		backgroundSprite_->SetRenderLayer(renderLayer_);
+	if (Sprite* backgroundSprite = MadoEngine::SpriteManager::GetInstance().TryGet(backgroundSprite_)) {
+		backgroundSprite->SetSceneType(sceneType_);
+		backgroundSprite->SetRenderLayer(renderLayer_);
 	}
-	if (gaugeSprite_) {
-		gaugeSprite_->SetSceneType(sceneType_);
-		gaugeSprite_->SetRenderLayer(renderLayer_);
+	if (Sprite* gaugeSprite = MadoEngine::SpriteManager::GetInstance().TryGet(gaugeSprite_)) {
+		gaugeSprite->SetSceneType(sceneType_);
+		gaugeSprite->SetRenderLayer(renderLayer_);
 	}
 }
 

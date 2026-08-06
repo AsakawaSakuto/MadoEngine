@@ -1,4 +1,5 @@
 #pragma once
+#include "Render/Object/ObjectHandle.h"
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
@@ -38,7 +39,7 @@ namespace UI::Game {
 
 	private:
 		struct DamageTextSlot {
-			MadoEngine::Text* text = nullptr;
+			MadoEngine::TextHandle text{};
 			Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
 			float horizontalOffset = 0.0f;
 			float verticalOffset = 0.0f;

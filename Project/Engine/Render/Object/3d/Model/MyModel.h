@@ -1,46 +1,78 @@
 #pragma once
+
 #include "ModelManager.h"
 
 namespace MyModel {
 
-/// @brief 描画レイヤーを指定してモデルインスタンスを作成する
-/// @param name 作成するモデルの識別名
-/// @param modelName 使用するモデルアセット名
-/// @param sceneType 描画を許可するシーン種別
-/// @param layer 設定する描画レイヤー
-/// @return 作成したモデルのポインタ。作成に失敗した場合はnullptr
-inline Model* Create(
+/// @brief 描画Layerを指定してModelを生成する
+/// @param name Model名
+/// @param modelName Modelアセット名またはパス
+/// @param sceneType 所属Scene
+/// @param layer 描画Layer
+/// @return 生成したModelのHandle。失敗した場合は無効Handle
+[[nodiscard]] inline MadoEngine::ModelHandle Create(
 	const std::string& name,
 	const std::string& modelName,
 	SceneType sceneType,
-	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default)
-{
-	Model* model = MadoEngine::ModelManager::GetInstance().Create(name, modelName, sceneType);
-	if (model) {
+	MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default) {
+	MadoEngine::ModelManager& manager = MadoEngine::ModelManager::GetInstance();
+	const MadoEngine::ModelHandle handle = manager.Create(name, modelName, sceneType);
+	if (Model* model = manager.TryGet(handle)) {
 		model->SetRenderLayer(layer);
 	}
-	return model;
+	return handle;
 }
 
-/// @brief モデルインスタンスを取得する
-/// @param name 取得対象のモデル名
-inline Model* Get(const std::string& name) {
-	return MadoEngine::ModelManager::GetInstance().Get(name);
+/// @brief 名前からModelのHandleを取得する
+/// @param name Model名
+/// @return 見つかったModelのHandle。見つからない場合は無効Handle
+[[nodiscard]] inline MadoEngine::ModelHandle Find(const std::string& name) {
+	return MadoEngine::ModelManager::GetInstance().Find(name);
 }
 
-/// @brief モデルインスタンスを破棄する
-/// @param name 破棄対象のモデル名
+/// @brief 名前からModelのHandleを取得する互換API
+/// @param name Model名
+/// @return 見つかったModelのHandle。見つからない場合は無効Handle
+[[nodiscard]] inline MadoEngine::ModelHandle Get(const std::string& name) {
+	return Find(name);
+}
+
+/// @brief HandleからModelを一時参照として取得する
+/// @param handle ModelのHandle
+/// @return 有効な場合はModel、無効な場合はnullptr
+inline Model* TryGet(MadoEngine::ModelHandle handle) {
+	return MadoEngine::ModelManager::GetInstance().TryGet(handle);
+}
+
+/// @brief Handleを指定してModelを即時削除する
+/// @param handle 削除対象のHandle
+inline void Destroy(MadoEngine::ModelHandle handle) {
+	MadoEngine::ModelManager::GetInstance().Destroy(handle);
+}
+
+/// @brief Handleを指定してModelの削除を安全な時点まで延期する
+/// @param handle 削除対象のHandle
+inline void RequestDestroy(MadoEngine::ModelHandle handle) {
+	if (Model* model = MadoEngine::ModelManager::GetInstance().TryGet(handle)) {
+		model->SetVisible(false);
+	}
+	MadoEngine::ModelManager::GetInstance().RequestDestroy(handle);
+}
+
+/// @brief 名前を指定してModelを即時削除する互換API
+/// @param name 削除対象の名前
 inline void Destroy(const std::string& name) {
 	MadoEngine::ModelManager::GetInstance().Destroy(name);
 }
 
-/// @brief 指定したシーンに属するModelインスタンスをすべて破棄する
-/// @param sceneType 破棄対象のシーン種別
+/// @brief 指定SceneのModelを一括削除する互換API
+/// @param sceneType 削除対象のScene
 inline void DestroyByScene(SceneType sceneType) {
 	MadoEngine::ModelManager::GetInstance().DestroyByScene(sceneType);
 }
 
-/// @brief カメラをセットする
+/// @brief 描画に使用するCameraを設定する
+/// @param camera Camera
 inline void SetCamera(Camera& camera) {
 	MadoEngine::ModelManager::GetInstance().SetCamera(camera);
 }

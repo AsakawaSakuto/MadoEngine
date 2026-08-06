@@ -62,12 +62,12 @@ void MapBlock::SetVisible(bool isVisible) {
 
 	isModelDraw_ = isVisible;
 
-	if (groundInstancedModel_) {
-		groundInstancedModel_->SetInstanceVisible(groundInstanceHandle_, isModelDraw_);
+	if (InstancedModel* model = MyInstancedModel::TryGet(groundInstancedModel_)) {
+		model->SetInstanceVisible(groundInstanceHandle_, isModelDraw_);
 	}
 
-	if (slopeInstancedModel_) {
-		slopeInstancedModel_->SetInstanceVisible(slopeInstanceHandle_, isModelDraw_);
+	if (InstancedModel* model = MyInstancedModel::TryGet(slopeInstancedModel_)) {
+		model->SetInstanceVisible(slopeInstanceHandle_, isModelDraw_);
 	}
 }
 
@@ -127,11 +127,12 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 		"block",
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::Default);
-	if (!groundInstancedModel_) {
+	InstancedModel* groundModel = MyInstancedModel::TryGet(groundInstancedModel_);
+	if (!groundModel) {
 		return;
 	}
 
-	groundInstancedModel_->SetTexture("blockTexture2");
+	groundModel->SetTexture("blockTexture2");
 	//groundInstancedModel_->SetReceiveShadow(false);
 
 	InstancedModel::InstanceDesc instanceDesc;
@@ -139,7 +140,7 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f * static_cast<float>(height_), blockSize.z / 2.0f };
 	instanceDesc.transform.rotate = { 0.0f, 0.0f, 0.0f };
 	instanceDesc.isVisible = isModelDraw_;
-	groundInstanceHandle_ = groundInstancedModel_->AddInstance(instanceDesc);
+	groundInstanceHandle_ = groundModel->AddInstance(instanceDesc);
 }
 
 void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
@@ -149,18 +150,19 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 		"Slope",
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::Default);
-	if (!slopeInstancedModel_) {
+	InstancedModel* slopeModel = MyInstancedModel::TryGet(slopeInstancedModel_);
+	if (!slopeModel) {
 		return;
 	}
 
-	slopeInstancedModel_->SetTexture("blockTexture2");
+	slopeModel->SetTexture("blockTexture2");
 
 	InstancedModel::InstanceDesc instanceDesc;
 	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_ + 1), transform_.translate.z };
 	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f, blockSize.z / 2.0f };
 	instanceDesc.transform.rotate = { 0.0f, GetSlopeRotationY(slopeDirection_), 0.0f };
 	instanceDesc.isVisible = isModelDraw_;
-	slopeInstanceHandle_ = slopeInstancedModel_->AddInstance(instanceDesc);
+	slopeInstanceHandle_ = slopeModel->AddInstance(instanceDesc);
 }
 
 std::string MapBlock::CreateColliderName() const {

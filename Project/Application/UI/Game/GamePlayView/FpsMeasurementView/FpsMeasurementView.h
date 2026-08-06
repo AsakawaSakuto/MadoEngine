@@ -1,4 +1,6 @@
 #pragma once
+#include "Render/Object/ObjectHandle.h"
+#include "Render/Object/ObjectHandle.h"
 
 namespace MadoEngine {
 	class Text;
@@ -20,7 +22,6 @@ namespace UI::Game {
 		void Finalize();
 
 	private:
-		MadoEngine::Text* fpsText_ = nullptr;
 		float sampleTime_ = 0.0f;
 		int sampleFrameCount_ = 0;
 	};

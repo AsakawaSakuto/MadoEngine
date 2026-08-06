@@ -16,22 +16,30 @@ namespace UI::Game {
 		for (int i = 0; i < slotCount; i++) {
 
 			weaponIconsBG_[i] = MySprite::Create("weaponIconBG" + std::to_string(i), "white2x2", SceneType::Game);
-			weaponIconsBG_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f - 64.0f });
-			weaponIconsBG_[i]->SetScale(Vector2{ 32.0f, 32.0f });
-			weaponIconsBG_[i]->SetColor(Vector4{ 0.1f, 0.1f, 0.1f, 1.0f });
+			if (Sprite* sprite = MySprite::TryGet(weaponIconsBG_[i])) {
+				sprite->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f - 64.0f });
+				sprite->SetScale(Vector2{ 32.0f, 32.0f });
+				sprite->SetColor(Vector4{ 0.1f, 0.1f, 0.1f, 1.0f });
+			}
 
 			weaponIconsShotGauge_[i] = MySprite::Create("weaponIconShotGauge" + std::to_string(i), "white2x2", SceneType::Game);
-			weaponIconsShotGauge_[i]->SetPosition(Vector2{ 104.0f + i * 68.0f, 260.0f - 64.0f });
-			weaponIconsShotGauge_[i]->SetScale(Vector2{ shotGaugeSize_, 0.0f });
-			weaponIconsShotGauge_[i]->SetColor(Vector4{ 0.5f, 0.5f, 0.5f, 1.0f });
-			weaponIconsShotGauge_[i]->SetAnchorPoint(Vector2{ 0.0f, 1.0f });
+			if (Sprite* sprite = MySprite::TryGet(weaponIconsShotGauge_[i])) {
+				sprite->SetPosition(Vector2{ 104.0f + i * 68.0f, 260.0f - 64.0f });
+				sprite->SetScale(Vector2{ shotGaugeSize_, 0.0f });
+				sprite->SetColor(Vector4{ 0.5f, 0.5f, 0.5f, 1.0f });
+				sprite->SetAnchorPoint(Vector2{ 0.0f, 1.0f });
+			}
 
 			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
-			weaponIconFrames_[i]->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f - 64.0f });
+			if (Sprite* sprite = MySprite::TryGet(weaponIconFrames_[i])) {
+				sprite->SetPosition(Vector2{ 100.0f + i * 68.0f, 200.0f - 64.0f });
+			}
 
 			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);
-			weaponIcons_[i]->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f - 64.0f });
-			weaponIcons_[i]->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
+			if (Sprite* sprite = MySprite::TryGet(weaponIcons_[i])) {
+				sprite->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f - 64.0f });
+				sprite->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
+			}
 		}
 	
 	}
@@ -48,25 +56,30 @@ namespace UI::Game {
 
 	void WeaponIconUI::Update(float deltaTime, const Weapon::Inventory& inventory) {
 		for (std::size_t slotIndex = 0; slotIndex < weaponIcons_.size(); ++slotIndex) {
+			Sprite* weaponIcon = MySprite::TryGet(weaponIcons_[slotIndex]);
+			Sprite* shotGauge = MySprite::TryGet(weaponIconsShotGauge_[slotIndex]);
+			if (!weaponIcon || !shotGauge) {
+				continue;
+			}
 			const Weapon::BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
 			const Projectile::Type weaponType = weapon ? weapon->GetProjectileType() : Projectile::Type::None;
 			const std::string textureName = Projectile::ProjectileTypeToString(weaponType);
 
-			if (weaponIcons_[slotIndex]->GetTextureName() != textureName) {
-				weaponIcons_[slotIndex]->SetTexture(textureName);
+			if (weaponIcon->GetTextureName() != textureName) {
+				weaponIcon->SetTexture(textureName);
 			}
 
 			const float shotCooldownProgress = weapon
 				? std::clamp(weapon->GetShotCooldownProgress(), 0.0f, 1.0f)
 				: 0.0f;
-			weaponIconsShotGauge_[slotIndex]->SetScale({
+			shotGauge->SetScale({
 				shotGaugeSize_,
 				shotGaugeSize_ * shotCooldownProgress,
 			});
 
 			if (!weapon) {
 				animationStates_[slotIndex] = {};
-				weaponIcons_[slotIndex]->SetScale(startIconScale);
+				weaponIcon->SetScale(startIconScale);
 				continue;
 			}
 
@@ -80,8 +93,12 @@ namespace UI::Game {
 		}
 
 		IconAnimationState& state = animationStates_[slotIndex];
+		Sprite* weaponIcon = MySprite::TryGet(weaponIcons_[slotIndex]);
+		if (!weaponIcon) {
+			return;
+		}
 		if (!state.isPlaying) {
-			weaponIcons_[slotIndex]->SetScale(startIconScale);
+			weaponIcon->SetScale(startIconScale);
 			return;
 		}
 
@@ -97,9 +114,9 @@ namespace UI::Game {
 			EaseType::EaseOutCubic,
 			EaseType::EaseInCubic);
 
-		weaponIcons_[slotIndex]->SetScale(scale);
+		weaponIcon->SetScale(scale);
 		if (progress >= 1.0f) {
-			weaponIcons_[slotIndex]->SetScale(startIconScale);
+			weaponIcon->SetScale(startIconScale);
 			state.isPlaying = false;
 		}
 	}

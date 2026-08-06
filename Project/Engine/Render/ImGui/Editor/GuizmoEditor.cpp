@@ -189,7 +189,7 @@ namespace MadoEngine::Editor {
         struct ModelGizmoEditState {
             bool wasUsing = false;
             bool isEditing = false;
-            Model* target = nullptr;
+            ModelHandle target{};
             Transform3D beforeTransform{};
         };
 
@@ -412,35 +412,39 @@ namespace MadoEngine::Editor {
         /// @param selectedModel 現在選択されているModel
         /// @param beforeDrawTransform ギズモ描画前のTransform
         /// @return 履歴が追加された場合はtrue
-        bool UpdateModelGizmoHistory(Model* selectedModel, const Transform3D& beforeDrawTransform) {
+        bool UpdateModelGizmoHistory(ModelHandle selectedModelHandle, const Transform3D& beforeDrawTransform) {
             ModelGizmoEditState& state = CurrentModelGizmoEditState();
+            ModelManager& manager = ModelManager::GetInstance();
+            Model* selectedModel = manager.TryGet(selectedModelHandle);
             const bool isUsing = ImGuizmo::IsUsing();
             bool isChanged = false;
 
             if (!state.wasUsing && isUsing && selectedModel) {
                 state.isEditing = true;
-                state.target = selectedModel;
+                state.target = selectedModelHandle;
                 state.beforeTransform = beforeDrawTransform;
             }
 
-            if (state.wasUsing && !isUsing && state.isEditing && state.target) {
-                const Transform3D afterTransform = state.target->GetTransform();
-                if (!NearlyEqual(state.beforeTransform, afterTransform)) {
-                    EditorHistory::GetInstance().Push(std::make_unique<ModelTransformCommand>(
-                        state.target,
-                        TransformSnapshot{ state.beforeTransform },
-                        TransformSnapshot{ afterTransform }));
-                    isChanged = true;
+            if (state.wasUsing && !isUsing && state.isEditing) {
+                if (Model* target = manager.TryGet(state.target)) {
+                    const Transform3D afterTransform = target->GetTransform();
+                    if (!NearlyEqual(state.beforeTransform, afterTransform)) {
+                        EditorHistory::GetInstance().Push(std::make_unique<ModelTransformCommand>(
+                            state.target,
+                            TransformSnapshot{ state.beforeTransform },
+                            TransformSnapshot{ afterTransform }));
+                        isChanged = true;
+                    }
                 }
 
                 state.isEditing = false;
-                state.target = nullptr;
+                state.target = {};
                 state.beforeTransform = {};
             }
 
             if (!selectedModel && !isUsing) {
                 state.isEditing = false;
-                state.target = nullptr;
+                state.target = {};
                 state.beforeTransform = {};
             }
 
@@ -464,20 +468,20 @@ namespace MadoEngine::Editor {
     }
 
     /// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄する
-    /// @param selectedModel 現在選択中のModelポインタ
-    void ResetModelGizmoOnSceneChange(Model*& selectedModel) {
-        selectedModel = nullptr;
+    /// @param selectedModel 現在選択中のModelHandle
+    void ResetModelGizmoOnSceneChange(ModelHandle& selectedModel) {
+        selectedModel = {};
 
         ModelGizmoEditState& state = CurrentModelGizmoEditState();
         state.wasUsing = false;
         state.isEditing = false;
-        state.target = nullptr;
+        state.target = {};
         state.beforeTransform = {};
 
         EditorHistory::GetInstance().Clear();
     }
 
-    bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, Model*& selectedModel) {
+    bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, ModelHandle& selectedModelHandle) {
         ImVec2 imageMin{};
         ImVec2 imageSize{};
         if (!TryGetGameViewImageRect(imageMin, imageSize)) {
@@ -486,9 +490,16 @@ namespace MadoEngine::Editor {
 
         bool isChanged = false;
         HandleHistoryShortcuts();
+		ModelManager& manager = ModelManager::GetInstance();
+		Model* selectedModel = manager.TryGet(selectedModelHandle);
 
+		if (selectedModelHandle.IsValid() && !selectedModel) {
+			selectedModelHandle = {};
+			isChanged = true;
+		}
         if (selectedModel && !selectedModel->IsVisible()) {
-            selectedModel = nullptr;
+            selectedModelHandle = {};
+			selectedModel = nullptr;
             isChanged = true;
         }
 
@@ -511,12 +522,12 @@ namespace MadoEngine::Editor {
                 selectedModel->SetTransform(transform);
                 isChanged = true;
             }
-            if (UpdateModelGizmoHistory(selectedModel, beforeDrawTransform)) {
+            if (UpdateModelGizmoHistory(selectedModelHandle, beforeDrawTransform)) {
                 isChanged = true;
             }
         } else {
             Transform3D emptyTransform{};
-            UpdateModelGizmoHistory(nullptr, emptyTransform);
+            UpdateModelGizmoHistory({}, emptyTransform);
         }
 
         const bool canSelect =
@@ -530,7 +541,7 @@ namespace MadoEngine::Editor {
             Vector3 rayOrigin{};
             Vector3 rayDirection{};
             if (TryCreateRayFromGameView(camera, imageMin, imageSize, mousePosition, rayOrigin, rayDirection)) {
-                selectedModel = MadoEngine::ModelManager::GetInstance().PickByRay(
+                selectedModelHandle = manager.PickByRay(
                     sceneType,
                     rayOrigin,
                     rayDirection,

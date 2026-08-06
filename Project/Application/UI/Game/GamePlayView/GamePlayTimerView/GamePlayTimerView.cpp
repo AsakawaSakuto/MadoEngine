@@ -12,17 +12,13 @@ namespace {
 namespace UI::Game {
 
 	void GamePlayTimerView::Initialize() {
-		timerText_ = MyText::Create(
-			kTextObjectName,
-			"Time : 00:00",
-			SceneType::Game,
-			MadoEngine::EditorManagementMode::EditorManaged,
-			MadoEngine::Render::RenderLayer::UI);
 		displayedRemainingSeconds_ = -1;
 	}
 
 	void GamePlayTimerView::Update(float remainingTime) {
-		if (!timerText_) {
+		auto timerTextHandle = MyText::Find(kTextObjectName);
+		MadoEngine::Text* timerText = MyText::TryGet(timerTextHandle);
+		if (!timerText) {
 			return;
 		}
 
@@ -33,13 +29,11 @@ namespace UI::Game {
 
 		const int minutes = remainingSeconds / 60;
 		const int seconds = remainingSeconds % 60;
-		timerText_->SetText(std::format("Time : {:02}:{:02}", minutes, seconds));
+		timerText->SetText(std::format("{:02}:{:02}", minutes, seconds));
 		displayedRemainingSeconds_ = remainingSeconds;
 	}
 
 	void GamePlayTimerView::Finalize() {
-		MyText::Destroy(kTextObjectName);
-		timerText_ = nullptr;
 		displayedRemainingSeconds_ = -1;
 	}
 }

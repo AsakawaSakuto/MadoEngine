@@ -12,14 +12,16 @@ void MapEventObjectBase::SetHighlighted(bool isHighlighted) {
 
 	isHighlighted_ = isHighlighted;
 
-	if (normalInstancedModel_ && outlineInstancedModel_) {
-		normalInstancedModel_->SetInstanceVisible(normalInstanceHandle_, !isHighlighted);
-		outlineInstancedModel_->SetInstanceVisible(outlineInstanceHandle_, isHighlighted);
+	InstancedModel* normalModel = MyInstancedModel::TryGet(normalInstancedModel_);
+	InstancedModel* outlineModel = MyInstancedModel::TryGet(outlineInstancedModel_);
+	if (normalModel && outlineModel) {
+		normalModel->SetInstanceVisible(normalInstanceHandle_, !isHighlighted);
+		outlineModel->SetInstanceVisible(outlineInstanceHandle_, isHighlighted);
 		return;
 	}
 
-	if (model_) {
-		model_->SetRenderLayer(isHighlighted
+	if (Model* model = MyModel::TryGet(model_)) {
+		model->SetRenderLayer(isHighlighted
 			? MadoEngine::Render::RenderLayer::MapEventObjectOutline
 			: MadoEngine::Render::RenderLayer::MapEventObject);
 	}
@@ -30,9 +32,9 @@ void MapEventObjectBase::SetColliderName(const std::string& colliderName) {
 }
 
 void MapEventObjectBase::SetInstancedDraw(
-	InstancedModel* normalModel,
+	MadoEngine::InstancedModelHandle normalModel,
 	uint32_t normalHandle,
-	InstancedModel* outlineModel,
+	MadoEngine::InstancedModelHandle outlineModel,
 	uint32_t outlineHandle) {
 	normalInstancedModel_ = normalModel;
 	normalInstanceHandle_ = normalHandle;
@@ -41,10 +43,10 @@ void MapEventObjectBase::SetInstancedDraw(
 }
 
 void MapEventObjectBase::HideInstancedDraw() {
-	if (normalInstancedModel_) {
-		normalInstancedModel_->SetInstanceVisible(normalInstanceHandle_, false);
+	if (InstancedModel* normalModel = MyInstancedModel::TryGet(normalInstancedModel_)) {
+		normalModel->SetInstanceVisible(normalInstanceHandle_, false);
 	}
-	if (outlineInstancedModel_) {
-		outlineInstancedModel_->SetInstanceVisible(outlineInstanceHandle_, false);
+	if (InstancedModel* outlineModel = MyInstancedModel::TryGet(outlineInstancedModel_)) {
+		outlineModel->SetInstanceVisible(outlineInstanceHandle_, false);
 	}
 }

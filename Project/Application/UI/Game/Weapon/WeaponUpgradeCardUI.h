@@ -55,12 +55,12 @@ namespace UI::Game {
 			static_cast<std::size_t>(CardSpriteType::Count);
 
 		std::size_t cardIndex_ = 0;
-		std::array<Sprite*, kCardSpriteCount> cardSprites_{};
-		Sprite* cardIconSprite_ = nullptr;
-		MadoEngine::Text* weaponNameText_ = nullptr; // 武器名とカテゴリを表示するテキスト
-		MadoEngine::Text* categoryText_ = nullptr;   // カテゴリ名とレアリティを表示するテキスト
-		MadoEngine::Text* detailText_ = nullptr;     // ステータス変化量や説明を表示するテキスト
-		MadoEngine::Text* selectionText_ = nullptr;  // 選択中を表示するテキスト
+		std::array<MadoEngine::SpriteHandle, kCardSpriteCount> cardSprites_{};
+		MadoEngine::SpriteHandle cardIconSprite_{};
+		MadoEngine::TextHandle weaponNameText_{}; // 武器名とカテゴリを表示するテキスト
+		MadoEngine::TextHandle categoryText_{};   // カテゴリ名とレアリティを表示するテキスト
+		MadoEngine::TextHandle detailText_{};     // ステータス変化量や説明を表示するテキスト
+		MadoEngine::TextHandle selectionText_{};  // 選択中を表示するテキスト
 		float selectedAnimationTime_ = 0.0f;
 		bool isSelected_ = false;
 		bool isVisible_ = false;

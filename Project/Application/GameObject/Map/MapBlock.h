@@ -83,8 +83,8 @@ private:
 	SlopeDirection slopeDirection_ = SlopeDirection::PulsX;
 	bool isModelDraw_ = true;
 	bool isColliderRegistered_ = false;
-	InstancedModel* groundInstancedModel_ = nullptr;
-	InstancedModel* slopeInstancedModel_ = nullptr;
+	MadoEngine::InstancedModelHandle groundInstancedModel_{};
+	MadoEngine::InstancedModelHandle slopeInstancedModel_{};
 	uint32_t groundInstanceHandle_ = UINT32_MAX;
 	uint32_t slopeInstanceHandle_ = UINT32_MAX;
 };

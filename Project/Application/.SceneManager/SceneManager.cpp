@@ -3,10 +3,14 @@
 #include "ImGuiHeaders.h"
 #include "Utility/Logger/Logger.h"
 #include "Utility/Light/LightManager.h"
+#include "Render/Object/2d/Sprite/SpriteManager.h"
+#include "Render/Object/2d/Text/TextManager.h"
+#include "Render/Object/3d/Model/ModelManager.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
 #include "EditorUIHeaders.h"
+#include "Render/ImGui/Editor/History/EditorHistory.h"
 #include "../InputRegister.h"
 #include "../ColliderPairRegister.h"
 #include <cassert>
@@ -60,9 +64,21 @@ SceneManager::~SceneManager() {
 		return;
 	}
 
+	const SceneType previousSceneType = currentSceneType_;
+	MadoEngine::Editor::EditorHistory::GetInstance().Clear();
+#ifdef USE_IMGUI
+	MadoEngine::Editor::ResetModelGizmoOnSceneChange(selectedModel_);
+#else
+	selectedModel_ = {};
+#endif // USE_IMGUI
 	currentScene_->Finalize();
-	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(currentSceneType_);
-	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(currentSceneType_);
+	currentScene_.reset();
+	MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
+	MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
+	MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
+	LightManager::GetInstance().DestroyByScene(previousSceneType);
+	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
+	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 }
 
 void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
@@ -79,7 +95,7 @@ void SceneManager::Initialize(SceneType initialScene) {
 
 	ChangeScene(initialScene);
 
-	selectedModel_ = nullptr;
+	selectedModel_ = {};
 }
 
 void SceneManager::Update(float dt) {
@@ -274,12 +290,21 @@ void SceneManager::ChangeScene(SceneType type) {
 	}
 
 	if (currentScene_) {
+		const SceneType previousSceneType = currentSceneType_;
+		MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
 		MadoEngine::Editor::ResetModelGizmoOnSceneChange(selectedModel_);
+#else
+		selectedModel_ = {};
 #endif // USE_IMGUI
 		currentScene_->Finalize();
-		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(currentSceneType_);
-		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(currentSceneType_);
+		currentScene_.reset();
+		MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
+		MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
+		MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
+		LightManager::GetInstance().DestroyByScene(previousSceneType);
+		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
+		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}
 

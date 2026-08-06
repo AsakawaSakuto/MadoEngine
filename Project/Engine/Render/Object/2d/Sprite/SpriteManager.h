@@ -1,157 +1,216 @@
 #pragma once
+
 #include "Sprite.h"
 #include "SpriteSharedGeometry.h"
-#include "Utility/EditorManagementMode.h"
+#include "Render/Object/ObjectHandle.h"
 #include "Render/Object/RenderLayer.h"
+#include "Utility/EditorManagementMode.h"
 #include ".SceneManager/SceneType.h"
-#include <unordered_map>
-#include <memory>
-#include <string>
-#include <unordered_set>
-#include <vector>
 #include <d3d12.h>
 #include <filesystem>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace MadoEngine {
 
-/// @brief Spriteの生成・ライフサイクル管理・一括更新/描画を担当するシングルトン
+/// @brief Sprite生成情報
+struct SpriteCreateDesc {
+	std::string name;
+	std::string textureName;
+	SceneType sceneType = SceneType::None;
+	EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+};
+
+/// @brief Spriteの所有と世代付き参照を管理するManager
 class SpriteManager {
 public:
-
-	/// @brief シングルトンインスタンスを取得する
-	/// @return SpriteManagerの唯一のインスタンス
+	/// @brief SpriteManagerのシングルトンを取得する
+	/// @return SpriteManagerのインスタンス
 	static SpriteManager& GetInstance();
 
-	// コピー・ムーブ禁止
-	SpriteManager(const SpriteManager&)            = delete;
+	SpriteManager(const SpriteManager&) = delete;
 	SpriteManager& operator=(const SpriteManager&) = delete;
-	SpriteManager(SpriteManager&&)                 = delete;
-	SpriteManager& operator=(SpriteManager&&)      = delete;
+	SpriteManager(SpriteManager&&) = delete;
+	SpriteManager& operator=(SpriteManager&&) = delete;
 
-	/// @brief 初期化（共有ジオメトリバッファの生成）
+	/// @brief SpriteManagerを初期化する
 	/// @param device D3D12デバイス
 	/// @param commandList コマンドリスト
 	/// @param psoRegistry PSOレジストリ
-	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, MadoEngine::Render::PSORegistry* psoRegistry);
+	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Render::PSORegistry* psoRegistry);
 
-	/// @brief 全リソースを解放する
+	/// @brief 全Spriteと共有リソースを解放する
 	void Finalize();
 
-	/// @brief 管理中のSpriteへスクリーンサイズを設定する
+	/// @brief 全Spriteへスクリーンサイズを設定する
 	/// @param width スクリーン幅
 	/// @param height スクリーン高さ
 	void SetScreenSize(float width, float height);
 
-	/// @brief Spriteを生成して管理下に登録する
-	/// @param name Spriteの識別名
-	/// @param textureName 使用するテクスチャ名
-	/// @param sceneType 描画を許可するシーンの種類（SceneType::None の場合は全シーンで描画）
-	/// @param managementMode Spriteの管理方法
-	/// @return 生成したSpriteのポインタ（所有権はSpriteManagerが持つ）
-	Sprite* Create(
+	/// @brief Spriteを生成する
+	/// @param name Sprite名
+	/// @param textureName テクスチャ名
+	/// @param sceneType 所属Scene
+	/// @param managementMode 管理方式
+	/// @return 生成したSpriteのHandle。失敗した場合は無効Handle
+	[[nodiscard]] SpriteHandle Create(
 		const std::string& name,
 		const std::string& textureName,
 		SceneType sceneType = SceneType::None,
 		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly);
 
-	/// @brief JsonからSpriteを生成してEditor管理対象へ登録する
-	/// @param json Sprite設定を格納したJson
-	/// @return 生成または更新したSprite、失敗した場合はnullptr
-	Sprite* CreateFromJson(const nlohmann::json& json);
+	/// @brief 指定した生成情報からSpriteを生成する
+	/// @param desc Sprite生成情報
+	/// @return 生成したSpriteのHandle。失敗した場合は無効Handle
+	[[nodiscard]] SpriteHandle Create(const SpriteCreateDesc& desc);
 
-	/// @brief 識別名でSpriteを取得する
-	/// @param name Spriteの識別名
-	/// @return Spriteのポインタ（存在しない場合はnullptr）
-	Sprite* Get(const std::string& name) const;
+	/// @brief 同じ条件のSpriteを取得し、存在しない場合だけ生成する
+	/// @param desc Sprite生成情報
+	/// @return 取得または生成したSpriteのHandle。条件不一致または生成失敗時は無効Handle
+	[[nodiscard]] SpriteHandle FindOrCreate(const SpriteCreateDesc& desc);
 
-	/// @brief Spriteの識別名を変更する
-	/// @param currentName 現在の識別名
-	/// @param newName 新しい識別名
+	/// @brief JSONからEditor管理Spriteを生成または更新する
+	/// @param json Sprite設定
+	/// @return 生成または更新したSpriteのHandle。失敗した場合は無効Handle
+	[[nodiscard]] SpriteHandle CreateFromJson(const nlohmann::json& json);
+
+	/// @brief HandleからSpriteを一時参照として取得する
+	/// @param handle 取得対象のHandle
+	/// @return 有効な場合はSprite、無効な場合はnullptr
+	Sprite* TryGet(SpriteHandle handle);
+
+	/// @brief HandleからSpriteを読み取り専用の一時参照として取得する
+	/// @param handle 取得対象のHandle
+	/// @return 有効な場合はSprite、無効な場合はnullptr
+	const Sprite* TryGet(SpriteHandle handle) const;
+
+	/// @brief 名前からSpriteのHandleを検索する
+	/// @param name 検索する名前
+	/// @return 見つかったSpriteのHandle。見つからない場合は無効Handle
+	[[nodiscard]] SpriteHandle Find(const std::string& name) const;
+
+	/// @brief Handleが現在のSpriteを参照しているか確認する
+	/// @param handle 確認するHandle
+	/// @return 有効なSpriteを参照している場合はtrue
+	[[nodiscard]] bool IsValid(SpriteHandle handle) const;
+
+	/// @brief 名前からSpriteを一時参照として取得する互換API
+	/// @param name Sprite名
+	/// @return 見つかったSprite。見つからない場合はnullptr
+	Sprite* Get(const std::string& name);
+
+	/// @brief 名前からSpriteを読み取り専用の一時参照として取得する互換API
+	/// @param name Sprite名
+	/// @return 見つかったSprite。見つからない場合はnullptr
+	const Sprite* Get(const std::string& name) const;
+
+	/// @brief 名前を変更してもHandleを維持する
+	/// @param handle 名前を変更するSpriteのHandle
+	/// @param newName 新しい名前
+	/// @return 変更に成功した場合はtrue
+	bool Rename(SpriteHandle handle, const std::string& newName);
+
+	/// @brief 名前を指定してSprite名を変更する互換API
+	/// @param currentName 現在の名前
+	/// @param newName 新しい名前
 	/// @return 変更に成功した場合はtrue
 	bool Rename(const std::string& currentName, const std::string& newName);
 
-	/// @brief 指定したSpriteを破棄する
-	/// @param name Spriteの識別名
-	void Destroy(const std::string& name);
+	/// @brief GPUが対象を使用していないことが保証された時点でSpriteを即時削除する
+	/// @param handle 削除対象のHandle
+	/// @return 削除できた場合はtrue
+	bool Destroy(SpriteHandle handle);
 
-	/// @brief GPU処理完了後にSpriteを削除するよう予約する
-	/// @param name 削除対象のSprite名
+	/// @brief 名前を指定してSpriteを即時削除する互換API
+	/// @param name 削除対象の名前
+	/// @return 削除できた場合はtrue
+	bool Destroy(const std::string& name);
+
+	/// @brief 描画中でも安全な時点までSpriteの削除を延期する
+	/// @param handle 削除対象のHandle
+	void RequestDestroy(SpriteHandle handle);
+
+	/// @brief 名前を指定してSpriteの削除を延期する互換API
+	/// @param name 削除対象の名前
 	void RequestDestroy(const std::string& name);
 
-	/// @brief 予約されたSprite削除を実行する
+	/// @brief 延期されているSprite削除を安全な時点で実行する
 	void FlushPendingDestroys();
 
-	/// @brief 指定したシーンに属するSpriteインスタンスをすべて破棄する
-	/// @param sceneType 破棄対象のシーン種別
+	/// @brief 指定Sceneに属するSpriteを即時削除する
+	/// @param sceneType 削除対象のScene
 	void DestroyByScene(SceneType sceneType);
 
-	/// @brief 管理下の全Spriteを更新する
+	/// @brief 現在Sceneで有効な全Spriteを更新する
+	/// @param currentSceneType 現在のScene
 	void UpdateAll(SceneType currentSceneType);
 
-	/// @brief 管理下の全Spriteを描画する（IsVisible() == false またはシーン不一致はスキップ）
-	/// @param currentSceneType 現在実行中のシーンの種類
+	/// @brief 現在Sceneで有効な全Spriteを描画する
+	/// @param currentSceneType 現在のScene
 	void DrawAll(SceneType currentSceneType);
 
-	/// @brief 指定した描画レイヤーのSpriteのみを描画する
-	/// @param currentSceneType 現在のシーン種別
-	/// @param layer 描画対象のレイヤー
-	void DrawLayer(SceneType currentSceneType, MadoEngine::Render::RenderLayer layer);
+	/// @brief 指定描画LayerのSpriteを描画する
+	/// @param currentSceneType 現在のScene
+	/// @param layer 描画Layer
+	void DrawLayer(SceneType currentSceneType, Render::RenderLayer layer);
 
-	/// @brief 指定したレイヤーマスクに含まれるSpriteを描画する
-	/// @param currentSceneType 現在のシーン種別
-	/// @param layerMask 描画対象のレイヤーマスク
-	void DrawLayerMask(SceneType currentSceneType, MadoEngine::Render::RenderLayerMask layerMask);
+	/// @brief 指定描画LayerMaskのSpriteを描画する
+	/// @param currentSceneType 現在のScene
+	/// @param layerMask 描画LayerMask
+	void DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask);
 
-	/// @brief Editor管理対象のSprite一覧をJsonへ変換する
-	/// @return Editor管理対象のSprite一覧を格納したJson
+	/// @brief Editor管理SpriteをJSONへ変換する
+	/// @return Sprite一覧を含むJSON
 	nlohmann::json ToJson() const;
 
-	/// @brief JsonからEditor管理対象のSprite一覧を復元する
-	/// @param json 復元元のJson
+	/// @brief JSONからEditor管理Spriteを復元する
+	/// @param json Sprite一覧を含むJSON
 	void FromJson(const nlohmann::json& json);
 
-	/// @brief Editor管理対象のSprite一覧をJsonファイルへ保存する
-	/// @param filePath 保存先のファイルパス
+	/// @brief Editor管理SpriteをJSONファイルへ保存する
+	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
-	/// @brief JsonファイルからEditor管理対象のSprite一覧を読み込む
-	/// @param filePath 読み込み元のファイルパス
+	/// @brief JSONファイルからEditor管理Spriteを読み込む
+	/// @param filePath 読み込み元
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
 
-	/// @brief 管理中のSprite名一覧を取得する
-	/// @return 描画順に並んだSprite名一覧
+	/// @brief 描画順でSprite名一覧を取得する
+	/// @return Sprite名一覧
 	std::vector<std::string> GetNames() const;
 
-	/// @brief Editor管理対象のSprite名一覧を取得する
-	/// @return 描画順に並んだEditor管理対象のSprite名一覧
+	/// @brief 描画順でEditor管理Sprite名一覧を取得する
+	/// @return Editor管理Sprite名一覧
 	std::vector<std::string> GetEditorManagedNames() const;
 
 private:
-	struct SpriteEntry {
+	struct SpriteSlot {
 		std::unique_ptr<Sprite> sprite;
+		std::string name;
+		std::string textureName;
 		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+		uint32_t generation = 1;
+		bool active = false;
 	};
 
-	SpriteManager()  = default;
+	SpriteManager() = default;
 	~SpriteManager() = default;
 
-	ID3D12Device*              device_      = nullptr;
+	ID3D12Device* device_ = nullptr;
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
-
-	MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr; // PSOレジストリ（外部からセット）
-
-	// 共有ジオメトリバッファ（このクラスが唯一の所有者）
+	Render::PSORegistry* psoRegistry_ = nullptr;
 	SpriteSharedGeometry sharedGeometry_;
-
 	float screenWidth_ = 1280.0f;
 	float screenHeight_ = 720.0f;
-
-	// Sprite管理マップ（識別名 → Spriteと管理方法）
-	std::unordered_map<std::string, SpriteEntry> sprites_;
-	std::vector<std::string> drawOrder_;
-	std::unordered_set<std::string> pendingDestroySpriteNames_;
+	std::vector<SpriteSlot> slots_;
+	std::vector<uint32_t> freeSlots_;
+	std::unordered_map<std::string, SpriteHandle> nameToHandle_;
+	std::vector<SpriteHandle> drawOrder_;
+	std::vector<SpriteHandle> pendingDestroyHandles_;
 };
 
 } // namespace MadoEngine

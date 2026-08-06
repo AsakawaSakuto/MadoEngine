@@ -46,7 +46,7 @@ namespace Enemy {
 		MapLimit mapLimit_;
 		Data::Status baseStatus_;
 		std::size_t spawnLimit_ = 2000;
-		float spawnInterval_ = 0.5f;
+		float spawnInterval_ = 0.1f;
 		float spawnTimer_ = 0.0f;
 		float elapsedTime_ = 0.0f;
 		float minSpawnRadius_ = 8.0f;

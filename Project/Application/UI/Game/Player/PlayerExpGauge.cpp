@@ -7,7 +7,9 @@ namespace UI::Game {
 		expGauge_->Initialize("PlayerExpGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
 
 		dopaGauge_ = MySprite::Create("PlayerExpDopaGauge", "DopaGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
-		dopaGauge_->SetScale({ 160.0f, 32.0f });
+		if (Sprite* sprite = MySprite::TryGet(dopaGauge_)) {
+			sprite->SetScale({ 160.0f, 32.0f });
+		}
 	}
 
 	void PlayerExpGauge::Update(float currentExp, float maxExp) {
@@ -24,14 +26,14 @@ namespace UI::Game {
 	}
 
 	void PlayerExpGauge::IsUpgrade(bool isUpgrade, float deltaTime) {
-		if (dopaGauge_) {
+		if (Sprite* dopaGauge = MySprite::TryGet(dopaGauge_)) {
 			if (isUpgrade) {
-				dopaGauge_->SetVisible(true);
+				dopaGauge->SetVisible(true);
 
 				uvOffsetX_ += uvSpeed_ * deltaTime;
-				dopaGauge_->SetUVTranslate(Vector2{ uvOffsetX_, 0.0f });
+				dopaGauge->SetUVTranslate(Vector2{ uvOffsetX_, 0.0f });
 			} else {
-				dopaGauge_->SetVisible(false);
+				dopaGauge->SetVisible(false);
 				uvOffsetX_ = 0.0f;
 			}
 		}

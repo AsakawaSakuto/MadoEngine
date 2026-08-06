@@ -11,18 +11,14 @@ namespace {
 namespace UI::Game {
 
 	void FpsMeasurementView::Initialize() {
-		fpsText_ = MyText::Create(
-			kTextObjectName,
-			"FPS : 0.0",
-			SceneType::Game,
-			MadoEngine::EditorManagementMode::EditorManaged,
-			MadoEngine::Render::RenderLayer::UI);
 		sampleTime_ = 0.0f;
 		sampleFrameCount_ = 0;
 	}
 
 	void FpsMeasurementView::Update(float deltaTime) {
-		if (!fpsText_) {
+		auto fpsTextHandle = MyText::Find(kTextObjectName);
+		MadoEngine::Text* fpsText = MyText::TryGet(fpsTextHandle);
+		if (!fpsText) {
 			return;
 		}
 
@@ -35,14 +31,12 @@ namespace UI::Game {
 		const float fps = sampleTime_ > 0.0f
 			? static_cast<float>(sampleFrameCount_) / sampleTime_
 			: 0.0f;
-		fpsText_->SetText(std::format("FPS : {:.1f}", fps));
+		fpsText->SetText(std::format("FPS : {:.1f}", fps));
 		sampleTime_ = 0.0f;
 		sampleFrameCount_ = 0;
 	}
 
 	void FpsMeasurementView::Finalize() {
-		MyText::Destroy(kTextObjectName);
-		fpsText_ = nullptr;
 		sampleTime_ = 0.0f;
 		sampleFrameCount_ = 0;
 	}

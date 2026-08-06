@@ -370,6 +370,21 @@ namespace MadoEngine {
 		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), imageSize);
 		ImGui::End();
 		ImGui::PopStyleVar();
+
+		// 最終描画結果を実解像度で確認する固定サイズのGame View
+		constexpr float kFixedGameViewWidth = 1280.0f;
+		constexpr float kFixedGameViewHeight = 720.0f;
+		const ImVec2 fixedGameViewSize(kFixedGameViewWidth, kFixedGameViewHeight);
+		ImGui::SetNextWindowSize(
+			ImVec2(kFixedGameViewWidth, kFixedGameViewHeight + ImGui::GetFrameHeight()),
+			ImGuiCond_FirstUseEver
+		);
+		ImGui::SetNextWindowContentSize(fixedGameViewSize);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Game View 1280x720", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), fixedGameViewSize);
+		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 	void ImGuiManager::End(ID3D12GraphicsCommandList* commandList) {

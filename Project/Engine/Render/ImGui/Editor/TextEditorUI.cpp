@@ -241,8 +241,8 @@ void DrawTextManagerEditorUI() {
 	TextManager& manager = TextManager::GetInstance();
 
 	static std::array<char, 128> createName{};
-	static std::string selectedName;
-	static std::string editingName;
+	static TextHandle selectedHandle{};
+	static TextHandle editingHandle{};
 	static std::array<char, 4096> textBuffer{};
 	static std::array<char, 128> screenBuffer{};
 	static bool isBufferInitialized = false;
@@ -258,14 +258,14 @@ void DrawTextManagerEditorUI() {
 	ImGui::SameLine();
 	if (ImGui::Button("追加")) {
 		const std::string requestedName = createName.data();
-		Text* created = manager.Create(
+		const TextHandle created = manager.Create(
 			requestedName,
 			SceneType::None,
 			EditorManagementMode::EditorManaged);
-		if (created) {
-			selectedName = requestedName;
+		if (created.IsValid()) {
+			selectedHandle = created;
 			CopyToBuffer(createName, MakeNextAvailableTextName(manager, requestedName));
-			editingName.clear();
+			editingHandle = {};
 		}
 	}
 	if (ImGui::Button("保存")) {
@@ -274,12 +274,12 @@ void DrawTextManagerEditorUI() {
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
 		LoadTextEditorJson();
-		editingName.clear();
+		editingHandle = {};
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("復元")) {
 		manager.LoadFromFile("Assets/Json/TextObjects.json.bak");
-		editingName.clear();
+		editingHandle = {};
 	}
 
 	ImGui::Separator();
@@ -288,19 +288,20 @@ void DrawTextManagerEditorUI() {
 	ImGui::BeginChild("TextList", ImVec2(180.0f, 0.0f), true);
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
-		const bool selected = name == selectedName;
+		const TextHandle handle = manager.Find(name);
+		const bool selected = handle == selectedHandle;
 		const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 		const float selectableWidth = (std::max)(1.0f, ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x);
 		if (ImGui::Selectable(name.c_str(), selected, 0, ImVec2(selectableWidth, 0.0f))) {
-			selectedName = name;
-			editingName.clear();
+			selectedHandle = handle;
+			editingHandle = {};
 		}
 		ImGui::SameLine();
 		if (ImGui::SmallButton("削除")) {
-			manager.RequestDestroy(name);
-			if (selectedName == name) {
-				selectedName.clear();
-				editingName.clear();
+			manager.RequestDestroy(handle);
+			if (selectedHandle == handle) {
+				selectedHandle = {};
+				editingHandle = {};
 			}
 			ImGui::PopID();
 			break;
@@ -312,21 +313,27 @@ void DrawTextManagerEditorUI() {
 	ImGui::SameLine();
 
 	ImGui::BeginChild("TextProperties", ImVec2(0.0f, 0.0f), true);
-	Text* selectedText = manager.Get(selectedName);
+	Text* selectedText = manager.TryGet(selectedHandle);
 	if (selectedText) {
-		if (editingName != selectedName) {
+		std::string selectedName;
+		for (const std::string& name : names) {
+			if (manager.Find(name) == selectedHandle) {
+				selectedName = name;
+				break;
+			}
+		}
+		if (editingHandle != selectedHandle) {
 			CopyToBuffer(textBuffer, selectedText->GetText());
 			CopyToBuffer(screenBuffer, selectedText->GetTargetScreen());
-			editingName = selectedName;
+			editingHandle = selectedHandle;
 		}
 
 		std::array<char, 128> nameBuffer{};
 		CopyToBuffer(nameBuffer, selectedName);
 		if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
 			const std::string newName = nameBuffer.data();
-			if (!newName.empty() && manager.Rename(selectedName, newName)) {
-				selectedName = newName;
-				editingName = newName;
+			if (!newName.empty()) {
+				manager.Rename(selectedHandle, newName);
 			}
 		}
 
