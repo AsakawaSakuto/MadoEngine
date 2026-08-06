@@ -500,10 +500,7 @@ namespace MadoEngine::Editor {
 		}
 		std::string selectedAssetName = assetNames.empty() ? std::string{} : assetNames[selectedAssetIndex];
 
-		const ImGuiTreeNodeFlags assetCreationHeaderFlags = assetNames.empty()
-			? ImGuiTreeNodeFlags_DefaultOpen
-			: ImGuiTreeNodeFlags_None;
-		if (ImGui::CollapsingHeader("アセットの作成・複製", assetCreationHeaderFlags)) {
+		if (ImGui::CollapsingHeader("アセットの作成・複製", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Indent();
 			ImGui::TextUnformatted("新規アセット名");
 			ImGui::SetNextItemWidth((std::max)(180.0f, ImGui::GetContentRegionAvail().x - 210.0f));
@@ -589,7 +586,7 @@ namespace MadoEngine::Editor {
 			ImGui::EndCombo();
 		}
 
-		if (ImGui::CollapsingHeader("アセット名の変更・削除")) {
+		if (ImGui::CollapsingHeader("アセット名の変更・削除", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Indent();
 		if (assetRenameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);

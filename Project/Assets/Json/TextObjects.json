@@ -95,45 +95,6 @@
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "EnemyCountText",
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "Enemy : 5",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 24.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
             "name": "GamePlayTimerText",
             "position": [
                 0.0,
@@ -158,41 +119,41 @@
         },
         {
             "anchorPoint": [
-                0.5,
-                0.5
+                0.0,
+                0.0
             ],
             "characterSpacing": 0.0,
             "color": [
-                0.0,
-                0.0,
-                0.0,
+                1.0,
+                1.0,
+                1.0,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
-            "fontSize": 40.0,
+            "fontSize": 24.0,
             "horizontalAlign": "Left",
-            "layer": "Sphere1",
+            "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "a",
+            "name": "EnemyCountText",
             "position": [
-                684.0,
-                225.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
                 1.0,
                 1.0
             ],
-            "scene": "None",
+            "scene": "Game",
             "screen": "BackBuffer",
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "武器名",
+            "text": "Enemy : 5",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": false,
+            "visible": true,
             "wordWrap": true
         }
     ]

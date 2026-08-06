@@ -95,7 +95,7 @@
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "GamePlayTimerText",
+            "name": "EnemyCountText",
             "position": [
                 0.0,
                 0.0
@@ -111,7 +111,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Time : 09:53",
+            "text": "Enemy : 5",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -134,7 +134,7 @@
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "EnemyCountText",
+            "name": "GamePlayTimerText",
             "position": [
                 0.0,
                 0.0
@@ -150,7 +150,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 5",
+            "text": "Time : 09:53",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -192,7 +192,7 @@
             "text": "武器名",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         }
     ]

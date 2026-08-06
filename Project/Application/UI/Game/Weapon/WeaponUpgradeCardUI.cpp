@@ -14,6 +14,7 @@ namespace {
 	constexpr Vector2 kIconBorderScale = { 4.8f, 4.8f };
 	constexpr Vector2 kIconBackgroundScale = { 4.0f, 4.0f };
 	constexpr Vector2 kIconScale = { 0.9f, 0.9f };
+	constexpr Vector4 kNewWeaponColor = { 0.95f, 0.97f, 1.0f, 1.0f };
 	constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
 	/// @brief std::array形式の色をVector4へ変換
@@ -140,7 +141,7 @@ namespace UI::Game {
 				categoryText_->SetColor(ToVector4(choice.rarityDisplayColor));
 			} else {
 				categoryText_->SetText("NEW\n新規武器");
-				categoryText_->SetColor({ 0.25f, 0.9f, 1.0f, 1.0f });
+				categoryText_->SetColor(kNewWeaponColor);
 			}
 		}
 
@@ -160,7 +161,7 @@ namespace UI::Game {
 		if (iconBorder) {
 			iconBorder->SetColor(isOwnedWeaponUpgrade
 				? ToVector4(choice.rarityDisplayColor)
-				: Vector4{ 0.25f, 0.9f, 1.0f, 1.0f });
+				: kNewWeaponColor);
 		}
 
 		SetVisible(true);
