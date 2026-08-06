@@ -192,14 +192,16 @@ namespace MadoEngine
 		std::memset(defaultParameter, 0, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		postEffectDefaultParameterResource_->Unmap(0, nullptr);
 
-		postEffectManager_.Initialize(postEffectCopyDesc_, dxDevice_->GetDevice());
+		MadoEngine::Render::PostEffectManager& postEffectManager =
+			MadoEngine::Render::PostEffectManager::GetInstance();
+		postEffectManager.Initialize(postEffectCopyDesc_, dxDevice_->GetDevice());
 
 		MadoEngine::Editor::LoadAudioEditorJson();
 		MadoEngine::Editor::LoadLightEditorJson();
 		MadoEngine::Editor::LoadModelEditorJson();
 		MadoEngine::Editor::LoadSpriteEditorJson();
 		MadoEngine::Editor::LoadTextEditorJson();
-		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager_);
+		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager);
 		
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
@@ -262,39 +264,39 @@ namespace MadoEngine
 	}
 
 	MadoEngine::Render::LayerEffectPass* EngineExecution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
-		return postEffectManager_.AddLayerPass(desc);
+		return MadoEngine::Render::PostEffectManager::GetInstance().AddLayerPass(desc);
 	}
 
 	MadoEngine::Render::LayerEffectPass* EngineExecution::AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
-		return postEffectManager_.AddScreenPass(desc);
+		return MadoEngine::Render::PostEffectManager::GetInstance().AddScreenPass(desc);
 	}
 
 	void EngineExecution::ClearLayerEffectPasses() {
-		postEffectManager_.ClearLayerPasses();
+		MadoEngine::Render::PostEffectManager::GetInstance().ClearLayerPasses();
 	}
 
 	void EngineExecution::ClearScreenEffectPasses() {
-		postEffectManager_.ClearScreenPasses();
+		MadoEngine::Render::PostEffectManager::GetInstance().ClearScreenPasses();
 	}
 
 	const std::vector<MadoEngine::Render::LayerEffectPass>& EngineExecution::GetLayerEffectPasses() const {
-		return postEffectManager_.GetLayerPasses();
+		return MadoEngine::Render::PostEffectManager::GetInstance().GetLayerPasses();
 	}
 
 	const MadoEngine::Render::LayerEffectPass* EngineExecution::GetFirstEnabledLayerEffectPass() const {
-		return postEffectManager_.GetFirstEnabledLayerPass();
+		return MadoEngine::Render::PostEffectManager::GetInstance().GetFirstEnabledLayerPass();
 	}
 
 	MadoEngine::Render::RenderLayerMask EngineExecution::GetEnabledLayerEffectTargetMask() const {
-		return postEffectManager_.GetEnabledLayerTargetMask();
+		return MadoEngine::Render::PostEffectManager::GetInstance().GetEnabledLayerTargetMask();
 	}
 
 	MadoEngine::Render::PostEffectManager& EngineExecution::GetPostEffectManager() {
-		return postEffectManager_;
+		return MadoEngine::Render::PostEffectManager::GetInstance();
 	}
 
 	const MadoEngine::Render::PostEffectManager& EngineExecution::GetPostEffectManager() const {
-		return postEffectManager_;
+		return MadoEngine::Render::PostEffectManager::GetInstance();
 	}
 
 	void EngineExecution::PreDraw(
@@ -302,7 +304,8 @@ namespace MadoEngine
 		const Vector3& shadowFocusPosition)
 	{
 #ifdef USE_IMGUI
-		MadoEngine::Editor::ApplyPendingLayerEffectPassEditorOperations(postEffectManager_);
+		MadoEngine::Editor::ApplyPendingLayerEffectPassEditorOperations(
+			MadoEngine::Render::PostEffectManager::GetInstance());
 #endif // USE_IMGUI
 
 		isSceneColorEnded_ = false;
@@ -472,7 +475,8 @@ namespace MadoEngine
 		}
 
 		EndSceneColorRender();
-		for (MadoEngine::Render::LayerEffectPass& pass : postEffectManager_.GetScreenPasses()) {
+		for (MadoEngine::Render::LayerEffectPass& pass :
+			MadoEngine::Render::PostEffectManager::GetInstance().GetScreenPasses()) {
 			if (!pass.IsEnabled() || pass.GetScreenEffectStage() != stage) {
 				continue;
 			}
@@ -609,7 +613,8 @@ namespace MadoEngine
 
 		//ImGui::ShowDemoWindow();
 
-		MadoEngine::Editor::DrawLayerEffectPassEditorUI(postEffectManager_);
+		MadoEngine::Editor::DrawLayerEffectPassEditorUI(
+			MadoEngine::Render::PostEffectManager::GetInstance());
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
 		MadoEngine::Editor::DrawModelManagerEditorUI();
@@ -666,12 +671,13 @@ namespace MadoEngine
 	}
 
 	bool EngineExecution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
-		return postEffectManager_.NeedsIgnoreDepthMask(layerMask);
+		return MadoEngine::Render::PostEffectManager::GetInstance().NeedsIgnoreDepthMask(layerMask);
 	}
 
 	void EngineExecution::UpdateParticleFogParameters() {
 		MadoEngine::Particle::ParticleFogParameters parameters{};
-		for (const MadoEngine::Render::LayerEffectPass& pass : postEffectManager_.GetScreenPasses()) {
+		for (const MadoEngine::Render::LayerEffectPass& pass :
+			MadoEngine::Render::PostEffectManager::GetInstance().GetScreenPasses()) {
 			if (!pass.IsEnabled() ||
 				pass.GetScreenEffectStage() != MadoEngine::Render::ScreenEffectStage::Scene ||
 				pass.GetEffectShaderKey() != kFogShaderKey) {
@@ -793,6 +799,7 @@ namespace MadoEngine
 		MadoEngine::ModelManager::GetInstance().Finalize();
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().Finalize();
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Finalize();
+		MadoEngine::Render::PostEffectManager::GetInstance().Finalize();
 		computePsoRegistry_->Finalize();
 		psoRegistry_->Finalize();
 		MadoEngine::TextureManager::GetInstance().Finalize();

@@ -10,10 +10,22 @@ namespace MadoEngine::Render {
 	/// @brief ポストエフェクトの登録状態と実行時パラメータを管理するクラス
 	class PostEffectManager {
 	public:
+		/// @brief PostEffectManagerのシングルトンインスタンスを取得する
+		/// @return PostEffectManagerの参照
+		static PostEffectManager& GetInstance();
+
+		PostEffectManager(const PostEffectManager&) = delete;
+		PostEffectManager& operator=(const PostEffectManager&) = delete;
+		PostEffectManager(PostEffectManager&&) = delete;
+		PostEffectManager& operator=(PostEffectManager&&) = delete;
+
 		/// @brief ポストエフェクト管理を初期化する
 		/// @param basePostEffectDesc ポストエフェクト用の基本PSO設定
 		/// @param device D3D12デバイス
 		void Initialize(const PSODesc& basePostEffectDesc, ID3D12Device* device);
+
+		/// @brief GPU完了待機後に登録済みPassとデバイス参照を解放する
+		void Finalize();
 
 		/// @brief レイヤー対象のポストエフェクトPassを追加する
 		/// @param desc 追加するPassの生成設定
@@ -112,6 +124,8 @@ namespace MadoEngine::Render {
 		bool NeedsIgnoreDepthMask(RenderLayerMask layerMask) const;
 
 	private:
+		PostEffectManager() = default;
+
 		/// @brief 指定配列からPass名を検索する
 		/// @param passes 検索対象のPass配列
 		/// @param name 検索するPass名
@@ -134,6 +148,7 @@ namespace MadoEngine::Render {
 		ID3D12Device* device_ = nullptr;
 		std::vector<LayerEffectPass> layerPasses_;
 		std::vector<LayerEffectPass> screenPasses_;
+		bool isInitialized_ = false;
 	};
 
 } // namespace MadoEngine::Render

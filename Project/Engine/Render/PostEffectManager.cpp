@@ -3,16 +3,38 @@
 #include <cassert>
 
 namespace MadoEngine::Render {
+	PostEffectManager& PostEffectManager::GetInstance() {
+		static PostEffectManager instance;
+		return instance;
+	}
 
 	void PostEffectManager::Initialize(const PSODesc& basePostEffectDesc, ID3D12Device* device) {
 		assert(device && "PostEffectManagerのD3D12Deviceが空です");
+		if (isInitialized_) {
+			Logger::Output("PostEffectManagerは既に初期化されています", Logger::Level::Warning);
+			return;
+		}
 
 		basePostEffectDesc_ = basePostEffectDesc;
 		device_ = device;
+		isInitialized_ = true;
+	}
+
+	void PostEffectManager::Finalize() {
+		if (!isInitialized_) {
+			return;
+		}
+
+		layerPasses_.clear();
+		screenPasses_.clear();
+		basePostEffectDesc_ = {};
+		device_ = nullptr;
+		isInitialized_ = false;
+		Logger::Output("PostEffectManagerを終了しました", Logger::Level::Engine);
 	}
 
 	LayerEffectPass* PostEffectManager::AddLayerPass(const LayerEffectPass::Desc& desc) {
-		assert(device_ && "PostEffectManagerが初期化されていません");
+		assert(isInitialized_ && device_ && "PostEffectManagerが初期化されていません");
 
 		layerPasses_.emplace_back();
 		layerPasses_.back().Initialize(desc, basePostEffectDesc_, device_);
@@ -20,7 +42,7 @@ namespace MadoEngine::Render {
 	}
 
 	LayerEffectPass* PostEffectManager::AddScreenPass(const LayerEffectPass::Desc& desc) {
-		assert(device_ && "PostEffectManagerが初期化されていません");
+		assert(isInitialized_ && device_ && "PostEffectManagerが初期化されていません");
 
 		screenPasses_.emplace_back();
 		screenPasses_.back().Initialize(desc, basePostEffectDesc_, device_);

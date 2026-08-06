@@ -217,7 +217,6 @@ namespace MadoEngine
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
 		MadoEngine::Render::PSODesc compositeDesc_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> postEffectDefaultParameterResource_;
-		MadoEngine::Render::PostEffectManager postEffectManager_;
 		std::string currentCompositeSourceName_ = "SceneColor";
 		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
 		std::string currentLayerEffectSourceName_ = "LayerColor";
