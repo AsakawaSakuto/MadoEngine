@@ -152,6 +152,8 @@ namespace MadoEngine::Ribbon {
 		MadoEngine::Render::BlendMode blendMode = MadoEngine::Render::BlendMode::Add;
 		MadoEngine::Render::CullMode cullMode = MadoEngine::Render::CullMode::None;
 		float globalAlpha = 1.0f;
+		float startAlphaFade = 0.0f;
+		float endAlphaFade = 0.0f;
 		Vector2 uvScale = { 1.0f, 1.0f };
 		Vector2 uvOffset{};
 		RibbonUvMode uvMode = RibbonUvMode::Stretch;

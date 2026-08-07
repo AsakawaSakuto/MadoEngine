@@ -136,6 +136,10 @@
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\BeamEffect\BeamEffectAsset.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\BeamEffect\BeamEffectInstance.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\BeamEffect\BeamEffectSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\BeamEffect\BeamPointGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\ManualRibbonPointSource.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectAsset.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectInstance.cpp" />
@@ -155,6 +159,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\BeamEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\CylinderEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\RibbonEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
@@ -600,6 +605,12 @@
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\MyPrimitiveEffect3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\BeamEffect\BeamEffectAsset.h" />
+    <ClInclude Include="Engine\Render\Object\3d\BeamEffect\BeamEffectInstance.h" />
+    <ClInclude Include="Engine\Render\Object\3d\BeamEffect\BeamEffectSystem3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\BeamEffect\BeamEffectTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\BeamEffect\BeamPointGenerator.h" />
+    <ClInclude Include="Engine\Render\Object\3d\BeamEffect\MyBeamEffect3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\IRibbonPointSource.h" />
     <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\ManualRibbonPointSource.h" />
     <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\MyRibbonEffect3d.h" />
@@ -669,6 +680,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\CylinderEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\BeamEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\RibbonEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>

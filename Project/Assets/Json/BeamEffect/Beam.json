@@ -1,16 +1,17 @@
 {
     "geometry": {
         "cameraFacing": true,
-        "interpolation": "linear",
-        "smoothingSubdivision": 0,
-        "widthOverLifetime": {
-            "default": 0.5,
+        "endFade": 0.05000000074505806,
+        "segmentCount": 16,
+        "startFade": 0.05000000074505806,
+        "widthOverTime": {
+            "default": 0.25,
             "keys": []
         }
     },
     "material": {
         "blendMode": "add",
-        "colorOverLifetime": {
+        "colorOverTime": {
             "default": [
                 1.0,
                 1.0,
@@ -20,7 +21,7 @@
             "keys": []
         },
         "cullMode": "none",
-        "globalAlpha": {
+        "globalAlphaOverTime": {
             "default": 1.0,
             "keys": []
         },
@@ -40,16 +41,15 @@
             0.0
         ]
     },
+    "noise": {
+        "amplitude": 0.0,
+        "frequency": 3.0,
+        "scrollSpeed": 1.0,
+        "seed": 0
+    },
     "playback": {
         "duration": 1.0,
         "isLoop": false
-    },
-    "trail": {
-        "generationMode": "transformHistory",
-        "maxPointCount": 128,
-        "minPointDistance": 0.05000000074505806,
-        "pointLifetime": 0.5,
-        "simulationSpace": "world"
     },
     "version": 1
 }

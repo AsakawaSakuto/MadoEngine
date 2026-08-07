@@ -127,6 +127,11 @@ namespace MadoEngine
 			commandManager_->GetCommandList(),
 			psoRegistry_.get()
 		);
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Initialize(
+			dxDevice_->GetDevice(),
+			commandManager_->GetCommandList(),
+			psoRegistry_.get()
+		);
 
 		// Sprite/Textの座標系は実ウィンドウサイズではなく基準解像度に固定する
 		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
@@ -250,6 +255,9 @@ namespace MadoEngine
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().OnGpuFrameCompleted(
 			commandManager_->GetCompletedFenceValue()
 		);
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().OnGpuFrameCompleted(
+			commandManager_->GetCompletedFenceValue()
+		);
 		swapChain_->Resize(width, height);
 		depthStencilBuffer_->Resize(width, height);
 		layerDepthStencilBuffer_->Resize(width, height);
@@ -348,6 +356,9 @@ namespace MadoEngine
 			commandManager_->GetNextFenceValue()
 		);
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().BeginFrame(
+			commandManager_->GetNextFenceValue()
+		);
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().BeginFrame(
 			commandManager_->GetNextFenceValue()
 		);
 
@@ -640,6 +651,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawParticleSystemEditorUI();
 		MadoEngine::Editor::DrawCylinderEffectEditorUI();
 		MadoEngine::Editor::DrawRibbonEffectEditorUI();
+		MadoEngine::Editor::DrawBeamEffectEditorUI();
 
 		//MadoEngine::Editor::DrawLoggerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
@@ -790,6 +802,9 @@ namespace MadoEngine
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().OnGpuFrameCompleted(
 			commandManager_->GetCompletedFenceValue()
 		);
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().OnGpuFrameCompleted(
+			commandManager_->GetCompletedFenceValue()
+		);
 
 		// 描画で参照したリソースはGPU処理完了後に解放する
 		MadoEngine::SpriteManager::GetInstance().FlushPendingDestroys();
@@ -811,6 +826,9 @@ namespace MadoEngine
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().OnGpuFrameCompleted(
 			commandManager_->GetCompletedFenceValue()
 		);
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().OnGpuFrameCompleted(
+			commandManager_->GetCompletedFenceValue()
+		);
 
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance().Finalize();
@@ -821,6 +839,7 @@ namespace MadoEngine
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().Finalize();
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Finalize();
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Finalize();
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Finalize();
 		MadoEngine::Render::PostEffectManager::GetInstance().Finalize();
 		computePsoRegistry_->Finalize();
 		psoRegistry_->Finalize();

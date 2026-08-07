@@ -247,10 +247,29 @@ namespace MadoEngine::Ribbon {
 			float width = data.widthOverLifetime.Evaluate(normalizedLifetime);
 			width = std::isfinite(width) ? (std::max)(0.0f, width) : 0.0f;
 			const Vector3 halfWidth = side * (width * 0.5f);
-			const Vector4 color = NormalizeColor(
-				data.colorOverLifetime.Evaluate(normalizedLifetime),
-				data.globalAlpha
+			const float startAlphaFade = std::clamp(
+				std::isfinite(data.startAlphaFade) ? data.startAlphaFade : 0.0f,
+				0.0f,
+				1.0f
 			);
+			const float endAlphaFade = std::clamp(
+				std::isfinite(data.endAlphaFade) ? data.endAlphaFade : 0.0f,
+				0.0f,
+				1.0f
+			);
+			float lengthAlpha = 1.0f;
+			if (startAlphaFade > 0.0f) {
+				lengthAlpha = (std::min)(lengthAlpha, normalizedLifetime / startAlphaFade);
+			}
+			if (endAlphaFade > 0.0f) {
+				lengthAlpha = (std::min)(
+					lengthAlpha,
+					(1.0f - normalizedLifetime) / endAlphaFade
+				);
+			}
+			Vector4 sourceColor = data.colorOverLifetime.Evaluate(normalizedLifetime);
+			sourceColor.w *= std::clamp(lengthAlpha, 0.0f, 1.0f);
+			const Vector4 color = NormalizeColor(sourceColor, data.globalAlpha);
 
 			float ribbonU = data.uvMode == RibbonUvMode::Tile
 				? cumulativeDistances[index] / (std::max)(data.tileLength, 0.001f)
