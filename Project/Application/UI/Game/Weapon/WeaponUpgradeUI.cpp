@@ -24,10 +24,10 @@ namespace UI::Game {
 	}
 
 	void UpgradeUI::Finalize() {
+		ResetSelection();
 		for (WeaponUpgradeCardUI& card : upgradeCards_) {
 			card.Finalize();
 		}
-		ResetSelection();
 	}
 
 	void UpgradeUI::Update(
@@ -38,6 +38,29 @@ namespace UI::Game {
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
 		if (visibleChoiceCount_ == 0 || choices.empty()) {
+			return;
+		}
+		if (isDecisionAnimationPlaying_) {
+			UpdateCards(deltaTime);
+			const bool isChoiceValid =
+				decisionChoiceIndex_ < visibleChoiceCount_ &&
+				decisionChoiceIndex_ < choices.size() &&
+				choices[decisionChoiceIndex_].generation == decisionGeneration_;
+			if (!isChoiceValid) {
+				ResetDecisionAnimationState();
+				return;
+			}
+			if (!upgradeCards_[decisionChoiceIndex_].IsDecisionAnimationFinished()) {
+				return;
+			}
+
+			const std::size_t choiceIndex = decisionChoiceIndex_;
+			const std::uint64_t generation = decisionGeneration_;
+			ResetDecisionAnimationState();
+			if (upgradeSystem.SelectChoice(choiceIndex, generation, inventory)) {
+				SynchronizeSelection(upgradeSystem);
+				UpdateCards(0.0f);
+			}
 			return;
 		}
 
@@ -55,20 +78,22 @@ namespace UI::Game {
 			return;
 		}
 
-		const std::uint64_t generation = choices[selectedChoiceIndex_].generation;
-		if (upgradeSystem.SelectChoice(selectedChoiceIndex_, generation, inventory)) {
-			SynchronizeSelection(upgradeSystem);
-			UpdateCards(0.0f);
-		}
+		BeginDecisionAnimation(
+			selectedChoiceIndex_,
+			choices[selectedChoiceIndex_].generation);
 	}
 
 	void UpgradeUI::DrawImGui(Weapon::UpgradeSystem& upgradeSystem, Weapon::Inventory& inventory) {
 #ifdef USE_IMGUI
+		(void)inventory;
 		SynchronizeSelection(upgradeSystem);
 
 		ImGui::Begin("武器アップグレード");
 		ImGui::Text("未処理アップグレード: %d", upgradeSystem.GetPendingUpgradeCount());
-		ImGui::TextDisabled("↑ / W・↓ / S: 選択　Space / A: 決定");
+		ImGui::TextDisabled("← / A・→ / D: 選択　Space / A: 決定");
+		if (isDecisionAnimationPlaying_) {
+			ImGui::TextDisabled("選択決定演出中");
+		}
 		ImGui::Separator();
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
@@ -106,14 +131,10 @@ namespace UI::Game {
 				ImGui::TextDisabled("強化ステータス・レアリティなし");
 			}
 
-			const std::uint64_t generation = choice.generation;
-			if (ImGui::Button("この候補を選択")) {
+			if (ImGui::Button("この候補を選択") && !isDecisionAnimationPlaying_) {
 				selectedChoiceIndex_ = choiceIndex;
-				if (upgradeSystem.SelectChoice(choiceIndex, generation, inventory)) {
-					ResetSelection();
-				}
-				ImGui::PopID();
-				break;
+				UpdateCards(0.0f);
+				BeginDecisionAnimation(choiceIndex, choice.generation);
 			}
 
 			ImGui::Separator();
@@ -141,6 +162,7 @@ namespace UI::Game {
 
 		const std::uint64_t currentGeneration = choices.front().generation;
 		if (selectedGeneration_ != currentGeneration) {
+			ResetDecisionAnimationState();
 			selectedChoiceIndex_ = 0;
 			selectedGeneration_ = currentGeneration;
 			visibleChoiceCount_ = (std::min)(choices.size(), upgradeCards_.size());
@@ -168,7 +190,31 @@ namespace UI::Game {
 		}
 	}
 
+	void UpgradeUI::BeginDecisionAnimation(std::size_t choiceIndex, std::uint64_t generation) {
+		if (isDecisionAnimationPlaying_ || choiceIndex >= visibleChoiceCount_ ||
+			choiceIndex >= upgradeCards_.size()) {
+			return;
+		}
+
+		selectedChoiceIndex_ = choiceIndex;
+		UpdateCards(0.0f);
+		decisionChoiceIndex_ = choiceIndex;
+		decisionGeneration_ = generation;
+		isDecisionAnimationPlaying_ = true;
+		upgradeCards_[choiceIndex].PlayDecisionAnimation();
+	}
+
+	void UpgradeUI::ResetDecisionAnimationState() {
+		if (isDecisionAnimationPlaying_ && decisionChoiceIndex_ < upgradeCards_.size()) {
+			upgradeCards_[decisionChoiceIndex_].ResetDecisionAnimation();
+		}
+		decisionChoiceIndex_ = 0;
+		decisionGeneration_ = 0;
+		isDecisionAnimationPlaying_ = false;
+	}
+
 	void UpgradeUI::ResetSelection() {
+		ResetDecisionAnimationState();
 		selectedChoiceIndex_ = 0;
 		visibleChoiceCount_ = 0;
 		selectedGeneration_ = 0;

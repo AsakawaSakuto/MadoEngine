@@ -20,7 +20,9 @@ constexpr Vector2 kIconScale = { 0.9f, 0.9f };
 constexpr float kSelectedCardScale = 1.08f;          // 選択中カードの拡大率
 constexpr float kSelectedCardPulseScale = 0.01f;     // 選択中カードの拡縮幅
 constexpr float kScaleTransitionDuration = 0.18f;    // 選択状態の拡大率を適用する際の補間時間
-constexpr float kSelectedCardPulseDuration = 0.25f;  // 選択中カードの拡縮周期
+constexpr float kSelectedCardPulseDuration = 1.25f;  // 選択中カードの拡縮周期
+constexpr float kDecisionAnimationDuration = 0.2f;   // 選択決定時にカードを上昇させる時間
+constexpr float kDecisionRiseDistance = 64.0f;       // 選択決定時のカード上昇量
 constexpr Vector4 kNewWeaponColor = { 0.95f, 0.97f, 1.0f, 1.0f };
 constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
@@ -129,14 +131,24 @@ void WeaponUpgradeCardUI::Finalize() {
 	selectionText_ = {};
 	scaleTransitionTimer_.Reset();
 	selectedPulseTimer_.Reset();
+	decisionAnimationTimer_.Reset();
 	scaleTransitionStart_ = 1.0f;
 	currentScale_ = 1.0f;
+	decisionOffsetY_ = 0.0f;
 	isSelected_ = false;
+	isDecisionAnimationPlaying_ = false;
 	isVisible_ = false;
 	isInitialized_ = false;
 }
 
 void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
+	scaleTransitionTimer_.Reset();
+	selectedPulseTimer_.Reset();
+	scaleTransitionStart_ = 1.0f;
+	currentScale_ = 1.0f;
+	isSelected_ = false;
+	ResetDecisionAnimation();
+
 	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
 		const std::string textureName = Projectile::ProjectileTypeToString(choice.weaponType);
 		if (!cardIconSprite->SetTexture(textureName)) {
@@ -185,8 +197,11 @@ void WeaponUpgradeCardUI::SetVisible(bool isVisible) {
 	if (!isVisible_) {
 		scaleTransitionTimer_.Reset();
 		selectedPulseTimer_.Reset();
+		decisionAnimationTimer_.Reset();
 		scaleTransitionStart_ = 1.0f;
 		currentScale_ = 1.0f;
+		decisionOffsetY_ = 0.0f;
+		isDecisionAnimationPlaying_ = false;
 		ApplySelectionScale(currentScale_);
 	}
 	ApplyVisibility();
@@ -212,7 +227,7 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 		easeType);
 
 	float displayScale = currentScale_;
-	if (isSelected_ && scaleTransitionTimer_.IsFinished()) {
+	if (isSelected_ && scaleTransitionTimer_.IsFinished() && !isDecisionAnimationPlaying_) {
 		if (!selectedPulseTimer_.IsActive()) {
 			selectedPulseTimer_.Start(kSelectedCardPulseDuration, true);
 		}
@@ -221,11 +236,41 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 			2.0f * std::numbers::pi_v<float>;
 		displayScale += std::sin(pulseAngle) * kSelectedCardPulseScale;
 	}
+	if (isDecisionAnimationPlaying_) {
+		decisionAnimationTimer_.Update(safeDeltaTime);
+		decisionOffsetY_ = Easing::Lerp(
+			0.0f,
+			-kDecisionRiseDistance,
+			decisionAnimationTimer_.GetProgress(),
+			EaseType::EaseOutCubic);
+	}
 
 	ApplySelectionScale(displayScale);
 	border->SetColor(isSelected_
 		? Vector4{ 1.0f, 0.82f, 0.18f, 1.0f }
 		: Vector4{ 0.35f, 0.38f, 0.45f, 1.0f });
+}
+
+void WeaponUpgradeCardUI::PlayDecisionAnimation() {
+	if (!isVisible_ || !isSelected_) {
+		return;
+	}
+
+	selectedPulseTimer_.Reset();
+	decisionAnimationTimer_.Start(kDecisionAnimationDuration, false);
+	decisionOffsetY_ = 0.0f;
+	isDecisionAnimationPlaying_ = true;
+}
+
+void WeaponUpgradeCardUI::ResetDecisionAnimation() {
+	decisionAnimationTimer_.Reset();
+	decisionOffsetY_ = 0.0f;
+	isDecisionAnimationPlaying_ = false;
+	ApplySelectionScale(currentScale_);
+}
+
+bool WeaponUpgradeCardUI::IsDecisionAnimationFinished() const {
+	return isDecisionAnimationPlaying_ && decisionAnimationTimer_.IsFinished();
 }
 
 void WeaponUpgradeCardUI::ApplyLayout() {
@@ -286,9 +331,9 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 
 void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 	const float cardPositionX = kCardBasePositionX + kCardPositionDifferenceX * static_cast<float>(cardIndex_);
-	const Vector2 cardPosition = { cardPositionX, kCardPositionY };
+	const Vector2 cardPosition = { cardPositionX, kCardPositionY + decisionOffsetY_ };
 	const Vector2 iconPosition = ScalePositionAroundCenter(
-		{ cardPositionX - 70.0f, 225.0f }, cardPosition, scale);
+		{ cardPositionX - 70.0f, 225.0f + decisionOffsetY_ }, cardPosition, scale);
 
 	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
 		border->SetPosition(cardPosition);
@@ -314,22 +359,22 @@ void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 	const Vector2 textScale = { scale, scale };
 	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
 		weaponNameText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX + 38.0f, 205.0f }, cardPosition, scale));
+			{ cardPositionX + 38.0f, 205.0f + decisionOffsetY_ }, cardPosition, scale));
 		weaponNameText->SetScale(textScale);
 	}
 	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
 		categoryText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX + 38.0f, 240.0f }, cardPosition, scale));
+			{ cardPositionX + 38.0f, 240.0f + decisionOffsetY_ }, cardPosition, scale));
 		categoryText->SetScale(textScale);
 	}
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
 		detailText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX, 390.0f }, cardPosition, scale));
+			{ cardPositionX, 390.0f + decisionOffsetY_ }, cardPosition, scale));
 		detailText->SetScale(textScale);
 	}
 	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
 		selectionText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX, 515.0f }, cardPosition, scale));
+			{ cardPositionX, 515.0f + decisionOffsetY_ }, cardPosition, scale));
 		selectionText->SetScale(textScale);
 	}
 }

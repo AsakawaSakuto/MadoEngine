@@ -37,6 +37,16 @@ namespace UI::Game {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime);
 
+		/// @brief 選択決定時の上昇演出を開始
+		void PlayDecisionAnimation();
+
+		/// @brief 選択決定時の上昇演出を初期状態へ戻す
+		void ResetDecisionAnimation();
+
+		/// @brief 選択決定時の上昇演出が完了したか確認
+		/// @return 上昇演出が完了した場合はtrue
+		bool IsDecisionAnimationFinished() const;
+
 	private:
 		enum class CardSpriteType {
 			Border,
@@ -68,9 +78,12 @@ namespace UI::Game {
 		MadoEngine::TextHandle selectionText_{};  // 選択中を表示するテキスト
 		GameTimer scaleTransitionTimer_;
 		GameTimer selectedPulseTimer_;
+		GameTimer decisionAnimationTimer_;
 		float scaleTransitionStart_ = 1.0f;
 		float currentScale_ = 1.0f;
+		float decisionOffsetY_ = 0.0f;
 		bool isSelected_ = false;
+		bool isDecisionAnimationPlaying_ = false;
 		bool isVisible_ = false;
 		bool isInitialized_ = false;
 	};

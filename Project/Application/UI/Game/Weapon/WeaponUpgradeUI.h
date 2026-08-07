@@ -45,6 +45,14 @@ namespace UI::Game {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateCards(float deltaTime);
 
+		/// @brief 指定した候補の選択決定演出を開始
+		/// @param choiceIndex 選択した候補番号
+		/// @param generation 選択した候補の世代番号
+		void BeginDecisionAnimation(std::size_t choiceIndex, std::uint64_t generation);
+
+		/// @brief 選択決定演出の進行状態を初期化
+		void ResetDecisionAnimationState();
+
 		/// @brief 選択状態を初期値へ戻してカードを非表示化
 		void ResetSelection();
 
@@ -54,5 +62,8 @@ namespace UI::Game {
 		std::size_t selectedChoiceIndex_ = 0;
 		std::size_t visibleChoiceCount_ = 0;
 		std::uint64_t selectedGeneration_ = 0;
+		std::size_t decisionChoiceIndex_ = 0;
+		std::uint64_t decisionGeneration_ = 0;
+		bool isDecisionAnimationPlaying_ = false;
 	};
 }
