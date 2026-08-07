@@ -219,6 +219,7 @@ namespace MadoEngine::Render {
 			<< static_cast<int>(desc.topology) << L"_"
 			<< static_cast<int>(desc.inputLayout) << L"_"
 			<< desc.renderTargetCount << L"_"
+			<< static_cast<int>(desc.preserveRenderTargetAlpha) << L"_"
 			<< static_cast<int>(desc.rtvFormat) << L"_"
 			<< static_cast<int>(desc.dsvFormat) << L"_"
 			<< desc.depthBias << L"_"

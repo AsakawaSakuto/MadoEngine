@@ -50,7 +50,7 @@ public:
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
 
-	/// @brief 指定したレイヤーマスクに含まれるParticleを描画します
+	/// @brief 指定したレイヤーマスクに含まれる透過Effectを描画します
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
 

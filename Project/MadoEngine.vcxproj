@@ -135,14 +135,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleCommon.hlsli" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleInitialize.CS.hlsl" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleClearCounter.CS.hlsl" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleUpdate.CS.hlsl" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticlePrepareEmit.CS.hlsl" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleEmit.CS.hlsl" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleBuildArgs.CS.hlsl" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticle.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -214,6 +206,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\History\EditorHistory.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\CylinderEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\RibbonEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\ModelEditor.cpp" />
@@ -249,6 +242,12 @@
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\ManualRibbonPointSource.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectAsset.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectInstance.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectRenderer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\TrailPointSource.cpp" />
     <ClCompile Include="Engine\Render\PostEffect\PostEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.cpp" />
@@ -411,6 +410,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\History\EditorHistory.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\CylinderEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\RibbonEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LoggerEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\ModelEditor.h" />
@@ -464,6 +464,15 @@
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\MyPrimitiveEffect3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\IRibbonPointSource.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\ManualRibbonPointSource.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\MyRibbonEffect3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectAsset.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectInstance.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectRenderer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectSystem3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\TrailPointSource.h" />
     <ClInclude Include="Engine\Render\PostEffect\PostEffectPass.h" />
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
     <ClInclude Include="Engine\Render\PostEffect\MyPostEffect.h" />

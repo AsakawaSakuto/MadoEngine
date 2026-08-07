@@ -7,5 +7,6 @@
 #include "Render/ImGui/Editor/ModelEditor.h"
 #include "Render/ImGui/Editor/PostEffectEditor.h"
 #include "Render/ImGui/Editor/ParticleEditor.h"
+#include "Render/ImGui/Editor/RibbonEditor.h"
 #include "Render/ImGui/Editor/SpriteEditor.h"
 #include "Render/ImGui/Editor/TextEditorUI.h"

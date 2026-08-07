@@ -9,6 +9,10 @@
       <UniqueIdentifier>{6F118F80-B874-47B7-A541-29D58DC09567}</UniqueIdentifier>
       <Extensions>hlsl;hlsli</Extensions>
     </Filter>
+    <Filter Include="Ribbon Shader">
+      <UniqueIdentifier>{EAF71F0C-F587-4FAE-8C98-B578E7AFD4E0}</UniqueIdentifier>
+      <Extensions>hlsl;hlsli</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -35,6 +39,12 @@
     </None>
     <None Include="Assets\Shader\Object3d\Particle\GpuParticle.VS.hlsl">
       <Filter>Particle Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\RibbonEffect\Ribbon.VS.hlsl">
+      <Filter>Ribbon Shader</Filter>
+    </None>
+    <None Include="Assets\Shader\Object3d\RibbonEffect\Ribbon.PS.hlsl">
+      <Filter>Ribbon Shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +136,12 @@
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\ManualRibbonPointSource.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectAsset.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectInstance.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectRenderer3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectSystem3d.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\TrailPointSource.cpp" />
     <ClCompile Include="Engine\Render\PostEffect\PostEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.cpp" />
@@ -140,6 +156,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\CylinderEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\RibbonEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\ModelEditor.cpp" />
@@ -583,6 +600,15 @@
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\MyPrimitiveEffect3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\IRibbonPointSource.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\ManualRibbonPointSource.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\MyRibbonEffect3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectAsset.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectInstance.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectRenderer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectSystem3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\TrailPointSource.h" />
     <ClInclude Include="Engine\Render\Shadow\ShadowMap.h" />
     <ClInclude Include="Engine\Utility\Light\DirectionalLight.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
@@ -643,6 +669,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\ImGui\Editor\CylinderEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\RibbonEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

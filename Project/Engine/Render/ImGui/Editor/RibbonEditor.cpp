@@ -1,13 +1,12 @@
-#include "CylinderEditor.h"
+#include "RibbonEditor.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
-#include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
 #include <algorithm>
 #include <array>
 #include <cfloat>
 #include <cmath>
 #include <cstring>
-#include <numbers>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -17,10 +16,12 @@ namespace {
 
 #ifdef USE_IMGUI
 
-	using namespace MadoEngine::Effect;
+	using namespace MadoEngine::Ribbon;
+	using MadoEngine::Effect::EffectKeyframe;
+	using MadoEngine::Effect::EffectTrack;
 
 	/// @brief 文字列を固定長Bufferへコピーする
-	/// @tparam Size Bufferの要素数
+	/// @tparam Size Buffer要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
 	template<std::size_t Size>
@@ -29,24 +30,22 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 新規Cylinder Assetに使用できる名前を生成する
-	/// @param system 名前の使用状況を確認するPrimitive Effect System
-	/// @param baseName 名前の基準文字列
-	/// @return 使用可能なCylinder Asset名
-	std::string MakeAvailableCylinderAssetName(
-		const PrimitiveEffectSystem3d& system,
+	/// @brief 使用可能なRibbon Asset名を生成する
+	/// @param system 名前を確認するSystem
+	/// @param baseName 基準名
+	/// @return 使用可能な名前
+	std::string MakeAvailableAssetName(
+		const RibbonEffectSystem3d& system,
 		const std::string& baseName) {
 		if (system.IsAssetNameAvailable(baseName)) {
 			return baseName;
 		}
-
 		for (uint32_t suffix = 2; suffix < 10000; ++suffix) {
 			const std::string candidate = baseName + " (" + std::to_string(suffix) + ")";
 			if (system.IsAssetNameAvailable(candidate)) {
 				return candidate;
 			}
 		}
-
 		return baseName;
 	}
 
@@ -97,7 +96,7 @@ namespace {
 
 	/// @brief イージング種類を選択するComboを描画する
 	/// @param label UI表示名
-	/// @param easing 編集対象のイージング種類
+	/// @param easing 編集対象イージング
 	/// @return 値を変更した場合はtrue
 	bool DrawEaseTypeCombo(const char* label, EaseType& easing) {
 		int easingIndex = std::clamp(
@@ -112,7 +111,6 @@ namespace {
 			static_cast<int>(kEaseTypeNames.size()))) {
 			return false;
 		}
-
 		easing = static_cast<EaseType>(easingIndex);
 		return true;
 	}
@@ -174,25 +172,32 @@ namespace {
 		return (largestGapStart + largestGapEnd) * 0.5f;
 	}
 
-	/// @brief 型付きエフェクトトラックを編集する
-	/// @tparam T トラック値の型
-	/// @tparam ValueDrawer 値編集UIを描画する関数型
+	/// @brief 型付きEffect Track編集UIを描画する
+	/// @tparam T Track値型
+	/// @tparam ValueDrawer 値編集関数型
 	/// @param label UI表示名
-	/// @param track 編集対象トラック
-	/// @param duration エフェクトの再生時間
-	/// @param drawValue 値編集UIを描画する関数
-	/// @return トラックを変更した場合はtrue
+	/// @param track 編集対象Track
+	/// @param maximumTime Key時刻上限
+	/// @param timeFormat 時刻表示Format
+	/// @param drawValue 値編集関数
+	/// @return 値を変更した場合はtrue
 	template<class T, class ValueDrawer>
 	bool DrawTrackEditor(
 		const char* label,
 		EffectTrack<T>& track,
-		float duration,
+		float maximumTime,
+		const char* timeFormat,
 		ValueDrawer drawValue) {
 		bool changed = false;
-		static std::unordered_map<const void*, int> selectedKeyframeIndices;
-		int& selectedKeyframeIndex = selectedKeyframeIndices[static_cast<const void*>(&track)];
+		static std::unordered_map<std::string, int> selectedKeyframeIndices;
+		int& selectedKeyframeIndex = selectedKeyframeIndices[label];
 		ImGui::PushID(label);
-		const bool isOpen = ImGui::TreeNodeEx("トラック", ImGuiTreeNodeFlags_SpanAvailWidth, "%s", label);
+		const bool isOpen = ImGui::TreeNodeEx(
+			"トラック",
+			ImGuiTreeNodeFlags_SpanAvailWidth,
+			"%s",
+			label
+		);
 		if (isOpen) {
 			T defaultValue = track.GetDefaultValue();
 			if (drawValue("既定値", defaultValue)) {
@@ -213,7 +218,7 @@ namespace {
 			const bool hasSelection = selectedKeyframeIndex >= 0;
 			const std::optional<float> insertionTime = FindKeyframeInsertionTime(
 				keyframes,
-				duration,
+				maximumTime,
 				selectedKeyframeIndex
 			);
 			std::optional<float> requestedSelectionTime;
@@ -281,7 +286,6 @@ namespace {
 				ImGui::TableSetupColumn("値", ImGuiTableColumnFlags_WidthStretch, 1.4f);
 				ImGui::TableSetupColumn("イージング", ImGuiTableColumnFlags_WidthStretch, 1.2f);
 				ImGui::TableHeadersRow();
-
 				for (int index = 0; index < static_cast<int>(keyframes.size()); ++index) {
 					EffectKeyframe<T>& keyframe = keyframes[index];
 					ImGui::PushID(index);
@@ -298,8 +302,8 @@ namespace {
 						&keyframe.time,
 						0.01f,
 						0.0f,
-						(std::max)(duration, 0.001f),
-						"%.3f秒"
+						(std::max)(maximumTime, 0.001f),
+						timeFormat
 					)) {
 						selectedKeyframeIndex = index;
 						changed = true;
@@ -338,7 +342,6 @@ namespace {
 				}
 				ImGui::EndPopup();
 			}
-
 			if (changed) {
 				track.SetKeyframes(std::move(keyframes));
 				if (requestedSelectionTime.has_value()) {
@@ -362,69 +365,55 @@ namespace {
 		return changed;
 	}
 
-	/// @brief floatトラックを編集する
+	/// @brief float Track編集UIを描画する
 	/// @param label UI表示名
-	/// @param track 編集対象トラック
-	/// @param duration エフェクトの再生時間
+	/// @param track 編集対象Track
+	/// @param maximumTime Key時刻上限
+	/// @param timeFormat 時刻表示Format
 	/// @param speed Drag操作速度
-	/// @param minimum 最小値
-	/// @param maximum 最大値
-	/// @return トラックを変更した場合はtrue
+	/// @param minimumValue 値下限
+	/// @param maximumValue 値上限
+	/// @return 値を変更した場合はtrue
 	bool DrawFloatTrack(
 		const char* label,
 		EffectTrack<float>& track,
-		float duration,
+		float maximumTime,
+		const char* timeFormat,
 		float speed,
-		float minimum,
-		float maximum) {
+		float minimumValue,
+		float maximumValue) {
 		return DrawTrackEditor(
 			label,
 			track,
-			duration,
-			[speed, minimum, maximum](const char* valueLabel, float& value) {
-				return ImGui::DragFloat(valueLabel, &value, speed, minimum, maximum, "%.3f");
+			maximumTime,
+			timeFormat,
+			[speed, minimumValue, maximumValue](const char* valueLabel, float& value) {
+				return ImGui::DragFloat(
+					valueLabel,
+					&value,
+					speed,
+					minimumValue,
+					maximumValue,
+					"%.3f"
+				);
 			}
 		);
 	}
 
-	/// @brief Vector2トラックを編集する
+	/// @brief Color Track編集UIを描画する
 	/// @param label UI表示名
-	/// @param track 編集対象トラック
-	/// @param duration エフェクトの再生時間
-	/// @param speed Drag操作速度
-	/// @param minimum 最小値
-	/// @param maximum 最大値
-	/// @return トラックを変更した場合はtrue
-	bool DrawVector2Track(
-		const char* label,
-		EffectTrack<Vector2>& track,
-		float duration,
-		float speed,
-		float minimum,
-		float maximum) {
-		return DrawTrackEditor(
-			label,
-			track,
-			duration,
-			[speed, minimum, maximum](const char* valueLabel, Vector2& value) {
-				return ImGui::DragFloat2(valueLabel, &value.x, speed, minimum, maximum, "%.3f");
-			}
-		);
-	}
-
-	/// @brief 色トラックを編集する
-	/// @param label UI表示名
-	/// @param track 編集対象トラック
-	/// @param duration エフェクトの再生時間
-	/// @return トラックを変更した場合はtrue
+	/// @param track 編集対象Track
+	/// @param maximumTime Key時刻上限
+	/// @return 値を変更した場合はtrue
 	bool DrawColorTrack(
 		const char* label,
 		EffectTrack<Vector4>& track,
-		float duration) {
+		float maximumTime) {
 		return DrawTrackEditor(
 			label,
 			track,
-			duration,
+			maximumTime,
+			"%.3f",
 			[](const char* valueLabel, Vector4& value) {
 				return ImGui::ColorEdit4(
 					valueLabel,
@@ -437,210 +426,468 @@ namespace {
 		);
 	}
 
-	/// @brief Cylinderの基本設定を編集する
+	/// @brief Ribbonの基本設定を編集する
 	/// @param config 編集対象設定
-	/// @return 設定を変更した場合はtrue
-	bool DrawBasicEditor(CylinderEffectConfig& config) {
+	/// @return 値を変更した場合はtrue
+	bool DrawBasicEditor(RibbonEffectConfig& config) {
 		bool changed = false;
-		changed |= ImGui::DragFloat("再生時間", &config.duration, 0.01f, 0.001f, 3600.0f, "%.3f秒");
-		changed |= ImGui::Checkbox("ループ再生", &config.isLoop);
+		changed |= ImGui::DragFloat(
+			"再生時間",
+			&config.playback.duration,
+			0.01f,
+			0.001f,
+			3600.0f,
+			"%.3f秒"
+		);
+		changed |= ImGui::Checkbox("ループ再生", &config.playback.isLoop);
+
+		ImGui::SeparatorText("表示範囲の再生");
+		const char* playbackModeNames[] = {
+			"全体表示 (Full)",
+			"先頭から表示 (Reveal)",
+			"指定区間を移動 (Sweep)",
+		};
+		int playbackModeIndex = static_cast<int>(config.playback.mode);
+		if (ImGui::Combo(
+			"再生方法",
+			&playbackModeIndex,
+			playbackModeNames,
+			static_cast<int>(std::size(playbackModeNames)))) {
+			config.playback.mode = static_cast<RibbonPlaybackMode>(playbackModeIndex);
+			changed = true;
+		}
+
+		switch (config.playback.mode) {
+		case RibbonPlaybackMode::Reveal:
+			ImGui::TextDisabled("再生率に応じて、最初の制御点から進行位置まで表示します。");
+			break;
+		case RibbonPlaybackMode::Sweep:
+			ImGui::TextDisabled("再生率に応じて、指定した長さの区間を経路上で移動します。");
+			changed |= ImGui::DragFloat(
+				"表示区間の長さ",
+				&config.playback.sweepLength,
+				0.01f,
+				0.001f,
+				100000.0f,
+				"%.3f"
+			);
+			break;
+		case RibbonPlaybackMode::Full:
+		default:
+			ImGui::TextDisabled("再生中は常にRibbon全体を表示します。");
+			break;
+		}
+
+		if (config.playback.mode != RibbonPlaybackMode::Full) {
+			changed |= DrawFloatTrack(
+				"再生進行率",
+				config.playback.progress,
+				1.0f,
+				"%.3f",
+				0.01f,
+				0.0f,
+				1.0f
+			);
+			ImGui::TextDisabled("トラック時刻0.0が再生開始、1.0が再生終了です。");
+		}
 		return changed;
 	}
 
-	/// @brief Cylinderの形状設定を編集する
-	/// @param config 編集対象設定
-	/// @return 設定を変更した場合はtrue
-	bool DrawGeometryEditor(CylinderEffectConfig& config) {
+	/// @brief Manual Ribbonの既定制御点を編集する
+	/// @param trail 編集対象Trail設定
+	/// @param selectedControlPointIndex 選択中制御点Index
+	/// @return 値を変更した場合はtrue
+	bool DrawManualControlPointEditor(
+		RibbonTrailModule& trail,
+		int& selectedControlPointIndex) {
 		bool changed = false;
-		CylinderGeometryModule& geometry = config.geometry;
-
-		int radialSegments = static_cast<int>(geometry.radialSegments);
-		if (ImGui::DragInt("円周分割数", &radialSegments, 1.0f, 3, 256)) {
-			geometry.radialSegments = static_cast<uint32_t>(std::clamp(radialSegments, 3, 256));
-			changed = true;
+		std::vector<Vector3>& controlPoints = trail.defaultControlPoints;
+		ImGui::TextDisabled(
+			"Assetの既定形状です。ゲーム実行中はSetControlPoints()で上書きできます。"
+		);
+		if (trail.simulationSpace == RibbonSimulationSpace::Local) {
+			ImGui::TextDisabled("ローカル空間: 座標へRibbonのTransformが適用されます。");
+		} else {
+			ImGui::TextDisabled("ワールド空間: 座標をワールド座標としてそのまま使用します。");
 		}
 
-		int heightSegments = static_cast<int>(geometry.heightSegments);
-		if (ImGui::DragInt("高さ分割数", &heightSegments, 1.0f, 1, 64)) {
-			geometry.heightSegments = static_cast<uint32_t>(std::clamp(heightSegments, 1, 64));
+		if (controlPoints.empty()) {
+			selectedControlPointIndex = -1;
+		} else {
+			selectedControlPointIndex = std::clamp(
+				selectedControlPointIndex,
+				0,
+				static_cast<int>(controlPoints.size()) - 1
+			);
+		}
+		const bool hasSelection = selectedControlPointIndex >= 0;
+		constexpr float operationButtonWidth = 72.0f;
+
+		ImGui::BeginDisabled(controlPoints.size() >= trail.maxPointCount);
+		if (ImGui::Button("追加", ImVec2(operationButtonWidth, 0.0f))) {
+			const Vector3 newPoint = hasSelection
+				? controlPoints[selectedControlPointIndex] + Vector3{ 1.0f, 0.0f, 0.0f }
+				: controlPoints.empty()
+				? Vector3{}
+				: controlPoints.back() + Vector3{ 1.0f, 0.0f, 0.0f };
+			selectedControlPointIndex = hasSelection
+				? selectedControlPointIndex + 1
+				: static_cast<int>(controlPoints.size());
+			controlPoints.insert(
+				controlPoints.begin() + selectedControlPointIndex,
+				newPoint
+			);
 			changed = true;
 		}
-
-		const char* pivotNames[] = { "下端", "中央", "上端" };
-		int pivotIndex = static_cast<int>(geometry.pivot);
-		if (ImGui::Combo("基準位置", &pivotIndex, pivotNames, static_cast<int>(std::size(pivotNames)))) {
-			geometry.pivot = static_cast<CylinderPivot>(pivotIndex);
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(!hasSelection || controlPoints.size() >= trail.maxPointCount);
+		if (ImGui::Button("複製", ImVec2(operationButtonWidth, 0.0f))) {
+			const Vector3 duplicatedPoint = controlPoints[selectedControlPointIndex];
+			++selectedControlPointIndex;
+			controlPoints.insert(
+				controlPoints.begin() + selectedControlPointIndex,
+				duplicatedPoint
+			);
 			changed = true;
 		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(!hasSelection || selectedControlPointIndex == 0);
+		if (ImGui::Button("上へ", ImVec2(operationButtonWidth, 0.0f))) {
+			std::swap(
+				controlPoints[selectedControlPointIndex],
+				controlPoints[selectedControlPointIndex - 1]
+			);
+			--selectedControlPointIndex;
+			changed = true;
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(
+			!hasSelection ||
+			selectedControlPointIndex + 1 >= static_cast<int>(controlPoints.size())
+		);
+		if (ImGui::Button("下へ", ImVec2(operationButtonWidth, 0.0f))) {
+			std::swap(
+				controlPoints[selectedControlPointIndex],
+				controlPoints[selectedControlPointIndex + 1]
+			);
+			++selectedControlPointIndex;
+			changed = true;
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(!hasSelection);
+		if (ImGui::Button("削除", ImVec2(operationButtonWidth, 0.0f))) {
+			controlPoints.erase(controlPoints.begin() + selectedControlPointIndex);
+			if (controlPoints.empty()) {
+				selectedControlPointIndex = -1;
+			} else {
+				selectedControlPointIndex = (std::min)(
+					selectedControlPointIndex,
+					static_cast<int>(controlPoints.size()) - 1
+				);
+			}
+			changed = true;
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(controlPoints.empty());
+		if (ImGui::Button("全消去", ImVec2(operationButtonWidth, 0.0f))) {
+			ImGui::OpenPopup("制御点をすべて消去##ManualControlPointClearConfirmation");
+		}
+		ImGui::EndDisabled();
 
-		ImGui::SeparatorText("アニメーショントラック");
-		changed |= DrawVector2Track("下端半径", geometry.bottomRadii, config.duration, 0.01f, 0.0f, 10000.0f);
-		changed |= DrawVector2Track("上端半径", geometry.topRadii, config.duration, 0.01f, 0.0f, 10000.0f);
-		changed |= DrawFloatTrack("高さ", geometry.height, config.duration, 0.01f, 0.001f, 10000.0f);
-		changed |= DrawFloatTrack("開始角度", geometry.startAngleDegrees, config.duration, 0.1f, -36000.0f, 36000.0f);
-		changed |= DrawFloatTrack("円弧角度", geometry.arcAngleDegrees, config.duration, 0.1f, -360.0f, 360.0f);
+		const char* selectedPointLabel = selectedControlPointIndex >= 0
+			? "一覧から座標を直接編集できます。"
+			: "制御点を追加してください。";
+		ImGui::TextDisabled(
+			"制御点数: %zu / %u  |  %s",
+			controlPoints.size(),
+			trail.maxPointCount,
+			selectedPointLabel
+		);
+
+		const float tableHeight = std::clamp(
+			(static_cast<float>(controlPoints.size()) + 1.0f) * ImGui::GetTextLineHeightWithSpacing() + 8.0f,
+			100.0f,
+			300.0f
+		);
+		const ImGuiTableFlags tableFlags =
+			ImGuiTableFlags_Borders |
+			ImGuiTableFlags_RowBg |
+			ImGuiTableFlags_SizingStretchProp |
+			ImGuiTableFlags_ScrollY;
+		if (ImGui::BeginTable("ManualControlPointTable", 4, tableFlags, ImVec2(0.0f, tableHeight))) {
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableSetupColumn("制御点", ImGuiTableColumnFlags_WidthFixed, 96.0f);
+			ImGui::TableSetupColumn("X", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Y", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Z", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableHeadersRow();
+			for (int index = 0; index < static_cast<int>(controlPoints.size()); ++index) {
+				ImGui::PushID(index);
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				const std::string pointLabel = "制御点 " + std::to_string(index + 1);
+				if (ImGui::Selectable(pointLabel.c_str(), selectedControlPointIndex == index)) {
+					selectedControlPointIndex = index;
+				}
+				float* components[] = {
+					&controlPoints[index].x,
+					&controlPoints[index].y,
+					&controlPoints[index].z,
+				};
+				for (int componentIndex = 0; componentIndex < 3; ++componentIndex) {
+					ImGui::TableSetColumnIndex(componentIndex + 1);
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					ImGui::PushID(componentIndex);
+					if (ImGui::DragFloat("##Value", components[componentIndex], 0.01f, 0.0f, 0.0f, "%.3f")) {
+						selectedControlPointIndex = index;
+						changed = true;
+					}
+					ImGui::PopID();
+				}
+				ImGui::PopID();
+			}
+			ImGui::EndTable();
+		}
+
+		if (ImGui::BeginPopupModal(
+			"制御点をすべて消去##ManualControlPointClearConfirmation",
+			nullptr,
+			ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::TextUnformatted("既定制御点をすべて消去しますか？");
+			if (ImGui::Button("消去する")) {
+				controlPoints.clear();
+				selectedControlPointIndex = -1;
+				changed = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("キャンセル")) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (controlPoints.size() < kMinimumRibbonPointCount) {
+			ImGui::TextColored(
+				ImVec4(1.0f, 0.75f, 0.2f, 1.0f),
+				"描画には2点以上の制御点が必要です。"
+			);
+		}
 		return changed;
 	}
 
-	/// @brief Cylinderのマテリアル設定を編集する
+	/// @brief RibbonのPoint生成設定を編集する
 	/// @param config 編集対象設定
-	/// @return 設定を変更した場合はtrue
-	bool DrawMaterialEditor(CylinderEffectConfig& config) {
+	/// @param selectedControlPointIndex 選択中制御点Index
+	/// @return 値を変更した場合はtrue
+	bool DrawTrailEditor(RibbonEffectConfig& config, int& selectedControlPointIndex) {
 		bool changed = false;
-		CylinderMaterialModule& material = config.material;
+		const char* generationModeNames[] = { "Transform履歴", "手動制御点" };
+		int generationModeIndex = static_cast<int>(config.trail.generationMode);
+		if (ImGui::Combo(
+			"制御点の生成方式",
+			&generationModeIndex,
+			generationModeNames,
+			static_cast<int>(std::size(generationModeNames)))) {
+			config.trail.generationMode = static_cast<RibbonPointGenerationMode>(generationModeIndex);
+			changed = true;
+		}
 
+		const char* simulationSpaceNames[] = { "ワールド", "ローカル" };
+		int simulationSpaceIndex = static_cast<int>(config.trail.simulationSpace);
+		if (ImGui::Combo(
+			"シミュレーション空間",
+			&simulationSpaceIndex,
+			simulationSpaceNames,
+			static_cast<int>(std::size(simulationSpaceNames)))) {
+			config.trail.simulationSpace = static_cast<RibbonSimulationSpace>(simulationSpaceIndex);
+			changed = true;
+		}
+
+		changed |= ImGui::DragFloat(
+			"制御点の生存時間",
+			&config.trail.pointLifetime,
+			0.01f,
+			0.001f,
+			3600.0f,
+			"%.3f秒"
+		);
+		changed |= ImGui::DragFloat(
+			"最小生成距離",
+			&config.trail.minPointDistance,
+			0.001f,
+			0.0f,
+			100000.0f,
+			"%.3f"
+		);
+		int maxPointCount = static_cast<int>(config.trail.maxPointCount);
+		if (ImGui::DragInt("最大制御点数", &maxPointCount, 1.0f, 2, 4096)) {
+			config.trail.maxPointCount = static_cast<uint32_t>(std::clamp(maxPointCount, 2, 4096));
+			changed = true;
+		}
+		if (config.trail.generationMode == RibbonPointGenerationMode::Manual) {
+			ImGui::SeparatorText("既定制御点");
+			changed |= DrawManualControlPointEditor(config.trail, selectedControlPointIndex);
+		}
+		return changed;
+	}
+
+	/// @brief Ribbonの形状設定を編集する
+	/// @param config 編集対象設定
+	/// @return 値を変更した場合はtrue
+	bool DrawGeometryEditor(RibbonEffectConfig& config) {
+		bool changed = false;
+		const char* interpolationModeNames[] = { "線形", "Catmull-Rom" };
+		int interpolationModeIndex = static_cast<int>(config.geometry.interpolation);
+		if (ImGui::Combo(
+			"補間方式",
+			&interpolationModeIndex,
+			interpolationModeNames,
+			static_cast<int>(std::size(interpolationModeNames)))) {
+			config.geometry.interpolation = static_cast<RibbonInterpolationMode>(interpolationModeIndex);
+			changed = true;
+		}
+
+		int smoothingSubdivision = static_cast<int>(config.geometry.smoothingSubdivision);
+		if (ImGui::DragInt("補間分割数", &smoothingSubdivision, 1.0f, 0, 32)) {
+			config.geometry.smoothingSubdivision = static_cast<uint32_t>(
+				std::clamp(smoothingSubdivision, 0, 32)
+			);
+			changed = true;
+		}
+		changed |= ImGui::Checkbox("カメラへ正対", &config.geometry.cameraFacing);
+		ImGui::SeparatorText("寿命トラック");
+		changed |= DrawFloatTrack(
+			"Ribbon幅",
+			config.geometry.widthOverLifetime,
+			1.0f,
+			"%.3f",
+			0.01f,
+			0.0f,
+			100000.0f
+		);
+		ImGui::TextDisabled("時刻0が生成直後、時刻1が寿命終了時です。");
+		return changed;
+	}
+
+	/// @brief RibbonのMaterial設定を編集する
+	/// @param config 編集対象設定
+	/// @return 値を変更した場合はtrue
+	bool DrawMaterialEditor(RibbonEffectConfig& config) {
+		bool changed = false;
 		const MadoEngine::Editor::TextureSelector textureSelector;
-		changed |= textureSelector.Draw("テクスチャ", material.textureName);
+		changed |= textureSelector.Draw("テクスチャ", config.material.textureName);
 
 		const char* blendModeNames[] = { "通常", "加算", "減算", "乗算", "ブレンドなし" };
-		int blendModeIndex = static_cast<int>(material.blendMode);
+		int blendModeIndex = static_cast<int>(config.material.blendMode);
 		if (ImGui::Combo(
 			"ブレンドモード",
 			&blendModeIndex,
 			blendModeNames,
 			static_cast<int>(std::size(blendModeNames)))) {
-			material.blendMode = static_cast<MadoEngine::Render::BlendMode>(blendModeIndex);
+			config.material.blendMode = static_cast<MadoEngine::Render::BlendMode>(blendModeIndex);
 			changed = true;
 		}
 
 		const char* cullModeNames[] = { "なし", "前面", "背面" };
-		int cullModeIndex = static_cast<int>(material.cullMode);
+		int cullModeIndex = static_cast<int>(config.material.cullMode);
 		if (ImGui::Combo(
 			"カリングモード",
 			&cullModeIndex,
 			cullModeNames,
 			static_cast<int>(std::size(cullModeNames)))) {
-			material.cullMode = static_cast<MadoEngine::Render::CullMode>(cullModeIndex);
+			config.material.cullMode = static_cast<MadoEngine::Render::CullMode>(cullModeIndex);
 			changed = true;
 		}
 
 		ImGui::SeparatorText("アニメーショントラック");
-		changed |= DrawFloatTrack("全体の不透明度", material.globalAlpha, config.duration, 0.01f, 0.0f, 1.0f);
-		changed |= DrawFloatTrack("下端フェード範囲", material.bottomFadeRange, config.duration, 0.01f, 0.0f, 1.0f);
-		changed |= DrawFloatTrack("上端フェード範囲", material.topFadeRange, config.duration, 0.01f, 0.0f, 1.0f);
-		return changed;
-	}
-
-	/// @brief CylinderのUV設定を編集する
-	/// @param config 編集対象設定
-	/// @return 設定を変更した場合はtrue
-	bool DrawUvEditor(CylinderEffectConfig& config) {
-		bool changed = false;
-		CylinderUvModule& uv = config.material.uv;
-
-		const char* directionNames[] = { "上から下", "下から上", "時計回り", "反時計回り" };
-		int directionIndex = static_cast<int>(uv.direction);
-		if (ImGui::Combo(
-			"UV方向",
-			&directionIndex,
-			directionNames,
-			static_cast<int>(std::size(directionNames)))) {
-			uv.direction = static_cast<CylinderUvDirection>(directionIndex);
-			changed = true;
-		}
-
-		ImGui::SeparatorText("アニメーショントラック");
-		changed |= DrawVector2Track("UVスケール", uv.scale, config.duration, 0.01f, -100.0f, 100.0f);
-		changed |= DrawVector2Track("UVオフセット", uv.offset, config.duration, 0.01f, -100.0f, 100.0f);
-		changed |= DrawFloatTrack("UV回転角度", uv.rotationDegrees, config.duration, 0.1f, -36000.0f, 36000.0f);
-		return changed;
-	}
-
-	/// @brief CylinderのGradient設定を編集する
-	/// @param config 編集対象設定
-	/// @return 設定を変更した場合はtrue
-	bool DrawGradientEditor(CylinderEffectConfig& config) {
-		bool changed = false;
-		std::vector<CylinderColorStop>& gradient = config.material.gradient;
-		int removeIndex = -1;
-
-		for (int index = 0; index < static_cast<int>(gradient.size()); ++index) {
-			CylinderColorStop& stop = gradient[index];
-			ImGui::PushID(index);
-			const bool isOpen = ImGui::TreeNodeEx(
-				"GradientStop",
-				ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth,
-				"停止点 %d",
-				index + 1
-			);
-			if (isOpen) {
-				changed |= ImGui::DragFloat("位置", &stop.position, 0.01f, 0.0f, 1.0f, "%.3f");
-				changed |= DrawColorTrack("色", stop.color, config.duration);
-				ImGui::BeginDisabled(gradient.size() <= 1);
-				if (ImGui::Button("停止点を削除")) {
-					removeIndex = index;
-				}
-				ImGui::EndDisabled();
-				ImGui::TreePop();
-			}
-			ImGui::PopID();
-		}
-
-		if (removeIndex >= 0) {
-			gradient.erase(gradient.begin() + removeIndex);
-			changed = true;
-		}
-
-		ImGui::BeginDisabled(gradient.size() >= kMaximumCylinderGradientStops);
-		if (ImGui::Button("停止点を追加")) {
-			CylinderColorStop stop;
-			if (!gradient.empty()) {
-				stop.position = (std::min)(1.0f, gradient.back().position + 0.1f);
-				stop.color.SetDefaultValue(gradient.back().color.GetDefaultValue());
-			} else {
-				stop.position = 0.5f;
-			}
-			gradient.push_back(std::move(stop));
-			changed = true;
-		}
-		ImGui::EndDisabled();
-		ImGui::SameLine();
-		ImGui::TextDisabled(
-			"%zu / %u",
-			gradient.size(),
-			kMaximumCylinderGradientStops
+		changed |= DrawColorTrack("寿命による色", config.material.colorOverLifetime, 1.0f);
+		changed |= DrawFloatTrack(
+			"全体の不透明度",
+			config.material.globalAlpha,
+			(std::max)(config.playback.duration, 0.001f),
+			"%.3f秒",
+			0.01f,
+			0.0f,
+			1.0f
 		);
 		return changed;
 	}
 
-	/// @brief Cylinder Assetの編集状態を比較するためのスナップショットを生成する
-	/// @param asset スナップショットを生成するCylinder Asset
-	/// @return JSON形式のスナップショット
-	std::string CreateCylinderAssetSnapshot(const CylinderEffectAsset& asset) {
+	/// @brief RibbonのUV設定を編集する
+	/// @param config 編集対象設定
+	/// @return 値を変更した場合はtrue
+	bool DrawUvEditor(RibbonEffectConfig& config) {
+		bool changed = false;
+		const char* uvModeNames[] = { "全体へ伸長", "距離でタイル" };
+		int uvModeIndex = static_cast<int>(config.material.uvMode);
+		if (ImGui::Combo(
+			"UV配置方式",
+			&uvModeIndex,
+			uvModeNames,
+			static_cast<int>(std::size(uvModeNames)))) {
+			config.material.uvMode = static_cast<RibbonUvMode>(uvModeIndex);
+			changed = true;
+		}
+		changed |= ImGui::DragFloat2("UVスケール", &config.material.uvScale.x, 0.01f);
+		changed |= ImGui::DragFloat2("UVオフセット", &config.material.uvOffset.x, 0.01f);
+		changed |= ImGui::DragFloat2("UVスクロール速度", &config.material.uvScroll.x, 0.01f);
+		if (config.material.uvMode == RibbonUvMode::Tile) {
+			changed |= ImGui::DragFloat(
+				"タイル1枚の長さ",
+				&config.material.tileLength,
+				0.01f,
+				0.001f,
+				100000.0f,
+				"%.3f"
+			);
+		}
+		return changed;
+	}
+
+	/// @brief Ribbon Assetの編集状態比較用Snapshotを生成する
+	/// @param asset Snapshotを生成するAsset
+	/// @return JSON形式Snapshot
+	std::string CreateRibbonAssetSnapshot(const RibbonEffectAsset& asset) {
 		return asset.ToJson().dump();
 	}
 
-	/// @brief Cylinder Editorのプレビューを再生する
-	/// @param system 再生に使用するPrimitive Effect System
+	/// @brief Ribbon Previewを再生する
+	/// @param system 再生に使用するSystem
 	/// @param assetName 再生するAsset名
-	/// @param transform プレビューのTransform
-	/// @param isLoop ループ再生する場合はtrue
-	/// @return 再生したCylinder EffectのHandle
-	PrimitiveEffectHandle PlayCylinderPreview(
-		PrimitiveEffectSystem3d& system,
+	/// @param previewPosition Preview基準位置
+	/// @param isLoop Loop再生する場合はtrue
+	/// @return 再生したRibbon Handle
+	RibbonEffectHandle PlayRibbonPreview(
+		RibbonEffectSystem3d& system,
 		const std::string& assetName,
-		const Transform3D& transform,
+		const Vector3& previewPosition,
 		bool isLoop) {
-		PrimitiveEffectPlayDesc desc;
-		desc.transform = transform;
+		RibbonEffectPlayDesc desc;
 		desc.sceneType = SceneType::None;
 		desc.renderLayer = MadoEngine::Render::RenderLayer::Effect;
 		desc.loopOverride = isLoop;
+		desc.transform.translate = previewPosition;
 		return system.Play(assetName, desc);
 	}
 
-	/// @brief Cylinder Editorのプレビューを即時停止して状態を消去する
-	/// @param system 停止に使用するPrimitive Effect System
+	/// @brief Ribbon Previewを即時停止して状態を消去する
+	/// @param system 停止に使用するSystem
 	/// @param handle 停止するHandle
-	/// @param assetName プレビュー中Asset名
-	/// @param assetSnapshot プレビュー開始時のAssetスナップショット
-	void StopCylinderPreview(
-		PrimitiveEffectSystem3d& system,
-		PrimitiveEffectHandle& handle,
+	/// @param assetName Preview中Asset名
+	/// @param assetSnapshot Preview開始時Snapshot
+	void StopRibbonPreview(
+		RibbonEffectSystem3d& system,
+		RibbonEffectHandle& handle,
 		std::string& assetName,
 		std::string& assetSnapshot) {
 		if (system.IsAlive(handle)) {
-			system.Stop(handle, PrimitiveEffectStopMode::Immediate);
+			system.Stop(handle, RibbonStopMode::Immediate);
 		}
 		handle = {};
 		assetName.clear();
@@ -653,15 +900,16 @@ namespace {
 
 namespace MadoEngine::Editor {
 
-	void DrawCylinderEffectEditorUI() {
+	void DrawRibbonEffectEditorUI() {
 #ifdef USE_IMGUI
-		PrimitiveEffectSystem3d& system = PrimitiveEffectSystem3d::GetInstance();
+		RibbonEffectSystem3d& system = RibbonEffectSystem3d::GetInstance();
 		static int selectedAssetIndex = 0;
 		static int selectedSettingPage = 0;
-		static PrimitiveEffectHandle previewHandle;
+		static int selectedManualControlPointIndex = 0;
+		static RibbonEffectHandle previewHandle;
 		static std::string previewAssetName;
 		static std::string previewAssetSnapshot;
-		static Transform3D previewTransform;
+		static Vector3 previewPosition = { 0.0f, 1.0f, 0.0f };
 		static bool previewLoop = true;
 		static std::array<char, 128> newAssetNameBuffer{};
 		static std::array<char, 128> renameAssetNameBuffer{};
@@ -669,18 +917,21 @@ namespace MadoEngine::Editor {
 		static std::unordered_map<std::string, std::string> savedAssetSnapshots;
 		static bool isNameBufferInitialized = false;
 		if (!isNameBufferInitialized) {
-			CopyToBuffer(
-				newAssetNameBuffer,
-				MakeAvailableCylinderAssetName(system, "新規Cylinder")
-			);
+			CopyToBuffer(newAssetNameBuffer, MakeAvailableAssetName(system, "新規Ribbon"));
 			isNameBufferInitialized = true;
 		}
 
 		ImGui::SetNextWindowSize(ImVec2(980.0f, 720.0f), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(760.0f, 520.0f), ImVec2(FLT_MAX, FLT_MAX));
-		if (!ImGui::Begin("Cylinderエディター")) {
+		if (!ImGui::Begin("Ribbonエディター")) {
 			ImGui::End();
 			return;
+		}
+
+		if (!system.IsAlive(previewHandle)) {
+			previewHandle = {};
+			previewAssetName.clear();
+			previewAssetSnapshot.clear();
 		}
 
 		std::vector<std::string> assetNames = system.GetAssetNames();
@@ -700,7 +951,7 @@ namespace MadoEngine::Editor {
 			ImGui::TextUnformatted("新規アセット名");
 			ImGui::SetNextItemWidth((std::max)(180.0f, ImGui::GetContentRegionAvail().x - 220.0f));
 			ImGui::InputText(
-				"##NewCylinderAssetName",
+				"##NewRibbonAssetName",
 				newAssetNameBuffer.data(),
 				newAssetNameBuffer.size()
 			);
@@ -712,7 +963,7 @@ namespace MadoEngine::Editor {
 			ImGui::BeginDisabled(isNewAssetNameEmpty || !isNewAssetNameAvailable);
 			if (ImGui::Button("新規作成")) {
 				if (system.CreateAsset(newAssetName)) {
-					StopCylinderPreview(
+					StopRibbonPreview(
 						system,
 						previewHandle,
 						previewAssetName,
@@ -723,12 +974,12 @@ namespace MadoEngine::Editor {
 					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
 					selectedAssetName = newAssetName;
 					assetRenameOriginalName.clear();
-					if (const CylinderEffectAsset* createdAsset = system.FindAsset(newAssetName)) {
-						savedAssetSnapshots[newAssetName] = CreateCylinderAssetSnapshot(*createdAsset);
+					if (const RibbonEffectAsset* createdAsset = system.FindAsset(newAssetName)) {
+						savedAssetSnapshots[newAssetName] = CreateRibbonAssetSnapshot(*createdAsset);
 					}
 					CopyToBuffer(
 						newAssetNameBuffer,
-						MakeAvailableCylinderAssetName(system, "新規Cylinder")
+						MakeAvailableAssetName(system, "新規Ribbon")
 					);
 				}
 			}
@@ -742,7 +993,7 @@ namespace MadoEngine::Editor {
 			);
 			if (ImGui::Button("選択中を複製")) {
 				if (system.DuplicateAsset(selectedAssetName, newAssetName)) {
-					StopCylinderPreview(
+					StopRibbonPreview(
 						system,
 						previewHandle,
 						previewAssetName,
@@ -753,12 +1004,12 @@ namespace MadoEngine::Editor {
 					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
 					selectedAssetName = newAssetName;
 					assetRenameOriginalName.clear();
-					if (const CylinderEffectAsset* duplicatedAsset = system.FindAsset(newAssetName)) {
-						savedAssetSnapshots[newAssetName] = CreateCylinderAssetSnapshot(*duplicatedAsset);
+					if (const RibbonEffectAsset* duplicatedAsset = system.FindAsset(newAssetName)) {
+						savedAssetSnapshots[newAssetName] = CreateRibbonAssetSnapshot(*duplicatedAsset);
 					}
 					CopyToBuffer(
 						newAssetNameBuffer,
-						MakeAvailableCylinderAssetName(system, "新規Cylinder")
+						MakeAvailableAssetName(system, "新規Ribbon")
 					);
 				}
 			}
@@ -773,7 +1024,7 @@ namespace MadoEngine::Editor {
 		}
 
 		if (assetNames.empty()) {
-			ImGui::TextDisabled("編集するCylinder Effect Assetを作成してください。");
+			ImGui::TextDisabled("編集するRibbonエフェクトアセットを作成してください。");
 			ImGui::End();
 			return;
 		}
@@ -786,11 +1037,11 @@ namespace MadoEngine::Editor {
 		);
 		selectedAssetName = assetNames[selectedAssetIndex];
 		std::string assetComboPreview = selectedAssetName;
-		if (const CylinderEffectAsset* selectedAsset = system.FindAsset(selectedAssetName)) {
+		if (const RibbonEffectAsset* selectedAsset = system.FindAsset(selectedAssetName)) {
 			const auto saved = savedAssetSnapshots.find(selectedAssetName);
 			if (
 				saved != savedAssetSnapshots.end() &&
-				saved->second != CreateCylinderAssetSnapshot(*selectedAsset)) {
+				saved->second != CreateRibbonAssetSnapshot(*selectedAsset)) {
 				assetComboPreview += " *";
 			}
 		}
@@ -798,21 +1049,20 @@ namespace MadoEngine::Editor {
 		if (ImGui::BeginCombo("アセット", assetComboPreview.c_str())) {
 			for (int index = 0; index < static_cast<int>(assetNames.size()); ++index) {
 				std::string displayName = assetNames[index];
-				if (const CylinderEffectAsset* listedAsset = system.FindAsset(assetNames[index])) {
+				if (const RibbonEffectAsset* listedAsset = system.FindAsset(assetNames[index])) {
 					const auto saved = savedAssetSnapshots.find(assetNames[index]);
 					if (
 						saved != savedAssetSnapshots.end() &&
-						saved->second != CreateCylinderAssetSnapshot(*listedAsset)) {
+						saved->second != CreateRibbonAssetSnapshot(*listedAsset)) {
 						displayName += " *";
 					}
 				}
-
 				const bool isSelected = index == selectedAssetIndex;
 				if (ImGui::Selectable(displayName.c_str(), isSelected)) {
 					selectedAssetIndex = index;
 					selectedAssetName = assetNames[index];
 					assetRenameOriginalName.clear();
-					StopCylinderPreview(
+					StopRibbonPreview(
 						system,
 						previewHandle,
 						previewAssetName,
@@ -849,7 +1099,7 @@ namespace MadoEngine::Editor {
 			);
 			if (ImGui::Button("アセット名を変更")) {
 				const std::string oldAssetName = selectedAssetName;
-				StopCylinderPreview(
+				StopRibbonPreview(
 					system,
 					previewHandle,
 					previewAssetName,
@@ -862,8 +1112,8 @@ namespace MadoEngine::Editor {
 					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
 					selectedAssetName = renameAssetName;
 					assetRenameOriginalName = renameAssetName;
-					if (const CylinderEffectAsset* renamedAsset = system.FindAsset(renameAssetName)) {
-						savedAssetSnapshots[renameAssetName] = CreateCylinderAssetSnapshot(*renamedAsset);
+					if (const RibbonEffectAsset* renamedAsset = system.FindAsset(renameAssetName)) {
+						savedAssetSnapshots[renameAssetName] = CreateRibbonAssetSnapshot(*renamedAsset);
 					}
 				}
 			}
@@ -873,16 +1123,16 @@ namespace MadoEngine::Editor {
 			}
 
 			if (ImGui::Button("アセットを削除")) {
-				ImGui::OpenPopup("CylinderAssetDeleteConfirmation");
+				ImGui::OpenPopup("RibbonAssetDeleteConfirmation");
 			}
 			if (ImGui::BeginPopupModal(
-				"CylinderAssetDeleteConfirmation",
+				"RibbonAssetDeleteConfirmation",
 				nullptr,
 				ImGuiWindowFlags_AlwaysAutoResize)) {
 				ImGui::Text("「%s」を削除しますか？", selectedAssetName.c_str());
-				ImGui::TextDisabled("Jsonファイルは.trashディレクトリへ退避されます。");
+				ImGui::TextDisabled("JSONファイルは.trashディレクトリへ退避されます。");
 				if (ImGui::Button("削除する")) {
-					StopCylinderPreview(
+					StopRibbonPreview(
 						system,
 						previewHandle,
 						previewAssetName,
@@ -912,28 +1162,27 @@ namespace MadoEngine::Editor {
 		}
 
 		if (assetNames.empty()) {
-			ImGui::TextDisabled("Cylinder Effect Assetがありません。新規作成してください。");
+			ImGui::TextDisabled("Ribbonエフェクトアセットがありません。新規作成してください。");
 			ImGui::End();
 			return;
 		}
 
-		CylinderEffectAsset* asset = system.FindEditableAsset(selectedAssetName);
+		RibbonEffectAsset* asset = system.FindEditableAsset(selectedAssetName);
 		if (!asset) {
-			ImGui::TextDisabled("選択したCylinder Effect Assetを取得できませんでした。");
+			ImGui::TextDisabled("選択したRibbonエフェクトアセットを取得できませんでした。");
 			ImGui::End();
 			return;
 		}
 		savedAssetSnapshots.try_emplace(
 			selectedAssetName,
-			CreateCylinderAssetSnapshot(*asset)
+			CreateRibbonAssetSnapshot(*asset)
 		);
-		bool isDirty =
-			savedAssetSnapshots[selectedAssetName] != CreateCylinderAssetSnapshot(*asset);
+		bool isDirty = savedAssetSnapshots[selectedAssetName] != CreateRibbonAssetSnapshot(*asset);
 
 		if (ImGui::Button("アセットを保存")) {
 			asset->Validate();
-			if (asset->SaveToFile()) {
-				savedAssetSnapshots[selectedAssetName] = CreateCylinderAssetSnapshot(*asset);
+			if (asset->SaveToFile({}, true)) {
+				savedAssetSnapshots[selectedAssetName] = CreateRibbonAssetSnapshot(*asset);
 				isDirty = false;
 			}
 		}
@@ -941,10 +1190,14 @@ namespace MadoEngine::Editor {
 		bool reloadRequested = false;
 		if (ImGui::Button("再読み込み")) {
 			if (isDirty) {
-				ImGui::OpenPopup("CylinderAssetReloadConfirmation");
+				ImGui::OpenPopup("RibbonAssetReloadConfirmation");
 			} else {
 				reloadRequested = true;
 			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("バックアップを読み込み")) {
+			ImGui::OpenPopup("RibbonAssetBackupConfirmation");
 		}
 		ImGui::SameLine();
 		if (isDirty) {
@@ -954,7 +1207,7 @@ namespace MadoEngine::Editor {
 		}
 
 		if (ImGui::BeginPopupModal(
-			"CylinderAssetReloadConfirmation",
+			"RibbonAssetReloadConfirmation",
 			nullptr,
 			ImGuiWindowFlags_AlwaysAutoResize)) {
 			ImGui::TextUnformatted("未保存の変更を破棄して再読み込みしますか？");
@@ -969,17 +1222,38 @@ namespace MadoEngine::Editor {
 			ImGui::EndPopup();
 		}
 
-		if (reloadRequested) {
-			StopCylinderPreview(
+		bool backupRequested = false;
+		if (ImGui::BeginPopupModal(
+			"RibbonAssetBackupConfirmation",
+			nullptr,
+			ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::TextUnformatted("現在の編集内容を破棄してバックアップを読み込みますか？");
+			ImGui::TextDisabled("読み込んだ内容は保存するまでJSONへ反映されません。");
+			if (ImGui::Button("バックアップを読み込む")) {
+				backupRequested = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("キャンセル")) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (reloadRequested || backupRequested) {
+			StopRibbonPreview(
 				system,
 				previewHandle,
 				previewAssetName,
 				previewAssetSnapshot
 			);
-			if (system.ReloadAsset(selectedAssetName)) {
+			const bool loaded = backupRequested
+				? system.LoadAssetBackup(selectedAssetName)
+				: system.ReloadAsset(selectedAssetName);
+			if (loaded) {
 				asset = system.FindEditableAsset(selectedAssetName);
-				if (asset) {
-					savedAssetSnapshots[selectedAssetName] = CreateCylinderAssetSnapshot(*asset);
+				if (asset && reloadRequested) {
+					savedAssetSnapshots[selectedAssetName] = CreateRibbonAssetSnapshot(*asset);
 				}
 			}
 		}
@@ -990,55 +1264,44 @@ namespace MadoEngine::Editor {
 		}
 
 		ImGui::SeparatorText("プレビュー");
-		const ImGuiTableFlags previewTableFlags = ImGuiTableFlags_SizingStretchProp;
 		bool previewLoopChanged = false;
-		if (ImGui::BeginTable("CylinderPreviewSettings", 2, previewTableFlags)) {
-			ImGui::TableSetupColumn("Transform", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+		if (ImGui::BeginTable("RibbonPreviewSettings", 2, ImGuiTableFlags_SizingStretchProp)) {
+			ImGui::TableSetupColumn("位置", ImGuiTableColumnFlags_WidthStretch, 2.0f);
 			ImGui::TableSetupColumn("再生", ImGuiTableColumnFlags_WidthStretch, 1.0f);
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::DragFloat3("位置", &previewTransform.translate.x, 0.05f);
+			ImGui::DragFloat3(
+				"プレビュー基準位置",
+				&previewPosition.x,
+				0.05f
+			);
 			ImGui::TableSetColumnIndex(1);
 			previewLoopChanged = ImGui::Checkbox("プレビューをループ", &previewLoop);
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			float rotationDegrees[3] = {
-				previewTransform.rotate.x * 180.0f / std::numbers::pi_v<float>,
-				previewTransform.rotate.y * 180.0f / std::numbers::pi_v<float>,
-				previewTransform.rotate.z * 180.0f / std::numbers::pi_v<float>,
-			};
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::DragFloat3("回転", rotationDegrees, 0.5f, -360.0f, 360.0f, "%.1f度")) {
-				previewTransform.rotate = {
-					rotationDegrees[0] * std::numbers::pi_v<float> / 180.0f,
-					rotationDegrees[1] * std::numbers::pi_v<float> / 180.0f,
-					rotationDegrees[2] * std::numbers::pi_v<float> / 180.0f,
-				};
-			}
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::DragFloat3("スケール", &previewTransform.scale.x, 0.01f, 0.001f, 1000.0f, "%.3f");
 			ImGui::EndTable();
 		}
 
 		if (ImGui::Button("プレビューを再生")) {
-			StopCylinderPreview(
+			StopRibbonPreview(
 				system,
 				previewHandle,
 				previewAssetName,
 				previewAssetSnapshot
 			);
-			previewHandle = PlayCylinderPreview(system, selectedAssetName, previewTransform, previewLoop);
+			previewHandle = PlayRibbonPreview(
+				system,
+				selectedAssetName,
+				previewPosition,
+				previewLoop
+			);
 			if (system.IsAlive(previewHandle)) {
 				previewAssetName = selectedAssetName;
-				previewAssetSnapshot = CreateCylinderAssetSnapshot(*asset);
+				previewAssetSnapshot = CreateRibbonAssetSnapshot(*asset);
 			}
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("プレビューを停止")) {
-			StopCylinderPreview(
+			StopRibbonPreview(
 				system,
 				previewHandle,
 				previewAssetName,
@@ -1055,13 +1318,13 @@ namespace MadoEngine::Editor {
 		ImGui::TextDisabled("再生中: %zu", system.GetActiveEffectCount());
 
 		bool assetChanged = false;
-		CylinderEffectConfig& config = asset->GetConfig();
+		RibbonEffectConfig& config = asset->GetConfig();
 		ImGui::SeparatorText("設定");
-		const char* settingPageNames[] = { "基本", "形状", "マテリアル", "UV", "グラデーション" };
+		const char* settingPageNames[] = { "基本", "トレイル", "形状", "マテリアル", "UV" };
 		const float settingPageButtonWidth =
 			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 4.0f) /
 			static_cast<float>(std::size(settingPageNames));
-		ImGui::PushID("CylinderSettingPageButtons");
+		ImGui::PushID("RibbonSettingPageButtons");
 		for (int pageIndex = 0; pageIndex < static_cast<int>(std::size(settingPageNames)); ++pageIndex) {
 			ImGui::PushID(pageIndex);
 			if (pageIndex > 0) {
@@ -1081,19 +1344,19 @@ namespace MadoEngine::Editor {
 		}
 		ImGui::PopID();
 
-		ImGui::BeginChild("CylinderSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::BeginChild("RibbonSettingPane", ImVec2(0.0f, 0.0f), true);
 		switch (selectedSettingPage) {
 		case 1:
-			assetChanged |= DrawGeometryEditor(config);
+			assetChanged |= DrawTrailEditor(config, selectedManualControlPointIndex);
 			break;
 		case 2:
-			assetChanged |= DrawMaterialEditor(config);
+			assetChanged |= DrawGeometryEditor(config);
 			break;
 		case 3:
-			assetChanged |= DrawUvEditor(config);
+			assetChanged |= DrawMaterialEditor(config);
 			break;
 		case 4:
-			assetChanged |= DrawGradientEditor(config);
+			assetChanged |= DrawUvEditor(config);
 			break;
 		case 0:
 		default:
@@ -1106,24 +1369,38 @@ namespace MadoEngine::Editor {
 			asset->Validate();
 		}
 
-		const std::string currentAssetSnapshot = CreateCylinderAssetSnapshot(*asset);
-		if (
-			system.IsAlive(previewHandle) &&
-			previewAssetName == selectedAssetName) {
+		const std::string currentAssetSnapshot = CreateRibbonAssetSnapshot(*asset);
+		if (system.IsAlive(previewHandle) && previewAssetName == selectedAssetName) {
 			const bool isAssetChanged = previewAssetSnapshot != currentAssetSnapshot;
 			if (isAssetChanged || previewLoopChanged) {
-				StopCylinderPreview(
+				StopRibbonPreview(
 					system,
 					previewHandle,
 					previewAssetName,
 					previewAssetSnapshot
 				);
-				previewHandle = PlayCylinderPreview(system, selectedAssetName, previewTransform, previewLoop);
+				previewHandle = PlayRibbonPreview(
+					system,
+					selectedAssetName,
+					previewPosition,
+					previewLoop
+				);
 				if (system.IsAlive(previewHandle)) {
 					previewAssetName = selectedAssetName;
 					previewAssetSnapshot = currentAssetSnapshot;
 				}
+			} else if (config.trail.generationMode == RibbonPointGenerationMode::TransformHistory) {
+				const float time = static_cast<float>(ImGui::GetTime());
+				Transform3D previewTransform;
+				previewTransform.translate = {
+					previewPosition.x + std::sin(time * 1.7f) * 3.0f,
+					previewPosition.y + std::sin(time * 2.3f) * 0.75f,
+					previewPosition.z + std::cos(time * 1.7f) * 1.5f,
+				};
+				system.SetTransform(previewHandle, previewTransform);
 			} else {
+				Transform3D previewTransform;
+				previewTransform.translate = previewPosition;
 				system.SetTransform(previewHandle, previewTransform);
 			}
 		}

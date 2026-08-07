@@ -50,6 +50,7 @@ namespace MadoEngine::Render {
 		StaticModel,
 		SkiningModel,
 		Line,
+		Ribbon,
 	};
 
 	/// @brief PSOを一意に識別するための記述子
@@ -61,6 +62,7 @@ namespace MadoEngine::Render {
 		TopologyType    topology    = TopologyType::Triangle;
 		InputLayoutType inputLayout = InputLayoutType::StaticModel;
 		uint32_t        renderTargetCount = 1;
+		bool            preserveRenderTargetAlpha = false;
 		DXGI_FORMAT     rtvFormat   = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		DXGI_FORMAT     dsvFormat   = DXGI_FORMAT_D32_FLOAT;
 		int             depthBias = D3D12_DEFAULT_DEPTH_BIAS;

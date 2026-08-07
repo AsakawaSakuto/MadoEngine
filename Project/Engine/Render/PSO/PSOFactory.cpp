@@ -40,6 +40,12 @@ namespace MadoEngine::Render {
 		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 	};
 
+	static const D3D12_INPUT_ELEMENT_DESC kRibbonLayout[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	};
+
 	// ---------------------------------------------------------------
 
 	void PSOFactory::Initialize(Core::DxDevice* device) {
@@ -58,7 +64,10 @@ namespace MadoEngine::Render {
 		psoDesc.InputLayout = { elements, elementCount };
 
 		// ブレンド
-		psoDesc.BlendState = BuildBlendDesc(desc.blendMode);
+		psoDesc.BlendState = BuildBlendDesc(
+			desc.blendMode,
+			desc.preserveRenderTargetAlpha
+		);
 
 		// 深度ステンシル
 		psoDesc.DepthStencilState = BuildDepthStencilDesc(desc.depthMode);
@@ -137,6 +146,10 @@ namespace MadoEngine::Render {
 				*outElements = kLineLayout;
 				*outCount    = _countof(kLineLayout);
 				break;
+			case InputLayoutType::Ribbon:
+				*outElements = kRibbonLayout;
+				*outCount = _countof(kRibbonLayout);
+				break;
 			default:
 				*outElements = kStaticModelLayout;
 				*outCount    = _countof(kStaticModelLayout);
@@ -144,7 +157,9 @@ namespace MadoEngine::Render {
 		}
 	}
 
-	D3D12_BLEND_DESC PSOFactory::BuildBlendDesc(BlendMode mode) {
+	D3D12_BLEND_DESC PSOFactory::BuildBlendDesc(
+		BlendMode mode,
+		bool preserveRenderTargetAlpha) {
 		D3D12_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable  = FALSE;
 		desc.IndependentBlendEnable = FALSE;
@@ -152,7 +167,13 @@ namespace MadoEngine::Render {
 		auto& rt = desc.RenderTarget[0];
 		rt.BlendEnable           = TRUE;
 		rt.LogicOpEnable         = FALSE;
-		rt.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		rt.RenderTargetWriteMask = preserveRenderTargetAlpha
+			? static_cast<UINT8>(
+				D3D12_COLOR_WRITE_ENABLE_RED |
+				D3D12_COLOR_WRITE_ENABLE_GREEN |
+				D3D12_COLOR_WRITE_ENABLE_BLUE
+			)
+			: D3D12_COLOR_WRITE_ENABLE_ALL;
 		rt.SrcBlendAlpha         = D3D12_BLEND_ONE;
 		rt.DestBlendAlpha        = D3D12_BLEND_ZERO;
 		rt.BlendOpAlpha          = D3D12_BLEND_OP_ADD;

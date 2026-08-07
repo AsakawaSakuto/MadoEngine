@@ -35,8 +35,12 @@ namespace MadoEngine::Render {
 
 		/// @brief BlendModeに応じたD3D12_BLEND_DESCを組み立てる
 		/// @param mode ブレンドモード
+		/// @param preserveRenderTargetAlpha 描画先Alphaを保持する場合はtrue
 		/// @return 組み立て済みのD3D12_BLEND_DESC
-		static D3D12_BLEND_DESC BuildBlendDesc(BlendMode mode);
+		static D3D12_BLEND_DESC BuildBlendDesc(
+			BlendMode mode,
+			bool preserveRenderTargetAlpha
+		);
 
 		/// @brief DepthModeに応じたD3D12_DEPTH_STENCIL_DESCを組み立てる
 		/// @param mode 深度モード

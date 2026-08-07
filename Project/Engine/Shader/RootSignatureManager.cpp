@@ -699,6 +699,52 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("ParticleCompute.RootSig", rootSigDesc);
 		}
 
+		// Ribbon Effect用 RootSignature
+		// b0: Camera、t0: Texture、s0: Sampler
+		{
+			D3D12_DESCRIPTOR_RANGE textureRange{};
+			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			textureRange.NumDescriptors = 1;
+			textureRange.BaseShaderRegister = 0;
+			textureRange.RegisterSpace = 0;
+			textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+			D3D12_ROOT_PARAMETER rootParams[2]{};
+			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+			rootParams[0].Descriptor.ShaderRegister = 0;
+			rootParams[0].Descriptor.RegisterSpace = 0;
+			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParams[1].DescriptorTable.NumDescriptorRanges = 1;
+			rootParams[1].DescriptorTable.pDescriptorRanges = &textureRange;
+			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_STATIC_SAMPLER_DESC sampler{};
+			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			sampler.MipLODBias = 0.0f;
+			sampler.MaxAnisotropy = 0;
+			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			sampler.MinLOD = 0.0f;
+			sampler.MaxLOD = D3D12_FLOAT32_MAX;
+			sampler.ShaderRegister = 0;
+			sampler.RegisterSpace = 0;
+			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+			rootSigDesc.NumParameters = _countof(rootParams);
+			rootSigDesc.pParameters = rootParams;
+			rootSigDesc.NumStaticSamplers = 1;
+			rootSigDesc.pStaticSamplers = &sampler;
+			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			MadoEngine::RootSignatureManager::GetInstance().Register("RibbonEffect3d.RootSig", rootSigDesc);
+		}
+
 		// Cylinder Effect用 RootSignature
 		// t0: Cylinder Instance、b0: Camera、t1: Texture、s0: Sampler
 		{

@@ -9,6 +9,7 @@
 #include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
 #include "EditorUIHeaders.h"
 #include "Render/ImGui/Editor/History/EditorHistory.h"
 #include "../InputRegister.h"
@@ -79,6 +80,7 @@ SceneManager::~SceneManager() {
 	LightManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
+	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 }
 
 void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
@@ -118,6 +120,7 @@ void SceneManager::Update(float dt) {
 	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
+	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Update(dt);
 }
 
 void SceneManager::Draw() {
@@ -158,6 +161,11 @@ void SceneManager::DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask lay
 
 	const Camera camera = currentScene_->GetCamera();
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().DrawLayerMask(
+		currentSceneType_,
+		camera,
+		layerMask
+	);
+	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().DrawLayerMask(
 		currentSceneType_,
 		camera,
 		layerMask
@@ -305,6 +313,7 @@ void SceneManager::ChangeScene(SceneType type) {
 		LightManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
+		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}
 

@@ -24,6 +24,7 @@ namespace MadoEngine::Render {
 			HashCombine(seed, static_cast<int>(desc.topology));
 			HashCombine(seed, static_cast<int>(desc.inputLayout));
 			HashCombine(seed, desc.renderTargetCount);
+			HashCombine(seed, desc.preserveRenderTargetAlpha);
 			HashCombine(seed, static_cast<int>(desc.rtvFormat));
 			HashCombine(seed, static_cast<int>(desc.dsvFormat));
 			HashCombine(seed, desc.depthBias);
@@ -46,6 +47,7 @@ namespace MadoEngine::Render {
 				   lhs.topology    == rhs.topology     &&
 				   lhs.inputLayout == rhs.inputLayout  &&
 				   lhs.renderTargetCount == rhs.renderTargetCount &&
+				   lhs.preserveRenderTargetAlpha == rhs.preserveRenderTargetAlpha &&
 				   lhs.rtvFormat   == rhs.rtvFormat    &&
 				   lhs.dsvFormat   == rhs.dsvFormat    &&
 				   lhs.depthBias   == rhs.depthBias    &&
