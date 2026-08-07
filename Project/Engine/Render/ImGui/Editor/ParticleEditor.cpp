@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cfloat>
+#include <charconv>
 #include <cstring>
 #include <string>
 #include <type_traits>
@@ -55,42 +56,88 @@ namespace {
 
 	/// @brief Emitter一覧内で重複しない名前を生成する
 	/// @param emitters 名前の重複を確認するEmitter一覧
-	/// @param baseName 名前の基準文字列
+	/// @param createdName 初期名または直前に作成した名前
 	/// @return 重複しないEmitter名
 	std::string MakeUniqueEmitterName(
 		const std::vector<EmitterConfig>& emitters,
-		const std::string& baseName) {
-		if (!IsEmitterNameUsed(emitters, baseName)) {
-			return baseName;
+		const std::string& createdName) {
+		if (!IsEmitterNameUsed(emitters, createdName)) {
+			return createdName;
 		}
 
-		for (uint32_t suffix = 2; ; ++suffix) {
-			const std::string candidate = baseName + " (" + std::to_string(suffix) + ")";
+		std::size_t suffixStart = createdName.size();
+		while (suffixStart > 0) {
+			const char character = createdName[suffixStart - 1];
+			if (character < '0' || character > '9') {
+				break;
+			}
+			--suffixStart;
+		}
+
+		std::string baseName = createdName.substr(0, suffixStart);
+		uint64_t suffix = 1;
+		if (suffixStart < createdName.size()) {
+			const char* suffixBegin = createdName.data() + suffixStart;
+			const char* suffixEnd = createdName.data() + createdName.size();
+			const std::from_chars_result result = std::from_chars(suffixBegin, suffixEnd, suffix);
+			if (result.ec == std::errc{} && result.ptr == suffixEnd) {
+				++suffix;
+			} else {
+				baseName = createdName;
+				suffix = 1;
+			}
+		}
+
+		for (;;) {
+			const std::string candidate = baseName + std::to_string(suffix);
 			if (!IsEmitterNameUsed(emitters, candidate)) {
 				return candidate;
 			}
+			++suffix;
 		}
 	}
 
 	/// @brief 新規Particle Assetに使用できる名前を生成する
 	/// @param particleSystem 名前の使用状況を確認するParticleSystem
-	/// @param baseName 名前の基準文字列
+	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能なParticle Asset名
 	std::string MakeAvailableParticleAssetName(
 		const ParticleSystem3d& particleSystem,
-		const std::string& baseName) {
-		if (particleSystem.IsAssetNameAvailable(baseName)) {
-			return baseName;
+		const std::string& createdName) {
+		if (particleSystem.IsAssetNameAvailable(createdName)) {
+			return createdName;
 		}
 
-		for (uint32_t suffix = 2; suffix < 10000; ++suffix) {
-			const std::string candidate = baseName + " (" + std::to_string(suffix) + ")";
-			if (particleSystem.IsAssetNameAvailable(candidate)) {
-				return candidate;
+		std::size_t suffixStart = createdName.size();
+		while (suffixStart > 0) {
+			const char character = createdName[suffixStart - 1];
+			if (character < '0' || character > '9') {
+				break;
+			}
+			--suffixStart;
+		}
+
+		std::string baseName = createdName.substr(0, suffixStart);
+		uint64_t suffix = 1;
+		if (suffixStart < createdName.size()) {
+			const char* suffixBegin = createdName.data() + suffixStart;
+			const char* suffixEnd = createdName.data() + createdName.size();
+			const std::from_chars_result result = std::from_chars(suffixBegin, suffixEnd, suffix);
+			if (result.ec == std::errc{} && result.ptr == suffixEnd) {
+				++suffix;
+			} else {
+				baseName = createdName;
+				suffix = 1;
 			}
 		}
 
-		return baseName;
+		for (;;) {
+			const std::string candidate = baseName + std::to_string(suffix);
+			if (particleSystem.IsAssetNameAvailable(candidate)) {
+				return candidate;
+			}
+			++suffix;
+		}
 	}
 
 	/// @brief 文字列を固定長Bufferへコピーする
@@ -473,14 +520,15 @@ namespace MadoEngine::Editor {
 		static std::array<char, 128> renameEmitterNameBuffer{};
 		static std::string emitterRenameAssetName;
 		static std::string emitterRenameOriginalName;
+		static std::string emitterCreateAssetName;
 		static int renameEmitterIndex = -1;
 		static bool isNameBufferInitialized = false;
 		if (!isNameBufferInitialized) {
 			CopyToBuffer(
 				newAssetNameBuffer,
-				MakeAvailableParticleAssetName(particleSystem, "新規パーティクル")
+				MakeAvailableParticleAssetName(particleSystem, "Particle")
 			);
-			CopyToBuffer(newEmitterNameBuffer, "新規エミッター");
+			CopyToBuffer(newEmitterNameBuffer, "Emitter");
 			isNameBufferInitialized = true;
 		}
 
@@ -524,7 +572,7 @@ namespace MadoEngine::Editor {
 				renameEmitterIndex = -1;
 				CopyToBuffer(
 					newAssetNameBuffer,
-					MakeAvailableParticleAssetName(particleSystem, "新規パーティクル")
+					MakeAvailableParticleAssetName(particleSystem, newAssetName)
 				);
 			}
 		}
@@ -545,7 +593,7 @@ namespace MadoEngine::Editor {
 				renameEmitterIndex = -1;
 				CopyToBuffer(
 					newAssetNameBuffer,
-					MakeAvailableParticleAssetName(particleSystem, "新規パーティクル")
+					MakeAvailableParticleAssetName(particleSystem, newAssetName)
 				);
 			}
 		}
@@ -765,6 +813,13 @@ namespace MadoEngine::Editor {
 		}
 
 		std::vector<EmitterConfig>& emitters = asset->GetEmitters();
+		if (emitterCreateAssetName != selectedAssetName) {
+			CopyToBuffer(
+				newEmitterNameBuffer,
+				MakeUniqueEmitterName(emitters, "Emitter")
+			);
+			emitterCreateAssetName = selectedAssetName;
+		}
 		ImGui::SameLine();
 		ImGui::TextDisabled("%zu エミッター", emitters.size());
 		const float emitterListWidth = std::clamp(
@@ -793,7 +848,7 @@ namespace MadoEngine::Editor {
 			renameEmitterIndex = -1;
 			CopyToBuffer(
 				newEmitterNameBuffer,
-				MakeUniqueEmitterName(emitters, "新規エミッター")
+				MakeUniqueEmitterName(emitters, newEmitterName)
 			);
 		}
 		ImGui::EndDisabled();
@@ -834,7 +889,7 @@ namespace MadoEngine::Editor {
 			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 		if (ImGui::Button("複製", ImVec2(emitterOperationButtonWidth, 0.0f))) {
 			EmitterConfig emitter = emitters[selectedEmitterIndex];
-			emitter.name = MakeUniqueEmitterName(emitters, emitter.name + " のコピー");
+			emitter.name = MakeUniqueEmitterName(emitters, emitter.name);
 			emitters.insert(emitters.begin() + selectedEmitterIndex + 1, std::move(emitter));
 			++selectedEmitterIndex;
 			renameEmitterIndex = -1;

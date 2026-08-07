@@ -373,11 +373,20 @@ namespace MadoEngine::Ribbon {
 			}
 			source.push_back({ point.position, normalizedLifetime });
 		}
-		if (source.size() < kMinimumRibbonPointCount || data.smoothingSubdivision == 0) {
+		uint32_t smoothingSubdivision = (std::min)(
+			data.smoothingSubdivision,
+			kMaximumRibbonSmoothingSubdivision
+		);
+		if (
+			data.interpolation == RibbonInterpolationMode::CatmullRom &&
+			smoothingSubdivision == 0) {
+			smoothingSubdivision = kDefaultRibbonCurveSubdivision;
+		}
+		if (source.size() < kMinimumRibbonPointCount || smoothingSubdivision == 0) {
 			return source;
 		}
 
-		const uint32_t steps = data.smoothingSubdivision + 1;
+		const uint32_t steps = smoothingSubdivision + 1;
 		std::vector<SmoothedPoint> result;
 		result.reserve((source.size() - 1) * steps + 1);
 		result.push_back(source.front());

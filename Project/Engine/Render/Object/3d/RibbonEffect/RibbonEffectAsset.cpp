@@ -593,6 +593,11 @@ namespace MadoEngine::Ribbon {
 			0u,
 			kMaximumRibbonSmoothingSubdivision
 		);
+		if (
+			config_.geometry.interpolation == RibbonInterpolationMode::CatmullRom &&
+			config_.geometry.smoothingSubdivision == 0) {
+			config_.geometry.smoothingSubdivision = kDefaultRibbonCurveSubdivision;
+		}
 
 		NormalizeTrack(
 			config_.geometry.widthOverLifetime,

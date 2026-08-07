@@ -31,11 +31,11 @@ namespace MadoEngine::Effect {
 		/// @param time 評価するエフェクト内時刻
 		/// @return 補間された値
 		T Evaluate(float time) const {
-			if (keyframes_.empty()) {
+			if (keyframes_.empty() || !std::isfinite(time)) {
 				return defaultValue_;
 			}
 
-			if (time <= keyframes_.front().time) {
+			if (time < keyframes_.front().time) {
 				return keyframes_.front().value;
 			}
 			if (time >= keyframes_.back().time) {
@@ -89,16 +89,7 @@ namespace MadoEngine::Effect {
 				}
 			);
 
-			std::vector<EffectKeyframe<T>> normalized;
-			normalized.reserve(keyframes.size());
-			for (const EffectKeyframe<T>& keyframe : keyframes) {
-				if (!normalized.empty() && normalized.back().time == keyframe.time) {
-					normalized.back() = keyframe;
-					continue;
-				}
-				normalized.push_back(keyframe);
-			}
-			keyframes_ = std::move(normalized);
+			keyframes_ = std::move(keyframes);
 		}
 
 		/// @brief キーフレームを取得する

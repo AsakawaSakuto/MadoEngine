@@ -5,7 +5,9 @@
 #include <algorithm>
 #include <array>
 #include <cfloat>
+#include <charconv>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <numbers>
 #include <optional>
@@ -19,6 +21,17 @@ namespace {
 
 	using namespace MadoEngine::Effect;
 
+	/// @brief Track Editor内でKeyframeを識別するIDを発行する
+	/// @return 新しいEditor用ID
+	uint32_t AllocateKeyframeEditorId() {
+		static uint32_t nextId = 1;
+		const uint32_t id = nextId++;
+		if (nextId == 0) {
+			nextId = 1;
+		}
+		return id;
+	}
+
 	/// @brief 文字列を固定長Bufferへコピーする
 	/// @tparam Size Bufferの要素数
 	/// @param buffer コピー先Buffer
@@ -31,23 +44,45 @@ namespace {
 
 	/// @brief 新規Cylinder Assetに使用できる名前を生成する
 	/// @param system 名前の使用状況を確認するPrimitive Effect System
-	/// @param baseName 名前の基準文字列
+	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能なCylinder Asset名
 	std::string MakeAvailableCylinderAssetName(
 		const PrimitiveEffectSystem3d& system,
-		const std::string& baseName) {
-		if (system.IsAssetNameAvailable(baseName)) {
-			return baseName;
+		const std::string& createdName) {
+		if (system.IsAssetNameAvailable(createdName)) {
+			return createdName;
 		}
 
-		for (uint32_t suffix = 2; suffix < 10000; ++suffix) {
-			const std::string candidate = baseName + " (" + std::to_string(suffix) + ")";
-			if (system.IsAssetNameAvailable(candidate)) {
-				return candidate;
+		std::size_t suffixStart = createdName.size();
+		while (suffixStart > 0) {
+			const char character = createdName[suffixStart - 1];
+			if (character < '0' || character > '9') {
+				break;
+			}
+			--suffixStart;
+		}
+
+		std::string baseName = createdName.substr(0, suffixStart);
+		uint64_t suffix = 1;
+		if (suffixStart < createdName.size()) {
+			const char* suffixBegin = createdName.data() + suffixStart;
+			const char* suffixEnd = createdName.data() + createdName.size();
+			const std::from_chars_result result = std::from_chars(suffixBegin, suffixEnd, suffix);
+			if (result.ec == std::errc{} && result.ptr == suffixEnd) {
+				++suffix;
+			} else {
+				baseName = createdName;
+				suffix = 1;
 			}
 		}
 
-		return baseName;
+		for (;;) {
+			const std::string candidate = baseName + std::to_string(suffix);
+			if (system.IsAssetNameAvailable(candidate)) {
+				return candidate;
+			}
+			++suffix;
+		}
 	}
 
 	constexpr std::array<const char*, 42> kEaseTypeNames = {
@@ -190,7 +225,9 @@ namespace {
 		ValueDrawer drawValue) {
 		bool changed = false;
 		static std::unordered_map<const void*, int> selectedKeyframeIndices;
-		int& selectedKeyframeIndex = selectedKeyframeIndices[static_cast<const void*>(&track)];
+		static std::unordered_map<const void*, std::vector<uint32_t>> keyframeIds;
+		const void* trackKey = static_cast<const void*>(&track);
+		int& selectedKeyframeIndex = selectedKeyframeIndices[trackKey];
 		ImGui::PushID(label);
 		const bool isOpen = ImGui::TreeNodeEx("トラック", ImGuiTreeNodeFlags_SpanAvailWidth, "%s", label);
 		if (isOpen) {
@@ -201,6 +238,13 @@ namespace {
 			}
 
 			std::vector<EffectKeyframe<T>> keyframes = track.GetKeyframes();
+			std::vector<uint32_t>& editorIds = keyframeIds[trackKey];
+			while (editorIds.size() < keyframes.size()) {
+				editorIds.push_back(AllocateKeyframeEditorId());
+			}
+			if (editorIds.size() > keyframes.size()) {
+				editorIds.resize(keyframes.size());
+			}
 			if (keyframes.empty()) {
 				selectedKeyframeIndex = -1;
 			} else {
@@ -216,7 +260,7 @@ namespace {
 				duration,
 				selectedKeyframeIndex
 			);
-			std::optional<float> requestedSelectionTime;
+			std::optional<int> requestedSelectionIndex;
 			constexpr float operationButtonWidth = 72.0f;
 
 			ImGui::BeginDisabled(!insertionTime.has_value());
@@ -225,8 +269,9 @@ namespace {
 				keyframe.time = insertionTime.value();
 				keyframe.value = track.Evaluate(keyframe.time);
 				keyframe.easing = EaseType::Linear;
-				requestedSelectionTime = keyframe.time;
+				requestedSelectionIndex = static_cast<int>(keyframes.size());
 				keyframes.push_back(keyframe);
+				editorIds.push_back(AllocateKeyframeEditorId());
 				changed = true;
 			}
 			ImGui::EndDisabled();
@@ -235,8 +280,9 @@ namespace {
 			if (ImGui::Button("複製", ImVec2(operationButtonWidth, 0.0f))) {
 				EffectKeyframe<T> keyframe = keyframes[selectedKeyframeIndex];
 				keyframe.time = insertionTime.value();
-				requestedSelectionTime = keyframe.time;
+				requestedSelectionIndex = static_cast<int>(keyframes.size());
 				keyframes.push_back(keyframe);
+				editorIds.push_back(AllocateKeyframeEditorId());
 				changed = true;
 			}
 			ImGui::EndDisabled();
@@ -244,6 +290,7 @@ namespace {
 			ImGui::BeginDisabled(!hasSelection);
 			if (ImGui::Button("削除", ImVec2(operationButtonWidth, 0.0f))) {
 				keyframes.erase(keyframes.begin() + selectedKeyframeIndex);
+				editorIds.erase(editorIds.begin() + selectedKeyframeIndex);
 				if (keyframes.empty()) {
 					selectedKeyframeIndex = -1;
 				} else {
@@ -263,6 +310,7 @@ namespace {
 			ImGui::EndDisabled();
 			ImGui::SameLine();
 			ImGui::TextDisabled("%zu個", keyframes.size());
+			ImGui::TextDisabled("時刻は前後のキーフレームの範囲内に制限されます。");
 
 			const float tableHeight = std::clamp(
 				(static_cast<float>(keyframes.size()) + 1.0f) * ImGui::GetTextLineHeightWithSpacing() + 8.0f,
@@ -284,7 +332,17 @@ namespace {
 
 				for (int index = 0; index < static_cast<int>(keyframes.size()); ++index) {
 					EffectKeyframe<T>& keyframe = keyframes[index];
-					ImGui::PushID(index);
+					const float minimumKeyframeTime = index > 0
+						? keyframes[index - 1].time
+						: 0.0f;
+					const float requestedMaximumKeyframeTime = index + 1 < static_cast<int>(keyframes.size())
+						? keyframes[index + 1].time
+						: (std::max)(duration, 0.001f);
+					const float maximumKeyframeTime = (std::max)(
+						minimumKeyframeTime,
+						requestedMaximumKeyframeTime
+					);
+					ImGui::PushID(static_cast<int>(editorIds[index]));
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					const std::string keyframeLabel = "キーフレーム " + std::to_string(index + 1);
@@ -297,10 +355,15 @@ namespace {
 						"##Time",
 						&keyframe.time,
 						0.01f,
-						0.0f,
-						(std::max)(duration, 0.001f),
+						minimumKeyframeTime,
+						maximumKeyframeTime,
 						"%.3f秒"
 					)) {
+						keyframe.time = std::clamp(
+							std::isfinite(keyframe.time) ? keyframe.time : minimumKeyframeTime,
+							minimumKeyframeTime,
+							maximumKeyframeTime
+						);
 						selectedKeyframeIndex = index;
 						changed = true;
 					}
@@ -328,6 +391,7 @@ namespace {
 				ImGui::TextDisabled("トラックは既定値を使用する状態へ戻ります。");
 				if (ImGui::Button("消去する")) {
 					keyframes.clear();
+					editorIds.clear();
 					selectedKeyframeIndex = -1;
 					changed = true;
 					ImGui::CloseCurrentPopup();
@@ -340,21 +404,32 @@ namespace {
 			}
 
 			if (changed) {
-				track.SetKeyframes(std::move(keyframes));
-				if (requestedSelectionTime.has_value()) {
-					const std::vector<EffectKeyframe<T>>& normalizedKeyframes = track.GetKeyframes();
-					const auto selected = std::lower_bound(
-						normalizedKeyframes.begin(),
-						normalizedKeyframes.end(),
-						requestedSelectionTime.value(),
-						[](const EffectKeyframe<T>& keyframe, float time) {
-							return keyframe.time < time;
+				if (
+					requestedSelectionIndex.has_value() &&
+					requestedSelectionIndex.value() >= 0 &&
+					requestedSelectionIndex.value() < static_cast<int>(keyframes.size())) {
+					EffectKeyframe<T> selectedKeyframe = std::move(
+						keyframes[requestedSelectionIndex.value()]
+					);
+					const uint32_t selectedEditorId = editorIds[requestedSelectionIndex.value()];
+					keyframes.erase(keyframes.begin() + requestedSelectionIndex.value());
+					editorIds.erase(editorIds.begin() + requestedSelectionIndex.value());
+					const auto insertion = std::upper_bound(
+						keyframes.begin(),
+						keyframes.end(),
+						selectedKeyframe.time,
+						[](float time, const EffectKeyframe<T>& keyframe) {
+							return time < keyframe.time;
 						}
 					);
-					selectedKeyframeIndex = selected == normalizedKeyframes.end()
-						? static_cast<int>(normalizedKeyframes.size()) - 1
-						: static_cast<int>(std::distance(normalizedKeyframes.begin(), selected));
+					selectedKeyframeIndex = static_cast<int>(std::distance(keyframes.begin(), insertion));
+					keyframes.insert(insertion, std::move(selectedKeyframe));
+					editorIds.insert(
+						editorIds.begin() + selectedKeyframeIndex,
+						selectedEditorId
+					);
 				}
+				track.SetKeyframes(std::move(keyframes));
 			}
 			ImGui::TreePop();
 		}
@@ -671,7 +746,7 @@ namespace MadoEngine::Editor {
 		if (!isNameBufferInitialized) {
 			CopyToBuffer(
 				newAssetNameBuffer,
-				MakeAvailableCylinderAssetName(system, "新規Cylinder")
+				MakeAvailableCylinderAssetName(system, "Cylinder")
 			);
 			isNameBufferInitialized = true;
 		}
@@ -728,7 +803,7 @@ namespace MadoEngine::Editor {
 					}
 					CopyToBuffer(
 						newAssetNameBuffer,
-						MakeAvailableCylinderAssetName(system, "新規Cylinder")
+						MakeAvailableCylinderAssetName(system, newAssetName)
 					);
 				}
 			}
@@ -758,7 +833,7 @@ namespace MadoEngine::Editor {
 					}
 					CopyToBuffer(
 						newAssetNameBuffer,
-						MakeAvailableCylinderAssetName(system, "新規Cylinder")
+						MakeAvailableCylinderAssetName(system, newAssetName)
 					);
 				}
 			}

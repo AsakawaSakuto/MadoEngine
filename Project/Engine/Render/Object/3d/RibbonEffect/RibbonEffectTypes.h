@@ -18,6 +18,7 @@ namespace MadoEngine::Ribbon {
 	inline constexpr uint32_t kMinimumRibbonPointCount = 2;
 	inline constexpr uint32_t kMaximumRibbonPointCount = 4096;
 	inline constexpr uint32_t kMaximumRibbonSmoothingSubdivision = 32;
+	inline constexpr uint32_t kDefaultRibbonCurveSubdivision = 8;
 
 	enum class RibbonPointGenerationMode : uint32_t {
 		TransformHistory,
