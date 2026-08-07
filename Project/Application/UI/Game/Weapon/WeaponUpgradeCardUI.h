@@ -1,5 +1,6 @@
 #pragma once
 #include <RenderHeaders.h>
+#include "Utility/GameTimer/GameTimer.h"
 #include <array>
 #include <cstddef>
 
@@ -48,6 +49,10 @@ namespace UI::Game {
 		/// @brief カードの配置を設定
 		void ApplyLayout();
 
+		/// @brief カード全体へ選択状態の拡大率を適用
+		/// @param scale カード全体へ適用する拡大率
+		void ApplySelectionScale(float scale);
+
 		/// @brief 管理する描画オブジェクトの表示状態を反映
 		void ApplyVisibility();
 
@@ -61,7 +66,10 @@ namespace UI::Game {
 		MadoEngine::TextHandle categoryText_{};   // カテゴリ名とレアリティを表示するテキスト
 		MadoEngine::TextHandle detailText_{};     // ステータス変化量や説明を表示するテキスト
 		MadoEngine::TextHandle selectionText_{};  // 選択中を表示するテキスト
-		float selectedAnimationTime_ = 0.0f;
+		GameTimer scaleTransitionTimer_;
+		GameTimer selectedPulseTimer_;
+		float scaleTransitionStart_ = 1.0f;
+		float currentScale_ = 1.0f;
 		bool isSelected_ = false;
 		bool isVisible_ = false;
 		bool isInitialized_ = false;

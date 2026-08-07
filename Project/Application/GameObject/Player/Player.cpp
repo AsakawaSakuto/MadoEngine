@@ -118,6 +118,11 @@ namespace Player {
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
 			transform_.translate = { 0.0f, 100.0f, 0.0f };
 		}
+
+		if (MyInput::GetKeybord()->IsTrigger(DIK_F4)) {
+			status_.currentExp += status_.expToNextLevel;
+			ProcessLevelUp();
+		}
 	}
 
 	void Base::ResolveAfterCollision() {

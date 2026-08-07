@@ -1,8 +1,10 @@
 #include "WeaponUpgradeCardUI.h"
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
+#include "Utility/Easing/Easing.h"
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <numbers>
 #include <string>
 
 namespace {
@@ -15,6 +17,10 @@ constexpr Vector2 kCardBackgroundScale = { 15.0f, 23.0f };
 constexpr Vector2 kIconBorderScale = { 4.8f, 4.8f };
 constexpr Vector2 kIconBackgroundScale = { 4.0f, 4.0f };
 constexpr Vector2 kIconScale = { 0.9f, 0.9f };
+constexpr float kSelectedCardScale = 1.08f;          // 選択中カードの拡大率
+constexpr float kSelectedCardPulseScale = 0.01f;     // 選択中カードの拡縮幅
+constexpr float kScaleTransitionDuration = 0.18f;    // 選択状態の拡大率を適用する際の補間時間
+constexpr float kSelectedCardPulseDuration = 0.25f;  // 選択中カードの拡縮周期
 constexpr Vector4 kNewWeaponColor = { 0.95f, 0.97f, 1.0f, 1.0f };
 constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
@@ -37,6 +43,18 @@ Sprite* ResolveSprite(MadoEngine::SpriteHandle handle) {
 /// @return 有効な場合はText、無効な場合はnullptr
 MadoEngine::Text* ResolveText(MadoEngine::TextHandle handle) {
 	return MyText::TryGet(handle);
+}
+
+/// @brief 基準位置を中心として座標を拡大する
+/// @param position 拡大する座標
+/// @param center 拡大の中心座標
+/// @param scale 拡大率
+/// @return 拡大後の座標
+Vector2 ScalePositionAroundCenter(const Vector2& position, const Vector2& center, float scale) {
+	return {
+		center.x + (position.x - center.x) * scale,
+		center.y + (position.y - center.y) * scale,
+	};
 }
 
 } // namespace
@@ -109,6 +127,10 @@ void WeaponUpgradeCardUI::Finalize() {
 	categoryText_ = {};
 	detailText_ = {};
 	selectionText_ = {};
+	scaleTransitionTimer_.Reset();
+	selectedPulseTimer_.Reset();
+	scaleTransitionStart_ = 1.0f;
+	currentScale_ = 1.0f;
 	isSelected_ = false;
 	isVisible_ = false;
 	isInitialized_ = false;
@@ -150,7 +172,9 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 
 void WeaponUpgradeCardUI::SetSelected(bool isSelected) {
 	if (isSelected_ != isSelected) {
-		selectedAnimationTime_ = 0.0f;
+		scaleTransitionStart_ = currentScale_;
+		scaleTransitionTimer_.Start(kScaleTransitionDuration, false);
+		selectedPulseTimer_.Reset();
 	}
 	isSelected_ = isSelected;
 	ApplyVisibility();
@@ -159,7 +183,11 @@ void WeaponUpgradeCardUI::SetSelected(bool isSelected) {
 void WeaponUpgradeCardUI::SetVisible(bool isVisible) {
 	isVisible_ = isVisible;
 	if (!isVisible_) {
-		selectedAnimationTime_ = 0.0f;
+		scaleTransitionTimer_.Reset();
+		selectedPulseTimer_.Reset();
+		scaleTransitionStart_ = 1.0f;
+		currentScale_ = 1.0f;
+		ApplySelectionScale(currentScale_);
 	}
 	ApplyVisibility();
 }
@@ -172,59 +200,57 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 	if (!border) {
 		return;
 	}
-	if (!isSelected_) {
-		selectedAnimationTime_ = 0.0f;
-		border->SetScale(kCardBorderScale);
-		border->SetColor({ 0.35f, 0.38f, 0.45f, 1.0f });
-		return;
+	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
+	scaleTransitionTimer_.Update(safeDeltaTime);
+	const float transitionProgress = scaleTransitionTimer_.GetProgress();
+	const float targetScale = isSelected_ ? kSelectedCardScale : 1.0f;
+	const EaseType easeType = isSelected_ ? EaseType::EaseOutBack : EaseType::EaseOutCubic;
+	currentScale_ = Easing::Lerp(
+		scaleTransitionStart_,
+		targetScale,
+		transitionProgress,
+		easeType);
+
+	float displayScale = currentScale_;
+	if (isSelected_ && scaleTransitionTimer_.IsFinished()) {
+		if (!selectedPulseTimer_.IsActive()) {
+			selectedPulseTimer_.Start(kSelectedCardPulseDuration, true);
+		}
+		selectedPulseTimer_.Update(safeDeltaTime);
+		const float pulseAngle = selectedPulseTimer_.GetProgress() *
+			2.0f * std::numbers::pi_v<float>;
+		displayScale += std::sin(pulseAngle) * kSelectedCardPulseScale;
 	}
 
-	selectedAnimationTime_ += (std::max)(deltaTime, 0.0f);
-	const float pulse = 1.0f + std::sin(selectedAnimationTime_ * 5.0f) * 0.015f;
-	border->SetScale({ kCardBorderScale.x * pulse, kCardBorderScale.y * pulse });
-	border->SetColor({ 1.0f, 0.82f, 0.18f, 1.0f });
+	ApplySelectionScale(displayScale);
+	border->SetColor(isSelected_
+		? Vector4{ 1.0f, 0.82f, 0.18f, 1.0f }
+		: Vector4{ 0.35f, 0.38f, 0.45f, 1.0f });
 }
 
 void WeaponUpgradeCardUI::ApplyLayout() {
-	const float cardPositionX = kCardBasePositionX + kCardPositionDifferenceX * static_cast<float>(cardIndex_);
-	const Vector2 cardPosition = { cardPositionX, kCardPositionY };
-	const Vector2 iconPosition = { cardPositionX - 70.0f, 225.0f };
-
 	for (MadoEngine::SpriteHandle handle : cardSprites_) {
 		if (Sprite* sprite = ResolveSprite(handle)) {
 			sprite->SetAnchorPoint({ 0.5f, 0.5f });
 		}
 	}
 	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
-		border->SetPosition(cardPosition);
-		border->SetScale(kCardBorderScale);
 		border->SetColor({ 0.35f, 0.38f, 0.45f, 1.0f });
 	}
 	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
-		background->SetPosition(cardPosition);
-		background->SetScale(kCardBackgroundScale);
 		background->SetColor({ 0.055f, 0.07f, 0.11f, 0.96f });
 	}
-	if (Sprite* iconBorder = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)])) {
-		iconBorder->SetPosition(iconPosition);
-		iconBorder->SetScale(kIconBorderScale);
-	}
 	if (Sprite* iconBackground = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBackground)])) {
-		iconBackground->SetPosition(iconPosition);
-		iconBackground->SetScale(kIconBackgroundScale);
 		iconBackground->SetColor({ 0.025f, 0.03f, 0.05f, 1.0f });
 	}
 	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
 		cardIconSprite->SetAnchorPoint({ 0.5f, 0.5f });
-		cardIconSprite->SetPosition(iconPosition);
-		cardIconSprite->SetScale(kIconScale);
 	}
 	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
 		weaponNameText->SetFontFamily("Yu Gothic UI");
 		weaponNameText->SetFontSize(24.0f);
 		weaponNameText->SetAreaSize({ 125.0f, 60.0f });
 		weaponNameText->SetAnchorPoint({ 0.5f, 0.5f });
-		weaponNameText->SetPosition({ cardPositionX + 38.0f, 205.0f });
 		weaponNameText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
 		weaponNameText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
 		weaponNameText->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
@@ -234,7 +260,6 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 		categoryText->SetFontSize(17.0f);
 		categoryText->SetAreaSize({ 125.0f, 70.0f });
 		categoryText->SetAnchorPoint({ 0.5f, 0.5f });
-		categoryText->SetPosition({ cardPositionX + 38.0f, 240.0f });
 		categoryText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
 		categoryText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
 	}
@@ -243,7 +268,6 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 		detailText->SetFontSize(22.0f);
 		detailText->SetAreaSize({ 210.0f, 125.0f });
 		detailText->SetAnchorPoint({ 0.5f, 0.5f });
-		detailText->SetPosition({ cardPositionX, 390.0f });
 		detailText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
 		detailText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
 		detailText->SetColor({ 0.92f, 0.94f, 1.0f, 1.0f });
@@ -253,10 +277,60 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 		selectionText->SetFontSize(20.0f);
 		selectionText->SetAreaSize({ 150.0f, 36.0f });
 		selectionText->SetAnchorPoint({ 0.5f, 0.5f });
-		selectionText->SetPosition({ cardPositionX, 515.0f });
 		selectionText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
 		selectionText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
 		selectionText->SetColor({ 1.0f, 0.82f, 0.18f, 1.0f });
+	}
+	ApplySelectionScale(1.0f);
+}
+
+void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
+	const float cardPositionX = kCardBasePositionX + kCardPositionDifferenceX * static_cast<float>(cardIndex_);
+	const Vector2 cardPosition = { cardPositionX, kCardPositionY };
+	const Vector2 iconPosition = ScalePositionAroundCenter(
+		{ cardPositionX - 70.0f, 225.0f }, cardPosition, scale);
+
+	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
+		border->SetPosition(cardPosition);
+		border->SetScale(kCardBorderScale * scale);
+	}
+	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
+		background->SetPosition(cardPosition);
+		background->SetScale(kCardBackgroundScale * scale);
+	}
+	if (Sprite* iconBorder = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)])) {
+		iconBorder->SetPosition(iconPosition);
+		iconBorder->SetScale(kIconBorderScale * scale);
+	}
+	if (Sprite* iconBackground = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBackground)])) {
+		iconBackground->SetPosition(iconPosition);
+		iconBackground->SetScale(kIconBackgroundScale * scale);
+	}
+	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
+		cardIconSprite->SetPosition(iconPosition);
+		cardIconSprite->SetScale(kIconScale * scale);
+	}
+
+	const Vector2 textScale = { scale, scale };
+	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
+		weaponNameText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX + 38.0f, 205.0f }, cardPosition, scale));
+		weaponNameText->SetScale(textScale);
+	}
+	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
+		categoryText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX + 38.0f, 240.0f }, cardPosition, scale));
+		categoryText->SetScale(textScale);
+	}
+	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
+		detailText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX, 390.0f }, cardPosition, scale));
+		detailText->SetScale(textScale);
+	}
+	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
+		selectionText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX, 515.0f }, cardPosition, scale));
+		selectionText->SetScale(textScale);
 	}
 }
 
