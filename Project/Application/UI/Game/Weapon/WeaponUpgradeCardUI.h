@@ -82,6 +82,8 @@ namespace UI::Game {
 		float scaleTransitionStart_ = 1.0f;
 		float currentScale_ = 1.0f;
 		float decisionOffsetY_ = 0.0f;
+		Vector4 accentColor_ = { 0.35f, 0.38f, 0.45f, 1.0f }; // 未選択時のカード枠とアイコン枠の色
+		Vector4 backgroundColor_ = { 0.055f, 0.07f, 0.11f, 0.96f }; // カード本体の背景色
 		bool isSelected_ = false;
 		bool isDecisionAnimationPlaying_ = false;
 		bool isVisible_ = false;

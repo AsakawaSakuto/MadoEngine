@@ -24,6 +24,8 @@ constexpr float kSelectedCardPulseDuration = 1.25f;  // 選択中カードの拡
 constexpr float kDecisionAnimationDuration = 0.2f;   // 選択決定時にカードを上昇させる時間
 constexpr float kDecisionRiseDistance = 64.0f;       // 選択決定時のカード上昇量
 constexpr Vector4 kNewWeaponColor = { 0.95f, 0.97f, 1.0f, 1.0f };
+constexpr Vector4 kDefaultCardBackgroundColor = { 0.055f, 0.07f, 0.11f, 0.96f };
+constexpr Vector4 kLegendaryCardBackgroundColor = { 0.22f, 0.13f, 0.025f, 0.98f };
 constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
 /// @brief 配列形式の色をVector4へ変換する
@@ -135,6 +137,8 @@ void WeaponUpgradeCardUI::Finalize() {
 	scaleTransitionStart_ = 1.0f;
 	currentScale_ = 1.0f;
 	decisionOffsetY_ = 0.0f;
+	accentColor_ = { 0.35f, 0.38f, 0.45f, 1.0f };
+	backgroundColor_ = kDefaultCardBackgroundColor;
 	isSelected_ = false;
 	isDecisionAnimationPlaying_ = false;
 	isVisible_ = false;
@@ -160,13 +164,19 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 	}
 
 	const bool isOwnedWeaponUpgrade = choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade;
+	accentColor_ = isOwnedWeaponUpgrade ? ToVector4(choice.rarityDisplayColor) : kNewWeaponColor;
+	const bool isLegendary = isOwnedWeaponUpgrade && choice.rarity &&
+		*choice.rarity == Rarity::Legendary;
+	backgroundColor_ = isLegendary
+		? kLegendaryCardBackgroundColor
+		: kDefaultCardBackgroundColor;
 	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
 		if (isOwnedWeaponUpgrade) {
 			categoryText->SetText(choice.rarityDisplayName + "\n" + choice.choiceTypeDisplayName);
-			categoryText->SetColor(ToVector4(choice.rarityDisplayColor));
+			categoryText->SetColor(accentColor_);
 		} else {
 			categoryText->SetText("NEW\n新規武器");
-			categoryText->SetColor(kNewWeaponColor);
+			categoryText->SetColor(accentColor_);
 		}
 	}
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
@@ -177,7 +187,13 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 		}
 	}
 	if (Sprite* iconBorder = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)])) {
-		iconBorder->SetColor(isOwnedWeaponUpgrade ? ToVector4(choice.rarityDisplayColor) : kNewWeaponColor);
+		iconBorder->SetColor(accentColor_);
+	}
+	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
+		border->SetColor(accentColor_);
+	}
+	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
+		background->SetColor(backgroundColor_);
 	}
 	SetVisible(true);
 }
@@ -246,9 +262,7 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 	}
 
 	ApplySelectionScale(displayScale);
-	border->SetColor(isSelected_
-		? Vector4{ 1.0f, 0.82f, 0.18f, 1.0f }
-		: Vector4{ 0.35f, 0.38f, 0.45f, 1.0f });
+	border->SetColor(accentColor_);
 }
 
 void WeaponUpgradeCardUI::PlayDecisionAnimation() {
@@ -280,10 +294,10 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 		}
 	}
 	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
-		border->SetColor({ 0.35f, 0.38f, 0.45f, 1.0f });
+		border->SetColor(accentColor_);
 	}
 	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
-		background->SetColor({ 0.055f, 0.07f, 0.11f, 0.96f });
+		background->SetColor(backgroundColor_);
 	}
 	if (Sprite* iconBackground = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBackground)])) {
 		iconBackground->SetColor({ 0.025f, 0.03f, 0.05f, 1.0f });
