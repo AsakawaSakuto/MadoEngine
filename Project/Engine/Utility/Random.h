@@ -56,6 +56,13 @@ public:
         return dist(engine);
     }
 
+    /// @brief 符号なし32ビット整数の乱数を生成します。
+    /// @return 生成された符号なし32ビット整数です。
+    uint32_t UInt() {
+        std::uniform_int_distribution<uint32_t> dist;
+        return dist(engine);
+    }
+
     /// @brief 浮動小数点乱数を生成
     /// 
     /// 指定された範囲内で一様分布に従う浮動小数点乱数を生成する。
@@ -142,6 +149,12 @@ namespace MyRand {
     /// @return int 生成された乱数値 [min, max]
     inline int GetInt(int min, int max) {
         return GetInstance().Int(min, max);
+    }
+
+    /// @brief グローバルな乱数生成器を使用して符号なし32ビット整数を生成します。
+    /// @return 生成された符号なし32ビット整数です。
+    inline uint32_t GetUInt() {
+        return GetInstance().UInt();
     }
 
     /// @brief 浮動小数点乱数を生成

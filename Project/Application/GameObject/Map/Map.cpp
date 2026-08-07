@@ -101,9 +101,8 @@ void DestroyMapInstancedBatches() {
 /// @param seed Map生成に使用するシード値です。
 void Map::Initialize(uint32_t seed) {
 
-	seed_ = seed;
-	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(seed_, 100));
-	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed_, 200));
+	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 100));
+	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 200));
 	ClampHeightSettings();
 	eventObjects_.clear();
 	DestroyMapInstancedBatches();
@@ -237,12 +236,6 @@ void Map::DrawImGui() {
 
 #endif // USE_IMGUI
 
-}
-
-/// @brief Map生成に使用したシード値を取得します。
-/// @return uint32_t Map生成に使用したシード値です。
-uint32_t Map::GetSeed() const {
-	return seed_;
 }
 
 void Map::GenerateJars() {

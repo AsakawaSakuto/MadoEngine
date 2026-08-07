@@ -65,7 +65,7 @@
         {
             "effectShaderKey": "PostEffect/Fog.PS",
             "effectType": "Fog",
-            "enabled": false,
+            "enabled": true,
             "key": "ScreenEffectPass_2",
             "name": "Fog",
             "parameters": {

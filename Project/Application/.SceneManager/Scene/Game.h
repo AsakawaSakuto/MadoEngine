@@ -13,6 +13,7 @@
 #include "Utility/Light/LightManager.h"
 #include "UI/UIHeaders.h"
 #include "System/InGameSession/InGameSession.h"
+#include <cstdint>
 
 /// @brief テストシーン
 /// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
@@ -51,6 +52,8 @@ public:
 	/// @return Player座標を取得できた場合はtrueを返します。
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
+	std::uint32_t gameSeed_ = 0;
+
 	DebugCamera debugCamera_;
 	TPS_Camera tpsCamera_;
 

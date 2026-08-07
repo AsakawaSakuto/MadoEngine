@@ -479,7 +479,7 @@ namespace MadoEngine::Particle {
 
 		PlayDesc resolvedDesc = desc;
 		if (resolvedDesc.randomSeed == 0) {
-			resolvedDesc.randomSeed = MyRand::CreateSeed();
+			resolvedDesc.randomSeed = MyRand::GetUInt();
 		}
 
 		EffectSlot& slot = effectSlots_[slotIndex];

@@ -24,10 +24,6 @@ public:
 	/// @brief Map調整用のImGuiを描画
 	void DrawImGui();
 
-	/// @brief Map生成に使用したシード値を取得
-	/// @return uint32_t Map生成に使用したシード値
-	uint32_t GetSeed() const;
-
 private:
 	
 	/// @brief Map上にJarをランダム配置
@@ -58,8 +54,7 @@ private:
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
 	Random terrainRandom_;
 	Random eventObjectRandom_;
-	uint32_t seed_ = 0;
-
+	
 	int mapWidth_ = 20;
 	int mapHeight_ = 20;
 	int jarSpawnCount_ = 100;

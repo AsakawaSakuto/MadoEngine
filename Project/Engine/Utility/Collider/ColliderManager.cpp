@@ -1310,6 +1310,8 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
+            // Slope境界で下降側の上面が候補から外れないよう接地許容距離分だけ下へ広げます。
+            queryBounds.min.y -= 0.08f;
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
@@ -1496,6 +1498,8 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
+            // 下降先のSlopeを追従候補に含めるため許可されたスナップ距離分だけ下へ広げます。
+            queryBounds.min.y -= std::max(maxSnapDownDistance, 0.0f);
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
@@ -1621,6 +1625,8 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
+            // 接地判定と同じSlopeを法線取得でも候補に含めます。
+            queryBounds.min.y -= 0.08f;
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;

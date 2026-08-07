@@ -8,7 +8,6 @@
 
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
-	constexpr std::uint32_t kWeaponUpgradeRandomSeed = 0x4d41444fu;
 }
 
 Game::Game()
@@ -18,6 +17,9 @@ Game::Game()
 Game::~Game() {}
 
 void Game::Initialize() {
+	gameSeed_ = MyRand::CreateSeed();
+	MyRand::SetSeed(gameSeed_);
+
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 
 	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
@@ -47,7 +49,7 @@ void Game::Initialize() {
 	MyCollider::RegisterCollider("MapLimitBox", CollisionTag::MapLimitBox, &mapLimitBox_, &mapLimitBoxPos_, 1.0f);
 	
 	map_ = std::make_unique<Map>();
-	map_->Initialize(MyRand::CreateSeed());
+	map_->Initialize(gameSeed_);
 
 	enemyManager_ = std::make_unique<Enemy::Manager>();
 	enemyManager_->Initialize(player_.get());
@@ -64,7 +66,7 @@ void Game::Initialize() {
 	weaponInventory_->Initialize(Projectile::Type::FireBall);
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 	weaponUpgradeSystem_ = std::make_unique<Weapon::UpgradeSystem>();
-	weaponUpgradeSystem_->Initialize(player_->GetLevel(), kWeaponUpgradeRandomSeed);
+	weaponUpgradeSystem_->Initialize(player_->GetLevel(), gameSeed_);
 	weaponUpgradeUI_.Initialize();
 
 	fadeSprite_ = MySprite::Create("testFade", "black2x2", SceneType::Game);
@@ -88,7 +90,7 @@ void Game::Initialize() {
 
 	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
 	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
-		seedValueText->SetText(std::format("Seed : {}", map_->GetSeed()));
+		seedValueText->SetText(std::format("Seed : {}", gameSeed_));
 	}
 }
 
@@ -213,7 +215,7 @@ void Game::DrawImGui() {
 
 	ImGui::Begin("seed");
 
-	ImGui::Text("map seed : %u", map_->GetSeed());
+	ImGui::Text("game seed : %u", gameSeed_);
 
 	ImGui::End();
 
