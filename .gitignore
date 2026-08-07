@@ -10,5 +10,7 @@
 *.ilk
 *.ini
 
+*.codex-build
+
 !resources/**/*.obj
 /Assets/.EngineResource/Log/

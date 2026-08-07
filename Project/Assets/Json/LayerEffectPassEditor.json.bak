@@ -2,6 +2,7 @@
     "layerPasses": [
         {
             "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "effectType": "DepthOutline",
             "enabled": true,
             "ignoreDepthForMask": true,
             "key": "LayerEffectPass_2",
@@ -16,11 +17,12 @@
                 "Intensity": 1.0,
                 "Thickness": 1.0
             },
-            "screenEffectStage": "Final",
+            "scope": "Layer",
             "targetLayerMask": 16
         },
         {
             "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "effectType": "DepthOutline",
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_3",
@@ -35,11 +37,12 @@
                 "Intensity": 1.0,
                 "Thickness": 1.5
             },
-            "screenEffectStage": "Final",
+            "scope": "Layer",
             "targetLayerMask": 8
         },
         {
             "effectShaderKey": "PostEffect/Bloom.PS",
+            "effectType": "Bloom",
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_5",
@@ -54,196 +57,15 @@
                 "SoftKnee": 1.0,
                 "Threshold": 0.5
             },
-            "screenEffectStage": "Final",
+            "scope": "Layer",
             "targetLayerMask": 8
-        },
-        {
-            "effectShaderKey": "PostEffect/Binarize.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_1",
-            "name": "Sphere1",
-            "parameters": {
-                "HighColorB": 1.0,
-                "HighColorG": 1.0,
-                "HighColorR": 1.0,
-                "Intensity": 1.0,
-                "LowColorB": 0.0,
-                "LowColorG": 0.0,
-                "LowColorR": 0.0,
-                "Threshold": 0.5
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 256
-        },
-        {
-            "effectShaderKey": "PostEffect/BoxFilter.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_4",
-            "name": "Sphere2",
-            "parameters": {
-                "Intensity": 1.0,
-                "Radius": 2.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 512
-        },
-        {
-            "effectShaderKey": "PostEffect/ColorFilter.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_6",
-            "name": "Sphere3",
-            "parameters": {
-                "FilterColorB": 0.0,
-                "FilterColorG": 0.0,
-                "FilterColorR": 1.0,
-                "Intensity": 1.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1024
-        },
-        {
-            "effectShaderKey": "PostEffect/GaussianFilter.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_7",
-            "name": "Sphere4",
-            "parameters": {
-                "Intensity": 1.0,
-                "Radius": 2.0,
-                "Sigma": 2.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 2048
-        },
-        {
-            "effectShaderKey": "PostEffect/GrayScale.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_8",
-            "name": "Sphere5",
-            "parameters": {},
-            "screenEffectStage": "Final",
-            "targetLayerMask": 4096
-        },
-        {
-            "effectShaderKey": "PostEffect/Invert.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_9",
-            "name": "Sphere6",
-            "parameters": {},
-            "screenEffectStage": "Final",
-            "targetLayerMask": 8192
-        },
-        {
-            "effectShaderKey": "PostEffect/DepthOutline.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_10",
-            "name": "Sphere7",
-            "parameters": {
-                "ColorA": 1.0,
-                "ColorB": 1.0,
-                "ColorG": 1.0,
-                "ColorR": 1.0,
-                "DepthSensitivity": 80.0,
-                "EdgeThreshold": 0.004999999888241291,
-                "Intensity": 1.0,
-                "Thickness": 1.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 16384
-        },
-        {
-            "effectShaderKey": "PostEffect/LuminanceOutline.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_11",
-            "name": "Sphere8",
-            "parameters": {
-                "ColorA": 1.0,
-                "ColorB": 0.0,
-                "ColorG": 0.0,
-                "ColorR": 0.0,
-                "EdgeThreshold": 0.05000000074505806,
-                "Intensity": 1.0,
-                "LuminanceSensitivity": 5.0,
-                "Thickness": 1.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 32768
-        },
-        {
-            "effectShaderKey": "PostEffect/PixelArt.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_12",
-            "name": "Sphere9",
-            "parameters": {
-                "ColorSteps": 10.0,
-                "Contrast": 1.0,
-                "Intensity": 1.0,
-                "PixelSize": 6.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 65536
-        },
-        {
-            "effectShaderKey": "PostEffect/Random.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_13",
-            "name": "Sphere10",
-            "parameters": {
-                "Contrast": 1.0,
-                "Intensity": 1.0,
-                "NoiseScale": 1.0,
-                "Time": 1.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 131072
-        },
-        {
-            "effectShaderKey": "PostEffect/Sepia.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_14",
-            "name": "Sphere11",
-            "parameters": {},
-            "screenEffectStage": "Final",
-            "targetLayerMask": 262144
-        },
-        {
-            "effectShaderKey": "PostEffect/Toon.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_15",
-            "name": "Sphere12",
-            "parameters": {
-                "ColorSteps": 9.0,
-                "Contrast": 1.100000023841858,
-                "DepthSensitivity": 1.0,
-                "EdgeIntensity": 1.0,
-                "EdgeThreshold": 0.004999999888241291,
-                "Intensity": 1.0,
-                "OutlineColorB": 0.0,
-                "OutlineColorG": 0.0,
-                "OutlineColorR": 0.0,
-                "Saturation": 1.5,
-                "Thickness": 1.2000000476837158
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 524288
         }
     ],
     "screenPasses": [
         {
             "effectShaderKey": "PostEffect/Fog.PS",
-            "enabled": false,
-            "ignoreDepthForMask": false,
+            "effectType": "Fog",
+            "enabled": true,
             "key": "ScreenEffectPass_2",
             "name": "Fog",
             "parameters": {
@@ -258,117 +80,9 @@
                 "NearClip": 0.10000000149011612,
                 "StartDistance": 50.0
             },
-            "screenEffectStage": "Scene",
-            "targetLayerMask": 255
-        },
-        {
-            "effectShaderKey": "PostEffect/Vignette.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_1",
-            "name": "FullScreen1",
-            "parameters": {
-                "ColorA": 1.0,
-                "ColorB": 0.0,
-                "ColorG": 0.0,
-                "ColorR": 0.0,
-                "InnerRadius": 0.3499999940395355,
-                "Intensity": 1.0,
-                "OuterScale": 2.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1048575
-        },
-        {
-            "effectShaderKey": "PostEffect/RadialBlur.PS",
-            "enabled": false,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_3",
-            "name": "FullScreen2",
-            "parameters": {
-                "CenterX": 0.5,
-                "CenterY": 0.5,
-                "Falloff": 1.0,
-                "Intensity": 1.0,
-                "Radius": 0.44999998807907104,
-                "SampleCount": 8.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1048575
-        },
-        {
-            "effectShaderKey": "PostEffect/ChromaticAberration.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_4",
-            "name": "FullScreen3",
-            "parameters": {
-                "CenterX": 0.5,
-                "CenterY": 0.5,
-                "EdgeStrength": 1.0,
-                "Intensity": 1.0,
-                "OffsetPixels": 5.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1048575
-        },
-        {
-            "effectShaderKey": "PostEffect/Bloom.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_5",
-            "name": "FullScreen4",
-            "parameters": {
-                "BloomColorA": 1.0,
-                "BloomColorB": 1.0,
-                "BloomColorG": 1.0,
-                "BloomColorR": 1.0,
-                "Intensity": 1.5,
-                "Radius": 4.0,
-                "SoftKnee": 0.5,
-                "Threshold": 0.699999988079071
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1048575
-        },
-        {
-            "effectShaderKey": "PostEffect/LensDistortion.PS",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_6",
-            "name": "FullScreen5",
-            "parameters": {
-                "CenterX": 0.5,
-                "CenterY": 0.5,
-                "CubicDistortion": -0.05000000074505806,
-                "Distortion": 0.10000000149011612,
-                "Intensity": 1.0,
-                "Zoom": 1.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1048575
-        },
-        {
-            "effectShaderKey": "PostEffect/Fog.PS",
-            "enabled": false,
-            "ignoreDepthForMask": false,
-            "key": "ScreenEffectPass_7",
-            "name": "FullScreen6",
-            "parameters": {
-                "ColorA": 1.0,
-                "ColorB": 0.7813953161239624,
-                "ColorG": 0.7200649380683899,
-                "ColorR": 0.6178475022315979,
-                "Density": 1.0,
-                "EndDistance": 75.0,
-                "FarClip": 1000.0,
-                "HeightStrength": 0.0,
-                "NearClip": 0.10000000149011612,
-                "StartDistance": 0.0
-            },
-            "screenEffectStage": "Final",
-            "targetLayerMask": 1048575
+            "scope": "Screen",
+            "screenEffectStage": "Scene"
         }
     ],
-    "version": 2
+    "version": 3
 }

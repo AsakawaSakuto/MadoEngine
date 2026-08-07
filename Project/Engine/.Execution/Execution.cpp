@@ -13,8 +13,6 @@ namespace {
 	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
 	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
 	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
-	const std::string kFogShaderKey = "PostEffect/Fog.PS";
-
 } // namespace
 
 namespace MadoEngine
@@ -201,7 +199,7 @@ namespace MadoEngine
 		MadoEngine::Editor::LoadModelEditorJson();
 		MadoEngine::Editor::LoadSpriteEditorJson();
 		MadoEngine::Editor::LoadTextEditorJson();
-		MadoEngine::Editor::LoadLayerEffectPassEditorJson(postEffectManager);
+		MadoEngine::Editor::LoadPostEffectEditorJson(postEffectManager);
 		
 #ifdef USE_IMGUI
 		// ImGuiManagerの初期化
@@ -263,12 +261,16 @@ namespace MadoEngine
 		);
 	}
 
-	MadoEngine::Render::LayerEffectPass* EngineExecution::AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
-		return MadoEngine::Render::PostEffectManager::GetInstance().AddLayerPass(desc);
+	MadoEngine::Render::PostEffectPassHandle EngineExecution::AddLayerEffectPass(
+		const MadoEngine::Render::LayerPostEffectPassCreateDesc& desc)
+	{
+		return MadoEngine::Render::PostEffectManager::GetInstance().CreateLayerPass(desc);
 	}
 
-	MadoEngine::Render::LayerEffectPass* EngineExecution::AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc) {
-		return MadoEngine::Render::PostEffectManager::GetInstance().AddScreenPass(desc);
+	MadoEngine::Render::PostEffectPassHandle EngineExecution::AddScreenEffectPass(
+		const MadoEngine::Render::ScreenPostEffectPassCreateDesc& desc)
+	{
+		return MadoEngine::Render::PostEffectManager::GetInstance().CreateScreenPass(desc);
 	}
 
 	void EngineExecution::ClearLayerEffectPasses() {
@@ -279,12 +281,14 @@ namespace MadoEngine
 		MadoEngine::Render::PostEffectManager::GetInstance().ClearScreenPasses();
 	}
 
-	const std::vector<MadoEngine::Render::LayerEffectPass>& EngineExecution::GetLayerEffectPasses() const {
-		return MadoEngine::Render::PostEffectManager::GetInstance().GetLayerPasses();
+	const std::vector<MadoEngine::Render::PostEffectPassHandle>& EngineExecution::GetLayerEffectPassHandles() const {
+		return MadoEngine::Render::PostEffectManager::GetInstance().GetLayerPassHandles();
 	}
 
-	const MadoEngine::Render::LayerEffectPass* EngineExecution::GetFirstEnabledLayerEffectPass() const {
-		return MadoEngine::Render::PostEffectManager::GetInstance().GetFirstEnabledLayerPass();
+	const MadoEngine::Render::PostEffectPass* EngineExecution::TryGetPostEffectPass(
+		MadoEngine::Render::PostEffectPassHandle handle) const
+	{
+		return MadoEngine::Render::PostEffectManager::GetInstance().TryGet(handle);
 	}
 
 	MadoEngine::Render::RenderLayerMask EngineExecution::GetEnabledLayerEffectTargetMask() const {
@@ -304,7 +308,7 @@ namespace MadoEngine
 		const Vector3& shadowFocusPosition)
 	{
 #ifdef USE_IMGUI
-		MadoEngine::Editor::ApplyPendingLayerEffectPassEditorOperations(
+		MadoEngine::Editor::ApplyPendingPostEffectEditorOperations(
 			MadoEngine::Render::PostEffectManager::GetInstance());
 #endif // USE_IMGUI
 
@@ -401,9 +405,9 @@ namespace MadoEngine
 		isSceneColorEnded_ = true;
 	}
 
-	void EngineExecution::BeginLayerEffectRender(const MadoEngine::Render::LayerEffectPass& pass) {
-		assert(pass.IsEnabled() && "無効なLayerEffectPassは実行できません");
-		assert(pass.GetTargetLayerMask() != 0 && "LayerEffectPassの対象LayerMaskが0です");
+	void EngineExecution::BeginLayerEffectRender(const MadoEngine::Render::PostEffectPass& pass) {
+		assert(pass.IsEnabled() && "無効なLayer向けPostEffectPassは実行できません");
+		assert(pass.GetTargetLayerMask() != 0 && "Layer向けPostEffectPassの対象LayerMaskが0です");
 
 		EndSceneColorRender();
 		isLayerEffectChainResolved_ = false;
@@ -424,14 +428,14 @@ namespace MadoEngine
 		renderTargetManager_->End(kLayerColorTarget, commandManager_->GetCommandList());
 	}
 
-	void EngineExecution::ApplyLayerEffectAndComposite(const MadoEngine::Render::LayerEffectPass& pass) {
+	void EngineExecution::ApplyLayerEffectAndComposite(const MadoEngine::Render::PostEffectPass& pass) {
 		ApplyLayerEffectToChain(pass);
 		CompositeLayerEffectChain();
 	}
 
-	void EngineExecution::ApplyLayerEffectToChain(const MadoEngine::Render::LayerEffectPass& pass) {
-		assert(pass.IsEnabled() && "無効なLayerEffectPassは実行できません");
-		assert(pass.GetTargetLayerMask() != 0 && "LayerEffectPassの対象LayerMaskが0です");
+	void EngineExecution::ApplyLayerEffectToChain(const MadoEngine::Render::PostEffectPass& pass) {
+		assert(pass.IsEnabled() && "無効なLayer向けPostEffectPassは実行できません");
+		assert(pass.GetTargetLayerMask() != 0 && "Layer向けPostEffectPassの対象LayerMaskが0です");
 
 		const std::string& outputTargetName = GetNextLayerEffectOutputName();
 		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
@@ -475,9 +479,11 @@ namespace MadoEngine
 		}
 
 		EndSceneColorRender();
-		for (MadoEngine::Render::LayerEffectPass& pass :
-			MadoEngine::Render::PostEffectManager::GetInstance().GetScreenPasses()) {
-			if (!pass.IsEnabled() || pass.GetScreenEffectStage() != stage) {
+		MadoEngine::Render::PostEffectManager& manager =
+			MadoEngine::Render::PostEffectManager::GetInstance();
+		for (MadoEngine::Render::PostEffectPassHandle handle : manager.GetScreenPassHandles()) {
+			const MadoEngine::Render::PostEffectPass* pass = manager.TryGet(handle);
+			if (!pass || !pass->IsEnabled() || pass->GetScreenEffectStage() != stage) {
 				continue;
 			}
 
@@ -486,8 +492,8 @@ namespace MadoEngine
 			viewportScissor_->Apply(commandManager_->GetCommandList());
 			DrawPostEffect(
 				renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
-				pass.GetEffectPSODesc(),
-				pass.GetParameterGPUVirtualAddress()
+				pass->GetEffectPSODesc(),
+				pass->GetParameterGPUVirtualAddress()
 			);
 			renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
 
@@ -613,7 +619,7 @@ namespace MadoEngine
 
 		//ImGui::ShowDemoWindow();
 
-		MadoEngine::Editor::DrawLayerEffectPassEditorUI(
+		MadoEngine::Editor::DrawPostEffectEditorUI(
 			MadoEngine::Render::PostEffectManager::GetInstance());
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
@@ -676,43 +682,39 @@ namespace MadoEngine
 
 	void EngineExecution::UpdateParticleFogParameters() {
 		MadoEngine::Particle::ParticleFogParameters parameters{};
-		for (const MadoEngine::Render::LayerEffectPass& pass :
-			MadoEngine::Render::PostEffectManager::GetInstance().GetScreenPasses()) {
-			if (!pass.IsEnabled() ||
-				pass.GetScreenEffectStage() != MadoEngine::Render::ScreenEffectStage::Scene ||
-				pass.GetEffectShaderKey() != kFogShaderKey) {
+		MadoEngine::Render::PostEffectManager& manager =
+			MadoEngine::Render::PostEffectManager::GetInstance();
+		for (MadoEngine::Render::PostEffectPassHandle handle : manager.GetScreenPassHandles()) {
+			const MadoEngine::Render::PostEffectPass* pass = manager.TryGet(handle);
+			if (!pass || !pass->IsEnabled() ||
+				pass->GetScreenEffectStage() != MadoEngine::Render::ScreenEffectStage::Scene ||
+				pass->GetPostEffectType() != MadoEngine::Render::PostEffectType::Fog) {
 				continue;
 			}
 
-			auto getParameter = [&pass](const char* key, float fallback) {
-				float value = fallback;
-				pass.TryGetFloatParameter(key, value);
-				return value;
-			};
+			MadoEngine::Render::FogParameters fogParameters{};
+			if (!manager.TryGetParameters(handle, fogParameters)) {
+				continue;
+			}
 
-			parameters.color = {
-				getParameter("ColorR", 0.58f),
-				getParameter("ColorG", 0.68f),
-				getParameter("ColorB", 0.74f),
-				getParameter("ColorA", 1.0f),
-			};
+			parameters.color = fogParameters.color;
 			if (parameters.color == Vector4{}) {
 				parameters.color = { 0.58f, 0.68f, 0.74f, 1.0f };
 			}
 
 			parameters.distanceParams = {
-				getParameter("StartDistance", 850.0f),
-				getParameter("EndDistance", 1000.0f),
-				getParameter("Density", 1.0f),
-				getParameter("HeightStrength", 0.0f),
+				fogParameters.startDistance,
+				fogParameters.endDistance,
+				fogParameters.density,
+				fogParameters.heightStrength,
 			};
 			if (parameters.distanceParams == Vector4{}) {
 				parameters.distanceParams = { 850.0f, 1000.0f, 1.0f, 0.0f };
 			}
 
 			parameters.cameraParams = {
-				getParameter("NearClip", 0.1f),
-				getParameter("FarClip", 1000.0f),
+				fogParameters.nearClip,
+				fogParameters.farClip,
 				0.0f,
 				0.0f,
 			};
@@ -778,6 +780,7 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::TextManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();
+		MadoEngine::Render::PostEffectManager::GetInstance().FlushPendingDestroys();
 	}
 
 	void EngineExecution::Finalize()

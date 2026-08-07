@@ -1,9 +1,12 @@
 #pragma once
 #include "Render/Object/RenderLayer.h"
+#include "Render/PostEffect/PostEffectDefinitionRegistry.h"
+#include "Render/PostEffect/PostEffectType.h"
 #include "Render/PSO/PSODesc.h"
 #include <cstddef>
 #include <cstdint>
 #include <d3d12.h>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -24,10 +27,10 @@ namespace MadoEngine::Render {
 		return stage == ScreenEffectStage::Scene || stage == ScreenEffectStage::Final;
 	}
 
-	/// @brief 特定の描画Layerに適用するポストエフェクト設定を管理するクラス
-	class LayerEffectPass {
+	/// @brief LayerとScreenの両方へ適用できるポストエフェクトPass
+	class PostEffectPass {
 	public:
-		/// @brief LayerEffectPassの生成設定
+		/// @brief PostEffectPassの生成設定
 		struct Desc {
 			std::string key;
 			std::string name = "LayerEffect";
@@ -48,8 +51,8 @@ namespace MadoEngine::Render {
 			float speed = 0.01f;
 		};
 
-		/// @brief LayerEffectPassを初期化する
-		/// @param desc LayerEffectPassの生成設定
+		/// @brief PostEffectPassを初期化する
+		/// @param desc PostEffectPassの生成設定
 		/// @param basePostEffectDesc ポストエフェクト用の基本PSO設定
 		/// @param device D3D12デバイス
 		void Initialize(const Desc& desc, const PSODesc& basePostEffectDesc, ID3D12Device* device);
@@ -111,6 +114,14 @@ namespace MadoEngine::Render {
 		/// @param shaderKey PixelShaderキー
 		void SetEffectShaderKey(const std::string& shaderKey);
 
+		/// @brief Registry定義を適用してEffect種別と既定パラメータを置き換える
+		/// @param definition 適用するEffect定義
+		void ApplyEffectDefinition(const PostEffectDefinition& definition);
+
+		/// @brief 適用中のポストエフェクト種別を取得する
+		/// @return 適用中のポストエフェクト種別。未登録Shaderの場合はstd::nullopt
+		std::optional<PostEffectType> GetPostEffectType() const;
+
 		/// @brief 適用するPixelShaderキーを取得する
 		/// @return PixelShaderキー
 		const std::string& GetEffectShaderKey() const;
@@ -132,6 +143,16 @@ namespace MadoEngine::Render {
 		/// @param data 書き込むデータ先頭アドレス
 		/// @param sizeInBytes 書き込むデータサイズ
 		void SetParameterData(const void* data, std::size_t sizeInBytes);
+
+		/// @brief CPU側パラメータを指定領域へ安全にコピーする
+		/// @param outData コピー先
+		/// @param sizeInBytes コピーするサイズ
+		/// @return 保存サイズと指定サイズが一致してコピーできた場合はtrue
+		bool TryCopyParameterData(void* outData, std::size_t sizeInBytes) const;
+
+		/// @brief CPU側に保存しているパラメータサイズを取得する
+		/// @return パラメータサイズ
+		std::size_t GetParameterDataSize() const;
 
 		/// @brief ImGui編集用のfloatパラメータを追加する
 		/// @param label UIに表示する名前
@@ -218,6 +239,7 @@ namespace MadoEngine::Render {
 		void UploadParameterData();
 
 		Desc desc_;
+		std::optional<PostEffectType> effectType_ = PostEffectType::CopyImage;
 		PSODesc effectDesc_;
 		ID3D12Device* device_ = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12Resource> parameterResource_;

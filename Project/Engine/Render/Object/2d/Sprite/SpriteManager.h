@@ -6,6 +6,7 @@
 #include "Render/Object/RenderLayer.h"
 #include "Utility/EditorManagementMode.h"
 #include ".SceneManager/SceneType.h"
+#include <cstddef>
 #include <d3d12.h>
 #include <filesystem>
 #include <memory>
@@ -182,6 +183,10 @@ public:
 	/// @brief 描画順でSprite名一覧を取得する
 	/// @return Sprite名一覧
 	std::vector<std::string> GetNames() const;
+
+	/// @brief 管理中のSpriteインスタンス数を取得する
+	/// @return 管理中のSpriteインスタンス数
+	std::size_t GetSpriteCount() const;
 
 	/// @brief 描画順でEditor管理Sprite名一覧を取得する
 	/// @return Editor管理Sprite名一覧

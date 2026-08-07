@@ -649,6 +649,10 @@ std::vector<std::string> ModelManager::GetNames() const {
 	return names;
 }
 
+std::size_t ModelManager::GetModelCount() const {
+	return modelNameToHandle_.size();
+}
+
 std::vector<std::string> ModelManager::GetEditorManagedNames() const {
 	std::vector<std::string> names;
 	names.reserve(modelNameToHandle_.size());

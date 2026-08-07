@@ -413,6 +413,10 @@ std::vector<std::string> SpriteManager::GetNames() const {
 	return names;
 }
 
+std::size_t SpriteManager::GetSpriteCount() const {
+	return nameToHandle_.size();
+}
+
 std::vector<std::string> SpriteManager::GetEditorManagedNames() const {
 	std::vector<std::string> names;
 	names.reserve(drawOrder_.size());

@@ -99,10 +99,14 @@ namespace UI::Game {
 			1.0f + initialScaleAddition_,
 		});
 		text->SetColor(damageTextColor_);
-		text->SetVisible(true);
+		text->SetVisible(isVisible_);
 	}
 
 	void ProjectileDamageView::Update(float deltaTime, const Camera& camera) {
+		if (!isVisible_) {
+			return;
+		}
+
 		for (DamageTextSlot& slot : slots_) {
 			MadoEngine::Text* text = MyText::TryGet(slot.text);
 			if (!slot.isActive || !text) {
@@ -151,6 +155,23 @@ namespace UI::Game {
 				alpha,
 			});
 			text->SetVisible(true);
+		}
+	}
+
+	void ProjectileDamageView::SetVisible(bool isVisible) {
+		if (isVisible_ == isVisible) {
+			return;
+		}
+
+		isVisible_ = isVisible;
+		if (isVisible_) {
+			return;
+		}
+
+		for (DamageTextSlot& slot : slots_) {
+			if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
+				text->SetVisible(false);
+			}
 		}
 	}
 

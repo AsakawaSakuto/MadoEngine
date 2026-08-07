@@ -31,6 +31,10 @@ namespace UI::Game {
 		/// @param camera ワールド座標の投影に使用するカメラ
 		void Update(float deltaTime, const Camera& camera);
 
+		/// @brief ダメージ数値の表示可否を設定する
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief ダメージ表示用Textプールを終了する
 		void Finalize();
 
@@ -66,6 +70,7 @@ namespace UI::Game {
 		std::array<DamageTextSlot, kPoolSize> slots_;
 		std::size_t nextSlotIndex_ = 0;
 		std::uint64_t spawnSequence_ = 0;
+		bool isVisible_ = true;
 		float displayLifeTime_ = 0.5f;         // ダメージ表示の寿命（秒）
 		float fadeStartProgress_ = 0.5f;       // ダメージ表示のフェード開始タイミング
 		float scaleSettleProgress_ = 1.0f;     // ダメージ表示のスケールが落ち着くタイミング

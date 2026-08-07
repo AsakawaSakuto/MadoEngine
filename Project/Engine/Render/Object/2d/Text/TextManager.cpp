@@ -395,6 +395,10 @@ std::vector<std::string> TextManager::GetNames() const {
 	return names;
 }
 
+std::size_t TextManager::GetTextCount() const {
+	return nameToHandle_.size();
+}
+
 std::vector<std::string> TextManager::GetEditorManagedNames() const {
 	std::vector<std::string> names;
 	names.reserve(nameToHandle_.size());

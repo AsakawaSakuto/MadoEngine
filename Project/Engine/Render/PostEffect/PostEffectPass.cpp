@@ -1,4 +1,4 @@
-#include "Render/LayerEffectPass.h"
+#include "Render/PostEffect/PostEffectPass.h"
 #include "Utility/ResourceHelper/ResourceHelper.h"
 #include "Utility/Logger/Logger.h"
 #include <cassert>
@@ -6,9 +6,9 @@
 
 namespace MadoEngine::Render {
 
-	void LayerEffectPass::Initialize(const Desc& desc, const PSODesc& basePostEffectDesc, ID3D12Device* device) {
-		assert(!desc.name.empty() && "LayerEffectPass名が空です");
-		assert(!desc.effectShaderKey.empty() && "LayerEffectPassのPixelShaderキーが空です");
+	void PostEffectPass::Initialize(const Desc& desc, const PSODesc& basePostEffectDesc, ID3D12Device* device) {
+		assert(!desc.name.empty() && "PostEffectPass名が空です");
+		assert(!desc.effectShaderKey.empty() && "PostEffectPassのPixelShaderキーが空です");
 		assert(IsValidScreenEffectStage(desc.screenEffectStage) && "ScreenEffectStageが範囲外です");
 		assert(device && "D3D12Deviceが空です");
 
@@ -19,79 +19,125 @@ namespace MadoEngine::Render {
 		effectDesc_ = basePostEffectDesc;
 		effectDesc_.psKey = desc_.effectShaderKey;
 		device_ = device;
+		if (const PostEffectDefinition* definition =
+			PostEffectDefinitionRegistry::FindByShaderKey(desc_.effectShaderKey)) {
+			ApplyEffectDefinition(*definition);
+		} else {
+			effectType_.reset();
+			Logger::Output(
+				"未登録のポストエフェクトShaderキーです: " + desc_.effectShaderKey,
+				Logger::Level::Warning
+			);
+		}
 
-		Logger::Output("LayerEffectPassを初期化しました: " + desc_.name, Logger::Level::Engine);
+		Logger::Output("PostEffectPassを初期化しました: " + desc_.name, Logger::Level::Engine);
 	}
 
-	void LayerEffectPass::SetEnabled(bool enabled) {
+	void PostEffectPass::SetEnabled(bool enabled) {
 		desc_.enabled = enabled;
 	}
 
-	bool LayerEffectPass::IsEnabled() const {
+	bool PostEffectPass::IsEnabled() const {
 		return desc_.enabled;
 	}
 
-	void LayerEffectPass::SetIgnoreDepthForMask(bool ignoreDepth) {
+	void PostEffectPass::SetIgnoreDepthForMask(bool ignoreDepth) {
 		desc_.ignoreDepthForMask = ignoreDepth;
 	}
 
-	bool LayerEffectPass::IsIgnoreDepthForMask() const {
+	bool PostEffectPass::IsIgnoreDepthForMask() const {
 		return desc_.ignoreDepthForMask;
 	}
 
-	void LayerEffectPass::SetScreenEffectStage(ScreenEffectStage stage) {
+	void PostEffectPass::SetScreenEffectStage(ScreenEffectStage stage) {
 		assert(IsValidScreenEffectStage(stage) && "ScreenEffectStageが範囲外です");
 		desc_.screenEffectStage = stage;
 	}
 
-	ScreenEffectStage LayerEffectPass::GetScreenEffectStage() const {
+	ScreenEffectStage PostEffectPass::GetScreenEffectStage() const {
 		return desc_.screenEffectStage;
 	}
 
-	void LayerEffectPass::SetName(const std::string& name) {
-		assert(!name.empty() && "LayerEffectPass名が空です");
+	void PostEffectPass::SetName(const std::string& name) {
+		assert(!name.empty() && "PostEffectPass名が空です");
 		desc_.name = name;
 	}
 
-	const std::string& LayerEffectPass::GetName() const {
+	const std::string& PostEffectPass::GetName() const {
 		return desc_.name;
 	}
 
-	const std::string& LayerEffectPass::GetKey() const {
+	const std::string& PostEffectPass::GetKey() const {
 		return desc_.key;
 	}
 
-	void LayerEffectPass::SetTargetLayer(RenderLayer layer) {
+	void PostEffectPass::SetTargetLayer(RenderLayer layer) {
 		SetTargetLayerMask(ToRenderLayerMask(layer));
 	}
 
-	void LayerEffectPass::SetTargetLayerMask(RenderLayerMask layerMask) {
+	void PostEffectPass::SetTargetLayerMask(RenderLayerMask layerMask) {
 		desc_.targetLayerMask = layerMask;
 	}
 
-	RenderLayerMask LayerEffectPass::GetTargetLayerMask() const {
+	RenderLayerMask PostEffectPass::GetTargetLayerMask() const {
 		return desc_.targetLayerMask;
 	}
 
-	RenderLayerMask LayerEffectPass::GetBaseLayerMask(RenderLayerMask sourceLayerMask) const {
+	RenderLayerMask PostEffectPass::GetBaseLayerMask(RenderLayerMask sourceLayerMask) const {
 		return RemoveRenderLayerMask(sourceLayerMask, desc_.targetLayerMask);
 	}
 
-	void LayerEffectPass::SetEffectShaderKey(const std::string& shaderKey) {
-		assert(!shaderKey.empty() && "LayerEffectPassのPixelShaderキーが空です");
+	void PostEffectPass::SetEffectShaderKey(const std::string& shaderKey) {
+		assert(!shaderKey.empty() && "PostEffectPassのPixelShaderキーが空です");
+		if (const PostEffectDefinition* definition = PostEffectDefinitionRegistry::FindByShaderKey(shaderKey)) {
+			ApplyEffectDefinition(*definition);
+			return;
+		}
+
 		desc_.effectShaderKey = shaderKey;
 		effectDesc_.psKey = desc_.effectShaderKey;
+		effectType_.reset();
+		ClearFloatParameterControls();
+		ClearParameterData();
+		Logger::Output("未登録のポストエフェクトShaderキーです: " + shaderKey, Logger::Level::Warning);
 	}
 
-	const std::string& LayerEffectPass::GetEffectShaderKey() const {
+	void PostEffectPass::ApplyEffectDefinition(const PostEffectDefinition& definition) {
+		desc_.effectShaderKey = std::string(definition.shaderKey);
+		effectDesc_.psKey = desc_.effectShaderKey;
+		effectType_ = definition.type;
+		ClearFloatParameterControls();
+		ClearParameterData();
+
+		if (definition.defaultParameterData && definition.parameterSize > 0) {
+			SetParameterData(definition.defaultParameterData, definition.parameterSize);
+		}
+
+		for (const PostEffectFloatParameterDefinition& parameter : definition.GetParameters()) {
+			AddFloatParameterControl(
+				std::string(parameter.key),
+				std::string(parameter.label),
+				parameter.offset,
+				parameter.minValue,
+				parameter.maxValue,
+				parameter.speed
+			);
+		}
+	}
+
+	std::optional<PostEffectType> PostEffectPass::GetPostEffectType() const {
+		return effectType_;
+	}
+
+	const std::string& PostEffectPass::GetEffectShaderKey() const {
 		return desc_.effectShaderKey;
 	}
 
-	const PSODesc& LayerEffectPass::GetEffectPSODesc() const {
+	const PSODesc& PostEffectPass::GetEffectPSODesc() const {
 		return effectDesc_;
 	}
 
-	void LayerEffectPass::SetParameterData(const void* data, std::size_t sizeInBytes) {
+	void PostEffectPass::SetParameterData(const void* data, std::size_t sizeInBytes) {
 		assert(data && "ConstantBufferへ書き込むデータが空です");
 		assert(sizeInBytes > 0 && "ConstantBufferへ書き込むサイズが0です");
 
@@ -102,7 +148,22 @@ namespace MadoEngine::Render {
 		UploadParameterData();
 	}
 
-	void LayerEffectPass::AddFloatParameterControl(
+	bool PostEffectPass::TryCopyParameterData(void* outData, std::size_t sizeInBytes) const {
+		if (!outData || sizeInBytes != parameterData_.size()) {
+			return false;
+		}
+
+		if (sizeInBytes > 0) {
+			std::memcpy(outData, parameterData_.data(), sizeInBytes);
+		}
+		return true;
+	}
+
+	std::size_t PostEffectPass::GetParameterDataSize() const {
+		return parameterData_.size();
+	}
+
+	void PostEffectPass::AddFloatParameterControl(
 		const std::string& label,
 		std::size_t offset,
 		float minValue,
@@ -112,7 +173,7 @@ namespace MadoEngine::Render {
 		AddFloatParameterControl(label, label, offset, minValue, maxValue, speed);
 	}
 
-	void LayerEffectPass::AddFloatParameterControl(
+	void PostEffectPass::AddFloatParameterControl(
 		const std::string& key,
 		const std::string& label,
 		std::size_t offset,
@@ -134,15 +195,15 @@ namespace MadoEngine::Render {
 		floatParameterControls_.push_back(control);
 	}
 
-	const std::vector<LayerEffectPass::FloatParameterControl>& LayerEffectPass::GetFloatParameterControls() const {
+	const std::vector<PostEffectPass::FloatParameterControl>& PostEffectPass::GetFloatParameterControls() const {
 		return floatParameterControls_;
 	}
 
-	void LayerEffectPass::ClearFloatParameterControls() {
+	void PostEffectPass::ClearFloatParameterControls() {
 		floatParameterControls_.clear();
 	}
 
-	void LayerEffectPass::ClearParameterData() {
+	void PostEffectPass::ClearParameterData() {
 		if (parameterResource_ && mappedParameter_) {
 			parameterResource_->Unmap(0, nullptr);
 		}
@@ -154,7 +215,7 @@ namespace MadoEngine::Render {
 		parameterBufferSizeInBytes_ = 0;
 	}
 
-	bool LayerEffectPass::TryGetFloatParameter(std::size_t offset, float& outValue) const {
+	bool PostEffectPass::TryGetFloatParameter(std::size_t offset, float& outValue) const {
 		if (offset + sizeof(float) > parameterData_.size()) {
 			return false;
 		}
@@ -163,7 +224,7 @@ namespace MadoEngine::Render {
 		return true;
 	}
 
-	bool LayerEffectPass::TryGetFloatParameter(const std::string& key, float& outValue) const {
+	bool PostEffectPass::TryGetFloatParameter(const std::string& key, float& outValue) const {
 		for (const FloatParameterControl& control : floatParameterControls_) {
 			if (control.key == key) {
 				return TryGetFloatParameter(control.offset, outValue);
@@ -173,14 +234,14 @@ namespace MadoEngine::Render {
 		return false;
 	}
 
-	void LayerEffectPass::SetFloatParameter(std::size_t offset, float value) {
+	void PostEffectPass::SetFloatParameter(std::size_t offset, float value) {
 		assert(offset + sizeof(float) <= parameterData_.size() && "floatパラメータのoffsetがConstantBufferの範囲外です");
 
 		std::memcpy(parameterData_.data() + offset, &value, sizeof(float));
 		UploadParameterData();
 	}
 
-	bool LayerEffectPass::SetFloatParameter(const std::string& key, float value) {
+	bool PostEffectPass::SetFloatParameter(const std::string& key, float value) {
 		for (const FloatParameterControl& control : floatParameterControls_) {
 			if (control.key == key) {
 				SetFloatParameter(control.offset, value);
@@ -191,11 +252,11 @@ namespace MadoEngine::Render {
 		return false;
 	}
 
-	bool LayerEffectPass::HasParameterBuffer() const {
+	bool PostEffectPass::HasParameterBuffer() const {
 		return parameterResource_.Get() != nullptr;
 	}
 
-	D3D12_GPU_VIRTUAL_ADDRESS LayerEffectPass::GetParameterGPUVirtualAddress() const {
+	D3D12_GPU_VIRTUAL_ADDRESS PostEffectPass::GetParameterGPUVirtualAddress() const {
 		if (!parameterResource_) {
 			return 0;
 		}
@@ -203,12 +264,12 @@ namespace MadoEngine::Render {
 		return parameterResource_->GetGPUVirtualAddress();
 	}
 
-	std::size_t LayerEffectPass::AlignConstantBufferSize(std::size_t sizeInBytes) {
+	std::size_t PostEffectPass::AlignConstantBufferSize(std::size_t sizeInBytes) {
 		constexpr std::size_t kConstantBufferAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 		return (sizeInBytes + kConstantBufferAlignment - 1) & ~(kConstantBufferAlignment - 1);
 	}
 
-	void LayerEffectPass::EnsureParameterBuffer(std::size_t sizeInBytes) {
+	void PostEffectPass::EnsureParameterBuffer(std::size_t sizeInBytes) {
 		assert(device_ && "D3D12Deviceが空です");
 
 		const std::size_t alignedSize = AlignConstantBufferSize(sizeInBytes);
@@ -229,13 +290,13 @@ namespace MadoEngine::Render {
 		std::memset(mappedParameter_, 0, parameterBufferSizeInBytes_);
 
 		Logger::Output(
-			"[Engine] LayerEffectPassのパラメータ用ConstantBufferを作成しました: " +
+			"[Engine] PostEffectPassのパラメータ用ConstantBufferを作成しました: " +
 			desc_.name + " " + std::to_string(parameterBufferSizeInBytes_) + " bytes",
 			Logger::Level::Engine
 		);
 	}
 
-	void LayerEffectPass::UploadParameterData() {
+	void PostEffectPass::UploadParameterData() {
 		assert(mappedParameter_ && "ConstantBufferがMapされていません");
 
 		std::memset(mappedParameter_, 0, parameterBufferSizeInBytes_);

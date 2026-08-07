@@ -2,6 +2,7 @@
     "layerPasses": [
         {
             "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "effectType": "DepthOutline",
             "enabled": true,
             "ignoreDepthForMask": true,
             "key": "LayerEffectPass_2",
@@ -16,11 +17,12 @@
                 "Intensity": 1.0,
                 "Thickness": 1.0
             },
-            "screenEffectStage": "Final",
+            "scope": "Layer",
             "targetLayerMask": 16
         },
         {
             "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "effectType": "DepthOutline",
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_3",
@@ -35,11 +37,12 @@
                 "Intensity": 1.0,
                 "Thickness": 1.5
             },
-            "screenEffectStage": "Final",
+            "scope": "Layer",
             "targetLayerMask": 8
         },
         {
             "effectShaderKey": "PostEffect/Bloom.PS",
+            "effectType": "Bloom",
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_5",
@@ -54,15 +57,15 @@
                 "SoftKnee": 1.0,
                 "Threshold": 0.5
             },
-            "screenEffectStage": "Final",
+            "scope": "Layer",
             "targetLayerMask": 8
         }
     ],
     "screenPasses": [
         {
             "effectShaderKey": "PostEffect/Fog.PS",
+            "effectType": "Fog",
             "enabled": false,
-            "ignoreDepthForMask": false,
             "key": "ScreenEffectPass_2",
             "name": "Fog",
             "parameters": {
@@ -77,9 +80,9 @@
                 "NearClip": 0.10000000149011612,
                 "StartDistance": 50.0
             },
-            "screenEffectStage": "Scene",
-            "targetLayerMask": 255
+            "scope": "Screen",
+            "screenEffectStage": "Scene"
         }
     ],
-    "version": 2
+    "version": 3
 }

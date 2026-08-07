@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -249,8 +249,9 @@
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
-    <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
+    <ClCompile Include="Engine\Render\PostEffect\PostEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
+    <ClCompile Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\ComputePSORegistry.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSOFactory.cpp" />
     <ClCompile Include="Engine\Render\PSO\PSORegistry.cpp" />
@@ -463,8 +464,13 @@
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\MyPrimitiveEffect3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectTypes.h" />
-    <ClInclude Include="Engine\Render\LayerEffectPass.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectPass.h" />
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
+    <ClInclude Include="Engine\Render\PostEffect\MyPostEffect.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectParameters.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectPassHandle.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectType.h" />
     <ClInclude Include="Engine\Render\PSO\ComputePSODesc.h" />
     <ClInclude Include="Engine\Render\PSO\ComputePSORegistry.h" />
     <ClInclude Include="Engine\Render\PSO\PSODesc.h" />
@@ -483,6 +489,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Line\Line.h" />
     <ClInclude Include="Engine\Utility\EditorManagementMode.h" />
     <ClInclude Include="Engine\Render\Object\ObjectHandle.h" />
+    <ClInclude Include="Engine\Utility\Handle\GenerationalHandle.h" />
     <ClInclude Include="Engine\Render\Object\RenderLayer.h" />
     <ClInclude Include="Engine\Render\Object\IRenderObject2d.h" />
     <ClInclude Include="Engine\Render\Object\IRenderObject3d.h" />

@@ -126,8 +126,9 @@
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\PrimitiveEffect\PrimitiveEffectSystem3d.cpp" />
-    <ClCompile Include="Engine\Render\LayerEffectPass.cpp" />
+    <ClCompile Include="Engine\Render\PostEffect\PostEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
+    <ClCompile Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.cpp" />
     <ClCompile Include="Engine\Render\Shadow\ShadowMap.cpp" />
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
@@ -359,10 +360,16 @@
     <ClInclude Include="Engine\Render\Object\IRenderObject3d.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\LayerEffectPass.h">
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectPass.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
+    <ClInclude Include="Engine\Render\PostEffect\MyPostEffect.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectParameters.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectPassHandle.h" />
+    <ClInclude Include="Engine\Render\PostEffect\PostEffectType.h" />
+    <ClInclude Include="Engine\Utility\Handle\GenerationalHandle.h" />
     <ClInclude Include="Application\.SceneManager\SceneManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>

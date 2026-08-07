@@ -6,6 +6,7 @@
 #include "Render/Object/RenderLayer.h"
 #include "Utility/EditorManagementMode.h"
 #include ".SceneManager/SceneType.h"
+#include <cstddef>
 #include <d3d12.h>
 #include <filesystem>
 #include <memory>
@@ -247,6 +248,10 @@ public:
 	/// @brief 通常Model名一覧を取得する
 	/// @return 名前順のModel名一覧
 	std::vector<std::string> GetNames() const;
+
+	/// @brief 管理中の通常Modelインスタンス数を取得する
+	/// @return 管理中の通常Modelインスタンス数
+	std::size_t GetModelCount() const;
 
 	/// @brief Editor管理Model名一覧を取得する
 	/// @return 名前順のEditor管理Model名一覧

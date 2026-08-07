@@ -281,6 +281,8 @@ void DrawTextManagerEditorUI() {
 		manager.LoadFromFile("Assets/Json/TextObjects.json.bak");
 		editingHandle = {};
 	}
+	ImGui::SameLine();
+	ImGui::Text("インスタンス数: %zu", manager.GetTextCount());
 
 	ImGui::Separator();
 
@@ -289,6 +291,18 @@ void DrawTextManagerEditorUI() {
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
 		const TextHandle handle = manager.Find(name);
+		Text* text = manager.TryGet(handle);
+		if (!text) {
+			ImGui::PopID();
+			continue;
+		}
+
+		bool visible = text->IsVisible();
+		if (ImGui::Checkbox("##Visible", &visible)) {
+			text->SetVisible(visible);
+		}
+		ImGui::SameLine();
+
 		const bool selected = handle == selectedHandle;
 		const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 		const float selectableWidth = (std::max)(1.0f, ImGui::GetContentRegionAvail().x - deleteButtonWidth - ImGui::GetStyle().ItemSpacing.x);
@@ -375,11 +389,6 @@ void DrawTextManagerEditorUI() {
 		float colorValues[4] = { color.x, color.y, color.z, color.w };
 		if (ImGui::ColorEdit4("色", colorValues)) {
 			selectedText->SetColor({ colorValues[0], colorValues[1], colorValues[2], colorValues[3] });
-		}
-
-		bool visible = selectedText->IsVisible();
-		if (ImGui::Checkbox("表示", &visible)) {
-			selectedText->SetVisible(visible);
 		}
 
 		bool wordWrap = selectedText->IsWordWrapEnabled();

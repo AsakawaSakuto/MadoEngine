@@ -180,6 +180,7 @@ SceneType Game::Update(float dt) {
 		}
 		sceneCamera_ = tpsCamera_;
 	}
+	projectileDamageView_.SetVisible(inGameSession_->IsPlaying());
 	projectileDamageView_.Update(deltaTime, sceneCamera_);
 
 	return SceneType::Game;

@@ -310,11 +310,6 @@ namespace {
 
 		DrawAnchorCombo(sprite);
 
-		bool isVisible = sprite.IsVisible();
-		if (ImGui::Checkbox("表示", &isVisible)) {
-			sprite.SetVisible(isVisible);
-		}
-
 		bool isFitToScreen = sprite.IsFitToScreen();
 		if (ImGui::Checkbox("画面全体へフィット", &isFitToScreen)) {
 			sprite.SetFitToScreen(isFitToScreen);
@@ -394,6 +389,8 @@ void DrawSpriteManagerEditorUI() {
 		backupPath += ".bak";
 		manager.LoadFromFile(backupPath);
 	}
+	ImGui::SameLine();
+	ImGui::Text("インスタンス数: %zu", manager.GetSpriteCount());
 
 	ImGui::Separator();
 
@@ -402,6 +399,18 @@ void DrawSpriteManagerEditorUI() {
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
 		const SpriteHandle handle = manager.Find(name);
+		Sprite* sprite = manager.TryGet(handle);
+		if (!sprite) {
+			ImGui::PopID();
+			continue;
+		}
+
+		bool isVisible = sprite->IsVisible();
+		if (ImGui::Checkbox("##Visible", &isVisible)) {
+			sprite->SetVisible(isVisible);
+		}
+		ImGui::SameLine();
+
 		const bool isSelected = handle == selectedHandle;
 		const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 		const float selectableWidth = (std::max)(

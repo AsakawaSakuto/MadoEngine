@@ -327,11 +327,6 @@ namespace MadoEngine::Editor {
 				model.SetColor({ colorValues[0], colorValues[1], colorValues[2], colorValues[3] });
 			}
 
-			bool isVisible = model.IsVisible();
-			if (ImGui::Checkbox("表示", &isVisible)) {
-				model.SetVisible(isVisible);
-			}
-
 			bool isLightingEnabled = model.IsLightingEnabled();
 			if (ImGui::Checkbox("ライティング", &isLightingEnabled)) {
 				model.SetLightingEnabled(isLightingEnabled);
@@ -433,6 +428,8 @@ namespace MadoEngine::Editor {
 			backupPath += ".bak";
 			manager.LoadFromFile(backupPath);
 		}
+		ImGui::SameLine();
+		ImGui::Text("インスタンス数: %zu", manager.GetModelCount());
 
 		ImGui::Separator();
 
@@ -441,6 +438,18 @@ namespace MadoEngine::Editor {
 		for (const std::string& name : names) {
 			ImGui::PushID(name.c_str());
 			const ModelHandle handle = manager.Find(name);
+			Model* model = manager.TryGet(handle);
+			if (!model) {
+				ImGui::PopID();
+				continue;
+			}
+
+			bool isVisible = model->IsVisible();
+			if (ImGui::Checkbox("##Visible", &isVisible)) {
+				model->SetVisible(isVisible);
+			}
+			ImGui::SameLine();
+
 			const bool isSelected = handle == selectedHandle;
 			const float deleteButtonWidth = ImGui::CalcTextSize("削除").x + ImGui::GetStyle().FramePadding.x * 2.0f;
 			const float selectableWidth = (std::max)(

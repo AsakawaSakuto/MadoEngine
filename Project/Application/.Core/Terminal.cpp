@@ -35,33 +35,36 @@ void Terminal::Run() {
 			sceneManager_->DrawCurrentScene();
 			execution_->EndSceneColorRender();
 
-			const std::vector<MadoEngine::Render::LayerEffectPass>& layerEffectPasses = execution_->GetLayerEffectPasses();
-			for (std::size_t passIndex = 0; passIndex < layerEffectPasses.size(); ++passIndex) {
-				const MadoEngine::Render::LayerEffectPass& layerEffectPass = layerEffectPasses[passIndex];
-				if (!layerEffectPass.IsEnabled() || layerEffectPass.GetTargetLayerMask() == 0) {
+			const std::vector<MadoEngine::Render::PostEffectPassHandle>& layerEffectPassHandles =
+				execution_->GetLayerEffectPassHandles();
+			for (std::size_t passIndex = 0; passIndex < layerEffectPassHandles.size(); ++passIndex) {
+				const MadoEngine::Render::PostEffectPass* layerEffectPass =
+					execution_->TryGetPostEffectPass(layerEffectPassHandles[passIndex]);
+				if (!layerEffectPass || !layerEffectPass->IsEnabled() || layerEffectPass->GetTargetLayerMask() == 0) {
 					continue;
 				}
 
-				const MadoEngine::Render::RenderLayerMask chainLayerMask = layerEffectPass.GetTargetLayerMask();
-				execution_->BeginLayerEffectRender(layerEffectPass);
+				const MadoEngine::Render::RenderLayerMask chainLayerMask = layerEffectPass->GetTargetLayerMask();
+				execution_->BeginLayerEffectRender(*layerEffectPass);
 				sceneManager_->DrawSceneLayerMask(chainLayerMask);
 				execution_->EndLayerEffectRender();
 
-				execution_->ApplyLayerEffectToChain(layerEffectPass);
+				execution_->ApplyLayerEffectToChain(*layerEffectPass);
 
-				while (passIndex + 1 < layerEffectPasses.size()) {
-					const MadoEngine::Render::LayerEffectPass& nextLayerEffectPass = layerEffectPasses[passIndex + 1];
-					if (!nextLayerEffectPass.IsEnabled() || nextLayerEffectPass.GetTargetLayerMask() == 0) {
+				while (passIndex + 1 < layerEffectPassHandles.size()) {
+					const MadoEngine::Render::PostEffectPass* nextLayerEffectPass =
+						execution_->TryGetPostEffectPass(layerEffectPassHandles[passIndex + 1]);
+					if (!nextLayerEffectPass || !nextLayerEffectPass->IsEnabled() || nextLayerEffectPass->GetTargetLayerMask() == 0) {
 						++passIndex;
 						continue;
 					}
 
-					if (nextLayerEffectPass.GetTargetLayerMask() != chainLayerMask) {
+					if (nextLayerEffectPass->GetTargetLayerMask() != chainLayerMask) {
 						break;
 					}
 
 					++passIndex;
-					execution_->ApplyLayerEffectToChain(nextLayerEffectPass);
+					execution_->ApplyLayerEffectToChain(*nextLayerEffectPass);
 				}
 
 				execution_->CompositeLayerEffectChain();

@@ -7,25 +7,25 @@
 #include "../../../RenderHeaders.h"
 namespace MadoEngine::Editor {
 
-/// @brief Layer Effect Pass EditorのJson設定を読み込む
+/// @brief PostEffect EditorのJson設定を読み込む
 /// @param postEffectManager 読み込み先のPostEffectManager
 /// @return 読み込みに成功した場合はtrue
-bool LoadLayerEffectPassEditorJsonFromFile(Render::PostEffectManager& postEffectManager);
+bool LoadPostEffectEditorJsonFromFile(Render::PostEffectManager& postEffectManager);
 
-/// @brief Layer Effect Pass EditorのJson設定を読み込む
+/// @brief PostEffect EditorのJson設定を読み込む
 /// @param postEffectManager 読み込み先のPostEffectManager
 /// @return 読み込みに成功した場合はtrue
-bool LoadLayerEffectPassEditorJson(Render::PostEffectManager& postEffectManager);
+bool LoadPostEffectEditorJson(Render::PostEffectManager& postEffectManager);
 
 #ifdef USE_IMGUI
 
-/// @brief 予約されたLayer Effect Pass Editor操作を適用する
+/// @brief 予約されたPostEffect Editor操作を適用する
 /// @param postEffectManager 適用対象のポストエフェクト管理クラス
-void ApplyPendingLayerEffectPassEditorOperations(Render::PostEffectManager& postEffectManager);
+void ApplyPendingPostEffectEditorOperations(Render::PostEffectManager& postEffectManager);
 
-/// @brief Layer Effect Pass Editorを描画する
+/// @brief PostEffect Editorを描画する
 /// @param postEffectManager 編集対象のポストエフェクト管理クラス
-void DrawLayerEffectPassEditorUI(Render::PostEffectManager& postEffectManager);
+void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager);
 
 #endif // USE_IMGUI
 

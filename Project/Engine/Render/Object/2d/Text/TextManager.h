@@ -6,6 +6,7 @@
 #include "Render/PSO/PSORegistry.h"
 #include "Utility/EditorManagementMode.h"
 #include ".SceneManager/SceneType.h"
+#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -181,6 +182,10 @@ public:
 	/// @brief Text名一覧を取得する
 	/// @return 名前順のText名一覧
 	std::vector<std::string> GetNames() const;
+
+	/// @brief 管理中のTextインスタンス数を取得する
+	/// @return 管理中のTextインスタンス数
+	std::size_t GetTextCount() const;
 
 	/// @brief Editor管理Text名一覧を取得する
 	/// @return 名前順のEditor管理Text名一覧

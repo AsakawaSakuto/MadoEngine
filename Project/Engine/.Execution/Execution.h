@@ -39,32 +39,39 @@ namespace MadoEngine
 			const Vector3& shadowFocusPosition
 		);
 
-		/// @brief LayerEffectPassを登録する
-		/// @param desc LayerEffectPassの生成設定
-		/// @return 登録したLayerEffectPassのポインタ
-		MadoEngine::Render::LayerEffectPass* AddLayerEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc);
+		/// @brief Layer向けPostEffectPassを登録する
+		/// @param desc 個別描画レイヤー向けPassの生成設定
+		/// @return 登録したPassのHandle
+		[[nodiscard]] MadoEngine::Render::PostEffectPassHandle AddLayerEffectPass(
+			const MadoEngine::Render::LayerPostEffectPassCreateDesc& desc
+		);
 
 		/// @brief 画面全体に適用するポストエフェクトPassを登録する
-		/// @param desc ポストエフェクトPassの生成設定
-		/// @return 登録したポストエフェクトPassのポインタ
-		MadoEngine::Render::LayerEffectPass* AddScreenEffectPass(const MadoEngine::Render::LayerEffectPass::Desc& desc);
+		/// @param desc フルスクリーン向けPassの生成設定
+		/// @return 登録したPassのHandle
+		[[nodiscard]] MadoEngine::Render::PostEffectPassHandle AddScreenEffectPass(
+			const MadoEngine::Render::ScreenPostEffectPassCreateDesc& desc
+		);
 
-		/// @brief 登録済みLayerEffectPassをすべて削除する
+		/// @brief 登録済みのLayer向けPostEffectPassをすべて削除する
 		void ClearLayerEffectPasses();
 
 		/// @brief 登録済みの画面全体ポストエフェクトPassをすべて削除する
 		void ClearScreenEffectPasses();
 
-		/// @brief 登録済みLayerEffectPassを取得する
-		/// @return 登録済みLayerEffectPass配列
-		const std::vector<MadoEngine::Render::LayerEffectPass>& GetLayerEffectPasses() const;
+		/// @brief 登録済みのLayer向けPostEffectPassの実行順Handle一覧を取得する
+		/// @return 登録済みのLayer向けPostEffectPassの実行順Handle一覧
+		const std::vector<MadoEngine::Render::PostEffectPassHandle>& GetLayerEffectPassHandles() const;
 
-		/// @brief 最初に有効なLayerEffectPassを取得する
-		/// @return 有効なLayerEffectPass。存在しない場合はnullptr
-		const MadoEngine::Render::LayerEffectPass* GetFirstEnabledLayerEffectPass() const;
+		/// @brief HandleからPassを描画処理中だけ使用する一時参照として取得する
+		/// @param handle 取得対象のHandle
+		/// @return 有効な場合はPass、無効な場合はnullptr
+		const MadoEngine::Render::PostEffectPass* TryGetPostEffectPass(
+			MadoEngine::Render::PostEffectPassHandle handle
+		) const;
 
-		/// @brief 有効なLayerEffectPassの対象Layerをまとめたマスクを取得する
-		/// @return 有効なLayerEffectPassの対象Layerマスク
+		/// @brief 有効なLayer向けPostEffectPassの対象Layerをまとめたマスクを取得する
+		/// @return 有効なLayer向けPostEffectPassの対象Layerマスク
 		MadoEngine::Render::RenderLayerMask GetEnabledLayerEffectTargetMask() const;
 
 		/// @brief ポストエフェクト管理クラスを取得する
@@ -79,19 +86,19 @@ namespace MadoEngine
 		void EndSceneColorRender();
 
 		/// @brief ポストエフェクト対象Layer用RenderTargetへの描画を開始する
-		/// @param pass 実行するLayerEffectPass
-		void BeginLayerEffectRender(const MadoEngine::Render::LayerEffectPass& pass);
+		/// @param pass 実行するLayer向けPostEffectPass
+		void BeginLayerEffectRender(const MadoEngine::Render::PostEffectPass& pass);
 
 		/// @brief ポストエフェクト対象Layer用RenderTargetへの描画を終了する
 		void EndLayerEffectRender();
 
 		/// @brief 対象Layerのポストエフェクト結果をシーンへ合成する
-		/// @param pass 実行するLayerEffectPass
-		void ApplyLayerEffectAndComposite(const MadoEngine::Render::LayerEffectPass& pass);
+		/// @param pass 実行するLayer向けPostEffectPass
+		void ApplyLayerEffectAndComposite(const MadoEngine::Render::PostEffectPass& pass);
 
 		/// @brief 対象Layerの現在のチェーン結果へポストエフェクトを適用する
-		/// @param pass 実行するLayerEffectPass
-		void ApplyLayerEffectToChain(const MadoEngine::Render::LayerEffectPass& pass);
+		/// @param pass 実行するLayer向けPostEffectPass
+		void ApplyLayerEffectToChain(const MadoEngine::Render::PostEffectPass& pass);
 
 		/// @brief 対象Layerのエフェクトチェーン結果を現在の合成済み画像へ合成する
 		void CompositeLayerEffectChain();
