@@ -1,4 +1,5 @@
 #include "BeamEditor.h"
+#include "EffectEmitterEditorCommon.h"
 #include "ImGuiHeaders.h"
 #include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
 #include "TextureSelector.h"
@@ -411,6 +412,7 @@ namespace MadoEngine::Editor {
 #ifdef USE_IMGUI
 		BeamEffectSystem3d& system = BeamEffectSystem3d::GetInstance();
 		static int selectedAssetIndex = 0;
+		static int selectedEmitterIndex = 0;
 		static int selectedPage = 0;
 		static BeamEffectHandle previewHandle;
 		static std::string previewAssetName;
@@ -419,6 +421,11 @@ namespace MadoEngine::Editor {
 		static bool previewLoop = true;
 		static std::array<char, 128> newAssetNameBuffer{};
 		static std::array<char, 128> renameAssetNameBuffer{};
+		static std::array<char, 128> newEmitterNameBuffer{};
+		static std::array<char, 128> renameEmitterNameBuffer{};
+		static std::string emitterCreateAssetName;
+		static std::string emitterRenameIdentity;
+		static const BeamEffectAsset* emitterSelectedAsset = nullptr;
 		static std::string renameOriginalName;
 		static std::unordered_map<std::string, std::string> savedSnapshots;
 		static bool isNameInitialized = false;
@@ -633,8 +640,29 @@ namespace MadoEngine::Editor {
 		ImGui::TextDisabled("再生中: %zu", system.GetActiveEffectCount());
 
 		bool changed = false;
-		BeamEffectConfig& config = asset->GetConfig();
-		ImGui::SeparatorText("設定");
+		if (emitterSelectedAsset != asset) {
+			selectedEmitterIndex = 0;
+			emitterCreateAssetName.clear();
+			emitterRenameIdentity.clear();
+			emitterSelectedAsset = asset;
+		}
+		std::vector<BeamEmitterConfig>& emitters = asset->GetEmitters();
+		changed |= Detail::DrawEffectEmitterListPane(
+			"BeamEmitters",
+			selectedAssetName,
+			emitters,
+			kMaximumBeamEmitterCount,
+			selectedEmitterIndex,
+			newEmitterNameBuffer,
+			emitterCreateAssetName,
+			renameEmitterNameBuffer,
+			emitterRenameIdentity
+		);
+		BeamEmitterConfig& config = emitters[selectedEmitterIndex];
+		ImGui::SameLine();
+		ImGui::BeginChild("BeamEmitterSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::Text("設定: %s", config.name.c_str());
+		ImGui::Separator();
 		const char* pageNames[] = { "基本", "形状", "ノイズ", "マテリアル", "UV" };
 		const float pageWidth =
 			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 4.0f) /
@@ -656,7 +684,7 @@ namespace MadoEngine::Editor {
 			}
 			ImGui::PopID();
 		}
-		ImGui::BeginChild("BeamSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::BeginChild("BeamSettingScrollPane", ImVec2(0.0f, 0.0f), false);
 		switch (selectedPage) {
 		case 1: changed |= DrawGeometryEditor(config); break;
 		case 2: changed |= DrawNoiseEditor(config); break;
@@ -666,11 +694,12 @@ namespace MadoEngine::Editor {
 		default: changed |= DrawBasicEditor(config); break;
 		}
 		ImGui::EndChild();
+		ImGui::EndChild();
 		if (changed) {
 			asset->Validate();
 		}
 		if (system.IsAlive(previewHandle) && previewAssetName == selectedAssetName) {
-			if (previewLoopChanged) {
+			if (changed || previewLoopChanged) {
 				StopPreview(system, previewHandle);
 				BeamEffectPlayDesc desc;
 				desc.startPosition = previewStart;

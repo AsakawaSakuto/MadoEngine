@@ -9,7 +9,7 @@ namespace MadoEngine::Ribbon {
 	/// @brief Ribbon描画とPoint生成の変更されない設定を保持するAsset
 	class RibbonEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 3;
+		static constexpr uint32_t kCurrentVersion = 5;
 
 		/// @brief JsonファイルからAssetを読み込む
 		/// @param filePath 読み込むJsonファイル
@@ -45,13 +45,25 @@ namespace MadoEngine::Ribbon {
 		/// @brief Ribbon設定を取得する
 		/// @return Ribbon設定
 		const RibbonEffectConfig& GetConfig() const {
-			return config_;
+			return emitters_.front();
 		}
 
 		/// @brief 編集可能なRibbon設定を取得する
 		/// @return 編集可能なRibbon設定
 		RibbonEffectConfig& GetConfig() {
-			return config_;
+			return emitters_.front();
+		}
+
+		/// @brief Emitter設定一覧を取得する
+		/// @return Emitter設定一覧
+		const std::vector<RibbonEmitterConfig>& GetEmitters() const {
+			return emitters_;
+		}
+
+		/// @brief 編集可能なEmitter設定一覧を取得する
+		/// @return 編集可能なEmitter設定一覧
+		std::vector<RibbonEmitterConfig>& GetEmitters() {
+			return emitters_;
 		}
 
 		/// @brief Assetの保存先を取得する
@@ -73,7 +85,7 @@ namespace MadoEngine::Ribbon {
 		uint32_t version_ = kCurrentVersion;
 		std::string name_;
 		std::filesystem::path filePath_;
-		RibbonEffectConfig config_;
+		std::vector<RibbonEmitterConfig> emitters_{ RibbonEmitterConfig{} };
 	};
 
 } // namespace MadoEngine::Ribbon

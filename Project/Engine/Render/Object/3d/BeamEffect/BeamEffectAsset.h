@@ -9,7 +9,7 @@ namespace MadoEngine::Beam {
 	/// @brief Beamの再生、形状、Noise、Material設定を保持するAsset
 	class BeamEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 2;
+		static constexpr uint32_t kCurrentVersion = 4;
 
 		/// @brief JsonファイルからAssetを読み込む
 		/// @param filePath 読み込むJsonファイル
@@ -45,13 +45,25 @@ namespace MadoEngine::Beam {
 		/// @brief Beam設定を取得する
 		/// @return Beam設定
 		const BeamEffectConfig& GetConfig() const {
-			return config_;
+			return emitters_.front();
 		}
 
 		/// @brief 編集可能なBeam設定を取得する
 		/// @return 編集可能なBeam設定
 		BeamEffectConfig& GetConfig() {
-			return config_;
+			return emitters_.front();
+		}
+
+		/// @brief Emitter設定一覧を取得する
+		/// @return Emitter設定一覧
+		const std::vector<BeamEmitterConfig>& GetEmitters() const {
+			return emitters_;
+		}
+
+		/// @brief 編集可能なEmitter設定一覧を取得する
+		/// @return 編集可能なEmitter設定一覧
+		std::vector<BeamEmitterConfig>& GetEmitters() {
+			return emitters_;
 		}
 
 		/// @brief 保存先ファイルを取得する
@@ -73,7 +85,7 @@ namespace MadoEngine::Beam {
 		uint32_t version_ = kCurrentVersion;
 		std::string name_;
 		std::filesystem::path filePath_;
-		BeamEffectConfig config_;
+		std::vector<BeamEmitterConfig> emitters_{ BeamEmitterConfig{} };
 	};
 
 } // namespace MadoEngine::Beam

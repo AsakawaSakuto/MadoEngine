@@ -9,7 +9,7 @@ namespace MadoEngine::Effect {
 	/// @brief Cylinderエフェクトの変更されない設定を保持するAsset
 	class CylinderEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 1;
+		static constexpr uint32_t kCurrentVersion = 3;
 
 		/// @brief JsonファイルからAssetを読み込む
 		/// @param filePath 読み込むJsonファイルパス
@@ -45,13 +45,25 @@ namespace MadoEngine::Effect {
 		/// @brief Cylinder設定を取得する
 		/// @return Cylinder設定
 		const CylinderEffectConfig& GetConfig() const {
-			return config_;
+			return emitters_.front();
 		}
 
 		/// @brief 編集可能なCylinder設定を取得する
 		/// @return 編集可能なCylinder設定
 		CylinderEffectConfig& GetConfig() {
-			return config_;
+			return emitters_.front();
+		}
+
+		/// @brief Emitter設定一覧を取得する
+		/// @return Emitter設定一覧
+		const std::vector<CylinderEmitterConfig>& GetEmitters() const {
+			return emitters_;
+		}
+
+		/// @brief 編集可能なEmitter設定一覧を取得する
+		/// @return 編集可能なEmitter設定一覧
+		std::vector<CylinderEmitterConfig>& GetEmitters() {
+			return emitters_;
 		}
 
 		/// @brief 読み込み元ファイルパスを取得する
@@ -67,7 +79,7 @@ namespace MadoEngine::Effect {
 		uint32_t version_ = kCurrentVersion;
 		std::string name_;
 		std::filesystem::path filePath_;
-		CylinderEffectConfig config_;
+		std::vector<CylinderEmitterConfig> emitters_{ CylinderEmitterConfig{} };
 	};
 
 } // namespace MadoEngine::Effect

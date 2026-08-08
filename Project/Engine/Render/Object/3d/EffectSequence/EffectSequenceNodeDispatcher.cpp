@@ -37,31 +37,6 @@ namespace {
 		};
 	}
 
-	/// @brief Ribbon上書き制御点をAssetのSimulation Spaceへ変換する
-	/// @param assetName Ribbon Asset名
-	/// @param settings Ribbon固有設定
-	/// @param transform Node World Transform
-	/// @return Ribbon Systemへ渡す制御点
-	std::vector<Vector3> BuildRibbonControlPoints(
-		const std::string& assetName,
-		const RibbonNodeSettings& settings,
-		const Transform3D& transform) {
-		std::vector<Vector3> points = settings.controlPoints;
-		const MadoEngine::Ribbon::RibbonEffectAsset* asset =
-			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().FindAsset(assetName);
-		if (
-			!asset ||
-			asset->GetConfig().trail.simulationSpace == MadoEngine::Ribbon::RibbonSimulationSpace::Local) {
-			return points;
-		}
-
-		const Matrix4x4 world = MakeMatrix(transform);
-		for (Vector3& point : points) {
-			point = Matrix::Transform(point, world);
-		}
-		return points;
-	}
-
 } // namespace
 
 namespace MadoEngine::EffectSequence {
@@ -120,9 +95,9 @@ namespace MadoEngine::EffectSequence {
 			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetPlaybackSpeed(handle, playbackSpeed);
 			if (const auto* settings = std::get_if<RibbonNodeSettings>(&node.settings)) {
 				if (settings->overrideManualControlPoints) {
-					MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetControlPoints(
+					MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetLocalControlPoints(
 						handle,
-						BuildRibbonControlPoints(node.effectAssetName, *settings, worldTransform)
+						settings->controlPoints
 					);
 				}
 			}
@@ -226,9 +201,9 @@ namespace MadoEngine::EffectSequence {
 				MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetTransform(child, worldTransform);
 				if (const auto* settings = std::get_if<RibbonNodeSettings>(&node.settings)) {
 					if (settings->overrideManualControlPoints) {
-						MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetControlPoints(
+						MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetLocalControlPoints(
 							child,
-							BuildRibbonControlPoints(node.effectAssetName, *settings, worldTransform)
+							settings->controlPoints
 						);
 					}
 				}

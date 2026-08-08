@@ -2,6 +2,7 @@
 #include "CylinderEffectAsset.h"
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 namespace MadoEngine::Effect {
 
@@ -73,14 +74,20 @@ namespace MadoEngine::Effect {
 		}
 
 	private:
+		/// @brief 1つのEmitterに固有な再生状態
+		struct EmitterState {
+			CylinderEmitterConfig config;
+			float playbackTime = 0.0f;
+			bool isLoop = false;
+			bool isFinished = false;
+		};
+
 		std::shared_ptr<const CylinderEffectAsset> asset_;
+		std::vector<EmitterState> emitters_;
 		Transform3D transform_;
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
-		float playbackTime_ = 0.0f;
 		float playbackSpeed_ = 1.0f;
-		bool isLoop_ = false;
-		bool isFinished_ = false;
 		bool isPaused_ = false;
 	};
 

@@ -440,6 +440,17 @@ namespace MadoEngine::Ribbon {
 		return true;
 	}
 
+	bool RibbonEffectSystem3d::SetLocalControlPoints(
+		RibbonEffectHandle handle,
+		const std::vector<Vector3>& controlPoints) {
+		RibbonEffectInstance* instance = Resolve(handle);
+		if (!instance || !instance->SetLocalControlPoints(controlPoints)) {
+			return false;
+		}
+		isRenderDataPrepared_ = false;
+		return true;
+	}
+
 	bool RibbonEffectSystem3d::ClearControlPoints(RibbonEffectHandle handle) {
 		RibbonEffectInstance* instance = Resolve(handle);
 		if (!instance || !instance->ClearControlPoints()) {

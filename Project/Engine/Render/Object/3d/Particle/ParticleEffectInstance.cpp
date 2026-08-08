@@ -207,11 +207,16 @@ namespace MadoEngine::Particle {
 			return;
 		}
 
-		emitters_.resize(asset_->GetEmitters().size());
-		for (std::size_t index = 0; index < emitters_.size(); ++index) {
+		emitters_.reserve(asset_->GetEmitters().size());
+		for (std::size_t index = 0; index < asset_->GetEmitters().size(); ++index) {
+			const EmitterConfig& config = asset_->GetEmitters()[index];
+			if (!config.isEnabled) {
+				continue;
+			}
 			const uint32_t emitterSeed = MyRand::MakeDerivedSeed(desc.randomSeed, static_cast<uint32_t>(index));
-			emitters_[index].Initialize(
-				asset_->GetEmitters()[index],
+			ParticleEmitterInstance& emitter = emitters_.emplace_back();
+			emitter.Initialize(
+				config,
 				emitterSeed,
 				desc.loopOverride,
 				desc.transform,

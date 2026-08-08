@@ -2,6 +2,7 @@
 #include "ManualRibbonPointSource.h"
 #include "RibbonEffectRenderer3d.h"
 #include "TrailPointSource.h"
+#include "Math/Function/MatrixFunction.h"
 #include <algorithm>
 #include <cmath>
 
@@ -14,30 +15,32 @@ namespace MadoEngine::Ribbon {
 		transform_ = desc.transform;
 		sceneType_ = desc.sceneType;
 		renderLayer_ = desc.renderLayer;
-		playbackTime_ = 0.0f;
-		totalTime_ = 0.0f;
 		playbackSpeed_ = 1.0f;
-		isGenerating_ = asset_ != nullptr;
-		isImmediatelyFinished_ = asset_ == nullptr;
 		isPaused_ = false;
-		isLoop_ = asset_ ? asset_->GetConfig().playback.isLoop : false;
-		if (desc.loopOverride.has_value()) {
-			isLoop_ = desc.loopOverride.value();
-		}
-
+		emitters_.clear();
 		if (!asset_) {
 			return;
 		}
-		const RibbonTrailModule& trail = asset_->GetConfig().trail;
-		if (trail.generationMode == RibbonPointGenerationMode::Manual) {
-			pointSource_ = std::make_unique<ManualRibbonPointSource>(trail, transform_);
-		} else {
-			pointSource_ = std::make_unique<TrailPointSource>(trail, transform_);
+		emitters_.reserve(asset_->GetEmitters().size());
+		for (const RibbonEmitterConfig& config : asset_->GetEmitters()) {
+			if (!config.isEnabled) {
+				continue;
+			}
+			EmitterState state;
+			state.config = config;
+			state.isGenerating = true;
+			state.isLoop = desc.loopOverride.value_or(config.playback.isLoop);
+			if (config.trail.generationMode == RibbonPointGenerationMode::Manual) {
+				state.pointSource = std::make_unique<ManualRibbonPointSource>(config.trail, transform_);
+			} else {
+				state.pointSource = std::make_unique<TrailPointSource>(config.trail, transform_);
+			}
+			emitters_.push_back(std::move(state));
 		}
 	}
 
 	void RibbonEffectInstance::Update(float deltaTime) {
-		if (isImmediatelyFinished_ || isPaused_ || !asset_ || !pointSource_) {
+		if (isPaused_ || !asset_) {
 			return;
 		}
 
@@ -47,33 +50,41 @@ namespace MadoEngine::Ribbon {
 			0.1f
 		);
 		const float scaledDeltaTime = safeDeltaTime * playbackSpeed_;
-		pointSource_->Update(scaledDeltaTime);
-		totalTime_ += scaledDeltaTime;
-		if (!isGenerating_) {
-			return;
-		}
+		for (EmitterState& emitter : emitters_) {
+			if (emitter.isImmediatelyFinished || !emitter.pointSource) {
+				continue;
+			}
+			emitter.pointSource->Update(scaledDeltaTime);
+			emitter.totalTime += scaledDeltaTime;
+			if (!emitter.isGenerating) {
+				continue;
+			}
 
-		const float duration = asset_->GetConfig().playback.duration;
-		playbackTime_ += scaledDeltaTime;
-		if (isLoop_) {
-			playbackTime_ = std::fmod(playbackTime_, duration);
-			return;
-		}
-		if (playbackTime_ >= duration) {
-			playbackTime_ = duration;
-			Stop(RibbonStopMode::Finish);
+			const float duration = emitter.config.playback.duration;
+			emitter.playbackTime += scaledDeltaTime;
+			if (emitter.isLoop) {
+				emitter.playbackTime = std::fmod(emitter.playbackTime, duration);
+				continue;
+			}
+			if (emitter.playbackTime >= duration) {
+				emitter.playbackTime = duration;
+				emitter.isGenerating = false;
+				emitter.pointSource->Stop(RibbonStopMode::Finish);
+			}
 		}
 	}
 
 	void RibbonEffectInstance::Stop(RibbonStopMode mode) {
-		if (!pointSource_ || isImmediatelyFinished_) {
-			return;
-		}
-		isGenerating_ = false;
-		isLoop_ = false;
-		pointSource_->Stop(mode);
-		if (mode == RibbonStopMode::Immediate) {
-			isImmediatelyFinished_ = true;
+		for (EmitterState& emitter : emitters_) {
+			if (!emitter.pointSource || emitter.isImmediatelyFinished) {
+				continue;
+			}
+			emitter.isGenerating = false;
+			emitter.isLoop = false;
+			emitter.pointSource->Stop(mode);
+			if (mode == RibbonStopMode::Immediate) {
+				emitter.isImmediatelyFinished = true;
+			}
 		}
 	}
 
@@ -94,10 +105,17 @@ namespace MadoEngine::Ribbon {
 	}
 
 	bool RibbonEffectInstance::IsFinished() const {
-		if (isImmediatelyFinished_ || !asset_ || !pointSource_) {
+		if (!asset_) {
 			return true;
 		}
-		return !isGenerating_ && pointSource_->GetPoints().empty();
+		return std::all_of(
+			emitters_.begin(),
+			emitters_.end(),
+			[](const EmitterState& emitter) {
+				return emitter.isImmediatelyFinished || !emitter.pointSource ||
+					(!emitter.isGenerating && emitter.pointSource->GetPoints().empty());
+			}
+		);
 	}
 
 	bool RibbonEffectInstance::Matches(
@@ -108,64 +126,106 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void RibbonEffectInstance::SubmitRenderData(RibbonEffectRenderer3d& renderer) const {
-		if (IsFinished() || pointSource_->GetPoints().size() < kMinimumRibbonPointCount) {
+		if (IsFinished()) {
 			return;
 		}
 
-		const RibbonEffectConfig& config = asset_->GetConfig();
-		RibbonRenderData data;
-		data.points = pointSource_->GetPoints();
-		data.widthOverLifetime = config.geometry.widthOverLifetime;
-		data.colorOverLifetime = config.material.colorOverLifetime;
-		data.interpolation = config.geometry.interpolation;
-		data.smoothingSubdivision = config.geometry.smoothingSubdivision;
-		data.cameraFacing = config.geometry.cameraFacing;
-		data.textureName = config.material.textureName;
-		data.blendMode = config.material.blendMode;
-		data.cullMode = config.material.cullMode;
-		data.globalAlpha = std::clamp(config.material.globalAlpha.Evaluate(playbackTime_), 0.0f, 1.0f);
-		data.uvScale = config.material.uvScale;
-		data.uvOffset = {
-			config.material.uvOffset.x + config.material.uvScroll.x * totalTime_,
-			config.material.uvOffset.y + config.material.uvScroll.y * totalTime_,
-		};
-		data.uvMode = config.material.uvMode;
-		data.tileLength = config.material.tileLength;
-		const float normalizedPlaybackTime = std::clamp(
-			playbackTime_ / config.playback.duration,
-			0.0f,
-			1.0f
-		);
-		data.playbackMode = config.playback.mode;
-		data.playbackProgress = std::clamp(
-			config.playback.progress.Evaluate(normalizedPlaybackTime),
-			0.0f,
-			1.0f
-		);
-		data.sweepLength = config.playback.sweepLength;
-		data.renderLayer = renderLayer_;
-		renderer.Submit(data);
+		for (const EmitterState& emitter : emitters_) {
+			if (emitter.isImmediatelyFinished || !emitter.pointSource ||
+				emitter.pointSource->GetPoints().size() < kMinimumRibbonPointCount) {
+				continue;
+			}
+			const RibbonEmitterConfig& config = emitter.config;
+			RibbonRenderData data;
+			data.points = emitter.pointSource->GetPoints();
+			data.widthOverLifetime = config.geometry.widthOverLifetime;
+			data.colorOverLifetime = config.material.colorOverLifetime;
+			data.interpolation = config.geometry.interpolation;
+			data.smoothingSubdivision = config.geometry.smoothingSubdivision;
+			data.cameraFacing = config.geometry.cameraFacing;
+			data.textureName = config.material.textureName;
+			data.blendMode = config.material.blendMode;
+			data.cullMode = config.material.cullMode;
+			data.globalAlpha = std::clamp(config.material.globalAlpha.Evaluate(emitter.playbackTime), 0.0f, 1.0f);
+			data.uvScale = config.material.uvScale;
+			data.uvOffset = {
+				config.material.uvOffset.x + config.material.uvScroll.x * emitter.totalTime,
+				config.material.uvOffset.y + config.material.uvScroll.y * emitter.totalTime,
+			};
+			data.uvMode = config.material.uvMode;
+			data.tileLength = config.material.tileLength;
+			const float normalizedPlaybackTime = std::clamp(
+				emitter.playbackTime / config.playback.duration,
+				0.0f,
+				1.0f
+			);
+			data.playbackMode = config.playback.mode;
+			data.playbackProgress = std::clamp(
+				config.playback.progress.Evaluate(normalizedPlaybackTime),
+				0.0f,
+				1.0f
+			);
+			data.sweepLength = config.playback.sweepLength;
+			data.renderLayer = renderLayer_;
+			renderer.Submit(data);
+		}
 	}
 
 	void RibbonEffectInstance::SetTransform(const Transform3D& transform) {
 		transform_ = transform;
-		if (pointSource_) {
-			pointSource_->SetTransform(transform_);
+		for (EmitterState& emitter : emitters_) {
+			if (emitter.pointSource) {
+				emitter.pointSource->SetTransform(transform_);
+			}
 		}
 	}
 
 	bool RibbonEffectInstance::SetControlPoints(const std::vector<Vector3>& controlPoints) {
-		auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(pointSource_.get());
-		return manualSource && manualSource->SetControlPoints(controlPoints);
+		bool wasSet = false;
+		for (EmitterState& emitter : emitters_) {
+			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
+			if (manualSource) {
+				wasSet = manualSource->SetControlPoints(controlPoints) || wasSet;
+			}
+		}
+		return wasSet;
+	}
+
+	bool RibbonEffectInstance::SetLocalControlPoints(const std::vector<Vector3>& controlPoints) {
+		const Matrix4x4 world = Matrix::MakeAffine(
+			transform_.scale,
+			transform_.rotate,
+			transform_.translate
+		);
+		bool wasSet = false;
+		for (EmitterState& emitter : emitters_) {
+			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
+			if (!manualSource) {
+				continue;
+			}
+			if (emitter.config.trail.simulationSpace == RibbonSimulationSpace::Local) {
+				wasSet = manualSource->SetControlPoints(controlPoints) || wasSet;
+				continue;
+			}
+			std::vector<Vector3> worldControlPoints = controlPoints;
+			for (Vector3& point : worldControlPoints) {
+				point = Matrix::Transform(point, world);
+			}
+			wasSet = manualSource->SetControlPoints(worldControlPoints) || wasSet;
+		}
+		return wasSet;
 	}
 
 	bool RibbonEffectInstance::ClearControlPoints() {
-		auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(pointSource_.get());
-		if (!manualSource) {
-			return false;
+		bool wasCleared = false;
+		for (EmitterState& emitter : emitters_) {
+			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
+			if (manualSource) {
+				manualSource->Clear();
+				wasCleared = true;
+			}
 		}
-		manualSource->Clear();
-		return true;
+		return wasCleared;
 	}
 
 } // namespace MadoEngine::Ribbon

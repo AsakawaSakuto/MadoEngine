@@ -311,6 +311,207 @@ namespace {
 		track.SetKeyframes(std::move(keyframes));
 	}
 
+	/// @brief JsonからCylinder Emitter設定を読み込む
+	/// @param json 読み込み元Json
+	/// @return 読み込んだEmitter設定
+	CylinderEmitterConfig ReadCylinderEmitter(const JsonValue& json) {
+		CylinderEmitterConfig config;
+		config.name = ReadString(json, "name", config.name);
+		config.isEnabled = ReadBool(json, "isEnabled", config.isEnabled);
+		config.duration = ReadFloat(json, "duration", config.duration);
+		config.isLoop = ReadBool(json, "loop", config.isLoop);
+
+		const auto readFloatValue = [](const JsonValue& value, float fallback) {
+			return value.is_number() ? value.get<float>() : fallback;
+		};
+		const auto readVector2Value = [](const JsonValue& value, const Vector2& fallback) {
+			return MadoEngine::Json::JsonSerializer::ToVector2(value, fallback);
+		};
+		const auto readVector4Value = [](const JsonValue& value, const Vector4& fallback) {
+			return MadoEngine::Json::JsonSerializer::ToVector4(value, fallback);
+		};
+
+		if (const JsonValue* geometry = FindValue(json, "geometry")) {
+			config.geometry.radialSegments = ReadUInt(*geometry, "radialSegments", config.geometry.radialSegments);
+			config.geometry.heightSegments = ReadUInt(*geometry, "heightSegments", config.geometry.heightSegments);
+			config.geometry.pivot = ParsePivot(ReadString(*geometry, "pivot", "bottom"));
+			if (const JsonValue* value = FindValue(*geometry, "bottomRadii")) {
+				config.geometry.bottomRadii = ReadTrack(*value, config.geometry.bottomRadii.GetDefaultValue(), readVector2Value);
+			}
+			if (const JsonValue* value = FindValue(*geometry, "topRadii")) {
+				config.geometry.topRadii = ReadTrack(*value, config.geometry.topRadii.GetDefaultValue(), readVector2Value);
+			}
+			if (const JsonValue* value = FindValue(*geometry, "height")) {
+				config.geometry.height = ReadTrack(*value, config.geometry.height.GetDefaultValue(), readFloatValue);
+			}
+			if (const JsonValue* value = FindValue(*geometry, "startAngleDegrees")) {
+				config.geometry.startAngleDegrees = ReadTrack(*value, config.geometry.startAngleDegrees.GetDefaultValue(), readFloatValue);
+			}
+			if (const JsonValue* value = FindValue(*geometry, "arcAngleDegrees")) {
+				config.geometry.arcAngleDegrees = ReadTrack(*value, config.geometry.arcAngleDegrees.GetDefaultValue(), readFloatValue);
+			}
+		}
+
+		if (const JsonValue* material = FindValue(json, "material")) {
+			config.material.textureName = ReadString(*material, "textureName", config.material.textureName);
+			config.material.blendMode = ParseBlendMode(ReadString(*material, "blendMode", "add"));
+			config.material.cullMode = ParseCullMode(ReadString(*material, "cullMode", "none"));
+			if (const JsonValue* value = FindValue(*material, "globalAlpha")) {
+				config.material.globalAlpha = ReadTrack(*value, config.material.globalAlpha.GetDefaultValue(), readFloatValue);
+			}
+			if (const JsonValue* value = FindValue(*material, "bottomFadeRange")) {
+				config.material.bottomFadeRange = ReadTrack(*value, config.material.bottomFadeRange.GetDefaultValue(), readFloatValue);
+			}
+			if (const JsonValue* value = FindValue(*material, "topFadeRange")) {
+				config.material.topFadeRange = ReadTrack(*value, config.material.topFadeRange.GetDefaultValue(), readFloatValue);
+			}
+			if (const JsonValue* uv = FindValue(*material, "uv")) {
+				config.material.uv.direction = ParseUvDirection(ReadString(*uv, "direction", "topToBottom"));
+				if (const JsonValue* value = FindValue(*uv, "scale")) {
+					config.material.uv.scale = ReadTrack(*value, config.material.uv.scale.GetDefaultValue(), readVector2Value);
+				}
+				if (const JsonValue* value = FindValue(*uv, "offset")) {
+					config.material.uv.offset = ReadTrack(*value, config.material.uv.offset.GetDefaultValue(), readVector2Value);
+				}
+				if (const JsonValue* value = FindValue(*uv, "rotationDegrees")) {
+					config.material.uv.rotationDegrees = ReadTrack(*value, config.material.uv.rotationDegrees.GetDefaultValue(), readFloatValue);
+				}
+			}
+
+			config.material.gradient.clear();
+			if (const JsonValue* gradient = FindValue(*material, "gradient"); gradient && gradient->is_array()) {
+				for (const JsonValue& stopJson : *gradient) {
+					if (!stopJson.is_object()) {
+						continue;
+					}
+					CylinderColorStop stop;
+					stop.position = ReadFloat(stopJson, "position", stop.position);
+					if (const JsonValue* value = FindValue(stopJson, "color")) {
+						stop.color = ReadTrack(*value, stop.color.GetDefaultValue(), readVector4Value);
+					}
+					config.material.gradient.push_back(std::move(stop));
+				}
+			}
+		}
+		return config;
+	}
+
+	/// @brief Cylinder Emitter設定をJsonへ変換する
+	/// @param config 変換するEmitter設定
+	/// @return 変換後Json
+	JsonValue WriteCylinderEmitter(const CylinderEmitterConfig& config) {
+		JsonValue gradient = JsonValue::array();
+		for (const CylinderColorStop& stop : config.material.gradient) {
+			gradient.push_back({
+				{ "position", stop.position },
+				{ "color", WriteTrack(stop.color) },
+			});
+		}
+		return JsonValue{
+			{ "name", config.name },
+			{ "isEnabled", config.isEnabled },
+			{ "duration", config.duration },
+			{ "loop", config.isLoop },
+			{ "geometry", {
+				{ "radialSegments", config.geometry.radialSegments },
+				{ "heightSegments", config.geometry.heightSegments },
+				{ "pivot", ToString(config.geometry.pivot) },
+				{ "bottomRadii", WriteTrack(config.geometry.bottomRadii) },
+				{ "topRadii", WriteTrack(config.geometry.topRadii) },
+				{ "height", WriteTrack(config.geometry.height) },
+				{ "startAngleDegrees", WriteTrack(config.geometry.startAngleDegrees) },
+				{ "arcAngleDegrees", WriteTrack(config.geometry.arcAngleDegrees) },
+			} },
+			{ "material", {
+				{ "textureName", config.material.textureName },
+				{ "blendMode", ToString(config.material.blendMode) },
+				{ "cullMode", ToString(config.material.cullMode) },
+				{ "globalAlpha", WriteTrack(config.material.globalAlpha) },
+				{ "bottomFadeRange", WriteTrack(config.material.bottomFadeRange) },
+				{ "topFadeRange", WriteTrack(config.material.topFadeRange) },
+				{ "uv", {
+					{ "direction", ToString(config.material.uv.direction) },
+					{ "scale", WriteTrack(config.material.uv.scale) },
+					{ "offset", WriteTrack(config.material.uv.offset) },
+					{ "rotationDegrees", WriteTrack(config.material.uv.rotationDegrees) },
+				} },
+				{ "gradient", gradient },
+			} },
+		};
+	}
+
+	/// @brief Cylinder Emitter設定を安全な範囲へ補正する
+	/// @param config 補正対象Emitter設定
+	void ValidateCylinderEmitter(CylinderEmitterConfig& config) {
+		config.duration = std::clamp(std::isfinite(config.duration) ? config.duration : 1.0f, 0.001f, 3600.0f);
+		config.geometry.radialSegments = std::clamp(config.geometry.radialSegments, 3u, 256u);
+		config.geometry.heightSegments = std::clamp(config.geometry.heightSegments, 1u, 64u);
+
+		const auto normalizeRadii = [](Vector2 value) {
+			value.x = std::isfinite(value.x) ? (std::max)(0.0f, value.x) : 1.0f;
+			value.y = std::isfinite(value.y) ? (std::max)(0.0f, value.y) : 1.0f;
+			return value;
+		};
+		const auto normalizeHeight = [](float value) {
+			return std::clamp(std::isfinite(value) ? value : 1.0f, 0.001f, 10000.0f);
+		};
+		const auto normalizeAngle = [](float value) { return std::isfinite(value) ? value : 0.0f; };
+		const auto normalizeArc = [](float value) {
+			return std::clamp(std::isfinite(value) ? value : 360.0f, -360.0f, 360.0f);
+		};
+		const auto normalizeUnit = [](float value) {
+			return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
+		};
+		const auto normalizeVector2 = [](Vector2 value) {
+			value.x = std::isfinite(value.x) ? value.x : 0.0f;
+			value.y = std::isfinite(value.y) ? value.y : 0.0f;
+			return value;
+		};
+		const auto normalizeColor = [](Vector4 value) {
+			value.x = std::isfinite(value.x) ? (std::max)(0.0f, value.x) : 1.0f;
+			value.y = std::isfinite(value.y) ? (std::max)(0.0f, value.y) : 1.0f;
+			value.z = std::isfinite(value.z) ? (std::max)(0.0f, value.z) : 1.0f;
+			value.w = std::clamp(std::isfinite(value.w) ? value.w : 1.0f, 0.0f, 1.0f);
+			return value;
+		};
+
+		NormalizeTrack(config.geometry.bottomRadii, normalizeRadii);
+		NormalizeTrack(config.geometry.topRadii, normalizeRadii);
+		NormalizeTrack(config.geometry.height, normalizeHeight);
+		NormalizeTrack(config.geometry.startAngleDegrees, normalizeAngle);
+		NormalizeTrack(config.geometry.arcAngleDegrees, normalizeArc);
+		NormalizeTrack(config.material.globalAlpha, normalizeUnit);
+		NormalizeTrack(config.material.bottomFadeRange, normalizeUnit);
+		NormalizeTrack(config.material.topFadeRange, normalizeUnit);
+		NormalizeTrack(config.material.uv.scale, normalizeVector2);
+		NormalizeTrack(config.material.uv.offset, normalizeVector2);
+		NormalizeTrack(config.material.uv.rotationDegrees, normalizeAngle);
+
+		if (config.material.textureName.empty()) {
+			config.material.textureName = "white2x2";
+		}
+		if (config.material.gradient.empty()) {
+			CylinderColorStop bottom;
+			CylinderColorStop top;
+			top.position = 1.0f;
+			config.material.gradient = { bottom, top };
+		}
+		if (config.material.gradient.size() > kMaximumCylinderGradientStops) {
+			config.material.gradient.resize(kMaximumCylinderGradientStops);
+		}
+		for (CylinderColorStop& stop : config.material.gradient) {
+			stop.position = normalizeUnit(stop.position);
+			NormalizeTrack(stop.color, normalizeColor);
+		}
+		std::stable_sort(
+			config.material.gradient.begin(),
+			config.material.gradient.end(),
+			[](const CylinderColorStop& lhs, const CylinderColorStop& rhs) {
+				return lhs.position < rhs.position;
+			}
+		);
+	}
+
 } // namespace
 
 namespace MadoEngine::Effect {
@@ -341,199 +542,53 @@ namespace MadoEngine::Effect {
 		if (version_ > kCurrentVersion) {
 			Logger::Output("未対応のCylinder Effect Assetバージョンです: " + std::to_string(version_), Logger::Level::Warning);
 		}
-
-		config_.duration = ReadFloat(json, "duration", config_.duration);
-		config_.isLoop = ReadBool(json, "loop", config_.isLoop);
-
-		const auto readFloatValue = [](const JsonValue& value, float fallback) {
-			return value.is_number() ? value.get<float>() : fallback;
-		};
-		const auto readVector2Value = [](const JsonValue& value, const Vector2& fallback) {
-			return MadoEngine::Json::JsonSerializer::ToVector2(value, fallback);
-		};
-		const auto readVector4Value = [](const JsonValue& value, const Vector4& fallback) {
-			return MadoEngine::Json::JsonSerializer::ToVector4(value, fallback);
-		};
-
-		if (const JsonValue* geometry = FindValue(json, "geometry")) {
-			config_.geometry.radialSegments = ReadUInt(*geometry, "radialSegments", config_.geometry.radialSegments);
-			config_.geometry.heightSegments = ReadUInt(*geometry, "heightSegments", config_.geometry.heightSegments);
-			config_.geometry.pivot = ParsePivot(ReadString(*geometry, "pivot", "bottom"));
-			if (const JsonValue* value = FindValue(*geometry, "bottomRadii")) {
-				config_.geometry.bottomRadii = ReadTrack(*value, config_.geometry.bottomRadii.GetDefaultValue(), readVector2Value);
-			}
-			if (const JsonValue* value = FindValue(*geometry, "topRadii")) {
-				config_.geometry.topRadii = ReadTrack(*value, config_.geometry.topRadii.GetDefaultValue(), readVector2Value);
-			}
-			if (const JsonValue* value = FindValue(*geometry, "height")) {
-				config_.geometry.height = ReadTrack(*value, config_.geometry.height.GetDefaultValue(), readFloatValue);
-			}
-			if (const JsonValue* value = FindValue(*geometry, "startAngleDegrees")) {
-				config_.geometry.startAngleDegrees = ReadTrack(*value, config_.geometry.startAngleDegrees.GetDefaultValue(), readFloatValue);
-			}
-			if (const JsonValue* value = FindValue(*geometry, "arcAngleDegrees")) {
-				config_.geometry.arcAngleDegrees = ReadTrack(*value, config_.geometry.arcAngleDegrees.GetDefaultValue(), readFloatValue);
-			}
-		}
-
-		if (const JsonValue* material = FindValue(json, "material")) {
-			config_.material.textureName = ReadString(*material, "textureName", config_.material.textureName);
-			config_.material.blendMode = ParseBlendMode(ReadString(*material, "blendMode", "add"));
-			config_.material.cullMode = ParseCullMode(ReadString(*material, "cullMode", "none"));
-			if (const JsonValue* value = FindValue(*material, "globalAlpha")) {
-				config_.material.globalAlpha = ReadTrack(*value, config_.material.globalAlpha.GetDefaultValue(), readFloatValue);
-			}
-			if (const JsonValue* value = FindValue(*material, "bottomFadeRange")) {
-				config_.material.bottomFadeRange = ReadTrack(*value, config_.material.bottomFadeRange.GetDefaultValue(), readFloatValue);
-			}
-			if (const JsonValue* value = FindValue(*material, "topFadeRange")) {
-				config_.material.topFadeRange = ReadTrack(*value, config_.material.topFadeRange.GetDefaultValue(), readFloatValue);
-			}
-
-			if (const JsonValue* uv = FindValue(*material, "uv")) {
-				config_.material.uv.direction = ParseUvDirection(ReadString(*uv, "direction", "topToBottom"));
-				if (const JsonValue* value = FindValue(*uv, "scale")) {
-					config_.material.uv.scale = ReadTrack(*value, config_.material.uv.scale.GetDefaultValue(), readVector2Value);
-				}
-				if (const JsonValue* value = FindValue(*uv, "offset")) {
-					config_.material.uv.offset = ReadTrack(*value, config_.material.uv.offset.GetDefaultValue(), readVector2Value);
-				}
-				if (const JsonValue* value = FindValue(*uv, "rotationDegrees")) {
-					config_.material.uv.rotationDegrees = ReadTrack(*value, config_.material.uv.rotationDegrees.GetDefaultValue(), readFloatValue);
+		emitters_.clear();
+		const JsonValue* emitters = FindValue(json, "emitters");
+		if (emitters && emitters->is_array()) {
+			const std::size_t emitterCount = (std::min)(emitters->size(), kMaximumCylinderEmitterCount);
+			emitters_.reserve(emitterCount);
+			for (std::size_t index = 0; index < emitterCount; ++index) {
+				if (emitters->at(index).is_object()) {
+					emitters_.push_back(ReadCylinderEmitter(emitters->at(index)));
 				}
 			}
-
-			config_.material.gradient.clear();
-			if (const JsonValue* gradient = FindValue(*material, "gradient"); gradient && gradient->is_array()) {
-				for (const JsonValue& stopJson : *gradient) {
-					if (!stopJson.is_object()) {
-						continue;
-					}
-					CylinderColorStop stop;
-					stop.position = ReadFloat(stopJson, "position", stop.position);
-					if (const JsonValue* value = FindValue(stopJson, "color")) {
-						stop.color = ReadTrack(*value, stop.color.GetDefaultValue(), readVector4Value);
-					}
-					config_.material.gradient.push_back(std::move(stop));
-				}
-			}
+		} else {
+			emitters_.push_back(ReadCylinderEmitter(json));
 		}
 
 		Validate();
 	}
 
 	nlohmann::json CylinderEffectAsset::ToJson() const {
-		JsonValue gradient = JsonValue::array();
-		for (const CylinderColorStop& stop : config_.material.gradient) {
-			gradient.push_back({
-				{ "position", stop.position },
-				{ "color", WriteTrack(stop.color) },
-			});
-		}
-
-		return JsonValue{
+		JsonValue json{
 			{ "version", kCurrentVersion },
-			{ "duration", config_.duration },
-			{ "loop", config_.isLoop },
-			{ "geometry", {
-				{ "radialSegments", config_.geometry.radialSegments },
-				{ "heightSegments", config_.geometry.heightSegments },
-				{ "pivot", ToString(config_.geometry.pivot) },
-				{ "bottomRadii", WriteTrack(config_.geometry.bottomRadii) },
-				{ "topRadii", WriteTrack(config_.geometry.topRadii) },
-				{ "height", WriteTrack(config_.geometry.height) },
-				{ "startAngleDegrees", WriteTrack(config_.geometry.startAngleDegrees) },
-				{ "arcAngleDegrees", WriteTrack(config_.geometry.arcAngleDegrees) },
-			} },
-			{ "material", {
-				{ "textureName", config_.material.textureName },
-				{ "blendMode", ToString(config_.material.blendMode) },
-				{ "cullMode", ToString(config_.material.cullMode) },
-				{ "globalAlpha", WriteTrack(config_.material.globalAlpha) },
-				{ "bottomFadeRange", WriteTrack(config_.material.bottomFadeRange) },
-				{ "topFadeRange", WriteTrack(config_.material.topFadeRange) },
-				{ "uv", {
-					{ "direction", ToString(config_.material.uv.direction) },
-					{ "scale", WriteTrack(config_.material.uv.scale) },
-					{ "offset", WriteTrack(config_.material.uv.offset) },
-					{ "rotationDegrees", WriteTrack(config_.material.uv.rotationDegrees) },
-				} },
-				{ "gradient", gradient },
-			} },
+			{ "emitters", JsonValue::array() },
 		};
+		for (const CylinderEmitterConfig& emitter : emitters_) {
+			json["emitters"].push_back(WriteCylinderEmitter(emitter));
+		}
+		return json;
 	}
 
 	void CylinderEffectAsset::Validate() {
-		config_.duration = std::clamp(std::isfinite(config_.duration) ? config_.duration : 1.0f, 0.001f, 3600.0f);
-		config_.geometry.radialSegments = std::clamp(config_.geometry.radialSegments, 3u, 256u);
-		config_.geometry.heightSegments = std::clamp(config_.geometry.heightSegments, 1u, 64u);
-
-		const auto normalizeRadii = [](Vector2 value) {
-			value.x = std::isfinite(value.x) ? (std::max)(0.0f, value.x) : 1.0f;
-			value.y = std::isfinite(value.y) ? (std::max)(0.0f, value.y) : 1.0f;
-			return value;
-		};
-		const auto normalizeHeight = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 1.0f, 0.001f, 10000.0f);
-		};
-		const auto normalizeAngle = [](float value) {
-			return std::isfinite(value) ? value : 0.0f;
-		};
-		const auto normalizeArc = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 360.0f, -360.0f, 360.0f);
-		};
-		const auto normalizeUnit = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
-		};
-		const auto normalizeVector2 = [](Vector2 value) {
-			value.x = std::isfinite(value.x) ? value.x : 0.0f;
-			value.y = std::isfinite(value.y) ? value.y : 0.0f;
-			return value;
-		};
-		const auto normalizeColor = [](Vector4 value) {
-			value.x = std::isfinite(value.x) ? (std::max)(0.0f, value.x) : 1.0f;
-			value.y = std::isfinite(value.y) ? (std::max)(0.0f, value.y) : 1.0f;
-			value.z = std::isfinite(value.z) ? (std::max)(0.0f, value.z) : 1.0f;
-			value.w = std::clamp(std::isfinite(value.w) ? value.w : 1.0f, 0.0f, 1.0f);
-			return value;
-		};
-
-		NormalizeTrack(config_.geometry.bottomRadii, normalizeRadii);
-		NormalizeTrack(config_.geometry.topRadii, normalizeRadii);
-		NormalizeTrack(config_.geometry.height, normalizeHeight);
-		NormalizeTrack(config_.geometry.startAngleDegrees, normalizeAngle);
-		NormalizeTrack(config_.geometry.arcAngleDegrees, normalizeArc);
-		NormalizeTrack(config_.material.globalAlpha, normalizeUnit);
-		NormalizeTrack(config_.material.bottomFadeRange, normalizeUnit);
-		NormalizeTrack(config_.material.topFadeRange, normalizeUnit);
-		NormalizeTrack(config_.material.uv.scale, normalizeVector2);
-		NormalizeTrack(config_.material.uv.offset, normalizeVector2);
-		NormalizeTrack(config_.material.uv.rotationDegrees, normalizeAngle);
-
-		if (config_.material.textureName.empty()) {
-			config_.material.textureName = "white2x2";
+		version_ = kCurrentVersion;
+		if (emitters_.empty()) {
+			emitters_.push_back(CylinderEmitterConfig{});
 		}
-		if (config_.material.gradient.empty()) {
-			CylinderColorStop bottom;
-			bottom.position = 0.0f;
-			CylinderColorStop top;
-			top.position = 1.0f;
-			config_.material.gradient = { bottom, top };
+		if (emitters_.size() > kMaximumCylinderEmitterCount) {
+			emitters_.resize(kMaximumCylinderEmitterCount);
 		}
-		if (config_.material.gradient.size() > kMaximumCylinderGradientStops) {
-			config_.material.gradient.resize(kMaximumCylinderGradientStops);
-		}
-		for (CylinderColorStop& stop : config_.material.gradient) {
-			stop.position = normalizeUnit(stop.position);
-			NormalizeTrack(stop.color, normalizeColor);
-		}
-		std::stable_sort(
-			config_.material.gradient.begin(),
-			config_.material.gradient.end(),
-			[](const CylinderColorStop& lhs, const CylinderColorStop& rhs) {
-				return lhs.position < rhs.position;
+		std::vector<std::string> usedNames;
+		usedNames.reserve(emitters_.size());
+		for (CylinderEmitterConfig& emitter : emitters_) {
+			const std::string baseName = emitter.name.empty() ? "Emitter" : emitter.name;
+			emitter.name = baseName;
+			for (uint32_t suffix = 1; std::find(usedNames.begin(), usedNames.end(), emitter.name) != usedNames.end(); ++suffix) {
+				emitter.name = baseName + std::to_string(suffix);
 			}
-		);
+			usedNames.push_back(emitter.name);
+			ValidateCylinderEmitter(emitter);
+		}
 	}
 
 } // namespace MadoEngine::Effect

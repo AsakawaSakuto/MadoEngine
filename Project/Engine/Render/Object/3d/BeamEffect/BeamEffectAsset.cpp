@@ -271,6 +271,215 @@ namespace {
 		return value == MadoEngine::Ribbon::RibbonUvMode::Tile ? "tile" : "stretch";
 	}
 
+	/// @brief JsonからBeam Emitter設定を読み込む
+	/// @param json 読み込み元Json
+	/// @param useLegacyExtensionFallback 旧Versionの伸長率補正を使う場合はtrue
+	/// @return 読み込んだEmitter設定
+	BeamEmitterConfig ReadBeamEmitter(
+		const JsonValue& json,
+		bool useLegacyExtensionFallback) {
+		BeamEmitterConfig config;
+		config.name = ReadString(json, "name", config.name);
+		config.isEnabled = ReadBool(json, "isEnabled", config.isEnabled);
+		bool hasExtensionTrack = false;
+		if (const JsonValue* playback = FindValue(json, "playback")) {
+			config.playback.duration = ReadFloat(*playback, "duration", config.playback.duration);
+			config.playback.isLoop = ReadBool(*playback, "isLoop", config.playback.isLoop);
+			if (const JsonValue* extension = FindValue(*playback, "extensionOverTime")) {
+				config.playback.extensionOverTime = ReadTrack(
+					*extension,
+					config.playback.extensionOverTime.GetDefaultValue(),
+					[](const JsonValue& value, float fallback) {
+						return value.is_number() ? value.get<float>() : fallback;
+					}
+				);
+				hasExtensionTrack = true;
+			}
+		}
+		if (useLegacyExtensionFallback && !hasExtensionTrack) {
+			config.playback.extensionOverTime = MadoEngine::Effect::EffectTrack<float>{ 1.0f };
+		}
+		if (const JsonValue* geometry = FindValue(json, "geometry")) {
+			config.geometry.segmentCount = ReadUInt(*geometry, "segmentCount", config.geometry.segmentCount);
+			config.geometry.cameraFacing = ReadBool(*geometry, "cameraFacing", config.geometry.cameraFacing);
+			config.geometry.startFade = ReadFloat(*geometry, "startFade", config.geometry.startFade);
+			config.geometry.endFade = ReadFloat(*geometry, "endFade", config.geometry.endFade);
+			if (const JsonValue* width = FindValue(*geometry, "widthOverTime")) {
+				config.geometry.widthOverTime = ReadTrack(
+					*width,
+					config.geometry.widthOverTime.GetDefaultValue(),
+					[](const JsonValue& value, float fallback) {
+						return value.is_number() ? value.get<float>() : fallback;
+					}
+				);
+			}
+		}
+		if (const JsonValue* noise = FindValue(json, "noise")) {
+			config.noise.amplitude = ReadFloat(*noise, "amplitude", config.noise.amplitude);
+			config.noise.frequency = ReadFloat(*noise, "frequency", config.noise.frequency);
+			config.noise.scrollSpeed = ReadFloat(*noise, "scrollSpeed", config.noise.scrollSpeed);
+			config.noise.seed = ReadUInt(*noise, "seed", config.noise.seed);
+		}
+		if (const JsonValue* material = FindValue(json, "material")) {
+			config.material.textureName = ReadString(*material, "textureName", config.material.textureName);
+			config.material.blendMode = ParseBlendMode(ReadString(*material, "blendMode", "add"));
+			config.material.cullMode = ParseCullMode(ReadString(*material, "cullMode", "none"));
+			config.material.uvMode = ParseUvMode(ReadString(*material, "uvMode", "stretch"));
+			config.material.tileLength = ReadFloat(*material, "tileLength", config.material.tileLength);
+			if (const JsonValue* value = FindValue(*material, "uvScale")) {
+				config.material.uvScale = ReadVector2(*value, config.material.uvScale);
+			}
+			if (const JsonValue* value = FindValue(*material, "uvOffset")) {
+				config.material.uvOffset = ReadVector2(*value, config.material.uvOffset);
+			}
+			if (const JsonValue* value = FindValue(*material, "uvScroll")) {
+				config.material.uvScroll = ReadVector2(*value, config.material.uvScroll);
+			}
+			if (const JsonValue* color = FindValue(*material, "colorOverTime")) {
+				config.material.colorOverTime = ReadTrack(
+					*color,
+					config.material.colorOverTime.GetDefaultValue(),
+					ReadVector4
+				);
+			}
+			if (const JsonValue* color = FindValue(*material, "colorOverLength")) {
+				config.material.colorOverLength = ReadTrack(
+					*color,
+					config.material.colorOverLength.GetDefaultValue(),
+					ReadVector4
+				);
+			}
+			if (const JsonValue* alpha = FindValue(*material, "globalAlphaOverTime")) {
+				config.material.globalAlphaOverTime = ReadTrack(
+					*alpha,
+					config.material.globalAlphaOverTime.GetDefaultValue(),
+					[](const JsonValue& value, float fallback) {
+						return value.is_number() ? value.get<float>() : fallback;
+					}
+				);
+			}
+		}
+		return config;
+	}
+
+	/// @brief Beam Emitter設定をJsonへ変換する
+	/// @param config 変換対象Emitter設定
+	/// @return 変換後Json
+	JsonValue WriteBeamEmitter(const BeamEmitterConfig& config) {
+		return JsonValue{
+			{ "name", config.name },
+			{ "isEnabled", config.isEnabled },
+			{ "playback", {
+				{ "duration", config.playback.duration },
+				{ "isLoop", config.playback.isLoop },
+				{ "extensionOverTime", WriteTrack(config.playback.extensionOverTime, [](float value) { return JsonValue(value); }) },
+			} },
+			{ "geometry", {
+				{ "widthOverTime", WriteTrack(config.geometry.widthOverTime, [](float value) { return JsonValue(value); }) },
+				{ "segmentCount", config.geometry.segmentCount },
+				{ "cameraFacing", config.geometry.cameraFacing },
+				{ "startFade", config.geometry.startFade },
+				{ "endFade", config.geometry.endFade },
+			} },
+			{ "noise", {
+				{ "amplitude", config.noise.amplitude },
+				{ "frequency", config.noise.frequency },
+				{ "scrollSpeed", config.noise.scrollSpeed },
+				{ "seed", config.noise.seed },
+			} },
+			{ "material", {
+				{ "textureName", config.material.textureName },
+				{ "blendMode", ToString(config.material.blendMode) },
+				{ "cullMode", ToString(config.material.cullMode) },
+				{ "colorOverTime", WriteTrack(config.material.colorOverTime, WriteVector4) },
+				{ "colorOverLength", WriteTrack(config.material.colorOverLength, WriteVector4) },
+				{ "globalAlphaOverTime", WriteTrack(config.material.globalAlphaOverTime, [](float value) { return JsonValue(value); }) },
+				{ "uvScale", WriteVector2(config.material.uvScale) },
+				{ "uvOffset", WriteVector2(config.material.uvOffset) },
+				{ "uvScroll", WriteVector2(config.material.uvScroll) },
+				{ "uvMode", ToString(config.material.uvMode) },
+				{ "tileLength", config.material.tileLength },
+			} },
+		};
+	}
+
+	/// @brief Beam Emitter設定を安全な範囲へ補正する
+	/// @param config 補正対象Emitter設定
+	void ValidateBeamEmitter(BeamEmitterConfig& config) {
+		config.playback.duration = std::clamp(
+			std::isfinite(config.playback.duration) ? config.playback.duration : 1.0f,
+			0.001f,
+			3600.0f
+		);
+		config.geometry.segmentCount = std::clamp(
+			config.geometry.segmentCount,
+			kMinimumBeamSegmentCount,
+			kMaximumBeamSegmentCount
+		);
+		config.geometry.startFade = std::clamp(
+			std::isfinite(config.geometry.startFade) ? config.geometry.startFade : 0.0f,
+			0.0f,
+			1.0f
+		);
+		config.geometry.endFade = std::clamp(
+			std::isfinite(config.geometry.endFade) ? config.geometry.endFade : 0.0f,
+			0.0f,
+			1.0f
+		);
+		const float fadeSum = config.geometry.startFade + config.geometry.endFade;
+		if (fadeSum > 1.0f) {
+			config.geometry.startFade /= fadeSum;
+			config.geometry.endFade /= fadeSum;
+		}
+		config.noise.amplitude = std::clamp(
+			std::isfinite(config.noise.amplitude) ? config.noise.amplitude : 0.0f,
+			0.0f,
+			100000.0f
+		);
+		config.noise.frequency = std::clamp(
+			std::isfinite(config.noise.frequency) ? config.noise.frequency : 0.0f,
+			0.0f,
+			10000.0f
+		);
+		config.noise.scrollSpeed = std::clamp(
+			std::isfinite(config.noise.scrollSpeed) ? config.noise.scrollSpeed : 0.0f,
+			-10000.0f,
+			10000.0f
+		);
+		if (config.material.textureName.empty()) {
+			config.material.textureName = "white2x2";
+		}
+		const auto normalizeFloat = [](float value, float minimum, float maximum, float fallback) {
+			return std::clamp(std::isfinite(value) ? value : fallback, minimum, maximum);
+		};
+		NormalizeTrack(config.geometry.widthOverTime, [&](float value) {
+			return normalizeFloat(value, 0.0f, 100000.0f, 0.25f);
+		});
+		NormalizeTrack(config.playback.extensionOverTime, [&](float value) {
+			return normalizeFloat(value, 0.0f, 1.0f, 1.0f);
+		});
+		NormalizeTrack(config.material.globalAlphaOverTime, [&](float value) {
+			return normalizeFloat(value, 0.0f, 1.0f, 1.0f);
+		});
+		const auto normalizeColor = [&](const Vector4& value) {
+			return Vector4{
+				normalizeFloat(value.x, 0.0f, 100.0f, 1.0f),
+				normalizeFloat(value.y, 0.0f, 100.0f, 1.0f),
+				normalizeFloat(value.z, 0.0f, 100.0f, 1.0f),
+				normalizeFloat(value.w, 0.0f, 1.0f, 1.0f),
+			};
+		};
+		NormalizeTrack(config.material.colorOverTime, normalizeColor);
+		NormalizeTrack(config.material.colorOverLength, normalizeColor);
+		config.material.uvScale.x = normalizeFloat(config.material.uvScale.x, -10000.0f, 10000.0f, 1.0f);
+		config.material.uvScale.y = normalizeFloat(config.material.uvScale.y, -10000.0f, 10000.0f, 1.0f);
+		config.material.uvOffset.x = normalizeFloat(config.material.uvOffset.x, -100000.0f, 100000.0f, 0.0f);
+		config.material.uvOffset.y = normalizeFloat(config.material.uvOffset.y, -100000.0f, 100000.0f, 0.0f);
+		config.material.uvScroll.x = normalizeFloat(config.material.uvScroll.x, -10000.0f, 10000.0f, 0.0f);
+		config.material.uvScroll.y = normalizeFloat(config.material.uvScroll.y, -10000.0f, 10000.0f, 0.0f);
+		config.material.tileLength = normalizeFloat(config.material.tileLength, 0.0001f, 100000.0f, 1.0f);
+	}
+
 } // namespace
 
 namespace MadoEngine::Beam {
@@ -298,7 +507,6 @@ namespace MadoEngine::Beam {
 	}
 
 	void BeamEffectAsset::FromJson(const nlohmann::json& json) {
-		config_ = BeamEffectConfig{};
 		version_ = ReadUInt(json, "version", kCurrentVersion);
 		const uint32_t loadedVersion = version_;
 		if (version_ > kCurrentVersion) {
@@ -307,198 +515,55 @@ namespace MadoEngine::Beam {
 				Logger::Level::Warning
 			);
 		}
-		bool hasExtensionTrack = false;
-		if (const JsonValue* playback = FindValue(json, "playback")) {
-			config_.playback.duration = ReadFloat(*playback, "duration", config_.playback.duration);
-			config_.playback.isLoop = ReadBool(*playback, "isLoop", config_.playback.isLoop);
-			if (const JsonValue* extension = FindValue(*playback, "extensionOverTime")) {
-				config_.playback.extensionOverTime = ReadTrack(
-					*extension,
-					config_.playback.extensionOverTime.GetDefaultValue(),
-					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
-					}
-				);
-				hasExtensionTrack = true;
+		emitters_.clear();
+		if (const JsonValue* emitters = FindValue(json, "emitters"); emitters && emitters->is_array()) {
+			const size_t emitterCount = (std::min)(emitters->size(), kMaximumBeamEmitterCount);
+			for (size_t index = 0; index < emitterCount; ++index) {
+				const JsonValue& emitterJson = (*emitters)[index];
+				if (emitterJson.is_object()) {
+					emitters_.push_back(ReadBeamEmitter(emitterJson, false));
+				}
 			}
-		}
-		if (loadedVersion < 2 && !hasExtensionTrack) {
-			config_.playback.extensionOverTime = MadoEngine::Effect::EffectTrack<float>{ 1.0f };
-		}
-		if (const JsonValue* geometry = FindValue(json, "geometry")) {
-			config_.geometry.segmentCount = ReadUInt(*geometry, "segmentCount", config_.geometry.segmentCount);
-			config_.geometry.cameraFacing = ReadBool(*geometry, "cameraFacing", config_.geometry.cameraFacing);
-			config_.geometry.startFade = ReadFloat(*geometry, "startFade", config_.geometry.startFade);
-			config_.geometry.endFade = ReadFloat(*geometry, "endFade", config_.geometry.endFade);
-			if (const JsonValue* width = FindValue(*geometry, "widthOverTime")) {
-				config_.geometry.widthOverTime = ReadTrack(
-					*width,
-					config_.geometry.widthOverTime.GetDefaultValue(),
-					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
-					}
-				);
-			}
-		}
-		if (const JsonValue* noise = FindValue(json, "noise")) {
-			config_.noise.amplitude = ReadFloat(*noise, "amplitude", config_.noise.amplitude);
-			config_.noise.frequency = ReadFloat(*noise, "frequency", config_.noise.frequency);
-			config_.noise.scrollSpeed = ReadFloat(*noise, "scrollSpeed", config_.noise.scrollSpeed);
-			config_.noise.seed = ReadUInt(*noise, "seed", config_.noise.seed);
-		}
-		if (const JsonValue* material = FindValue(json, "material")) {
-			config_.material.textureName = ReadString(*material, "textureName", config_.material.textureName);
-			config_.material.blendMode = ParseBlendMode(ReadString(*material, "blendMode", "add"));
-			config_.material.cullMode = ParseCullMode(ReadString(*material, "cullMode", "none"));
-			config_.material.uvMode = ParseUvMode(ReadString(*material, "uvMode", "stretch"));
-			config_.material.tileLength = ReadFloat(*material, "tileLength", config_.material.tileLength);
-			if (const JsonValue* value = FindValue(*material, "uvScale")) {
-				config_.material.uvScale = ReadVector2(*value, config_.material.uvScale);
-			}
-			if (const JsonValue* value = FindValue(*material, "uvOffset")) {
-				config_.material.uvOffset = ReadVector2(*value, config_.material.uvOffset);
-			}
-			if (const JsonValue* value = FindValue(*material, "uvScroll")) {
-				config_.material.uvScroll = ReadVector2(*value, config_.material.uvScroll);
-			}
-			if (const JsonValue* color = FindValue(*material, "colorOverTime")) {
-				config_.material.colorOverTime = ReadTrack(
-					*color,
-					config_.material.colorOverTime.GetDefaultValue(),
-					ReadVector4
-				);
-			}
-			if (const JsonValue* color = FindValue(*material, "colorOverLength")) {
-				config_.material.colorOverLength = ReadTrack(
-					*color,
-					config_.material.colorOverLength.GetDefaultValue(),
-					ReadVector4
-				);
-			}
-			if (const JsonValue* alpha = FindValue(*material, "globalAlphaOverTime")) {
-				config_.material.globalAlphaOverTime = ReadTrack(
-					*alpha,
-					config_.material.globalAlphaOverTime.GetDefaultValue(),
-					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
-					}
-				);
-			}
+		} else {
+			emitters_.push_back(ReadBeamEmitter(json, loadedVersion < 2));
 		}
 		Validate();
 	}
 
 	nlohmann::json BeamEffectAsset::ToJson() const {
+		JsonValue emitters = JsonValue::array();
+		for (const BeamEmitterConfig& emitter : emitters_) {
+			emitters.push_back(WriteBeamEmitter(emitter));
+		}
 		return JsonValue{
 			{ "version", kCurrentVersion },
-			{ "playback", {
-				{ "duration", config_.playback.duration },
-				{ "isLoop", config_.playback.isLoop },
-				{ "extensionOverTime", WriteTrack(config_.playback.extensionOverTime, [](float value) { return JsonValue(value); }) },
-			} },
-			{ "geometry", {
-				{ "widthOverTime", WriteTrack(config_.geometry.widthOverTime, [](float value) { return JsonValue(value); }) },
-				{ "segmentCount", config_.geometry.segmentCount },
-				{ "cameraFacing", config_.geometry.cameraFacing },
-				{ "startFade", config_.geometry.startFade },
-				{ "endFade", config_.geometry.endFade },
-			} },
-			{ "noise", {
-				{ "amplitude", config_.noise.amplitude },
-				{ "frequency", config_.noise.frequency },
-				{ "scrollSpeed", config_.noise.scrollSpeed },
-				{ "seed", config_.noise.seed },
-			} },
-			{ "material", {
-				{ "textureName", config_.material.textureName },
-				{ "blendMode", ToString(config_.material.blendMode) },
-				{ "cullMode", ToString(config_.material.cullMode) },
-				{ "colorOverTime", WriteTrack(config_.material.colorOverTime, WriteVector4) },
-				{ "colorOverLength", WriteTrack(config_.material.colorOverLength, WriteVector4) },
-				{ "globalAlphaOverTime", WriteTrack(config_.material.globalAlphaOverTime, [](float value) { return JsonValue(value); }) },
-				{ "uvScale", WriteVector2(config_.material.uvScale) },
-				{ "uvOffset", WriteVector2(config_.material.uvOffset) },
-				{ "uvScroll", WriteVector2(config_.material.uvScroll) },
-				{ "uvMode", ToString(config_.material.uvMode) },
-				{ "tileLength", config_.material.tileLength },
-			} },
+			{ "emitters", std::move(emitters) },
 		};
 	}
 
 	void BeamEffectAsset::Validate() {
 		version_ = kCurrentVersion;
-		config_.playback.duration = std::clamp(
-			std::isfinite(config_.playback.duration) ? config_.playback.duration : 1.0f,
-			0.001f,
-			3600.0f
-		);
-		config_.geometry.segmentCount = std::clamp(
-			config_.geometry.segmentCount,
-			kMinimumBeamSegmentCount,
-			kMaximumBeamSegmentCount
-		);
-		config_.geometry.startFade = std::clamp(
-			std::isfinite(config_.geometry.startFade) ? config_.geometry.startFade : 0.0f,
-			0.0f,
-			1.0f
-		);
-		config_.geometry.endFade = std::clamp(
-			std::isfinite(config_.geometry.endFade) ? config_.geometry.endFade : 0.0f,
-			0.0f,
-			1.0f
-		);
-		const float fadeSum = config_.geometry.startFade + config_.geometry.endFade;
-		if (fadeSum > 1.0f) {
-			config_.geometry.startFade /= fadeSum;
-			config_.geometry.endFade /= fadeSum;
+		if (emitters_.empty()) {
+			emitters_.push_back(BeamEmitterConfig{});
 		}
-		config_.noise.amplitude = std::clamp(
-			std::isfinite(config_.noise.amplitude) ? config_.noise.amplitude : 0.0f,
-			0.0f,
-			100000.0f
-		);
-		config_.noise.frequency = std::clamp(
-			std::isfinite(config_.noise.frequency) ? config_.noise.frequency : 0.0f,
-			0.0f,
-			10000.0f
-		);
-		config_.noise.scrollSpeed = std::clamp(
-			std::isfinite(config_.noise.scrollSpeed) ? config_.noise.scrollSpeed : 0.0f,
-			-10000.0f,
-			10000.0f
-		);
-		if (config_.material.textureName.empty()) {
-			config_.material.textureName = "white2x2";
+		if (emitters_.size() > kMaximumBeamEmitterCount) {
+			emitters_.resize(kMaximumBeamEmitterCount);
 		}
-		const auto normalizeFloat = [](float value, float minimum, float maximum, float fallback) {
-			return std::clamp(std::isfinite(value) ? value : fallback, minimum, maximum);
-		};
-		NormalizeTrack(config_.geometry.widthOverTime, [&](float value) {
-			return normalizeFloat(value, 0.0f, 100000.0f, 0.25f);
-		});
-		NormalizeTrack(config_.playback.extensionOverTime, [&](float value) {
-			return normalizeFloat(value, 0.0f, 1.0f, 1.0f);
-		});
-		NormalizeTrack(config_.material.globalAlphaOverTime, [&](float value) {
-			return normalizeFloat(value, 0.0f, 1.0f, 1.0f);
-		});
-		const auto normalizeColor = [&](const Vector4& value) {
-			return Vector4{
-				normalizeFloat(value.x, 0.0f, 100.0f, 1.0f),
-				normalizeFloat(value.y, 0.0f, 100.0f, 1.0f),
-				normalizeFloat(value.z, 0.0f, 100.0f, 1.0f),
-				normalizeFloat(value.w, 0.0f, 1.0f, 1.0f),
-			};
-		};
-		NormalizeTrack(config_.material.colorOverTime, normalizeColor);
-		NormalizeTrack(config_.material.colorOverLength, normalizeColor);
-		config_.material.uvScale.x = normalizeFloat(config_.material.uvScale.x, -10000.0f, 10000.0f, 1.0f);
-		config_.material.uvScale.y = normalizeFloat(config_.material.uvScale.y, -10000.0f, 10000.0f, 1.0f);
-		config_.material.uvOffset.x = normalizeFloat(config_.material.uvOffset.x, -100000.0f, 100000.0f, 0.0f);
-		config_.material.uvOffset.y = normalizeFloat(config_.material.uvOffset.y, -100000.0f, 100000.0f, 0.0f);
-		config_.material.uvScroll.x = normalizeFloat(config_.material.uvScroll.x, -10000.0f, 10000.0f, 0.0f);
-		config_.material.uvScroll.y = normalizeFloat(config_.material.uvScroll.y, -10000.0f, 10000.0f, 0.0f);
-		config_.material.tileLength = normalizeFloat(config_.material.tileLength, 0.0001f, 100000.0f, 1.0f);
+
+		std::vector<std::string> usedNames;
+		usedNames.reserve(emitters_.size());
+		for (size_t index = 0; index < emitters_.size(); ++index) {
+			BeamEmitterConfig& emitter = emitters_[index];
+			std::string baseName = emitter.name.empty() ? "Emitter" : emitter.name;
+			std::string uniqueName = baseName;
+			uint32_t suffix = 1;
+			while (std::find(usedNames.begin(), usedNames.end(), uniqueName) != usedNames.end()) {
+				uniqueName = baseName + std::to_string(suffix++);
+			}
+			emitter.name = std::move(uniqueName);
+			usedNames.push_back(emitter.name);
+			ValidateBeamEmitter(emitter);
+		}
 	}
 
 } // namespace MadoEngine::Beam

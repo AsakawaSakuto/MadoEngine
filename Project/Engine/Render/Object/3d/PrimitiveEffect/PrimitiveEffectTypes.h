@@ -7,6 +7,7 @@
 #include "Render/Object/RenderLayer.h"
 #include "Render/PSO/PSODesc.h"
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -16,6 +17,7 @@
 namespace MadoEngine::Effect {
 
 	inline constexpr uint32_t kMaximumCylinderGradientStops = 8;
+	inline constexpr std::size_t kMaximumCylinderEmitterCount = 64;
 
 	enum class CylinderUvDirection : uint32_t {
 		TopToBottom,
@@ -69,12 +71,16 @@ namespace MadoEngine::Effect {
 		std::vector<CylinderColorStop> gradient;
 	};
 
-	struct CylinderEffectConfig {
+	struct CylinderEmitterConfig {
+		std::string name = "Emitter";
+		bool isEnabled = true;
 		float duration = 1.0f;
 		bool isLoop = false;
 		CylinderGeometryModule geometry;
 		CylinderMaterialModule material;
 	};
+
+	using CylinderEffectConfig = CylinderEmitterConfig;
 
 	struct PrimitiveEffectHandle {
 		uint32_t index = (std::numeric_limits<uint32_t>::max)();

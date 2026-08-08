@@ -70,6 +70,11 @@ namespace MadoEngine::Ribbon {
 		/// @return Manual Sourceへ設定できた場合はtrue
 		bool SetControlPoints(const std::vector<Vector3>& controlPoints);
 
+		/// @brief Sequence Root基準のManual Ribbon制御点を設定する
+		/// @param controlPoints Local空間の制御点
+		/// @return 1つ以上のManual Emitterへ設定できた場合はtrue
+		bool SetLocalControlPoints(const std::vector<Vector3>& controlPoints);
+
 		/// @brief Manual Ribbonの制御点を破棄する
 		/// @return Manual Sourceを消去できた場合はtrue
 		bool ClearControlPoints();
@@ -81,17 +86,23 @@ namespace MadoEngine::Ribbon {
 		}
 
 	private:
+		/// @brief 1つのEmitterに固有な再生状態
+		struct EmitterState {
+			RibbonEmitterConfig config;
+			std::unique_ptr<IRibbonPointSource> pointSource;
+			float playbackTime = 0.0f;
+			float totalTime = 0.0f;
+			bool isLoop = false;
+			bool isGenerating = false;
+			bool isImmediatelyFinished = false;
+		};
+
 		std::shared_ptr<const RibbonEffectAsset> asset_;
-		std::unique_ptr<IRibbonPointSource> pointSource_;
+		std::vector<EmitterState> emitters_;
 		Transform3D transform_;
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
-		float playbackTime_ = 0.0f;
-		float totalTime_ = 0.0f;
 		float playbackSpeed_ = 1.0f;
-		bool isLoop_ = false;
-		bool isGenerating_ = false;
-		bool isImmediatelyFinished_ = false;
 		bool isPaused_ = false;
 	};
 

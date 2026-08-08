@@ -7,15 +7,18 @@
 #include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
 #include "Render/Object/RenderLayer.h"
 #include "Render/PSO/PSODesc.h"
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace MadoEngine::Beam {
 
 	inline constexpr uint32_t kMinimumBeamSegmentCount = 1;
 	inline constexpr uint32_t kMaximumBeamSegmentCount = 1024;
+	inline constexpr std::size_t kMaximumBeamEmitterCount = 64;
 
 	enum class BeamStopMode : uint32_t {
 		Finish,
@@ -70,12 +73,16 @@ namespace MadoEngine::Beam {
 		float tileLength = 1.0f;
 	};
 
-	struct BeamEffectConfig {
+	struct BeamEmitterConfig {
+		std::string name = "Emitter";
+		bool isEnabled = true;
 		BeamPlaybackModule playback;
 		BeamGeometryModule geometry;
 		BeamNoiseModule noise;
 		BeamMaterialModule material;
 	};
+
+	using BeamEffectConfig = BeamEmitterConfig;
 
 	struct BeamEffectHandle {
 		uint32_t index = (std::numeric_limits<uint32_t>::max)();

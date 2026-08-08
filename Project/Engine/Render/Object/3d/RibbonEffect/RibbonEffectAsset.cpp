@@ -364,6 +364,249 @@ namespace {
 		}
 	}
 
+	/// @brief JsonからRibbon Emitter設定を読み込む
+	/// @param json 読み込み元Json
+	/// @return 読み込んだEmitter設定
+	RibbonEmitterConfig ReadRibbonEmitter(const JsonValue& json) {
+		RibbonEmitterConfig config;
+		config.name = ReadString(json, "name", config.name);
+		config.isEnabled = ReadBool(json, "isEnabled", config.isEnabled);
+		if (const JsonValue* playback = FindValue(json, "playback")) {
+			config.playback.duration = ReadFloat(*playback, "duration", config.playback.duration);
+			config.playback.isLoop = ReadBool(*playback, "isLoop", config.playback.isLoop);
+			config.playback.mode = ParsePlaybackMode(ReadString(*playback, "mode", "full"));
+			config.playback.sweepLength = ReadFloat(*playback, "sweepLength", config.playback.sweepLength);
+			if (const JsonValue* progress = FindValue(*playback, "progress")) {
+				config.playback.progress = ReadTrack(
+					*progress,
+					config.playback.progress.GetDefaultValue(),
+					[](const JsonValue& value, float fallback) {
+						return value.is_number() ? value.get<float>() : fallback;
+					}
+				);
+			}
+		}
+		if (const JsonValue* trail = FindValue(json, "trail")) {
+			config.trail.pointLifetime = ReadFloat(*trail, "pointLifetime", config.trail.pointLifetime);
+			config.trail.minPointDistance = ReadFloat(*trail, "minPointDistance", config.trail.minPointDistance);
+			config.trail.maxPointCount = ReadUInt(*trail, "maxPointCount", config.trail.maxPointCount);
+			config.trail.generationMode = ParseGenerationMode(ReadString(*trail, "generationMode", "transformHistory"));
+			config.trail.simulationSpace = ParseSimulationSpace(ReadString(*trail, "simulationSpace", "world"));
+			if (const JsonValue* controlPoints = FindValue(*trail, "defaultControlPoints")) {
+				config.trail.defaultControlPoints.clear();
+				if (controlPoints->is_array()) {
+					config.trail.defaultControlPoints.reserve(controlPoints->size());
+					for (const JsonValue& controlPoint : *controlPoints) {
+						config.trail.defaultControlPoints.push_back(ReadVector3(controlPoint, Vector3{}));
+					}
+				}
+			}
+		}
+		if (const JsonValue* geometry = FindValue(json, "geometry")) {
+			config.geometry.interpolation = ParseInterpolation(ReadString(*geometry, "interpolation", "linear"));
+			config.geometry.smoothingSubdivision = ReadUInt(
+				*geometry,
+				"smoothingSubdivision",
+				config.geometry.smoothingSubdivision
+			);
+			config.geometry.cameraFacing = ReadBool(*geometry, "cameraFacing", config.geometry.cameraFacing);
+			if (const JsonValue* width = FindValue(*geometry, "widthOverLifetime")) {
+				config.geometry.widthOverLifetime = ReadTrack(
+					*width,
+					config.geometry.widthOverLifetime.GetDefaultValue(),
+					[](const JsonValue& value, float fallback) {
+						return value.is_number() ? value.get<float>() : fallback;
+					}
+				);
+			}
+		}
+		if (const JsonValue* material = FindValue(json, "material")) {
+			config.material.textureName = ReadString(*material, "textureName", config.material.textureName);
+			config.material.blendMode = ParseBlendMode(ReadString(*material, "blendMode", "add"));
+			config.material.cullMode = ParseCullMode(ReadString(*material, "cullMode", "none"));
+			config.material.uvMode = ParseUvMode(ReadString(*material, "uvMode", "stretch"));
+			config.material.tileLength = ReadFloat(*material, "tileLength", config.material.tileLength);
+			if (const JsonValue* value = FindValue(*material, "uvScale")) {
+				config.material.uvScale = ReadVector2(*value, config.material.uvScale);
+			}
+			if (const JsonValue* value = FindValue(*material, "uvOffset")) {
+				config.material.uvOffset = ReadVector2(*value, config.material.uvOffset);
+			}
+			if (const JsonValue* value = FindValue(*material, "uvScroll")) {
+				config.material.uvScroll = ReadVector2(*value, config.material.uvScroll);
+			}
+			if (const JsonValue* color = FindValue(*material, "colorOverLifetime")) {
+				config.material.colorOverLifetime = ReadTrack(
+					*color,
+					config.material.colorOverLifetime.GetDefaultValue(),
+					ReadVector4
+				);
+			}
+			if (const JsonValue* alpha = FindValue(*material, "globalAlpha")) {
+				config.material.globalAlpha = ReadTrack(
+					*alpha,
+					config.material.globalAlpha.GetDefaultValue(),
+					[](const JsonValue& value, float fallback) {
+						return value.is_number() ? value.get<float>() : fallback;
+					}
+				);
+			}
+		}
+		return config;
+	}
+
+	/// @brief Ribbon Emitter設定をJsonへ変換する
+	/// @param config 変換対象Emitter設定
+	/// @return 変換後Json
+	JsonValue WriteRibbonEmitter(const RibbonEmitterConfig& config) {
+		return JsonValue{
+			{ "name", config.name },
+			{ "isEnabled", config.isEnabled },
+			{ "playback", {
+				{ "duration", config.playback.duration },
+				{ "isLoop", config.playback.isLoop },
+				{ "mode", ToString(config.playback.mode) },
+				{ "progress", WriteTrack(config.playback.progress, [](float value) { return JsonValue(value); }) },
+				{ "sweepLength", config.playback.sweepLength },
+			} },
+			{ "trail", {
+				{ "pointLifetime", config.trail.pointLifetime },
+				{ "minPointDistance", config.trail.minPointDistance },
+				{ "maxPointCount", config.trail.maxPointCount },
+				{ "generationMode", ToString(config.trail.generationMode) },
+				{ "simulationSpace", ToString(config.trail.simulationSpace) },
+				{ "defaultControlPoints", WriteControlPoints(config.trail.defaultControlPoints) },
+			} },
+			{ "geometry", {
+				{ "widthOverLifetime", WriteTrack(config.geometry.widthOverLifetime, [](float value) { return JsonValue(value); }) },
+				{ "interpolation", ToString(config.geometry.interpolation) },
+				{ "smoothingSubdivision", config.geometry.smoothingSubdivision },
+				{ "cameraFacing", config.geometry.cameraFacing },
+			} },
+			{ "material", {
+				{ "textureName", config.material.textureName },
+				{ "blendMode", ToString(config.material.blendMode) },
+				{ "cullMode", ToString(config.material.cullMode) },
+				{ "colorOverLifetime", WriteTrack(config.material.colorOverLifetime, WriteVector4) },
+				{ "globalAlpha", WriteTrack(config.material.globalAlpha, [](float value) { return JsonValue(value); }) },
+				{ "uvScale", WriteVector2(config.material.uvScale) },
+				{ "uvOffset", WriteVector2(config.material.uvOffset) },
+				{ "uvScroll", WriteVector2(config.material.uvScroll) },
+				{ "uvMode", ToString(config.material.uvMode) },
+				{ "tileLength", config.material.tileLength },
+			} },
+		};
+	}
+
+	/// @brief Ribbon Emitter設定を安全な範囲へ補正する
+	/// @param config 補正対象Emitter設定
+	void ValidateRibbonEmitter(RibbonEmitterConfig& config) {
+		switch (config.playback.mode) {
+		case RibbonPlaybackMode::Full:
+		case RibbonPlaybackMode::Reveal:
+		case RibbonPlaybackMode::Sweep:
+			break;
+		default:
+			config.playback.mode = RibbonPlaybackMode::Full;
+			break;
+		}
+		config.playback.duration = std::clamp(
+			std::isfinite(config.playback.duration) ? config.playback.duration : 1.0f,
+			0.001f,
+			3600.0f
+		);
+		config.playback.sweepLength = std::clamp(
+			std::isfinite(config.playback.sweepLength) ? config.playback.sweepLength : 1.0f,
+			0.001f,
+			100000.0f
+		);
+		NormalizeTrack(
+			config.playback.progress,
+			1.0f,
+			[](float value) {
+				return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
+			}
+		);
+		config.trail.pointLifetime = std::clamp(
+			std::isfinite(config.trail.pointLifetime) ? config.trail.pointLifetime : 0.5f,
+			0.001f,
+			3600.0f
+		);
+		config.trail.minPointDistance = std::clamp(
+			std::isfinite(config.trail.minPointDistance) ? config.trail.minPointDistance : 0.05f,
+			0.0f,
+			100000.0f
+		);
+		config.trail.maxPointCount = std::clamp(
+			config.trail.maxPointCount,
+			kMinimumRibbonPointCount,
+			kMaximumRibbonPointCount
+		);
+		config.trail.defaultControlPoints.erase(
+			std::remove_if(
+				config.trail.defaultControlPoints.begin(),
+				config.trail.defaultControlPoints.end(),
+				[](const Vector3& point) {
+					return !std::isfinite(point.x) || !std::isfinite(point.y) || !std::isfinite(point.z);
+				}
+			),
+			config.trail.defaultControlPoints.end()
+		);
+		if (config.trail.defaultControlPoints.size() > config.trail.maxPointCount) {
+			config.trail.defaultControlPoints.resize(config.trail.maxPointCount);
+		}
+		config.geometry.smoothingSubdivision = std::clamp(
+			config.geometry.smoothingSubdivision,
+			0u,
+			kMaximumRibbonSmoothingSubdivision
+		);
+		if (
+			config.geometry.interpolation == RibbonInterpolationMode::CatmullRom &&
+			config.geometry.smoothingSubdivision == 0) {
+			config.geometry.smoothingSubdivision = kDefaultRibbonCurveSubdivision;
+		}
+		NormalizeTrack(
+			config.geometry.widthOverLifetime,
+			1.0f,
+			[](float value) {
+				return std::clamp(std::isfinite(value) ? value : 0.5f, 0.0f, 100000.0f);
+			}
+		);
+		NormalizeTrack(
+			config.material.colorOverLifetime,
+			1.0f,
+			[](const Vector4& value) {
+				return Vector4{
+					std::clamp(std::isfinite(value.x) ? value.x : 1.0f, 0.0f, 100.0f),
+					std::clamp(std::isfinite(value.y) ? value.y : 1.0f, 0.0f, 100.0f),
+					std::clamp(std::isfinite(value.z) ? value.z : 1.0f, 0.0f, 100.0f),
+					std::clamp(std::isfinite(value.w) ? value.w : 1.0f, 0.0f, 1.0f),
+				};
+			}
+		);
+		NormalizeTrack(
+			config.material.globalAlpha,
+			config.playback.duration,
+			[](float value) {
+				return std::clamp(std::isfinite(value) ? value : 1.0f, 0.0f, 1.0f);
+			}
+		);
+		if (config.material.textureName.empty()) {
+			config.material.textureName = "white2x2";
+		}
+		config.material.uvScale.x = std::isfinite(config.material.uvScale.x) ? config.material.uvScale.x : 1.0f;
+		config.material.uvScale.y = std::isfinite(config.material.uvScale.y) ? config.material.uvScale.y : 1.0f;
+		config.material.uvOffset.x = std::isfinite(config.material.uvOffset.x) ? config.material.uvOffset.x : 0.0f;
+		config.material.uvOffset.y = std::isfinite(config.material.uvOffset.y) ? config.material.uvOffset.y : 0.0f;
+		config.material.uvScroll.x = std::isfinite(config.material.uvScroll.x) ? config.material.uvScroll.x : 0.0f;
+		config.material.uvScroll.y = std::isfinite(config.material.uvScroll.y) ? config.material.uvScroll.y : 0.0f;
+		config.material.tileLength = std::clamp(
+			std::isfinite(config.material.tileLength) ? config.material.tileLength : 1.0f,
+			0.001f,
+			100000.0f
+		);
+	}
+
 } // namespace
 
 namespace MadoEngine::Ribbon {
@@ -391,7 +634,6 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void RibbonEffectAsset::FromJson(const nlohmann::json& json) {
-		config_ = RibbonEffectConfig{};
 		version_ = ReadUInt(json, "version", kCurrentVersion);
 		if (version_ > kCurrentVersion) {
 			Logger::Output(
@@ -400,246 +642,52 @@ namespace MadoEngine::Ribbon {
 			);
 		}
 
-		if (const JsonValue* playback = FindValue(json, "playback")) {
-			config_.playback.duration = ReadFloat(*playback, "duration", config_.playback.duration);
-			config_.playback.isLoop = ReadBool(*playback, "isLoop", config_.playback.isLoop);
-			config_.playback.mode = ParsePlaybackMode(ReadString(*playback, "mode", "full"));
-			config_.playback.sweepLength = ReadFloat(
-				*playback,
-				"sweepLength",
-				config_.playback.sweepLength
-			);
-			if (const JsonValue* progress = FindValue(*playback, "progress")) {
-				config_.playback.progress = ReadTrack(
-					*progress,
-					config_.playback.progress.GetDefaultValue(),
-					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
-					}
-				);
-			}
-		}
-		if (const JsonValue* trail = FindValue(json, "trail")) {
-			config_.trail.pointLifetime = ReadFloat(*trail, "pointLifetime", config_.trail.pointLifetime);
-			config_.trail.minPointDistance = ReadFloat(*trail, "minPointDistance", config_.trail.minPointDistance);
-			config_.trail.maxPointCount = ReadUInt(*trail, "maxPointCount", config_.trail.maxPointCount);
-			config_.trail.generationMode = ParseGenerationMode(
-				ReadString(*trail, "generationMode", "transformHistory")
-			);
-			config_.trail.simulationSpace = ParseSimulationSpace(
-				ReadString(*trail, "simulationSpace", "world")
-			);
-			if (const JsonValue* controlPoints = FindValue(*trail, "defaultControlPoints")) {
-				config_.trail.defaultControlPoints.clear();
-				if (controlPoints->is_array()) {
-					config_.trail.defaultControlPoints.reserve(controlPoints->size());
-					for (const JsonValue& controlPoint : *controlPoints) {
-						config_.trail.defaultControlPoints.push_back(ReadVector3(controlPoint, Vector3{}));
-					}
+		emitters_.clear();
+		const JsonValue* emitters = FindValue(json, "emitters");
+		if (emitters && emitters->is_array()) {
+			const std::size_t emitterCount = (std::min)(emitters->size(), kMaximumRibbonEmitterCount);
+			emitters_.reserve(emitterCount);
+			for (std::size_t index = 0; index < emitterCount; ++index) {
+				if (emitters->at(index).is_object()) {
+					emitters_.push_back(ReadRibbonEmitter(emitters->at(index)));
 				}
 			}
-		}
-		if (const JsonValue* geometry = FindValue(json, "geometry")) {
-			config_.geometry.interpolation = ParseInterpolation(
-				ReadString(*geometry, "interpolation", "linear")
-			);
-			config_.geometry.smoothingSubdivision = ReadUInt(
-				*geometry,
-				"smoothingSubdivision",
-				config_.geometry.smoothingSubdivision
-			);
-			config_.geometry.cameraFacing = ReadBool(*geometry, "cameraFacing", config_.geometry.cameraFacing);
-			if (const JsonValue* width = FindValue(*geometry, "widthOverLifetime")) {
-				config_.geometry.widthOverLifetime = ReadTrack(
-					*width,
-					config_.geometry.widthOverLifetime.GetDefaultValue(),
-					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
-					}
-				);
-			}
-		}
-		if (const JsonValue* material = FindValue(json, "material")) {
-			config_.material.textureName = ReadString(*material, "textureName", config_.material.textureName);
-			config_.material.blendMode = ParseBlendMode(ReadString(*material, "blendMode", "add"));
-			config_.material.cullMode = ParseCullMode(ReadString(*material, "cullMode", "none"));
-			config_.material.uvMode = ParseUvMode(ReadString(*material, "uvMode", "stretch"));
-			config_.material.tileLength = ReadFloat(*material, "tileLength", config_.material.tileLength);
-			if (const JsonValue* value = FindValue(*material, "uvScale")) {
-				config_.material.uvScale = ReadVector2(*value, config_.material.uvScale);
-			}
-			if (const JsonValue* value = FindValue(*material, "uvOffset")) {
-				config_.material.uvOffset = ReadVector2(*value, config_.material.uvOffset);
-			}
-			if (const JsonValue* value = FindValue(*material, "uvScroll")) {
-				config_.material.uvScroll = ReadVector2(*value, config_.material.uvScroll);
-			}
-			if (const JsonValue* color = FindValue(*material, "colorOverLifetime")) {
-				config_.material.colorOverLifetime = ReadTrack(
-					*color,
-					config_.material.colorOverLifetime.GetDefaultValue(),
-					ReadVector4
-				);
-			}
-			if (const JsonValue* alpha = FindValue(*material, "globalAlpha")) {
-				config_.material.globalAlpha = ReadTrack(
-					*alpha,
-					config_.material.globalAlpha.GetDefaultValue(),
-					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
-					}
-				);
-			}
+		} else {
+			emitters_.push_back(ReadRibbonEmitter(json));
 		}
 		Validate();
 	}
 
 	nlohmann::json RibbonEffectAsset::ToJson() const {
-		return JsonValue{
+		JsonValue json{
 			{ "version", kCurrentVersion },
-			{ "playback", {
-				{ "duration", config_.playback.duration },
-				{ "isLoop", config_.playback.isLoop },
-				{ "mode", ToString(config_.playback.mode) },
-				{ "progress", WriteTrack(config_.playback.progress, [](float value) { return JsonValue(value); }) },
-				{ "sweepLength", config_.playback.sweepLength },
-			} },
-			{ "trail", {
-				{ "pointLifetime", config_.trail.pointLifetime },
-				{ "minPointDistance", config_.trail.minPointDistance },
-				{ "maxPointCount", config_.trail.maxPointCount },
-				{ "generationMode", ToString(config_.trail.generationMode) },
-				{ "simulationSpace", ToString(config_.trail.simulationSpace) },
-				{ "defaultControlPoints", WriteControlPoints(config_.trail.defaultControlPoints) },
-			} },
-			{ "geometry", {
-				{ "widthOverLifetime", WriteTrack(config_.geometry.widthOverLifetime, [](float value) { return JsonValue(value); }) },
-				{ "interpolation", ToString(config_.geometry.interpolation) },
-				{ "smoothingSubdivision", config_.geometry.smoothingSubdivision },
-				{ "cameraFacing", config_.geometry.cameraFacing },
-			} },
-			{ "material", {
-				{ "textureName", config_.material.textureName },
-				{ "blendMode", ToString(config_.material.blendMode) },
-				{ "cullMode", ToString(config_.material.cullMode) },
-				{ "colorOverLifetime", WriteTrack(config_.material.colorOverLifetime, WriteVector4) },
-				{ "globalAlpha", WriteTrack(config_.material.globalAlpha, [](float value) { return JsonValue(value); }) },
-				{ "uvScale", WriteVector2(config_.material.uvScale) },
-				{ "uvOffset", WriteVector2(config_.material.uvOffset) },
-				{ "uvScroll", WriteVector2(config_.material.uvScroll) },
-				{ "uvMode", ToString(config_.material.uvMode) },
-				{ "tileLength", config_.material.tileLength },
-			} },
+			{ "emitters", JsonValue::array() },
 		};
+		for (const RibbonEmitterConfig& emitter : emitters_) {
+			json["emitters"].push_back(WriteRibbonEmitter(emitter));
+		}
+		return json;
 	}
 
 	void RibbonEffectAsset::Validate() {
-		switch (config_.playback.mode) {
-		case RibbonPlaybackMode::Full:
-		case RibbonPlaybackMode::Reveal:
-		case RibbonPlaybackMode::Sweep:
-			break;
-		default:
-			config_.playback.mode = RibbonPlaybackMode::Full;
-			break;
+		version_ = kCurrentVersion;
+		if (emitters_.empty()) {
+			emitters_.push_back(RibbonEmitterConfig{});
 		}
-		config_.playback.duration = std::clamp(
-			std::isfinite(config_.playback.duration) ? config_.playback.duration : 1.0f,
-			0.001f,
-			3600.0f
-		);
-		config_.playback.sweepLength = std::clamp(
-			std::isfinite(config_.playback.sweepLength) ? config_.playback.sweepLength : 1.0f,
-			0.001f,
-			100000.0f
-		);
-		NormalizeTrack(
-			config_.playback.progress,
-			1.0f,
-			[](float value) {
-				return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
-			}
-		);
-		config_.trail.pointLifetime = std::clamp(
-			std::isfinite(config_.trail.pointLifetime) ? config_.trail.pointLifetime : 0.5f,
-			0.001f,
-			3600.0f
-		);
-		config_.trail.minPointDistance = std::clamp(
-			std::isfinite(config_.trail.minPointDistance) ? config_.trail.minPointDistance : 0.05f,
-			0.0f,
-			100000.0f
-		);
-		config_.trail.maxPointCount = std::clamp(
-			config_.trail.maxPointCount,
-			kMinimumRibbonPointCount,
-			kMaximumRibbonPointCount
-		);
-		config_.trail.defaultControlPoints.erase(
-			std::remove_if(
-				config_.trail.defaultControlPoints.begin(),
-				config_.trail.defaultControlPoints.end(),
-				[](const Vector3& point) {
-					return !std::isfinite(point.x) || !std::isfinite(point.y) || !std::isfinite(point.z);
-				}
-			),
-			config_.trail.defaultControlPoints.end()
-		);
-		if (config_.trail.defaultControlPoints.size() > config_.trail.maxPointCount) {
-			config_.trail.defaultControlPoints.resize(config_.trail.maxPointCount);
+		if (emitters_.size() > kMaximumRibbonEmitterCount) {
+			emitters_.resize(kMaximumRibbonEmitterCount);
 		}
-		config_.geometry.smoothingSubdivision = std::clamp(
-			config_.geometry.smoothingSubdivision,
-			0u,
-			kMaximumRibbonSmoothingSubdivision
-		);
-		if (
-			config_.geometry.interpolation == RibbonInterpolationMode::CatmullRom &&
-			config_.geometry.smoothingSubdivision == 0) {
-			config_.geometry.smoothingSubdivision = kDefaultRibbonCurveSubdivision;
+		std::vector<std::string> usedNames;
+		usedNames.reserve(emitters_.size());
+		for (RibbonEmitterConfig& emitter : emitters_) {
+			const std::string baseName = emitter.name.empty() ? "Emitter" : emitter.name;
+			emitter.name = baseName;
+			for (uint32_t suffix = 1; std::find(usedNames.begin(), usedNames.end(), emitter.name) != usedNames.end(); ++suffix) {
+				emitter.name = baseName + std::to_string(suffix);
+			}
+			usedNames.push_back(emitter.name);
+			ValidateRibbonEmitter(emitter);
 		}
-
-		NormalizeTrack(
-			config_.geometry.widthOverLifetime,
-			1.0f,
-			[](float value) {
-				return std::clamp(std::isfinite(value) ? value : 0.5f, 0.0f, 100000.0f);
-			}
-		);
-		NormalizeTrack(
-			config_.material.colorOverLifetime,
-			1.0f,
-			[](const Vector4& value) {
-				return Vector4{
-					std::clamp(std::isfinite(value.x) ? value.x : 1.0f, 0.0f, 100.0f),
-					std::clamp(std::isfinite(value.y) ? value.y : 1.0f, 0.0f, 100.0f),
-					std::clamp(std::isfinite(value.z) ? value.z : 1.0f, 0.0f, 100.0f),
-					std::clamp(std::isfinite(value.w) ? value.w : 1.0f, 0.0f, 1.0f),
-				};
-			}
-		);
-		NormalizeTrack(
-			config_.material.globalAlpha,
-			config_.playback.duration,
-			[](float value) {
-				return std::clamp(std::isfinite(value) ? value : 1.0f, 0.0f, 1.0f);
-			}
-		);
-
-		if (config_.material.textureName.empty()) {
-			config_.material.textureName = "white2x2";
-		}
-		config_.material.uvScale.x = std::isfinite(config_.material.uvScale.x) ? config_.material.uvScale.x : 1.0f;
-		config_.material.uvScale.y = std::isfinite(config_.material.uvScale.y) ? config_.material.uvScale.y : 1.0f;
-		config_.material.uvOffset.x = std::isfinite(config_.material.uvOffset.x) ? config_.material.uvOffset.x : 0.0f;
-		config_.material.uvOffset.y = std::isfinite(config_.material.uvOffset.y) ? config_.material.uvOffset.y : 0.0f;
-		config_.material.uvScroll.x = std::isfinite(config_.material.uvScroll.x) ? config_.material.uvScroll.x : 0.0f;
-		config_.material.uvScroll.y = std::isfinite(config_.material.uvScroll.y) ? config_.material.uvScroll.y : 0.0f;
-		config_.material.tileLength = std::clamp(
-			std::isfinite(config_.material.tileLength) ? config_.material.tileLength : 1.0f,
-			0.001f,
-			100000.0f
-		);
 	}
 
 } // namespace MadoEngine::Ribbon

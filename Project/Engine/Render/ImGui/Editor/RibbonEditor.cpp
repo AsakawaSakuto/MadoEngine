@@ -1,4 +1,5 @@
 #include "RibbonEditor.h"
+#include "EffectEmitterEditorCommon.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
 #include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
@@ -1011,6 +1012,7 @@ namespace MadoEngine::Editor {
 #ifdef USE_IMGUI
 		RibbonEffectSystem3d& system = RibbonEffectSystem3d::GetInstance();
 		static int selectedAssetIndex = 0;
+		static int selectedEmitterIndex = 0;
 		static int selectedSettingPage = 0;
 		static int selectedManualControlPointIndex = 0;
 		static RibbonEffectHandle previewHandle;
@@ -1020,6 +1022,11 @@ namespace MadoEngine::Editor {
 		static bool previewLoop = true;
 		static std::array<char, 128> newAssetNameBuffer{};
 		static std::array<char, 128> renameAssetNameBuffer{};
+		static std::array<char, 128> newEmitterNameBuffer{};
+		static std::array<char, 128> renameEmitterNameBuffer{};
+		static std::string emitterCreateAssetName;
+		static std::string emitterRenameIdentity;
+		static const RibbonEffectAsset* emitterSelectedAsset = nullptr;
 		static std::string assetRenameOriginalName;
 		static std::unordered_map<std::string, std::string> savedAssetSnapshots;
 		static bool isNameBufferInitialized = false;
@@ -1425,8 +1432,29 @@ namespace MadoEngine::Editor {
 		ImGui::TextDisabled("再生中: %zu", system.GetActiveEffectCount());
 
 		bool assetChanged = false;
-		RibbonEffectConfig& config = asset->GetConfig();
-		ImGui::SeparatorText("設定");
+		if (emitterSelectedAsset != asset) {
+			selectedEmitterIndex = 0;
+			emitterCreateAssetName.clear();
+			emitterRenameIdentity.clear();
+			emitterSelectedAsset = asset;
+		}
+		std::vector<RibbonEmitterConfig>& emitters = asset->GetEmitters();
+		assetChanged |= Detail::DrawEffectEmitterListPane(
+			"RibbonEmitters",
+			selectedAssetName,
+			emitters,
+			kMaximumRibbonEmitterCount,
+			selectedEmitterIndex,
+			newEmitterNameBuffer,
+			emitterCreateAssetName,
+			renameEmitterNameBuffer,
+			emitterRenameIdentity
+		);
+		RibbonEmitterConfig& config = emitters[selectedEmitterIndex];
+		ImGui::SameLine();
+		ImGui::BeginChild("RibbonEmitterSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::Text("設定: %s", config.name.c_str());
+		ImGui::Separator();
 		const char* settingPageNames[] = { "基本", "トレイル", "形状", "マテリアル", "UV" };
 		const float settingPageButtonWidth =
 			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 4.0f) /
@@ -1451,7 +1479,7 @@ namespace MadoEngine::Editor {
 		}
 		ImGui::PopID();
 
-		ImGui::BeginChild("RibbonSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::BeginChild("RibbonSettingScrollPane", ImVec2(0.0f, 0.0f), false);
 		switch (selectedSettingPage) {
 		case 1:
 			assetChanged |= DrawTrailEditor(config, selectedManualControlPointIndex);
@@ -1470,6 +1498,7 @@ namespace MadoEngine::Editor {
 			assetChanged |= DrawBasicEditor(config);
 			break;
 		}
+		ImGui::EndChild();
 		ImGui::EndChild();
 
 		if (assetChanged) {
@@ -1496,7 +1525,12 @@ namespace MadoEngine::Editor {
 					previewAssetName = selectedAssetName;
 					previewAssetSnapshot = currentAssetSnapshot;
 				}
-			} else if (config.trail.generationMode == RibbonPointGenerationMode::TransformHistory) {
+			} else if (std::any_of(
+				emitters.begin(),
+				emitters.end(),
+				[](const RibbonEmitterConfig& emitter) {
+					return emitter.trail.generationMode == RibbonPointGenerationMode::TransformHistory;
+				})) {
 				const float time = static_cast<float>(ImGui::GetTime());
 				Transform3D previewTransform;
 				previewTransform.translate = {

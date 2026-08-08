@@ -2,6 +2,7 @@
 #include "BeamEffectAsset.h"
 #include "BeamPointGenerator.h"
 #include <memory>
+#include <vector>
 
 namespace MadoEngine::Ribbon {
 	class RibbonEffectRenderer3d;
@@ -79,18 +80,24 @@ namespace MadoEngine::Beam {
 		}
 
 	private:
+		/// @brief 1つのEmitterに固有な再生状態
+		struct EmitterState {
+			BeamEmitterConfig config;
+			float playbackTime = 0.0f;
+			float totalTime = 0.0f;
+			bool isLoop = false;
+			bool isStopping = false;
+			bool isFinished = false;
+		};
+
 		std::shared_ptr<const BeamEffectAsset> asset_;
+		std::vector<EmitterState> emitters_;
 		BeamPointGenerator pointGenerator_;
 		Vector3 startPosition_{};
 		Vector3 endPosition_{};
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
-		float playbackTime_ = 0.0f;
-		float totalTime_ = 0.0f;
 		float playbackSpeed_ = 1.0f;
-		bool isLoop_ = false;
-		bool isStopping_ = false;
-		bool isFinished_ = true;
 		bool isPaused_ = false;
 	};
 

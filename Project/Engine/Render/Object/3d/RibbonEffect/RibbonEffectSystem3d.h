@@ -145,6 +145,15 @@ namespace MadoEngine::Ribbon {
 			const std::vector<Vector3>& controlPoints
 		);
 
+		/// @brief Local空間のManual Ribbon制御点を各EmitterのSimulation Spaceへ変換して設定する
+		/// @param handle 更新対象Handle
+		/// @param controlPoints Local空間の制御点
+		/// @return 更新に成功した場合はtrue
+		bool SetLocalControlPoints(
+			RibbonEffectHandle handle,
+			const std::vector<Vector3>& controlPoints
+		);
+
 		/// @brief Manual Ribbonの制御点を消去する
 		/// @param handle 更新対象Handle
 		/// @return 消去に成功した場合はtrue

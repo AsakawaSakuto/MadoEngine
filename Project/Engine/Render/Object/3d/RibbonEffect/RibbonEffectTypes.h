@@ -7,6 +7,7 @@
 #include "Render/Object/3d/PrimitiveEffect/EffectTrack.h"
 #include "Render/Object/RenderLayer.h"
 #include "Render/PSO/PSODesc.h"
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -19,6 +20,7 @@ namespace MadoEngine::Ribbon {
 	inline constexpr uint32_t kMaximumRibbonPointCount = 4096;
 	inline constexpr uint32_t kMaximumRibbonSmoothingSubdivision = 32;
 	inline constexpr uint32_t kDefaultRibbonCurveSubdivision = 8;
+	inline constexpr std::size_t kMaximumRibbonEmitterCount = 64;
 
 	enum class RibbonPointGenerationMode : uint32_t {
 		TransformHistory,
@@ -105,12 +107,16 @@ namespace MadoEngine::Ribbon {
 		float tileLength = 1.0f;
 	};
 
-	struct RibbonEffectConfig {
+	struct RibbonEmitterConfig {
+		std::string name = "Emitter";
+		bool isEnabled = true;
 		RibbonPlaybackModule playback;
 		RibbonTrailModule trail;
 		RibbonGeometryModule geometry;
 		RibbonMaterialModule material;
 	};
+
+	using RibbonEffectConfig = RibbonEmitterConfig;
 
 	struct RibbonEffectHandle {
 		uint32_t index = (std::numeric_limits<uint32_t>::max)();

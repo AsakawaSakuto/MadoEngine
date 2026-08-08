@@ -1,4 +1,5 @@
 #include "CylinderEditor.h"
+#include "EffectEmitterEditorCommon.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
@@ -216,20 +217,27 @@ namespace {
 	/// @param track 編集対象トラック
 	/// @param duration エフェクトの再生時間
 	/// @param drawValue 値編集UIを描画する関数
+	/// @param treeNodeFlags トラック見出しへ追加するTreeNodeフラグ
 	/// @return トラックを変更した場合はtrue
 	template<class T, class ValueDrawer>
 	bool DrawTrackEditor(
 		const char* label,
 		EffectTrack<T>& track,
 		float duration,
-		ValueDrawer drawValue) {
+		ValueDrawer drawValue,
+		ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_None) {
 		bool changed = false;
 		static std::unordered_map<const void*, int> selectedKeyframeIndices;
 		static std::unordered_map<const void*, std::vector<uint32_t>> keyframeIds;
 		const void* trackKey = static_cast<const void*>(&track);
 		int& selectedKeyframeIndex = selectedKeyframeIndices[trackKey];
 		ImGui::PushID(label);
-		const bool isOpen = ImGui::TreeNodeEx("トラック", ImGuiTreeNodeFlags_SpanAvailWidth, "%s", label);
+		const bool isOpen = ImGui::TreeNodeEx(
+			"トラック",
+			ImGuiTreeNodeFlags_SpanAvailWidth | treeNodeFlags,
+			"%s",
+			label
+		);
 		if (isOpen) {
 			T defaultValue = track.GetDefaultValue();
 			if (drawValue("既定値", defaultValue)) {
@@ -491,11 +499,13 @@ namespace {
 	/// @param label UI表示名
 	/// @param track 編集対象トラック
 	/// @param duration エフェクトの再生時間
+	/// @param defaultOpen 初回表示時にトラックを展開する場合はtrue
 	/// @return トラックを変更した場合はtrue
 	bool DrawColorTrack(
 		const char* label,
 		EffectTrack<Vector4>& track,
-		float duration) {
+		float duration,
+		bool defaultOpen = false) {
 		return DrawTrackEditor(
 			label,
 			track,
@@ -508,7 +518,8 @@ namespace {
 					ImGuiColorEditFlags_Float |
 					ImGuiColorEditFlags_HDR
 				);
-			}
+			},
+			defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None
 		);
 	}
 
@@ -557,6 +568,11 @@ namespace {
 		return changed;
 	}
 
+	/// @brief Cylinderのグラデーション設定を編集する
+	/// @param config 編集対象設定
+	/// @return 設定を変更した場合はtrue
+	bool DrawGradientEditor(CylinderEffectConfig& config);
+
 	/// @brief Cylinderのマテリアル設定を編集する
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
@@ -593,6 +609,9 @@ namespace {
 		changed |= DrawFloatTrack("全体の不透明度", material.globalAlpha, config.duration, 0.01f, 0.0f, 1.0f);
 		changed |= DrawFloatTrack("下端フェード範囲", material.bottomFadeRange, config.duration, 0.01f, 0.0f, 1.0f);
 		changed |= DrawFloatTrack("上端フェード範囲", material.topFadeRange, config.duration, 0.01f, 0.0f, 1.0f);
+
+		ImGui::SeparatorText("グラデーション");
+		changed |= DrawGradientEditor(config);
 		return changed;
 	}
 
@@ -621,60 +640,319 @@ namespace {
 		return changed;
 	}
 
+	/// @brief グラデーション停止点を追加できる位置を求める
+	/// @param gradient 位置順に並んだグラデーション停止点
+	/// @param preferredIndex 優先して隣接位置を探す停止点番号
+	/// @return 追加可能な位置。空きがない場合はstd::nullopt
+	std::optional<float> FindGradientStopInsertionPosition(
+		const std::vector<CylinderColorStop>& gradient,
+		int preferredIndex) {
+		constexpr float minimumGap = 0.001f;
+		if (gradient.empty()) {
+			return 0.5f;
+		}
+
+		const auto midpointIfAvailable = [](float begin, float end) -> std::optional<float> {
+			constexpr float requiredGap = 0.001f;
+			if (end - begin <= requiredGap) {
+				return std::nullopt;
+			}
+			return (begin + end) * 0.5f;
+		};
+
+		if (preferredIndex >= 0 && preferredIndex < static_cast<int>(gradient.size())) {
+			const float selectedPosition = std::clamp(gradient[preferredIndex].position, 0.0f, 1.0f);
+			const float nextPosition = preferredIndex + 1 < static_cast<int>(gradient.size())
+				? std::clamp(gradient[preferredIndex + 1].position, 0.0f, 1.0f)
+				: 1.0f;
+			if (const std::optional<float> position = midpointIfAvailable(selectedPosition, nextPosition)) {
+				return position;
+			}
+
+			const float previousPosition = preferredIndex > 0
+				? std::clamp(gradient[preferredIndex - 1].position, 0.0f, 1.0f)
+				: 0.0f;
+			if (const std::optional<float> position = midpointIfAvailable(previousPosition, selectedPosition)) {
+				return position;
+			}
+		}
+
+		float largestGapBegin = 0.0f;
+		float largestGapEnd = 0.0f;
+		float previousPosition = 0.0f;
+		for (const CylinderColorStop& stop : gradient) {
+			const float position = std::clamp(stop.position, 0.0f, 1.0f);
+			if (position - previousPosition > largestGapEnd - largestGapBegin) {
+				largestGapBegin = previousPosition;
+				largestGapEnd = position;
+			}
+			previousPosition = position;
+		}
+		if (1.0f - previousPosition > largestGapEnd - largestGapBegin) {
+			largestGapBegin = previousPosition;
+			largestGapEnd = 1.0f;
+		}
+		if (largestGapEnd - largestGapBegin <= minimumGap) {
+			return std::nullopt;
+		}
+		return (largestGapBegin + largestGapEnd) * 0.5f;
+	}
+
+	/// @brief HDR色をグラデーションプレビュー用の色へ変換する
+	/// @param color 変換するHDR色
+	/// @return 0から1へ制限したImGui描画色
+	ImU32 ToGradientPreviewColor(const Vector4& color) {
+		const auto normalize = [](float value) {
+			return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
+		};
+		return ImGui::ColorConvertFloat4ToU32(ImVec4{
+			normalize(color.x),
+			normalize(color.y),
+			normalize(color.z),
+			normalize(color.w),
+		});
+	}
+
+	/// @brief 指定時刻のCylinderグラデーションを描画する
+	/// @param gradient 描画するグラデーション停止点
+	/// @param previewTime 色トラックを評価する時刻
+	void DrawGradientPreview(
+		const std::vector<CylinderColorStop>& gradient,
+		float previewTime) {
+		const float width = (std::max)(ImGui::GetContentRegionAvail().x, 1.0f);
+		ImGui::InvisibleButton("##GradientPreview", ImVec2(width, 30.0f));
+		const ImVec2 previewMinimum = ImGui::GetItemRectMin();
+		const ImVec2 previewMaximum = ImGui::GetItemRectMax();
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		drawList->AddRectFilled(
+			previewMinimum,
+			previewMaximum,
+			ImGui::GetColorU32(ImGuiCol_FrameBg)
+		);
+		if (gradient.empty()) {
+			drawList->AddRect(
+				previewMinimum,
+				previewMaximum,
+				ImGui::GetColorU32(ImGuiCol_Border)
+			);
+			return;
+		}
+
+		const float previewWidth = previewMaximum.x - previewMinimum.x;
+		const auto positionToX = [previewMinimum, previewWidth](float position) {
+			return previewMinimum.x + std::clamp(position, 0.0f, 1.0f) * previewWidth;
+		};
+		const ImU32 firstColor = ToGradientPreviewColor(gradient.front().color.Evaluate(previewTime));
+		const float firstX = positionToX(gradient.front().position);
+		if (firstX > previewMinimum.x) {
+			drawList->AddRectFilled(
+				previewMinimum,
+				ImVec2(firstX, previewMaximum.y),
+				firstColor
+			);
+		}
+
+		for (std::size_t index = 0; index + 1 < gradient.size(); ++index) {
+			const float leftX = positionToX(gradient[index].position);
+			const float rightX = positionToX(gradient[index + 1].position);
+			if (rightX <= leftX) {
+				continue;
+			}
+			const ImU32 leftColor = ToGradientPreviewColor(gradient[index].color.Evaluate(previewTime));
+			const ImU32 rightColor = ToGradientPreviewColor(gradient[index + 1].color.Evaluate(previewTime));
+			drawList->AddRectFilledMultiColor(
+				ImVec2(leftX, previewMinimum.y),
+				ImVec2(rightX, previewMaximum.y),
+				leftColor,
+				rightColor,
+				rightColor,
+				leftColor
+			);
+		}
+
+		const ImU32 lastColor = ToGradientPreviewColor(gradient.back().color.Evaluate(previewTime));
+		const float lastX = positionToX(gradient.back().position);
+		if (lastX < previewMaximum.x) {
+			drawList->AddRectFilled(
+				ImVec2(lastX, previewMinimum.y),
+				previewMaximum,
+				lastColor
+			);
+		}
+		drawList->AddRect(
+			previewMinimum,
+			previewMaximum,
+			ImGui::GetColorU32(ImGuiCol_Border)
+		);
+	}
+
 	/// @brief CylinderのGradient設定を編集する
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawGradientEditor(CylinderEffectConfig& config) {
 		bool changed = false;
 		std::vector<CylinderColorStop>& gradient = config.material.gradient;
-		int removeIndex = -1;
-
-		for (int index = 0; index < static_cast<int>(gradient.size()); ++index) {
-			CylinderColorStop& stop = gradient[index];
-			ImGui::PushID(index);
-			const bool isOpen = ImGui::TreeNodeEx(
-				"GradientStop",
-				ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth,
-				"停止点 %d",
-				index + 1
-			);
-			if (isOpen) {
-				changed |= ImGui::DragFloat("位置", &stop.position, 0.01f, 0.0f, 1.0f, "%.3f");
-				changed |= DrawColorTrack("色", stop.color, config.duration);
-				ImGui::BeginDisabled(gradient.size() <= 1);
-				if (ImGui::Button("停止点を削除")) {
-					removeIndex = index;
-				}
-				ImGui::EndDisabled();
-				ImGui::TreePop();
-			}
-			ImGui::PopID();
-		}
-
-		if (removeIndex >= 0) {
-			gradient.erase(gradient.begin() + removeIndex);
+		static std::unordered_map<const void*, int> selectedStopIndices;
+		static std::unordered_map<const void*, float> previewTimes;
+		const void* gradientKey = static_cast<const void*>(&gradient);
+		int& selectedStopIndex = selectedStopIndices[gradientKey];
+		float& previewTime = previewTimes[gradientKey];
+		if (gradient.empty()) {
+			gradient.emplace_back();
+			selectedStopIndex = 0;
 			changed = true;
 		}
+		selectedStopIndex = std::clamp(
+			selectedStopIndex,
+			0,
+			static_cast<int>(gradient.size()) - 1
+		);
+		const float maximumPreviewTime = (std::max)(config.duration, 0.001f);
+		previewTime = std::clamp(
+			std::isfinite(previewTime) ? previewTime : 0.0f,
+			0.0f,
+			maximumPreviewTime
+		);
+		const std::optional<float> insertionPosition = FindGradientStopInsertionPosition(
+			gradient,
+			selectedStopIndex
+		);
+		const bool canAdd = gradient.size() < kMaximumCylinderGradientStops && insertionPosition.has_value();
+		const auto insertStop = [&gradient, &selectedStopIndex, &changed](CylinderColorStop stop) {
+			const auto insertion = std::upper_bound(
+				gradient.begin(),
+				gradient.end(),
+				stop.position,
+				[](float position, const CylinderColorStop& existingStop) {
+					return position < existingStop.position;
+				}
+			);
+			selectedStopIndex = static_cast<int>(std::distance(gradient.begin(), insertion));
+			gradient.insert(insertion, std::move(stop));
+			changed = true;
+		};
 
-		ImGui::BeginDisabled(gradient.size() >= kMaximumCylinderGradientStops);
-		if (ImGui::Button("停止点を追加")) {
+		ImGui::PushID(gradientKey);
+		constexpr float operationButtonWidth = 72.0f;
+		ImGui::BeginDisabled(!canAdd);
+		if (ImGui::Button("追加", ImVec2(operationButtonWidth, 0.0f))) {
 			CylinderColorStop stop;
-			if (!gradient.empty()) {
-				stop.position = (std::min)(1.0f, gradient.back().position + 0.1f);
-				stop.color.SetDefaultValue(gradient.back().color.GetDefaultValue());
-			} else {
-				stop.position = 0.5f;
-			}
-			gradient.push_back(std::move(stop));
+			stop.position = insertionPosition.value();
+			insertStop(std::move(stop));
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(!canAdd);
+		if (ImGui::Button("複製", ImVec2(operationButtonWidth, 0.0f))) {
+			CylinderColorStop stop = gradient[selectedStopIndex];
+			stop.position = insertionPosition.value();
+			insertStop(std::move(stop));
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(gradient.size() <= 1);
+		if (ImGui::Button("削除", ImVec2(operationButtonWidth, 0.0f))) {
+			gradient.erase(gradient.begin() + selectedStopIndex);
+			selectedStopIndex = (std::min)(
+				selectedStopIndex,
+				static_cast<int>(gradient.size()) - 1
+			);
 			changed = true;
 		}
 		ImGui::EndDisabled();
 		ImGui::SameLine();
-		ImGui::TextDisabled(
-			"%zu / %u",
-			gradient.size(),
-			kMaximumCylinderGradientStops
+		ImGui::TextDisabled("%zu / %u", gradient.size(), kMaximumCylinderGradientStops);
+
+		const ImGuiTableFlags tableFlags =
+			ImGuiTableFlags_Borders |
+			ImGuiTableFlags_RowBg |
+			ImGuiTableFlags_SizingStretchProp |
+			ImGuiTableFlags_ScrollY;
+		const float tableHeight = std::clamp(
+			(static_cast<float>(gradient.size()) + 1.0f) * ImGui::GetTextLineHeightWithSpacing() + 12.0f,
+			100.0f,
+			230.0f
 		);
+		if (ImGui::BeginTable("グラデーション停止点", 3, tableFlags, ImVec2(0.0f, tableHeight))) {
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableSetupColumn("停止点", ImGuiTableColumnFlags_WidthFixed, 105.0f);
+			ImGui::TableSetupColumn("位置", ImGuiTableColumnFlags_WidthStretch, 0.8f);
+			ImGui::TableSetupColumn("既定色", ImGuiTableColumnFlags_WidthStretch, 1.6f);
+			ImGui::TableHeadersRow();
+
+			for (int index = 0; index < static_cast<int>(gradient.size()); ++index) {
+				CylinderColorStop& stop = gradient[index];
+				const float minimumPosition = index > 0 ? gradient[index - 1].position : 0.0f;
+				const float maximumPosition = index + 1 < static_cast<int>(gradient.size())
+					? gradient[index + 1].position
+					: 1.0f;
+				ImGui::PushID(index);
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				const std::string stopLabel = "停止点 " + std::to_string(index + 1);
+				if (ImGui::Selectable(stopLabel.c_str(), selectedStopIndex == index)) {
+					selectedStopIndex = index;
+				}
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::DragFloat(
+					"##Position",
+					&stop.position,
+					0.005f,
+					minimumPosition,
+					maximumPosition,
+					"%.3f"
+				)) {
+					stop.position = std::clamp(
+						std::isfinite(stop.position) ? stop.position : minimumPosition,
+						minimumPosition,
+						maximumPosition
+					);
+					selectedStopIndex = index;
+					changed = true;
+				}
+				ImGui::TableSetColumnIndex(2);
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				Vector4 defaultColor = stop.color.GetDefaultValue();
+				if (ImGui::ColorEdit4(
+					"##DefaultColor",
+					&defaultColor.x,
+					ImGuiColorEditFlags_AlphaBar |
+					ImGuiColorEditFlags_Float |
+					ImGuiColorEditFlags_HDR
+				)) {
+					stop.color.SetDefaultValue(defaultColor);
+					selectedStopIndex = index;
+					changed = true;
+				}
+				ImGui::PopID();
+			}
+			ImGui::EndTable();
+		}
+
+		ImGui::SeparatorText("時刻プレビュー");
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::SliderFloat(
+			"##GradientPreviewTime",
+			&previewTime,
+			0.0f,
+			maximumPreviewTime,
+			"%.3f秒"
+		);
+		DrawGradientPreview(gradient, previewTime);
+		ImGui::TextDisabled("グラデーションは現在のプレビュー時刻で評価されます。");
+
+		if (selectedStopIndex >= 0 && selectedStopIndex < static_cast<int>(gradient.size())) {
+			ImGui::SeparatorText("選択中の停止点");
+			ImGui::Text("停止点 %d / 位置 %.3f", selectedStopIndex + 1, gradient[selectedStopIndex].position);
+			changed |= DrawColorTrack(
+				"色アニメーション",
+				gradient[selectedStopIndex].color,
+				config.duration,
+				true
+			);
+		}
+		ImGui::PopID();
 		return changed;
 	}
 
@@ -732,6 +1010,7 @@ namespace MadoEngine::Editor {
 #ifdef USE_IMGUI
 		PrimitiveEffectSystem3d& system = PrimitiveEffectSystem3d::GetInstance();
 		static int selectedAssetIndex = 0;
+		static int selectedEmitterIndex = 0;
 		static int selectedSettingPage = 0;
 		static PrimitiveEffectHandle previewHandle;
 		static std::string previewAssetName;
@@ -740,6 +1019,11 @@ namespace MadoEngine::Editor {
 		static bool previewLoop = true;
 		static std::array<char, 128> newAssetNameBuffer{};
 		static std::array<char, 128> renameAssetNameBuffer{};
+		static std::array<char, 128> newEmitterNameBuffer{};
+		static std::array<char, 128> renameEmitterNameBuffer{};
+		static std::string emitterCreateAssetName;
+		static std::string emitterRenameIdentity;
+		static const CylinderEffectAsset* emitterSelectedAsset = nullptr;
 		static std::string assetRenameOriginalName;
 		static std::unordered_map<std::string, std::string> savedAssetSnapshots;
 		static bool isNameBufferInitialized = false;
@@ -1130,11 +1414,38 @@ namespace MadoEngine::Editor {
 		ImGui::TextDisabled("再生中: %zu", system.GetActiveEffectCount());
 
 		bool assetChanged = false;
-		CylinderEffectConfig& config = asset->GetConfig();
-		ImGui::SeparatorText("設定");
-		const char* settingPageNames[] = { "基本", "形状", "マテリアル", "UV", "グラデーション" };
+		if (emitterSelectedAsset != asset) {
+			selectedEmitterIndex = 0;
+			emitterCreateAssetName.clear();
+			emitterRenameIdentity.clear();
+			emitterSelectedAsset = asset;
+		}
+		std::vector<CylinderEmitterConfig>& emitters = asset->GetEmitters();
+		assetChanged |= Detail::DrawEffectEmitterListPane(
+			"CylinderEmitters",
+			selectedAssetName,
+			emitters,
+			kMaximumCylinderEmitterCount,
+			selectedEmitterIndex,
+			newEmitterNameBuffer,
+			emitterCreateAssetName,
+			renameEmitterNameBuffer,
+			emitterRenameIdentity
+		);
+		CylinderEmitterConfig& config = emitters[selectedEmitterIndex];
+		ImGui::SameLine();
+		ImGui::BeginChild("CylinderEmitterSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::Text("設定: %s", config.name.c_str());
+		ImGui::Separator();
+		const char* settingPageNames[] = { "基本", "形状", "マテリアル", "UV" };
+		selectedSettingPage = std::clamp(
+			selectedSettingPage,
+			0,
+			static_cast<int>(std::size(settingPageNames)) - 1
+		);
 		const float settingPageButtonWidth =
-			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 4.0f) /
+			(ImGui::GetContentRegionAvail().x -
+				ImGui::GetStyle().ItemSpacing.x * static_cast<float>(std::size(settingPageNames) - 1)) /
 			static_cast<float>(std::size(settingPageNames));
 		ImGui::PushID("CylinderSettingPageButtons");
 		for (int pageIndex = 0; pageIndex < static_cast<int>(std::size(settingPageNames)); ++pageIndex) {
@@ -1156,7 +1467,7 @@ namespace MadoEngine::Editor {
 		}
 		ImGui::PopID();
 
-		ImGui::BeginChild("CylinderSettingPane", ImVec2(0.0f, 0.0f), true);
+		ImGui::BeginChild("CylinderSettingScrollPane", ImVec2(0.0f, 0.0f), false);
 		switch (selectedSettingPage) {
 		case 1:
 			assetChanged |= DrawGeometryEditor(config);
@@ -1167,14 +1478,12 @@ namespace MadoEngine::Editor {
 		case 3:
 			assetChanged |= DrawUvEditor(config);
 			break;
-		case 4:
-			assetChanged |= DrawGradientEditor(config);
-			break;
 		case 0:
 		default:
 			assetChanged |= DrawBasicEditor(config);
 			break;
 		}
+		ImGui::EndChild();
 		ImGui::EndChild();
 
 		if (assetChanged) {

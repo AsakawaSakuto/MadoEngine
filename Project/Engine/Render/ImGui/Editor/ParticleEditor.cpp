@@ -875,13 +875,20 @@ namespace MadoEngine::Editor {
 		);
 		ImGui::BeginChild("EmitterSelectionList", ImVec2(0.0f, emitterListHeight), true);
 		for (int index = 0; index < static_cast<int>(emitters.size()); ++index) {
+			ImGui::PushID(index);
 			const bool isSelected = index == selectedEmitterIndex;
+			ImGui::Checkbox("##EmitterEnabled", &emitters[index].isEnabled);
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("有効");
+			}
+			ImGui::SameLine();
 			if (ImGui::Selectable(emitters[index].name.c_str(), isSelected)) {
 				selectedEmitterIndex = index;
 			}
 			if (isSelected) {
 				ImGui::SetItemDefaultFocus();
 			}
+			ImGui::PopID();
 		}
 		ImGui::EndChild();
 
@@ -995,7 +1002,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		if (showEmitterShape) {
+		if (showEmitterShape && emitters[selectedEmitterIndex].isEnabled) {
 			Transform3D emitterTransform;
 			emitterTransform.translate = previewPosition;
 			ParticleEmitterDebugDrawer3d::Submit(

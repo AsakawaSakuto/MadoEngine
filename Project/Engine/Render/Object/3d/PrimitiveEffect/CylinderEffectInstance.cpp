@@ -36,40 +36,57 @@ namespace MadoEngine::Effect {
 		transform_ = desc.transform;
 		sceneType_ = desc.sceneType;
 		renderLayer_ = desc.renderLayer;
-		playbackTime_ = 0.0f;
 		playbackSpeed_ = 1.0f;
-		isFinished_ = false;
 		isPaused_ = false;
-		isLoop_ = asset_ ? asset_->GetConfig().isLoop : false;
-		if (desc.loopOverride.has_value()) {
-			isLoop_ = desc.loopOverride.value();
+		emitters_.clear();
+		if (!asset_) {
+			return;
+		}
+		emitters_.reserve(asset_->GetEmitters().size());
+		for (const CylinderEmitterConfig& config : asset_->GetEmitters()) {
+			if (!config.isEnabled) {
+				continue;
+			}
+			EmitterState state;
+			state.config = config;
+			state.isLoop = desc.loopOverride.value_or(config.isLoop);
+			emitters_.push_back(std::move(state));
 		}
 	}
 
 	void CylinderEffectInstance::Update(float deltaTime) {
-		if (isFinished_ || isPaused_ || !asset_) {
+		if (isPaused_ || !asset_) {
 			return;
 		}
 
-		const float duration = asset_->GetConfig().duration;
-		playbackTime_ += std::clamp(deltaTime, 0.0f, 0.1f) * playbackSpeed_;
-		if (isLoop_) {
-			playbackTime_ = std::fmod(playbackTime_, duration);
-			return;
-		}
-
-		if (playbackTime_ >= duration) {
-			playbackTime_ = duration;
-			isFinished_ = true;
+		const float scaledDeltaTime = std::clamp(
+			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			0.0f,
+			0.1f
+		) * playbackSpeed_;
+		for (EmitterState& emitter : emitters_) {
+			if (emitter.isFinished) {
+				continue;
+			}
+			emitter.playbackTime += scaledDeltaTime;
+			if (emitter.isLoop) {
+				emitter.playbackTime = std::fmod(emitter.playbackTime, emitter.config.duration);
+				continue;
+			}
+			if (emitter.playbackTime >= emitter.config.duration) {
+				emitter.playbackTime = emitter.config.duration;
+				emitter.isFinished = true;
+			}
 		}
 	}
 
 	void CylinderEffectInstance::Stop(PrimitiveEffectStopMode mode) {
-		if (mode == PrimitiveEffectStopMode::Immediate) {
-			isFinished_ = true;
-			return;
+		for (EmitterState& emitter : emitters_) {
+			emitter.isLoop = false;
+			if (mode == PrimitiveEffectStopMode::Immediate) {
+				emitter.isFinished = true;
+			}
 		}
-		isLoop_ = false;
 	}
 
 	void CylinderEffectInstance::Pause() {
@@ -89,7 +106,11 @@ namespace MadoEngine::Effect {
 	}
 
 	bool CylinderEffectInstance::IsFinished() const {
-		return isFinished_ || !asset_;
+		return !asset_ || std::all_of(
+			emitters_.begin(),
+			emitters_.end(),
+			[](const EmitterState& emitter) { return emitter.isFinished; }
+		);
 	}
 
 	bool CylinderEffectInstance::Matches(
@@ -104,46 +125,52 @@ namespace MadoEngine::Effect {
 			return;
 		}
 
-		const CylinderEffectConfig& config = asset_->GetConfig();
-		CylinderRenderData data;
-		data.transform = transform_;
-		data.radialSegments = config.geometry.radialSegments;
-		data.heightSegments = config.geometry.heightSegments;
-		data.pivot = config.geometry.pivot;
-		data.bottomRadii = config.geometry.bottomRadii.Evaluate(playbackTime_);
-		data.topRadii = config.geometry.topRadii.Evaluate(playbackTime_);
-		data.bottomRadii.x = (std::max)(0.0f, data.bottomRadii.x);
-		data.bottomRadii.y = (std::max)(0.0f, data.bottomRadii.y);
-		data.topRadii.x = (std::max)(0.0f, data.topRadii.x);
-		data.topRadii.y = (std::max)(0.0f, data.topRadii.y);
-		data.height = (std::max)(0.001f, config.geometry.height.Evaluate(playbackTime_));
-		data.startAngleRadians = ToRadians(config.geometry.startAngleDegrees.Evaluate(playbackTime_));
-		data.arcAngleRadians = ToRadians(std::clamp(
-			config.geometry.arcAngleDegrees.Evaluate(playbackTime_),
-			-360.0f,
-			360.0f
-		));
-		data.uvDirection = config.material.uv.direction;
-		data.uvScale = config.material.uv.scale.Evaluate(playbackTime_);
-		data.uvOffset = config.material.uv.offset.Evaluate(playbackTime_);
-		data.uvRotationRadians = ToRadians(config.material.uv.rotationDegrees.Evaluate(playbackTime_));
-		data.globalAlpha = std::clamp(config.material.globalAlpha.Evaluate(playbackTime_), 0.0f, 1.0f);
-		data.bottomFadeRange = std::clamp(config.material.bottomFadeRange.Evaluate(playbackTime_), 0.0f, 1.0f);
-		data.topFadeRange = std::clamp(config.material.topFadeRange.Evaluate(playbackTime_), 0.0f, 1.0f);
-		data.textureName = config.material.textureName;
-		data.blendMode = config.material.blendMode;
-		data.cullMode = config.material.cullMode;
-		data.renderLayer = renderLayer_;
+		for (const EmitterState& emitter : emitters_) {
+			if (emitter.isFinished) {
+				continue;
+			}
+			const CylinderEmitterConfig& config = emitter.config;
+			const float playbackTime = emitter.playbackTime;
+			CylinderRenderData data;
+			data.transform = transform_;
+			data.radialSegments = config.geometry.radialSegments;
+			data.heightSegments = config.geometry.heightSegments;
+			data.pivot = config.geometry.pivot;
+			data.bottomRadii = config.geometry.bottomRadii.Evaluate(playbackTime);
+			data.topRadii = config.geometry.topRadii.Evaluate(playbackTime);
+			data.bottomRadii.x = (std::max)(0.0f, data.bottomRadii.x);
+			data.bottomRadii.y = (std::max)(0.0f, data.bottomRadii.y);
+			data.topRadii.x = (std::max)(0.0f, data.topRadii.x);
+			data.topRadii.y = (std::max)(0.0f, data.topRadii.y);
+			data.height = (std::max)(0.001f, config.geometry.height.Evaluate(playbackTime));
+			data.startAngleRadians = ToRadians(config.geometry.startAngleDegrees.Evaluate(playbackTime));
+			data.arcAngleRadians = ToRadians(std::clamp(
+				config.geometry.arcAngleDegrees.Evaluate(playbackTime),
+				-360.0f,
+				360.0f
+			));
+			data.uvDirection = config.material.uv.direction;
+			data.uvScale = config.material.uv.scale.Evaluate(playbackTime);
+			data.uvOffset = config.material.uv.offset.Evaluate(playbackTime);
+			data.uvRotationRadians = ToRadians(config.material.uv.rotationDegrees.Evaluate(playbackTime));
+			data.globalAlpha = std::clamp(config.material.globalAlpha.Evaluate(playbackTime), 0.0f, 1.0f);
+			data.bottomFadeRange = std::clamp(config.material.bottomFadeRange.Evaluate(playbackTime), 0.0f, 1.0f);
+			data.topFadeRange = std::clamp(config.material.topFadeRange.Evaluate(playbackTime), 0.0f, 1.0f);
+			data.textureName = config.material.textureName;
+			data.blendMode = config.material.blendMode;
+			data.cullMode = config.material.cullMode;
+			data.renderLayer = renderLayer_;
 
-		data.gradientCount = static_cast<uint32_t>((std::min)(
-			config.material.gradient.size(),
-			static_cast<std::size_t>(kMaximumCylinderGradientStops)
-		));
-		for (uint32_t index = 0; index < data.gradientCount; ++index) {
-			data.gradient[index].position = config.material.gradient[index].position;
-			data.gradient[index].color = NormalizeColor(config.material.gradient[index].color.Evaluate(playbackTime_));
+			data.gradientCount = static_cast<uint32_t>((std::min)(
+				config.material.gradient.size(),
+				static_cast<std::size_t>(kMaximumCylinderGradientStops)
+			));
+			for (uint32_t index = 0; index < data.gradientCount; ++index) {
+				data.gradient[index].position = config.material.gradient[index].position;
+				data.gradient[index].color = NormalizeColor(config.material.gradient[index].color.Evaluate(playbackTime));
+			}
+			renderer.Submit(data);
 		}
-		renderer.Submit(data);
 	}
 
 } // namespace MadoEngine::Effect

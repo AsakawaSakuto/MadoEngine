@@ -48,20 +48,26 @@ namespace MadoEngine::Beam {
 		endPosition_ = desc.endPosition;
 		sceneType_ = desc.sceneType;
 		renderLayer_ = desc.renderLayer;
-		playbackTime_ = 0.0f;
-		totalTime_ = 0.0f;
 		playbackSpeed_ = 1.0f;
-		isStopping_ = false;
-		isFinished_ = asset_ == nullptr;
 		isPaused_ = false;
-		isLoop_ = asset_ ? asset_->GetConfig().playback.isLoop : false;
-		if (desc.loopOverride.has_value()) {
-			isLoop_ = desc.loopOverride.value();
+		emitters_.clear();
+		if (!asset_) {
+			return;
+		}
+		emitters_.reserve(asset_->GetEmitters().size());
+		for (const BeamEmitterConfig& config : asset_->GetEmitters()) {
+			if (!config.isEnabled) {
+				continue;
+			}
+			EmitterState state;
+			state.config = config;
+			state.isLoop = desc.loopOverride.value_or(config.playback.isLoop);
+			emitters_.push_back(std::move(state));
 		}
 	}
 
 	void BeamEffectInstance::Update(float deltaTime) {
-		if (isFinished_ || isPaused_ || !asset_) {
+		if (isPaused_ || !asset_) {
 			return;
 		}
 		const float safeDeltaTime = std::clamp(
@@ -70,27 +76,31 @@ namespace MadoEngine::Beam {
 			0.1f
 		);
 		const float scaledDeltaTime = safeDeltaTime * playbackSpeed_;
-		totalTime_ += scaledDeltaTime;
-		playbackTime_ += scaledDeltaTime;
-		const float duration = asset_->GetConfig().playback.duration;
-		if (isLoop_ && !isStopping_) {
-			playbackTime_ = std::fmod(playbackTime_, duration);
-			return;
-		}
-		if (playbackTime_ >= duration) {
-			playbackTime_ = duration;
-			isFinished_ = true;
+		for (EmitterState& emitter : emitters_) {
+			if (emitter.isFinished) {
+				continue;
+			}
+			emitter.totalTime += scaledDeltaTime;
+			emitter.playbackTime += scaledDeltaTime;
+			const float duration = emitter.config.playback.duration;
+			if (emitter.isLoop && !emitter.isStopping) {
+				emitter.playbackTime = std::fmod(emitter.playbackTime, duration);
+				continue;
+			}
+			if (emitter.playbackTime >= duration) {
+				emitter.playbackTime = duration;
+				emitter.isFinished = true;
+			}
 		}
 	}
 
 	void BeamEffectInstance::Stop(BeamStopMode mode) {
-		if (isFinished_) {
-			return;
-		}
-		isLoop_ = false;
-		isStopping_ = true;
-		if (mode == BeamStopMode::Immediate) {
-			isFinished_ = true;
+		for (EmitterState& emitter : emitters_) {
+			emitter.isLoop = false;
+			emitter.isStopping = true;
+			if (mode == BeamStopMode::Immediate) {
+				emitter.isFinished = true;
+			}
 		}
 	}
 
@@ -111,7 +121,11 @@ namespace MadoEngine::Beam {
 	}
 
 	bool BeamEffectInstance::IsFinished() const {
-		return isFinished_ || !asset_;
+		return !asset_ || std::all_of(
+			emitters_.begin(),
+			emitters_.end(),
+			[](const EmitterState& emitter) { return emitter.isFinished; }
+		);
 	}
 
 	bool BeamEffectInstance::Matches(
@@ -126,62 +140,67 @@ namespace MadoEngine::Beam {
 		if (IsFinished()) {
 			return;
 		}
-		const BeamEffectConfig& config = asset_->GetConfig();
-		const std::vector<MadoEngine::Ribbon::RibbonPoint> points = pointGenerator_.Generate(
-			startPosition_,
-			endPosition_,
-			config.geometry,
-			config.noise,
-			totalTime_
-		);
-		if (points.size() < MadoEngine::Ribbon::kMinimumRibbonPointCount) {
-			return;
-		}
+		for (const EmitterState& emitter : emitters_) {
+			if (emitter.isFinished) {
+				continue;
+			}
+			const BeamEmitterConfig& config = emitter.config;
+			const std::vector<MadoEngine::Ribbon::RibbonPoint> points = pointGenerator_.Generate(
+				startPosition_,
+				endPosition_,
+				config.geometry,
+				config.noise,
+				emitter.totalTime
+			);
+			if (points.size() < MadoEngine::Ribbon::kMinimumRibbonPointCount) {
+				continue;
+			}
 
-		const float normalizedTime = std::clamp(
-			playbackTime_ / config.playback.duration,
-			0.0f,
-			1.0f
-		);
-		MadoEngine::Ribbon::RibbonRenderData data;
-		data.points = points;
-		data.widthOverLifetime.SetDefaultValue((std::max)(
-			config.geometry.widthOverTime.Evaluate(normalizedTime),
-			0.0f
-		));
-		const Vector4 overallColor = config.material.colorOverTime.Evaluate(normalizedTime);
-		data.colorOverLifetime = BuildCombinedColorTrack(
-			config.material.colorOverLength,
-			overallColor
-		);
-		data.interpolation = MadoEngine::Ribbon::RibbonInterpolationMode::Linear;
-		data.smoothingSubdivision = 0;
-		data.cameraFacing = config.geometry.cameraFacing;
-		data.textureName = config.material.textureName;
-		data.blendMode = config.material.blendMode;
-		data.cullMode = config.material.cullMode;
-		data.globalAlpha = std::clamp(
-			config.material.globalAlphaOverTime.Evaluate(normalizedTime),
-			0.0f,
-			1.0f
-		);
-		data.startAlphaFade = config.geometry.startFade;
-		data.endAlphaFade = config.geometry.endFade;
-		data.uvScale = config.material.uvScale;
-		data.uvOffset = {
-			config.material.uvOffset.x + config.material.uvScroll.x * totalTime_,
-			config.material.uvOffset.y + config.material.uvScroll.y * totalTime_,
-		};
-		data.uvMode = config.material.uvMode;
-		data.tileLength = config.material.tileLength;
-		data.playbackMode = MadoEngine::Ribbon::RibbonPlaybackMode::Reveal;
-		data.playbackProgress = std::clamp(
-			config.playback.extensionOverTime.Evaluate(normalizedTime),
-			0.0f,
-			1.0f
-		);
-		data.renderLayer = renderLayer_;
-		renderer.Submit(data);
+			const float normalizedTime = std::clamp(
+				emitter.playbackTime / config.playback.duration,
+				0.0f,
+				1.0f
+			);
+			MadoEngine::Ribbon::RibbonRenderData data;
+			data.points = points;
+			data.widthOverLifetime.SetDefaultValue((std::max)(
+				config.geometry.widthOverTime.Evaluate(normalizedTime),
+				0.0f
+			));
+			const Vector4 overallColor = config.material.colorOverTime.Evaluate(normalizedTime);
+			data.colorOverLifetime = BuildCombinedColorTrack(
+				config.material.colorOverLength,
+				overallColor
+			);
+			data.interpolation = MadoEngine::Ribbon::RibbonInterpolationMode::Linear;
+			data.smoothingSubdivision = 0;
+			data.cameraFacing = config.geometry.cameraFacing;
+			data.textureName = config.material.textureName;
+			data.blendMode = config.material.blendMode;
+			data.cullMode = config.material.cullMode;
+			data.globalAlpha = std::clamp(
+				config.material.globalAlphaOverTime.Evaluate(normalizedTime),
+				0.0f,
+				1.0f
+			);
+			data.startAlphaFade = config.geometry.startFade;
+			data.endAlphaFade = config.geometry.endFade;
+			data.uvScale = config.material.uvScale;
+			data.uvOffset = {
+				config.material.uvOffset.x + config.material.uvScroll.x * emitter.totalTime,
+				config.material.uvOffset.y + config.material.uvScroll.y * emitter.totalTime,
+			};
+			data.uvMode = config.material.uvMode;
+			data.tileLength = config.material.tileLength;
+			data.playbackMode = MadoEngine::Ribbon::RibbonPlaybackMode::Reveal;
+			data.playbackProgress = std::clamp(
+				config.playback.extensionOverTime.Evaluate(normalizedTime),
+				0.0f,
+				1.0f
+			);
+			data.renderLayer = renderLayer_;
+			renderer.Submit(data);
+		}
 	}
 
 	void BeamEffectInstance::SetEndpoints(
