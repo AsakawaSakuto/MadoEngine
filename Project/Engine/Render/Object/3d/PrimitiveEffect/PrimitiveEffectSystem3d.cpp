@@ -464,6 +464,36 @@ namespace MadoEngine::Effect {
 		return true;
 	}
 
+	bool PrimitiveEffectSystem3d::Pause(PrimitiveEffectHandle handle) {
+		CylinderEffectInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->Pause();
+		return true;
+	}
+
+	bool PrimitiveEffectSystem3d::Resume(PrimitiveEffectHandle handle) {
+		CylinderEffectInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->Resume();
+		return true;
+	}
+
+	bool PrimitiveEffectSystem3d::SetPlaybackSpeed(
+		PrimitiveEffectHandle handle,
+		float playbackSpeed) {
+		CylinderEffectInstance* instance = Resolve(handle);
+		return instance && instance->SetPlaybackSpeed(playbackSpeed);
+	}
+
+	bool PrimitiveEffectSystem3d::IsPaused(PrimitiveEffectHandle handle) const {
+		const CylinderEffectInstance* instance = Resolve(handle);
+		return instance && instance->IsPaused();
+	}
+
 	bool PrimitiveEffectSystem3d::IsAlive(PrimitiveEffectHandle handle) const {
 		return Resolve(handle) != nullptr;
 	}

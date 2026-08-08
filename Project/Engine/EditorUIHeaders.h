@@ -2,6 +2,7 @@
 #include "Render/ImGui/Editor/AudioEditor.h"
 #include "Render/ImGui/Editor/BeamEditor.h"
 #include "Render/ImGui/Editor/CylinderEditor.h"
+#include "Render/ImGui/Editor/EffectSequenceEditor.h"
 #include "Render/ImGui/Editor/GuizmoEditor.h"
 #include "Render/ImGui/Editor/LightEditor.h"
 #include "Render/ImGui/Editor/LoggerEditor.h"

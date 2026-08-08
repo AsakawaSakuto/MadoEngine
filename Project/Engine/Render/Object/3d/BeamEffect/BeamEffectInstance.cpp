@@ -50,8 +50,10 @@ namespace MadoEngine::Beam {
 		renderLayer_ = desc.renderLayer;
 		playbackTime_ = 0.0f;
 		totalTime_ = 0.0f;
+		playbackSpeed_ = 1.0f;
 		isStopping_ = false;
 		isFinished_ = asset_ == nullptr;
+		isPaused_ = false;
 		isLoop_ = asset_ ? asset_->GetConfig().playback.isLoop : false;
 		if (desc.loopOverride.has_value()) {
 			isLoop_ = desc.loopOverride.value();
@@ -59,7 +61,7 @@ namespace MadoEngine::Beam {
 	}
 
 	void BeamEffectInstance::Update(float deltaTime) {
-		if (isFinished_ || !asset_) {
+		if (isFinished_ || isPaused_ || !asset_) {
 			return;
 		}
 		const float safeDeltaTime = std::clamp(
@@ -67,8 +69,9 @@ namespace MadoEngine::Beam {
 			0.0f,
 			0.1f
 		);
-		totalTime_ += safeDeltaTime;
-		playbackTime_ += safeDeltaTime;
+		const float scaledDeltaTime = safeDeltaTime * playbackSpeed_;
+		totalTime_ += scaledDeltaTime;
+		playbackTime_ += scaledDeltaTime;
 		const float duration = asset_->GetConfig().playback.duration;
 		if (isLoop_ && !isStopping_) {
 			playbackTime_ = std::fmod(playbackTime_, duration);
@@ -89,6 +92,22 @@ namespace MadoEngine::Beam {
 		if (mode == BeamStopMode::Immediate) {
 			isFinished_ = true;
 		}
+	}
+
+	void BeamEffectInstance::Pause() {
+		isPaused_ = true;
+	}
+
+	void BeamEffectInstance::Resume() {
+		isPaused_ = false;
+	}
+
+	bool BeamEffectInstance::SetPlaybackSpeed(float playbackSpeed) {
+		if (!std::isfinite(playbackSpeed) || playbackSpeed <= 0.0f || playbackSpeed > 256.0f) {
+			return false;
+		}
+		playbackSpeed_ = playbackSpeed;
+		return true;
 	}
 
 	bool BeamEffectInstance::IsFinished() const {

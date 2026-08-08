@@ -11,6 +11,7 @@
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
 #include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
 #include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
+#include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include "EditorUIHeaders.h"
 #include "Render/ImGui/Editor/History/EditorHistory.h"
 #include "../InputRegister.h"
@@ -79,10 +80,11 @@ SceneManager::~SceneManager() {
 	MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
 	LightManager::GetInstance().DestroyByScene(previousSceneType);
+	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
-	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().ClearScene(previousSceneType);
+	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 }
 
 void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
@@ -120,10 +122,11 @@ void SceneManager::Update(float dt) {
 
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
 	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
+	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Update(dt);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
-	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Update(dt);
+	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Update(dt);
 }
 
 void SceneManager::Draw() {
@@ -319,10 +322,11 @@ void SceneManager::ChangeScene(SceneType type) {
 		MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
 		LightManager::GetInstance().DestroyByScene(previousSceneType);
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().ClearScene(previousSceneType);
+		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}
 

@@ -23,6 +23,23 @@ namespace MadoEngine::Effect {
 		/// @param mode 停止方法
 		void Stop(PrimitiveEffectStopMode mode);
 
+		/// @brief Cylinder Effectの時間進行を一時停止する
+		void Pause();
+
+		/// @brief Cylinder Effectの時間進行を再開する
+		void Resume();
+
+		/// @brief Cylinder Effectの再生速度を設定する
+		/// @param playbackSpeed 設定する再生速度
+		/// @return 有効な再生速度を設定できた場合はtrue
+		bool SetPlaybackSpeed(float playbackSpeed);
+
+		/// @brief Cylinder Effectが一時停止中か確認する
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused() const {
+			return isPaused_;
+		}
+
 		/// @brief 再生が終了したか確認する
 		/// @return 再生終了済みの場合はtrue
 		bool IsFinished() const;
@@ -61,8 +78,10 @@ namespace MadoEngine::Effect {
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
 		float playbackTime_ = 0.0f;
+		float playbackSpeed_ = 1.0f;
 		bool isLoop_ = false;
 		bool isFinished_ = false;
+		bool isPaused_ = false;
 	};
 
 } // namespace MadoEngine::Effect

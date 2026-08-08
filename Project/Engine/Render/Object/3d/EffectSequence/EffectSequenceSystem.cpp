@@ -1,4 +1,4 @@
-#include "BeamEffectSystem3d.h"
+#include "EffectSequenceSystem.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <chrono>
@@ -8,7 +8,7 @@
 
 namespace {
 
-	constexpr std::size_t kMaximumBeamAssetNameLength = 100;
+	constexpr std::size_t kMaximumEffectSequenceAssetNameLength = 100;
 
 	/// @brief UTF-8文字列からFilesystem Pathを生成する
 	/// @param value UTF-8文字列
@@ -38,8 +38,7 @@ namespace {
 		try {
 			outFilePath = directoryPath / MakeUtf8Path(assetName + ".json");
 			return true;
-		}
-		catch (const std::system_error&) {
+		} catch (const std::system_error&) {
 			return false;
 		}
 	}
@@ -50,7 +49,7 @@ namespace {
 	bool IsValidAssetName(const std::string& assetName) {
 		if (
 			assetName.empty() ||
-			assetName.size() > kMaximumBeamAssetNameLength ||
+			assetName.size() > kMaximumEffectSequenceAssetNameLength ||
 			assetName.front() == ' ' ||
 			assetName.back() == ' ' ||
 			assetName.back() == '.') {
@@ -83,10 +82,10 @@ namespace {
 		);
 	}
 
-	/// @brief JsonファイルがAsset Directory直下にあるか確認する
+	/// @brief JSONファイルがAsset Directory直下にあるか確認する
 	/// @param filePath 確認対象ファイル
 	/// @param directoryPath Asset Directory
-	/// @return Directory直下のJsonの場合はtrue
+	/// @return Directory直下のJSONの場合はtrue
 	bool IsAssetFilePath(
 		const std::filesystem::path& filePath,
 		const std::filesystem::path& directoryPath) {
@@ -99,10 +98,10 @@ namespace {
 		return !error && canonicalFile.extension() == ".json" && canonicalFile.parent_path() == canonicalDirectory;
 	}
 
-	/// @brief Asset JsonをTrash Directoryへ退避する
-	/// @param sourcePath 退避元Json
+	/// @brief Asset JSONをTrash Directoryへ退避する
+	/// @param sourcePath 退避元JSON
 	/// @param assetDirectoryPath Asset Directory
-	/// @param outTrashPath 退避先Path出力
+	/// @param outTrashPath 退避先Pathの出力先
 	/// @return 退避に成功した場合はtrue
 	bool MoveAssetFileToTrash(
 		const std::filesystem::path& sourcePath,
@@ -127,8 +126,7 @@ namespace {
 			outTrashPath = trashDirectory / MakeUtf8Path(
 				PathToUtf8String(sourcePath.stem()) + "_" + std::to_string(timestamp) + ".json"
 			);
-		}
-		catch (const std::system_error&) {
+		} catch (const std::system_error&) {
 			return false;
 		}
 		std::filesystem::rename(sourcePath, outTrashPath, error);
@@ -137,51 +135,50 @@ namespace {
 
 } // namespace
 
-namespace MadoEngine::Beam {
+namespace MadoEngine::EffectSequence {
 
-	BeamEffectSystem3d& BeamEffectSystem3d::GetInstance() {
-		static BeamEffectSystem3d instance;
+	EffectSequenceSystem& EffectSequenceSystem::GetInstance() {
+		static EffectSequenceSystem instance;
 		return instance;
 	}
 
-	void BeamEffectSystem3d::Initialize(
-		ID3D12Device* device,
-		ID3D12GraphicsCommandList* commandList,
-		MadoEngine::Render::PSORegistry* psoRegistry) {
+	void EffectSequenceSystem::Initialize() {
 		Finalize();
-		renderer_.Initialize(device, commandList, psoRegistry);
 		const std::size_t assetCount = LoadAssetsFromDirectory(assetDirectoryPath_);
 		isInitialized_ = true;
 		Logger::Output(
-			"BeamEffectSystem3dを初期化しました。Asset数: " + std::to_string(assetCount),
+			"EffectSequenceSystemを初期化しました。Asset数: " + std::to_string(assetCount),
 			Logger::Level::Engine
 		);
 	}
 
-	void BeamEffectSystem3d::Finalize() {
-		renderer_.Finalize();
+	void EffectSequenceSystem::Finalize() {
+		for (SequenceSlot& slot : sequenceSlots_) {
+			if (slot.instance) {
+				slot.instance->Destroy(EffectSequenceFinishReason::StopImmediate);
+			}
+		}
 		assets_.clear();
 		assetPaths_.clear();
-		effectSlots_.clear();
+		sequenceSlots_.clear();
 		freeSlotIndices_ = {};
-		preparedSceneType_ = SceneType::None;
-		currentSubmissionFenceValue_ = 0;
-		isRenderDataPrepared_ = false;
+		finishedEvents_.clear();
 		isInitialized_ = false;
 	}
 
-	std::size_t BeamEffectSystem3d::LoadAssetsFromDirectory(
+	std::size_t EffectSequenceSystem::LoadAssetsFromDirectory(
 		const std::filesystem::path& directoryPath) {
 		assetDirectoryPath_ = directoryPath;
 		std::error_code error;
 		std::filesystem::create_directories(directoryPath, error);
 		if (error) {
 			Logger::Output(
-				"Beam Effect Asset Directoryを作成できません: " + PathToUtf8String(directoryPath),
+				"Effect Sequence Asset Directoryを作成できません: " + PathToUtf8String(directoryPath),
 				Logger::Level::Error
 			);
 			return 0;
 		}
+
 		std::vector<std::filesystem::path> paths;
 		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(directoryPath, error)) {
 			if (error) {
@@ -199,42 +196,45 @@ namespace MadoEngine::Beam {
 		return loadedCount;
 	}
 
-	bool BeamEffectSystem3d::LoadAsset(const std::filesystem::path& filePath) {
-		auto asset = std::make_shared<BeamEffectAsset>();
+	bool EffectSequenceSystem::LoadAsset(const std::filesystem::path& filePath) {
+		auto asset = std::make_shared<EffectSequenceAsset>();
 		if (!asset->LoadFromFile(filePath) || asset->GetName().empty()) {
 			return false;
 		}
 		const std::string name = asset->GetName();
 		assets_[name] = std::move(asset);
 		assetPaths_[name] = filePath;
-		Logger::Output("Beam Effect Assetを登録しました: " + name, Logger::Level::Assets);
+		Logger::Output("Effect Sequence Assetを登録しました: " + name, Logger::Level::Assets);
 		return true;
 	}
 
-	bool BeamEffectSystem3d::ReloadAsset(const std::string& assetName) {
+	bool EffectSequenceSystem::ReloadAsset(const std::string& assetName) {
 		const auto found = assetPaths_.find(assetName);
 		return found != assetPaths_.end() && LoadAsset(found->second);
 	}
 
-	bool BeamEffectSystem3d::LoadAssetBackup(const std::string& assetName) {
+	bool EffectSequenceSystem::LoadAssetBackup(const std::string& assetName) {
 		const auto found = assetPaths_.find(assetName);
 		if (found == assetPaths_.end()) {
 			return false;
 		}
 		std::filesystem::path backupPath = found->second;
 		backupPath += ".bak";
-		auto asset = std::make_shared<BeamEffectAsset>();
+		auto asset = std::make_shared<EffectSequenceAsset>();
 		if (!asset->LoadFromFile(backupPath)) {
 			return false;
 		}
 		asset->SetName(assetName);
 		asset->SetFilePath(found->second);
 		assets_[assetName] = std::move(asset);
-		Logger::Output("Beam Effect AssetのBackupを読み込みました: " + assetName, Logger::Level::Assets);
+		Logger::Output(
+			"Effect Sequence AssetのBackupを読み込みました: " + assetName,
+			Logger::Level::Assets
+		);
 		return true;
 	}
 
-	bool BeamEffectSystem3d::CreateAsset(const std::string& assetName) {
+	bool EffectSequenceSystem::CreateAsset(const std::string& assetName) {
 		if (!IsAssetNameAvailable(assetName)) {
 			return false;
 		}
@@ -242,13 +242,13 @@ namespace MadoEngine::Beam {
 		if (!TryMakeAssetFilePath(assetDirectoryPath_, assetName, filePath)) {
 			return false;
 		}
-		BeamEffectAsset asset;
+		EffectSequenceAsset asset;
 		asset.SetName(assetName);
 		asset.Validate();
 		return asset.SaveToFile(filePath, false) && LoadAsset(filePath);
 	}
 
-	bool BeamEffectSystem3d::DuplicateAsset(
+	bool EffectSequenceSystem::DuplicateAsset(
 		const std::string& sourceAssetName,
 		const std::string& newAssetName) {
 		const auto source = assets_.find(sourceAssetName);
@@ -259,13 +259,13 @@ namespace MadoEngine::Beam {
 		if (!TryMakeAssetFilePath(assetDirectoryPath_, newAssetName, filePath)) {
 			return false;
 		}
-		BeamEffectAsset copy = *source->second;
+		EffectSequenceAsset copy = *source->second;
 		copy.SetName(newAssetName);
 		copy.Validate();
 		return copy.SaveToFile(filePath, false) && LoadAsset(filePath);
 	}
 
-	bool BeamEffectSystem3d::RenameAsset(
+	bool EffectSequenceSystem::RenameAsset(
 		const std::string& assetName,
 		const std::string& newAssetName) {
 		const auto asset = assets_.find(assetName);
@@ -280,13 +280,13 @@ namespace MadoEngine::Beam {
 		if (!TryMakeAssetFilePath(assetDirectoryPath_, newAssetName, newPath)) {
 			return false;
 		}
-		BeamEffectAsset renamed = *asset->second;
+		EffectSequenceAsset renamed = *asset->second;
 		renamed.SetName(newAssetName);
 		renamed.Validate();
 		if (!renamed.SaveToFile(newPath, false)) {
 			return false;
 		}
-		auto loaded = std::make_shared<BeamEffectAsset>();
+		auto loaded = std::make_shared<EffectSequenceAsset>();
 		if (!loaded->LoadFromFile(newPath)) {
 			std::error_code error;
 			std::filesystem::remove(newPath, error);
@@ -303,13 +303,13 @@ namespace MadoEngine::Beam {
 		assets_[newAssetName] = std::move(loaded);
 		assetPaths_[newAssetName] = newPath;
 		Logger::Output(
-			"Beam Effect Asset名を変更しました: " + assetName + " -> " + newAssetName,
+			"Effect Sequence Asset名を変更しました: " + assetName + " -> " + newAssetName,
 			Logger::Level::Assets
 		);
 		return true;
 	}
 
-	bool BeamEffectSystem3d::DeleteAsset(const std::string& assetName) {
+	bool EffectSequenceSystem::DeleteAsset(const std::string& assetName) {
 		const auto asset = assets_.find(assetName);
 		const auto path = assetPaths_.find(assetName);
 		if (asset == assets_.end() || path == assetPaths_.end()) {
@@ -322,13 +322,13 @@ namespace MadoEngine::Beam {
 		assets_.erase(asset);
 		assetPaths_.erase(path);
 		Logger::Output(
-			"Beam Effect AssetをTrashへ退避しました: " + PathToUtf8String(trashPath),
+			"Effect Sequence AssetをTrashへ退避しました: " + PathToUtf8String(trashPath),
 			Logger::Level::Assets
 		);
 		return true;
 	}
 
-	bool BeamEffectSystem3d::IsAssetNameAvailable(const std::string& assetName) const {
+	bool EffectSequenceSystem::IsAssetNameAvailable(const std::string& assetName) const {
 		if (!IsValidAssetName(assetName) || assets_.contains(assetName)) {
 			return false;
 		}
@@ -340,42 +340,48 @@ namespace MadoEngine::Beam {
 		return !std::filesystem::exists(path, error) && !error;
 	}
 
-	BeamEffectHandle BeamEffectSystem3d::Play(
+	EffectSequenceHandle EffectSequenceSystem::Play(
 		const std::string& assetName,
-		const BeamEffectPlayDesc& desc) {
+		const EffectSequencePlayDesc& desc) {
 		if (!isInitialized_) {
-			Logger::Output("初期化前にはBeam Effectを再生できません。", Logger::Level::Warning);
+			Logger::Output("初期化前にEffect Sequenceは再生できません。", Logger::Level::Warning);
 			return {};
 		}
 		const auto found = assets_.find(assetName);
 		if (found == assets_.end()) {
-			Logger::Output("Beam Effect Assetが見つかりません: " + assetName, Logger::Level::Warning);
+			Logger::Output("Effect Sequence Assetが見つかりません: " + assetName, Logger::Level::Warning);
 			return {};
 		}
+
 		uint32_t slotIndex = 0;
 		if (!freeSlotIndices_.empty()) {
 			slotIndex = freeSlotIndices_.front();
 			freeSlotIndices_.pop();
 		} else {
-			slotIndex = static_cast<uint32_t>(effectSlots_.size());
-			effectSlots_.push_back({});
+			slotIndex = static_cast<uint32_t>(sequenceSlots_.size());
+			sequenceSlots_.push_back({});
 		}
-		EffectSlot& slot = effectSlots_[slotIndex];
-		slot.instance = std::make_unique<BeamEffectInstance>();
-		slot.instance->Initialize(found->second, desc);
-		isRenderDataPrepared_ = false;
+		SequenceSlot& slot = sequenceSlots_[slotIndex];
+		slot.instance = std::make_unique<EffectSequenceInstance>();
+		slot.instance->Initialize(found->second, desc, dispatcher_);
 		return { slotIndex, slot.generation };
 	}
 
-	void BeamEffectSystem3d::Stop(BeamEffectHandle handle, BeamStopMode mode) {
-		if (BeamEffectInstance* instance = Resolve(handle)) {
-			instance->Stop(mode);
-			isRenderDataPrepared_ = false;
+	void EffectSequenceSystem::Stop(
+		EffectSequenceHandle handle,
+		EffectSequenceStopMode mode) {
+		EffectSequenceInstance* instance = Resolve(handle);
+		if (!instance) {
+			return;
+		}
+		instance->Stop(mode);
+		if (instance->IsFinished()) {
+			CompleteAndReleaseSlot(handle.index, true);
 		}
 	}
 
-	bool BeamEffectSystem3d::Pause(BeamEffectHandle handle) {
-		BeamEffectInstance* instance = Resolve(handle);
+	bool EffectSequenceSystem::Pause(EffectSequenceHandle handle) {
+		EffectSequenceInstance* instance = Resolve(handle);
 		if (!instance) {
 			return false;
 		}
@@ -383,8 +389,8 @@ namespace MadoEngine::Beam {
 		return true;
 	}
 
-	bool BeamEffectSystem3d::Resume(BeamEffectHandle handle) {
-		BeamEffectInstance* instance = Resolve(handle);
+	bool EffectSequenceSystem::Resume(EffectSequenceHandle handle) {
+		EffectSequenceInstance* instance = Resolve(handle);
 		if (!instance) {
 			return false;
 		}
@@ -392,129 +398,82 @@ namespace MadoEngine::Beam {
 		return true;
 	}
 
-	bool BeamEffectSystem3d::SetPlaybackSpeed(
-		BeamEffectHandle handle,
+	bool EffectSequenceSystem::SetTransform(
+		EffectSequenceHandle handle,
+		const Transform3D& transform) {
+		EffectSequenceInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->SetTransform(transform);
+		return true;
+	}
+
+	bool EffectSequenceSystem::SetPlaybackSpeed(
+		EffectSequenceHandle handle,
 		float playbackSpeed) {
-		BeamEffectInstance* instance = Resolve(handle);
+		EffectSequenceInstance* instance = Resolve(handle);
 		return instance && instance->SetPlaybackSpeed(playbackSpeed);
 	}
 
-	bool BeamEffectSystem3d::IsPaused(BeamEffectHandle handle) const {
-		const BeamEffectInstance* instance = Resolve(handle);
-		return instance && instance->IsPaused();
-	}
-
-	bool BeamEffectSystem3d::SetEndpoints(
-		BeamEffectHandle handle,
-		const Vector3& startPosition,
-		const Vector3& endPosition) {
-		BeamEffectInstance* instance = Resolve(handle);
-		if (!instance) {
-			return false;
-		}
-		instance->SetEndpoints(startPosition, endPosition);
-		isRenderDataPrepared_ = false;
-		return true;
-	}
-
-	bool BeamEffectSystem3d::SetStartPosition(
-		BeamEffectHandle handle,
-		const Vector3& position) {
-		BeamEffectInstance* instance = Resolve(handle);
-		if (!instance) {
-			return false;
-		}
-		instance->SetStartPosition(position);
-		isRenderDataPrepared_ = false;
-		return true;
-	}
-
-	bool BeamEffectSystem3d::SetEndPosition(
-		BeamEffectHandle handle,
-		const Vector3& position) {
-		BeamEffectInstance* instance = Resolve(handle);
-		if (!instance) {
-			return false;
-		}
-		instance->SetEndPosition(position);
-		isRenderDataPrepared_ = false;
-		return true;
-	}
-
-	bool BeamEffectSystem3d::IsAlive(BeamEffectHandle handle) const {
+	bool EffectSequenceSystem::IsAlive(EffectSequenceHandle handle) const {
 		return Resolve(handle) != nullptr;
 	}
 
-	void BeamEffectSystem3d::Update(float deltaTime) {
+	bool EffectSequenceSystem::IsPaused(EffectSequenceHandle handle) const {
+		const EffectSequenceInstance* instance = Resolve(handle);
+		return instance && instance->IsPaused();
+	}
+
+	std::optional<float> EffectSequenceSystem::GetPlaybackTime(EffectSequenceHandle handle) const {
+		const EffectSequenceInstance* instance = Resolve(handle);
+		return instance ? std::optional<float>{ instance->GetPlaybackTime() } : std::nullopt;
+	}
+
+	void EffectSequenceSystem::Update(float deltaTime) {
 		if (!isInitialized_) {
 			return;
 		}
-		isRenderDataPrepared_ = false;
-		for (uint32_t index = 0; index < effectSlots_.size(); ++index) {
-			EffectSlot& slot = effectSlots_[index];
+		for (uint32_t index = 0; index < sequenceSlots_.size(); ++index) {
+			SequenceSlot& slot = sequenceSlots_[index];
 			if (!slot.instance) {
 				continue;
 			}
 			slot.instance->Update(deltaTime);
 			if (slot.instance->IsFinished()) {
-				ReleaseSlot(index);
+				CompleteAndReleaseSlot(index, true);
 			}
 		}
 	}
 
-	void BeamEffectSystem3d::BeginFrame(uint64_t submissionFenceValue) {
-		currentSubmissionFenceValue_ = submissionFenceValue;
-		isRenderDataPrepared_ = false;
-	}
-
-	void BeamEffectSystem3d::DrawLayerMask(
-		SceneType sceneType,
-		const Camera& camera,
-		MadoEngine::Render::RenderLayerMask layerMask) {
-		if (!isInitialized_ || layerMask == 0) {
-			return;
-		}
-		if (!isRenderDataPrepared_ || preparedSceneType_ != sceneType) {
-			renderer_.Begin(camera, currentSubmissionFenceValue_);
-			for (const EffectSlot& slot : effectSlots_) {
-				if (!slot.instance || !slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
-					continue;
-				}
-				slot.instance->SubmitRenderData(renderer_);
-			}
-			preparedSceneType_ = sceneType;
-			isRenderDataPrepared_ = true;
-		}
-		renderer_.Draw(layerMask);
-	}
-
-	void BeamEffectSystem3d::OnGpuFrameCompleted(uint64_t completedFenceValue) {
-		renderer_.OnGpuFrameCompleted(completedFenceValue);
-	}
-
-	void BeamEffectSystem3d::ClearScene(SceneType sceneType) {
+	void EffectSequenceSystem::ClearScene(SceneType sceneType) {
 		if (sceneType == SceneType::None) {
 			return;
 		}
-		for (uint32_t index = 0; index < effectSlots_.size(); ++index) {
-			EffectSlot& slot = effectSlots_[index];
-			if (slot.instance && slot.instance->GetSceneType() == sceneType) {
-				ReleaseSlot(index);
+		for (uint32_t index = 0; index < sequenceSlots_.size(); ++index) {
+			SequenceSlot& slot = sequenceSlots_[index];
+			if (!slot.instance || slot.instance->GetSceneType() != sceneType) {
+				continue;
 			}
+			slot.instance->Destroy(EffectSequenceFinishReason::SceneCleared);
+			CompleteAndReleaseSlot(index, false);
 		}
-		isRenderDataPrepared_ = false;
 	}
 
-	void BeamEffectSystem3d::StopAll(BeamStopMode mode) {
-		for (EffectSlot& slot : effectSlots_) {
-			if (slot.instance) {
-				slot.instance->Stop(mode);
+	void EffectSequenceSystem::StopAll(EffectSequenceStopMode mode) {
+		for (uint32_t index = 0; index < sequenceSlots_.size(); ++index) {
+			SequenceSlot& slot = sequenceSlots_[index];
+			if (!slot.instance) {
+				continue;
+			}
+			slot.instance->Stop(mode);
+			if (slot.instance->IsFinished()) {
+				CompleteAndReleaseSlot(index, true);
 			}
 		}
-		isRenderDataPrepared_ = false;
 	}
 
-	std::vector<std::string> BeamEffectSystem3d::GetAssetNames() const {
+	std::vector<std::string> EffectSequenceSystem::GetAssetNames() const {
 		std::vector<std::string> names;
 		names.reserve(assets_.size());
 		for (const auto& [name, asset] : assets_) {
@@ -525,44 +484,67 @@ namespace MadoEngine::Beam {
 		return names;
 	}
 
-	const BeamEffectAsset* BeamEffectSystem3d::FindAsset(const std::string& assetName) const {
+	const EffectSequenceAsset* EffectSequenceSystem::FindAsset(const std::string& assetName) const {
 		const auto found = assets_.find(assetName);
 		return found != assets_.end() ? found->second.get() : nullptr;
 	}
 
-	BeamEffectAsset* BeamEffectSystem3d::FindEditableAsset(const std::string& assetName) {
+	EffectSequenceAsset* EffectSequenceSystem::FindEditableAsset(const std::string& assetName) {
 		const auto found = assets_.find(assetName);
 		return found != assets_.end() ? found->second.get() : nullptr;
 	}
 
-	std::size_t BeamEffectSystem3d::GetActiveEffectCount() const {
+	std::size_t EffectSequenceSystem::GetActiveSequenceCount() const {
 		return static_cast<std::size_t>(std::count_if(
-			effectSlots_.begin(),
-			effectSlots_.end(),
-			[](const EffectSlot& slot) {
+			sequenceSlots_.begin(),
+			sequenceSlots_.end(),
+			[](const SequenceSlot& slot) {
 				return slot.instance != nullptr;
 			}
 		));
 	}
 
-	BeamEffectInstance* BeamEffectSystem3d::Resolve(BeamEffectHandle handle) {
-		if (!handle.HasValue() || handle.index >= effectSlots_.size()) {
+	std::vector<EffectSequenceFinishedEvent> EffectSequenceSystem::ConsumeFinishedEvents() {
+		std::vector<EffectSequenceFinishedEvent> events = std::move(finishedEvents_);
+		finishedEvents_.clear();
+		return events;
+	}
+
+	EffectSequenceInstance* EffectSequenceSystem::Resolve(EffectSequenceHandle handle) {
+		if (!handle.HasValue() || handle.index >= sequenceSlots_.size()) {
 			return nullptr;
 		}
-		EffectSlot& slot = effectSlots_[handle.index];
+		SequenceSlot& slot = sequenceSlots_[handle.index];
 		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
 	}
 
-	const BeamEffectInstance* BeamEffectSystem3d::Resolve(BeamEffectHandle handle) const {
-		if (!handle.HasValue() || handle.index >= effectSlots_.size()) {
+	const EffectSequenceInstance* EffectSequenceSystem::Resolve(EffectSequenceHandle handle) const {
+		if (!handle.HasValue() || handle.index >= sequenceSlots_.size()) {
 			return nullptr;
 		}
-		const EffectSlot& slot = effectSlots_[handle.index];
+		const SequenceSlot& slot = sequenceSlots_[handle.index];
 		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
 	}
 
-	void BeamEffectSystem3d::ReleaseSlot(uint32_t index) {
-		EffectSlot& slot = effectSlots_[index];
+	void EffectSequenceSystem::CompleteAndReleaseSlot(uint32_t index, bool emitEvent) {
+		SequenceSlot& slot = sequenceSlots_[index];
+		if (!slot.instance) {
+			return;
+		}
+		if (emitEvent) {
+			finishedEvents_.push_back({
+				{ index, slot.generation },
+				slot.instance->GetAssetName(),
+				slot.instance->GetSceneType(),
+				slot.instance->GetFinishReason(),
+				slot.instance->GetPlaybackContext(),
+			});
+		}
+		ReleaseSlot(index);
+	}
+
+	void EffectSequenceSystem::ReleaseSlot(uint32_t index) {
+		SequenceSlot& slot = sequenceSlots_[index];
 		slot.instance.reset();
 		++slot.generation;
 		if (slot.generation == 0) {
@@ -571,4 +553,4 @@ namespace MadoEngine::Beam {
 		freeSlotIndices_.push(index);
 	}
 
-} // namespace MadoEngine::Beam
+} // namespace MadoEngine::EffectSequence

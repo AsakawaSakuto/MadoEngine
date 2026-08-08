@@ -16,8 +16,10 @@ namespace MadoEngine::Ribbon {
 		renderLayer_ = desc.renderLayer;
 		playbackTime_ = 0.0f;
 		totalTime_ = 0.0f;
+		playbackSpeed_ = 1.0f;
 		isGenerating_ = asset_ != nullptr;
 		isImmediatelyFinished_ = asset_ == nullptr;
+		isPaused_ = false;
 		isLoop_ = asset_ ? asset_->GetConfig().playback.isLoop : false;
 		if (desc.loopOverride.has_value()) {
 			isLoop_ = desc.loopOverride.value();
@@ -35,7 +37,7 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void RibbonEffectInstance::Update(float deltaTime) {
-		if (isImmediatelyFinished_ || !asset_ || !pointSource_) {
+		if (isImmediatelyFinished_ || isPaused_ || !asset_ || !pointSource_) {
 			return;
 		}
 
@@ -44,14 +46,15 @@ namespace MadoEngine::Ribbon {
 			0.0f,
 			0.1f
 		);
-		pointSource_->Update(safeDeltaTime);
-		totalTime_ += safeDeltaTime;
+		const float scaledDeltaTime = safeDeltaTime * playbackSpeed_;
+		pointSource_->Update(scaledDeltaTime);
+		totalTime_ += scaledDeltaTime;
 		if (!isGenerating_) {
 			return;
 		}
 
 		const float duration = asset_->GetConfig().playback.duration;
-		playbackTime_ += safeDeltaTime;
+		playbackTime_ += scaledDeltaTime;
 		if (isLoop_) {
 			playbackTime_ = std::fmod(playbackTime_, duration);
 			return;
@@ -72,6 +75,22 @@ namespace MadoEngine::Ribbon {
 		if (mode == RibbonStopMode::Immediate) {
 			isImmediatelyFinished_ = true;
 		}
+	}
+
+	void RibbonEffectInstance::Pause() {
+		isPaused_ = true;
+	}
+
+	void RibbonEffectInstance::Resume() {
+		isPaused_ = false;
+	}
+
+	bool RibbonEffectInstance::SetPlaybackSpeed(float playbackSpeed) {
+		if (!std::isfinite(playbackSpeed) || playbackSpeed <= 0.0f || playbackSpeed > 256.0f) {
+			return false;
+		}
+		playbackSpeed_ = playbackSpeed;
+		return true;
 	}
 
 	bool RibbonEffectInstance::IsFinished() const {

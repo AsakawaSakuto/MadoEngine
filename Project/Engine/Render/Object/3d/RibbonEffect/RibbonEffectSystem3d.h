@@ -115,6 +115,27 @@ namespace MadoEngine::Ribbon {
 		/// @return 更新に成功した場合はtrue
 		bool SetTransform(RibbonEffectHandle handle, const Transform3D& transform);
 
+		/// @brief 指定したRibbon Effectを一時停止する
+		/// @param handle 一時停止するEffect Handle
+		/// @return 一時停止できた場合はtrue
+		bool Pause(RibbonEffectHandle handle);
+
+		/// @brief 指定したRibbon Effectを再開する
+		/// @param handle 再開するEffect Handle
+		/// @return 再開できた場合はtrue
+		bool Resume(RibbonEffectHandle handle);
+
+		/// @brief 指定したRibbon Effectの再生速度を設定する
+		/// @param handle 設定するEffect Handle
+		/// @param playbackSpeed 再生速度
+		/// @return 設定できた場合はtrue
+		bool SetPlaybackSpeed(RibbonEffectHandle handle, float playbackSpeed);
+
+		/// @brief 指定したRibbon Effectが一時停止中か確認する
+		/// @param handle 確認するEffect Handle
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused(RibbonEffectHandle handle) const;
+
 		/// @brief Manual Ribbonの制御点を置き換える
 		/// @param handle 更新対象Handle
 		/// @param controlPoints 設定順の制御点

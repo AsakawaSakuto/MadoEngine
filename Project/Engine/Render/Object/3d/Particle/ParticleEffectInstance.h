@@ -135,6 +135,23 @@ namespace MadoEngine::Particle {
 		/// @param mode 停止方法
 		void Stop(StopMode mode);
 
+		/// @brief Effectの時間進行を一時停止する
+		void Pause();
+
+		/// @brief Effectの時間進行を再開する
+		void Resume();
+
+		/// @brief Effectの再生速度を設定する
+		/// @param playbackSpeed 設定する再生速度
+		/// @return 有効な再生速度を設定できた場合はtrue
+		bool SetPlaybackSpeed(float playbackSpeed);
+
+		/// @brief Effectが一時停止中か確認する
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused() const {
+			return isPaused_;
+		}
+
 		/// @brief Effectの再生が完了したか確認する
 		/// @return 全Emitterの再生が完了している場合はtrue
 		bool IsFinished() const;
@@ -179,6 +196,8 @@ namespace MadoEngine::Particle {
 		Transform3D transform_;
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
+		float playbackSpeed_ = 1.0f;
+		bool isPaused_ = false;
 	};
 
 } // namespace MadoEngine::Particle

@@ -27,6 +27,23 @@ namespace MadoEngine::Ribbon {
 		/// @param mode 停止方式
 		void Stop(RibbonStopMode mode);
 
+		/// @brief Ribbon Effectの時間進行と履歴生成を一時停止する
+		void Pause();
+
+		/// @brief Ribbon Effectの時間進行と履歴生成を再開する
+		void Resume();
+
+		/// @brief Ribbon Effectの再生速度を設定する
+		/// @param playbackSpeed 設定する再生速度
+		/// @return 有効な再生速度を設定できた場合はtrue
+		bool SetPlaybackSpeed(float playbackSpeed);
+
+		/// @brief Ribbon Effectが一時停止中か確認する
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused() const {
+			return isPaused_;
+		}
+
 		/// @brief Instanceが終了したか確認する
 		/// @return 終了済みの場合はtrue
 		bool IsFinished() const;
@@ -71,9 +88,11 @@ namespace MadoEngine::Ribbon {
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
 		float playbackTime_ = 0.0f;
 		float totalTime_ = 0.0f;
+		float playbackSpeed_ = 1.0f;
 		bool isLoop_ = false;
 		bool isGenerating_ = false;
 		bool isImmediatelyFinished_ = false;
+		bool isPaused_ = false;
 	};
 
 } // namespace MadoEngine::Ribbon

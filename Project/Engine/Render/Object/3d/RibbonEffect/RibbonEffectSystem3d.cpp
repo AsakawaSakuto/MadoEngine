@@ -399,6 +399,36 @@ namespace MadoEngine::Ribbon {
 		return true;
 	}
 
+	bool RibbonEffectSystem3d::Pause(RibbonEffectHandle handle) {
+		RibbonEffectInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->Pause();
+		return true;
+	}
+
+	bool RibbonEffectSystem3d::Resume(RibbonEffectHandle handle) {
+		RibbonEffectInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->Resume();
+		return true;
+	}
+
+	bool RibbonEffectSystem3d::SetPlaybackSpeed(
+		RibbonEffectHandle handle,
+		float playbackSpeed) {
+		RibbonEffectInstance* instance = Resolve(handle);
+		return instance && instance->SetPlaybackSpeed(playbackSpeed);
+	}
+
+	bool RibbonEffectSystem3d::IsPaused(RibbonEffectHandle handle) const {
+		const RibbonEffectInstance* instance = Resolve(handle);
+		return instance && instance->IsPaused();
+	}
+
 	bool RibbonEffectSystem3d::SetControlPoints(
 		RibbonEffectHandle handle,
 		const std::vector<Vector3>& controlPoints) {

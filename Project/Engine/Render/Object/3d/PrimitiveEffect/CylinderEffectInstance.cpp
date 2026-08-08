@@ -37,7 +37,9 @@ namespace MadoEngine::Effect {
 		sceneType_ = desc.sceneType;
 		renderLayer_ = desc.renderLayer;
 		playbackTime_ = 0.0f;
+		playbackSpeed_ = 1.0f;
 		isFinished_ = false;
+		isPaused_ = false;
 		isLoop_ = asset_ ? asset_->GetConfig().isLoop : false;
 		if (desc.loopOverride.has_value()) {
 			isLoop_ = desc.loopOverride.value();
@@ -45,12 +47,12 @@ namespace MadoEngine::Effect {
 	}
 
 	void CylinderEffectInstance::Update(float deltaTime) {
-		if (isFinished_ || !asset_) {
+		if (isFinished_ || isPaused_ || !asset_) {
 			return;
 		}
 
 		const float duration = asset_->GetConfig().duration;
-		playbackTime_ += std::clamp(deltaTime, 0.0f, 0.1f);
+		playbackTime_ += std::clamp(deltaTime, 0.0f, 0.1f) * playbackSpeed_;
 		if (isLoop_) {
 			playbackTime_ = std::fmod(playbackTime_, duration);
 			return;
@@ -68,6 +70,22 @@ namespace MadoEngine::Effect {
 			return;
 		}
 		isLoop_ = false;
+	}
+
+	void CylinderEffectInstance::Pause() {
+		isPaused_ = true;
+	}
+
+	void CylinderEffectInstance::Resume() {
+		isPaused_ = false;
+	}
+
+	bool CylinderEffectInstance::SetPlaybackSpeed(float playbackSpeed) {
+		if (!std::isfinite(playbackSpeed) || playbackSpeed <= 0.0f || playbackSpeed > 256.0f) {
+			return false;
+		}
+		playbackSpeed_ = playbackSpeed;
+		return true;
 	}
 
 	bool CylinderEffectInstance::IsFinished() const {

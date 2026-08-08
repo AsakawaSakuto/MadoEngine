@@ -100,6 +100,27 @@ namespace MadoEngine::Effect {
 		/// @return 変更に成功した場合はtrue
 		bool SetTransform(PrimitiveEffectHandle handle, const Transform3D& transform);
 
+		/// @brief 指定したPrimitive Effectを一時停止する
+		/// @param handle 一時停止するEffect Handle
+		/// @return 一時停止できた場合はtrue
+		bool Pause(PrimitiveEffectHandle handle);
+
+		/// @brief 指定したPrimitive Effectを再開する
+		/// @param handle 再開するEffect Handle
+		/// @return 再開できた場合はtrue
+		bool Resume(PrimitiveEffectHandle handle);
+
+		/// @brief 指定したPrimitive Effectの再生速度を設定する
+		/// @param handle 設定するEffect Handle
+		/// @param playbackSpeed 再生速度
+		/// @return 設定できた場合はtrue
+		bool SetPlaybackSpeed(PrimitiveEffectHandle handle, float playbackSpeed);
+
+		/// @brief 指定したPrimitive Effectが一時停止中か確認する
+		/// @param handle 確認するEffect Handle
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused(PrimitiveEffectHandle handle) const;
+
 		/// @brief Handleが現在も有効か確認する
 		/// @param handle 確認するHandle
 		/// @return 有効な場合はtrue

@@ -97,6 +97,27 @@ namespace MadoEngine::Beam {
 		/// @param mode 停止方式
 		void Stop(BeamEffectHandle handle, BeamStopMode mode = BeamStopMode::Finish);
 
+		/// @brief 指定したBeam Effectを一時停止する
+		/// @param handle 一時停止するEffect Handle
+		/// @return 一時停止できた場合はtrue
+		bool Pause(BeamEffectHandle handle);
+
+		/// @brief 指定したBeam Effectを再開する
+		/// @param handle 再開するEffect Handle
+		/// @return 再開できた場合はtrue
+		bool Resume(BeamEffectHandle handle);
+
+		/// @brief 指定したBeam Effectの再生速度を設定する
+		/// @param handle 設定するEffect Handle
+		/// @param playbackSpeed 再生速度
+		/// @return 設定できた場合はtrue
+		bool SetPlaybackSpeed(BeamEffectHandle handle, float playbackSpeed);
+
+		/// @brief 指定したBeam Effectが一時停止中か確認する
+		/// @param handle 確認するEffect Handle
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused(BeamEffectHandle handle) const;
+
 		/// @brief 始点と終点を更新する
 		/// @param handle 更新対象Handle
 		/// @param startPosition 新しい始点

@@ -207,6 +207,7 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\BeamEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\CylinderEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\EffectSequenceEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\RibbonEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LightEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\LoggerEditor.cpp" />
@@ -253,6 +254,10 @@
     <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectRenderer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectSystem3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\RibbonEffect\TrailPointSource.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceAsset.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceInstance.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceNodeDispatcher.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceSystem.cpp" />
     <ClCompile Include="Engine\Render\PostEffect\PostEffectPass.cpp" />
     <ClCompile Include="Engine\Render\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Render\PostEffect\PostEffectDefinitionRegistry.cpp" />
@@ -416,6 +421,7 @@
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\BeamEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\CylinderEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\EffectSequenceEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\RibbonEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LightEditor.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\LoggerEditor.h" />
@@ -485,6 +491,12 @@
     <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\RibbonEffectTypes.h" />
     <ClInclude Include="Engine\Render\Object\3d\RibbonEffect\TrailPointSource.h" />
+    <ClInclude Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceAsset.h" />
+    <ClInclude Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceInstance.h" />
+    <ClInclude Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceNodeDispatcher.h" />
+    <ClInclude Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceSystem.h" />
+    <ClInclude Include="Engine\Render\Object\3d\EffectSequence\EffectSequenceTypes.h" />
+    <ClInclude Include="Engine\Render\Object\3d\EffectSequence\MyEffectSequence3d.h" />
     <ClInclude Include="Engine\Render\PostEffect\PostEffectPass.h" />
     <ClInclude Include="Engine\Render\PostEffectManager.h" />
     <ClInclude Include="Engine\Render\PostEffect\MyPostEffect.h" />

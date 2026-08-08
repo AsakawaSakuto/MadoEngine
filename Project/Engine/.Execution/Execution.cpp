@@ -132,6 +132,7 @@ namespace MadoEngine
 			commandManager_->GetCommandList(),
 			psoRegistry_.get()
 		);
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Initialize();
 
 		// Sprite/Textの座標系は実ウィンドウサイズではなく基準解像度に固定する
 		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
@@ -652,6 +653,7 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawCylinderEffectEditorUI();
 		MadoEngine::Editor::DrawRibbonEffectEditorUI();
 		MadoEngine::Editor::DrawBeamEffectEditorUI();
+		MadoEngine::Editor::DrawEffectSequenceEditorUI();
 
 		//MadoEngine::Editor::DrawLoggerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
@@ -836,6 +838,7 @@ namespace MadoEngine
 		MadoEngine::SpriteManager::GetInstance().Finalize();
 		MadoEngine::TextManager::GetInstance().Finalize();
 		MadoEngine::ModelManager::GetInstance().Finalize();
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Finalize();
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().Finalize();
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Finalize();
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Finalize();

@@ -97,6 +97,27 @@ namespace MadoEngine::Particle {
 		/// @return 変更に成功した場合はtrue
 		bool SetTransform(EffectHandle handle, const Transform3D& transform);
 
+		/// @brief 指定したParticle Effectを一時停止する
+		/// @param handle 一時停止するEffect Handle
+		/// @return 一時停止できた場合はtrue
+		bool Pause(EffectHandle handle);
+
+		/// @brief 指定したParticle Effectを再開する
+		/// @param handle 再開するEffect Handle
+		/// @return 再開できた場合はtrue
+		bool Resume(EffectHandle handle);
+
+		/// @brief 指定したParticle Effectの再生速度を設定する
+		/// @param handle 設定するEffect Handle
+		/// @param playbackSpeed 再生速度
+		/// @return 設定できた場合はtrue
+		bool SetPlaybackSpeed(EffectHandle handle, float playbackSpeed);
+
+		/// @brief 指定したParticle Effectが一時停止中か確認する
+		/// @param handle 確認するEffect Handle
+		/// @return 一時停止中の場合はtrue
+		bool IsPaused(EffectHandle handle) const;
+
 		/// @brief Effect Handleが現在も有効か確認する
 		/// @param handle 確認するEffect Handle
 		/// @return 有効な場合はtrue

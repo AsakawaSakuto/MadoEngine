@@ -199,6 +199,8 @@ namespace MadoEngine::Particle {
 		transform_ = desc.transform;
 		sceneType_ = desc.sceneType;
 		renderLayer_ = desc.renderLayer;
+		playbackSpeed_ = 1.0f;
+		isPaused_ = false;
 		emitters_.clear();
 
 		if (!asset_) {
@@ -220,8 +222,13 @@ namespace MadoEngine::Particle {
 	}
 
 	void ParticleEffectInstance::Update(float deltaTime) {
+		if (isPaused_) {
+			return;
+		}
+
+		const float scaledDeltaTime = deltaTime * playbackSpeed_;
 		for (ParticleEmitterInstance& emitter : emitters_) {
-			emitter.Update(deltaTime, transform_);
+			emitter.Update(scaledDeltaTime, transform_);
 		}
 	}
 
@@ -243,6 +250,22 @@ namespace MadoEngine::Particle {
 		for (ParticleEmitterInstance& emitter : emitters_) {
 			emitter.Stop(mode);
 		}
+	}
+
+	void ParticleEffectInstance::Pause() {
+		isPaused_ = true;
+	}
+
+	void ParticleEffectInstance::Resume() {
+		isPaused_ = false;
+	}
+
+	bool ParticleEffectInstance::SetPlaybackSpeed(float playbackSpeed) {
+		if (!std::isfinite(playbackSpeed) || playbackSpeed <= 0.0f || playbackSpeed > 256.0f) {
+			return false;
+		}
+		playbackSpeed_ = playbackSpeed;
+		return true;
 	}
 
 	void ParticleEffectInstance::SetTransform(const Transform3D& transform) {

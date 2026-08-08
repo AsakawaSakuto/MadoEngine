@@ -507,6 +507,34 @@ namespace MadoEngine::Particle {
 		return true;
 	}
 
+	bool ParticleSystem3d::Pause(EffectHandle handle) {
+		ParticleEffectInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->Pause();
+		return true;
+	}
+
+	bool ParticleSystem3d::Resume(EffectHandle handle) {
+		ParticleEffectInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->Resume();
+		return true;
+	}
+
+	bool ParticleSystem3d::SetPlaybackSpeed(EffectHandle handle, float playbackSpeed) {
+		ParticleEffectInstance* instance = Resolve(handle);
+		return instance && instance->SetPlaybackSpeed(playbackSpeed);
+	}
+
+	bool ParticleSystem3d::IsPaused(EffectHandle handle) const {
+		const ParticleEffectInstance* instance = Resolve(handle);
+		return instance && instance->IsPaused();
+	}
+
 	bool ParticleSystem3d::IsAlive(EffectHandle handle) const {
 		return Resolve(handle) != nullptr;
 	}
