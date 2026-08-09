@@ -185,6 +185,33 @@ namespace MadoEngine {
         return srvIndex;
     }
 
+    bool TextureManager::RenameTexture(const std::string& currentKey, const std::string& newKey) {
+        if (currentKey.empty() || newKey.empty()) {
+            Logger::Output("[Engine] テクスチャの管理キーを空文字へ変更できません", Logger::Level::Warning);
+            return false;
+        }
+        if (currentKey == newKey) {
+            return textures_.contains(currentKey);
+        }
+
+        auto currentIt = textures_.find(currentKey);
+        if (currentIt == textures_.end()) {
+            Logger::Output("[Engine] 名前変更対象のテクスチャが見つかりません: " + currentKey, Logger::Level::Warning);
+            return false;
+        }
+        if (textures_.contains(newKey)) {
+            Logger::Output("[Engine] 変更先のテクスチャ管理キーが既に存在します: " + newKey, Logger::Level::Warning);
+            return false;
+        }
+
+        auto node = textures_.extract(currentIt);
+        node.key() = newKey;
+        textures_.insert(std::move(node));
+
+        Logger::Output("[Engine] テクスチャの管理キーを変更しました: " + currentKey + " -> " + newKey, Logger::Level::Assets);
+        return true;
+    }
+
     bool TextureManager::DestroyTexture(const std::string& key) {
         auto it = textures_.find(key);
         if (it == textures_.end()) {

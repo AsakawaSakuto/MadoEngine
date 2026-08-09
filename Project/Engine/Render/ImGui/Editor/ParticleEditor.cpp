@@ -537,7 +537,7 @@ namespace MadoEngine::Editor {
 			ImVec2(760.0f, 520.0f),
 			ImVec2(FLT_MAX, FLT_MAX)
 		);
-		if (!ImGui::Begin("パーティクルエディター")) {
+		if (!ImGui::Begin("ParticleEditor")) {
 			ImGui::End();
 			return;
 		}

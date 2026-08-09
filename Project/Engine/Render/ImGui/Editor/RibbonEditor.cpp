@@ -1037,7 +1037,7 @@ namespace MadoEngine::Editor {
 
 		ImGui::SetNextWindowSize(ImVec2(980.0f, 720.0f), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(760.0f, 520.0f), ImVec2(FLT_MAX, FLT_MAX));
-		if (!ImGui::Begin("Ribbonエディター")) {
+		if (!ImGui::Begin("RibbonEditor")) {
 			ImGui::End();
 			return;
 		}

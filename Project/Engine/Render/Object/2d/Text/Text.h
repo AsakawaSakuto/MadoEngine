@@ -160,7 +160,8 @@ private:
 
 	/// @brief TextManagerが管理する識別名と動的テクスチャキーを更新する
 	/// @param objectName 新しい識別名
-	void SetObjectName(const std::string& objectName);
+	/// @return 識別名と動的テクスチャキーを更新できた場合はtrue
+	bool SetObjectName(const std::string& objectName);
 
 	/// @brief 共通初期化を行う
 	void InitializeCommonResources();

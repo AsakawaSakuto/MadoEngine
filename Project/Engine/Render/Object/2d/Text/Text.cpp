@@ -186,15 +186,20 @@ void Text::ReleaseTexture() {
 	isTextureDirty_ = true;
 }
 
-void Text::SetObjectName(const std::string& objectName) {
+bool Text::SetObjectName(const std::string& objectName) {
 	if (objectName_ == objectName) {
-		return;
+		return true;
 	}
 
-	ReleaseTexture();
+	const std::string newTextureKey = "__Text_" + objectName;
+	if (textureIndex_ != UINT32_MAX &&
+		!TextureManager::GetInstance().RenameTexture(textureKey_, newTextureKey)) {
+		return false;
+	}
+
 	objectName_ = objectName;
-	textureKey_ = "__Text_" + objectName_;
-	MarkDirty();
+	textureKey_ = newTextureKey;
+	return true;
 }
 
 void Text::SetText(const std::string& text) {

@@ -2,45 +2,6 @@
     "texts": [
         {
             "anchorPoint": [
-                1.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "EnemyCountText",
-            "position": [
-                1265.0,
-                120.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "E",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
                 0.5,
                 0.5
             ],
@@ -72,7 +33,46 @@
                 0.0,
                 0.0
             ],
-            "text": "04:36",
+            "text": "04:56",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                1.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "EnemyCountText",
+            "position": [
+                1265.0,
+                120.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Enemy : 27",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -111,7 +111,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 95 / 100",
+            "text": "HP : 84 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -150,7 +150,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.0",
+            "text": "FPS : 55.9",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -189,7 +189,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 4226229424",
+            "text": "Seed : 4058798575",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

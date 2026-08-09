@@ -243,6 +243,7 @@ void DrawTextManagerEditorUI() {
 	static std::array<char, 128> createName{};
 	static TextHandle selectedHandle{};
 	static TextHandle editingHandle{};
+	static std::array<char, 128> nameBuffer{};
 	static std::array<char, 4096> textBuffer{};
 	static std::array<char, 128> screenBuffer{};
 	static bool isBufferInitialized = false;
@@ -337,16 +338,20 @@ void DrawTextManagerEditorUI() {
 			}
 		}
 		if (editingHandle != selectedHandle) {
+			CopyToBuffer(nameBuffer, selectedName);
 			CopyToBuffer(textBuffer, selectedText->GetText());
 			CopyToBuffer(screenBuffer, selectedText->GetTargetScreen());
 			editingHandle = selectedHandle;
 		}
 
-		std::array<char, 128> nameBuffer{};
-		CopyToBuffer(nameBuffer, selectedName);
-		if (ImGui::InputText("Name", nameBuffer.data(), nameBuffer.size())) {
+		const bool isNameSubmitted = ImGui::InputText(
+			"Name",
+			nameBuffer.data(),
+			nameBuffer.size(),
+			ImGuiInputTextFlags_EnterReturnsTrue);
+		if (isNameSubmitted || ImGui::IsItemDeactivatedAfterEdit()) {
 			const std::string newName = nameBuffer.data();
-			if (!newName.empty()) {
+			if (!newName.empty() && newName != selectedName) {
 				manager.Rename(selectedHandle, newName);
 			}
 		}

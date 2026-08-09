@@ -298,7 +298,7 @@ namespace MadoEngine::Editor {
 
 		ImGui::SetNextWindowSize(ImVec2(1120.0f, 820.0f), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(800.0f, 560.0f), ImVec2(FLT_MAX, FLT_MAX));
-		if (!ImGui::Begin("エフェクトシーケンスエディター")) {
+		if (!ImGui::Begin("EffectSequenceEditor")) {
 			ImGui::End();
 			return;
 		}

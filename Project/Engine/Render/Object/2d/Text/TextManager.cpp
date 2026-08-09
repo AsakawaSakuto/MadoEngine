@@ -191,12 +191,15 @@ bool TextManager::Rename(TextHandle handle, const std::string& newName) {
 		Logger::Output("同名のTextが既に存在します: " + newName, Logger::Level::Warning);
 		return false;
 	}
+	if (!text->SetObjectName(newName)) {
+		Logger::Output("Textの内部テクスチャキーを変更できませんでした: " + newName, Logger::Level::Warning);
+		return false;
+	}
 
 	const std::string oldName = slot.name;
 	nameToHandle_.erase(oldName);
 	slot.name = newName;
 	nameToHandle_.emplace(newName, handle);
-	text->SetObjectName(newName);
 	Logger::Output("Text名を変更しました: " + oldName + " -> " + newName, Logger::Level::Application);
 	return true;
 }

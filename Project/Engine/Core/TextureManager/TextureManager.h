@@ -76,6 +76,12 @@ namespace MadoEngine {
             const uint8_t* rgbaPixels,
             uint32_t dataSize);
 
+        /// @brief GPUリソースとSRVを維持したままテクスチャの管理キーを変更します。
+        /// @param currentKey 現在の管理キー。
+        /// @param newKey 新しい管理キー。
+        /// @return 管理キーを変更できた場合はtrue。
+        bool RenameTexture(const std::string& currentKey, const std::string& newKey);
+
         /// @brief 指定キーのテクスチャを登録解除し、SRVを解放します。
         /// @param key 登録キー。
         /// @return 解放できた場合はtrue。
