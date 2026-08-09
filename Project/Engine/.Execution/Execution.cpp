@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <filesystem>
 
 namespace {
 
@@ -13,6 +14,8 @@ namespace {
 	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
 	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
 	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
+	const std::filesystem::path kScreenshotOutputDirectory = "Assets/Screenshot";
+	constexpr int kGameViewCaptureKey = DIK_F11;
 } // namespace
 
 namespace MadoEngine
@@ -143,6 +146,11 @@ namespace MadoEngine
 
 		renderTargetManager_ = std::make_unique<MadoEngine::Render::RenderTargetManager>();
 		renderTargetManager_->Initialize(dxDevice_.get(), rtvManager_, srvManager_);
+		gameViewCapture_ = std::make_unique<MadoEngine::Render::GameViewCapture>();
+		gameViewCapture_->Initialize(
+			commandManager_->GetCommandQueue(),
+			kScreenshotOutputDirectory
+		);
 
 		MadoEngine::Render::RenderTargetManager::Desc sceneColorDesc{};
 		sceneColorDesc.width = renderWidth_;
@@ -233,6 +241,9 @@ namespace MadoEngine
 
 		// InputManagerの更新（キーボード、マウス、ゲームパッドの状態を更新）
 		MadoEngine::InputManager::GetInstance().Update(windowsAPI_->GetHWnd(), dt);
+		if (MadoEngine::InputManager::GetInstance().GetKeybord()->IsTrigger(kGameViewCaptureKey)) {
+			isGameViewCaptureRequested_ = true;
+		}
 
 		// WindowsAPIの入力処理（フルスクリーン切り替えなど）
 		windowsAPI_->ProcessInput();
@@ -813,6 +824,13 @@ namespace MadoEngine
 		MadoEngine::TextManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::Render::PostEffectManager::GetInstance().FlushPendingDestroys();
+
+		if (isGameViewCaptureRequested_) {
+			const MadoEngine::Render::RenderTexture* gameViewTexture =
+				renderTargetManager_->Get(resolvedPostEffectTargetName_);
+			(void)gameViewCapture_->Capture(*gameViewTexture);
+			isGameViewCaptureRequested_ = false;
+		}
 	}
 
 	void EngineExecution::Finalize()

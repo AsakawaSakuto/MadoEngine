@@ -220,6 +220,7 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::ViewportScissor> viewportScissor_; // ビューポート＆シザー矩形
 
 		std::unique_ptr<MadoEngine::Render::RenderTargetManager> renderTargetManager_;
+		std::unique_ptr<MadoEngine::Render::GameViewCapture> gameViewCapture_;
 		std::unique_ptr<MadoEngine::Render::ShadowMap> shadowMap_;
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
 		MadoEngine::Render::PSODesc compositeDesc_;
@@ -236,6 +237,7 @@ namespace MadoEngine
 		bool isOverlayRenderActive_ = false;
 		bool isSceneScreenEffectStageApplied_ = false;
 		bool isFinalScreenEffectStageApplied_ = false;
+		bool isGameViewCaptureRequested_ = false;
 
 #ifdef USE_IMGUI
 		std::unique_ptr<MadoEngine::ImGuiManager> imguiManager_;
