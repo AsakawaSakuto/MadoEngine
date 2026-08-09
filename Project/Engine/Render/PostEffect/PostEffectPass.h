@@ -13,6 +13,21 @@
 #include <wrl/client.h>
 
 namespace MadoEngine::Render {
+	/// @brief 個別描画レイヤー向けポストエフェクトの適用段階
+	enum class LayerEffectStage : uint32_t {
+		Scene,
+		Transparent,
+		Overlay,
+	};
+
+	/// @brief レイヤーポストエフェクトの適用段階が有効か判定する
+	/// @param stage 判定する適用段階
+	/// @return 有効な適用段階の場合はtrue
+	constexpr bool IsValidLayerEffectStage(LayerEffectStage stage) {
+		return stage == LayerEffectStage::Scene ||
+			stage == LayerEffectStage::Transparent ||
+			stage == LayerEffectStage::Overlay;
+	}
 
 	/// @brief フルスクリーンポストエフェクトの適用段階
 	enum class ScreenEffectStage : uint32_t {
@@ -35,6 +50,7 @@ namespace MadoEngine::Render {
 			std::string key;
 			std::string name = "LayerEffect";
 			RenderLayerMask targetLayerMask = ToRenderLayerMask(RenderLayer::Default);
+			LayerEffectStage layerEffectStage = LayerEffectStage::Scene;
 			std::string effectShaderKey = "PostEffect/CopyImage.PS";
 			bool enabled = true;
 			bool ignoreDepthForMask = false;
@@ -104,6 +120,14 @@ namespace MadoEngine::Render {
 		/// @brief 対象Layerマスクを取得する
 		/// @return 対象Layerマスク
 		RenderLayerMask GetTargetLayerMask() const;
+
+		/// @brief 個別描画レイヤー向けポストエフェクトの適用段階を設定する
+		/// @param stage 設定する適用段階
+		void SetLayerEffectStage(LayerEffectStage stage);
+
+		/// @brief 個別描画レイヤー向けポストエフェクトの適用段階を取得する
+		/// @return 設定されている適用段階
+		LayerEffectStage GetLayerEffectStage() const;
 
 		/// @brief 対象Layerを除外した描画Layerマスクを取得する
 		/// @param sourceLayerMask 元になるLayerマスク

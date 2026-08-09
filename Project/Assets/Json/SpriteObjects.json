@@ -12,7 +12,7 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Sphere1",
+            "layer": "Default",
             "name": "MoneyUI",
             "position": [
                 330.0,
@@ -51,7 +51,7 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Sphere1",
+            "layer": "Default",
             "name": "KillUI",
             "position": [
                 440.0,

@@ -9,6 +9,7 @@ namespace MadoEngine::Render {
 	void PostEffectPass::Initialize(const Desc& desc, const PSODesc& basePostEffectDesc, ID3D12Device* device) {
 		assert(!desc.name.empty() && "PostEffectPass名が空です");
 		assert(!desc.effectShaderKey.empty() && "PostEffectPassのPixelShaderキーが空です");
+		assert(IsValidLayerEffectStage(desc.layerEffectStage) && "LayerEffectStageが範囲外です");
 		assert(IsValidScreenEffectStage(desc.screenEffectStage) && "ScreenEffectStageが範囲外です");
 		assert(device && "D3D12Deviceが空です");
 
@@ -81,6 +82,15 @@ namespace MadoEngine::Render {
 
 	RenderLayerMask PostEffectPass::GetTargetLayerMask() const {
 		return desc_.targetLayerMask;
+	}
+
+	void PostEffectPass::SetLayerEffectStage(LayerEffectStage stage) {
+		assert(IsValidLayerEffectStage(stage) && "LayerEffectStageが範囲外です");
+		desc_.layerEffectStage = stage;
+	}
+
+	LayerEffectStage PostEffectPass::GetLayerEffectStage() const {
+		return desc_.layerEffectStage;
 	}
 
 	RenderLayerMask PostEffectPass::GetBaseLayerMask(RenderLayerMask sourceLayerMask) const {

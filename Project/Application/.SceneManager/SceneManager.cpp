@@ -196,6 +196,15 @@ void SceneManager::DrawOverlayLayerMask(MadoEngine::Render::RenderLayerMask laye
 	MadoEngine::TextManager::GetInstance().DrawLayerMask(currentSceneType_, layerMask);
 }
 
+void SceneManager::DrawOverlayInOrder(MadoEngine::Render::IRenderLayerBatchContext& batchContext) {
+	if (!currentScene_) {
+		return;
+	}
+
+	MadoEngine::SpriteManager::GetInstance().DrawInOrder(currentSceneType_, batchContext);
+	MadoEngine::TextManager::GetInstance().DrawInOrder(currentSceneType_, batchContext);
+}
+
 void SceneManager::DrawCurrentScene() {
 	if (currentScene_) {
 		currentScene_->Draw();

@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneType.h"
+#include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Render/Object/RenderLayer.h"
 #include "Render/Object/3d/Model/ModelManager.h"
 #include <memory>
@@ -57,6 +58,10 @@ public:
 	/// @brief 指定したレイヤーマスクに含まれるSpriteとTextを描画します
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawOverlayLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
+
+	/// @brief SpriteとTextを元の描画順の連続レイヤーバッチとして描画する
+	/// @param batchContext バッチ前後の描画処理を受け取るContext
+	void DrawOverlayInOrder(MadoEngine::Render::IRenderLayerBatchContext& batchContext);
 
 	/// @brief 現在のシーン固有の描画処理を実行します
 	void DrawCurrentScene();

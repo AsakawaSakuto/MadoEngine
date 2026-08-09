@@ -16,6 +16,10 @@
 
 namespace MadoEngine {
 
+namespace Render {
+class IRenderLayerBatchContext;
+}
+
 /// @brief Sprite生成情報
 struct SpriteCreateDesc {
 	std::string name;
@@ -161,6 +165,14 @@ public:
 	/// @param currentSceneType 現在のScene
 	/// @param layerMask 描画LayerMask
 	void DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask);
+
+	/// @brief 現在SceneのSpriteを元の描画順の連続レイヤーバッチとして描画する
+	/// @param currentSceneType 現在のScene
+	/// @param batchContext バッチ前後の描画処理を受け取るContext
+	void DrawInOrder(
+		SceneType currentSceneType,
+		Render::IRenderLayerBatchContext& batchContext
+	);
 
 	/// @brief Editor管理SpriteをJSONへ変換する
 	/// @return Sprite一覧を含むJSON

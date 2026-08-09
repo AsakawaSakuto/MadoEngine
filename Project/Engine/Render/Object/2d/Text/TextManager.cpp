@@ -1,4 +1,5 @@
 #include "TextManager.h"
+#include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Shader/RootSignatureManager.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
@@ -340,6 +341,58 @@ void TextManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerM
 			isStateSet = true;
 		}
 		text->Draw();
+	}
+}
+
+void TextManager::DrawInOrder(
+	SceneType currentSceneType,
+	Render::IRenderLayerBatchContext& batchContext,
+	const std::string& targetScreen)
+{
+	bool isBatchActive = false;
+	bool isStateSet = false;
+	Render::RenderLayer currentLayer = Render::RenderLayer::Default;
+	for (const auto& [name, handle] : nameToHandle_) {
+		(void)name;
+		Text* text = TryGet(handle);
+		if (!text) {
+			continue;
+		}
+		const SceneType textScene = text->GetSceneType();
+		if (!text->IsVisible()) {
+			continue;
+		}
+		if (textScene != SceneType::None && textScene != currentSceneType) {
+			continue;
+		}
+		if (!targetScreen.empty() && text->GetTargetScreen() != targetScreen) {
+			continue;
+		}
+
+		const Render::RenderLayer layer = text->GetRenderLayer();
+		if (!isBatchActive || layer != currentLayer) {
+			if (isBatchActive) {
+				batchContext.EndRenderLayerBatch(currentLayer);
+			}
+			currentLayer = layer;
+			batchContext.BeginRenderLayerBatch(currentLayer);
+			isBatchActive = true;
+			isStateSet = false;
+		}
+
+		if (!isStateSet) {
+			commandList_->SetGraphicsRootSignature(RootSignatureManager::GetInstance().Get(text->GetRootSigKey()));
+			commandList_->SetPipelineState(psoRegistry_->Get(text->GetPSODesc()));
+			commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList_->IASetVertexBuffers(0, 1, &sharedGeometry_.vbv);
+			commandList_->IASetIndexBuffer(&sharedGeometry_.ibv);
+			isStateSet = true;
+		}
+		text->Draw();
+	}
+
+	if (isBatchActive) {
+		batchContext.EndRenderLayerBatch(currentLayer);
 	}
 }
 

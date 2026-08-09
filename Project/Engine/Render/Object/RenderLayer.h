@@ -3,135 +3,40 @@
 #include <string>
 
 namespace MadoEngine::Render {
+	// 描画レイヤーを追加するときは、この一覧に1行追加する
+#define MADO_RENDER_LAYER_DEFINITIONS(X) \
+	X(Default, "Default") \
+	X(World, "World") \
+	X(MapEventObject, "MapEventObject") \
+	X(MapEventObjectOutline, "MapEventObjectOutline") \
+	X(Player, "Player") \
+	X(Effect, "Effect") \
+	X(UI, "UI") \
+	X(Debug, "Debug") \
+    /*X(Test, "Test") \*/
 
 	/// @brief 描画対象を分類するレイヤー
 	enum class RenderLayer : uint32_t {
-		Default,
-		World,
-		MapEventObject,
-		MapEventObjectOutline,
-		Player,
-		Effect,
-		UI,
-		Debug,
-
-		Sphere1,
-		Sphere2,
-		Sphere3,
-		Sphere4,
-		Sphere5,
-		Sphere6,
-		Sphere7,
-		Sphere8,
-		Sphere9,
-		Sphere10,
-		Sphere11,
-		Sphere12,
+#define MADO_DEFINE_RENDER_LAYER_ENUM(name, serializedName) name,
+		MADO_RENDER_LAYER_DEFINITIONS(MADO_DEFINE_RENDER_LAYER_ENUM)
+#undef MADO_DEFINE_RENDER_LAYER_ENUM
+		Count,
 	};
 
 	inline constexpr const char* kRenderLayerNames[] = {
-		"Default",
-		"World",
-		"MapEventObject",
-		"MapEventObjectOutline",
-		"Player",
-		"Effect",
-		"UI",
-		"Debug",
-
-		"Sphere1",
-		"Sphere2",
-		"Sphere3",
-		"Sphere4",
-		"Sphere5",
-		"Sphere6",
-		"Sphere7",
-		"Sphere8",
-		"Sphere9",
-		"Sphere10",
-		"Sphere11",
-		"Sphere12",
+#define MADO_DEFINE_RENDER_LAYER_NAME(name, serializedName) serializedName,
+		MADO_RENDER_LAYER_DEFINITIONS(MADO_DEFINE_RENDER_LAYER_NAME)
+#undef MADO_DEFINE_RENDER_LAYER_NAME
 	};
 
-	inline std::string RenderLayerToString(RenderLayer layer) {
-		switch (layer) {
-		case RenderLayer::World:
-			return "World";
-		case RenderLayer::MapEventObject:
-			return "MapEventObject";
-		case RenderLayer::MapEventObjectOutline:
-			return "MapEventObjectOutline";
-		case RenderLayer::Player:
-			return "Player";
-		case RenderLayer::Effect:
-			return "Effect";
-		case RenderLayer::UI:
-			return "UI";
-		case RenderLayer::Debug:
-			return "Debug";
-		case RenderLayer::Default:
-
-		case RenderLayer::Sphere1:
-			return "Sphere1";
-		case RenderLayer::Sphere2:
-			return "Sphere2";
-		case RenderLayer::Sphere3:
-			return "Sphere3";
-		case RenderLayer::Sphere4:
-			return "Sphere4";
-		case RenderLayer::Sphere5:
-			return "Sphere5";
-		case RenderLayer::Sphere6:
-			return "Sphere6";
-		case RenderLayer::Sphere7:
-			return "Sphere7";
-		case RenderLayer::Sphere8:
-			return "Sphere8";
-		case RenderLayer::Sphere9:
-			return "Sphere9";
-		case RenderLayer::Sphere10:
-			return "Sphere10";
-		case RenderLayer::Sphere11:
-			return "Sphere11";
-		case RenderLayer::Sphere12:
-			return "Sphere12";
-
-		default:
-			return "Default";
-		}
-	}
-
-	inline RenderLayer RenderLayerFromString(const std::string& value) {
-		if (value == "World") { return RenderLayer::World; }
-		if (value == "MapEventObject") { return RenderLayer::MapEventObject; }
-		if (value == "MapEventObjectOutline") { return RenderLayer::MapEventObjectOutline; }
-		if (value == "Player") { return RenderLayer::Player; }
-		if (value == "Effect") { return RenderLayer::Effect; }
-		if (value == "UI") { return RenderLayer::UI; }
-		if (value == "Debug") { return RenderLayer::Debug; }
-
-		if (value == "Sphere1") { return RenderLayer::Sphere1; }
-		if (value == "Sphere2") { return RenderLayer::Sphere2; }
-		if (value == "Sphere3") { return RenderLayer::Sphere3; }
-		if (value == "Sphere4") { return RenderLayer::Sphere4; }
-		if (value == "Sphere5") { return RenderLayer::Sphere5; }
-		if (value == "Sphere6") { return RenderLayer::Sphere6; }
-		if (value == "Sphere7") { return RenderLayer::Sphere7; }
-		if (value == "Sphere8") { return RenderLayer::Sphere8; }
-		if (value == "Sphere9") { return RenderLayer::Sphere9; }
-		if (value == "Sphere10") { return RenderLayer::Sphere10; }
-		if (value == "Sphere11") { return RenderLayer::Sphere11; }
-		if (value == "Sphere12") { return RenderLayer::Sphere12; }
-
-		return RenderLayer::Default;
-	}
+#undef MADO_RENDER_LAYER_DEFINITIONS
 
 	using RenderLayerMask = uint32_t;
 
-	inline constexpr uint32_t kRenderLayerCount =
-		static_cast<uint32_t>(sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
+	inline constexpr uint32_t kRenderLayerCount = static_cast<uint32_t>(RenderLayer::Count);
 
 	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
+	static_assert(kRenderLayerCount <= sizeof(RenderLayerMask) * 8u, "RenderLayerMaskの上限を超えています");
 
 	/// @brief インデックスからRenderLayerを取得する
 	/// @param index 取得するRenderLayerのインデックス
@@ -180,6 +85,30 @@ namespace MadoEngine::Render {
 		}
 
 		return kRenderLayerNames[static_cast<uint32_t>(layer)];
+	}
+
+	/// @brief RenderLayerをシリアライズ用文字列へ変換する
+	/// @param layer 変換対象のレイヤー
+	/// @return レイヤーのシリアライズ用文字列。未定義の場合はDefault
+	inline std::string RenderLayerToString(RenderLayer layer) {
+		if (!IsValidRenderLayer(layer)) {
+			return kRenderLayerNames[static_cast<uint32_t>(RenderLayer::Default)];
+		}
+
+		return GetRenderLayerName(layer);
+	}
+
+	/// @brief シリアライズ用文字列からRenderLayerへ変換する
+	/// @param value 変換対象の文字列
+	/// @return 文字列に対応するレイヤー。未定義の場合はDefault
+	inline RenderLayer RenderLayerFromString(const std::string& value) {
+		for (uint32_t index = 0; index < kRenderLayerCount; ++index) {
+			if (value == kRenderLayerNames[index]) {
+				return GetRenderLayerByIndex(index);
+			}
+		}
+
+		return RenderLayer::Default;
 	}
 
 	/// @brief RenderLayerMaskの表示名を取得する

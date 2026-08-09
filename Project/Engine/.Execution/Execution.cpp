@@ -14,8 +14,9 @@ namespace {
 	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
 	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
 	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
-	const std::filesystem::path kScreenshotOutputDirectory = "Assets/Screenshot";
-	constexpr int kGameViewCaptureKey = DIK_F11;
+
+	const std::filesystem::path kScreenshotOutputDirectory = "Assets/Screenshot"; // スクリーンショットの出力先ディレクトリ
+	constexpr int kGameViewCaptureKey = DIK_F11;                                  // スクリーンショットを撮るキー
 } // namespace
 
 namespace MadoEngine
@@ -323,6 +324,12 @@ namespace MadoEngine
 		return MadoEngine::Render::PostEffectManager::GetInstance().GetEnabledLayerTargetMask();
 	}
 
+	MadoEngine::Render::RenderLayerMask EngineExecution::GetEnabledLayerEffectTargetMask(
+		MadoEngine::Render::LayerEffectStage stage) const
+	{
+		return MadoEngine::Render::PostEffectManager::GetInstance().GetEnabledLayerTargetMask(stage);
+	}
+
 	MadoEngine::Render::PostEffectManager& EngineExecution::GetPostEffectManager() {
 		return MadoEngine::Render::PostEffectManager::GetInstance();
 	}
@@ -447,7 +454,9 @@ namespace MadoEngine
 		isLayerEffectChainResolved_ = false;
 		currentLayerEffectSourceName_ = kLayerColorTarget;
 
-		const bool ignoreDepthForMask = NeedsIgnoreDepthMask(pass.GetTargetLayerMask());
+		const MadoEngine::Render::LayerEffectStage stage = pass.GetLayerEffectStage();
+		const bool ignoreDepthForMask = stage == MadoEngine::Render::LayerEffectStage::Overlay ||
+			NeedsIgnoreDepthMask(pass.GetTargetLayerMask(), stage);
 		currentLayerMaskDepthStencilBuffer_ = ignoreDepthForMask ? layerDepthStencilBuffer_.get() : depthStencilBuffer_.get();
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = currentLayerMaskDepthStencilBuffer_->GetDSVCPUHandle();
 		currentLayerMaskDepthStencilBuffer_->Transition(commandManager_->GetCommandList(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -713,8 +722,11 @@ namespace MadoEngine
 		commandList->DrawInstanced(3, 1, 0, 0);
 	}
 
-	bool EngineExecution::NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const {
-		return MadoEngine::Render::PostEffectManager::GetInstance().NeedsIgnoreDepthMask(layerMask);
+	bool EngineExecution::NeedsIgnoreDepthMask(
+		Render::RenderLayerMask layerMask,
+		Render::LayerEffectStage stage) const
+	{
+		return MadoEngine::Render::PostEffectManager::GetInstance().NeedsIgnoreDepthMask(layerMask, stage);
 	}
 
 	void EngineExecution::UpdateParticleFogParameters() {

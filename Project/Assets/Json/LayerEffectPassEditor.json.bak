@@ -59,13 +59,34 @@
             },
             "scope": "Layer",
             "targetLayerMask": 8
+        },
+        {
+            "effectShaderKey": "PostEffect/Binarize.PS",
+            "effectType": "Binarize",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_1",
+            "layerEffectStage": "Overlay",
+            "name": "Test",
+            "parameters": {
+                "HighColorB": 1.0,
+                "HighColorG": 1.0,
+                "HighColorR": 1.0,
+                "Intensity": 1.0,
+                "LowColorB": 0.0,
+                "LowColorG": 0.0,
+                "LowColorR": 0.0,
+                "Threshold": 0.5
+            },
+            "scope": "Layer",
+            "targetLayerMask": 256
         }
     ],
     "screenPasses": [
         {
             "effectShaderKey": "PostEffect/Fog.PS",
             "effectType": "Fog",
-            "enabled": false,
+            "enabled": true,
             "key": "ScreenEffectPass_2",
             "name": "Fog",
             "parameters": {
@@ -84,5 +105,5 @@
             "screenEffectStage": "Scene"
         }
     ],
-    "version": 3
+    "version": 4
 }

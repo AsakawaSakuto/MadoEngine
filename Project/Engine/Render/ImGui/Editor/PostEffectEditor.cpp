@@ -19,6 +19,35 @@ namespace {
 // 既存設定との後方互換性を維持するため、JSONファイル名は変更しない。
 const std::filesystem::path kPostEffectEditorJsonPath = "Assets/Json/LayerEffectPassEditor.json";
 
+/// @brief レイヤーポストエフェクトの適用段階名を取得する
+/// @param stage 名前を取得する適用段階
+/// @return 適用段階名
+const char* GetLayerEffectStageName(Render::LayerEffectStage stage) {
+	switch (stage) {
+	case Render::LayerEffectStage::Transparent:
+		return "Transparent";
+	case Render::LayerEffectStage::Overlay:
+		return "Overlay";
+	case Render::LayerEffectStage::Scene:
+	default:
+		return "Scene";
+	}
+}
+
+/// @brief 文字列からレイヤーポストエフェクトの適用段階を取得する
+/// @param value 変換する適用段階名
+/// @return 変換した適用段階。未定義名の場合はScene
+Render::LayerEffectStage LayerEffectStageFromString(const std::string& value) {
+	if (value == "Transparent") {
+		return Render::LayerEffectStage::Transparent;
+	}
+	if (value == "Overlay") {
+		return Render::LayerEffectStage::Overlay;
+	}
+
+	return Render::LayerEffectStage::Scene;
+}
+
 /// @brief フルスクリーンポストエフェクトの適用段階名を取得する
 /// @param stage 名前を取得する適用段階
 /// @return 適用段階名
@@ -167,6 +196,9 @@ Render::PostEffectPassHandle UpsertPostEffectPassFromJson(
 				"targetLayerMask",
 				Render::ToRenderLayerMask(Render::RenderLayer::Default)
 			);
+			desc.layerEffectStage = LayerEffectStageFromString(
+				passJson.value("layerEffectStage", std::string("Scene"))
+			);
 			desc.effectShaderKey = std::string(definition.shaderKey);
 			desc.enabled = passJson.value("enabled", true);
 			desc.ignoreDepthForMask = passJson.value("ignoreDepthForMask", false);
@@ -196,6 +228,9 @@ Render::PostEffectPassHandle UpsertPostEffectPassFromJson(
 		pass->SetTargetLayerMask(passJson.value(
 			"targetLayerMask",
 			Render::ToRenderLayerMask(Render::RenderLayer::Default)
+		));
+		pass->SetLayerEffectStage(LayerEffectStageFromString(
+			passJson.value("layerEffectStage", std::string("Scene"))
 		));
 		pass->SetIgnoreDepthForMask(passJson.value("ignoreDepthForMask", false));
 	} else {
@@ -365,6 +400,7 @@ nlohmann::json SerializePostEffectPass(
 	}
 	if (scope == Render::PostEffectPassScope::Layer) {
 		passJson["targetLayerMask"] = pass.GetTargetLayerMask();
+		passJson["layerEffectStage"] = GetLayerEffectStageName(pass.GetLayerEffectStage());
 		passJson["ignoreDepthForMask"] = pass.IsIgnoreDepthForMask();
 	} else {
 		passJson["screenEffectStage"] = GetScreenEffectStageName(pass.GetScreenEffectStage());
@@ -397,7 +433,7 @@ nlohmann::json SerializePostEffectPassList(
 /// @return 保存に成功した場合はtrue
 bool SavePostEffectEditorJson(const Render::PostEffectManager& manager) {
 	nlohmann::json root;
-	root["version"] = 3;
+	root["version"] = 4;
 	root["layerPasses"] = SerializePostEffectPassList(
 		manager,
 		manager.GetLayerPassHandles(),
@@ -532,10 +568,6 @@ void DrawLayerSelectionCombo(Render::PostEffectPass& pass) {
 		}
 	}
 
-	const bool allSelected = currentLayerMask == Render::kAllRenderLayers;
-	if (ImGui::Selectable("All", allSelected)) {
-		pass.SetTargetLayerMask(Render::kAllRenderLayers);
-	}
 	ImGui::EndCombo();
 }
 
@@ -822,6 +854,11 @@ void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager) {
 		if (scope == Render::PostEffectPassScope::Layer) {
 			ImGui::TextUnformatted("Layer");
 			DrawLayerSelectionCombo(*selectedPass);
+			int stageIndex = static_cast<int>(selectedPass->GetLayerEffectStage());
+			const char* stages[] = { "Scene", "Transparent", "Overlay" };
+			if (ImGui::Combo("Stage", &stageIndex, stages, 3)) {
+				selectedPass->SetLayerEffectStage(static_cast<Render::LayerEffectStage>(stageIndex));
+			}
 			bool ignoreDepth = selectedPass->IsIgnoreDepthForMask();
 			if (ImGui::Checkbox("Ignore Depth", &ignoreDepth)) {
 				selectedPass->SetIgnoreDepthForMask(ignoreDepth);

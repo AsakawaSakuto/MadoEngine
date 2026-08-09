@@ -63,9 +63,18 @@ public:
 	/// @param fontFamily DirectWriteで使用するフォントファミリー名
 	void SetFontFamily(const std::string& fontFamily);
 
+	/// @brief Assets/Fontから読み込んだフォントを設定
+	/// @param fontFilePath Assets/Fontを基準としたフォントファイルパス
+	/// @param fontFamily DirectWriteで使用するフォントファミリー名
+	void SetFontAsset(const std::string& fontFilePath, const std::string& fontFamily);
+
 	/// @brief 使用フォント名を取得
 	/// @return フォントファミリー名
 	const std::string& GetFontFamily() const { return fontFamily_; }
+
+	/// @brief 使用中のアセットフォントファイルパスを取得
+	/// @return アセットフォントを使用しない場合は空文字列
+	const std::string& GetFontFilePath() const { return fontFilePath_; }
 
 	/// @brief フォントサイズを設定
 	/// @param fontSize フォントサイズ
@@ -205,6 +214,7 @@ private:
 
 	std::string text_ = "Text";
 	std::string fontFamily_ = "Yu Gothic UI";
+	std::string fontFilePath_;
 	float fontSize_ = 24.0f;
 	float lineSpacing_ = 1.0f;
 	float characterSpacing_ = 0.0f;

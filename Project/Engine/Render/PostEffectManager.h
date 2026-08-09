@@ -20,6 +20,7 @@ struct LayerPostEffectPassCreateDesc {
 	std::string key;
 	std::string name;
 	RenderLayerMask targetLayerMask = ToRenderLayerMask(RenderLayer::Default);
+	LayerEffectStage layerEffectStage = LayerEffectStage::Scene;
 	std::string effectShaderKey = "PostEffect/CopyImage.PS";
 	bool enabled = true;
 	bool ignoreDepthForMask = false;
@@ -240,10 +241,21 @@ public:
 	/// @return 有効なPassの対象LayerMask
 	RenderLayerMask GetEnabledLayerTargetMask() const;
 
+	/// @brief 指定段階で有効な個別描画レイヤー向けPassの対象LayerMaskをまとめて取得する
+	/// @param stage 対象の適用段階
+	/// @return 指定段階で有効なPassの対象LayerMask
+	RenderLayerMask GetEnabledLayerTargetMask(LayerEffectStage stage) const;
+
 	/// @brief 指定LayerMaskの描画にDepth無視マスクが必要か判定する
 	/// @param layerMask 判定するLayerMask
 	/// @return Depth無視が必要な場合はtrue
 	bool NeedsIgnoreDepthMask(RenderLayerMask layerMask) const;
+
+	/// @brief 指定段階とLayerMaskの描画にDepth無視マスクが必要か判定する
+	/// @param layerMask 判定するLayerMask
+	/// @param stage 対象の適用段階
+	/// @return Depth無視が必要な場合はtrue
+	bool NeedsIgnoreDepthMask(RenderLayerMask layerMask, LayerEffectStage stage) const;
 
 private:
 	struct PostEffectPassSlot {

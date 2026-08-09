@@ -12,7 +12,7 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Sphere1",
+            "layer": "Default",
             "name": "MoneyUI",
             "position": [
                 330.0,
@@ -51,7 +51,7 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Sphere1",
+            "layer": "Default",
             "name": "KillUI",
             "position": [
                 440.0,
@@ -80,29 +80,29 @@
         },
         {
             "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
                 0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Test",
+            "name": "Sprite",
+            "position": [
                 0.0,
-                0.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Sphere1",
-            "name": "a",
-            "position": [
-                640.0,
-                360.0
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
-                16.0,
-                24.0
+                1.0,
+                1.0
             ],
             "scene": "None",
-            "texture": "white16x16",
+            "texture": "uvChecker",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -115,163 +115,7 @@
                     0.0
                 ]
             },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Sphere1",
-            "name": "b",
-            "position": [
-                640.0,
-                360.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                15.0,
-                23.0
-            ],
-            "scene": "None",
-            "texture": "white16x16",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.2511627674102783,
-                0.2511627674102783,
-                0.2511627674102783,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Sphere1",
-            "name": "c",
-            "position": [
-                570.0,
-                225.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                4.800000190734863,
-                4.800000190734863
-            ],
-            "scene": "None",
-            "texture": "white16x16",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.12558138370513916,
-                0.12558138370513916,
-                0.12558138370513916,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Sphere1",
-            "name": "d",
-            "position": [
-                570.0,
-                225.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                4.0,
-                4.0
-            ],
-            "scene": "None",
-            "texture": "white16x16",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Sphere1",
-            "name": "e",
-            "position": [
-                570.0,
-                225.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "None",
-            "texture": "Axe",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
+            "visible": true
         }
     ]
 }

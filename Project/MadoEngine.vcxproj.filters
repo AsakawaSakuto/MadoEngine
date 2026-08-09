@@ -476,6 +476,7 @@
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\2d\IRenderLayerBatchContext.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

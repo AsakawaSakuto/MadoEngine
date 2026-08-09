@@ -74,6 +74,13 @@ namespace MadoEngine
 		/// @return 有効なLayer向けPostEffectPassの対象Layerマスク
 		MadoEngine::Render::RenderLayerMask GetEnabledLayerEffectTargetMask() const;
 
+		/// @brief 指定段階で有効なLayer向けPostEffectPassの対象Layerをまとめたマスクを取得する
+		/// @param stage 対象の適用段階
+		/// @return 指定段階で有効なLayer向けPostEffectPassの対象Layerマスク
+		MadoEngine::Render::RenderLayerMask GetEnabledLayerEffectTargetMask(
+			MadoEngine::Render::LayerEffectStage stage
+		) const;
+
 		/// @brief ポストエフェクト管理クラスを取得する
 		/// @return ポストエフェクト管理クラス
 		MadoEngine::Render::PostEffectManager& GetPostEffectManager();
@@ -165,10 +172,14 @@ namespace MadoEngine
 			MadoEngine::Core::DepthStencilBuffer* maskDepthStencilBuffer = nullptr
 		);
 
-		/// @brief 指定LayerMaskのチェーンにDepth無視マスクが必要か判定する
+		/// @brief 指定段階とLayerMaskのチェーンにDepth無視マスクが必要か判定する
 		/// @param layerMask 判定するLayerMask
+		/// @param stage 対象の適用段階
 		/// @return Depth無視マスクが必要な場合はtrue
-		bool NeedsIgnoreDepthMask(Render::RenderLayerMask layerMask) const;
+		bool NeedsIgnoreDepthMask(
+			Render::RenderLayerMask layerMask,
+			Render::LayerEffectStage stage
+		) const;
 
 		/// @brief Scene段階のFog設定をParticle描画へ同期する
 		void UpdateParticleFogParameters();

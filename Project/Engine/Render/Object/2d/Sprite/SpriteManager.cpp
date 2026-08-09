@@ -1,4 +1,5 @@
 #include "SpriteManager.h"
+#include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Shader/RootSignatureManager.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
@@ -351,6 +352,53 @@ void SpriteManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLaye
 			isStateSet = true;
 		}
 		sprite->Draw();
+	}
+}
+
+void SpriteManager::DrawInOrder(
+	SceneType currentSceneType,
+	Render::IRenderLayerBatchContext& batchContext)
+{
+	bool isBatchActive = false;
+	bool isStateSet = false;
+	Render::RenderLayer currentLayer = Render::RenderLayer::Default;
+	for (SpriteHandle handle : drawOrder_) {
+		Sprite* sprite = TryGet(handle);
+		if (!sprite) {
+			continue;
+		}
+		const SceneType spriteScene = sprite->GetSceneType();
+		if (!sprite->IsVisible()) {
+			continue;
+		}
+		if (spriteScene != SceneType::None && spriteScene != currentSceneType) {
+			continue;
+		}
+
+		const Render::RenderLayer layer = sprite->GetRenderLayer();
+		if (!isBatchActive || layer != currentLayer) {
+			if (isBatchActive) {
+				batchContext.EndRenderLayerBatch(currentLayer);
+			}
+			currentLayer = layer;
+			batchContext.BeginRenderLayerBatch(currentLayer);
+			isBatchActive = true;
+			isStateSet = false;
+		}
+
+		if (!isStateSet) {
+			commandList_->SetGraphicsRootSignature(RootSignatureManager::GetInstance().Get(sprite->GetRootSigKey()));
+			commandList_->SetPipelineState(psoRegistry_->Get(sprite->GetPSODesc()));
+			commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			commandList_->IASetVertexBuffers(0, 1, &sharedGeometry_.vbv);
+			commandList_->IASetIndexBuffer(&sharedGeometry_.ibv);
+			isStateSet = true;
+		}
+		sprite->Draw();
+	}
+
+	if (isBatchActive) {
+		batchContext.EndRenderLayerBatch(currentLayer);
 	}
 }
 

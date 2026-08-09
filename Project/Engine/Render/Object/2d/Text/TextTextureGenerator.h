@@ -5,8 +5,10 @@
 #include <d2d1helper.h>
 #include <dwrite.h>
 #include <dwrite_1.h>
+#include <dwrite_3.h>
 #include <wincodec.h>
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include "Math/Vector2.h"
@@ -25,10 +27,18 @@ enum class TextVerticalAlign {
 	Bottom,
 };
 
+/// @brief Assets/Fontから読み込んだフォント情報
+struct TextFontAsset {
+	std::string filePath;
+	std::string displayName;
+	std::string familyName;
+};
+
 /// @brief DirectWriteで生成するTextテクスチャの設定
 struct TextTextureDesc {
 	std::wstring text = L"Text";
 	std::wstring fontFamily = L"Yu Gothic UI";
+	std::string fontFilePath;
 	float fontSize = 24.0f;
 	float lineSpacing = 1.0f;
 	float characterSpacing = 0.0f;
@@ -65,12 +75,30 @@ public:
 	/// @return 生成に成功した場合はtrue
 	bool Generate(const TextTextureDesc& desc, TextTexturePixels& outPixels);
 
+	/// @brief Assets/Fontから読み込んだフォント一覧を取得
+	/// @return 選択可能なフォント情報一覧
+	const std::vector<TextFontAsset>& GetFontAssets() const { return fontAssets_; }
+
 private:
 	TextTextureGenerator() = default;
 	~TextTextureGenerator() = default;
 
 	TextTextureGenerator(const TextTextureGenerator&) = delete;
 	TextTextureGenerator& operator=(const TextTextureGenerator&) = delete;
+
+	/// @brief 指定ディレクトリ内のフォントファイルを読み込む
+	/// @param fontDirectory フォントを検索するディレクトリ
+	void LoadFontAssets(const std::filesystem::path& fontDirectory);
+
+	/// @brief フォントファイルから専用DirectWriteコレクションを生成する
+	/// @param filePath 読み込むフォントファイルの絶対パス
+	/// @param outCollection 生成されたフォントコレクション
+	/// @param outFamilyName フォントファミリー名
+	/// @return 読み込みに成功した場合はtrue
+	bool CreateFontAssetCollection(
+		const std::filesystem::path& filePath,
+		Microsoft::WRL::ComPtr<IDWriteFontCollection1>& outCollection,
+		std::wstring& outFamilyName) const;
 
 	/// @brief TextLayoutから必要なテクスチャサイズを計算
 	/// @param textLayout 計測対象のTextLayout
@@ -97,6 +125,9 @@ private:
 	Microsoft::WRL::ComPtr<IDWriteFactory> writeFactory_;
 	Microsoft::WRL::ComPtr<ID2D1Factory> d2dFactory_;
 	Microsoft::WRL::ComPtr<IWICImagingFactory> wicFactory_;
+	std::vector<TextFontAsset> fontAssets_;
+	std::vector<std::wstring> fontAssetFamilyNames_;
+	std::vector<Microsoft::WRL::ComPtr<IDWriteFontCollection1>> fontAssetCollections_;
 	bool isInitialized_ = false;
 	bool didInitializeCom_ = false;
 };

@@ -58,6 +58,7 @@ PostEffectPassHandle PostEffectManager::CreateLayerPass(const LayerPostEffectPas
 	passDesc.key = desc.key;
 	passDesc.name = desc.name;
 	passDesc.targetLayerMask = desc.targetLayerMask;
+	passDesc.layerEffectStage = desc.layerEffectStage;
 	passDesc.effectShaderKey = desc.effectShaderKey;
 	passDesc.enabled = desc.enabled;
 	passDesc.ignoreDepthForMask = desc.ignoreDepthForMask;
@@ -321,10 +322,41 @@ RenderLayerMask PostEffectManager::GetEnabledLayerTargetMask() const {
 	return layerMask;
 }
 
+RenderLayerMask PostEffectManager::GetEnabledLayerTargetMask(LayerEffectStage stage) const {
+	assert(IsValidLayerEffectStage(stage) && "LayerEffectStageが範囲外です");
+
+	RenderLayerMask layerMask = 0;
+	for (PostEffectPassHandle handle : layerPassOrder_) {
+		const PostEffectPass* pass = TryGet(handle);
+		if (pass && pass->IsEnabled() && pass->GetLayerEffectStage() == stage) {
+			layerMask |= pass->GetTargetLayerMask();
+		}
+	}
+
+	return layerMask;
+}
+
 bool PostEffectManager::NeedsIgnoreDepthMask(RenderLayerMask layerMask) const {
 	for (PostEffectPassHandle handle : layerPassOrder_) {
 		const PostEffectPass* pass = TryGet(handle);
 		if (!pass || !pass->IsEnabled()) {
+			continue;
+		}
+
+		if (pass->GetTargetLayerMask() == layerMask && pass->IsIgnoreDepthForMask()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool PostEffectManager::NeedsIgnoreDepthMask(RenderLayerMask layerMask, LayerEffectStage stage) const {
+	assert(IsValidLayerEffectStage(stage) && "LayerEffectStageが範囲外です");
+
+	for (PostEffectPassHandle handle : layerPassOrder_) {
+		const PostEffectPass* pass = TryGet(handle);
+		if (!pass || !pass->IsEnabled() || pass->GetLayerEffectStage() != stage) {
 			continue;
 		}
 

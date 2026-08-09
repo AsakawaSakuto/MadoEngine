@@ -211,9 +211,19 @@ void Text::SetText(const std::string& text) {
 }
 
 void Text::SetFontFamily(const std::string& fontFamily) {
-	if (fontFamily_ == fontFamily) {
+	if (fontFamily_ == fontFamily && fontFilePath_.empty()) {
 		return;
 	}
+	fontFamily_ = fontFamily;
+	fontFilePath_.clear();
+	MarkDirty();
+}
+
+void Text::SetFontAsset(const std::string& fontFilePath, const std::string& fontFamily) {
+	if (fontFilePath_ == fontFilePath && fontFamily_ == fontFamily) {
+		return;
+	}
+	fontFilePath_ = fontFilePath;
 	fontFamily_ = fontFamily;
 	MarkDirty();
 }
@@ -296,6 +306,7 @@ void Text::FromJson(const nlohmann::json& json) {
 	textureKey_ = "__Text_" + objectName_;
 	text_ = json.value("text", text_);
 	fontFamily_ = json.value("fontFamily", fontFamily_);
+	fontFilePath_ = json.value("fontFile", std::string{});
 	fontSize_ = json.value("fontSize", fontSize_);
 	lineSpacing_ = std::max(0.1f, json.value("lineSpacing", lineSpacing_));
 	characterSpacing_ = std::clamp(json.value("characterSpacing", characterSpacing_), -64.0f, 256.0f);
@@ -325,6 +336,7 @@ nlohmann::json Text::ToJson() const {
 		{ "name", objectName_ },
 		{ "text", text_ },
 		{ "fontFamily", fontFamily_ },
+		{ "fontFile", fontFilePath_ },
 		{ "fontSize", fontSize_ },
 		{ "lineSpacing", lineSpacing_ },
 		{ "characterSpacing", characterSpacing_ },
@@ -352,6 +364,7 @@ void Text::RebuildTextureIfNeeded() {
 	TextTextureDesc desc{};
 	desc.text = Utf8ToWide(text_);
 	desc.fontFamily = Utf8ToWide(fontFamily_);
+	desc.fontFilePath = fontFilePath_;
 	desc.fontSize = fontSize_;
 	desc.lineSpacing = lineSpacing_;
 	desc.characterSpacing = characterSpacing_;

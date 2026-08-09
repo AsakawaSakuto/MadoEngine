@@ -2,45 +2,6 @@
     "texts": [
         {
             "anchorPoint": [
-                1.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "EnemyCountText",
-            "position": [
-                1265.0,
-                120.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "E",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
                 0.5,
                 0.5
             ],
@@ -51,7 +12,8 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 55.0,
             "horizontalAlign": "Left",
             "layer": "UI",
@@ -72,7 +34,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:36",
+            "text": "04:57",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -80,7 +42,7 @@
         },
         {
             "anchorPoint": [
-                0.0,
+                1.0,
                 0.0
             ],
             "characterSpacing": 0.0,
@@ -90,15 +52,16 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "PlayerHealthText",
+            "name": "EnemyCountText",
             "position": [
-                64.0,
-                64.0
+                1265.0,
+                120.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -111,7 +74,127 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 95 / 100",
+            "text": "Enemy : 28",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 20.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "LevelText1",
+            "position": [
+                200.0,
+                196.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "LV.00",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "PlayerHealthText",
+            "position": [
+                155.0,
+                84.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "HP : 93 / 100",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 20.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "LevelText3",
+            "position": [
+                335.0,
+                196.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Lv.00",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -129,14 +212,15 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "FpsText",
             "position": [
-                1132.0,
+                1110.0,
                 40.0
             ],
             "rotation": 0.0,
@@ -150,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.0",
+            "text": "FPS : 61.4",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -168,10 +252,11 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
-            "layer": "Sphere1",
+            "layer": "Default",
             "lineSpacing": 1.0,
             "name": "SeedValueText",
             "position": [
@@ -189,7 +274,87 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 4226229424",
+            "text": "Seed : 3195893849",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 20.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "LevelText0",
+            "position": [
+                133.0,
+                196.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Lv.00",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 20.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "LevelText2",
+            "position": [
+                268.0,
+                196.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Lv.00",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

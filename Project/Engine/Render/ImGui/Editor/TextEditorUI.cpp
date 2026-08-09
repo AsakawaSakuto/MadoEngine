@@ -104,36 +104,15 @@ namespace {
 	/// @brief RenderLayerを選択するComboを描画します。
 	/// @param text 編集対象Text。
 	void DrawRenderLayerCombo(Text& text) {
-		struct LayerItem {
-			const char* label;
-			Render::RenderLayer layer;
-		};
-
-		const LayerItem items[] = {
-			{ "Default",               Render::RenderLayer::Default },
-			{ "World",                 Render::RenderLayer::World },
-			{ "MapEventObject",        Render::RenderLayer::MapEventObject },
-			{ "MapEventObjectOutline", Render::RenderLayer::MapEventObjectOutline },
-			{ "Player",                Render::RenderLayer::Player },
-			{ "Effect",                Render::RenderLayer::Effect },
-			{ "UI",					   Render::RenderLayer::UI },
-			{ "Debug",                 Render::RenderLayer::Debug },
-		};
-
 		const Render::RenderLayer current = text.GetRenderLayer();
-		const char* preview = "Default";
-		for (const LayerItem& item : items) {
-			if (item.layer == current) {
-				preview = item.label;
-				break;
-			}
-		}
+		const char* preview = Render::GetRenderLayerName(current);
 
 		if (ImGui::BeginCombo("Layer", preview)) {
-			for (const LayerItem& item : items) {
-				const bool selected = item.layer == current;
-				if (ImGui::Selectable(item.label, selected)) {
-					text.SetRenderLayer(item.layer);
+			for (uint32_t index = 0; index < Render::kRenderLayerCount; ++index) {
+				const Render::RenderLayer layer = Render::GetRenderLayerByIndex(index);
+				const bool selected = layer == current;
+				if (ImGui::Selectable(Render::GetRenderLayerName(layer), selected)) {
+					text.SetRenderLayer(layer);
 				}
 				if (selected) {
 					ImGui::SetItemDefaultFocus();
@@ -185,26 +164,42 @@ namespace {
 	/// @brief Textフォント選択Comboを描画します。
 	/// @param text 編集対象Text。
 	void DrawFontCombo(Text& text) {
-		const TextFontFamilyType currentType = GetTextFontFamilyTypeFromName(text.GetFontFamily());
-		const char* preview = currentType == TextFontFamilyType::Invalid
-			? text.GetFontFamily().c_str()
-			: GetTextFontDisplayName(currentType);
+		const std::vector<TextFontAsset>& fontAssets = TextTextureGenerator::GetInstance().GetFontAssets();
+		const TextFontAsset* currentAsset = nullptr;
+		for (const TextFontAsset& fontAsset : fontAssets) {
+			if (fontAsset.filePath == text.GetFontFilePath()) {
+				currentAsset = &fontAsset;
+				break;
+			}
+		}
+
+		const char* preview = currentAsset
+			? currentAsset->displayName.c_str()
+			: "未選択";
 
 		if (ImGui::BeginCombo("フォント", preview)) {
-			for (const TextFontDefinition& definition : kTextFontDefinitions) {
-				const TextFontFamilyType type = definition.type;
-				const bool selected = type == currentType;
-				if (ImGui::Selectable(GetTextFontDisplayName(type), selected)) {
-					text.SetFontFamily(GetTextFontFamilyName(type));
+			if (!fontAssets.empty()) {
+				for (const TextFontAsset& fontAsset : fontAssets) {
+					ImGui::PushID(fontAsset.filePath.c_str());
+					const bool selected = currentAsset == &fontAsset;
+					if (ImGui::Selectable(fontAsset.displayName.c_str(), selected)) {
+						text.SetFontAsset(fontAsset.filePath, fontAsset.familyName);
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+					ImGui::PopID();
 				}
-				if (selected) {
-					ImGui::SetItemDefaultFocus();
-				}
+			} else {
+				ImGui::TextDisabled("Assets/Fontにフォントがありません。");
 			}
 
-			if (currentType == TextFontFamilyType::Invalid && !text.GetFontFamily().empty()) {
+			if (!text.GetFontFilePath().empty() && !currentAsset) {
 				ImGui::Separator();
-				ImGui::TextDisabled("現在のフォントは候補外です。");
+				ImGui::TextDisabled("保存されたフォントファイルが見つかりません。");
+			} else if (text.GetFontFilePath().empty() && !fontAssets.empty()) {
+				ImGui::Separator();
+				ImGui::TextDisabled("Assets/Fontからフォントを選択してください。");
 			}
 
 			ImGui::EndCombo();

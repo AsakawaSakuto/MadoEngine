@@ -15,6 +15,10 @@
 
 namespace MadoEngine {
 
+namespace Render {
+class IRenderLayerBatchContext;
+}
+
 /// @brief Text生成情報
 struct TextCreateDesc {
 	std::string name;
@@ -160,6 +164,16 @@ public:
 	/// @param layerMask 描画LayerMask
 	/// @param targetScreen 描画対象Screen。空文字の場合は絞り込まない
 	void DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask, const std::string& targetScreen = "");
+
+	/// @brief 現在SceneのTextを元の描画順の連続レイヤーバッチとして描画する
+	/// @param currentSceneType 現在のScene
+	/// @param batchContext バッチ前後の描画処理を受け取るContext
+	/// @param targetScreen 描画対象Screen。空文字の場合は絞り込まない
+	void DrawInOrder(
+		SceneType currentSceneType,
+		Render::IRenderLayerBatchContext& batchContext,
+		const std::string& targetScreen = ""
+	);
 
 	/// @brief Editor管理TextをJSONへ変換する
 	/// @return Text一覧を含むJSON

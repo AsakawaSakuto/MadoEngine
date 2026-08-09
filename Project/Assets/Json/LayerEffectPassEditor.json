@@ -6,6 +6,7 @@
             "enabled": true,
             "ignoreDepthForMask": true,
             "key": "LayerEffectPass_2",
+            "layerEffectStage": "Scene",
             "name": "PlayerOutline",
             "parameters": {
                 "ColorA": 1.0,
@@ -26,6 +27,7 @@
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_3",
+            "layerEffectStage": "Scene",
             "name": "MapObjectOutline",
             "parameters": {
                 "ColorA": 1.0,
@@ -46,6 +48,7 @@
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_5",
+            "layerEffectStage": "Scene",
             "name": "MapObjectBloom",
             "parameters": {
                 "BloomColorA": 1.0,
@@ -84,5 +87,5 @@
             "screenEffectStage": "Scene"
         }
     ],
-    "version": 3
+    "version": 4
 }

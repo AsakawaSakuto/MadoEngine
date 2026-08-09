@@ -437,6 +437,7 @@
     <ClInclude Include="Engine\Render\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.h" />
     <ClInclude Include="Engine\Render\Object\2d\Gauge\Gauge.h" />
+    <ClInclude Include="Engine\Render\Object\2d\IRenderLayerBatchContext.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteData.h" />
     <ClInclude Include="Engine\Render\Object\2d\Sprite\SpriteManager.h" />
