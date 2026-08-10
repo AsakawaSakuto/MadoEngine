@@ -163,6 +163,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\Karma\Karma.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\BeamEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\CylinderEditor.cpp" />
@@ -690,6 +691,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\Karma\Karma.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

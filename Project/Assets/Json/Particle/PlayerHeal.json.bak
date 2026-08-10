@@ -1,0 +1,132 @@
+{
+    "emitters": [
+        {
+            "backend": "auto",
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        0.501960813999176,
+                        1.0,
+                        0.0,
+                        1.0
+                    ],
+                    "min": [
+                        0.0,
+                        1.0,
+                        0.0,
+                        1.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        0.501960813999176,
+                        1.0,
+                        0.0,
+                        1.0
+                    ],
+                    "min": [
+                        0.0,
+                        1.0,
+                        0.0,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [],
+                "duration": 0.5,
+                "isLoop": false,
+                "maxParticles": 32,
+                "ratePerSecond": 32.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        0.0,
+                        5.0,
+                        0.0
+                    ],
+                    "min": [
+                        0.0,
+                        1.0,
+                        0.0
+                    ]
+                },
+                "directionMode": "configured",
+                "lifeTime": {
+                    "max": 0.5,
+                    "min": 0.5
+                },
+                "rotation": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 5.0,
+                    "min": 1.0
+                }
+            },
+            "isEnabled": true,
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "renderer": {
+                "blendMode": "normal",
+                "sortMode": "none",
+                "texture": "closs2"
+            },
+            "shape": {
+                "emitFromEdge": true,
+                "innerRadius": 0.0,
+                "normal": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "outerRadius": 0.75,
+                "type": "ring"
+            },
+            "simulationSpace": "world",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "min": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ]
+                },
+                "start": {
+                    "max": [
+                        0.5,
+                        0.5
+                    ],
+                    "min": [
+                        0.5,
+                        0.5
+                    ]
+                }
+            }
+        }
+    ],
+    "name": "PlayerHeal",
+    "version": 2
+}

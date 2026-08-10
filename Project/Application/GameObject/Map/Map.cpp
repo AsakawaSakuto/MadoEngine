@@ -1,16 +1,88 @@
 #include "Map.h"
 #include "GameObject/Map/EventObject/Chest/Chest.h"
 #include "GameObject/Map/EventObject/Jar/Jar.h"
+#include "GameObject/Map/EventObject/Karma/Karma.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
 
 namespace {
+constexpr float kRotationEpsilon = 1e-5f;
+
+/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返します。
+/// @param value 正規化するベクトルです。
+/// @param fallback 代替ベクトルです。
+/// @return 正規化済みのベクトルです。
+Vector3 NormalizeOrFallback(const Vector3& value, const Vector3& fallback) {
+	const float lengthSq = value.LengthSq();
+	if (lengthSq < kRotationEpsilon) {
+		return fallback;
+	}
+
+	return value * (1.0f / std::sqrt(lengthSq));
+}
+
+/// @brief 水平Yawから前方向ベクトルを作成します。
+/// @param yaw 水平Yaw角度です。
+/// @return 水平面上の前方向です。
+Vector3 CreateHorizontalForward(float yaw) {
+	return { std::sin(yaw), 0.0f, std::cos(yaw) };
+}
+
+/// @brief 水平Yawから右方向ベクトルを作成します。
+/// @param yaw 水平Yaw角度です。
+/// @return 水平面上の右方向です。
+Vector3 CreateHorizontalRight(float yaw) {
+	return { std::cos(yaw), 0.0f, -std::sin(yaw) };
+}
+
+/// @brief 回転行列の各軸からMakeAffineと同じ順序のEuler角を復元します。
+/// @param right ローカルX軸のワールド方向です。
+/// @param up ローカルY軸のワールド方向です。
+/// @param forward ローカルZ軸のワールド方向です。
+/// @return 復元したEuler角です。
+Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& forward) {
+	Vector3 euler = {};
+	const float sinY = std::clamp(-right.z, -1.0f, 1.0f);
+	euler.y = std::asin(sinY);
+
+	const float cosY = std::cos(euler.y);
+	if (std::abs(cosY) > kRotationEpsilon) {
+		euler.x = std::atan2(up.z, forward.z);
+		euler.z = std::atan2(right.y, right.x);
+		return euler;
+	}
+
+	euler.x = std::atan2(up.x * sinY, up.y);
+	euler.z = 0.0f;
+	return euler;
+}
+
+/// @brief Slope法線と水平向きに沿ったModel回転を作成します。
+/// @param yaw Modelの水平Yaw角度です。
+/// @param slopeNormal Slope上面の法線です。
+/// @return Slopeに沿ったModel回転です。
+Vector3 CreateSlopeAlignedRotation(float yaw, const Vector3& slopeNormal) {
+	const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
+	const Vector3 desiredForward = CreateHorizontalForward(yaw);
+
+	Vector3 forward = desiredForward - up * Math::Dot(desiredForward, up);
+	if (forward.LengthSq() < kRotationEpsilon) {
+		forward = Math::Cross(CreateHorizontalRight(yaw), up);
+	}
+	forward = NormalizeOrFallback(forward, { 0.0f, 0.0f, 1.0f });
+
+	Vector3 right = NormalizeOrFallback(Math::Cross(up, forward), CreateHorizontalRight(yaw));
+	forward = NormalizeOrFallback(Math::Cross(right, up), forward);
+
+	return ExtractEulerXYZ(right, up, forward);
+}
 
 /// @brief 低い側がMap外周の壁を向いている坂か判定します。
 /// @param x Map上のX座標です。
@@ -34,7 +106,7 @@ bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDir
 	return false;
 }
 
-/// @brief Jarの配置Y座標を計算します。
+/// @brief MapObjectの配置Y座標を計算します。
 /// @param block 配置対象のMapBlockです。
 /// @param blockCenter 配置対象ブロックの中心座標です。
 /// @param blockSize ブロックサイズです。
@@ -55,32 +127,23 @@ float CalculateSpawnY(const MapBlock& block, const Vector3& blockCenter, const V
 	return Collision::Detail::GetSlopeSurfaceY(slope, spawnPosition);
 }
 
-/// @brief 配置回転を計算します。
+/// @brief MapObjectの配置回転を計算します。
 /// @param block 配置対象のMapBlockです。
 /// @param blockSize ブロックサイズです。
-/// @return Jarの配置回転です。
-Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize) {
+/// @param yaw Modelの水平Yaw角度です。
+/// @return MapObjectの配置回転です。
+Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize, float yaw) {
 	if (block.GetType() != MapBlockType::Slope) {
-		return { 0.0f, 0.0f, 0.0f };
+		return { 0.0f, yaw, 0.0f };
 	}
 
-	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
-	switch (block.GetSlopeDirection()) {
-	case SlopeDirection::PulsX:
-		rotation.z = std::atan2(blockSize.y, blockSize.x);
-		break;
-	case SlopeDirection::MinusX:
-		rotation.z = -std::atan2(blockSize.y, blockSize.x);
-		break;
-	case SlopeDirection::PulsZ:
-		rotation.x = -std::atan2(blockSize.y, blockSize.z);
-		break;
-	case SlopeDirection::MinusZ:
-		rotation.x = std::atan2(blockSize.y, blockSize.z);
-		break;
-	}
+	Slope slope;
+	slope.min = Vector3(-blockSize.x / 2.0f, 0.0f, -blockSize.z / 2.0f);
+	slope.max = Vector3(blockSize.x / 2.0f, blockSize.y, blockSize.z / 2.0f);
+	slope.bottomExtendY = slope.min.y;
+	slope.direction = block.GetSlopeDirection();
 
-	return rotation;
+	return CreateSlopeAlignedRotation(yaw, Collision::Detail::GetSlopeTopNormal(slope));
 }
 
 /// @brief Mapで使用するインスタンス描画バッチを破棄します。
@@ -93,6 +156,8 @@ void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("Jar.Big.Outline");
 	MyInstancedModel::Destroy("Chest.Normal");
 	MyInstancedModel::Destroy("Chest.Outline");
+	MyInstancedModel::Destroy("Karma.Normal");
+	MyInstancedModel::Destroy("Karma.Outline");
 }
 
 }
@@ -176,6 +241,7 @@ void Map::Initialize(uint32_t seed) {
 	Logger::Output("Map : 地形を生成しました", Logger::Level::Application);
 	GenerateJars();
 	GenerateChests();
+	GenerateKarmas();
 }
 
 void Map::Update(Player::Base& player) {
@@ -285,7 +351,7 @@ void Map::GenerateJars() {
 
 		Jar::InitializeDesc desc;
 		desc.position = spawnPosition;
-		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, 0.0f);
 		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? JarType::Money : JarType::Exp;
 		desc.size = eventObjectRandom_.Int(0, 1) == 0 ? JarSize::Small : JarSize::Big;
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
@@ -344,8 +410,8 @@ void Map::GenerateChests() {
 
 		Chest::InitializeDesc desc;
 		desc.position = spawnPosition;
-		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_);
-		desc.rotation.y = eventObjectRandom_.Float(0.0f, 360.0f);
+		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, yaw);
 		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
 		desc.modelName = "ChestModel_" + std::to_string(createdCount);
 		desc.colliderName = "ChestAABB_" + std::to_string(createdCount);
@@ -357,6 +423,63 @@ void Map::GenerateChests() {
 	}
 
 	Logger::Output("Map : Chestを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+}
+
+void Map::GenerateKarmas() {
+
+	const int maxSpawnCount = karmaSpawnCount_;
+	if (maxSpawnCount <= 0) {
+		return;
+	}
+
+	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
+
+	int createdCount = 0;
+	int retryCount = 0;
+	const int maxRetryCount = maxSpawnCount * 20;
+
+	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
+		++retryCount;
+
+		const int x = eventObjectRandom_.Int(0, mapWidth_ - 1);
+		const int z = eventObjectRandom_.Int(0, mapHeight_ - 1);
+
+		MapBlock& spawnBlock = mapBlocks_[z][x];
+		if (spawnBlock.GetType() == MapBlockType::Air) {
+			continue;
+		}
+
+		const float karmaHalfSize = 0.75f;
+		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - karmaHalfSize);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - karmaHalfSize);
+		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
+		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
+
+		Vector3 spawnPosition = {
+			static_cast<float>(x) * blockSize_.x + offsetX,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z + offsetZ
+		};
+		const Vector3 blockCenter = {
+			static_cast<float>(x) * blockSize_.x,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z
+		};
+		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+
+		Karma::InitializeDesc desc;
+		desc.position = spawnPosition;
+		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, yaw);
+		desc.colliderName = "KarmaAABB_" + std::to_string(createdCount);
+
+		std::unique_ptr<Karma> karma = std::make_unique<Karma>();
+		karma->Initialize(desc);
+		eventObjects_.push_back(std::move(karma));
+		++createdCount;
+	}
+
+	Logger::Output("Map : Karmaを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
 }
 
 void Map::UpdateEventObjects(Player::Base& player) {

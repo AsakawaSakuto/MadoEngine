@@ -98,6 +98,13 @@ namespace Enemy {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateProjectileDamageCooldowns(float deltaTime);
 
+		/// @brief 被ダメージ時の白色点滅を開始する
+		void StartDamageFlash();
+
+		/// @brief 経過時間に応じて敵モデルの表示色を更新する
+		/// @param deltaTime 前フレームからの経過時間
+		void UpdateAppearance(float deltaTime);
+
 		/// @brief 死亡報酬を生成する
 		void SpawnDeathReward();
 
@@ -127,6 +134,7 @@ namespace Enemy {
 		std::string modelName_;
 		float projectileDamageInterval_ = 0.5f; // Projectileからのダメージを受ける間隔（秒）
 		std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
+		float damageFlashRemainingTime_ = 0.0f;
 		bool isActive_ = true;
 		bool isDeathRewardSpawned_ = false;
 		bool isReleased_ = false;

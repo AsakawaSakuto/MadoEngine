@@ -327,9 +327,13 @@ bool LoadSpriteEditorJson() {
 	return SpriteManager::GetInstance().LoadFromFile(kSpriteEditorJsonPath);
 }
 
+bool LoadSpriteEditorJson(SceneType sceneType) {
+	return SpriteManager::GetInstance().LoadFromFile(kSpriteEditorJsonPath, sceneType);
+}
+
 #ifdef USE_IMGUI
 
-void DrawSpriteManagerEditorUI() {
+void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 	SpriteManager& manager = SpriteManager::GetInstance();
 	const std::vector<std::string> textureNames = GetSelectableTextureNames();
 
@@ -377,17 +381,17 @@ void DrawSpriteManagerEditorUI() {
 	}
 
 	if (ImGui::Button("保存")) {
-		manager.SaveToFile(kSpriteEditorJsonPath);
+		manager.SaveToFile(kSpriteEditorJsonPath, currentSceneType);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
-		LoadSpriteEditorJson();
+		LoadSpriteEditorJson(currentSceneType);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("復元")) {
 		std::filesystem::path backupPath = kSpriteEditorJsonPath;
 		backupPath += ".bak";
-		manager.LoadFromFile(backupPath);
+		manager.LoadFromFile(backupPath, currentSceneType);
 	}
 	ImGui::SameLine();
 	ImGui::Text("インスタンス数: %zu", manager.GetSpriteCount());

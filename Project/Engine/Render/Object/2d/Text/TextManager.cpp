@@ -410,6 +410,16 @@ nlohmann::json TextManager::ToJson() const {
 }
 
 void TextManager::FromJson(const nlohmann::json& json) {
+	FromJsonInternal(json, std::nullopt);
+}
+
+void TextManager::FromJson(const nlohmann::json& json, SceneType sceneType) {
+	FromJsonInternal(json, sceneType);
+}
+
+void TextManager::FromJsonInternal(
+	const nlohmann::json& json,
+	std::optional<SceneType> sceneType) {
 	const nlohmann::json* textArray = nullptr;
 	if (json.is_array()) {
 		textArray = &json;
@@ -422,13 +432,82 @@ void TextManager::FromJson(const nlohmann::json& json) {
 	}
 
 	for (const nlohmann::json& textJson : *textArray) {
-		const TextHandle handle = CreateFromJson(textJson);
-		(void)handle;
+		try {
+			const SceneType textSceneType = SceneTypeFromString(
+				textJson.value("scene", SceneTypeToString(SceneType::None)));
+			if (sceneType &&
+				textSceneType != SceneType::None &&
+				textSceneType != *sceneType) {
+				continue;
+			}
+			const TextHandle handle = CreateFromJson(textJson);
+			(void)handle;
+		}
+		catch (const nlohmann::json::exception& exception) {
+			Logger::Output(
+				"TextのJSON要素を読み込めませんでした: " + std::string(exception.what()),
+				Logger::Level::Error);
+		}
 	}
 }
 
 bool TextManager::SaveToFile(const std::filesystem::path& filePath) const {
 	return Json::JsonFile::Save(filePath, ToJson(), 4, true);
+}
+
+bool TextManager::SaveToFile(
+	const std::filesystem::path& filePath,
+	SceneType sceneType) const {
+	nlohmann::json outputJson = nlohmann::json::object();
+	nlohmann::json mergedTexts = nlohmann::json::array();
+
+	if (Json::JsonFile::Exists(filePath)) {
+		nlohmann::json existingJson;
+		if (!Json::JsonFile::Load(filePath, existingJson)) {
+			return false;
+		}
+
+		const nlohmann::json* existingTexts = nullptr;
+		if (existingJson.is_array()) {
+			existingTexts = &existingJson;
+		} else if (existingJson.contains("texts") && existingJson.at("texts").is_array()) {
+			existingTexts = &existingJson.at("texts");
+		}
+		if (!existingTexts) {
+			Logger::Output(
+				"TextのJSONにtexts配列がないため、シーン単位の保存を中止しました",
+				Logger::Level::Warning);
+			return false;
+		}
+
+		if (existingJson.is_object()) {
+			outputJson = existingJson;
+		}
+
+		for (const nlohmann::json& textJson : *existingTexts) {
+			try {
+				const SceneType textSceneType = SceneTypeFromString(
+					textJson.value("scene", SceneTypeToString(SceneType::None)));
+				if (textSceneType != SceneType::None && textSceneType != sceneType) {
+					mergedTexts.push_back(textJson);
+				}
+			}
+			catch (const nlohmann::json::exception& exception) {
+				Logger::Output(
+					"Textのシーン設定を判定できないため保存を中止しました: " +
+					std::string(exception.what()),
+					Logger::Level::Error);
+				return false;
+			}
+		}
+	}
+
+	const nlohmann::json activeEditorJson = ToJson();
+	for (const nlohmann::json& textJson : activeEditorJson.at("texts")) {
+		mergedTexts.push_back(textJson);
+	}
+	outputJson["texts"] = std::move(mergedTexts);
+	return Json::JsonFile::Save(filePath, outputJson, 4, true);
 }
 
 bool TextManager::LoadFromFile(const std::filesystem::path& filePath) {
@@ -437,6 +516,17 @@ bool TextManager::LoadFromFile(const std::filesystem::path& filePath) {
 		return false;
 	}
 	FromJson(json);
+	return true;
+}
+
+bool TextManager::LoadFromFile(
+	const std::filesystem::path& filePath,
+	SceneType sceneType) {
+	nlohmann::json json;
+	if (!Json::JsonFile::Load(filePath, json)) {
+		return false;
+	}
+	FromJson(json, sceneType);
 	return true;
 }
 

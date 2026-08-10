@@ -603,6 +603,16 @@ nlohmann::json ModelManager::ToJson() const {
 }
 
 void ModelManager::FromJson(const nlohmann::json& json) {
+	FromJsonInternal(json, std::nullopt);
+}
+
+void ModelManager::FromJson(const nlohmann::json& json, SceneType sceneType) {
+	FromJsonInternal(json, sceneType);
+}
+
+void ModelManager::FromJsonInternal(
+	const nlohmann::json& json,
+	std::optional<SceneType> sceneType) {
 	const nlohmann::json* modelArray = nullptr;
 	if (json.is_array()) {
 		modelArray = &json;
@@ -616,6 +626,13 @@ void ModelManager::FromJson(const nlohmann::json& json) {
 
 	for (const nlohmann::json& modelJson : *modelArray) {
 		try {
+			const SceneType modelSceneType = SceneTypeFromString(
+				modelJson.value("scene", SceneTypeToString(SceneType::None)));
+			if (sceneType &&
+				modelSceneType != SceneType::None &&
+				modelSceneType != *sceneType) {
+				continue;
+			}
 			const ModelHandle handle = CreateFromJson(modelJson);
 			(void)handle;
 		}
@@ -629,12 +646,78 @@ bool ModelManager::SaveToFile(const std::filesystem::path& filePath) const {
 	return Json::JsonFile::Save(filePath, ToJson(), 4, true);
 }
 
+bool ModelManager::SaveToFile(
+	const std::filesystem::path& filePath,
+	SceneType sceneType) const {
+	nlohmann::json outputJson = nlohmann::json::object();
+	nlohmann::json mergedModels = nlohmann::json::array();
+
+	if (Json::JsonFile::Exists(filePath)) {
+		nlohmann::json existingJson;
+		if (!Json::JsonFile::Load(filePath, existingJson)) {
+			return false;
+		}
+
+		const nlohmann::json* existingModels = nullptr;
+		if (existingJson.is_array()) {
+			existingModels = &existingJson;
+		} else if (existingJson.contains("models") && existingJson.at("models").is_array()) {
+			existingModels = &existingJson.at("models");
+		}
+		if (!existingModels) {
+			Logger::Output(
+				"ModelのJSONにmodels配列がないため、シーン単位の保存を中止しました",
+				Logger::Level::Warning);
+			return false;
+		}
+
+		if (existingJson.is_object()) {
+			outputJson = existingJson;
+		}
+
+		for (const nlohmann::json& modelJson : *existingModels) {
+			try {
+				const SceneType modelSceneType = SceneTypeFromString(
+					modelJson.value("scene", SceneTypeToString(SceneType::None)));
+				if (modelSceneType != SceneType::None && modelSceneType != sceneType) {
+					mergedModels.push_back(modelJson);
+				}
+			}
+			catch (const nlohmann::json::exception& exception) {
+				Logger::Output(
+					"Modelのシーン設定を判定できないため保存を中止しました: " +
+					std::string(exception.what()),
+					Logger::Level::Error);
+				return false;
+			}
+		}
+	}
+
+	const nlohmann::json activeEditorJson = ToJson();
+	for (const nlohmann::json& modelJson : activeEditorJson.at("models")) {
+		mergedModels.push_back(modelJson);
+	}
+	outputJson["models"] = std::move(mergedModels);
+	return Json::JsonFile::Save(filePath, outputJson, 4, true);
+}
+
 bool ModelManager::LoadFromFile(const std::filesystem::path& filePath) {
 	nlohmann::json json;
 	if (!Json::JsonFile::Load(filePath, json)) {
 		return false;
 	}
 	FromJson(json);
+	return true;
+}
+
+bool ModelManager::LoadFromFile(
+	const std::filesystem::path& filePath,
+	SceneType sceneType) {
+	nlohmann::json json;
+	if (!Json::JsonFile::Load(filePath, json)) {
+		return false;
+	}
+	FromJson(json, sceneType);
 	return true;
 }
 

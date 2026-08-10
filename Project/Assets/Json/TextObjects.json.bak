@@ -2,46 +2,6 @@
     "texts": [
         {
             "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 55.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "GamePlayTimerText",
-            "position": [
-                640.0,
-                85.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "04:57",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
                 1.0,
                 0.0
             ],
@@ -74,7 +34,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 28",
+            "text": "Enemy : 10",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -94,14 +54,14 @@
             ],
             "fontFamily": "游ゴシック",
             "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 20.0,
+            "fontSize": 55.0,
             "horizontalAlign": "Left",
-            "layer": "Default",
+            "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "LevelText1",
+            "name": "GamePlayTimerText",
             "position": [
-                200.0,
-                196.0
+                640.0,
+                80.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -114,7 +74,7 @@
                 0.0,
                 0.0
             ],
-            "text": "LV.00",
+            "text": "04:35",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -154,7 +114,47 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 93 / 100",
+            "text": "HP : 82 / 100",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 20.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "LevelText1",
+            "position": [
+                201.0,
+                196.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -180,7 +180,7 @@
             "lineSpacing": 1.0,
             "name": "LevelText3",
             "position": [
-                335.0,
+                337.0,
                 196.0
             ],
             "rotation": 0.0,
@@ -194,7 +194,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.00",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -234,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 61.4",
+            "text": "FPS : 59.6",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -274,7 +274,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 3195893849",
+            "text": "Seed : 2841439203",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -300,7 +300,7 @@
             "lineSpacing": 1.0,
             "name": "LevelText0",
             "position": [
-                133.0,
+                134.0,
                 196.0
             ],
             "rotation": 0.0,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.00",
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -340,7 +340,7 @@
             "lineSpacing": 1.0,
             "name": "LevelText2",
             "position": [
-                268.0,
+                269.0,
                 196.0
             ],
             "rotation": 0.0,
@@ -354,7 +354,47 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.00",
+            "text": "",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 40.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "MoneyText",
+            "position": [
+                400.0,
+                50.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

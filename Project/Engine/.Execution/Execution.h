@@ -241,6 +241,7 @@ namespace MadoEngine
 		std::string currentLayerEffectSourceName_ = "LayerColor";
 		std::string currentTransparentTargetName_;
 		std::string currentOverlayTargetName_;
+		SceneType currentSceneType_ = SceneType::None;
 		bool isSceneColorEnded_ = false;
 		bool isLayerEffectChainResolved_ = false;
 		bool isLayerEffectResolved_ = false;

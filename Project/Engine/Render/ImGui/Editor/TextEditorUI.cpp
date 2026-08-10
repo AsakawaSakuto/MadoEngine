@@ -230,9 +230,13 @@ bool LoadTextEditorJson() {
 	return TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
 }
 
+bool LoadTextEditorJson(SceneType sceneType) {
+	return TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json", sceneType);
+}
+
 #ifdef USE_IMGUI
 
-void DrawTextManagerEditorUI() {
+void DrawTextManagerEditorUI(SceneType currentSceneType) {
 	TextManager& manager = TextManager::GetInstance();
 
 	static std::array<char, 128> createName{};
@@ -265,16 +269,16 @@ void DrawTextManagerEditorUI() {
 		}
 	}
 	if (ImGui::Button("保存")) {
-		manager.SaveToFile("Assets/Json/TextObjects.json");
+		manager.SaveToFile("Assets/Json/TextObjects.json", currentSceneType);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
-		LoadTextEditorJson();
+		LoadTextEditorJson(currentSceneType);
 		editingHandle = {};
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("復元")) {
-		manager.LoadFromFile("Assets/Json/TextObjects.json.bak");
+		manager.LoadFromFile("Assets/Json/TextObjects.json.bak", currentSceneType);
 		editingHandle = {};
 	}
 	ImGui::SameLine();

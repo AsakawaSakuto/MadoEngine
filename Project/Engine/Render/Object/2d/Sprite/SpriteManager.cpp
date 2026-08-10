@@ -415,6 +415,16 @@ nlohmann::json SpriteManager::ToJson() const {
 }
 
 void SpriteManager::FromJson(const nlohmann::json& json) {
+	FromJsonInternal(json, std::nullopt);
+}
+
+void SpriteManager::FromJson(const nlohmann::json& json, SceneType sceneType) {
+	FromJsonInternal(json, sceneType);
+}
+
+void SpriteManager::FromJsonInternal(
+	const nlohmann::json& json,
+	std::optional<SceneType> sceneType) {
 	const nlohmann::json* spriteArray = nullptr;
 	if (json.is_array()) {
 		spriteArray = &json;
@@ -428,6 +438,13 @@ void SpriteManager::FromJson(const nlohmann::json& json) {
 
 	for (const nlohmann::json& spriteJson : *spriteArray) {
 		try {
+			const SceneType spriteSceneType = SceneTypeFromString(
+				spriteJson.value("scene", SceneTypeToString(SceneType::None)));
+			if (sceneType &&
+				spriteSceneType != SceneType::None &&
+				spriteSceneType != *sceneType) {
+				continue;
+			}
 			const SpriteHandle handle = CreateFromJson(spriteJson);
 			(void)handle;
 		}
@@ -441,12 +458,78 @@ bool SpriteManager::SaveToFile(const std::filesystem::path& filePath) const {
 	return Json::JsonFile::Save(filePath, ToJson(), 4, true);
 }
 
+bool SpriteManager::SaveToFile(
+	const std::filesystem::path& filePath,
+	SceneType sceneType) const {
+	nlohmann::json outputJson = nlohmann::json::object();
+	nlohmann::json mergedSprites = nlohmann::json::array();
+
+	if (Json::JsonFile::Exists(filePath)) {
+		nlohmann::json existingJson;
+		if (!Json::JsonFile::Load(filePath, existingJson)) {
+			return false;
+		}
+
+		const nlohmann::json* existingSprites = nullptr;
+		if (existingJson.is_array()) {
+			existingSprites = &existingJson;
+		} else if (existingJson.contains("sprites") && existingJson.at("sprites").is_array()) {
+			existingSprites = &existingJson.at("sprites");
+		}
+		if (!existingSprites) {
+			Logger::Output(
+				"SpriteのJSONにsprites配列がないため、シーン単位の保存を中止しました",
+				Logger::Level::Warning);
+			return false;
+		}
+
+		if (existingJson.is_object()) {
+			outputJson = existingJson;
+		}
+
+		for (const nlohmann::json& spriteJson : *existingSprites) {
+			try {
+				const SceneType spriteSceneType = SceneTypeFromString(
+					spriteJson.value("scene", SceneTypeToString(SceneType::None)));
+				if (spriteSceneType != SceneType::None && spriteSceneType != sceneType) {
+					mergedSprites.push_back(spriteJson);
+				}
+			}
+			catch (const nlohmann::json::exception& exception) {
+				Logger::Output(
+					"Spriteのシーン設定を判定できないため保存を中止しました: " +
+					std::string(exception.what()),
+					Logger::Level::Error);
+				return false;
+			}
+		}
+	}
+
+	const nlohmann::json activeEditorJson = ToJson();
+	for (const nlohmann::json& spriteJson : activeEditorJson.at("sprites")) {
+		mergedSprites.push_back(spriteJson);
+	}
+	outputJson["sprites"] = std::move(mergedSprites);
+	return Json::JsonFile::Save(filePath, outputJson, 4, true);
+}
+
 bool SpriteManager::LoadFromFile(const std::filesystem::path& filePath) {
 	nlohmann::json json;
 	if (!Json::JsonFile::Load(filePath, json)) {
 		return false;
 	}
 	FromJson(json);
+	return true;
+}
+
+bool SpriteManager::LoadFromFile(
+	const std::filesystem::path& filePath,
+	SceneType sceneType) {
+	nlohmann::json json;
+	if (!Json::JsonFile::Load(filePath, json)) {
+		return false;
+	}
+	FromJson(json, sceneType);
 	return true;
 }
 

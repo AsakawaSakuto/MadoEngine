@@ -8,6 +8,8 @@ namespace Player {
 	namespace {
 		constexpr float kShadowGroundOffset = 0.01f;
 		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>;
+		constexpr float kHealthRegenerationInterval = 6.0f;
+		constexpr float kHealthRegenerationAmount = 1.0f;
 	}
 
 	void Base::Initialize() {
@@ -101,10 +103,48 @@ namespace Player {
 		}
 
 		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
+		if (status_.currentHealth <= 0.0f) {
+			regenerationTimer_.Stop();
+			return;
+		}
+
+		regenerationTimer_.Start(kHealthRegenerationInterval, true);
+	}
+
+	void Base::UpdateHealthRegeneration(float deltaTime) {
+		if (status_.currentHealth <= 0.0f || status_.maxHealth <= 0.0f) {
+			regenerationTimer_.Stop();
+			return;
+		}
+
+		if (status_.currentHealth >= status_.maxHealth) {
+			status_.currentHealth = status_.maxHealth;
+			regenerationTimer_.Stop();
+			return;
+		}
+
+		if (!regenerationTimer_.IsActive()) {
+			regenerationTimer_.Start(kHealthRegenerationInterval, true);
+		}
+
+		regenerationTimer_.Update(deltaTime);
+		if (!regenerationTimer_.WasLoopedThisFrame()) {
+			return;
+		}
+
+		status_.currentHealth = std::min(
+			status_.maxHealth,
+			status_.currentHealth + kHealthRegenerationAmount
+		);
+
+		if (status_.currentHealth >= status_.maxHealth) {
+			regenerationTimer_.Stop();
+		}
 	}
 
 	void Base::Update(float deltaTime) {
 		lastDeltaTime_ = std::max(0.0f, deltaTime);
+		UpdateHealthRegeneration(lastDeltaTime_);
 		controller_.Update();
 		lastMoveInput_ = controller_.GetMoveInput();
 
@@ -153,7 +193,6 @@ namespace Player {
 		MyDebugLine::AddShape(std::get<Sphere>(attackRangeSphere_), Vector4{ 1.0f,0.0f,0.0f,1.0f });
 	}
 
-	/// @brief Player直下の地面へ影の描画座標を更新します。
 	void Base::UpdateShadowTransform() {
 		Model* shadowModel = MyModel::TryGet(shadowModel_);
 		if (!shadowModel) {
@@ -196,8 +235,6 @@ namespace Player {
 		shadowModel->SetScale(shadowTransform_.scale);
 	}
 
-	/// @brief Playerの描画Model座標を取得します。
-	/// @return PlayerのModelワールド座標です。
 	Vector3 Base::GetModelPosition() const {
 		if (Model* model = MyModel::TryGet(model_)) {
 			return model->GetPosition();

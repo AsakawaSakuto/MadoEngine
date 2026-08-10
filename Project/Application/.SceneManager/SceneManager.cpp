@@ -20,6 +20,14 @@
 
 namespace {
 
+	/// @brief 指定シーン所属のEditor管理オブジェクトをJSONから読み込む
+	/// @param sceneType 読み込み対象のシーン
+	void LoadEditorSceneObjects(SceneType sceneType) {
+		MadoEngine::Editor::LoadModelEditorJson(sceneType);
+		MadoEngine::Editor::LoadSpriteEditorJson(sceneType);
+		MadoEngine::Editor::LoadTextEditorJson(sceneType);
+	}
+
 	/// @brief PointLightとSpotLightの位置をDebugLineで表示する
 	void AddLightPositionDebugSpheres() {
 		LightManager& lightManager = LightManager::GetInstance();
@@ -345,6 +353,7 @@ void SceneManager::ChangeScene(SceneType type) {
 
 	currentScene_ = it->second();
 	currentSceneType_ = type;
+	LoadEditorSceneObjects(currentSceneType_);
 	currentScene_->Initialize();
 	Logger::Output("シーン遷移を完了しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 }

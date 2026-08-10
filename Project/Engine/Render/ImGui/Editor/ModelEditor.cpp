@@ -366,9 +366,13 @@ namespace MadoEngine::Editor {
 		return ModelManager::GetInstance().LoadFromFile(kModelEditorJsonPath);
 	}
 
+	bool LoadModelEditorJson(SceneType sceneType) {
+		return ModelManager::GetInstance().LoadFromFile(kModelEditorJsonPath, sceneType);
+	}
+
 #ifdef USE_IMGUI
 
-	void DrawModelManagerEditorUI() {
+	void DrawModelManagerEditorUI(SceneType currentSceneType) {
 		ModelManager& manager = ModelManager::GetInstance();
 		const std::vector<std::string> modelNames = manager.GetAvailableModelNames();
 
@@ -416,17 +420,17 @@ namespace MadoEngine::Editor {
 		}
 
 		if (ImGui::Button("保存")) {
-			manager.SaveToFile(kModelEditorJsonPath);
+			manager.SaveToFile(kModelEditorJsonPath, currentSceneType);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("読込")) {
-			LoadModelEditorJson();
+			LoadModelEditorJson(currentSceneType);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("復元")) {
 			std::filesystem::path backupPath = kModelEditorJsonPath;
 			backupPath += ".bak";
-			manager.LoadFromFile(backupPath);
+			manager.LoadFromFile(backupPath, currentSceneType);
 		}
 		ImGui::SameLine();
 		ImGui::Text("インスタンス数: %zu", manager.GetModelCount());

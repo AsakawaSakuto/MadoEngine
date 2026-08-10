@@ -77,45 +77,6 @@
                 ]
             },
             "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Test",
-            "name": "Sprite",
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "None",
-            "texture": "uvChecker",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
         }
     ]
 }

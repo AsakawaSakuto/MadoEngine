@@ -148,6 +148,7 @@
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\Karma\Karma.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
@@ -338,6 +339,7 @@
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Jar\Jar.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Jar\JarType.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\Karma\Karma.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Application\GameObject\Map\Map.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlock.h" />

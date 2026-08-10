@@ -30,6 +30,7 @@ namespace UI::Game {
 				sprite->SetScale(Vector2{ shotGaugeSize_, 0.0f });
 				sprite->SetColor(Vector4{ 0.5f, 0.5f, 0.5f, 1.0f });
 				sprite->SetAnchorPoint(Vector2{ 0.0f, 1.0f });
+				sprite->SetVisible(false);
 			}
 
 			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
@@ -41,6 +42,7 @@ namespace UI::Game {
 			if (Sprite* sprite = MySprite::TryGet(weaponIcons_[i])) {
 				sprite->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f - 64.0f });
 				sprite->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
+				sprite->SetVisible(false);
 			}
 		}
 	
@@ -63,29 +65,38 @@ namespace UI::Game {
 
 			Sprite* weaponIcon = MySprite::TryGet(weaponIcons_[slotIndex]);
 			Sprite* shotGauge = MySprite::TryGet(weaponIconsShotGauge_[slotIndex]);
-			if (!weaponIcon || !shotGauge) {
+			Sprite* iconBackground = MySprite::TryGet(weaponIconsBG_[slotIndex]);
+			if (!weaponIcon || !shotGauge || !iconBackground) {
 				continue;
 			}
-			const Projectile::Type weaponType = weapon ? weapon->GetProjectileType() : Projectile::Type::None;
+
+			const bool isEquipped = weapon != nullptr;
+			weaponIcon->SetVisible(isEquipped);
+			shotGauge->SetVisible(isEquipped);
+			iconBackground->SetVisible(true);
+
+			if (!weapon) {
+				animationStates_[slotIndex] = {};
+				weaponIcon->SetScale(startIconScale);
+				shotGauge->SetScale({ shotGaugeSize_, 0.0f });
+				continue;
+			}
+
+			const Projectile::Type weaponType = weapon->GetProjectileType();
 			const std::string textureName = Projectile::ProjectileTypeToString(weaponType);
 
 			if (weaponIcon->GetTextureName() != textureName) {
 				weaponIcon->SetTexture(textureName);
 			}
 
-			const float shotCooldownProgress = weapon
-				? std::clamp(weapon->GetShotCooldownProgress(), 0.0f, 1.0f)
-				: 0.0f;
+			const float shotCooldownProgress = std::clamp(
+				weapon->GetShotCooldownProgress(),
+				0.0f,
+				1.0f);
 			shotGauge->SetScale({
 				shotGaugeSize_,
 				shotGaugeSize_ * shotCooldownProgress,
 			});
-
-			if (!weapon) {
-				animationStates_[slotIndex] = {};
-				weaponIcon->SetScale(startIconScale);
-				continue;
-			}
 
 			UpdateFireAnimation(deltaTime, slotIndex);
 		}

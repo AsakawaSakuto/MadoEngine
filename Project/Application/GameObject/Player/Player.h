@@ -58,6 +58,10 @@ namespace Player {
 		/// @brief Player直下の地面へ影の描画座標を更新
 		void UpdateShadowTransform();
 
+		/// @brief 一定間隔でPlayerのHPを自動回復
+		/// @param deltaTime 前フレームからの経過時間
+		void UpdateHealthRegeneration(float deltaTime);
+
 		ColliderShape hitAABB_;
 		ColliderShape expGetSphere_;
 		ColliderShape attackRangeSphere_;
@@ -78,6 +82,6 @@ namespace Player {
 
 		GamingColor gamingColor_; // ゲーミングカラー
 
-		GameTimer regeneTimer_;   // HPの自動回復タイマー
+		GameTimer regenerationTimer_; // HPの自動回復タイマー
 	};
 }

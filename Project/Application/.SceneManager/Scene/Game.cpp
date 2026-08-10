@@ -86,7 +86,8 @@ void Game::Initialize() {
 		text->SetColor({ 1.0f,0.0f,0.0f,1.0f });
 	}
 
-	MadoEngine::TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
+	moneyText_ = MyText::Find("MoneyText");
+	displayedMoney_ = -1;
 
 	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
 	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
@@ -157,6 +158,19 @@ SceneType Game::Update(float dt) {
 	expGauge_->IsUpgrade(inGameSession_->IsWaitingUpgradeSelection(), dt);
 
 	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
+
+	const int currentMoney = static_cast<int>(status.currentMoney);
+	if (currentMoney != displayedMoney_) {
+		MadoEngine::Text* moneyText = MyText::TryGet(moneyText_);
+		if (!moneyText) {
+			moneyText_ = MyText::Find("MoneyText");
+			moneyText = MyText::TryGet(moneyText_);
+		}
+		if (moneyText) {
+			moneyText->SetText(std::format("{}", currentMoney));
+			displayedMoney_ = currentMoney;
+		}
+	}
 
 	auto enemyCountHandle = MyText::Find("EnemyCountText");
 	if (MadoEngine::Text* enemyCountText = MyText::TryGet(enemyCountHandle)) {
@@ -259,6 +273,8 @@ void Game::Finalize() {
 	gamePlayTimerView_.Finalize();
 	projectileDamageView_.Finalize();
 	enemyCountText_ = {};
+	moneyText_ = {};
+	displayedMoney_ = -1;
 	fadeSprite_ = {};
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);

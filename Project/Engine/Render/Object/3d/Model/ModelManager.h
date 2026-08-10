@@ -10,6 +10,7 @@
 #include <d3d12.h>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -235,15 +236,32 @@ public:
 	/// @param json Model一覧を含むJSON
 	void FromJson(const nlohmann::json& json);
 
+	/// @brief JSONから指定シーン所属のEditor管理Modelを復元する
+	/// @param json Model一覧を含むJSON
+	/// @param sceneType 復元対象のシーン。SceneType::None所属のModelも復元する
+	void FromJson(const nlohmann::json& json, SceneType sceneType);
+
 	/// @brief Editor管理ModelをJSONファイルへ保存する
 	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
+	/// @brief 指定シーン所属のEditor管理ModelをJSONファイルへ保存する
+	/// @param filePath 保存先のファイルパス
+	/// @param sceneType 保存対象のシーン。SceneType::None所属のModelも保存する
+	/// @return 保存に成功した場合はtrue
+	bool SaveToFile(const std::filesystem::path& filePath, SceneType sceneType) const;
+
 	/// @brief JSONファイルからEditor管理Modelを読み込む
 	/// @param filePath 読み込み元
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
+
+	/// @brief JSONファイルから指定シーン所属のEditor管理Modelを読み込む
+	/// @param filePath 読み込み元のファイルパス
+	/// @param sceneType 読み込み対象のシーン。SceneType::None所属のModelも読み込む
+	/// @return 読み込みに成功した場合はtrue
+	bool LoadFromFile(const std::filesystem::path& filePath, SceneType sceneType);
 
 	/// @brief 通常Model名一覧を取得する
 	/// @return 名前順のModel名一覧
@@ -398,6 +416,11 @@ private:
 
 	ModelManager() = default;
 	~ModelManager() = default;
+
+	/// @brief JSONからEditor管理Modelを復元する
+	/// @param json Model一覧を含むJSON
+	/// @param sceneType 対象シーン。未指定の場合は全シーンを対象にする
+	void FromJsonInternal(const nlohmann::json& json, std::optional<SceneType> sceneType);
 
 	/// @brief Assets配下のModelアセットを読み込む
 	void LoadAllModels();

@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -183,15 +184,32 @@ public:
 	/// @param json Text一覧を含むJSON
 	void FromJson(const nlohmann::json& json);
 
+	/// @brief JSONから指定シーン所属のEditor管理Textを復元する
+	/// @param json Text一覧を含むJSON
+	/// @param sceneType 復元対象のシーン。SceneType::None所属のTextも復元する
+	void FromJson(const nlohmann::json& json, SceneType sceneType);
+
 	/// @brief Editor管理TextをJSONファイルへ保存する
 	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
+	/// @brief 指定シーン所属のEditor管理TextをJSONファイルへ保存する
+	/// @param filePath 保存先のファイルパス
+	/// @param sceneType 保存対象のシーン。SceneType::None所属のTextも保存する
+	/// @return 保存に成功した場合はtrue
+	bool SaveToFile(const std::filesystem::path& filePath, SceneType sceneType) const;
+
 	/// @brief JSONファイルからEditor管理Textを読み込む
 	/// @param filePath 読み込み元
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
+
+	/// @brief JSONファイルから指定シーン所属のEditor管理Textを読み込む
+	/// @param filePath 読み込み元のファイルパス
+	/// @param sceneType 読み込み対象のシーン。SceneType::None所属のTextも読み込む
+	/// @return 読み込みに成功した場合はtrue
+	bool LoadFromFile(const std::filesystem::path& filePath, SceneType sceneType);
 
 	/// @brief Text名一覧を取得する
 	/// @return 名前順のText名一覧
@@ -216,6 +234,11 @@ private:
 
 	TextManager() = default;
 	~TextManager() = default;
+
+	/// @brief JSONからEditor管理Textを復元する
+	/// @param json Text一覧を含むJSON
+	/// @param sceneType 対象シーン。未指定の場合は全シーンを対象にする
+	void FromJsonInternal(const nlohmann::json& json, std::optional<SceneType> sceneType);
 
 	ID3D12Device* device_ = nullptr;
 	ID3D12GraphicsCommandList* commandList_ = nullptr;

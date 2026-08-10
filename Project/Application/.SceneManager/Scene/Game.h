@@ -79,10 +79,12 @@ private:
 
 	MadoEngine::SpriteHandle fadeSprite_{};
 	MadoEngine::TextHandle enemyCountText_{};
+	MadoEngine::TextHandle moneyText_{};
 	UI::Game::FpsMeasurementView fpsMeasurementView_;
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
 	UI::Game::ProjectileDamageView projectileDamageView_;
 	GameTimer fadeOutTimer_;
+	int displayedMoney_ = -1;
 	bool useDebugCamera_ = false;
 
 	// System

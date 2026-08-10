@@ -216,9 +216,6 @@ namespace MadoEngine
 
 		MadoEngine::Editor::LoadAudioEditorJson();
 		MadoEngine::Editor::LoadLightEditorJson();
-		MadoEngine::Editor::LoadModelEditorJson();
-		MadoEngine::Editor::LoadSpriteEditorJson();
-		MadoEngine::Editor::LoadTextEditorJson();
 		MadoEngine::Editor::LoadPostEffectEditorJson(postEffectManager);
 		
 #ifdef USE_IMGUI
@@ -342,6 +339,7 @@ namespace MadoEngine
 		SceneType currentSceneType,
 		const Vector3& shadowFocusPosition)
 	{
+		currentSceneType_ = currentSceneType;
 #ifdef USE_IMGUI
 		MadoEngine::Editor::ApplyPendingPostEffectEditorOperations(
 			MadoEngine::Render::PostEffectManager::GetInstance());
@@ -666,9 +664,9 @@ namespace MadoEngine
 			MadoEngine::Render::PostEffectManager::GetInstance());
 		MadoEngine::Editor::DrawAudioManagerUI();
 		MadoEngine::Editor::DrawLightManagerEditorUI();
-		MadoEngine::Editor::DrawModelManagerEditorUI();
-		MadoEngine::Editor::DrawSpriteManagerEditorUI();
-		MadoEngine::Editor::DrawTextManagerEditorUI();
+		MadoEngine::Editor::DrawModelManagerEditorUI(currentSceneType_);
+		MadoEngine::Editor::DrawSpriteManagerEditorUI(currentSceneType_);
+		MadoEngine::Editor::DrawTextManagerEditorUI(currentSceneType_);
 		MadoEngine::Editor::DrawParticleSystemEditorUI();
 		MadoEngine::Editor::DrawCylinderEffectEditorUI();
 		MadoEngine::Editor::DrawRibbonEffectEditorUI();

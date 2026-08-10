@@ -32,6 +32,9 @@ private:
 	/// @brief Map上にChestをランダム配置
 	void GenerateChests();
 
+	/// @brief Map上にKarmaをランダム配置
+	void GenerateKarmas();
+
 	/// @brief Map上のイベントオブジェクトを更新
 	/// @param player 相互作用するPlayer
 	void UpdateEventObjects(Player::Base& player);
@@ -59,6 +62,7 @@ private:
 	int mapHeight_ = 20;
 	int jarSpawnCount_ = 100;
 	int chestSpawnCount_ = 50;
+	int karmaSpawnCount_ = 50;
 
 	bool isModelDraw_ = true;
 

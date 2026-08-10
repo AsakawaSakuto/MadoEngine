@@ -5,6 +5,10 @@
 #include <cmath>
 
 namespace Enemy {
+	namespace {
+		constexpr float kDamageFlashDuration = 6.0f / 60.0f;
+		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	}
 
 	Base::~Base() { Release(); }
 
@@ -13,6 +17,8 @@ namespace Enemy {
 		status_ = desc.status;
 		type_ = desc.type;
 		projectileDamageCooldowns_.clear();
+		damageFlashRemainingTime_ = 0.0f;
+		gamingColor_.Reset();
 		isActive_ = status_.currentHealth > 0.0f;
 		isDeathRewardSpawned_ = false;
 		isReleased_ = false;
@@ -50,10 +56,7 @@ namespace Enemy {
 
 	void Base::Update(float deltaTime) {
 		UpdateProjectileDamageCooldowns(deltaTime);
-
-		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetColor(gamingColor_.Update(deltaTime, 1.0f));
-		}
+		UpdateAppearance(deltaTime);
 
 		if (!isActive_ || !targetPlayer_) {
 			return;
@@ -108,6 +111,9 @@ namespace Enemy {
 		result.appliedDamage = healthBeforeDamage - status_.currentHealth;
 		result.wasApplied = result.appliedDamage > 0.0f;
 		result.wasKilled = status_.currentHealth <= 0.0f;
+		if (result.wasApplied) {
+			StartDamageFlash();
+		}
 		if (result.wasKilled) {
 			Kill();
 		}
@@ -138,6 +144,32 @@ namespace Enemy {
 			}
 
 			++iterator;
+		}
+	}
+
+	void Base::StartDamageFlash() {
+		damageFlashRemainingTime_ = kDamageFlashDuration;
+
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetColor(kDamageFlashColor);
+		}
+	}
+
+	void Base::UpdateAppearance(float deltaTime) {
+		const Vector4 baseColor = gamingColor_.Update(deltaTime, 1.0f);
+		if (damageFlashRemainingTime_ > 0.0f) {
+			if (std::isfinite(deltaTime) && deltaTime > 0.0f) {
+				damageFlashRemainingTime_ = std::max(0.0f, damageFlashRemainingTime_ - deltaTime);
+			}
+
+			if (Model* model = MyModel::TryGet(model_)) {
+				model->SetColor(kDamageFlashColor);
+			}
+			return;
+		}
+
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetColor(baseColor);
 		}
 	}
 

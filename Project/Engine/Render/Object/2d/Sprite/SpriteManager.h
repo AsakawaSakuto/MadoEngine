@@ -10,6 +10,7 @@
 #include <d3d12.h>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -182,15 +183,32 @@ public:
 	/// @param json Sprite一覧を含むJSON
 	void FromJson(const nlohmann::json& json);
 
+	/// @brief JSONから指定シーン所属のEditor管理Spriteを復元する
+	/// @param json Sprite一覧を含むJSON
+	/// @param sceneType 復元対象のシーン。SceneType::None所属のSpriteも復元する
+	void FromJson(const nlohmann::json& json, SceneType sceneType);
+
 	/// @brief Editor管理SpriteをJSONファイルへ保存する
 	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
+	/// @brief 指定シーン所属のEditor管理SpriteをJSONファイルへ保存する
+	/// @param filePath 保存先のファイルパス
+	/// @param sceneType 保存対象のシーン。SceneType::None所属のSpriteも保存する
+	/// @return 保存に成功した場合はtrue
+	bool SaveToFile(const std::filesystem::path& filePath, SceneType sceneType) const;
+
 	/// @brief JSONファイルからEditor管理Spriteを読み込む
 	/// @param filePath 読み込み元
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
+
+	/// @brief JSONファイルから指定シーン所属のEditor管理Spriteを読み込む
+	/// @param filePath 読み込み元のファイルパス
+	/// @param sceneType 読み込み対象のシーン。SceneType::None所属のSpriteも読み込む
+	/// @return 読み込みに成功した場合はtrue
+	bool LoadFromFile(const std::filesystem::path& filePath, SceneType sceneType);
 
 	/// @brief 描画順でSprite名一覧を取得する
 	/// @return Sprite名一覧
@@ -216,6 +234,11 @@ private:
 
 	SpriteManager() = default;
 	~SpriteManager() = default;
+
+	/// @brief JSONからEditor管理Spriteを復元する
+	/// @param json Sprite一覧を含むJSON
+	/// @param sceneType 対象シーン。未指定の場合は全シーンを対象にする
+	void FromJsonInternal(const nlohmann::json& json, std::optional<SceneType> sceneType);
 
 	ID3D12Device* device_ = nullptr;
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
