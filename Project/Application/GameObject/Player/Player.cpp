@@ -33,6 +33,7 @@ namespace Player {
 		s3.radius = 50.0f;
 		attackRangeSphere_ = s3;
 
+		// 移動解決、被弾、経験値回収、攻撃索引を独立させるため用途別Colliderを登録
 		MyCollider::RegisterCollider("PlayerMovementSphere", CollisionTag::PlayerMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerExpGetSphere", CollisionTag::PlayerDropObjectGetSphere, &expGetSphere_, &transform_.translate, 0.0f);
@@ -48,6 +49,7 @@ namespace Player {
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
 		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Game);
 		if (Model* shadowModel = MyModel::TryGet(shadowModel_)) {
+			// 地表へ重ねる簡易影として使用するためライティングとShadow処理を無効化
 			shadowModel->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 			shadowModel->SetTexture("white16x16");
 			shadowModel->SetColor({ 1.0f, 0.0f, 1.0f, 1.0f });
@@ -67,6 +69,7 @@ namespace Player {
 	}
 
 	void Base::AddMoney(int amount) {
+		// 不正な加算によって所持金が減少しないよう0以下を無視
 		if (amount <= 0) {
 			return;
 		}
@@ -75,6 +78,7 @@ namespace Player {
 	}
 
 	void Base::AddExp(int amount) {
+		// 不正な加算によって経験値が減少しないよう0以下を無視
 		if (amount <= 0) {
 			return;
 		}
@@ -89,6 +93,7 @@ namespace Player {
 			return;
 		}
 
+		// 一度に大量の経験値を得た場合も取りこぼさないよう連続してレベルアップ
 		while (status_.currentExp >= status_.expToNextLevel) {
 			status_.currentExp -= status_.expToNextLevel;
 			status_.level++;
@@ -108,26 +113,31 @@ namespace Player {
 			return;
 		}
 
+		// 被弾時点を起点に回復待機時間を再計測
 		regenerationTimer_.Start(kHealthRegenerationInterval, true);
 	}
 
 	void Base::UpdateHealthRegeneration(float deltaTime) {
+		// 死亡中または最大HPが不正な状態では回復周期を停止
 		if (status_.currentHealth <= 0.0f || status_.maxHealth <= 0.0f) {
 			regenerationTimer_.Stop();
 			return;
 		}
 
+		// 最大HPを超える値を残さず回復済みならTimerを停止
 		if (status_.currentHealth >= status_.maxHealth) {
 			status_.currentHealth = status_.maxHealth;
 			regenerationTimer_.Stop();
 			return;
 		}
 
+		// Timer停止中にHPが減った場合も自動で回復周期を再開
 		if (!regenerationTimer_.IsActive()) {
 			regenerationTimer_.Start(kHealthRegenerationInterval, true);
 		}
 
 		regenerationTimer_.Update(deltaTime);
+		// 毎フレームではなく設定した回復間隔を迎えたフレームだけHPを加算
 		if (!regenerationTimer_.WasLoopedThisFrame()) {
 			return;
 		}
@@ -148,7 +158,7 @@ namespace Player {
 		controller_.Update();
 		lastMoveInput_ = controller_.GetMoveInput();
 
-		// 全Colliderを更新する前に入力移動と重力による落下を反映する。
+		// Colliderへ最新座標を渡すため全Colliderの更新前に入力移動と重力落下を反映
 		movement_.Update(lastDeltaTime_, transform_, camera_, lastMoveInput_);
 
 		transform_.translate.x = std::clamp(transform_.translate.x, mapLimit_.min.x, mapLimit_.max.x);
@@ -166,6 +176,7 @@ namespace Player {
 	}
 
 	void Base::ResolveAfterCollision() {
+		// Collider解決後の接地結果を移動状態とModel姿勢へ反映
 		const bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, lastMoveInput_);
@@ -185,7 +196,7 @@ namespace Player {
 			model->SetColor(gamingColor_.Update(lastDeltaTime_, 1.0f));
 		}
 
-		// デバッグ表示
+		// 描画結果とColliderのずれを検証できるよう判定形状を可視化
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
 		MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
@@ -209,6 +220,7 @@ namespace Player {
 			foundGround = true;
 		}
 
+		// MapBlockとSlopeが重なる場所ではPlayerに最も近い上側の地表を採用
 		if (MyCollider::TryGetGroundSurfaceY(transform_.translate, CollisionTag::MapSlope, surfaceY, maxGroundDistance) &&
 			(!foundGround || surfaceY > groundY)) {
 			groundY = surfaceY;
@@ -240,6 +252,7 @@ namespace Player {
 			return model->GetPosition();
 		}
 
+		// Modelが利用できない間もゲーム座標から同じ基準位置を返却
 		return transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f };
 	}
 
@@ -248,6 +261,7 @@ namespace Player {
 #ifdef USE_IMGUI
 
 		ImGui::Begin("プレイヤー");
+		// 実際の移動へ使う速度成分を合成してデバッグ値を算出
 		const Vector3 slideVelocity = movement_.GetSlideVelocity();
 		const Vector3 jumpMoveVelocity = movement_.GetJumpMoveVelocity();
 		const float velocityY = movement_.GetVelocityY();
