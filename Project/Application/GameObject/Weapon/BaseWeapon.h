@@ -77,7 +77,7 @@ namespace Weapon {
 		float damageCount_ = 0.0f; // 武器の総ダメージ量
 
 		int shotNowCount_ = 0;  // 武器の現在射撃数
-		int upgradeLevel_ = 0;    // 武器のアップグレードレベル
+		int upgradeLevel_ = 1;    // 武器のアップグレードレベル
 		int slotIndex_ = -1;      // 武器のスロットインデックス
 		int projectileCount_ = 0; // 武器の発射数
 		bool wasFiredThisFrame_ = false;

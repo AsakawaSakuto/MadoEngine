@@ -48,6 +48,7 @@ namespace Enemy {
 		ImGui::Text("Enemy Count : %zu", enemyManager_ ? enemyManager_->GetEnemyCount() : 0);
 		ImGui::Text("Elapsed Time : %.1f", elapsedTime_);
 		ImGui::Checkbox("Active", &isActive_);
+		ImGui::DragScalar("Spawn Limit", ImGuiDataType_U64, &spawnLimit_, 1.0f);
 		ImGui::DragFloat("生成間隔（秒）", &spawnInterval_, 0.1f, kMinSpawnInterval, 600.0f, "%.1f");
 		ImGui::DragFloat("体力・攻撃力強化率（毎分）", &healthPowerGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat("移動速度強化率（毎分）", &moveSpeedGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");

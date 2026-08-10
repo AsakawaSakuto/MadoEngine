@@ -2,6 +2,7 @@
 #include "GameObject/Weapon/WeaponInventory.h"
 #include "Utility/Easing/Easing.h"
 #include <algorithm>
+#include <format>
 
 namespace UI::Game {
 
@@ -11,6 +12,7 @@ namespace UI::Game {
 		weaponIconsBG_.resize(slotCount);
 		weaponIconFrames_.resize(slotCount);
 		weaponIconsShotGauge_.resize(slotCount);
+		weaponLevelTexts_.resize(slotCount);
 		animationStates_.resize(slotCount);
 
 		for (int i = 0; i < slotCount; i++) {
@@ -56,12 +58,14 @@ namespace UI::Game {
 
 	void WeaponIconUI::Update(float deltaTime, const Weapon::Inventory& inventory) {
 		for (std::size_t slotIndex = 0; slotIndex < weaponIcons_.size(); ++slotIndex) {
+			const Weapon::BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
+			UpdateWeaponLevelText(slotIndex, weapon);
+
 			Sprite* weaponIcon = MySprite::TryGet(weaponIcons_[slotIndex]);
 			Sprite* shotGauge = MySprite::TryGet(weaponIconsShotGauge_[slotIndex]);
 			if (!weaponIcon || !shotGauge) {
 				continue;
 			}
-			const Weapon::BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
 			const Projectile::Type weaponType = weapon ? weapon->GetProjectileType() : Projectile::Type::None;
 			const std::string textureName = Projectile::ProjectileTypeToString(weaponType);
 
@@ -84,6 +88,29 @@ namespace UI::Game {
 			}
 
 			UpdateFireAnimation(deltaTime, slotIndex);
+		}
+	}
+
+	void WeaponIconUI::UpdateWeaponLevelText(std::size_t slotIndex, const Weapon::BaseWeapon* weapon) {
+		if (slotIndex >= weaponLevelTexts_.size()) {
+			return;
+		}
+
+		MadoEngine::TextHandle& levelTextHandle = weaponLevelTexts_[slotIndex];
+		MadoEngine::Text* levelText = MyText::TryGet(levelTextHandle);
+		if (!levelText) {
+			levelTextHandle = MyText::Find("LevelText" + std::to_string(slotIndex));
+			levelText = MyText::TryGet(levelTextHandle);
+		}
+		if (!levelText) {
+			return;
+		}
+
+		const std::string displayText = weapon
+			? std::format("Lv.{}", weapon->GetUpgradeLevel())
+			: "";
+		if (levelText->GetText() != displayText) {
+			levelText->SetText(displayText);
 		}
 	}
 

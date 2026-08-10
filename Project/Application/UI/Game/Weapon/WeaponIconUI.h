@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace Weapon {
+	class BaseWeapon;
 	class Inventory;
 }
 
@@ -37,6 +38,11 @@ namespace UI::Game {
 		/// @param slotIndex 更新する武器スロットの番号
 		void UpdateFireAnimation(float deltaTime, std::size_t slotIndex);
 
+		/// @brief 指定した武器スロットのレベル表示を更新
+		/// @param slotIndex 更新する武器スロットの番号
+		/// @param weapon スロットに装備されている武器。空きスロットの場合はnullptr
+		void UpdateWeaponLevelText(std::size_t slotIndex, const Weapon::BaseWeapon* weapon);
+
 		float fireAnimationDuration_ = 0.15f;    // 発射アニメーションの合計時間（秒）
 		Vector2 startIconScale = { 0.9f, 0.9f }; // 武器アイコンの通常時の拡縮率
 		Vector2 endIconScale = { 1.25f, 1.25f }; // 武器アイコンの発射アニメーション時の拡縮率
@@ -46,6 +52,7 @@ namespace UI::Game {
 		std::vector<MadoEngine::SpriteHandle> weaponIconsShotGauge_;
 		std::vector<MadoEngine::SpriteHandle> weaponIconsBG_;
 		std::vector<MadoEngine::SpriteHandle> weaponIconFrames_;
+		std::vector<MadoEngine::TextHandle> weaponLevelTexts_;
 		std::vector<IconAnimationState> animationStates_;
 	};
 }

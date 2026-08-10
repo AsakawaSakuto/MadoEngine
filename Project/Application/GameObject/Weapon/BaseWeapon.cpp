@@ -76,7 +76,7 @@ namespace Weapon {
 		status_ = loadedStatus;
 		weaponName_ = weaponName;
 
-		upgradeLevel_ = 0;
+		upgradeLevel_ = 1;
 		killCount_ = 0;
 		projectileCount_ = 0;
 		shotNowCount_ = 0;

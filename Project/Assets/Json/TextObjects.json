@@ -154,7 +154,7 @@
                 0.0,
                 0.0
             ],
-            "text": "LV.00",
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -194,7 +194,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.00",
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.00",
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -354,7 +354,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.00",
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
