@@ -8,13 +8,13 @@
                         0.501960813999176,
                         1.0,
                         0.0,
-                        1.0
+                        0.501960813999176
                     ],
                     "min": [
                         0.0,
                         1.0,
                         0.0,
-                        1.0
+                        0.0
                     ]
                 },
                 "start": {
@@ -34,7 +34,7 @@
             },
             "emission": {
                 "bursts": [],
-                "duration": 0.5,
+                "duration": 0.30000001192092896,
                 "isLoop": false,
                 "maxParticles": 32,
                 "ratePerSecond": 32.0,

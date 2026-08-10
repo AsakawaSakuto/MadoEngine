@@ -12,7 +12,24 @@
                         0.75,
                         0.75
                     ],
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 0.5,
+                            "value": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        }
+                    ]
                 },
                 "height": {
                     "default": 2.0,
@@ -20,7 +37,7 @@
                 },
                 "heightSegments": 1,
                 "pivot": "bottom",
-                "radialSegments": 32,
+                "radialSegments": 16,
                 "startAngleDegrees": {
                     "default": 0.0,
                     "keys": []
@@ -30,13 +47,30 @@
                         0.75,
                         0.75
                     ],
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 0.5,
+                            "value": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        }
+                    ]
                 }
             },
             "isEnabled": true,
             "loop": false,
             "material": {
-                "blendMode": "add",
+                "blendMode": "normal",
                 "bottomFadeRange": {
                     "default": 0.0,
                     "keys": []
@@ -44,7 +78,18 @@
                 "cullMode": "none",
                 "globalAlpha": {
                     "default": 1.0,
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": 1.0
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 0.5,
+                            "value": 0.3499999940395355
+                        }
+                    ]
                 },
                 "gradient": [
                     {

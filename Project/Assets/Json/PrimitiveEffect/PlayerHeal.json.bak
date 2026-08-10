@@ -9,10 +9,27 @@
                 },
                 "bottomRadii": {
                     "default": [
-                        1.0,
-                        1.0
+                        0.75,
+                        0.75
                     ],
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 0.5,
+                            "value": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        }
+                    ]
                 },
                 "height": {
                     "default": 2.0,
@@ -20,34 +37,40 @@
                 },
                 "heightSegments": 1,
                 "pivot": "bottom",
-                "radialSegments": 32,
+                "radialSegments": 16,
                 "startAngleDegrees": {
                     "default": 0.0,
+                    "keys": []
+                },
+                "topRadii": {
+                    "default": [
+                        0.75,
+                        0.75
+                    ],
                     "keys": [
                         {
                             "easing": "Linear",
                             "time": 0.0,
-                            "value": 0.0
+                            "value": [
+                                1.0,
+                                1.0
+                            ]
                         },
                         {
                             "easing": "Linear",
                             "time": 0.5,
-                            "value": 720.0
+                            "value": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
                         }
                     ]
-                },
-                "topRadii": {
-                    "default": [
-                        1.0,
-                        1.0
-                    ],
-                    "keys": []
                 }
             },
             "isEnabled": true,
             "loop": false,
             "material": {
-                "blendMode": "add",
+                "blendMode": "normal",
                 "bottomFadeRange": {
                     "default": 0.0,
                     "keys": []
@@ -55,7 +78,18 @@
                 "cullMode": "none",
                 "globalAlpha": {
                     "default": 1.0,
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": 1.0
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 0.5,
+                            "value": 0.10000000149011612
+                        }
+                    ]
                 },
                 "gradient": [
                     {
@@ -95,7 +129,24 @@
                             0.0,
                             0.0
                         ],
-                        "keys": []
+                        "keys": [
+                            {
+                                "easing": "Linear",
+                                "time": 0.0,
+                                "value": [
+                                    0.0,
+                                    0.0
+                                ]
+                            },
+                            {
+                                "easing": "Linear",
+                                "time": 0.5,
+                                "value": [
+                                    0.0,
+                                    2.0
+                                ]
+                            }
+                        ]
                     },
                     "rotationDegrees": {
                         "default": 0.0,
