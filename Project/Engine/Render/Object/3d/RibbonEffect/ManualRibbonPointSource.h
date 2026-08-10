@@ -6,39 +6,39 @@ namespace MadoEngine::Ribbon {
 	/// @brief ゲーム側から設定された制御点を使用するRibbon Point Strategy
 	class ManualRibbonPointSource final : public IRibbonPointSource {
 	public:
-		/// @brief Manual Point Sourceを構築する
+		/// @brief Manual Point Sourceを構築
 		/// @param config Point保持設定
 		/// @param initialTransform 初期Transform
 		ManualRibbonPointSource(const RibbonTrailModule& config, const Transform3D& initialTransform);
 
-		/// @brief 停止後のPoint寿命を更新する
+		/// @brief 停止後のPoint寿命を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
-		/// @brief Local空間制御点へ適用するTransformを更新する
+		/// @brief Local空間制御点へ適用するTransformを更新
 		/// @param transform 最新Transform
 		void SetTransform(const Transform3D& transform) override;
 
-		/// @brief 制御点の維持を停止する
+		/// @brief 制御点の維持を停止
 		/// @param mode 停止方式
 		void Stop(RibbonStopMode mode) override;
 
-		/// @brief 保持している制御点をすべて破棄する
+		/// @brief 保持している制御点をすべて破棄
 		void Clear() override;
 
-		/// @brief World座標へ解決済みのPoint列を取得する
+		/// @brief World座標へ解決済みのPoint列を取得
 		/// @return 設定順に並んだPoint列
 		const std::vector<RibbonPoint>& GetPoints() const override {
 			return worldPoints_;
 		}
 
-		/// @brief ゲーム側制御点を置き換える
+		/// @brief ゲーム側制御点を置換
 		/// @param controlPoints 設定順に並んだ制御点
 		/// @return 有効な制御点を設定できた場合はtrue
 		bool SetControlPoints(const std::vector<Vector3>& controlPoints);
 
 	private:
-		/// @brief 制御点をWorld座標へ変換して描画Pointを再構築する
+		/// @brief 制御点をWorld座標へ変換して描画Pointを再構築
 		void RebuildWorldPoints();
 
 		RibbonTrailModule config_;

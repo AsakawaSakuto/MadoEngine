@@ -14,16 +14,16 @@ namespace MadoEngine::Core {
 	public:
 		static RTVManager& GetInstance();
 
-		/// @brief RTVManagerを初期化する
+		/// @brief RTVManagerを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param maxDescriptors 最大デスクリプタ数（デフォルト: 256）
 		void Initialize(DxDevice* device, uint32_t maxDescriptors = 256);
 
-		/// @brief 新しいRTV用のデスクリプタインデックスを割り当てる
+		/// @brief 新しいRTV用のデスクリプタインデックスを割り当て
 		/// @return 割り当てられたデスクリプタインデックス
 		uint32_t Allocate();
 
-		/// @brief デスクリプタインデックスを解放して再利用可能にする
+		/// @brief デスクリプタインデックスを解放して再利用可能な状態へ変更
 		/// @param index 解放するデスクリプタインデックス
 		void Free(uint32_t index);
 

@@ -28,10 +28,10 @@ namespace Logger {
 		std::string formattedText;       // 表示用に整形済みのログ文字列
 	};
 
-	/// @brief ログシステムを初期化する
+	/// @brief ログシステムを初期化
 	void Initialize();
 
-	/// @brief ログシステムを終了する
+	/// @brief ログシステムを終了
 	void Finalize();
 
 	/// @brief ログを出力する関数
@@ -41,14 +41,14 @@ namespace Logger {
 		const std::source_location& location = std::source_location::current()
 	);
 
-	/// @brief メモリ上に保持しているログ履歴を取得する
+	/// @brief メモリ上に保持しているログ履歴を取得
 	/// @return ログ履歴のコピー
 	std::vector<LogEntry> GetEntries();
 
-	/// @brief メモリ上に保持しているログ履歴を消去する
+	/// @brief メモリ上に保持しているログ履歴を消去
 	void ClearEntries();
 
-	/// @brief メモリ上に保持するログ履歴の最大件数を設定する
-	/// @param maxEntries 最大保持件数。0を指定した場合は履歴を保持しない
+	/// @brief メモリ上に保持するログ履歴の最大件数を設定
+	/// @param maxEntries 最大保持件数、0の場合は履歴保持なし
 	void SetMaxBufferedEntries(std::size_t maxEntries);
 }

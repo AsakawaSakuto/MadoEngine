@@ -8,7 +8,7 @@
 
 namespace {
 
-	/// @brief Compute PSO生成失敗の詳細をログへ出力する
+	/// @brief Compute PSO生成失敗の詳細をログへ出力
 	/// @param reason 失敗理由
 	/// @param desc 生成に使用したCompute PSO記述子
 	void LogComputePipelineError(
@@ -25,7 +25,7 @@ namespace {
 		Logger::Output(message.str(), Logger::Level::Error);
 	}
 
-	/// @brief HRESULTを含むCompute PSO生成失敗の詳細をログへ出力する
+	/// @brief HRESULTを含むCompute PSO生成失敗の詳細をログへ出力
 	/// @param result 失敗したHRESULT
 	/// @param desc 生成に使用したCompute PSO記述子
 	void LogComputePipelineError(

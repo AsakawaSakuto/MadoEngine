@@ -21,7 +21,7 @@ namespace {
 
 	using namespace MadoEngine::EffectSequence;
 
-	/// @brief 文字列を固定長Bufferへコピーする
+	/// @brief 文字列を固定長Bufferへコピー
 	/// @tparam Size Buffer要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
@@ -31,7 +31,7 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 使用可能なSequence Asset名を生成する
+	/// @brief 使用可能なSequence Asset名を生成
 	/// @param system 名前を確認するSystem
 	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能な名前
@@ -71,7 +71,7 @@ namespace {
 		}
 	}
 
-	/// @brief Node Typeの日本語表示名を取得する
+	/// @brief Node Typeの日本語表示名を取得
 	/// @param nodeType Node Type
 	/// @return 表示名
 	const char* GetNodeTypeName(EffectSequenceNodeType nodeType) {
@@ -85,7 +85,7 @@ namespace {
 		}
 	}
 
-	/// @brief Node Typeに対応するEffect Asset名一覧を取得する
+	/// @brief Node Typeに対応するEffect Asset名一覧を取得
 	/// @param nodeType Node Type
 	/// @return 対応Asset名一覧
 	std::vector<std::string> GetEffectAssetNames(EffectSequenceNodeType nodeType) {
@@ -104,7 +104,7 @@ namespace {
 		}
 	}
 
-	/// @brief Node Typeに対応する固有設定へ置き換える
+	/// @brief Node Typeに対応する固有設定へ置換
 	/// @param node 設定対象Node
 	void ResetNodeSettings(EffectSequenceNode& node) {
 		switch (node.nodeType) {
@@ -127,10 +127,10 @@ namespace {
 		node.effectAssetName = assetNames.empty() ? std::string{} : assetNames.front();
 	}
 
-	/// @brief Node IDからNodeを検索する
+	/// @brief Node IDからNodeを検索
 	/// @param nodes 検索対象Node一覧
 	/// @param nodeId 検索するNode ID
-	/// @return 該当Node。存在しない場合はnullptr
+	/// @return 該当Node、存在しない場合はnullptr
 	EffectSequenceNode* FindNode(std::vector<EffectSequenceNode>& nodes, uint32_t nodeId) {
 		const auto found = std::find_if(nodes.begin(), nodes.end(), [nodeId](const EffectSequenceNode& node) {
 			return node.nodeId == nodeId;
@@ -138,7 +138,7 @@ namespace {
 		return found != nodes.end() ? &*found : nullptr;
 	}
 
-	/// @brief Parent候補が循環参照を作るか確認する
+	/// @brief Parent候補が循環参照を作るか確認
 	/// @param nodes Node一覧
 	/// @param nodeId 編集対象Node ID
 	/// @param parentNodeId Parent候補Node ID
@@ -163,7 +163,7 @@ namespace {
 		return true;
 	}
 
-	/// @brief Preview SequenceをImmediate停止する
+	/// @brief Preview SequenceをImmediate停止
 	/// @param system 停止に使用するSystem
 	/// @param handle 停止するPreview Handle
 	void StopPreview(EffectSequenceSystem& system, EffectSequenceHandle& handle) {
@@ -173,7 +173,7 @@ namespace {
 		handle = {};
 	}
 
-	/// @brief Preview Sequenceを再生する
+	/// @brief Preview Sequenceを再生
 	/// @param system 再生に使用するSystem
 	/// @param assetName 再生するAsset名
 	/// @param rootTransform Preview Root Transform
@@ -195,7 +195,7 @@ namespace {
 		return system.Play(assetName, desc);
 	}
 
-	/// @brief Transform編集UIを描画する
+	/// @brief Transform編集UIを描画
 	/// @param transform 編集対象Transform
 	/// @return 値を変更した場合はtrue
 	bool DrawTransformEditor(Transform3D& transform) {
@@ -206,7 +206,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Preview再生ヘッドを描画する
+	/// @brief Preview再生ヘッドを描画
 	/// @param playbackTime 現在時刻
 	/// @param duration Sequence時間
 	void DrawPlaybackHead(float playbackTime, float duration) {
@@ -226,7 +226,7 @@ namespace {
 		drawList->AddText({ start.x + 6.0f, start.y + 2.0f }, IM_COL32_WHITE, label.c_str());
 	}
 
-	/// @brief 選択Nodeの詳細設定UIを描画する
+	/// @brief 選択Nodeの詳細設定UIを描画
 	/// @param node 編集対象Node
 	/// @return 値を変更した場合はtrue
 	bool DrawNodeInspector(EffectSequenceNode& node) {

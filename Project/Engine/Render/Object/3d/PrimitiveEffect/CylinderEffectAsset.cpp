@@ -62,7 +62,7 @@ namespace {
 		{ "None", EaseType::None },
 	};
 
-	/// @brief ファイルパスをUTF-8文字列へ変換する
+	/// @brief ファイルパスをUTF-8文字列へ変換
 	/// @param path 変換するファイルパス
 	/// @return UTF-8文字列
 	std::string PathToUtf8String(const std::filesystem::path& path) {
@@ -70,10 +70,10 @@ namespace {
 		return std::string(reinterpret_cast<const char*>(value.data()), value.size());
 	}
 
-	/// @brief Jsonオブジェクトから子要素を取得する
+	/// @brief Jsonオブジェクトから子要素を取得
 	/// @param json 検索元Json
 	/// @param key 検索するキー
-	/// @return 子要素。存在しない場合はnullptr
+	/// @return 子要素、存在しない場合はnullptr
 	const JsonValue* FindValue(const JsonValue& json, const char* key) {
 		if (!json.is_object() || !json.contains(key) || json.at(key).is_null()) {
 			return nullptr;
@@ -81,7 +81,7 @@ namespace {
 		return &json.at(key);
 	}
 
-	/// @brief Jsonから文字列を安全に読み込む
+	/// @brief Jsonから文字列を安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込み失敗時の値
@@ -91,7 +91,7 @@ namespace {
 		return value && value->is_string() ? value->get<std::string>() : fallback;
 	}
 
-	/// @brief Jsonからfloatを安全に読み込む
+	/// @brief Jsonからfloatを安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込み失敗時の値
@@ -101,7 +101,7 @@ namespace {
 		return value && value->is_number() ? value->get<float>() : fallback;
 	}
 
-	/// @brief Jsonから符号なし整数を安全に読み込む
+	/// @brief Jsonから符号なし整数を安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込み失敗時の値
@@ -111,7 +111,7 @@ namespace {
 		return value && value->is_number_unsigned() ? value->get<uint32_t>() : fallback;
 	}
 
-	/// @brief Jsonからboolを安全に読み込む
+	/// @brief Jsonからboolを安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込み失敗時の値
@@ -121,7 +121,7 @@ namespace {
 		return value && value->is_boolean() ? value->get<bool>() : fallback;
 	}
 
-	/// @brief 文字列からイージング種類を取得する
+	/// @brief 文字列からイージング種類を取得
 	/// @param value 変換元文字列
 	/// @return イージング種類
 	EaseType ParseEaseType(const std::string& value) {
@@ -133,7 +133,7 @@ namespace {
 		return EaseType::Linear;
 	}
 
-	/// @brief イージング種類を文字列へ変換する
+	/// @brief イージング種類を文字列へ変換
 	/// @param value 変換するイージング種類
 	/// @return イージング名
 	const char* ToString(EaseType value) {
@@ -145,7 +145,7 @@ namespace {
 		return "Linear";
 	}
 
-	/// @brief Jsonから型付きトラックを読み込む
+	/// @brief Jsonから型付きトラックを読み込み
 	/// @tparam T トラック値の型
 	/// @tparam Reader 値の読み込み関数型
 	/// @param json 読み込み元Json
@@ -187,7 +187,7 @@ namespace {
 		return track;
 	}
 
-	/// @brief 型付きトラックをJsonへ変換する
+	/// @brief 型付きトラックをJsonへ変換
 	/// @tparam T トラック値の型
 	/// @param track 変換するトラック
 	/// @return 変換されたJson
@@ -206,7 +206,7 @@ namespace {
 		return json;
 	}
 
-	/// @brief 文字列からUV方向を取得する
+	/// @brief 文字列からUV方向を取得
 	/// @param value 変換元文字列
 	/// @return UV方向
 	CylinderUvDirection ParseUvDirection(const std::string& value) {
@@ -216,7 +216,7 @@ namespace {
 		return CylinderUvDirection::TopToBottom;
 	}
 
-	/// @brief UV方向を文字列へ変換する
+	/// @brief UV方向を文字列へ変換
 	/// @param value 変換するUV方向
 	/// @return UV方向名
 	const char* ToString(CylinderUvDirection value) {
@@ -229,7 +229,7 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列からPivotを取得する
+	/// @brief 文字列からPivotを取得
 	/// @param value 変換元文字列
 	/// @return Pivot
 	CylinderPivot ParsePivot(const std::string& value) {
@@ -238,7 +238,7 @@ namespace {
 		return CylinderPivot::Bottom;
 	}
 
-	/// @brief Pivotを文字列へ変換する
+	/// @brief Pivotを文字列へ変換
 	/// @param value 変換するPivot
 	/// @return Pivot名
 	const char* ToString(CylinderPivot value) {
@@ -250,7 +250,7 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列からBlendModeを取得する
+	/// @brief 文字列からBlendModeを取得
 	/// @param value 変換元文字列
 	/// @return BlendMode
 	MadoEngine::Render::BlendMode ParseBlendMode(const std::string& value) {
@@ -261,7 +261,7 @@ namespace {
 		return MadoEngine::Render::BlendMode::Add;
 	}
 
-	/// @brief BlendModeを文字列へ変換する
+	/// @brief BlendModeを文字列へ変換
 	/// @param value 変換するBlendMode
 	/// @return BlendMode名
 	const char* ToString(MadoEngine::Render::BlendMode value) {
@@ -275,7 +275,7 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列からCullModeを取得する
+	/// @brief 文字列からCullModeを取得
 	/// @param value 変換元文字列
 	/// @return CullMode
 	MadoEngine::Render::CullMode ParseCullMode(const std::string& value) {
@@ -284,7 +284,7 @@ namespace {
 		return MadoEngine::Render::CullMode::None;
 	}
 
-	/// @brief CullModeを文字列へ変換する
+	/// @brief CullModeを文字列へ変換
 	/// @param value 変換するCullMode
 	/// @return CullMode名
 	const char* ToString(MadoEngine::Render::CullMode value) {
@@ -296,7 +296,7 @@ namespace {
 		}
 	}
 
-	/// @brief トラック内の全値を補正する
+	/// @brief トラック内の全値を補正
 	/// @tparam T トラック値の型
 	/// @tparam Normalizer 値の補正関数型
 	/// @param track 補正対象トラック
@@ -311,7 +311,7 @@ namespace {
 		track.SetKeyframes(std::move(keyframes));
 	}
 
-	/// @brief JsonからCylinder Emitter設定を読み込む
+	/// @brief JsonからCylinder Emitter設定を読み込み
 	/// @param json 読み込み元Json
 	/// @return 読み込んだEmitter設定
 	CylinderEmitterConfig ReadCylinderEmitter(const JsonValue& json) {
@@ -396,7 +396,7 @@ namespace {
 		return config;
 	}
 
-	/// @brief Cylinder Emitter設定をJsonへ変換する
+	/// @brief Cylinder Emitter設定をJsonへ変換
 	/// @param config 変換するEmitter設定
 	/// @return 変換後Json
 	JsonValue WriteCylinderEmitter(const CylinderEmitterConfig& config) {
@@ -440,7 +440,7 @@ namespace {
 		};
 	}
 
-	/// @brief Cylinder Emitter設定を安全な範囲へ補正する
+	/// @brief Cylinder Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateCylinderEmitter(CylinderEmitterConfig& config) {
 		config.duration = std::clamp(std::isfinite(config.duration) ? config.duration : 1.0f, 0.001f, 3600.0f);

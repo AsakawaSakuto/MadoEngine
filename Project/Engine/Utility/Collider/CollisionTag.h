@@ -23,7 +23,7 @@ enum class CollisionTag {
 	DropObjectHitBox,
 };
 
-/// @brief CollisionTag を文字列に変換する
+/// @brief CollisionTag を文字列に変換
 /// @param tag 変換するタグ
 /// @return タグ名の文字列
 inline std::string CollisionTagToString(CollisionTag tag) {

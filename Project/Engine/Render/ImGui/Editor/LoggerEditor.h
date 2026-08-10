@@ -6,7 +6,7 @@ namespace MadoEngine::Editor {
 
 #ifdef USE_IMGUI
 
-/// @brief Loggerの履歴を表示するImGui UIを描画する
+/// @brief Loggerの履歴を表示するImGui UIを描画
 void DrawLoggerEditorUI();
 
 #endif // USE_IMGUI

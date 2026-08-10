@@ -5,10 +5,10 @@
 namespace {
 	constexpr float kRotationEpsilon = 1e-5f;
 
-	/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返します。
-	/// @param value 正規化するベクトルです。
-	/// @param fallback 代替ベクトルです。
-	/// @return 正規化済みベクトルです。
+	/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返却
+	/// @param value 正規化するベクトル
+	/// @param fallback 代替ベクトル
+	/// @return 正規化済みベクトル
 	Vector3 NormalizeOrFallback(const Vector3& value, const Vector3& fallback) {
 		const float lengthSq = value.LengthSq();
 		if (lengthSq < kRotationEpsilon) {
@@ -19,25 +19,25 @@ namespace {
 		return value * invLength;
 	}
 
-	/// @brief 水平Yawから前方向ベクトルを作成します。
-	/// @param yaw 水平Yaw角度です。
-	/// @return 水平面上の前方向です。
+	/// @brief 水平Yawから前方向ベクトルを作成
+	/// @param yaw 水平Yaw角度
+	/// @return 水平面上の前方向
 	Vector3 CreateHorizontalForward(float yaw) {
 		return { std::sin(yaw), 0.0f, std::cos(yaw) };
 	}
 
-	/// @brief 水平Yawから右方向ベクトルを作成します。
-	/// @param yaw 水平Yaw角度です。
-	/// @return 水平面上の右方向です。
+	/// @brief 水平Yawから右方向ベクトルを作成
+	/// @param yaw 水平Yaw角度
+	/// @return 水平面上の右方向
 	Vector3 CreateHorizontalRight(float yaw) {
 		return { std::cos(yaw), 0.0f, -std::sin(yaw) };
 	}
 
-	/// @brief 回転行列の各軸からMakeAffineと同じ順序のEuler角を復元します。
-	/// @param right ローカルX軸のワールド方向です。
-	/// @param up ローカルY軸のワールド方向です。
-	/// @param forward ローカルZ軸のワールド方向です。
-	/// @return 復元したEuler角です。
+	/// @brief 回転行列の各軸からMakeAffineと同じ順序のEuler角を復元
+	/// @param right ローカルX軸のワールド方向
+	/// @param up ローカルY軸のワールド方向
+	/// @param forward ローカルZ軸のワールド方向
+	/// @return 復元したEuler角
 	Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& forward) {
 		Vector3 euler = {};
 		const float sinY = std::clamp(-right.z, -1.0f, 1.0f);
@@ -55,10 +55,10 @@ namespace {
 		return euler;
 	}
 
-	/// @brief 斜面法線と水平向きに沿ったModel回転を作成します。
-	/// @param faceYaw Playerが向いている水平Yaw角度です。
-	/// @param slopeNormal Slope上面の法線です。
-	/// @return 斜面に沿ったModel回転です。
+	/// @brief 斜面法線と水平向きに沿ったModel回転を作成
+	/// @param faceYaw Playerが向いている水平Yaw角度
+	/// @param slopeNormal Slope上面の法線
+	/// @return 斜面に沿ったModel回転
 	Vector3 CreateSlopeAlignedRotation(float faceYaw, const Vector3& slopeNormal) {
 		const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
 		const Vector3 desiredForward = CreateHorizontalForward(faceYaw);

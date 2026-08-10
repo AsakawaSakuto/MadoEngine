@@ -25,7 +25,7 @@ static ColliderShape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
     return syncedShape;
 }
 
-/// @brief 指定したShapeのcenterを座標に同期する
+/// @brief 指定したShapeのcenterを座標に同期
 /// @param shape 同期する形状
 /// @param position 反映する座標
 static void SyncShapeCenter(ColliderShape& shape, const Vector3& position) {
@@ -36,7 +36,7 @@ static void SyncShapeCenter(ColliderShape& shape, const Vector3& position) {
         }, shape);
 }
 
-/// @brief コライダーの座標をShapeへ反映する
+/// @brief コライダーの座標をShapeへ反映
 /// @param info 同期するコライダー情報
 static void SyncColliderShapePosition(ColliderManager::ColliderInfo& info) {
     if (!info.pPosition || !info.pShape) {
@@ -46,7 +46,7 @@ static void SyncColliderShapePosition(ColliderManager::ColliderInfo& info) {
     SyncShapeCenter(*(info.pShape), *(info.pPosition));
 }
 
-/// @brief 2点間を線形補間する
+/// @brief 2点間を線形補間
 /// @param start 開始座標
 /// @param end 終了座標
 /// @param t 補間率
@@ -55,7 +55,7 @@ static Vector3 LerpVector3(const Vector3& start, const Vector3& end, float t) {
     return start + (end - start) * t;
 }
 
-/// @brief 点がAABB内にあるか判定する
+/// @brief 点がAABB内にあるか判定
 /// @param point 判定する点
 /// @param min AABBの最小座標
 /// @param max AABBの最大座標
@@ -66,7 +66,7 @@ static bool IsPointInsideAABB(const Vector3& point, const Vector3& min, const Ve
         point.z >= min.z && point.z <= max.z;
 }
 
-/// @brief SphereがAABBの上面上を移動しているか判定する
+/// @brief SphereがAABBの上面上を移動しているか判定
 /// @param relativeStart AABB基準の開始座標
 /// @param relativeEnd AABB基準の終了座標
 /// @param aabb 対象AABB
@@ -79,7 +79,7 @@ static bool IsSphereMovingOnAABBTop(const Vector3& relativeStart, const Vector3&
         relativeEnd.y >= topCenterY - kTopTolerance;
 }
 
-/// @brief SphereがAABB上面に乗っている状態か判定する
+/// @brief SphereがAABB上面に乗っている状態か判定
 /// @param center Sphere中心
 /// @param radius Sphere半径
 /// @param aabbMin AABB最小座標
@@ -99,7 +99,7 @@ static bool IsSphereOnAABBTop(const Vector3& center, float radius, const Vector3
         dx * dx + dz * dz <= radius * radius;
 }
 
-/// @brief AABB側面の接触を歩行用の継ぎ目として無視できるか判定する
+/// @brief AABB側面の接触を歩行用の継ぎ目として無視できるか判定
 /// @param center Sphere中心
 /// @param radius Sphere半径
 /// @param aabbMax AABB最大座標
@@ -110,7 +110,7 @@ static bool CanIgnoreAABBSideSeam(const Vector3& center, float radius, const Vec
     return bottomY >= aabbMax.y - kSeamTolerance;
 }
 
-/// @brief AABB内部に入ったSphereを最も近い面から押し出す
+/// @brief AABB内部に入ったSphereを最も近い面から押し出し
 /// @param center Sphere中心
 /// @param radius Sphere半径
 /// @param aabbMin AABB最小座標
@@ -161,7 +161,7 @@ struct SweptAABBHit {
     float exitTime = 1.0f;
 };
 
-/// @brief 移動する点とAABBの連続衝突判定を行う
+/// @brief 移動する点とAABBの連続衝突判定
 /// @param start 点の開始座標
 /// @param end 点の終了座標
 /// @param min AABBの最小座標
@@ -214,7 +214,7 @@ static SweptAABBHit SweepPointAABB(const Vector3& start, const Vector3& end, con
     return result;
 }
 
-/// @brief SphereとAABBの連続衝突判定を行う
+/// @brief SphereとAABBの連続衝突判定
 /// @param sphereInfo Sphereのコライダー情報
 /// @param aabbInfo AABBのコライダー情報
 /// @param hitTime 衝突時刻の出力先
@@ -245,7 +245,7 @@ static bool CheckSweptSphereAABB(ColliderManager::ColliderInfo& sphereInfo, Coll
     return true;
 }
 
-/// @brief 指定時刻のSphereとSlopeが衝突しているか判定する
+/// @brief 指定時刻のSphereとSlopeが衝突しているか判定
 /// @param sphereInfo Sphereのコライダー情報
 /// @param slopeInfo Slopeのコライダー情報
 /// @param t 判定時刻
@@ -258,7 +258,7 @@ static bool IsSphereSlopeHitAtTime(ColliderManager::ColliderInfo& sphereInfo, Co
     return Collision::IsHit(sphere, slope);
 }
 
-/// @brief Sphere中心からSlope上面までの法線方向距離を計算する
+/// @brief Sphere中心からSlope上面までの法線方向距離を計算
 /// @param center Sphere中心座標
 /// @param slope 対象Slope
 /// @param samplePoint 高さを取得するXZ座標
@@ -270,7 +270,7 @@ static float CalcSphereSlopeTopSignedDistance(const Vector3& center, const Slope
     return Math::Dot(center - planePoint, normal);
 }
 
-/// @brief SphereがSlope上面に接地しているかを法線方向距離で判定する
+/// @brief SphereがSlope上面に接地しているかを法線方向距離で判定
 /// @param sphere 対象Sphere
 /// @param slope 対象Slope
 /// @param center Sphere中心座標
@@ -287,7 +287,7 @@ static bool IsSphereTouchingSlopeTop(const Sphere& sphere, const Slope& slope, c
     return signedDistance >= -belowTolerance && signedDistance <= sphere.radius + aboveTolerance;
 }
 
-/// @brief Slope上面にSphereを接地させる中心Y座標を取得する
+/// @brief Slope上面にSphereを接地させる中心Y座標を取得
 /// @param sphere 対象Sphere
 /// @param slope 対象Slope
 /// @param samplePoint 高さを取得するXZ座標
@@ -299,7 +299,7 @@ static float CalcSlopeTopSupportCenterY(const Sphere& sphere, const Slope& slope
     return surfaceY + sphere.radius / normalY;
 }
 
-/// @brief Slope上面の法線方向にSphereを押し出すベクトルを取得する
+/// @brief Slope上面の法線方向にSphereを押し出すベクトルを取得
 /// @param center Sphere中心座標
 /// @param radius Sphere半径
 /// @param slope 対象Slope
@@ -334,7 +334,7 @@ static bool TryGetSlopeTopPushVector(const Vector3& center, float radius, const 
     return true;
 }
 
-/// @brief 指定時刻のSphereがSlope上面に乗る接触か判定する
+/// @brief 指定時刻のSphereがSlope上面に乗る接触か判定
 /// @param sphereInfo Sphereのコライダー情報
 /// @param slopeInfo Slopeのコライダー情報
 /// @param t 判定時刻
@@ -348,7 +348,7 @@ static bool IsSphereOnSlopeTopAtTime(ColliderManager::ColliderInfo& sphereInfo, 
     return IsSphereTouchingSlopeTop(sphere, slope, sphere.center, sphere.radius);
 }
 
-/// @brief Slope側面の接触を歩行用の継ぎ目として無視できるか判定する
+/// @brief Slope側面の接触を歩行用の継ぎ目として無視できるか判定
 /// @param center Sphere中心
 /// @param radius Sphere半径
 /// @param slope 対象Slope
@@ -362,7 +362,7 @@ static bool CanIgnoreSlopeSideSeam(const Vector3& center, float radius, const Sl
     return center.y >= supportCenterY - kSeamTolerance;
 }
 
-/// @brief SphereとSlopeの連続衝突判定を行う
+/// @brief SphereとSlopeの連続衝突判定
 /// @param sphereInfo Sphereのコライダー情報
 /// @param slopeInfo Slopeのコライダー情報
 /// @param hitTime 衝突時刻の出力先
@@ -438,11 +438,11 @@ static bool CheckSweptSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Col
     return true;
 }
 
-/// @brief Resolve overlap between a sphere and a slope.
-/// @param sphereInfo Sphere collider information.
-/// @param slopeInfo Slope collider information.
-/// @param factorSphere Movement ratio applied to the sphere.
-/// @param factorSlope Movement ratio applied to the slope.
+/// @brief SphereとSlopeの重なりを解消
+/// @param sphereInfo Sphereコライダー情報
+/// @param slopeInfo Slopeコライダー情報
+/// @param factorSphere Sphereへ適用する移動比率
+/// @param factorSlope Slopeへ適用する移動比率
 static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, ColliderManager::ColliderInfo& slopeInfo, float factorSphere, float factorSlope) {
     auto& sphere = std::get<Sphere>(*(sphereInfo.pShape));
     auto& slope = std::get<Slope>(*(slopeInfo.pShape));
@@ -530,9 +530,9 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
     }
 }
 
-/// @brief 指定したタグのコライダー名一覧を取得します。
-/// @param tag 検索対象の衝突タグです。
-/// @return コライダー名一覧へのポインタを返します。存在しない場合はnullptrを返します。
+/// @brief 指定したタグのコライダー名一覧を取得
+/// @param tag 検索対象の衝突タグ
+/// @return コライダー名一覧へのポインタを返します、存在しない場合はnullptr
 const std::vector<std::string>* ColliderManager::FindColliderNames(CollisionTag tag) const {
     auto it = m_colliderNamesByTag.find(tag);
     if (it == m_colliderNamesByTag.end()) {
@@ -542,10 +542,10 @@ const std::vector<std::string>* ColliderManager::FindColliderNames(CollisionTag 
     return &it->second;
 }
 
-/// @brief 最小最大座標から検索用AABBを作成します。
-/// @param min 最小座標です。
-/// @param max 最大座標です。
-/// @return 作成したAABBです。
+/// @brief 最小最大座標から検索用AABBを作成
+/// @param min 最小座標
+/// @param max 最大座標
+/// @return 作成したAABB
 static AABB MakeWorldBounds(const Vector3& min, const Vector3& max) {
     AABB bounds;
     bounds.center = { 0.0f, 0.0f, 0.0f };
@@ -554,10 +554,10 @@ static AABB MakeWorldBounds(const Vector3& min, const Vector3& max) {
     return bounds;
 }
 
-/// @brief AABBの交差判定を行います。
-/// @param a AABBです。
-/// @param b AABBです。
-/// @return 交差していればtrueを返します。
+/// @brief AABBの交差判定
+/// @param a AABB
+/// @param b AABB
+/// @return 交差していればtrue
 static bool IsBoundsIntersect(const AABB& a, const AABB& b) {
     const Vector3 aMin = a.GetMinWorld();
     const Vector3 aMax = a.GetMaxWorld();
@@ -569,9 +569,9 @@ static bool IsBoundsIntersect(const AABB& a, const AABB& b) {
         aMin.z <= bMax.z && aMax.z >= bMin.z;
 }
 
-/// @brief OBBの外接AABBを作成します。
-/// @param obb 対象OBBです。
-/// @return 外接AABBです。
+/// @brief OBBの外接AABBを作成
+/// @param obb 対象OBB
+/// @return 外接AABB
 static AABB MakeOBBBounds(const OBB& obb) {
     Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
     Vector3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
@@ -602,9 +602,9 @@ static AABB MakeOBBBounds(const OBB& obb) {
     return MakeWorldBounds(min, max);
 }
 
-/// @brief タグ別索引へコライダー名を追加します。
-/// @param tag 追加先の衝突タグです。
-/// @param name 追加するコライダー名です。
+/// @brief タグ別索引へコライダー名を追加
+/// @param tag 追加先の衝突タグ
+/// @param name 追加するコライダー名
 void ColliderManager::AddColliderNameToTag(CollisionTag tag, const std::string& name) {
     auto& names = m_colliderNamesByTag[tag];
     if (std::find(names.begin(), names.end(), name) != names.end()) {
@@ -614,9 +614,9 @@ void ColliderManager::AddColliderNameToTag(CollisionTag tag, const std::string& 
     names.push_back(name);
 }
 
-/// @brief タグ別索引からコライダー名を削除します。
-/// @param tag 削除対象の衝突タグです。
-/// @param name 削除するコライダー名です。
+/// @brief タグ別索引からコライダー名を削除
+/// @param tag 削除対象の衝突タグ
+/// @param name 削除するコライダー名
 void ColliderManager::RemoveColliderNameFromTag(CollisionTag tag, const std::string& name) {
     auto it = m_colliderNamesByTag.find(tag);
     if (it == m_colliderNamesByTag.end()) {
@@ -679,15 +679,15 @@ void ColliderManager::RemoveColliderAll() {
     Logger::Output("すべてのコライダーを削除しました", Logger::Level::Application);
 }
 
-/// @brief 衝突ルールを登録する
+/// @brief 衝突ルールを登録
 /// @param tagA グループA
 /// @param tagB グループB
-/// @param enableResolve 押し戻しを有効にするか
+/// @param enableResolve 押し戻しを有効にする場合はtrue
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve) {
     RegisterCollisionPair(tagA, tagB, CollisionPairSetting{ enableResolve, false });
 }
 
-/// @brief 衝突ルールを詳細設定付きで登録する
+/// @brief 衝突ルールを詳細設定付きで登録
 /// @param tagA グループA
 /// @param tagB グループB
 /// @param setting 押し戻しやCCDの有効状態
@@ -702,11 +702,11 @@ void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB
     );
 }
 
-/// @brief 衝突ルールを押し戻しとCCD指定付きで登録する
+/// @brief 衝突ルールを押し戻しとCCD指定付きで登録
 /// @param tagA グループA
 /// @param tagB グループB
-/// @param enableResolve 押し戻しを有効にするか
-/// @param enableCCD 連続衝突判定を有効にするか
+/// @param enableResolve 押し戻しを有効にする場合はtrue
+/// @param enableCCD 連続衝突判定を有効にする場合はtrue
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve, bool enableCCD) {
     RegisterCollisionPair(tagA, tagB, CollisionPairSetting{ enableResolve, enableCCD });
 }
@@ -856,7 +856,7 @@ void ColliderManager::QueryStaticTerrainBVH(const AABB& bounds, CollisionTag tar
     profileStats_.bvhCandidateCount += static_cast<uint32_t>(outCandidates.size());
 }
 
-/// @brief 前回座標から現在座標への移動で連続衝突しているか判定する
+/// @brief 前回座標から現在座標への移動で連続衝突しているか判定
 /// @param a コライダーA
 /// @param b コライダーB
 /// @param hitTime 衝突時刻の出力先
@@ -888,7 +888,7 @@ bool ColliderManager::CheckSweptCollision(ColliderInfo& a, ColliderInfo& b, floa
     return false;
 }
 
-/// @brief CCDで求めた衝突時刻へコライダー位置を戻す
+/// @brief CCDで求めた衝突時刻へコライダー位置を復元
 /// @param a コライダーA
 /// @param b コライダーB
 /// @param hitTime 衝突時刻
@@ -909,7 +909,7 @@ void ColliderManager::ApplySweptCollision(ColliderInfo& a, ColliderInfo& b, floa
     SyncColliderShapePosition(b);
 }
 
-/// @brief 現在座標を次回CCD用の前回座標として保存する
+/// @brief 現在座標を次回CCD用の前回座標として保存
 void ColliderManager::StorePreviousPositions() {
     for (auto& [name, info] : m_colliders) {
         if (!info.pPosition) {
@@ -1271,10 +1271,10 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
     return false;
 }
 
-/// @brief 指定したタグ同士で地面接触しているかを判定します。
-/// @param selfTag 接地を判定する側のタグです。
-/// @param targetTag 地面として扱う側のタグです。
-/// @return 接地していればtrueを返します。
+/// @brief 指定したタグ同士で地面接触しているかを判定
+/// @param selfTag 接地を判定する側のタグ
+/// @param targetTag 地面として扱う側のタグ
+/// @return 接地していればtrue
 bool ColliderManager::IsGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1290,10 +1290,10 @@ bool ColliderManager::IsGroundContact(CollisionTag selfTag, CollisionTag targetT
     return false;
 }
 
-/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定します。
-/// @param name 個体の識別名です。
-/// @param targetTag スロープとして扱うタグです。
-/// @return スロープ面に接触していればtrueを返します。
+/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定
+/// @param name 個体の識別名
+/// @param targetTag スロープとして扱うタグ
+/// @return スロープ面に接触していればtrue
 bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1353,10 +1353,10 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     return false;
 }
 
-/// @brief 指定したタグ同士で坂地面に接触しているかを判定します。
-/// @param selfTag 接地を判定する側のタグです。
-/// @param targetTag 坂地面として扱う側のタグです。
-/// @return 坂地面に接地していればtrueを返します。
+/// @brief 指定したタグ同士で坂地面に接触しているかを判定
+/// @param selfTag 接地を判定する側のタグ
+/// @param targetTag 坂地面として扱う側のタグ
+/// @return 坂地面に接地していればtrue
 bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1372,12 +1372,12 @@ bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag ta
     return false;
 }
 
-/// @brief 指定座標の直下にある地表面のY座標を取得します。
-/// @param origin 地表面を探す基準座標です。
-/// @param targetTag 地面として扱う対象タグです。
-/// @param outSurfaceY 見つかった地表面のY座標です。
-/// @param maxDistance 下方向に探索する最大距離です。
-/// @return 地表面が見つかった場合はtrueを返します。
+/// @brief 指定座標の直下にある地表面のY座標を取得
+/// @param origin 地表面を探す基準座標
+/// @param targetTag 地面として扱う対象タグ
+/// @param outSurfaceY 見つかった地表面のY座標
+/// @param maxDistance 下方向に探索する最大距離
+/// @return 地表面が見つかった場合はtrue
 bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance) {
     if (maxDistance < 0.0f) {
         return false;
@@ -1472,12 +1472,12 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
     return true;
 }
 
-/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得します。
-/// @param name Sphereコライダーの識別名です。
-/// @param targetTag Slopeとして扱うタグです。
-/// @param outCenterY Sphere中心に設定するY座標の出力先です。
-/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
-/// @return 追従できるSlopeが見つかればtrueを返します。
+/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得
+/// @param name Sphereコライダーの識別名
+/// @param targetTag Slopeとして扱うタグ
+/// @param outCenterY Sphere中心に設定するY座標の出力先
+/// @param maxSnapDownDistance 下方向に追従できる最大距離
+/// @return 追従できるSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1579,12 +1579,12 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     return true;
 }
 
-/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得します。
-/// @param selfTag Sphereコライダーとして扱う側のタグです。
-/// @param targetTag Slopeとして扱う側のタグです。
-/// @param outCenterY Sphere中心に設定するY座標の出力先です。
-/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
-/// @return 追従できるSlopeが見つかればtrueを返します。
+/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得
+/// @param selfTag Sphereコライダーとして扱う側のタグ
+/// @param targetTag Slopeとして扱う側のタグ
+/// @param outCenterY Sphere中心に設定するY座標の出力先
+/// @param maxSnapDownDistance 下方向に追従できる最大距離
+/// @return 追従できるSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1600,11 +1600,11 @@ bool ColliderManager::TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTa
     return false;
 }
 
-/// @brief Sphereコライダーが接地しているSlope上面の法線を取得します。
-/// @param name Sphereコライダーの識別名です。
-/// @param targetTag Slopeとして扱うタグです。
-/// @param outNormal Slope上面の法線の出力先です。
-/// @return 接地しているSlopeが見つかればtrueを返します。
+/// @brief Sphereコライダーが接地しているSlope上面の法線を取得
+/// @param name Sphereコライダーの識別名
+/// @param targetTag Slopeとして扱うタグ
+/// @param outNormal Slope上面の法線の出力先
+/// @return 接地しているSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1694,11 +1694,11 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
     return true;
 }
 
-/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得します。
-/// @param selfTag Sphereコライダーとして扱う側のタグです。
-/// @param targetTag Slopeとして扱う側のタグです。
-/// @param outNormal Slope上面の法線の出力先です。
-/// @return 接地しているSlopeが見つかればtrueを返します。
+/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得
+/// @param selfTag Sphereコライダーとして扱う側のタグ
+/// @param targetTag Slopeとして扱う側のタグ
+/// @param outNormal Slope上面の法線の出力先
+/// @return 接地しているSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {

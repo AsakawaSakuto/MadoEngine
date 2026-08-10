@@ -22,7 +22,7 @@ const char* GetTextFontFamilyName(TextFontFamilyType type);
 
 /// @brief フォントファミリー名からTextフォント種別を取得
 /// @param fontFamily DirectWriteフォントファミリー名
-/// @return 対応するフォント種別。候補外の場合はTextFontFamilyType::Invalid
+/// @return 対応するフォント種別、候補外の場合はTextFontFamilyType::Invalid
 TextFontFamilyType GetTextFontFamilyTypeFromName(const std::string& fontFamily);
 
 /// @brief DirectWriteで生成したテクスチャを2D空間へ描画するTextオブジェクト
@@ -33,7 +33,7 @@ public:
 	/// @brief 単体使用向けにTextを初期化
 	/// @param device D3D12デバイス
 	/// @param commandList コマンドリスト
-	/// @param textureName 未使用です
+	/// @param textureName 未使用
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) override;
 
 	/// @brief TextManager経由の共有ジオメトリでTextを初期化
@@ -85,7 +85,7 @@ public:
 	float GetFontSize() const { return fontSize_; }
 
 	/// @brief 行間倍率を設定
-	/// @param lineSpacing 行間倍率。1.0fで標準
+	/// @param lineSpacing 行間倍率、1.0fで標準
 	void SetLineSpacing(float lineSpacing);
 
 	/// @brief 行間倍率を取得
@@ -101,7 +101,7 @@ public:
 	float GetCharacterSpacing() const { return characterSpacing_; }
 
 	/// @brief Textの表示領域を設定
-	/// @param size 表示領域のピクセルサイズ。0以下の場合は文字列から自動計測
+	/// @param size 表示領域のピクセルサイズ、0以下の場合は文字列から自動計測
 	void SetAreaSize(const Vector2& size);
 
 	/// @brief Textの表示領域を取得
@@ -167,18 +167,18 @@ public:
 private:
 	friend class TextManager;
 
-	/// @brief TextManagerが管理する識別名と動的テクスチャキーを更新する
+	/// @brief TextManagerが管理する識別名と動的テクスチャキーを更新
 	/// @param objectName 新しい識別名
 	/// @return 識別名と動的テクスチャキーを更新できた場合はtrue
 	bool SetObjectName(const std::string& objectName);
 
-	/// @brief 共通初期化を行う
+	/// @brief 共通初期化
 	void InitializeCommonResources();
 
-	/// @brief Textテクスチャの再生成が必要な状態にする
+	/// @brief Textテクスチャの再生成要求を設定
 	void MarkDirty() { isTextureDirty_ = true; }
 
-	/// @brief 必要であればTextテクスチャを再生成する
+	/// @brief 必要であればTextテクスチャを再生成
 	void RebuildTextureIfNeeded();
 
 	/// @brief UTF-8文字列をUTF-16文字列へ変換

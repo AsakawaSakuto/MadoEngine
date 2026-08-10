@@ -40,7 +40,7 @@ private:
 	void UpdateEventObjects(Player::Base& player);
 
 	/// @brief Playerとイベントオブジェクトの相互作用を処理
-	/// @param player 相互作用するPlayerです。
+	/// @param player 相互作用するPlayer
 	void HandleEventObjectInteraction(Player::Base& player);
 
 	/// @brief 地形生成用の高さ設定を有効範囲に補正

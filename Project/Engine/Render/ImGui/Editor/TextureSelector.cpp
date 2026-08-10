@@ -18,10 +18,10 @@ namespace {
 		Vector2 pixelSize{};
 	};
 
-	/// @brief テクスチャプレビューの描画情報を作成する
+	/// @brief テクスチャプレビューの描画情報を作成
 	/// @param textureName TextureManagerに登録されているテクスチャ名
 	/// @param previewMaxSize プレビュー画像の一辺あたりの最大表示サイズ
-	/// @return 描画情報。テクスチャが見つからない場合はstd::nullopt
+	/// @return 描画情報、テクスチャが見つからない場合はstd::nullopt
 	std::optional<TexturePreviewData> CreateTexturePreviewData(
 		const std::string& textureName,
 		float previewMaxSize) {
@@ -44,7 +44,7 @@ namespace {
 		};
 	}
 
-	/// @brief 直前のImGui項目にカーソルが重なっている場合にテクスチャプレビューを表示する
+	/// @brief 直前のImGui項目にカーソルが重なっている場合にテクスチャプレビューを表示
 	/// @param textureName プレビュー対象のテクスチャ名
 	/// @param previewMaxSize プレビュー画像の一辺あたりの最大表示サイズ
 	void DrawHoveredTexturePreview(const std::string& textureName, float previewMaxSize) {
@@ -69,7 +69,7 @@ namespace {
 		}
 	}
 
-	/// @brief 選択中テクスチャのプレビューを描画する
+	/// @brief 選択中テクスチャのプレビューを描画
 	/// @param textureName プレビュー対象のテクスチャ名
 	/// @param previewMaxSize プレビュー画像の一辺あたりの最大表示サイズ
 	void DrawSelectedTexturePreview(const std::string& textureName, float previewMaxSize) {

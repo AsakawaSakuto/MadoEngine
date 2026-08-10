@@ -16,7 +16,7 @@ namespace {
 	constexpr float kMinimumLengthSquared = 0.000001f;
 	constexpr Vector4 kNormalColor = { 1.0f, 1.0f, 0.0f, 1.0f };
 
-	/// @brief ゼロベクトルを考慮して方向を正規化する
+	/// @brief ゼロベクトルを考慮して方向を正規化
 	/// @param direction 正規化する方向
 	/// @return 正規化した方向
 	Vector3 NormalizeDirection(const Vector3& direction) {
@@ -27,7 +27,7 @@ namespace {
 		return Math::Normalize(direction);
 	}
 
-	/// @brief 平面上の直交基底を生成する
+	/// @brief 平面上の直交基底を生成
 	/// @param normal 平面法線
 	/// @param outTangent 接線の出力先
 	/// @param outBitangent 従法線の出力先
@@ -40,7 +40,7 @@ namespace {
 		outBitangent = NormalizeDirection(Math::Cross(normalized, outTangent));
 	}
 
-	/// @brief 2点間の線分をDebugLineへ登録する
+	/// @brief 2点間の線分をDebugLineへ登録
 	/// @param start 線分の開始位置
 	/// @param end 線分の終了位置
 	/// @param color 表示色
@@ -51,7 +51,7 @@ namespace {
 		MyDebugLine::AddShape(segment, color);
 	}
 
-	/// @brief Transformを適用した円をDebugLineへ登録する
+	/// @brief Transformを適用した円をDebugLineへ登録
 	/// @param normal 円のローカル法線
 	/// @param radius 円のローカル半径
 	/// @param worldMatrix EmitterのWorld行列
@@ -87,7 +87,7 @@ namespace {
 		}
 	}
 
-	/// @brief 平面形状をDebugLineへ登録する
+	/// @brief 平面形状をDebugLineへ登録
 	/// @param shape 表示する平面形状
 	/// @param worldMatrix EmitterのWorld行列
 	/// @param rotationMatrix Emitterの回転行列

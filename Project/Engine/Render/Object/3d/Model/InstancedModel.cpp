@@ -21,9 +21,9 @@ constexpr UINT kInstancedRootShadow = 6;
 constexpr UINT kInstancedRootShadowMap = 7;
 constexpr float kInstancedShadowCompareBias = 0.00005f;
 
-/// @brief 指定値以上の2の累乗を取得します。
-/// @param value 必要な要素数です。
-/// @return 確保する要素数です。
+/// @brief 指定値以上の2の累乗を取得
+/// @param value 必要な要素数
+/// @return 確保する要素数
 size_t CalculateCapacity(size_t value) {
 	size_t capacity = kInitialInstanceCapacity;
 	while (capacity < value) {
@@ -32,8 +32,8 @@ size_t CalculateCapacity(size_t value) {
 	return capacity;
 }
 
-/// @brief インスタンスモデル用のシャドウマップ生成PSO設定を作成します。
-/// @return インスタンスモデル用のシャドウマップ生成PSO設定です。
+/// @brief インスタンスモデル用のシャドウマップ生成PSO設定を作成
+/// @return インスタンスモデル用のシャドウマップ生成PSO設定
 MadoEngine::Render::PSODesc CreateInstancedShadowPSODesc() {
 	MadoEngine::Render::PSODesc desc = MadoEngine::Render::ShadowMap::CreatePSODesc();
 	desc.vsKey = "Object3d/Shadow/InstancedShadowMap.VS";
@@ -105,9 +105,9 @@ void InstancedModel::InitializeInstanceResources() {
 	EnsureShadowInstanceResource(kInitialInstanceCapacity);
 }
 
-/// @brief 現在のインスタンスTransformからワールド行列を作成する
+/// @brief 現在のインスタンスTransformからワールド行列を作成
 /// @param transform ワールド行列へ変換するTransform
-/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
 /// @return 作成したワールド行列
 Matrix4x4 InstancedModel::MakeWorldMatrix(const Transform3D& transform, const Camera* billboardCamera) const {
 	if (!usebillbord_ || !billboardCamera) {
@@ -126,11 +126,11 @@ Matrix4x4 InstancedModel::MakeWorldMatrix(const Transform3D& transform, const Ca
 	return Matrix::Multiply(Matrix::Multiply(Matrix::Multiply(scaleMatrix, rotateMatrix), billboardMatrix), translateMatrix);
 }
 
-/// @brief 通常描画で参照するシャドウマップ情報を設定します。
-/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドルです。
-/// @param lightViewProjection ライト視点のビュー射影行列です。
-/// @param width シャドウマップの幅です。
-/// @param height シャドウマップの高さです。
+/// @brief 通常描画で参照するシャドウマップ情報を設定
+/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドル
+/// @param lightViewProjection ライト視点のビュー射影行列
+/// @param width シャドウマップの幅
+/// @param height シャドウマップの高さ
 void InstancedModel::SetShadowMap(
 	D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
 	const Matrix4x4& lightViewProjection,
@@ -220,14 +220,14 @@ void InstancedModel::Draw(Camera& useCamera) {
 	}
 }
 
-/// @brief シャドウマップへインスタンスモデルの深度を書き込みます。
-/// @param lightViewProjection ライト視点のビュー射影行列です。
+/// @brief シャドウマップへインスタンスモデルの深度を書き込み
+/// @param lightViewProjection ライト視点のビュー射影行列
 void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection) {
 	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
 	DrawShadowInternal(lightViewProjection, billboardCamera);
 }
 
-/// @brief シャドウマップ生成用にインスタンシングモデルを描画する
+/// @brief シャドウマップ生成用にインスタンシングモデルを描画
 /// @param lightViewProjection ライト視点のビュープロジェクション行列
 /// @param billboardCamera ビルボードの向きに使用するカメラ
 void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection, const Camera& billboardCamera) {
@@ -235,9 +235,9 @@ void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection, const Came
 	DrawShadowInternal(lightViewProjection, &billboardCamera);
 }
 
-/// @brief シャドウマップ生成用の共通描画処理を行う
+/// @brief シャドウマップ生成用の共通描画処理
 /// @param lightViewProjection ライト視点のビュープロジェクション行列
-/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
 void InstancedModel::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camera* billboardCamera) {
 	if (!sharedData_ || !isVisible_ || !castShadow_ || instances_.empty()) {
 		return;
@@ -324,11 +324,11 @@ void InstancedModel::EnsureInstanceResource(size_t requiredCount) {
 	);
 }
 
-/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新します。
-/// @param viewProjectionMatrix 変換に使用するビュー射影行列です。
+/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新
+/// @param viewProjectionMatrix 変換に使用するビュー射影行列
 
-/// @brief シャドウ描画用のインスタンスGPUデータ領域を確保します。
-/// @param requiredCount 必要なインスタンス数です。
+/// @brief シャドウ描画用のインスタンスGPUデータ領域を確保
+/// @param requiredCount 必要なインスタンス数
 void InstancedModel::EnsureShadowInstanceResource(size_t requiredCount) {
 	if (requiredCount <= shadowInstanceCapacity_) {
 		return;
@@ -344,11 +344,11 @@ void InstancedModel::EnsureShadowInstanceResource(size_t requiredCount) {
 	);
 }
 
-/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新します。
-/// @param viewProjectionMatrix 変換に使用するビュー射影行列です。
-/// @param outputData 書き込み先のGPUデータです。
-/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
-/// @return 描画対象のインスタンス数です。
+/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新
+/// @param viewProjectionMatrix 変換に使用するビュー射影行列
+/// @param outputData 書き込み先のGPUデータ
+/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
+/// @return 描画対象のインスタンス数
 size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData, const Camera* billboardCamera) {
 	if (!outputData) {
 		return 0;
@@ -382,7 +382,7 @@ void InstancedModel::UpdateLightGpuData() {
 	*lightGpuData_ = LightManager::GetInstance().GetCachedGpuData(sceneType_, receiveLightMask_);
 }
 
-/// @brief 影を受けるためのGPUデータを更新します。
+/// @brief 影を受けるためのGPUデータを更新
 void InstancedModel::UpdateReceiveShadowGpuData() {
 	if (!shadowGpuData_) {
 		return;

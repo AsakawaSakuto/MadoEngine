@@ -25,7 +25,7 @@ namespace {
 	constexpr UINT kSkinningRootShadowMap = 8;
 	constexpr float kShadowCompareBias = 0.00005f;
 
-	/// @brief Json配列からVector3を読み込む
+	/// @brief Json配列からVector3を読み込み
 	/// @param json 読み込むJson
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだVector3
@@ -41,7 +41,7 @@ namespace {
 		};
 	}
 
-	/// @brief Json配列からVector4を読み込む
+	/// @brief Json配列からVector4を読み込み
 	/// @param json 読み込むJson
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだVector4
@@ -58,9 +58,9 @@ namespace {
 		};
 	}
 
-	/// @brief 平行光源の方向を正規化する
+	/// @brief 平行光源の方向を正規化
 	/// @param direction 正規化する方向
-	/// @return 正規化済み方向。0ベクトルの場合は下向きを返す
+	/// @return 正規化済み方向、0ベクトルの場合は下向き
 	Vector3 NormalizeLightDirection(const Vector3& direction) {
 		Vector3 normalized = direction.Normalized();
 		if (normalized.LengthSq() == 0.0f) {
@@ -69,7 +69,7 @@ namespace {
 		return normalized;
 	}
 
-	/// @brief レイとAABBの交差距離を計算する
+	/// @brief レイとAABBの交差距離を計算
 	/// @param rayOrigin レイの始点
 	/// @param rayDirection 正規化済みのレイ方向
 	/// @param boxMin AABBの最小座標
@@ -117,8 +117,8 @@ namespace {
 		return true;
 	}
 
-	/// @brief スキニングモデル用のシャドウマップ生成PSO設定を作成します。
-	/// @return スキニングモデル用のシャドウマップ生成PSO設定です。
+	/// @brief スキニングモデル用のシャドウマップ生成PSO設定を作成
+	/// @return スキニングモデル用のシャドウマップ生成PSO設定
 	MadoEngine::Render::PSODesc CreateSkinningShadowPSODesc() {
 		MadoEngine::Render::PSODesc desc = MadoEngine::Render::ShadowMap::CreatePSODesc();
 		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkiningModel;
@@ -489,7 +489,7 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 	transformationData_->WorldInverseTranspose = worldInverseTransposeMatrix;
 }
 
-/// @brief シャドウ描画用の変換行列をGPUバッファへ更新する
+/// @brief シャドウ描画用の変換行列をGPUバッファへ更新
 /// @param lightViewProjection ライト視点のビュー射影行列
 void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection, const Camera* billboardCamera) {
 	if (!shadowTransformationData_) {
@@ -530,7 +530,7 @@ void Model::UpdateReceiveShadowGpuData() {
 	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
 }
 
-/// @brief モデルのワールド空間AABBを計算する
+/// @brief モデルのワールド空間AABBを計算
 /// @param outMin ワールド空間AABBの最小座標
 /// @param outMax ワールド空間AABBの最大座標
 /// @return 計算できた場合はtrue
@@ -571,7 +571,7 @@ bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* b
 	return true;
 }
 
-/// @brief モデルがカメラの視錐台内にあるか判定する
+/// @brief モデルがカメラの視錐台内にあるか判定
 /// @param camera 判定に使用するカメラ
 /// @return 視錐台内、または視錐台と交差している場合はtrue
 bool Model::IsInsideCameraFrustum(const Camera& camera) const {
@@ -683,7 +683,7 @@ void Model::Draw(Camera& useCamera) {
 	}
 }
 
-/// @brief シャドウマップ生成用にモデルを描画する
+/// @brief シャドウマップ生成用にモデルを描画
 /// @param lightViewProjection ライト視点のビュー射影行列
 void Model::DrawShadow(const Matrix4x4& lightViewProjection) {
 	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;

@@ -31,7 +31,7 @@ namespace DropObject {
 		void Update(float deltaTime, Player::Base& player);
 
 		/// @brief 移動状態を設定
-		/// @param isMoving trueの場合、TargetPositionへ向かう
+		/// @param isMoving TargetPositionへ移動する場合はtrue
 		void SetMoving(bool isMoving) { isMoving_ = isMoving; }
 
 		/// @brief 移動先座標を設定
@@ -39,7 +39,7 @@ namespace DropObject {
 		void SetTargetPosition(const Vector3& targetPosition) { targetPosition_ = targetPosition; }
 
 		/// @brief 生存状態を取得
-		/// @return 生存中であればtrueを返す
+		/// @return 生存中であればtrue
 		bool IsAlive() const { return isAlive_; }
 
 	private:
@@ -49,10 +49,10 @@ namespace DropObject {
 
 		/// @brief Player参照を指定してDropObjectを更新
 		/// @param deltaTime 1フレームの経過時間
-		/// @param player 経験値を受け取るPlayer。nullptrの場合は経験値加算を行わない
+		/// @param player 経験値を受け取るPlayer、nullptrの場合は経験値加算なし
 		void UpdateInternal(float deltaTime, Player::Base* player);
 
-		/// @brief Playerへ経験値を渡してDropObjectを取得済みにする
+		/// @brief Playerへ経験値を渡してDropObjectを取得済み状態へ変更
 		/// @param player 経験値を受け取るPlayer
 		void CollectExp(Player::Base& player);
 

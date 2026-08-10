@@ -9,7 +9,7 @@ namespace {
 	using JsonValue = nlohmann::json;
 	using namespace MadoEngine::Ribbon;
 
-	/// @brief Filesystem PathをUTF-8文字列へ変換する
+	/// @brief Filesystem PathをUTF-8文字列へ変換
 	/// @param path 変換対象Path
 	/// @return UTF-8文字列
 	std::string PathToUtf8String(const std::filesystem::path& path) {
@@ -17,10 +17,10 @@ namespace {
 		return std::string(reinterpret_cast<const char*>(value.data()), value.size());
 	}
 
-	/// @brief Json Objectから子要素を安全に取得する
+	/// @brief Json Objectから子要素を安全に取得
 	/// @param json 検索対象Json
 	/// @param key 検索Key
-	/// @return 子要素。存在しない場合はnullptr
+	/// @return 子要素、存在しない場合はnullptr
 	const JsonValue* FindValue(const JsonValue& json, const char* key) {
 		if (!json.is_object() || !json.contains(key) || json.at(key).is_null()) {
 			return nullptr;
@@ -28,7 +28,7 @@ namespace {
 		return &json.at(key);
 	}
 
-	/// @brief Jsonからfloatを安全に読み込む
+	/// @brief Jsonからfloatを安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -38,7 +38,7 @@ namespace {
 		return value && value->is_number() ? value->get<float>() : fallback;
 	}
 
-	/// @brief Jsonから符号なし整数を安全に読み込む
+	/// @brief Jsonから符号なし整数を安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -48,7 +48,7 @@ namespace {
 		return value && value->is_number_unsigned() ? value->get<uint32_t>() : fallback;
 	}
 
-	/// @brief Jsonからboolを安全に読み込む
+	/// @brief Jsonからboolを安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -58,7 +58,7 @@ namespace {
 		return value && value->is_boolean() ? value->get<bool>() : fallback;
 	}
 
-	/// @brief Jsonから文字列を安全に読み込む
+	/// @brief Jsonから文字列を安全に読み込み
 	/// @param json 読み込み元Json
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -68,7 +68,7 @@ namespace {
 		return value && value->is_string() ? value->get<std::string>() : fallback;
 	}
 
-	/// @brief Json配列からVector2を読み込む
+	/// @brief Json配列からVector2を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込み失敗時の値
 	/// @return 読み込んだVector2
@@ -79,7 +79,7 @@ namespace {
 		return { json[0].get<float>(), json[1].get<float>() };
 	}
 
-	/// @brief Json配列からVector3を読み込む
+	/// @brief Json配列からVector3を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込み失敗時の値
 	/// @return 読み込んだVector3
@@ -99,7 +99,7 @@ namespace {
 		};
 	}
 
-	/// @brief Json配列からVector4を読み込む
+	/// @brief Json配列からVector4を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込み失敗時の値
 	/// @return 読み込んだVector4
@@ -120,21 +120,21 @@ namespace {
 		};
 	}
 
-	/// @brief Vector2をJson配列へ変換する
+	/// @brief Vector2をJson配列へ変換
 	/// @param value 変換対象
 	/// @return 変換後Json
 	JsonValue WriteVector2(const Vector2& value) {
 		return JsonValue::array({ value.x, value.y });
 	}
 
-	/// @brief Vector3をJson配列へ変換する
+	/// @brief Vector3をJson配列へ変換
 	/// @param value 変換対象
 	/// @return 変換後Json
 	JsonValue WriteVector3(const Vector3& value) {
 		return JsonValue::array({ value.x, value.y, value.z });
 	}
 
-	/// @brief Manual Ribbonの既定制御点をJson配列へ変換する
+	/// @brief Manual Ribbonの既定制御点をJson配列へ変換
 	/// @param controlPoints 変換対象制御点
 	/// @return 変換後Json配列
 	JsonValue WriteControlPoints(const std::vector<Vector3>& controlPoints) {
@@ -145,14 +145,14 @@ namespace {
 		return json;
 	}
 
-	/// @brief Vector4をJson配列へ変換する
+	/// @brief Vector4をJson配列へ変換
 	/// @param value 変換対象
 	/// @return 変換後Json
 	JsonValue WriteVector4(const Vector4& value) {
 		return JsonValue::array({ value.x, value.y, value.z, value.w });
 	}
 
-	/// @brief JsonからEffectTrackを読み込む
+	/// @brief JsonからEffectTrackを読み込み
 	/// @tparam T Track値型
 	/// @tparam Reader 値読み込み関数型
 	/// @param json 読み込み元Json
@@ -194,7 +194,7 @@ namespace {
 		return track;
 	}
 
-	/// @brief EffectTrackをJsonへ変換する
+	/// @brief EffectTrackをJsonへ変換
 	/// @tparam T Track値型
 	/// @tparam Writer 値変換関数型
 	/// @param track 変換対象Track
@@ -215,7 +215,7 @@ namespace {
 		return json;
 	}
 
-	/// @brief Trackの全値を安全な値へ補正する
+	/// @brief Trackの全値を安全な値へ補正
 	/// @tparam T Track値型
 	/// @tparam Normalizer 補正関数型
 	/// @param track 補正対象Track
@@ -239,7 +239,7 @@ namespace {
 		track.SetKeyframes(std::move(keyframes));
 	}
 
-	/// @brief generationMode文字列をEnumへ変換する
+	/// @brief generationMode文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonPointGenerationMode ParseGenerationMode(const std::string& value) {
@@ -248,14 +248,14 @@ namespace {
 			: RibbonPointGenerationMode::TransformHistory;
 	}
 
-	/// @brief generationModeを文字列へ変換する
+	/// @brief generationModeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonPointGenerationMode value) {
 		return value == RibbonPointGenerationMode::Manual ? "manual" : "transformHistory";
 	}
 
-	/// @brief playbackMode文字列をEnumへ変換する
+	/// @brief playbackMode文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonPlaybackMode ParsePlaybackMode(const std::string& value) {
@@ -264,7 +264,7 @@ namespace {
 		return RibbonPlaybackMode::Full;
 	}
 
-	/// @brief playbackModeを文字列へ変換する
+	/// @brief playbackModeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonPlaybackMode value) {
@@ -276,49 +276,49 @@ namespace {
 		}
 	}
 
-	/// @brief simulationSpace文字列をEnumへ変換する
+	/// @brief simulationSpace文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonSimulationSpace ParseSimulationSpace(const std::string& value) {
 		return value == "local" ? RibbonSimulationSpace::Local : RibbonSimulationSpace::World;
 	}
 
-	/// @brief simulationSpaceを文字列へ変換する
+	/// @brief simulationSpaceを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonSimulationSpace value) {
 		return value == RibbonSimulationSpace::Local ? "local" : "world";
 	}
 
-	/// @brief interpolation文字列をEnumへ変換する
+	/// @brief interpolation文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonInterpolationMode ParseInterpolation(const std::string& value) {
 		return value == "catmullRom" ? RibbonInterpolationMode::CatmullRom : RibbonInterpolationMode::Linear;
 	}
 
-	/// @brief interpolationを文字列へ変換する
+	/// @brief interpolationを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonInterpolationMode value) {
 		return value == RibbonInterpolationMode::CatmullRom ? "catmullRom" : "linear";
 	}
 
-	/// @brief UV Mode文字列をEnumへ変換する
+	/// @brief UV Mode文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonUvMode ParseUvMode(const std::string& value) {
 		return value == "tile" ? RibbonUvMode::Tile : RibbonUvMode::Stretch;
 	}
 
-	/// @brief UV Modeを文字列へ変換する
+	/// @brief UV Modeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonUvMode value) {
 		return value == RibbonUvMode::Tile ? "tile" : "stretch";
 	}
 
-	/// @brief Blend Mode文字列をEnumへ変換する
+	/// @brief Blend Mode文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	MadoEngine::Render::BlendMode ParseBlendMode(const std::string& value) {
@@ -329,7 +329,7 @@ namespace {
 		return MadoEngine::Render::BlendMode::Add;
 	}
 
-	/// @brief Blend Modeを文字列へ変換する
+	/// @brief Blend Modeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(MadoEngine::Render::BlendMode value) {
@@ -343,7 +343,7 @@ namespace {
 		}
 	}
 
-	/// @brief Cull Mode文字列をEnumへ変換する
+	/// @brief Cull Mode文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	MadoEngine::Render::CullMode ParseCullMode(const std::string& value) {
@@ -352,7 +352,7 @@ namespace {
 		return MadoEngine::Render::CullMode::None;
 	}
 
-	/// @brief Cull Modeを文字列へ変換する
+	/// @brief Cull Modeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(MadoEngine::Render::CullMode value) {
@@ -364,7 +364,7 @@ namespace {
 		}
 	}
 
-	/// @brief JsonからRibbon Emitter設定を読み込む
+	/// @brief JsonからRibbon Emitter設定を読み込み
 	/// @param json 読み込み元Json
 	/// @return 読み込んだEmitter設定
 	RibbonEmitterConfig ReadRibbonEmitter(const JsonValue& json) {
@@ -455,7 +455,7 @@ namespace {
 		return config;
 	}
 
-	/// @brief Ribbon Emitter設定をJsonへ変換する
+	/// @brief Ribbon Emitter設定をJsonへ変換
 	/// @param config 変換対象Emitter設定
 	/// @return 変換後Json
 	JsonValue WriteRibbonEmitter(const RibbonEmitterConfig& config) {
@@ -498,7 +498,7 @@ namespace {
 		};
 	}
 
-	/// @brief Ribbon Emitter設定を安全な範囲へ補正する
+	/// @brief Ribbon Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateRibbonEmitter(RibbonEmitterConfig& config) {
 		switch (config.playback.mode) {

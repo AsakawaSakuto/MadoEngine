@@ -72,7 +72,7 @@ namespace Projectile {
 
 	/// @brief 武器種類がゲームで使用可能か確認
 	/// @param type 確認する武器種類
-	/// @return 使用可能な武器種類の場合はtrueを返す
+	/// @return 使用可能な武器種類の場合はtrue
 	inline bool IsPlayableWeaponType(Type type) {
 		for (const Type playableType : kPlayableWeaponTypes) {
 			if (playableType == type) {

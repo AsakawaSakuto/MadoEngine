@@ -25,7 +25,7 @@ public:
 
 	/// @brief Jarを取得した時の処理を実行
 	/// @param player 取得するPlayer
-	/// @return JarをMapから削除するためtrueを返す
+	/// @return JarをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
 
 private:

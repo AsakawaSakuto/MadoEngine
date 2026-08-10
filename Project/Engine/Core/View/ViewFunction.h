@@ -9,7 +9,7 @@
 /// @param device D3D12デバイスのポインタ
 /// @param heapType デスクリプタヒープのタイプ
 /// @param numDescriptors デスクリプタの数
-/// @param shaderVisible シェーダーから見えるかどうか
+/// @param shaderVisible シェーダーから参照可能な場合はtrue
 /// @return 生成されたデスクリプタヒープのポインタ
 ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 

@@ -26,7 +26,7 @@ namespace MadoEngine::Render {
 		RenderTexture(RenderTexture&&)                 = default;
 		RenderTexture& operator=(RenderTexture&&)      = default;
 
-		/// @brief レンダーテクスチャを初期化する
+		/// @brief レンダーテクスチャを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param rtvManager RTVManagerのポインタ
 		/// @param srvManager SRVManagerのポインタ
@@ -44,7 +44,7 @@ namespace MadoEngine::Render {
 			const std::array<float, 4>&    clearColor = { 0.1f, 0.25f, 0.5f, 1.0f }
 		);
 
-		/// @brief レンダーテクスチャをリサイズする
+		/// @brief レンダーテクスチャをリサイズ
 		/// @param width 新しいテクスチャ幅
 		/// @param height 新しいテクスチャ高さ
 		void Resize(uint32_t width, uint32_t height);
@@ -57,10 +57,10 @@ namespace MadoEngine::Render {
 			D3D12_CPU_DESCRIPTOR_HANDLE  depthStencilHandle
 		);
 
-		/// @brief 描画開始処理を行う
+		/// @brief 描画開始処理
 		/// @param commandList コマンドリスト
-		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル。不要な場合はnullptr
-		/// @param clearColor クリアカラー。nullptrの場合はデフォルトカラーを使用する
+		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル、不要な場合はnullptr
+		/// @param clearColor クリアカラー、nullptrの場合はデフォルトカラーを使用
 		void BeginRender(
 			ID3D12GraphicsCommandList*         commandList,
 			const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilHandle,
@@ -71,44 +71,44 @@ namespace MadoEngine::Render {
 		/// @param commandList コマンドリスト
 		void EndRender(ID3D12GraphicsCommandList* commandList);
 
-		/// @brief RTVのインデックスを取得する
+		/// @brief RTVのインデックスを取得
 		/// @return RTVデスクリプタインデックス
 		uint32_t GetRTVIndex() const { return rtvIndex_; }
 
-		/// @brief SRVのインデックスを取得する
+		/// @brief SRVのインデックスを取得
 		/// @return SRVデスクリプタインデックス
 		uint32_t GetSRVIndex() const { return srvIndex_; }
 
-		/// @brief RTVのCPUデスクリプタハンドルを取得する
+		/// @brief RTVのCPUデスクリプタハンドルを取得
 		/// @return CPUデスクリプタハンドル
 		D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCPUHandle() const;
 
-		/// @brief SRVのCPUデスクリプタハンドルを取得する
+		/// @brief SRVのCPUデスクリプタハンドルを取得
 		/// @return CPUデスクリプタハンドル
 		D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle() const;
 
-		/// @brief SRVのGPUデスクリプタハンドルを取得する
+		/// @brief SRVのGPUデスクリプタハンドルを取得
 		/// @return GPUデスクリプタハンドル
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle() const;
 
-		/// @brief テクスチャリソースを取得する
+		/// @brief テクスチャリソースを取得
 		/// @return ID3D12Resource ポインタ
 		ID3D12Resource* GetResource() const { return textureResource_.Get(); }
 
-		/// @brief テクスチャ幅を取得する
+		/// @brief テクスチャ幅を取得
 		/// @return 幅（ピクセル）
 		uint32_t GetWidth()  const { return width_; }
 
-		/// @brief テクスチャ高さを取得する
+		/// @brief テクスチャ高さを取得
 		/// @return 高さ（ピクセル）
 		uint32_t GetHeight() const { return height_; }
 
-		/// @brief テクスチャフォーマットを取得する
+		/// @brief テクスチャフォーマットを取得
 		/// @return DXGIフォーマット
 		DXGI_FORMAT GetFormat() const { return format_; }
 
 	private:
-		/// @brief テクスチャリソースとRTV/SRVを作成する
+		/// @brief テクスチャリソースとRTV/SRVを作成
 		void CreateResourceAndViews();
 
 		MadoEngine::Core::DxDevice* device_ = nullptr;

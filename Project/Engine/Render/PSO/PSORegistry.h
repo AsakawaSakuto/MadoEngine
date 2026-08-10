@@ -32,33 +32,33 @@ namespace MadoEngine::Render {
 		/// @return ID3D12PipelineState ポインタ
 		ID3D12PipelineState* Get(const PSODesc& desc);
 
-		/// @brief 指定した複数のPSOを同期的にプリウォームする
+		/// @brief 指定した複数のPSOを同期的にプリウォーム
 		/// @param descs プリウォームするPSODescのリスト
 		void Prewarm(const std::vector<PSODesc>& descs);
 
-		/// @brief 指定した複数のPSOを非同期でプリウォームする
+		/// @brief 指定した複数のPSOを非同期でプリウォーム
 		/// @param descs プリウォームするPSODescのリスト
 		void PrewarmAsync(const std::vector<PSODesc>& descs);
 
-		/// @brief 全プリウォームタスクが完了しているか確認する
+		/// @brief 全プリウォームタスクが完了しているか確認
 		/// @return 完了していれば true
 		bool IsPrewarmComplete() const;
 
-		/// @brief PipelineLibraryをファイルからロードする
+		/// @brief PipelineLibraryをファイルからロード
 		/// @param cachePath キャッシュファイルパス
 		void LoadPipelineLibrary(const std::wstring& cachePath);
 
-		/// @brief PipelineLibraryをファイルに保存する
+		/// @brief PipelineLibraryをファイルに保存
 		/// @param cachePath キャッシュファイルパス
 		void SavePipelineLibrary(const std::wstring& cachePath);
 
 	private:
-		/// @brief PSOを生成してキャッシュに追加する
+		/// @brief PSOを生成してキャッシュに追加
 		/// @param desc PSO記述子
 		/// @return ID3D12PipelineState ポインタ
 		ID3D12PipelineState* CreateAndCache(const PSODesc& desc);
 
-		/// @brief PSODescをPipelineLibrary用キー文字列に変換する
+		/// @brief PSODescをPipelineLibrary用キー文字列に変換
 		/// @param desc PSO記述子
 		/// @return ワイド文字列キー
 		static std::wstring MakeLibraryKey(const PSODesc& desc);

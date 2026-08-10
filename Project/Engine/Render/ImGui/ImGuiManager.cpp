@@ -85,14 +85,14 @@ namespace {
 		{ ImGuiCol_ModalWindowDimBg, "ModalWindowDimBg", "その他", "モーダル暗転背景" },
 	};
 
-	/// @brief ImGuiカラーをJson配列へ変換します。
+	/// @brief ImGuiカラーをJson配列へ変換
 	/// @param color 変換するImGuiカラー
 	/// @return RGBA順のJson配列
 	nlohmann::json ToJsonColor(const ImVec4& color) {
 		return nlohmann::json::array({ color.x, color.y, color.z, color.w });
 	}
 
-	/// @brief Json配列からImGuiカラーを読み取ります。
+	/// @brief Json配列からImGuiカラーを読み取り
 	/// @param json 読み取り元のJson値
 	/// @param outColor 読み取ったカラーの出力先
 	/// @return 読み取りに成功した場合はtrue
@@ -206,7 +206,7 @@ namespace MadoEngine {
 		ImGuizmo::BeginFrame();
 	}
 
-	/// @brief 既定のImGuiスタイルカラーを適用します。
+	/// @brief 既定のImGuiスタイルカラーを適用
 	void ImGuiManager::ApplyDefaultStyleColors() {
 		ImGui::StyleColorsDark();
 		ImVec4* colors = ImGui::GetStyle().Colors;
@@ -224,8 +224,8 @@ namespace MadoEngine {
 		colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
 	}
 
-	/// @brief ImGuiのスタイルカラーをJsonへ保存します。
-	/// @return 保存できた場合はtrueを返します。
+	/// @brief ImGuiのスタイルカラーをJsonへ保存
+	/// @return 保存できた場合はtrue
 	bool ImGuiManager::SaveStyleColors() const {
 		nlohmann::json root;
 		nlohmann::json colorsJson = nlohmann::json::object();
@@ -239,8 +239,8 @@ namespace MadoEngine {
 		return Json::JsonFile::Save(kStyleColorJsonPath, root, 4, true);
 	}
 
-	/// @brief ImGuiのスタイルカラーをJsonから読み込みます。
-	/// @return 読み込めた場合はtrueを返します。
+	/// @brief ImGuiのスタイルカラーをJsonから読み込み
+	/// @return 読み込めた場合はtrue
 	bool ImGuiManager::LoadStyleColors() {
 		if (!Json::JsonFile::Exists(kStyleColorJsonPath)) {
 			return false;
@@ -279,7 +279,7 @@ namespace MadoEngine {
 		return loaded;
 	}
 
-	/// @brief ImGuiのスタイルカラー編集ウィンドウを描画します。
+	/// @brief ImGuiのスタイルカラー編集ウィンドウを描画
 	void ImGuiManager::DrawStyleColorEditorUI() {
 		ImGui::Begin("ImGui Style Color");
 

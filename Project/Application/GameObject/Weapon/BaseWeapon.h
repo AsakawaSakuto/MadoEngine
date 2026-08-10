@@ -12,7 +12,7 @@ namespace Weapon {
 		/// @brief 武器を初期化
 		/// @param type 初期化する武器種類
 		/// @param slotIndex 武器を格納するスロット番号
-		/// @return 初期化に成功した場合はtrueを返す
+		/// @return 初期化に成功した場合はtrue
 		bool Initialize(Projectile::Type type, int slotIndex);
 
 		/// @brief 武器の射撃処理を更新
@@ -22,11 +22,11 @@ namespace Weapon {
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
 		/// @brief 直前の更新でProjectileを射出したか確認
-		/// @return Projectileを射出した場合はtrueを返す
+		/// @return Projectileを射出した場合はtrue
 		bool WasFiredThisFrame() const { return wasFiredThisFrame_; }
 
 		/// @brief 連射終了後のクールダウン進捗を取得
-		/// @return クールダウン開始を0.0f、終了を1.0fとした進捗。連射中は1.0f
+		/// @return クールダウン開始を0.0f、終了を1.0fとした進捗、連射中は1.0f
 		float GetShotCooldownProgress() const {
 			return cooldownTimer_.IsActive() ? cooldownTimer_.GetProgress() : 1.0f;
 		}
@@ -49,15 +49,15 @@ namespace Weapon {
 		/// @param statType 強化対象ステータス
 		/// @param rarity 強化レアリティ
 		/// @param outAmount 計算した加算値の出力先
-		/// @return 計算に成功した場合はtrueを返す
+		/// @return 計算に成功した場合はtrue
 		bool CalculateUpgradeAmount(UpgradeStatType statType, Rarity rarity, float& outAmount) const;
 
-		/// @brief 指定した強化を武器へ適用します。
+		/// @brief 指定した強化を武器へ適用
 		/// @param statType 強化対象ステータス
 		/// @param rarity 強化レアリティ
 		/// @param expectedAmount 選択肢へ表示した適用予定の加算値
 		/// @param outAppliedAmount 実際に適用した加算値の出力先
-		/// @return 強化の適用に成功した場合はtrueを返す
+		/// @return 強化の適用に成功した場合はtrue
 		bool ApplyUpgrade(UpgradeStatType statType, Rarity rarity, float expectedAmount, float& outAppliedAmount);
 
 	private:

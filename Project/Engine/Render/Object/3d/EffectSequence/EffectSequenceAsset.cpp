@@ -14,7 +14,7 @@ namespace {
 	using JsonValue = nlohmann::json;
 	using namespace MadoEngine::EffectSequence;
 
-	/// @brief Filesystem PathをUTF-8文字列へ変換する
+	/// @brief Filesystem PathをUTF-8文字列へ変換
 	/// @param path 変換対象Path
 	/// @return UTF-8文字列
 	std::string PathToUtf8String(const std::filesystem::path& path) {
@@ -22,10 +22,10 @@ namespace {
 		return std::string(reinterpret_cast<const char*>(value.data()), value.size());
 	}
 
-	/// @brief JSON Objectから子要素を安全に取得する
+	/// @brief JSON Objectから子要素を安全に取得
 	/// @param json 検索対象JSON
 	/// @param key 検索Key
-	/// @return 子要素。存在しない場合はnullptr
+	/// @return 子要素、存在しない場合はnullptr
 	const JsonValue* FindValue(const JsonValue& json, const char* key) {
 		if (!json.is_object() || !json.contains(key) || json.at(key).is_null()) {
 			return nullptr;
@@ -33,7 +33,7 @@ namespace {
 		return &json.at(key);
 	}
 
-	/// @brief JSONからfloatを安全に読み込む
+	/// @brief JSONからfloatを安全に読み込み
 	/// @param json 読み込み元JSON
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -43,7 +43,7 @@ namespace {
 		return value && value->is_number() ? value->get<float>() : fallback;
 	}
 
-	/// @brief JSONから符号なし整数を安全に読み込む
+	/// @brief JSONから符号なし整数を安全に読み込み
 	/// @param json 読み込み元JSON
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -68,7 +68,7 @@ namespace {
 			: fallback;
 	}
 
-	/// @brief JSONからboolを安全に読み込む
+	/// @brief JSONからboolを安全に読み込み
 	/// @param json 読み込み元JSON
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -78,7 +78,7 @@ namespace {
 		return value && value->is_boolean() ? value->get<bool>() : fallback;
 	}
 
-	/// @brief JSONから文字列を安全に読み込む
+	/// @brief JSONから文字列を安全に読み込み
 	/// @param json 読み込み元JSON
 	/// @param key 読み込みKey
 	/// @param fallback 読み込み失敗時の値
@@ -88,9 +88,9 @@ namespace {
 		return value && value->is_string() ? value->get<std::string>() : fallback;
 	}
 
-	/// @brief Node Type文字列をEnumへ変換する
+	/// @brief Node Type文字列をEnumへ変換
 	/// @param value 変換元文字列
-	/// @return 対応するNode Type。未対応の場合はCount
+	/// @return 対応するNode Type、未対応の場合はCount
 	EffectSequenceNodeType ParseNodeType(const std::string& value) {
 		if (value == "particle") { return EffectSequenceNodeType::Particle; }
 		if (value == "primitiveEffect") { return EffectSequenceNodeType::PrimitiveEffect; }
@@ -99,7 +99,7 @@ namespace {
 		return EffectSequenceNodeType::Count;
 	}
 
-	/// @brief Node Typeを文字列へ変換する
+	/// @brief Node Typeを文字列へ変換
 	/// @param value 変換元Node Type
 	/// @return JSON保存用文字列
 	const char* ToString(EffectSequenceNodeType value) {
@@ -113,16 +113,16 @@ namespace {
 		}
 	}
 
-	/// @brief Primitive Effect種類を文字列へ変換する
+	/// @brief Primitive Effect種類を文字列へ変換
 	/// @param value 変換元種類
 	/// @return JSON保存用文字列
 	const char* ToString(PrimitiveEffectNodeKind value) {
 		return value == PrimitiveEffectNodeKind::Cylinder ? "cylinder" : "invalid";
 	}
 
-	/// @brief RenderLayer文字列を安全に解析する
+	/// @brief RenderLayer文字列を安全に解析
 	/// @param value 解析する文字列
-	/// @return 有効なRenderLayer。未対応の場合はstd::nullopt
+	/// @return 有効なRenderLayer、未対応の場合はstd::nullopt
 	std::optional<MadoEngine::Render::RenderLayer> ParseRenderLayer(const std::string& value) {
 		for (uint32_t index = 0; index < MadoEngine::Render::kRenderLayerCount; ++index) {
 			const auto layer = MadoEngine::Render::GetRenderLayerByIndex(index);
@@ -133,7 +133,7 @@ namespace {
 		return std::nullopt;
 	}
 
-	/// @brief Vector3の全要素を安全な範囲へ補正する
+	/// @brief Vector3の全要素を安全な範囲へ補正
 	/// @param value 補正対象Vector
 	/// @param fallback 非有限値の場合の既定値
 	/// @param minimum 最小値
@@ -148,7 +148,7 @@ namespace {
 		value.z = std::clamp(std::isfinite(value.z) ? value.z : fallback.z, minimum, maximum);
 	}
 
-	/// @brief Transformを安全な範囲へ補正する
+	/// @brief Transformを安全な範囲へ補正
 	/// @param transform 補正対象Transform
 	void NormalizeTransform(Transform3D& transform) {
 		NormalizeVector3(transform.scale, { 1.0f, 1.0f, 1.0f }, 0.001f, 10000.0f);
@@ -156,7 +156,7 @@ namespace {
 		NormalizeVector3(transform.translate, {}, -1000000.0f, 1000000.0f);
 	}
 
-	/// @brief Node Typeに対応する既定固有設定を生成する
+	/// @brief Node Typeに対応する既定固有設定を生成
 	/// @param nodeType Node Type
 	/// @return 対応する固有設定
 	EffectSequenceNodeSettings MakeDefaultSettings(EffectSequenceNodeType nodeType) {
@@ -170,7 +170,7 @@ namespace {
 		}
 	}
 
-	/// @brief Node Typeと固有設定Variantが一致するか確認する
+	/// @brief Node Typeと固有設定Variantが一致するか確認
 	/// @param node 確認対象Node
 	/// @return 一致する場合はtrue
 	bool HasMatchingSettings(const EffectSequenceNode& node) {

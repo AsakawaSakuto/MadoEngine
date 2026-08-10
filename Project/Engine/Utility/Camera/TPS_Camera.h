@@ -25,7 +25,7 @@ public:
 
 	// --- ターゲット設定 ---
 
-	/// @brief 追従対象の位置を設定する
+	/// @brief 追従対象の位置を設定
 	/// @param targetPosition 追従するワールド座標
 	void SetTargetPosition(const Vector3& targetPosition) { targetPosition_ = targetPosition; }
 
@@ -39,25 +39,25 @@ public:
 	/// @param pitch X軸周りの回転角
 	void SetPitch(float pitch) { pitch_ = pitch; ClampPitch(); }
 
-	/// @brief ターゲットとの距離を設定する
+	/// @brief ターゲットとの距離を設定
 	/// @param distance カメラ-ターゲット間の距離
 	void SetDistance(float distance) { distance_ = distance; }
 
-	/// @brief 旋回角（Yaw）を取得する
+	/// @brief 旋回角（Yaw）を取得
 	/// @return Y軸周りの回転角（ラジアン）
 	float GetYaw() const { return yaw_; }
 
-	/// @brief 仰俯角（Pitch）を取得する
+	/// @brief 仰俯角（Pitch）を取得
 	/// @return X軸周りの回転角（ラジアン）
 	float GetPitch() const { return pitch_; }
 
 	// --- 入力感度 ---
 
-	/// @brief マウス回転感度を設定する
+	/// @brief マウス回転感度を設定
 	/// @param sensitivity マウス回転感度
 	void SetMouseSensitivity(float sensitivity) { mouseSensitivity_ = sensitivity; }
 
-	/// @brief ゲームパッド右スティック回転感度を設定する
+	/// @brief ゲームパッド右スティック回転感度を設定
 	/// @param sensitivity スティック回転感度
 	void SetGamePadSensitivity(float sensitivity) {	gamePadSensitivity_ = sensitivity; }
 
@@ -67,17 +67,17 @@ public:
 	/// @param strength 補間強度（0.0f〜1.0f）
 	void SetFollowStrength(float strength) { followStrength_ = std::clamp(strength, kMinFollowStrength, kMaxFollowStrength); }
 
-	/// @brief 追従の補間強度を取得する
+	/// @brief 追従の補間強度を取得
 	/// @return 補間強度（0.0f〜1.0f）
 	float GetFollowStrength() const { return followStrength_; }
 
 	// --- オフセット ---
 
-	/// @brief 肩越し視点用のローカルオフセットを設定する
+	/// @brief 肩越し視点用のローカルオフセットを設定
 	/// @param offset ターゲット座標系でのオフセット（右/上/前方向）
 	void SetOffset(const Vector3& offset) { offset_ = offset; }
 
-	/// @brief 現在のオフセットを取得する
+	/// @brief 現在のオフセットを取得
 	/// @return ローカルオフセット
 	const Vector3& GetOffset() const { return offset_; }
 
@@ -86,19 +86,19 @@ public:
 	/// @param maxPitch 最大仰俯角（例: 1.2f）
 	void SetPitchLimit(float minPitch, float maxPitch) { minPitch_ = (std::min)(minPitch, maxPitch); maxPitch_ = (std::max)(minPitch, maxPitch); ClampPitch();}
 
-	/// @brief マウス入力の有効/無効を設定する
+	/// @brief マウス入力の有効/無効を設定
 	/// @param enable trueで有効
 	void SetUseMouseInput(bool enable) { useMouseInput_ = enable; }
 
-	/// @brief ゲームパッド入力の有効/無効を設定する
+	/// @brief ゲームパッド入力の有効/無効を設定
 	/// @param enable trueで有効
 	void SetUseGamePadInput(bool enable) { useGamePadInput_ = enable; }
 
-	/// @brief マウス入力が有効かどうかを取得する
+	/// @brief マウス入力が有効かどうかを取得
 	/// @return 有効ならtrue
 	bool GetUseMouseInput() const { return useMouseInput_; }
 
-	/// @brief ゲームパッド入力が有効かどうかを取得する
+	/// @brief ゲームパッド入力が有効かどうかを取得
 	/// @return 有効ならtrue
 	bool GetUseGamePadInput() const { return useGamePadInput_; }
 
@@ -134,37 +134,37 @@ private:
 	// 肩越しオフセット（ターゲット座標系のローカルオフセット）
 	Vector3 offset_ = { 0.0f, 2.0f, -10.0f };
 
-	/// @brief 入力を処理してYaw/Pitchを更新する
+	/// @brief 入力を処理してYaw/Pitchを更新
 	/// @param deltaTime フレーム時間（秒）
 	void HandleInput(float deltaTime);
 
-	/// @brief 追従対象へ現在注視点を補間する
+	/// @brief 追従対象へ現在注視点を補間
 	void UpdateCurrentTarget();
 
-	/// @brief 球面座標からカメラ位置・回転を計算してベースクラスへ反映する
+	/// @brief 球面座標からカメラ位置・回転を計算してベースクラスへ反映
 	void ApplySphericalCoord();
 
-	/// @brief オフセット適用後の注視中心を計算する
+	/// @brief オフセット適用後の注視中心を計算
 	/// @return オフセット適用後の注視中心
 	Vector3 CalculateViewCenter() const;
 
-	/// @brief 球面座標からカメラ位置を計算する
+	/// @brief 球面座標からカメラ位置を計算
 	/// @param viewCenter 注視中心
 	/// @return カメラのワールド座標
 	Vector3 CalculateBasePosition(const Vector3& viewCenter) const;
 
-	/// @brief カメラから注視中心へ向かう前方ベクトルを計算する
+	/// @brief カメラから注視中心へ向かう前方ベクトルを計算
 	/// @return 正規化済み前方ベクトル
 	Vector3 CalculateForwardDirection() const;
 
-	/// @brief カメラの右方向ベクトルを計算する
+	/// @brief カメラの右方向ベクトルを計算
 	/// @return 正規化済み右方向ベクトル
 	Vector3 CalculateRightDirection() const;
 
-	/// @brief 注視中心へ向く回転を計算する
+	/// @brief 注視中心へ向く回転を計算
 	/// @param viewCenter 注視中心
 	void ApplyLookAtRotation(const Vector3& viewCenter);
 
-	/// @brief Pitch角を設定範囲内へ丸める
+	/// @brief Pitch角を設定範囲内へ丸め処理
 	void ClampPitch();
 };

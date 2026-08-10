@@ -9,7 +9,7 @@
 
 namespace {
 
-	/// @brief GaugeDirectionをJson保存用の文字列へ変換する
+	/// @brief GaugeDirectionをJson保存用の文字列へ変換
 	/// @param direction 変換する方向
 	/// @return 保存用文字列
 	const char* GaugeDirectionToString(GaugeDirection direction) {
@@ -26,7 +26,7 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列からGaugeDirectionへ変換する
+	/// @brief 文字列からGaugeDirectionへ変換
 	/// @param value 読み込んだ文字列
 	/// @return 対応する方向
 	GaugeDirection GaugeDirectionFromString(const std::string& value) {

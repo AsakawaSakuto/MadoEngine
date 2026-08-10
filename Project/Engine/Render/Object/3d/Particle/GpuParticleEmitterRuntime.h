@@ -11,7 +11,7 @@ namespace MadoEngine::Particle {
 	/// @brief Compute ShaderでParticleを更新するEmitter Runtime
 	class GpuParticleEmitterRuntime final : public IParticleEmitterRuntime {
 	public:
-		/// @brief GPU Runtimeへ必要な共有基盤を設定する
+		/// @brief GPU Runtimeへ必要な共有基盤を設定
 		/// @param device D3D12 Device
 		/// @param computePsoRegistry Compute PSO Registry
 		GpuParticleEmitterRuntime(
@@ -21,34 +21,34 @@ namespace MadoEngine::Particle {
 
 		~GpuParticleEmitterRuntime() override;
 
-		/// @brief Runtimeを初期化する
+		/// @brief Runtimeを初期化
 		/// @param config Emitter設定
 		/// @param randomSeed Emitter専用乱数Seed
 		/// @return 初期化に成功した場合はtrue
 		bool Initialize(const EmitterConfig& config, uint32_t randomSeed) override;
 
-		/// @brief GPU更新要求を蓄積する
+		/// @brief GPU更新要求を蓄積
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param emitterTransform 現在のEmitter Transform
 		void Update(float deltaTime, const Transform3D& emitterTransform) override;
 
-		/// @brief GPU発生要求を蓄積する
+		/// @brief GPU発生要求を蓄積
 		/// @param count 発生数
 		/// @param emitterTransform 発生時のEmitter Transform
 		void Emit(uint32_t count, const Transform3D& emitterTransform) override;
 
-		/// @brief Local Particleの描画へ最新Transformを反映する
+		/// @brief Local Particleの描画へ最新Transformを反映
 		/// @param emitterTransform 最新のEmitter Transform
 		void SetTransform(const Transform3D& emitterTransform) override;
 
-		/// @brief Particleを停止する
+		/// @brief Particleを停止
 		/// @param mode 停止方式
 		void Stop(StopMode mode) override;
 
-		/// @brief GPU Runtimeを初期状態へ戻す
+		/// @brief GPU Runtimeを初期状態へ復元
 		void Reset() override;
 
-		/// @brief GPU Simulation Commandを記録する
+		/// @brief GPU Simulation Commandを記録
 		/// @param commandList 記録可能なDirect CommandList
 		/// @param submissionFenceValue Command提出へ紐付けるFence値
 		void RecordGpuSimulation(
@@ -56,11 +56,11 @@ namespace MadoEngine::Particle {
 			uint64_t submissionFenceValue
 		) override;
 
-		/// @brief 非同期ReadbackをGPU完了後に反映する
+		/// @brief 非同期ReadbackをGPU完了後に反映
 		/// @param completedFenceValue GPUが完了済みのFence値
 		void OnGpuFrameCompleted(uint64_t completedFenceValue) override;
 
-		/// @brief GPU描画データをRendererへ登録する
+		/// @brief GPU描画データをRendererへ登録
 		/// @param renderer 登録先Renderer
 		/// @param emitterTransform 現在のEmitter Transform
 		/// @param renderLayer 描画Layer
@@ -70,23 +70,23 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		) const override;
 
-		/// @brief 生存Particleと未完了GPU処理が存在しないか確認する
+		/// @brief 生存Particleと未完了GPU処理が存在しないか確認
 		/// @return Runtimeが空の場合はtrue
 		bool IsIdle() const override;
 
-		/// @brief 現在のBackendを取得する
+		/// @brief 現在のBackendを取得
 		/// @return GPU Backend
 		ParticleBackend GetBackend() const override { return ParticleBackend::Gpu; }
 
-		/// @brief 遅延Readback済みの生存Particle数を取得する
+		/// @brief 遅延Readback済みの生存Particle数を取得
 		/// @return 生存Particle数
 		uint32_t GetAliveCount() const override { return cachedAliveCount_; }
 
-		/// @brief 最大Particle数を取得する
+		/// @brief 最大Particle数を取得
 		/// @return 最大Particle数
 		uint32_t GetMaxParticleCount() const override { return config_.emission.maxParticles; }
 
-		/// @brief GPU Buffer容量を取得する
+		/// @brief GPU Buffer容量を取得
 		/// @return GPU Buffer総容量
 		uint64_t GetGpuBufferCapacityBytes() const override { return gpuBufferCapacityBytes_; }
 
@@ -105,7 +105,7 @@ namespace MadoEngine::Particle {
 			uint64_t fenceValue = 0;
 		};
 
-		/// @brief Particle設定をGPU用PODへ変換する
+		/// @brief Particle設定をGPU用PODへ変換
 		/// @param config 変換元Emitter設定
 		/// @param randomSeed Emitter専用乱数Seed
 		/// @return GPU用Emitter設定
@@ -114,7 +114,7 @@ namespace MadoEngine::Particle {
 			uint32_t randomSeed
 		);
 
-		/// @brief Default Heap Bufferを生成する
+		/// @brief Default Heap Bufferを生成
 		/// @param sizeInBytes Buffer Size
 		/// @param initialState 初期Resource State
 		/// @param outBuffer 生成先
@@ -125,7 +125,7 @@ namespace MadoEngine::Particle {
 			BufferResource& outBuffer
 		);
 
-		/// @brief Upload Heap Bufferを生成してMapする
+		/// @brief Upload Heap Bufferを生成してMap
 		/// @param sizeInBytes Buffer Size
 		/// @param outResource 生成先Resource
 		/// @param outMappedData Map先Pointer
@@ -136,7 +136,7 @@ namespace MadoEngine::Particle {
 			void** outMappedData
 		);
 
-		/// @brief Readback Heap Bufferを生成する
+		/// @brief Readback Heap Bufferを生成
 		/// @param sizeInBytes Buffer Size
 		/// @param outResource 生成先Resource
 		/// @return 生成に成功した場合はtrue
@@ -145,7 +145,7 @@ namespace MadoEngine::Particle {
 			Microsoft::WRL::ComPtr<ID3D12Resource>& outResource
 		);
 
-		/// @brief Resource Stateを必要な場合だけ遷移する
+		/// @brief Resource Stateを必要な場合だけ遷移
 		/// @param commandList CommandList
 		/// @param buffer 対象Buffer
 		/// @param nextState 遷移先State
@@ -155,15 +155,15 @@ namespace MadoEngine::Particle {
 			D3D12_RESOURCE_STATES nextState
 		);
 
-		/// @brief UAV Barrierを記録する
+		/// @brief UAV Barrierを記録
 		/// @param commandList CommandList
-		/// @param resource 対象Resource。nullptrの場合は全UAV
+		/// @param resource 対象Resource、nullptrの場合は全UAV
 		void AddUavBarrier(
 			ID3D12GraphicsCommandList* commandList,
 			ID3D12Resource* resource = nullptr
 		) const;
 
-		/// @brief Compute Root Parameterへ全Bufferを設定する
+		/// @brief Compute Root Parameterへ全Bufferを設定
 		/// @param commandList CommandList
 		/// @param inputAliveIndex 読み込みAlive Buffer Index
 		/// @param outputAliveIndex 書き込みAlive Buffer Index
@@ -175,11 +175,11 @@ namespace MadoEngine::Particle {
 			D3D12_GPU_VIRTUAL_ADDRESS perFrameAddress
 		);
 
-		/// @brief GPU Bufferを描画参照可能なStateへ遷移する
+		/// @brief GPU Bufferを描画参照可能なStateへ遷移
 		/// @param commandList CommandList
 		void TransitionForDraw(ID3D12GraphicsCommandList* commandList);
 
-		/// @brief GPU Buffer容量を集計する
+		/// @brief GPU Buffer容量を集計
 		void CalculateGpuBufferCapacity();
 
 		ID3D12Device* device_ = nullptr;

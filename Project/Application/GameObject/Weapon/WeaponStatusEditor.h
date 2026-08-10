@@ -12,11 +12,11 @@ namespace Weapon {
 
 	private:
 		/// @brief 編集中の武器初期ステータスをJsonへ保存
-		/// @return 保存に成功した場合はtrueを返す
+		/// @return 保存に成功した場合はtrue
 		bool SaveToJson() const;
 
 		/// @brief 入力名のJsonがあれば読み込み、なければ現在値で作成
-		/// @return 読込または作成に成功した場合はtrueを返す
+		/// @return 読込または作成に成功した場合はtrue
 		bool LoadOrCreateJson();
 
 		/// @brief 入力名から武器初期ステータスJsonの保存先を取得

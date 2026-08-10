@@ -15,7 +15,7 @@ namespace {
 		kComputeThreadCount * D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
 	constexpr uint32_t kShapeFlagSurfaceOrEdge = 1u << 0;
 
-	/// @brief 256byte境界へ切り上げる
+	/// @brief 256byte境界へ切り上げ
 	/// @param size 切り上げるSize
 	/// @return 切り上げ後のSize
 	uint64_t AlignConstantBufferSize(uint64_t size) {
@@ -23,7 +23,7 @@ namespace {
 		return (size + alignment - 1) & ~(alignment - 1);
 	}
 
-	/// @brief Dispatch Group数を計算する
+	/// @brief Dispatch Group数を計算
 	/// @param itemCount 処理要素数
 	/// @return Dispatch Group数
 	uint32_t CalculateGroupCount(uint32_t itemCount) {

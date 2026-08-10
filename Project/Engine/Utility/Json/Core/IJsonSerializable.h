@@ -8,11 +8,11 @@ namespace MadoEngine::Json {
 	public:
 		virtual ~IJsonSerializable() = default;
 
-		/// @brief Jsonから値を読み込む
+		/// @brief Jsonから値を読み込み
 		/// @param json 読み込み元のJson
 		virtual void FromJson(const nlohmann::json& json) = 0;
 
-		/// @brief 現在の値をJsonへ変換する
+		/// @brief 現在の値をJsonへ変換
 		/// @return 変換されたJson
 		virtual nlohmann::json ToJson() const = 0;
 	};

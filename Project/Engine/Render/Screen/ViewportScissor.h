@@ -19,20 +19,20 @@ namespace MadoEngine::Render {
 		ViewportScissor(ViewportScissor&&)                 = default;
 		ViewportScissor& operator=(ViewportScissor&&)      = default;
 
-		/// @brief ビューポートとシザー矩形をウィンドウサイズで初期化・更新する
+		/// @brief ビューポートとシザー矩形をウィンドウサイズで初期化・更新
 		/// @param width  描画領域の幅（ピクセル）
 		/// @param height 描画領域の高さ（ピクセル）
 		void UpdateSize(uint32_t width, uint32_t height);
 
-		/// @brief ビューポートとシザー矩形をコマンドリストに適用する
+		/// @brief ビューポートとシザー矩形をコマンドリストに適用
 		/// @param commandList ID3D12GraphicsCommandList のポインタ
 		void Apply(ID3D12GraphicsCommandList* commandList) const;
 
-		/// @brief ビューポートを取得する
+		/// @brief ビューポートを取得
 		/// @return D3D12_VIEWPORT の const 参照
 		const D3D12_VIEWPORT& GetViewport() const { return viewport_; }
 
-		/// @brief シザー矩形を取得する
+		/// @brief シザー矩形を取得
 		/// @return D3D12_RECT の const 参照
 		const D3D12_RECT& GetScissorRect() const { return scissorRect_; }
 

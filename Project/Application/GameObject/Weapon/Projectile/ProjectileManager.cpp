@@ -10,7 +10,7 @@ namespace Projectile {
 		/// @param projectile 跳弾するProjectile
 		/// @param collidedEnemyId 衝突したEnemyの識別番号
 		/// @param enemyTargets 跳弾先候補
-		/// @return 跳弾先が存在する場合はその情報を、存在しない場合はnullptrを返す
+		/// @return 跳弾先が存在する場合はその情報を、存在しない場合はnullptr
 		const EnemyTargetInfo* FindNearestBounceTarget(
 			const IProjectile& projectile,
 			std::uint32_t collidedEnemyId,

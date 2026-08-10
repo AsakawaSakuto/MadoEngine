@@ -8,68 +8,68 @@ public:
 
     /// @brief コンストラクタ
     /// @param duration タイマーの継続時間
-    /// @param loop ループするかどうか
+    /// @param loop ループする場合はtrue
     GameTimer(float duration, bool loop = false);
 
-    /// @brief タイマーを更新する
+    /// @brief タイマーを更新
     /// @param deltaTime 経過時間
     void Update(float deltaTime = 1.0f / 60.0f);
 
-    /// @brief タイマーを開始する
+    /// @brief タイマーを開始
     /// @param duration タイマーの継続時間
-    /// @param loop ループするかどうか
+    /// @param loop ループする場合はtrue
     void Start(float duration, bool loop = false);
 
-    /// @brief タイマーを停止する
+    /// @brief タイマーを停止
     void Stop();
 
-    /// @brief タイマーをリセットする
+    /// @brief タイマーをリセット
     void Reset();
 
-    /// @brief タイマーを一時停止する
+    /// @brief タイマーを一時停止
     void Pause();
 
-    /// @brief 一時停止中のタイマーを再開する
+    /// @brief 一時停止中のタイマーを再開
     void Resume();
 
-    /// @brief タイマーが動作中かどうかを取得する
+    /// @brief タイマーが動作中かどうかを取得
     /// @return 動作中ならtrue
     bool IsActive() const;
 
-    /// @brief タイマーが完了したかどうかを取得する
+    /// @brief タイマーが完了したかどうかを取得
     /// @return 完了していればtrue
     bool IsFinished() const;
 
-    /// @brief このフレームでループしたかどうかを取得する
+    /// @brief このフレームでループしたかどうかを取得
     /// @return このフレームでループしていればtrue
     bool WasLoopedThisFrame() const;
 
-	/// @brief タイマーの進行率を取得する 0.0f から 1.0f の範囲で返す
+	/// @brief タイマーの進行率を0.0fから1.0fの範囲で取得
     /// @return 進行率
     float GetProgress() const;
 
-	/// @brief タイマーの逆進行率を取得する 1.0f から 0.0f の範囲で返す
+	/// @brief タイマーの逆進行率を1.0fから0.0fの範囲で取得
     /// @return 逆進行率
     float GetReverseProgress() const;
 
-    /// @brief 残り時間を取得する
+    /// @brief 残り時間を取得
     /// @return 残り時間
     float GetRemainingTime() const;
 
-    /// @brief 経過時間を取得する
+    /// @brief 経過時間を取得
     /// @return 経過時間
     float GetElapsedTime() const;
 
-    /// @brief タイマーの継続時間を取得する
+    /// @brief タイマーの継続時間を取得
     /// @return 継続時間
     float GetDuration() const;
 
-    /// @brief 継続時間を変更する
+    /// @brief 継続時間を変更
     /// @param duration 新しい継続時間
     void SetDuration(float duration);
 
-    /// @brief ループ設定を変更する
-    /// @param loop ループするかどうか
+    /// @brief ループ設定を変更
+    /// @param loop ループする場合はtrue
     void SetLoop(bool loop);
 
 private:

@@ -7,7 +7,7 @@ namespace MyCollider {
 	using CollisionPairSetting = ColliderManager::CollisionPairSetting;
 	using ProfileStats = ColliderManager::ProfileStats;
 
-	/// @brief コライダーを登録する
+	/// @brief コライダーを登録
 	/// @param name 識別名（例: "Enemy_0001"）
 	/// @param tag グループ（例: CollisionTag::Enemy）
 	/// @param pShape 形状データ（AABB, OBB, Sphere, OvalSphere, Plane, Segment, Lineのいずれか）
@@ -24,15 +24,15 @@ namespace MyCollider {
 		ColliderManager::GetInstance().RemoveCollider(name);
 	}
 
-	/// @brief 衝突ルールを登録する（初期化時に呼ぶ。Enemy vs Enemy も可能）
+	/// @brief 衝突ルールを登録する（初期化時に呼ぶ、Enemy vs Enemy も可能）
 	/// @param tagA グループA
 	/// @param tagB グループB
-	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする。デフォルトはfalse）
+	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする、デフォルトはfalse）
 	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve = false) {
 		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, enableResolve);
 	}
 
-	/// @brief 衝突ルールを詳細設定付きで登録する
+	/// @brief 衝突ルールを詳細設定付きで登録
 	/// @param tagA グループA
 	/// @param tagB グループB
 	/// @param setting 押し戻しやCCDの有効状態
@@ -40,16 +40,16 @@ namespace MyCollider {
 		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, setting);
 	}
 
-	/// @brief 衝突ルールを押し戻しとCCD指定付きで登録する
+	/// @brief 衝突ルールを押し戻しとCCD指定付きで登録
 	/// @param tagA グループA
 	/// @param tagB グループB
-	/// @param enableResolve 押し戻しを有効にするか
-	/// @param enableCCD 連続衝突判定を有効にするか
+	/// @param enableResolve 押し戻しを有効にする場合はtrue
+	/// @param enableCCD 連続衝突判定を有効にする場合はtrue
 	inline void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve, bool enableCCD) {
 		ColliderManager::GetInstance().RegisterCollisionPair(tagA, tagB, enableResolve, enableCCD);
 	}
 
-	/// @brief 特定の個体同士が衝突しているか
+	/// @brief 特定の個体同士の衝突を判定
 	/// @param nameA 個体Aの識別名
 	/// @param nameB 個体Bの識別名
 	/// @return 衝突していればtrue
@@ -57,7 +57,7 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsHitName(nameA, nameB);
 	}
 
-	/// @brief 特定の個体が、指定したTagを持つ誰かと衝突しているか
+	/// @brief 特定の個体と指定したTagを持つ個体との衝突を判定
 	/// @param name 個体の識別名
 	/// @param targetTag 対象のタグ
 	/// @return 衝突していればtrue
@@ -73,7 +73,7 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsHitTags(tagA, tagB);
 	}
 
-	/// @brief 指定した個体が、対象タグのAABB上面に乗っているかを判定する
+	/// @brief 指定した個体が、対象タグのAABB上面に乗っているかを判定
 	/// @param name 個体の識別名
 	/// @param targetTag 床として扱うタグ
 	/// @return 床面に接触していればtrue
@@ -81,15 +81,15 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsGroundContact(name, targetTag);
 	}
 
-	/// @brief 指定したタグ同士で地面接触しているかを判定します。
-	/// @param selfTag 接地を判定する側のタグです。
-	/// @param targetTag 地面として扱う側のタグです。
-	/// @return 接地していればtrueを返します。
+	/// @brief 指定したタグ同士で地面接触しているかを判定
+	/// @param selfTag 接地を判定する側のタグ
+	/// @param targetTag 地面として扱う側のタグ
+	/// @return 接地していればtrue
 	inline bool IsGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
 		return ColliderManager::GetInstance().IsGroundContact(selfTag, targetTag);
 	}
 
-	/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定する
+	/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定
 	/// @param name 個体の識別名
 	/// @param targetTag スロープとして扱うタグ
 	/// @return スロープ面に接触していればtrue
@@ -97,25 +97,25 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(name, targetTag);
 	}
 
-	/// @brief 指定したタグ同士で坂地面に接触しているかを判定します。
-	/// @param selfTag 接地を判定する側のタグです。
-	/// @param targetTag 坂地面として扱う側のタグです。
-	/// @return 坂地面に接地していればtrueを返します。
+	/// @brief 指定したタグ同士で坂地面に接触しているかを判定
+	/// @param selfTag 接地を判定する側のタグ
+	/// @param targetTag 坂地面として扱う側のタグ
+	/// @return 坂地面に接地していればtrue
 	inline bool IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
 		return ColliderManager::GetInstance().IsSlopeGroundContact(selfTag, targetTag);
 	}
 
-	/// @brief 指定座標の直下にある地表面のY座標を取得します。
-	/// @param origin 地表面を探す基準座標です。
-	/// @param targetTag 地面として扱う対象タグです。
-	/// @param outSurfaceY 見つかった地表面のY座標です。
-	/// @param maxDistance 下方向に探索する最大距離です。
-	/// @return 地表面が見つかった場合はtrueを返します。
+	/// @brief 指定座標の直下にある地表面のY座標を取得
+	/// @param origin 地表面を探す基準座標
+	/// @param targetTag 地面として扱う対象タグ
+	/// @param outSurfaceY 見つかった地表面のY座標
+	/// @param maxDistance 下方向に探索する最大距離
+	/// @return 地表面が見つかった場合はtrue
 	inline bool TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance) {
 		return ColliderManager::GetInstance().TryGetGroundSurfaceY(origin, targetTag, outSurfaceY, maxDistance);
 	}
 
-	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
+	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ
 	/// @param outCenterY Sphere中心に設定するY座標の出力先
@@ -125,17 +125,17 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().TryGetSlopeGroundCenterY(name, targetTag, outCenterY, maxSnapDownDistance);
 	}
 
-	/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得します。
-	/// @param selfTag Sphereコライダーとして扱う側のタグです。
-	/// @param targetTag Slopeとして扱う側のタグです。
-	/// @param outCenterY Sphere中心に設定するY座標の出力先です。
-	/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
-	/// @return 追従できるSlopeが見つかればtrueを返します。
+	/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得
+	/// @param selfTag Sphereコライダーとして扱う側のタグ
+	/// @param targetTag Slopeとして扱う側のタグ
+	/// @param outCenterY Sphere中心に設定するY座標の出力先
+	/// @param maxSnapDownDistance 下方向に追従できる最大距離
+	/// @return 追従できるSlopeが見つかればtrue
 	inline bool TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f) {
 		return ColliderManager::GetInstance().TryGetSlopeGroundCenterY(selfTag, targetTag, outCenterY, maxSnapDownDistance);
 	}
 
-	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
+	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ
 	/// @param outNormal Slope上面の法線の出力先
@@ -144,28 +144,28 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().TryGetSlopeGroundNormal(name, targetTag, outNormal);
 	}
 
-	/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得します。
-	/// @param selfTag Sphereコライダーとして扱う側のタグです。
-	/// @param targetTag Slopeとして扱う側のタグです。
-	/// @param outNormal Slope上面の法線の出力先です。
-	/// @return 接地しているSlopeが見つかればtrueを返します。
+	/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得
+	/// @param selfTag Sphereコライダーとして扱う側のタグ
+	/// @param targetTag Slopeとして扱う側のタグ
+	/// @param outNormal Slope上面の法線の出力先
+	/// @return 接地しているSlopeが見つかればtrue
 	inline bool TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal) {
 		return ColliderManager::GetInstance().TryGetSlopeGroundNormal(selfTag, targetTag, outNormal);
 	}
 
-	/// @brief 登録済みコライダーの衝突判定と押し戻しを更新する
+	/// @brief 登録済みコライダーの衝突判定と押し戻しを更新
 	inline void Update() {
 		ColliderManager::GetInstance().Update();
 	}
 
-	/// @brief Collider処理の統計情報を取得します。
-	/// @return 直近のCollider処理統計です。
+	/// @brief Collider処理の統計情報を取得
+	/// @return 直近のCollider処理統計
 	inline const ProfileStats& GetProfileStats() {
 		return ColliderManager::GetInstance().GetProfileStats();
 	}
 
 #ifdef USE_IMGUI
-	/// @brief Collider処理の統計情報をImGuiへ表示します。
+	/// @brief Collider処理の統計情報をImGuiへ表示
 	inline void DrawImGui() {
 		ColliderManager::GetInstance().DrawImGui();
 	}

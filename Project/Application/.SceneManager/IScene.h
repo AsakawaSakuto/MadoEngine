@@ -17,13 +17,13 @@ public:
 
 	Camera GetCamera() const { return sceneCamera_; }
 
-	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得します。
-	/// @return シャドウマップの注視点です。
+	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得
+	/// @return シャドウマップの注視点
 	virtual Vector3 GetShadowFocusPosition() const { return sceneCamera_.GetPosition(); }
 
-	/// @brief シャドウマップ確認用の対象座標を取得します。
-	/// @param outPosition 対象のワールド座標を受け取る変数です。
-	/// @return 対象座標を取得できた場合はtrueを返します。
+	/// @brief シャドウマップ確認用の対象座標を取得
+	/// @param outPosition 対象のワールド座標を受け取る変数
+	/// @return 対象座標を取得できた場合はtrue
 	virtual bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 		outPosition = {};
 		return false;

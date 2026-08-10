@@ -25,7 +25,7 @@ namespace {
 	constexpr UINT kGpuParticleRootBatch = 3;
 	constexpr UINT kGpuParticleRootAliveIndices = 4;
 
-	/// @brief BlendModeをParticle Shader用の値へ変換する
+	/// @brief BlendModeをParticle Shader用の値へ変換
 	/// @param blendMode 変換するBlendMode
 	/// @return Particle Shaderへ渡すBlendMode値
 	uint32_t ToParticleShaderBlendMode(MadoEngine::Render::BlendMode blendMode) {

@@ -21,10 +21,10 @@ namespace Weapon {
 			return static_cast<int>(clampedValue);
 		}
 
-		/// @brief 指定した強化ステータスの変更可能な設定を取得します。
-		/// @param status 参照する武器ステータスです。
-		/// @param type 取得する強化ステータスです。
-		/// @return 設定が存在する場合はポインターを、存在しない場合はnullptrを返します。
+		/// @brief 指定した強化ステータスの変更可能な設定を取得
+		/// @param status 参照する武器ステータス
+		/// @param type 取得する強化ステータス
+		/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
 		UpgradeValue* FindMutableUpgradeValue(UpgradeStatus& status, UpgradeStatType type) {
 			switch (type) {
 			case UpgradeStatType::Damage:           return &status.damage;

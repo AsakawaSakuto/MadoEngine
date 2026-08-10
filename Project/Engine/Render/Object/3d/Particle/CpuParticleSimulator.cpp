@@ -15,7 +15,7 @@ namespace {
 		Vector3 outward{};
 	};
 
-	/// @brief float範囲から乱数を生成する
+	/// @brief float範囲から乱数を生成
 	/// @param range 乱数範囲
 	/// @param random 乱数生成器
 	/// @return 生成した値
@@ -23,7 +23,7 @@ namespace {
 		return random.Float(range.min, range.max);
 	}
 
-	/// @brief Vector2範囲から乱数を生成する
+	/// @brief Vector2範囲から乱数を生成
 	/// @param range 乱数範囲
 	/// @param random 乱数生成器
 	/// @return 生成した値
@@ -34,7 +34,7 @@ namespace {
 		};
 	}
 
-	/// @brief Vector3範囲から乱数を生成する
+	/// @brief Vector3範囲から乱数を生成
 	/// @param range 乱数範囲
 	/// @param random 乱数生成器
 	/// @return 生成した値
@@ -46,7 +46,7 @@ namespace {
 		};
 	}
 
-	/// @brief Vector4範囲から乱数を生成する
+	/// @brief Vector4範囲から乱数を生成
 	/// @param range 乱数範囲
 	/// @param random 乱数生成器
 	/// @return 生成した値
@@ -59,7 +59,7 @@ namespace {
 		};
 	}
 
-	/// @brief 球面上の一様な方向を生成する
+	/// @brief 球面上の一様な方向を生成
 	/// @param random 乱数生成器
 	/// @return 生成した単位方向
 	Vector3 SampleUnitSphere(Random& random) {
@@ -69,7 +69,7 @@ namespace {
 		return { radius * std::cos(angle), z, radius * std::sin(angle) };
 	}
 
-	/// @brief 平面またはRing用の直交基底を生成する
+	/// @brief 平面またはRing用の直交基底を生成
 	/// @param normal 平面法線
 	/// @param outTangent 接線の出力先
 	/// @param outBitangent 従法線の出力先
@@ -82,7 +82,7 @@ namespace {
 		outBitangent = Math::Normalize(Math::Cross(normalized, outTangent));
 	}
 
-	/// @brief 発生形状から座標と外向き方向を生成する
+	/// @brief 発生形状から座標と外向き方向を生成
 	/// @param shape 発生形状
 	/// @param random 乱数生成器
 	/// @return 生成した形状サンプル
@@ -135,7 +135,7 @@ namespace {
 		}, shape);
 	}
 
-	/// @brief ゼロベクトルの場合に既定方向を返す
+	/// @brief ゼロベクトルの場合に既定方向を返却
 	/// @param direction 判定する方向
 	/// @return 正規化した方向
 	Vector3 NormalizeDirection(const Vector3& direction) {

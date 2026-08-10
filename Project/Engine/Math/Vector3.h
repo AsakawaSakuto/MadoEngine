@@ -51,13 +51,13 @@ struct Vector3 {
 
     // --- utilities (ユーティリティ) ---
 
-    /// @brief ベクトルの長さの2乗を返す
+    /// @brief ベクトルの長さの2乗を返却
     constexpr float LengthSq() const noexcept { return x * x + y * y + z * z; }
 
-    /// @brief ベクトルの長さを返す
+    /// @brief ベクトルの長さを返却
     float Length() const noexcept { return std::sqrt(LengthSq()); }
 
-    /// @brief 長さ1の単位ベクトルを返す
+    /// @brief 長さ1の単位ベクトルを返却
     Vector3 Normalized() const noexcept {
         const float len = Length();
         if (len == 0.0f) { return { 0.0f, 0.0f, 0.0f }; }
@@ -70,7 +70,7 @@ struct Vector3 {
         x /= len; y /= len; z /= len;
     }
 
-    /// @brief 2つのベクトルの内積を返す
+    /// @brief 2つのベクトルの内積を返却
     /// @param a ベクトル
     /// @param b ベクトル
     /// @return ベクトルaとbの内積
@@ -78,7 +78,7 @@ struct Vector3 {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
 
-    /// @brief 2つのベクトルの外積を返す
+    /// @brief 2つのベクトルの外積を返却
     /// @param a ベクトル
     /// @param b ベクトル
     /// @return ベクトルaとbの外積

@@ -25,44 +25,44 @@ public:
 
 	void Draw(Camera& useCamera) override;
 
-	/// @brief シャドウマップへインスタンスモデルの深度を書き込みます。
-	/// @param lightViewProjection ライト視点のビュー射影行列です。
+	/// @brief シャドウマップへインスタンスモデルの深度を書き込み
+	/// @param lightViewProjection ライト視点のビュー射影行列
 	void DrawShadow(const Matrix4x4& lightViewProjection);
 
-	/// @brief シャドウマップ生成用にインスタンシングモデルを描画する
+	/// @brief シャドウマップ生成用にインスタンシングモデルを描画
 	/// @param lightViewProjection ライト視点のビュープロジェクション行列
 	/// @param billboardCamera ビルボードの向きに使用するカメラ
 	void DrawShadow(const Matrix4x4& lightViewProjection, const Camera& billboardCamera);
 
-	/// @brief ビルボード行列を使用するかを設定する
-	/// @param enabled trueの場合はカメラ向きのビルボード行列を使用する
+	/// @brief ビルボード行列を使用するかを設定
+	/// @param enabled trueの場合はカメラ向きのビルボード行列を使用
 	void SetUseBillboard(bool enabled) { usebillbord_ = enabled; }
 
-	/// @brief ビルボード行列を使用するかを取得する
+	/// @brief ビルボード行列を使用するかを取得
 	/// @return 使用する場合はtrue
 	bool IsUseBillboard() const { return usebillbord_; }
 
-	/// @brief 他の3DObjectへ影を書き込むかを設定します。
-	/// @param enabled 影を書き込む場合はtrueです。
+	/// @brief 他の3DObjectへ影を書き込むかを設定
+	/// @param enabled 影を書き込む場合はtrue
 	void SetCastShadow(bool enabled) { castShadow_ = enabled; }
 
-	/// @brief 他の3DObjectへ影を書き込むかを取得します。
-	/// @return 影を書き込む場合はtrueです。
+	/// @brief 他の3DObjectへ影を書き込むかを取得
+	/// @return 影を書き込む場合はtrue
 	bool CanCastShadow() const { return castShadow_; }
 
-	/// @brief 他の3DObjectから影を書き込まれるかを設定します。
-	/// @param enabled 影を書き込まれる場合はtrueです。
+	/// @brief 他の3DObjectから影を書き込まれるかを設定
+	/// @param enabled 影を書き込まれる場合はtrue
 	void SetReceiveShadow(bool enabled) { receiveShadow_ = enabled; }
 
-	/// @brief 他の3DObjectから影を書き込まれるかを取得します。
-	/// @return 影を書き込まれる場合はtrueです。
+	/// @brief 他の3DObjectから影を書き込まれるかを取得
+	/// @return 影を書き込まれる場合はtrue
 	bool CanReceiveShadow() const { return receiveShadow_; }
 
-	/// @brief 通常描画で参照するシャドウマップ情報を設定します。
-	/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドルです。
-	/// @param lightViewProjection ライト視点のビュー射影行列です。
-	/// @param width シャドウマップの幅です。
-	/// @param height シャドウマップの高さです。
+	/// @brief 通常描画で参照するシャドウマップ情報を設定
+	/// @param shadowMapSrv シャドウマップSRVのGPUディスクリプタハンドル
+	/// @param lightViewProjection ライト視点のビュー射影行列
+	/// @param width シャドウマップの幅
+	/// @param height シャドウマップの高さ
 	void SetShadowMap(
 		D3D12_GPU_DESCRIPTOR_HANDLE shadowMapSrv,
 		const Matrix4x4& lightViewProjection,
@@ -70,31 +70,31 @@ public:
 		uint32_t height
 	);
 
-	/// @brief インスタンスを追加します。
-	/// @param desc 追加するインスタンスの設定です。
-	/// @return 追加したインスタンスのハンドルです。
+	/// @brief インスタンスを追加
+	/// @param desc 追加するインスタンスの設定
+	/// @return 追加したインスタンスのハンドル
 	uint32_t AddInstance(const InstanceDesc& desc);
 
-	/// @brief すべてのインスタンスを削除します。
+	/// @brief すべてのインスタンスを削除
 	void ClearInstances();
 
-	/// @brief インスタンスのTransformを設定します。
-	/// @param handle 対象インスタンスのハンドルです。
-	/// @param transform 設定するTransformです。
+	/// @brief インスタンスのTransformを設定
+	/// @param handle 対象インスタンスのハンドル
+	/// @param transform 設定するTransform
 	void SetInstanceTransform(uint32_t handle, const Transform3D& transform);
 
-	/// @brief インスタンスの色を設定します。
-	/// @param handle 対象インスタンスのハンドルです。
-	/// @param color 設定する色です。
+	/// @brief インスタンスの色を設定
+	/// @param handle 対象インスタンスのハンドル
+	/// @param color 設定する色
 	void SetInstanceColor(uint32_t handle, const Vector4& color);
 
-	/// @brief インスタンスの表示状態を設定します。
-	/// @param handle 対象インスタンスのハンドルです。
-	/// @param isVisible 表示する場合はtrueです。
+	/// @brief インスタンスの表示状態を設定
+	/// @param handle 対象インスタンスのハンドル
+	/// @param isVisible 表示する場合はtrue
 	void SetInstanceVisible(uint32_t handle, bool isVisible);
 
-	/// @brief インスタンス数を取得します。
-	/// @return 登録済みインスタンス数です。
+	/// @brief インスタンス数を取得
+	/// @return 登録済みインスタンス数
 	size_t GetInstanceCount() const { return instances_.size(); }
 
 	void SetSceneType(SceneType sceneType);
@@ -114,21 +114,21 @@ private:
 	void InitializeInstanceResources();
 	void EnsureInstanceResource(size_t requiredCount);
 	void EnsureShadowInstanceResource(size_t requiredCount);
-	/// @brief 現在のインスタンスTransformからワールド行列を作成する
+	/// @brief 現在のインスタンスTransformからワールド行列を作成
 	/// @param transform ワールド行列へ変換するTransform
-	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
 	/// @return 作成したワールド行列
 	Matrix4x4 MakeWorldMatrix(const Transform3D& transform, const Camera* billboardCamera) const;
 
-	/// @brief シャドウマップ生成用の共通描画処理を行う
+	/// @brief シャドウマップ生成用の共通描画処理
 	/// @param lightViewProjection ライト視点のビュープロジェクション行列
-	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
 	void DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camera* billboardCamera);
 
-	/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新する
+	/// @brief 指定されたビュー射影行列でインスタンスGPUデータを更新
 	/// @param viewProjectionMatrix 変換に使用するビュー射影行列
 	/// @param outputData 書き込み先のGPUデータ
-	/// @param billboardCamera ビルボードの向きに使用するカメラ。nullptrの場合は通常の回転を使用する
+	/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
 	/// @return 描画対象のインスタンス数
 	size_t BuildInstanceGpuData(const Matrix4x4& viewProjectionMatrix, InstanceForGPU* outputData, const Camera* billboardCamera = nullptr);
 	void UpdateLightGpuData();

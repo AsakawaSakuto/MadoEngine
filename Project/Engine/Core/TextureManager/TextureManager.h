@@ -22,7 +22,7 @@ namespace MadoEngine {
     /// @brief テクスチャの読み込みと管理を行うシングルトンクラス
     class TextureManager {
     public:
-        /// @brief シングルトンインスタンスを取得する
+        /// @brief シングルトンインスタンスを取得
         /// @return TextureManagerの唯一のインスタンス
         static TextureManager& GetInstance();
 
@@ -32,43 +32,43 @@ namespace MadoEngine {
         TextureManager(TextureManager&&) = delete;
         TextureManager& operator=(TextureManager&&) = delete;
 
-        /// @brief 初期化。"Assets/Texture" 内の全 .png を自動ロードする
+        /// @brief 初期化、"Assets/Texture" 内の全 .png を自動ロード
         /// @param device Direct3D 12 デバイスポインタ
         /// @param srvManager SRVManagerのポインタ
         void Initialize(ID3D12Device* device, MadoEngine::Core::SRVManager* srvManager);
 
-        /// @brief ファイル名をキーにテクスチャリソースを取得する
+        /// @brief ファイル名をキーにテクスチャリソースを取得
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @return テクスチャリソースの ComPtr（見つからない場合は nullptr）
         Microsoft::WRL::ComPtr<ID3D12Resource> GetTexture(const std::string& fileName) const;
 
-        /// @brief テクスチャのピクセルサイズを取得する
+        /// @brief テクスチャのピクセルサイズを取得
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @return ピクセル単位の幅・高さ（見つからない場合は {0,0}）
         Vector2 GetPixelSize(const std::string& fileName) const;
 
-        /// @brief テクスチャの登録順インデックスを取得する
+        /// @brief テクスチャの登録順インデックスを取得
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @return テクスチャインデックス（見つからない場合は UINT32_MAX）
         uint32_t GetTextureIndex(const std::string& fileName) const;
 
-        /// @brief テクスチャ名からSRVインデックスを取得する
+        /// @brief テクスチャ名からSRVインデックスを取得
         /// @param fileName キーとなるファイル名（拡張子なし）
         /// @param outTextureIndex 取得したSRVインデックスの出力先
         /// @return テクスチャが登録されている場合はtrue
         bool TryGetTextureIndex(const std::string& fileName, uint32_t& outTextureIndex) const;
 
-        /// @brief 登録済みテクスチャ名の一覧を取得する
+        /// @brief 登録済みテクスチャ名の一覧を取得
         /// @return 名前順に並べたテクスチャ名の一覧
         std::vector<std::string> GetTextureNames() const;
 
-        /// @brief RGBAピクセルを動的テクスチャとして登録または更新します。
-        /// @param key 登録キー。
-        /// @param width テクスチャ幅。
-        /// @param height テクスチャ高さ。
-        /// @param rgbaPixels RGBA8ピクセルデータ。
-        /// @param dataSize ピクセルデータサイズ。
-        /// @return SRVインデックス。失敗時はUINT32_MAX。
+        /// @brief RGBAピクセルを動的テクスチャとして登録または更新
+        /// @param key 登録キー
+        /// @param width テクスチャ幅
+        /// @param height テクスチャ高さ
+        /// @param rgbaPixels RGBA8ピクセルデータ
+        /// @param dataSize ピクセルデータサイズ
+        /// @return SRVインデックス、失敗時はUINT32_MAX
         uint32_t RegisterOrUpdateRGBA(
             const std::string& key,
             uint32_t width,
@@ -76,36 +76,36 @@ namespace MadoEngine {
             const uint8_t* rgbaPixels,
             uint32_t dataSize);
 
-        /// @brief GPUリソースとSRVを維持したままテクスチャの管理キーを変更します。
-        /// @param currentKey 現在の管理キー。
-        /// @param newKey 新しい管理キー。
-        /// @return 管理キーを変更できた場合はtrue。
+        /// @brief GPUリソースとSRVを維持したままテクスチャの管理キーを変更
+        /// @param currentKey 現在の管理キー
+        /// @param newKey 新しい管理キー
+        /// @return 管理キーを変更できた場合はtrue
         bool RenameTexture(const std::string& currentKey, const std::string& newKey);
 
-        /// @brief 指定キーのテクスチャを登録解除し、SRVを解放します。
-        /// @param key 登録キー。
-        /// @return 解放できた場合はtrue。
+        /// @brief 指定キーのテクスチャを登録解除し、SRVを解放
+        /// @param key 登録キー
+        /// @return 解放できた場合はtrue
         bool DestroyTexture(const std::string& key);
 
-        /// @brief テクスチャインデックスからSRVハンドルを取得する
+        /// @brief テクスチャインデックスからSRVハンドルを取得
         /// @param textureIndex テクスチャインデックス
         /// @return GPU用のSRVハンドル
         D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(uint32_t textureIndex);
 
-        /// @brief 全テクスチャリソースを解放する
+        /// @brief 全テクスチャリソースを解放
         void Finalize();
 
     private:
         TextureManager() = default;
         ~TextureManager() = default;
 
-        /// @brief WICファイルを読み込みミップマップを生成する
+        /// @brief WICファイルを読み込みミップマップを生成
         /// @param filePath 読み込む画像ファイルのパス（ワイド文字列）
         /// @param mipImage 出力先 ScratchImage
         /// @return 成功した場合 true
         bool LoadTexture(const std::wstring& filePath, DirectX::ScratchImage& mipImage) const;
 
-        /// @brief テクスチャ用 GPU リソースを生成する
+        /// @brief テクスチャ用 GPU リソースを生成
         /// @param device Direct3D 12 デバイスポインタ
         /// @param metadata テクスチャメタデータ
         /// @return 生成した ID3D12Resource の ComPtr
@@ -113,33 +113,33 @@ namespace MadoEngine {
             ID3D12Device* device,
             const DirectX::TexMetadata& metadata) const;
 
-        /// @brief RGBA8用の動的テクスチャリソースを作成します。
-        /// @param width テクスチャ幅。
-        /// @param height テクスチャ高さ。
-        /// @return 作成されたテクスチャリソース。
+        /// @brief RGBA8用の動的テクスチャリソースを作成
+        /// @param width テクスチャ幅
+        /// @param height テクスチャ高さ
+        /// @return 作成されたテクスチャリソース
         Microsoft::WRL::ComPtr<ID3D12Resource> CreateDynamicTextureResource(
             uint32_t width,
             uint32_t height) const;
 
-        /// @brief RGBA8ピクセルをテクスチャリソースへ書き込みます。
-        /// @param texture 書き込み先テクスチャ。
-        /// @param width テクスチャ幅。
-        /// @param height テクスチャ高さ。
-        /// @param rgbaPixels RGBA8ピクセルデータ。
+        /// @brief RGBA8ピクセルをテクスチャリソースへ書き込み
+        /// @param texture 書き込み先テクスチャ
+        /// @param width テクスチャ幅
+        /// @param height テクスチャ高さ
+        /// @param rgbaPixels RGBA8ピクセルデータ
         void UploadRGBAData(
             ID3D12Resource* texture,
             uint32_t width,
             uint32_t height,
             const uint8_t* rgbaPixels) const;
 
-        /// @brief GPU リソースへミップマップデータを転送する
+        /// @brief GPU リソースへミップマップデータを転送
         /// @param texture 転送先リソース
         /// @param mipImage 転送元 ScratchImage
         void UploadTextureData(
             ID3D12Resource* texture,
             const DirectX::ScratchImage& mipImage) const;
 
-        /// @brief std::string を std::wstring に変換する
+        /// @brief std::string を std::wstring に変換
         /// @param str 変換元の文字列
         /// @return 変換後のワイド文字列
         static std::wstring ConvertString(const std::string& str);

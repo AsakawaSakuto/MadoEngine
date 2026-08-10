@@ -50,7 +50,7 @@ namespace MadoEngine::InputDevice
 
 		bool IsConnected() const;
 
-		/// @brief 振動を設定する
+		/// @brief 振動を設定
 		/// @param leftMotor 左モーターの振動の強さ（0.0f～1.0f）
 		/// @param rightMotor 右モーターの振動の強さ（0.0f～1.0f）
 		/// @param time 振動の持続時間（秒）

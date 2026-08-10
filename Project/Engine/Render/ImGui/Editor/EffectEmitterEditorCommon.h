@@ -11,7 +11,7 @@
 
 namespace MadoEngine::Editor::Detail {
 
-	/// @brief 文字列を固定長Bufferへコピーする
+	/// @brief 文字列を固定長Bufferへコピー
 	/// @tparam Size Bufferの要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
@@ -21,7 +21,7 @@ namespace MadoEngine::Editor::Detail {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 指定したEmitter名が使用済みか確認する
+	/// @brief 指定したEmitter名が使用済みか確認
 	/// @tparam TEmitter Emitter設定型
 	/// @param emitters 確認対象一覧
 	/// @param name 確認する名前
@@ -40,7 +40,7 @@ namespace MadoEngine::Editor::Detail {
 		return false;
 	}
 
-	/// @brief Emitter一覧内で重複しない名前を生成する
+	/// @brief Emitter一覧内で重複しない名前を生成
 	/// @tparam TEmitter Emitter設定型
 	/// @param emitters 名前を確認する一覧
 	/// @param createdName 初期名または複製元の名前
@@ -83,7 +83,7 @@ namespace MadoEngine::Editor::Detail {
 		}
 	}
 
-	/// @brief Particle Editor形式のEmitter一覧Paneを描画する
+	/// @brief Particle Editor形式のEmitter一覧Paneを描画
 	/// @tparam TEmitter Emitter設定型
 	/// @param id ImGui ID
 	/// @param assetName 編集中Asset名

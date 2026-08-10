@@ -40,7 +40,7 @@ namespace UI::Game {
 		/// @brief 選択決定時の上昇演出を開始
 		void PlayDecisionAnimation();
 
-		/// @brief 選択決定時の上昇演出を初期状態へ戻す
+		/// @brief 選択決定時の上昇演出を初期状態へ復元
 		void ResetDecisionAnimation();
 
 		/// @brief 選択決定時の上昇演出が完了したか確認

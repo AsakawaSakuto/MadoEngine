@@ -23,9 +23,9 @@ namespace MadoEngine::Editor {
             const char* tooltip;
         };
 
-        /// @brief 指定したテクスチャ名のImGui用テクスチャIDを取得する
+        /// @brief 指定したテクスチャ名のImGui用テクスチャIDを取得
         /// @param textureName TextureManagerに登録されているテクスチャ名
-        /// @return ImGuiへ渡すテクスチャID。取得できない場合は0
+        /// @return ImGuiへ渡すテクスチャID、取得できない場合は0
         ImTextureID GetEditorIconTextureId(const char* textureName) {
             struct IconTextureCache {
                 const char* textureName;
@@ -65,7 +65,7 @@ namespace MadoEngine::Editor {
             return static_cast<ImTextureID>(TextureManager::GetInstance().GetSrvHandleGPU(textureIndex).ptr);
         }
 
-        /// @brief アイコン画像ボタンを描画する
+        /// @brief アイコン画像ボタンを描画
         /// @param info アイコンボタンの表示情報
         /// @param size ボタン内に表示する画像サイズ
         /// @return ボタンが押された場合はtrue
@@ -85,7 +85,7 @@ namespace MadoEngine::Editor {
 
             return isPressed;
         }
-        /// @brief Game Viewの画像表示領域を計算する
+        /// @brief Game Viewの画像表示領域を計算
         /// @param outImageMin 画像領域の左上座標
         /// @param outImageSize 画像領域のサイズ
         /// @return 有効な画像領域を取得できた場合はtrue
@@ -130,14 +130,14 @@ namespace MadoEngine::Editor {
             return true;
         }
 
-        /// @brief 現在のギズモ操作を取得する
+        /// @brief 現在のギズモ操作を取得
         /// @return 現在のギズモ操作
         ImGuizmo::OPERATION& CurrentGizmoOperation() {
             static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE;
             return currentOperation;
         }
 
-        /// @brief ギズモ操作をTranslate、Rotate、Scaleの順に切り替える
+        /// @brief ギズモ操作をTranslate、Rotate、Scaleの順に切り替え
         void CycleGizmoOperation() {
             ImGuizmo::OPERATION& currentOperation = CurrentGizmoOperation();
             if (currentOperation == ImGuizmo::TRANSLATE) {
@@ -149,7 +149,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief ギズモ操作モードの選択ボタンを描画する
+        /// @brief ギズモ操作モードの選択ボタンを描画
         /// @param imageMin Game View画像領域の左上座標
         /// @return 現在選択されているImGuizmo操作
         ImGuizmo::OPERATION DrawGizmoOperationButtons(const ImVec2& imageMin) {
@@ -193,14 +193,14 @@ namespace MadoEngine::Editor {
             Transform3D beforeTransform{};
         };
 
-        /// @brief Modelギズモ操作の開始/終了状態を取得する
+        /// @brief Modelギズモ操作の開始/終了状態を取得
         /// @return Modelギズモ操作状態
         ModelGizmoEditState& CurrentModelGizmoEditState() {
             static ModelGizmoEditState state;
             return state;
         }
 
-        /// @brief 2つのfloatがほぼ同じ値か確認する
+        /// @brief 2つのfloatがほぼ同じ値か確認
         /// @param a 比較する値
         /// @param b 比較する値
         /// @return ほぼ同じ場合はtrue
@@ -208,7 +208,7 @@ namespace MadoEngine::Editor {
             return std::fabs(a - b) <= 0.0001f;
         }
 
-        /// @brief 2つのVector3がほぼ同じ値か確認する
+        /// @brief 2つのVector3がほぼ同じ値か確認
         /// @param a 比較する値
         /// @param b 比較する値
         /// @return ほぼ同じ場合はtrue
@@ -218,7 +218,7 @@ namespace MadoEngine::Editor {
                 NearlyEqual(a.z, b.z);
         }
 
-        /// @brief 2つのTransformがほぼ同じ値か確認する
+        /// @brief 2つのTransformがほぼ同じ値か確認
         /// @param a 比較するTransform
         /// @param b 比較するTransform
         /// @return ほぼ同じ場合はtrue
@@ -228,7 +228,7 @@ namespace MadoEngine::Editor {
                 NearlyEqual(a.translate, b.translate);
         }
 
-        /// @brief Undo/Redoボタンを描画する
+        /// @brief Undo/Redoボタンを描画
         /// @param imageMin Game View画像領域の左上座標
         void DrawHistoryButtons(const ImVec2& imageMin) {
             EditorHistory& history = EditorHistory::GetInstance();
@@ -265,7 +265,7 @@ namespace MadoEngine::Editor {
             ImGui::PopStyleVar(3);
         }
 
-        /// @brief Editor履歴のショートカットを処理する
+        /// @brief Editor履歴のショートカットを処理
         void HandleHistoryShortcuts() {
             ImGuiIO& io = ImGui::GetIO();
             if (!io.KeyCtrl || ImGuizmo::IsUsing()) {
@@ -286,7 +286,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief ImGuizmoの行列編集結果をTransformへ反映する
+        /// @brief ImGuizmoの行列編集結果をTransformへ反映
         /// @param matrix 分解する行列
         /// @param operation 現在のギズモ操作
         /// @param transform 反映先のTransform
@@ -320,7 +320,7 @@ namespace MadoEngine::Editor {
             transform.scale = { scale[0], scale[1], scale[2] };
         }
 
-        /// @brief 点が矩形内にあるかを判定する
+        /// @brief 点が矩形内にあるかを判定
         /// @param point 判定する点
         /// @param rectMin 矩形の左上座標
         /// @param rectSize 矩形のサイズ
@@ -332,7 +332,7 @@ namespace MadoEngine::Editor {
                 point.y <= rectMin.y + rectSize.y;
         }
 
-        /// @brief Game View上のマウス座標からワールド空間レイを生成する
+        /// @brief Game View上のマウス座標からワールド空間レイを生成
         /// @param camera レイ生成に使用するカメラ
         /// @param imageMin Game View画像領域の左上座標
         /// @param imageSize Game View画像領域のサイズ
@@ -371,7 +371,7 @@ namespace MadoEngine::Editor {
             return true;
         }
 
-        /// @brief 指定領域にTransformギズモを描画する
+        /// @brief 指定領域にTransformギズモを描画
         /// @param camera ギズモ表示に使用するカメラ
         /// @param transform 操作対象のTransform
         /// @param imageMin Game View画像領域の左上座標
@@ -408,7 +408,7 @@ namespace MadoEngine::Editor {
             return isChanged;
         }
 
-        /// @brief Modelギズモ操作をUndo履歴に記録する
+        /// @brief Modelギズモ操作をUndo履歴に記録
         /// @param selectedModel 現在選択されているModel
         /// @param beforeDrawTransform ギズモ描画前のTransform
         /// @return 履歴が追加された場合はtrue
@@ -467,7 +467,7 @@ namespace MadoEngine::Editor {
         return isChanged;
     }
 
-    /// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄する
+    /// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄
     /// @param selectedModel 現在選択中のModelHandle
     void ResetModelGizmoOnSceneChange(ModelHandle& selectedModel) {
         selectedModel = {};

@@ -21,7 +21,7 @@ namespace MadoEngine::Editor {
 		};
 		constexpr std::size_t kLogLevelCount = kLogLevels.size();
 
-		/// @brief ログレベルの表示名を取得する
+		/// @brief ログレベルの表示名を取得
 		/// @param level 表示名を取得するログレベル
 		/// @return ログレベルの表示名
 		const char* GetLevelName(Logger::Level level) {
@@ -43,7 +43,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief ログレベルに対応する表示色を取得する
+		/// @brief ログレベルに対応する表示色を取得
 		/// @param level 表示色を取得するログレベル
 		/// @return ImGuiで使用する表示色
 		ImVec4 GetLevelColor(Logger::Level level) {
@@ -65,7 +65,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief ログレベルがフィルタで表示対象か判定する
+		/// @brief ログレベルがフィルタで表示対象か判定
 		/// @param level 判定するログレベル
 		/// @param levelFilters レベル別の表示フラグ
 		/// @return 表示対象の場合はtrue
@@ -78,7 +78,7 @@ namespace MadoEngine::Editor {
 			return levelFilters[index];
 		}
 
-		/// @brief ログが検索文字列に一致するか判定する
+		/// @brief ログが検索文字列に一致するか判定
 		/// @param entry 判定するログ
 		/// @param searchText 検索文字列
 		/// @return 検索条件に一致する場合はtrue
@@ -90,7 +90,7 @@ namespace MadoEngine::Editor {
 			return entry.formattedText.find(searchText) != std::string::npos;
 		}
 
-		/// @brief ログが現在の表示条件に一致するか判定する
+		/// @brief ログが現在の表示条件に一致するか判定
 		/// @param entry 判定するログ
 		/// @param levelFilters レベル別の表示フラグ
 		/// @param searchText 検索文字列
@@ -102,7 +102,7 @@ namespace MadoEngine::Editor {
 			return IsLevelEnabled(entry.level, levelFilters) && MatchesSearchText(entry, searchText);
 		}
 
-		/// @brief 表示対象ログの件数を数える
+		/// @brief 表示対象ログの件数を計数
 		/// @param entries ログ履歴
 		/// @param levelFilters レベル別の表示フラグ
 		/// @param searchText 検索文字列
@@ -121,7 +121,7 @@ namespace MadoEngine::Editor {
 			return count;
 		}
 
-		/// @brief 現在の表示条件に一致するログをクリップボード用文字列に変換する
+		/// @brief 現在の表示条件に一致するログをクリップボード用文字列に変換
 		/// @param entries ログ履歴
 		/// @param levelFilters レベル別の表示フラグ
 		/// @param searchText 検索文字列

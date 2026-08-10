@@ -14,16 +14,16 @@ namespace MadoEngine::Core {
 	public:
 		static DSVManager& GetInstance();
 
-		/// @brief DSVManagerを初期化する
+		/// @brief DSVManagerを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param maxDescriptors 最大デスクリプタ数（デフォルト: 128）
 		void Initialize(DxDevice* device, uint32_t maxDescriptors = 128);
 
-		/// @brief 新しいDSV用のデスクリプタインデックスを割り当てる
+		/// @brief 新しいDSV用のデスクリプタインデックスを割り当て
 		/// @return 割り当てられたデスクリプタインデックス
 		uint32_t Allocate();
 
-		/// @brief デスクリプタインデックスを解放して再利用可能にする
+		/// @brief デスクリプタインデックスを解放して再利用可能な状態へ変更
 		/// @param index 解放するデスクリプタインデックス
 		void Free(uint32_t index);
 

@@ -17,22 +17,22 @@ namespace MadoEngine::Ribbon {
 	/// @brief Ribbon描画データからCPU帯メッシュを生成して描画するRenderer
 	class RibbonEffectRenderer3d final {
 	public:
-		/// @brief 未初期化のRendererを構築する
+		/// @brief 未初期化のRendererを構築
 		RibbonEffectRenderer3d() = default;
 
-		/// @brief Rendererが所有するResourceを解放して破棄する
+		/// @brief Rendererが所有するResourceを解放して破棄
 		~RibbonEffectRenderer3d();
 
-		/// @brief RendererのCopy構築を禁止する
+		/// @brief RendererのCopy構築を禁止
 		/// @param other Copy元Renderer
 		RibbonEffectRenderer3d(const RibbonEffectRenderer3d&) = delete;
 
-		/// @brief RendererのCopy代入を禁止する
+		/// @brief RendererのCopy代入を禁止
 		/// @param other Copy元Renderer
 		/// @return 代入結果
 		RibbonEffectRenderer3d& operator=(const RibbonEffectRenderer3d&) = delete;
 
-		/// @brief Rendererを初期化する
+		/// @brief Rendererを初期化
 		/// @param device D3D12 Device
 		/// @param commandList 描画Command List
 		/// @param psoRegistry PSO Registry
@@ -42,23 +42,23 @@ namespace MadoEngine::Ribbon {
 			MadoEngine::Render::PSORegistry* psoRegistry
 		);
 
-		/// @brief Rendererが所有するGPU Resourceを解放する
+		/// @brief Rendererが所有するGPU Resourceを解放
 		void Finalize();
 
-		/// @brief 1 Frame分の描画データ登録を開始する
+		/// @brief 1 Frame分の描画データ登録を開始
 		/// @param camera 描画Camera
 		/// @param submissionFenceValue 今回のCommand提出に対応するFence値
 		void Begin(const Camera& camera, uint64_t submissionFenceValue);
 
-		/// @brief Ribbon描画データを登録して帯メッシュへ変換する
+		/// @brief Ribbon描画データを登録して帯メッシュへ変換
 		/// @param data Instanceが生成した描画データ
 		void Submit(const RibbonRenderData& data);
 
-		/// @brief 対象Layerの登録済みRibbonを描画する
+		/// @brief 対象Layerの登録済みRibbonを描画
 		/// @param layerMask 描画対象Layer Mask
 		void Draw(MadoEngine::Render::RenderLayerMask layerMask);
 
-		/// @brief GPU完了済みFence値を通知する
+		/// @brief GPU完了済みFence値を通知
 		/// @param completedFenceValue GPU完了済みFence値
 		void OnGpuFrameCompleted(uint64_t completedFenceValue);
 
@@ -103,12 +103,12 @@ namespace MadoEngine::Ribbon {
 			uint64_t fenceValue = 0;
 		};
 
-		/// @brief Point列を補間して描画用Point列を構築する
+		/// @brief Point列を補間して描画用Point列を構築
 		/// @param data Ribbon描画データ
 		/// @return 重複除去と補間を適用したPoint列
 		std::vector<SmoothedPoint> BuildSmoothedPoints(const RibbonRenderData& data) const;
 
-		/// @brief 再生モードに応じて距離基準の表示区間を切り出す
+		/// @brief 再生モードに応じて距離基準の表示区間を切り出し
 		/// @param points 補間済みPoint列
 		/// @param data Ribbon描画データ
 		/// @return 表示区間の境界点を補間したPoint列
@@ -117,7 +117,7 @@ namespace MadoEngine::Ribbon {
 			const RibbonRenderData& data
 		) const;
 
-		/// @brief Cameraと接線から安全なRibbon横方向を求める
+		/// @brief Cameraと接線から安全なRibbon横方向を算出
 		/// @param point Ribbon中心位置
 		/// @param tangent Ribbon接線
 		/// @param previousSide 直前の有効な横方向
@@ -130,7 +130,7 @@ namespace MadoEngine::Ribbon {
 			bool cameraFacing
 		) const;
 
-		/// @brief 選択中Frame ResourceのBuffer容量を確保する
+		/// @brief 選択中Frame ResourceのBuffer容量を確保
 		/// @param requiredVertexCount 必要Vertex数
 		/// @param requiredIndexCount 必要Index数
 		/// @return 容量確保に成功した場合はtrue
@@ -139,12 +139,12 @@ namespace MadoEngine::Ribbon {
 			std::size_t requiredIndexCount
 		);
 
-		/// @brief Texture名からTexture Indexを解決する
+		/// @brief Texture名からTexture Indexを解決
 		/// @param textureName Texture Manager登録名
 		/// @return Texture Index
 		uint32_t ResolveTextureIndex(const std::string& textureName);
 
-		/// @brief Ribbon用PSO設定を生成する
+		/// @brief Ribbon用PSO設定を生成
 		/// @param blendMode Blend Mode
 		/// @param cullMode Cull Mode
 		/// @return Ribbon用PSO設定

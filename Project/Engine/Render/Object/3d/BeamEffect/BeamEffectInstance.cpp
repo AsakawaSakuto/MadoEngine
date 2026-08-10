@@ -5,7 +5,7 @@
 
 namespace {
 
-	/// @brief 2つの色を成分ごとに乗算する
+	/// @brief 2つの色を成分ごとに乗算
 	/// @param lhs 左辺色
 	/// @param rhs 右辺色
 	/// @return 乗算後の色
@@ -18,7 +18,7 @@ namespace {
 		};
 	}
 
-	/// @brief 長さ方向色Trackへ再生時間による全体色を乗算する
+	/// @brief 長さ方向色Trackへ再生時間による全体色を乗算
 	/// @param lengthTrack 始点から終点までの色Track
 	/// @param overallColor 再生時間による全体色
 	/// @return 全体色を乗算した長さ方向色Track

@@ -11,7 +11,7 @@ namespace {
 	using Json = nlohmann::json;
 	using namespace MadoEngine::Particle;
 
-	/// @brief Filesystem PathをUTF-8文字列へ変換する
+	/// @brief Filesystem PathをUTF-8文字列へ変換
 	/// @param path 変換するPath
 	/// @return UTF-8文字列
 	std::string PathToUtf8String(const std::filesystem::path& path) {
@@ -22,10 +22,10 @@ namespace {
 		);
 	}
 
-	/// @brief Jsonオブジェクトから子要素を取得する
+	/// @brief Jsonオブジェクトから子要素を取得
 	/// @param json 検索元Json
 	/// @param key 検索するキー
-	/// @return 子要素。存在しない場合はnullptr
+	/// @return 子要素、存在しない場合はnullptr
 	const Json* FindValue(const Json& json, const char* key) {
 		if (!json.is_object() || !json.contains(key) || json.at(key).is_null()) {
 			return nullptr;
@@ -34,7 +34,7 @@ namespace {
 		return &json.at(key);
 	}
 
-	/// @brief Jsonから文字列を安全に取得する
+	/// @brief Jsonから文字列を安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -44,7 +44,7 @@ namespace {
 		return value && value->is_string() ? value->get<std::string>() : fallback;
 	}
 
-	/// @brief Jsonからfloatを安全に取得する
+	/// @brief Jsonからfloatを安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -54,7 +54,7 @@ namespace {
 		return value && value->is_number() ? value->get<float>() : fallback;
 	}
 
-	/// @brief Jsonからuint32_tを安全に取得する
+	/// @brief Jsonからuint32_tを安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -68,7 +68,7 @@ namespace {
 		return value->get<uint32_t>();
 	}
 
-	/// @brief Jsonからboolを安全に取得する
+	/// @brief Jsonからboolを安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -78,7 +78,7 @@ namespace {
 		return value && value->is_boolean() ? value->get<bool>() : fallback;
 	}
 
-	/// @brief JsonからVector2を安全に取得する
+	/// @brief JsonからVector2を安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -88,7 +88,7 @@ namespace {
 		return value ? MadoEngine::Json::JsonSerializer::ToVector2(*value, fallback) : fallback;
 	}
 
-	/// @brief JsonからVector3を安全に取得する
+	/// @brief JsonからVector3を安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -98,7 +98,7 @@ namespace {
 		return value ? MadoEngine::Json::JsonSerializer::ToVector3(*value, fallback) : fallback;
 	}
 
-	/// @brief JsonからVector4を安全に取得する
+	/// @brief JsonからVector4を安全に取得
 	/// @param json 読み込み元Json
 	/// @param key 読み込むキー
 	/// @param fallback 読み込みに失敗した場合の値
@@ -108,7 +108,7 @@ namespace {
 		return value ? MadoEngine::Json::JsonSerializer::ToVector4(*value, fallback) : fallback;
 	}
 
-	/// @brief Jsonからfloat範囲を読み込む
+	/// @brief Jsonからfloat範囲を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだ範囲
@@ -127,7 +127,7 @@ namespace {
 		};
 	}
 
-	/// @brief JsonからVector2範囲を読み込む
+	/// @brief JsonからVector2範囲を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだ範囲
@@ -146,7 +146,7 @@ namespace {
 		};
 	}
 
-	/// @brief JsonからVector3範囲を読み込む
+	/// @brief JsonからVector3範囲を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだ範囲
@@ -165,7 +165,7 @@ namespace {
 		};
 	}
 
-	/// @brief JsonからVector4範囲を読み込む
+	/// @brief JsonからVector4範囲を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだ範囲
@@ -185,49 +185,49 @@ namespace {
 
 	}
 
-	/// @brief float範囲をJsonへ変換する
+	/// @brief float範囲をJsonへ変換
 	/// @param range 変換する範囲
 	/// @return 変換したJson
 	Json WriteRange(const ValueRange<float>& range) {
 		return Json{ { "min", range.min }, { "max", range.max } };
 	}
 
-	/// @brief Vector2範囲をJsonへ変換する
+	/// @brief Vector2範囲をJsonへ変換
 	/// @param range 変換する範囲
 	/// @return 変換したJson
 	Json WriteRange(const ValueRange<Vector2>& range) {
 		return Json{ { "min", range.min }, { "max", range.max } };
 	}
 
-	/// @brief Vector3範囲をJsonへ変換する
+	/// @brief Vector3範囲をJsonへ変換
 	/// @param range 変換する範囲
 	/// @return 変換したJson
 	Json WriteRange(const ValueRange<Vector3>& range) {
 		return Json{ { "min", range.min }, { "max", range.max } };
 	}
 
-	/// @brief Vector4範囲をJsonへ変換する
+	/// @brief Vector4範囲をJsonへ変換
 	/// @param range 変換する範囲
 	/// @return 変換したJson
 	Json WriteRange(const ValueRange<Vector4>& range) {
 		return Json{ { "min", range.min }, { "max", range.max } };
 	}
 
-	/// @brief 文字列からSimulationSpaceを取得する
+	/// @brief 文字列からSimulationSpaceを取得
 	/// @param value 変換元文字列
 	/// @return 変換したSimulationSpace
 	SimulationSpace ParseSimulationSpace(const std::string& value) {
 		return value == "local" ? SimulationSpace::Local : SimulationSpace::World;
 	}
 
-	/// @brief SimulationSpaceを文字列へ変換する
+	/// @brief SimulationSpaceを文字列へ変換
 	/// @param value 変換するSimulationSpace
 	/// @return 変換した文字列
 	const char* ToString(SimulationSpace value) {
 		return value == SimulationSpace::Local ? "local" : "world";
 	}
 
-	/// @brief 文字列からParticle Backendを取得する
+	/// @brief 文字列からParticle Backendを取得
 	/// @param value 変換元文字列
 	/// @return 変換したParticle Backend
 	ParticleBackend ParseParticleBackend(const std::string& value) {
@@ -240,7 +240,7 @@ namespace {
 		return ParticleBackend::Auto;
 	}
 
-	/// @brief Particle Backendを文字列へ変換する
+	/// @brief Particle Backendを文字列へ変換
 	/// @param value 変換するParticle Backend
 	/// @return 変換した文字列
 	const char* ToString(ParticleBackend value) {
@@ -256,35 +256,35 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列からDirectionModeを取得する
+	/// @brief 文字列からDirectionModeを取得
 	/// @param value 変換元文字列
 	/// @return 変換したDirectionMode
 	DirectionMode ParseDirectionMode(const std::string& value) {
 		return value == "shapeOutward" ? DirectionMode::ShapeOutward : DirectionMode::Configured;
 	}
 
-	/// @brief DirectionModeを文字列へ変換する
+	/// @brief DirectionModeを文字列へ変換
 	/// @param value 変換するDirectionMode
 	/// @return 変換した文字列
 	const char* ToString(DirectionMode value) {
 		return value == DirectionMode::ShapeOutward ? "shapeOutward" : "configured";
 	}
 
-	/// @brief 文字列からSortModeを取得する
+	/// @brief 文字列からSortModeを取得
 	/// @param value 変換元文字列
 	/// @return 変換したSortMode
 	SortMode ParseSortMode(const std::string& value) {
 		return value == "backToFront" ? SortMode::BackToFront : SortMode::None;
 	}
 
-	/// @brief SortModeを文字列へ変換する
+	/// @brief SortModeを文字列へ変換
 	/// @param value 変換するSortMode
 	/// @return 変換した文字列
 	const char* ToString(SortMode value) {
 		return value == SortMode::BackToFront ? "backToFront" : "none";
 	}
 
-	/// @brief 文字列からBlendModeを取得する
+	/// @brief 文字列からBlendModeを取得
 	/// @param value 変換元文字列
 	/// @return 変換したBlendMode
 	MadoEngine::Render::BlendMode ParseBlendMode(const std::string& value) {
@@ -295,7 +295,7 @@ namespace {
 		return MadoEngine::Render::BlendMode::Add;
 	}
 
-	/// @brief BlendModeを文字列へ変換する
+	/// @brief BlendModeを文字列へ変換
 	/// @param value 変換するBlendMode
 	/// @return 変換した文字列
 	const char* ToString(MadoEngine::Render::BlendMode value) {
@@ -314,7 +314,7 @@ namespace {
 		}
 	}
 
-	/// @brief Jsonから発生形状を読み込む
+	/// @brief Jsonから発生形状を読み込み
 	/// @param json 読み込み元Json
 	/// @return 読み込んだ発生形状
 	ParticleShape ReadShape(const Json& json) {
@@ -357,7 +357,7 @@ namespace {
 		return shape;
 	}
 
-	/// @brief 発生形状をJsonへ変換する
+	/// @brief 発生形状をJsonへ変換
 	/// @param shape 変換する発生形状
 	/// @return 変換したJson
 	Json WriteShape(const ParticleShape& shape) {
@@ -385,7 +385,7 @@ namespace {
 		}, shape);
 	}
 
-	/// @brief float範囲の最小値と最大値を正しい順序へ補正する
+	/// @brief float範囲の最小値と最大値を正しい順序へ補正
 	/// @param range 補正する範囲
 	void NormalizeRange(ValueRange<float>& range) {
 		if (range.min > range.max) {
@@ -393,14 +393,14 @@ namespace {
 		}
 	}
 
-	/// @brief Vector2範囲の最小値と最大値を成分ごとに補正する
+	/// @brief Vector2範囲の最小値と最大値を成分ごとに補正
 	/// @param range 補正する範囲
 	void NormalizeRange(ValueRange<Vector2>& range) {
 		if (range.min.x > range.max.x) { std::swap(range.min.x, range.max.x); }
 		if (range.min.y > range.max.y) { std::swap(range.min.y, range.max.y); }
 	}
 
-	/// @brief Vector3範囲の最小値と最大値を成分ごとに補正する
+	/// @brief Vector3範囲の最小値と最大値を成分ごとに補正
 	/// @param range 補正する範囲
 	void NormalizeRange(ValueRange<Vector3>& range) {
 		if (range.min.x > range.max.x) { std::swap(range.min.x, range.max.x); }
@@ -408,7 +408,7 @@ namespace {
 		if (range.min.z > range.max.z) { std::swap(range.min.z, range.max.z); }
 	}
 
-	/// @brief Vector4範囲の最小値と最大値を成分ごとに補正する
+	/// @brief Vector4範囲の最小値と最大値を成分ごとに補正
 	/// @param range 補正する範囲
 	void NormalizeRange(ValueRange<Vector4>& range) {
 		if (range.min.x > range.max.x) { std::swap(range.min.x, range.max.x); }

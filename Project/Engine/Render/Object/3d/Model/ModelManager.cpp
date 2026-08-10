@@ -9,7 +9,7 @@
 
 namespace {
 
-/// @brief 文字列を小文字へ変換する
+/// @brief 文字列を小文字へ変換
 /// @param value 変換する文字列
 /// @return 小文字へ変換した文字列
 std::string ToLower(std::string value) {
@@ -19,14 +19,14 @@ std::string ToLower(std::string value) {
 	return value;
 }
 
-/// @brief ファイルパスを正規化する
+/// @brief ファイルパスを正規化
 /// @param path 正規化するパス
 /// @return 汎用形式へ正規化したパス
 std::string NormalizePath(const std::filesystem::path& path) {
 	return path.lexically_normal().generic_string();
 }
 
-/// @brief 対応しているModel拡張子か確認する
+/// @brief 対応しているModel拡張子か確認
 /// @param path 確認するパス
 /// @return 対応している場合はtrue
 bool IsModelExtension(const std::filesystem::path& path) {
@@ -34,7 +34,7 @@ bool IsModelExtension(const std::filesystem::path& path) {
 	return extension == ".obj" || extension == ".gltf" || extension == ".glb";
 }
 
-/// @brief Modelの親ディレクトリからModel種別を取得する
+/// @brief Modelの親ディレクトリからModel種別を取得
 /// @param modelRoot Modelルート
 /// @param path Modelファイルパス
 /// @param outType 取得したModel種別

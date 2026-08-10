@@ -7,7 +7,7 @@
 
 namespace {
 
-/// @brief 最小最大座標からAABBを作成する
+/// @brief 最小最大座標からAABBを作成
 /// @param min 最小座標
 /// @param max 最大座標
 /// @return 作成したAABB
@@ -19,7 +19,7 @@ AABB MakeBounds(const Vector3& min, const Vector3& max) {
 	return bounds;
 }
 
-/// @brief 2つのAABBを結合する
+/// @brief 2つのAABBを結合
 /// @param a AABB
 /// @param b AABB
 /// @return 2つのAABBを含むAABB
@@ -43,10 +43,10 @@ AABB MergeBounds(const AABB& a, const AABB& b) {
 	);
 }
 
-/// @brief AABB同士が交差しているか判定する
+/// @brief AABB同士が交差しているか判定
 /// @param a AABB
 /// @param b AABB
-/// @return 交差していればtrueを返す
+/// @return 交差していればtrue
 bool IsIntersectAABB(const AABB& a, const AABB& b) {
 	const Vector3 aMin = a.GetMinWorld();
 	const Vector3 aMax = a.GetMaxWorld();
@@ -58,7 +58,7 @@ bool IsIntersectAABB(const AABB& a, const AABB& b) {
 		aMin.z <= bMax.z && aMax.z >= bMin.z;
 }
 
-/// @brief AABBの中心座標を取得する
+/// @brief AABBの中心座標を取得
 /// @param bounds 対象AABB
 /// @return 中心座標
 Vector3 GetBoundsCenter(const AABB& bounds) {
@@ -67,7 +67,7 @@ Vector3 GetBoundsCenter(const AABB& bounds) {
 	return (min + max) * 0.5f;
 }
 
-/// @brief 指定範囲のAABBを結合する
+/// @brief 指定範囲のAABBを結合
 /// @param entries エントリ配列
 /// @param first 開始インデックス
 /// @param count エントリ数
@@ -90,7 +90,7 @@ AABB CalculateRangeBounds(const std::vector<StaticBVH::Entry>& entries, uint32_t
 	return MakeBounds(min, max);
 }
 
-/// @brief AABBの中心分布が最も広い軸を取得する
+/// @brief AABBの中心分布が最も広い軸を取得
 /// @param entries エントリ配列
 /// @param first 開始インデックス
 /// @param count エントリ数

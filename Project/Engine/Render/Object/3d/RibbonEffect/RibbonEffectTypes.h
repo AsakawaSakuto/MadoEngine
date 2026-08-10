@@ -54,7 +54,7 @@ namespace MadoEngine::Ribbon {
 	};
 
 	struct RibbonPlaybackModule {
-		/// @brief 0から1へ進む既定トラックを持つ再生設定を構築する
+		/// @brief 0から1へ進む既定トラックを持つ再生設定を構築
 		RibbonPlaybackModule()
 			: progress(0.0f) {
 			progress.SetKeyframes({
@@ -122,13 +122,13 @@ namespace MadoEngine::Ribbon {
 		uint32_t index = (std::numeric_limits<uint32_t>::max)();
 		uint32_t generation = 0;
 
-		/// @brief Handleが有効値を保持しているか確認する
+		/// @brief Handleが有効値を保持しているか確認
 		/// @return 有効値を保持している場合はtrue
 		bool HasValue() const {
 			return index != (std::numeric_limits<uint32_t>::max)() && generation != 0;
 		}
 
-		/// @brief 2つのHandleが同じInstanceを指すか比較する
+		/// @brief 2つのHandleが同じInstanceを指すか比較
 		/// @param other 比較対象Handle
 		/// @return 同じ値の場合はtrue
 		bool operator==(const RibbonEffectHandle& other) const = default;

@@ -11,16 +11,16 @@ public:
 
 	~Karma();
 
-	/// @brief 設定付きでKarmaを初期化します。
-	/// @param desc 初期化に使用する設定です。
+	/// @brief 設定付きでKarmaを初期化
+	/// @param desc 初期化に使用する設定
 	void Initialize(const InitializeDesc& desc);
 
-	/// @brief Karmaを更新します。
-	/// @param deltaTime 前フレームからの経過時間です。
+	/// @brief Karmaを更新
+	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;
 
-	/// @brief Karmaに相互作用した時の処理を実行します。
-	/// @param player 相互作用したPlayerです。
-	/// @return KarmaをMapから削除するためtrueを返します。
+	/// @brief Karmaに相互作用した時の処理を実行
+	/// @param player 相互作用したPlayer
+	/// @return KarmaをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
 };

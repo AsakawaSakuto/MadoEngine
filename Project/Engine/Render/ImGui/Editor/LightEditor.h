@@ -6,13 +6,13 @@
 #include "../../../MathHeaders.h"
 namespace MadoEngine::Editor {
 
-/// @brief LightEditorのJson設定を読み込む
+/// @brief LightEditorのJson設定を読み込み
 /// @return 読み込みに成功した場合はtrue
 bool LoadLightEditorJson();
 
 #ifdef USE_IMGUI
 
-/// @brief LightManager Editorを描画する
+/// @brief LightManager Editorを描画
 void DrawLightManagerEditorUI();
 
 #endif // USE_IMGUI

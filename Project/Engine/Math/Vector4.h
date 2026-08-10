@@ -51,12 +51,12 @@ struct Vector4 {
     constexpr bool operator==(const Vector4& r) const noexcept { return x == r.x && y == r.y && z == r.z && w == r.w; }
 
     // --- utilities (ユーティリティ) ---
-    /// @brief ベクトルの長さの2乗を返す
+    /// @brief ベクトルの長さの2乗を返却
     constexpr float LengthSq() const noexcept { return x * x + y * y + z * z + w * w; }
-    /// @brief ベクトルの長さを返す
+    /// @brief ベクトルの長さを返却
     float Length() const noexcept { return std::sqrt(LengthSq()); }
 
-    /// @brief 長さ1の単位ベクトルを返す
+    /// @brief 長さ1の単位ベクトルを返却
     Vector4 Normalized() const noexcept {
         const float len = Length();
         if (len == 0.0f) { return { 0.0f, 0.0f, 0.0f, 0.0f }; }
@@ -69,7 +69,7 @@ struct Vector4 {
         x /= len; y /= len; z /= len; w /= len;
     }
 
-    /// @brief 2つのベクトルの内積を返す
+    /// @brief 2つのベクトルの内積を返却
     /// @param a ベクトル
     /// @param b ベクトル
     /// @return ベクトルaとbの内積

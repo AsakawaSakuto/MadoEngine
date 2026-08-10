@@ -18,16 +18,16 @@ namespace MadoEngine::Effect {
 	template<class T>
 	class EffectTrack {
 	public:
-		/// @brief 既定値でトラックを構築する
+		/// @brief 既定値でトラックを構築
 		EffectTrack() = default;
 
-		/// @brief 指定した既定値でトラックを構築する
+		/// @brief 指定した既定値でトラックを構築
 		/// @param defaultValue キーフレーム未設定時の値
 		explicit EffectTrack(const T& defaultValue)
 			: defaultValue_(defaultValue) {
 		}
 
-		/// @brief 指定時刻の値を評価する
+		/// @brief 指定時刻の値を評価
 		/// @param time 評価するエフェクト内時刻
 		/// @return 補間された値
 		T Evaluate(float time) const {
@@ -60,19 +60,19 @@ namespace MadoEngine::Effect {
 			return Easing::Lerp(left->value, right->value, normalizedTime, left->easing);
 		}
 
-		/// @brief キーフレーム未設定時の値を設定する
+		/// @brief キーフレーム未設定時の値を設定
 		/// @param value 設定する値
 		void SetDefaultValue(const T& value) {
 			defaultValue_ = value;
 		}
 
-		/// @brief キーフレーム未設定時の値を取得する
+		/// @brief キーフレーム未設定時の値を取得
 		/// @return 現在の既定値
 		const T& GetDefaultValue() const {
 			return defaultValue_;
 		}
 
-		/// @brief キーフレームを設定して時刻順に整列する
+		/// @brief キーフレームを設定して時刻順に整列
 		/// @param keyframes 設定するキーフレーム
 		void SetKeyframes(std::vector<EffectKeyframe<T>> keyframes) {
 			for (EffectKeyframe<T>& keyframe : keyframes) {
@@ -92,13 +92,13 @@ namespace MadoEngine::Effect {
 			keyframes_ = std::move(keyframes);
 		}
 
-		/// @brief キーフレームを取得する
+		/// @brief キーフレームを取得
 		/// @return 時刻順に並んだキーフレーム
 		const std::vector<EffectKeyframe<T>>& GetKeyframes() const {
 			return keyframes_;
 		}
 
-		/// @brief キーフレームが存在するか確認する
+		/// @brief キーフレームが存在するか確認
 		/// @return 1つ以上存在する場合はtrue
 		bool HasKeyframes() const {
 			return !keyframes_.empty();

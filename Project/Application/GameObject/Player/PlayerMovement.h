@@ -9,7 +9,7 @@ namespace Player {
 	class Movement {
 	public:
 
-		/// @brief 移動状態を初期化します。
+		/// @brief 移動状態を初期化
 		void Initialize();
 
 		/// @brief 入力と重力をもとに移動を更新
@@ -69,7 +69,7 @@ namespace Player {
 		/// @param transform 更新対象のTransform
 		void ApplyJumpMoveBoost(float deltaTime, Transform3D& transform);
 
-		/// @brief 移動入力中のジャンプに水平初速を加える
+		/// @brief 移動入力中のジャンプに水平初速を加算
 		/// @param input Playerの移動操作入力
 		void AddJumpMoveBoost(const MoveInput& input);
 

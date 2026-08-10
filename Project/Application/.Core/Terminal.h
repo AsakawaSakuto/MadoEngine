@@ -15,15 +15,15 @@ public:
 	void Run();
 
 private:
-	/// @brief 指定段階のレイヤーポストエフェクトPassを実行する
+	/// @brief 指定段階のレイヤーポストエフェクトPassを実行
 	/// @param stage 実行する適用段階
 	void ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage);
 
-	/// @brief 2D描画の連続レイヤーバッチを開始する
+	/// @brief 2D描画の連続レイヤーバッチを開始
 	/// @param layer 描画するレイヤー
 	void BeginRenderLayerBatch(MadoEngine::Render::RenderLayer layer) override;
 
-	/// @brief 2D描画の連続レイヤーバッチを終了する
+	/// @brief 2D描画の連続レイヤーバッチを終了
 	/// @param layer 描画したレイヤー
 	void EndRenderLayerBatch(MadoEngine::Render::RenderLayer layer) override;
 

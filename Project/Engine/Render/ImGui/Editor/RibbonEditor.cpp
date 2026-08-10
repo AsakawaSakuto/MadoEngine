@@ -23,7 +23,7 @@ namespace {
 	using MadoEngine::Effect::EffectKeyframe;
 	using MadoEngine::Effect::EffectTrack;
 
-	/// @brief Track Editor内でKeyframeを識別するIDを発行する
+	/// @brief Track Editor内でKeyframeを識別するIDを発行
 	/// @return 新しいEditor用ID
 	uint32_t AllocateKeyframeEditorId() {
 		static uint32_t nextId = 1;
@@ -34,7 +34,7 @@ namespace {
 		return id;
 	}
 
-	/// @brief 文字列を固定長Bufferへコピーする
+	/// @brief 文字列を固定長Bufferへコピー
 	/// @tparam Size Buffer要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
@@ -44,7 +44,7 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 使用可能なRibbon Asset名を生成する
+	/// @brief 使用可能なRibbon Asset名を生成
 	/// @param system 名前を確認するSystem
 	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能な名前
@@ -132,7 +132,7 @@ namespace {
 		"None",
 	};
 
-	/// @brief イージング種類を選択するComboを描画する
+	/// @brief イージング種類を選択するComboを描画
 	/// @param label UI表示名
 	/// @param easing 編集対象イージング
 	/// @return 値を変更した場合はtrue
@@ -153,12 +153,12 @@ namespace {
 		return true;
 	}
 
-	/// @brief Keyframe追加に使用できる空き時刻を求める
+	/// @brief Keyframe追加に使用できる空き時刻を算出
 	/// @tparam T Track値型
 	/// @param keyframes 時刻順のKeyframe一覧
 	/// @param maximumTime Track時刻上限
 	/// @param preferredIndex 優先して近傍を検索するKeyframe Index
-	/// @return 追加可能な時刻。空きがない場合はstd::nullopt
+	/// @return 追加可能な時刻、空きがない場合はstd::nullopt
 	template<class T>
 	std::optional<float> FindKeyframeInsertionTime(
 		const std::vector<EffectKeyframe<T>>& keyframes,
@@ -210,7 +210,7 @@ namespace {
 		return (largestGapStart + largestGapEnd) * 0.5f;
 	}
 
-	/// @brief 型付きEffect Track編集UIを描画する
+	/// @brief 型付きEffect Track編集UIを描画
 	/// @tparam T Track値型
 	/// @tparam ValueDrawer 値編集関数型
 	/// @param label UI表示名
@@ -443,7 +443,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief float Track編集UIを描画する
+	/// @brief float Track編集UIを描画
 	/// @param label UI表示名
 	/// @param track 編集対象Track
 	/// @param maximumTime Key時刻上限
@@ -478,7 +478,7 @@ namespace {
 		);
 	}
 
-	/// @brief Color Track編集UIを描画する
+	/// @brief Color Track編集UIを描画
 	/// @param label UI表示名
 	/// @param track 編集対象Track
 	/// @param maximumTime Key時刻上限
@@ -504,7 +504,7 @@ namespace {
 		);
 	}
 
-	/// @brief 制御点間の移動経路設定を編集する
+	/// @brief 制御点間の移動経路設定を編集
 	/// @param geometry 編集対象形状設定
 	/// @return 値を変更した場合はtrue
 	bool DrawPathInterpolationEditor(RibbonGeometryModule& geometry) {
@@ -550,7 +550,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Ribbonの基本設定を編集する
+	/// @brief Ribbonの基本設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawBasicEditor(RibbonEffectConfig& config) {
@@ -618,7 +618,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Manual Ribbonの既定制御点を編集する
+	/// @brief Manual Ribbonの既定制御点を編集
 	/// @param trail 編集対象Trail設定
 	/// @param selectedControlPointIndex 選択中制御点Index
 	/// @return 値を変更した場合はtrue
@@ -806,7 +806,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief RibbonのPoint生成設定を編集する
+	/// @brief RibbonのPoint生成設定を編集
 	/// @param config 編集対象設定
 	/// @param selectedControlPointIndex 選択中制御点Index
 	/// @return 値を変更した場合はtrue
@@ -862,7 +862,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Ribbonの形状設定を編集する
+	/// @brief Ribbonの形状設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawGeometryEditor(RibbonEffectConfig& config) {
@@ -883,7 +883,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief RibbonのMaterial設定を編集する
+	/// @brief RibbonのMaterial設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawMaterialEditor(RibbonEffectConfig& config) {
@@ -927,7 +927,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief RibbonのUV設定を編集する
+	/// @brief RibbonのUV設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawUvEditor(RibbonEffectConfig& config) {
@@ -958,14 +958,14 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Ribbon Assetの編集状態比較用Snapshotを生成する
+	/// @brief Ribbon Assetの編集状態比較用Snapshotを生成
 	/// @param asset Snapshotを生成するAsset
 	/// @return JSON形式Snapshot
 	std::string CreateRibbonAssetSnapshot(const RibbonEffectAsset& asset) {
 		return asset.ToJson().dump();
 	}
 
-	/// @brief Ribbon Previewを再生する
+	/// @brief Ribbon Previewを再生
 	/// @param system 再生に使用するSystem
 	/// @param assetName 再生するAsset名
 	/// @param previewPosition Preview基準位置
@@ -984,7 +984,7 @@ namespace {
 		return system.Play(assetName, desc);
 	}
 
-	/// @brief Ribbon Previewを即時停止して状態を消去する
+	/// @brief Ribbon Previewを即時停止して状態を消去
 	/// @param system 停止に使用するSystem
 	/// @param handle 停止するHandle
 	/// @param assetName Preview中Asset名

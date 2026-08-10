@@ -69,7 +69,7 @@ public:
 
 	// ===== テクスチャ関連 =====
 
-	/// @brief オブジェクトのテクスチャを変更する
+	/// @brief オブジェクトのテクスチャを変更
 	/// @param textureName TextureManagerに登録されているテクスチャ名
 	/// @return テクスチャの変更に成功した場合はtrue
 	bool SetTexture(const std::string& textureName) {
@@ -103,22 +103,22 @@ public:
 	/// @return true:表示、false:非表示
 	bool IsVisible() const { return isVisible_; }
 
-	/// @brief 描画レイヤーを設定する
+	/// @brief 描画レイヤーを設定
 	/// @param layer 設定する描画レイヤー
 	void SetRenderLayer(MadoEngine::Render::RenderLayer layer) { renderLayer_ = layer; }
 
-	/// @brief 描画レイヤーを取得する
+	/// @brief 描画レイヤーを取得
 	/// @return 現在の描画レイヤー
 	MadoEngine::Render::RenderLayer GetRenderLayer() const { return renderLayer_; }
 
-	/// @brief 指定したレイヤーマスクに自身の描画レイヤーが含まれているか確認する
+	/// @brief 指定したレイヤーマスクに自身の描画レイヤーが含まれているか確認
 	/// @param layerMask 判定対象のレイヤーマスク
 	/// @return 含まれている場合はtrue
 	bool IsRenderLayerIncluded(MadoEngine::Render::RenderLayerMask layerMask) const {
 		return MadoEngine::Render::ContainsRenderLayer(layerMask, renderLayer_);
 	}
 
-	/// @brief PSORegistryを設定する
+	/// @brief PSORegistryを設定
 	/// @param registry PSORegistryポインタ
 	void SetPSORegistry(MadoEngine::Render::PSORegistry* registry) { psoRegistry_ = registry; }
 

@@ -2,7 +2,7 @@
 
 namespace {
 
-	/// @brief Json配列からfloatを取得する
+	/// @brief Json配列からfloatを取得
 	/// @param json 読み込み元のJson
 	/// @param index 取得する配列番号
 	/// @param defaultValue 取得できない場合の値
@@ -15,7 +15,7 @@ namespace {
 		return json.at(index).get<float>();
 	}
 
-	/// @brief Jsonオブジェクトからfloatを取得する
+	/// @brief Jsonオブジェクトからfloatを取得
 	/// @param json 読み込み元のJson
 	/// @param key 取得するキー
 	/// @param defaultValue 取得できない場合の値

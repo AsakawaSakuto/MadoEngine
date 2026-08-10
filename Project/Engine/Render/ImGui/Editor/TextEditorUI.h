@@ -8,18 +8,18 @@
 
 namespace MadoEngine::Editor {
 
-/// @brief TextEditorのJson設定を読み込む
+/// @brief TextEditorのJson設定を読み込み
 /// @return 読み込みに成功した場合はtrue
 bool LoadTextEditorJson();
 
-/// @brief 指定シーン所属のText Editor設定をJsonから読み込む
-/// @param sceneType 読み込み対象のシーン。SceneType::None所属のTextも読み込む
+/// @brief 指定シーン所属のText Editor設定をJsonから読み込み
+/// @param sceneType 読み込み対象のシーン、SceneType::None所属のTextも読み込み
 /// @return 読み込みに成功した場合はtrue
 bool LoadTextEditorJson(SceneType sceneType);
 
 #ifdef USE_IMGUI
 
-/// @brief TextManager用のEditor UIを描画する
+/// @brief TextManager用のEditor UIを描画
 /// @param currentSceneType 現在のシーン
 void DrawTextManagerEditorUI(SceneType currentSceneType);
 

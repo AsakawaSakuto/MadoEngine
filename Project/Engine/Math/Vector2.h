@@ -45,26 +45,26 @@ struct Vector2 {
 
     // --- utilities (ユーティリティ) ---
 
-	/// @brief ベクトルの長さの2乗を返す
+	/// @brief ベクトルの長さの2乗を返却
     constexpr float LengthSq() const noexcept { return x * x + y * y; }
 
-	/// @brief ベクトルの長さを返す
+	/// @brief ベクトルの長さを返却
     float Length() const noexcept { return std::sqrt(LengthSq()); }
 
-	/// @brief 長さ1の単位ベクトルを返す
+	/// @brief 長さ1の単位ベクトルを返却
     Vector2 Normalized() const noexcept {
         const float len = Length();
         if (len == 0.0f) { return { 0.0f, 0.0f }; }
         return { x / len, y / len };
     }
     
-	/// @brief ベクトルaとbの内積を返す
+	/// @brief ベクトルaとbの内積を返却
 	/// @param a ベクトル
 	/// @param b ベクトル
 	/// @return ベクトルaとbの内積
     constexpr float Dot(const Vector2& a, const Vector2& b) noexcept { return a.x * b.x + a.y * b.y; }
 
-	/// @brief ベクトルaとbの外積を返す
+	/// @brief ベクトルaとbの外積を返却
 	/// @param a ベクトル
 	/// @param b ベクトル
 	/// @return ベクトルaとbの外積

@@ -15,7 +15,7 @@ namespace MadoEngine::Render {
 		/// @param device DxDeviceポインタ
 		void Initialize(Core::DxDevice* device);
 
-		/// @brief PSODescをもとにD3D12_GRAPHICS_PIPELINE_STATE_DESCを構築する
+		/// @brief PSODescをもとにD3D12_GRAPHICS_PIPELINE_STATE_DESCを構築
 		/// @param desc PSO記述子
 		/// @return 組み立て済みのD3D12_GRAPHICS_PIPELINE_STATE_DESC
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC Build(const PSODesc& desc) const;
@@ -23,7 +23,7 @@ namespace MadoEngine::Render {
 	private:
 		Core::DxDevice* device_ = nullptr;
 
-		/// @brief InputLayoutTypeに応じたD3D12_INPUT_ELEMENT_DESCを選択する
+		/// @brief InputLayoutTypeに応じたD3D12_INPUT_ELEMENT_DESCを選択
 		/// @param type 入力レイアウトタイプ
 		/// @param outElements 出力要素配列へのポインタ
 		/// @param outCount 出力要素数
@@ -33,7 +33,7 @@ namespace MadoEngine::Render {
 			UINT* outCount
 		);
 
-		/// @brief BlendModeに応じたD3D12_BLEND_DESCを組み立てる
+		/// @brief BlendModeに応じたD3D12_BLEND_DESCを構築
 		/// @param mode ブレンドモード
 		/// @param preserveRenderTargetAlpha 描画先Alphaを保持する場合はtrue
 		/// @return 組み立て済みのD3D12_BLEND_DESC
@@ -42,12 +42,12 @@ namespace MadoEngine::Render {
 			bool preserveRenderTargetAlpha
 		);
 
-		/// @brief DepthModeに応じたD3D12_DEPTH_STENCIL_DESCを組み立てる
+		/// @brief DepthModeに応じたD3D12_DEPTH_STENCIL_DESCを構築
 		/// @param mode 深度モード
 		/// @return 組み立て済みのD3D12_DEPTH_STENCIL_DESC
 		static D3D12_DEPTH_STENCIL_DESC BuildDepthStencilDesc(DepthMode mode);
 
-		/// @brief CullMode/FillModeに応じたD3D12_RASTERIZER_DESCを組み立てる
+		/// @brief CullMode/FillModeに応じたD3D12_RASTERIZER_DESCを構築
 		/// @param cull カリングモード
 		/// @param fill フィルモード
 		/// @return 組み立て済みのD3D12_RASTERIZER_DESC

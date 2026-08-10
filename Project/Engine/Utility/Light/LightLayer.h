@@ -27,14 +27,14 @@ inline constexpr const char* kLightLayerNames[] = {
 
 static_assert(kLightLayerCount == sizeof(kLightLayerNames) / sizeof(kLightLayerNames[0]));
 
-/// @brief インデックスからLightLayerを取得する
+/// @brief インデックスからLightLayerを取得
 /// @param index 取得するLightLayerのインデックス
 /// @return インデックスに対応するLightLayer
 constexpr LightLayer GetLightLayerByIndex(uint32_t index) {
 	return static_cast<LightLayer>(index);
 }
 
-/// @brief LightLayerが有効な実レイヤーか確認する
+/// @brief LightLayerが有効な実レイヤーか確認
 /// @param layer 確認するライトレイヤー
 /// @return 実レイヤーの場合はtrue
 constexpr bool IsValidLightLayer(LightLayer layer) {
@@ -43,7 +43,7 @@ constexpr bool IsValidLightLayer(LightLayer layer) {
 
 inline constexpr LightLayerMask kAllLightLayers = 0xffffffffu;
 
-/// @brief LightLayerをビットマスクへ変換する
+/// @brief LightLayerをビットマスクへ変換
 /// @param layer 変換するライトレイヤー
 /// @return ライトレイヤーのビットマスク
 constexpr LightLayerMask ToLightLayerMask(LightLayer layer) {
@@ -62,9 +62,9 @@ constexpr LightLayerMask ToLightLayerMask(LightLayer layer) {
 	return 1u << static_cast<uint32_t>(layer);
 }
 
-/// @brief LightLayerの表示名を取得する
+/// @brief LightLayerの表示名を取得
 /// @param layer 表示名を取得するライトレイヤー
-/// @return ライトレイヤーの表示名。未定義の場合はUnknown
+/// @return ライトレイヤーの表示名、未定義の場合はUnknown
 constexpr const char* GetLightLayerName(LightLayer layer) {
 	if (layer == LightLayer::None) {
 		return "None";
@@ -81,9 +81,9 @@ constexpr const char* GetLightLayerName(LightLayer layer) {
 	return kLightLayerNames[static_cast<uint32_t>(layer)];
 }
 
-/// @brief LightLayerMaskの表示名を取得する
+/// @brief LightLayerMaskの表示名を取得
 /// @param layerMask 表示名を取得するライトレイヤーマスク
-/// @return ライトレイヤーマスクの表示名。未定義の組み合わせの場合はCustom
+/// @return ライトレイヤーマスクの表示名、未定義の組み合わせの場合はCustom
 constexpr const char* GetLightLayerMaskName(LightLayerMask layerMask) {
 	if (layerMask == ToLightLayerMask(LightLayer::None)) {
 		return "None";
@@ -103,7 +103,7 @@ constexpr const char* GetLightLayerMaskName(LightLayerMask layerMask) {
 	return "Custom";
 }
 
-/// @brief ライトレイヤー同士のOR演算を行う
+/// @brief ライトレイヤー同士のOR演算
 /// @param left 左辺のライトレイヤー
 /// @param right 右辺のライトレイヤー
 /// @return 合成したライトレイヤーマスク
@@ -111,7 +111,7 @@ constexpr LightLayerMask operator|(LightLayer left, LightLayer right) {
 	return ToLightLayerMask(left) | ToLightLayerMask(right);
 }
 
-/// @brief ライトレイヤーマスクにライトレイヤーを追加する
+/// @brief ライトレイヤーマスクにライトレイヤーを追加
 /// @param left 左辺のライトレイヤーマスク
 /// @param right 追加するライトレイヤー
 /// @return 合成したライトレイヤーマスク

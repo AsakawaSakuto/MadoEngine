@@ -7,17 +7,17 @@ namespace MadoEngine::Editor {
 
 #ifdef USE_IMGUI
 
-/// @brief Game View上にTransformギズモを描画し、Transformへ反映する
+/// @brief Game View上にTransformギズモを描画し、Transformへ反映
 /// @param camera ギズモ表示に使用するカメラ
 /// @param transform 操作対象のTransform
 /// @return ギズモ操作でTransformが変更された場合はtrue
 bool DrawTransformGizmoOnGameView(const Camera& camera, Transform3D& transform);
 
-/// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄する
+/// @brief Scene遷移前にModelギズモが保持しているModel参照と編集履歴を破棄
 /// @param selectedModel 現在選択中のModelポインタ
 void ResetModelGizmoOnSceneChange(ModelHandle& selectedModel);
 
-/// @brief Game View上でModelをクリック選択し、選択中ModelのTransformギズモを描画する
+/// @brief Game View上でModelをクリック選択し、選択中ModelのTransformギズモを描画
 /// @param camera 選択レイとギズモ表示に使用するカメラ
 /// @param sceneType 選択対象のシーン種別
 /// @param selectedModel 選択中Modelのポインタ

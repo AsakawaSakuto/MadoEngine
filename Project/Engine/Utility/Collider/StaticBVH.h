@@ -12,28 +12,28 @@ public:
 		AABB bounds;
 	};
 
-	/// @brief BVHを空にする
+	/// @brief BVHをクリア
 	void Clear();
 
-	/// @brief 静的ColliderのAABB一覧からBVHを構築する
+	/// @brief 静的ColliderのAABB一覧からBVHを構築
 	/// @param entries 構築に使う静的ColliderのAABB一覧
 	void Build(const std::vector<Entry>& entries);
 
-	/// @brief 指定AABBと交差するCollider名を検索する
+	/// @brief 指定AABBと交差するCollider名を検索
 	/// @param bounds 検索するAABB
-	/// @param outCandidates 検索結果を格納する配列、毎回clearされる
+	/// @param outCandidates 検索結果の格納先配列、呼び出しごとにclear
 	void Query(const AABB& bounds, std::vector<const std::string*>& outCandidates) const;
 
-	/// @brief 登録済みCollider数を取得する
+	/// @brief 登録済みCollider数を取得
 	/// @return 登録済みCollider数
 	size_t GetEntryCount() const;
 
-	/// @brief BVHノード数を取得する
+	/// @brief BVHノード数を取得
 	/// @return BVHノード数
 	size_t GetNodeCount() const;
 
-	/// @brief BVHが空かどうかを取得する
-	/// @return 空であればtrueを返す
+	/// @brief BVHが空かどうかを取得
+	/// @return 空であればtrue
 	bool IsEmpty() const;
 
 private:

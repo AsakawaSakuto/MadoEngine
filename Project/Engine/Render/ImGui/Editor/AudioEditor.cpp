@@ -18,14 +18,14 @@ namespace MadoEngine::Editor {
 
         const std::filesystem::path kAudioEditorJsonPath = "Assets/Json/AudioEditor.json";
 
-        /// @brief 音量を0.0fから1.0fの範囲に丸める
+        /// @brief 音量を0.0fから1.0fの範囲に丸め処理
         /// @param volume 丸める音量
         /// @return 丸めた音量
         float ClampVolume(float volume) {
             return std::clamp(volume, 0.0f, 1.0f);
         }
 
-        /// @brief Json値から音量を読み込む
+        /// @brief Json値から音量を読み込み
         /// @param value 読み込むJson値
         /// @param fallback 読み込めない場合の値
         /// @return 読み込んだ音量
@@ -37,7 +37,7 @@ namespace MadoEngine::Editor {
             return ClampVolume(value.get<float>());
         }
 
-        /// @brief Jsonオブジェクトから音量を読み込む
+        /// @brief Jsonオブジェクトから音量を読み込み
         /// @param json 読み込むJsonオブジェクト
         /// @param key 読み込むキー
         /// @param fallback 読み込めない場合の値
@@ -55,7 +55,7 @@ namespace MadoEngine::Editor {
             return ReadVolumeValue(*it, fallback);
         }
 
-        /// @brief AudioEditorの音量設定をJsonへ変換する
+        /// @brief AudioEditorの音量設定をJsonへ変換
         /// @return 音量設定Json
         nlohmann::json SerializeAudioEditorVolume() {
             AudioManager& audioManager = AudioManager::GetInstance();
@@ -82,7 +82,7 @@ namespace MadoEngine::Editor {
             return root;
         }
 
-        /// @brief Jsonからカテゴリ音量を読み込む
+        /// @brief Jsonからカテゴリ音量を読み込み
         /// @param categoryVolumes カテゴリ音量Json
         void ApplyCategoryVolumes(const nlohmann::json& categoryVolumes) {
             if (!categoryVolumes.is_object()) {
@@ -95,7 +95,7 @@ namespace MadoEngine::Editor {
             audioManager.SetVoiceVolume(ReadVolumeMember(categoryVolumes, "Voice", audioManager.GetVoiceVolume()));
         }
 
-        /// @brief Jsonから個別音量を読み込む
+        /// @brief Jsonから個別音量を読み込み
         /// @param individualVolumes 個別音量Json
         void ApplyIndividualVolumes(const nlohmann::json& individualVolumes) {
             if (!individualVolumes.is_object()) {
@@ -117,7 +117,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief AudioEditorの音量設定をJsonへ保存する
+        /// @brief AudioEditorの音量設定をJsonへ保存
         /// @return 保存に成功した場合はtrue
         bool SaveAudioEditorVolumeJson() {
             const bool succeeded = Json::JsonFile::Save(kAudioEditorJsonPath, SerializeAudioEditorVolume(), 4, true);
@@ -128,7 +128,7 @@ namespace MadoEngine::Editor {
             return succeeded;
         }
 
-        /// @brief AudioEditorの音量設定をJsonから読み込む
+        /// @brief AudioEditorの音量設定をJsonから読み込み
         /// @return 読み込みに成功した場合はtrue
         bool LoadAudioEditorVolumeJson() {
             nlohmann::json root;

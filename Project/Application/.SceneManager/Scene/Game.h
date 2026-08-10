@@ -43,13 +43,13 @@ public:
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
 
-	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得します。
-	/// @return Playerのワールド座標です。
+	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得
+	/// @return Playerのワールド座標
 	Vector3 GetShadowFocusPosition() const override;
 
-	/// @brief シャドウマップ確認用のPlayer描画座標を取得します。
-	/// @param outPosition PlayerのModelワールド座標を受け取る変数です。
-	/// @return Player座標を取得できた場合はtrueを返します。
+	/// @brief シャドウマップ確認用のPlayer描画座標を取得
+	/// @param outPosition PlayerのModelワールド座標を受け取る変数
+	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
 	std::uint32_t gameSeed_ = 0;

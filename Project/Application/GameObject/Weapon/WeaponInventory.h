@@ -22,16 +22,16 @@ namespace Weapon {
 
 		/// @brief 指定した種類の武器を一番左の空きスロットへ追加
 		/// @param type 追加する武器の種類
-		/// @return 武器を追加できた場合はtrueを返す
+		/// @return 武器を追加できた場合はtrue
 		bool AddWeapon(Projectile::Type type);
 
 		/// @brief 指定した種類の武器を所持しているか確認
 		/// @param type 確認する武器種類
-		/// @return 所持している場合はtrueを返す
+		/// @return 所持している場合はtrue
 		bool HasWeapon(Projectile::Type type) const;
 
 		/// @brief 武器スロットに空きがあるか確認
-		/// @return 空きがある場合はtrueを返す
+		/// @return 空きがある場合はtrue
 		bool HasEmptySlot() const;
 
 		/// @brief 現在装備している武器数を取得
@@ -40,24 +40,24 @@ namespace Weapon {
 
 		/// @brief 指定した種類の武器を取得
 		/// @param type 取得する武器種類
-		/// @return 所持している武器へのポインター。未所持の場合はnullptrを返す
+		/// @return 所持している武器へのポインター、未所持の場合はnullptr
 		BaseWeapon* GetWeapon(Projectile::Type type);
 
 		/// @brief 指定した種類の武器を取得
 		/// @param type 取得する武器種類
-		/// @return 所持している武器へのconstポインター。未所持の場合はnullptrを返す
+		/// @return 所持している武器へのconstポインター、未所持の場合はnullptr
 		const BaseWeapon* GetWeapon(Projectile::Type type) const;
 
-		/// @brief 指定したスロットに装備されている武器を取得します。
+		/// @brief 指定したスロットに装備されている武器を取得
 		/// @param slotIndex 取得する武器スロットの番号
-		/// @return 装備中の武器へのconstポインター。空きスロットまたは範囲外の場合はnullptrを返す
+		/// @return 装備中の武器へのconstポインター、空きスロットまたは範囲外の場合はnullptr
 		const BaseWeapon* GetWeaponAtSlot(std::size_t slotIndex) const;
 
 		/// @brief 武器構成の変更番号を取得
 		/// @return 武器の追加または削除ごとに増える変更番号
 		std::uint64_t GetRevision() const { return revision_; }
 
-		/// @brief 未処理の武器発射イベントを取得してキューを空にする
+		/// @brief 未処理の武器発射イベントを取得してキューをクリア
 		/// @return 発生順に格納された武器発射イベント
 		std::vector<WeaponFiredEvent> ConsumeWeaponFiredEvents();
 

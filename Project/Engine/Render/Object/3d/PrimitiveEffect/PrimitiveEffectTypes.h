@@ -86,13 +86,13 @@ namespace MadoEngine::Effect {
 		uint32_t index = (std::numeric_limits<uint32_t>::max)();
 		uint32_t generation = 0;
 
-		/// @brief ハンドルが有効値を保持しているか確認する
+		/// @brief ハンドルが有効値を保持しているか確認
 		/// @return 有効値を保持している場合はtrue
 		bool HasValue() const {
 			return index != (std::numeric_limits<uint32_t>::max)() && generation != 0;
 		}
 
-		/// @brief 2つのHandleが同じInstanceを指すか比較する
+		/// @brief 2つのHandleが同じInstanceを指すか比較
 		/// @param other 比較対象Handle
 		/// @return 同じ値の場合はtrue
 		bool operator==(const PrimitiveEffectHandle& other) const = default;

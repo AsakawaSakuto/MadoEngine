@@ -38,7 +38,7 @@ public:
     /// @param maxVertices 最大頂点数
     void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, uint32_t maxVertices);
 
-    /// @brief PSORegistryをセットする
+    /// @brief PSORegistryをセット
     /// @param psoRegistry PSORegistryポインタ
     void SetPSORegistry(MadoEngine::Render::PSORegistry* psoRegistry);
 
@@ -121,7 +121,7 @@ public:
     /// @param color 色（デフォルト：白）
     void AddPlane(const Plane& plane, int divisions = 10, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
-    /// @brief 坂道をワイヤーフレームで描画する
+    /// @brief 坂道をワイヤーフレームで描画
     /// @param slope 坂道形状
     /// @param color 描画色
     void AddSlope(const Slope& slope, const Vector4& color = { 1.0f, 1.0f, 1.0f, 1.0f });

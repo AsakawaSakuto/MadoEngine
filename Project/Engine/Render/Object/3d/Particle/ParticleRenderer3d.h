@@ -33,7 +33,7 @@ namespace MadoEngine::Particle {
 		ParticleRenderer3d(const ParticleRenderer3d&) = delete;
 		ParticleRenderer3d& operator=(const ParticleRenderer3d&) = delete;
 
-		/// @brief Rendererを初期化する
+		/// @brief Rendererを初期化
 		/// @param device D3D12Device
 		/// @param commandList 描画に使用するCommandList
 		/// @param psoRegistry PSO Registry
@@ -43,19 +43,19 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::PSORegistry* psoRegistry
 		);
 
-		/// @brief Rendererが所有するGPUリソースを解放する
+		/// @brief Rendererが所有するGPUリソースを解放
 		void Finalize();
 
-		/// @brief 1回分の描画データ登録を開始する
+		/// @brief 1回分の描画データ登録を開始
 		/// @param camera 描画に使用するCamera
 		/// @param submissionFenceValue Command提出へ紐付けるFence値
 		void Begin(const Camera& camera, uint64_t submissionFenceValue);
 
-		/// @brief 完了済みFence値を描画Frame Resourceへ通知する
+		/// @brief 完了済みFence値を描画Frame Resourceへ通知
 		/// @param completedFenceValue GPUが完了済みのFence値
 		void OnGpuFrameCompleted(uint64_t completedFenceValue);
 
-		/// @brief Emitterの生存Particleを描画データへ登録する
+		/// @brief Emitterの生存Particleを描画データへ登録
 		/// @param particles 生存Particle
 		/// @param config Emitter設定
 		/// @param emitterTransform EmitterのTransform
@@ -67,7 +67,7 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		);
 
-		/// @brief GPU Particle Bufferを描画データへ登録する
+		/// @brief GPU Particle Bufferを描画データへ登録
 		/// @param renderData GPU描画Resource
 		/// @param config Emitter設定
 		/// @param renderLayer 描画Layer
@@ -77,19 +77,19 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		);
 
-		/// @brief 登録済みParticleから対象Layerを描画する
+		/// @brief 登録済みParticleから対象Layerを描画
 		/// @param layerMask 描画対象LayerMask
 		void Draw(MadoEngine::Render::RenderLayerMask layerMask);
 
-		/// @brief Particle描画へ適用するFogパラメータを設定する
+		/// @brief Particle描画へ適用するFogパラメータを設定
 		/// @param parameters 適用するFogパラメータ
 		void SetFogParameters(const ParticleFogParameters& parameters);
 
-		/// @brief GPU Particle描画経路を利用できるか確認する
+		/// @brief GPU Particle描画経路を利用できるか確認
 		/// @return RootSignature、CommandSignature、PSOを利用できる場合はtrue
 		bool IsGpuRenderingAvailable() const;
 
-		/// @brief 登録済みParticle数を取得する
+		/// @brief 登録済みParticle数を取得
 		/// @return 登録済みParticle数
 		std::size_t GetPendingInstanceCount() const { return instances_.size(); }
 
@@ -136,7 +136,7 @@ namespace MadoEngine::Particle {
 			uint64_t fenceValue = 0;
 		};
 
-		/// @brief InstanceBuffer容量を必要数以上へ拡張する
+		/// @brief InstanceBuffer容量を必要数以上へ拡張
 		/// @param frameResourceIndex 更新するFrame Resource Index
 		/// @param requiredCount 必要なInstance数
 		void EnsureInstanceCapacity(
@@ -144,17 +144,17 @@ namespace MadoEngine::Particle {
 			std::size_t requiredCount
 		);
 
-		/// @brief テクスチャ名からTextureIndexを取得する
+		/// @brief テクスチャ名からTextureIndexを取得
 		/// @param textureName TextureManagerへ登録されている名前
 		/// @return TextureIndex
 		uint32_t ResolveTextureIndex(const std::string& textureName);
 
-		/// @brief Particle用PSO設定を作成する
+		/// @brief Particle用PSO設定を作成
 		/// @param blendMode 使用するBlendMode
 		/// @return Particle用PSO設定
 		MadoEngine::Render::PSODesc CreatePSODesc(MadoEngine::Render::BlendMode blendMode) const;
 
-		/// @brief GPU Particle用PSO設定を作成する
+		/// @brief GPU Particle用PSO設定を作成
 		/// @param blendMode 使用するBlendMode
 		/// @return GPU Particle用PSO設定
 		MadoEngine::Render::PSODesc CreateGpuPSODesc(

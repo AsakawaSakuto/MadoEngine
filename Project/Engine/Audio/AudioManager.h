@@ -78,7 +78,7 @@ namespace MadoEngine {
 		float GetVoiceVolume() const { return voiceVolume_; }
 
 		/// @brief 音声を再生
-		/// @param key ファイル名（拡張子なし）。例: "fire.mp3" → "fire"
+		/// @param key ファイル名（拡張子なし）、例: "fire.mp3" → "fire"
 		/// @param loop ループ再生するか（デフォルト: false）
 		void Play(const std::string& key, bool loop = false);
 

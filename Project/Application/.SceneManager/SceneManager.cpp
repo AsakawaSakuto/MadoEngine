@@ -20,7 +20,7 @@
 
 namespace {
 
-	/// @brief 指定シーン所属のEditor管理オブジェクトをJSONから読み込む
+	/// @brief 指定シーン所属のEditor管理オブジェクトをJSONから読み込み
 	/// @param sceneType 読み込み対象のシーン
 	void LoadEditorSceneObjects(SceneType sceneType) {
 		MadoEngine::Editor::LoadModelEditorJson(sceneType);
@@ -28,7 +28,7 @@ namespace {
 		MadoEngine::Editor::LoadTextEditorJson(sceneType);
 	}
 
-	/// @brief PointLightとSpotLightの位置をDebugLineで表示する
+	/// @brief PointLightとSpotLightの位置をDebugLineで表示
 	void AddLightPositionDebugSpheres() {
 		LightManager& lightManager = LightManager::GetInstance();
 		constexpr float kLightDebugSphereRadius = 0.5f;

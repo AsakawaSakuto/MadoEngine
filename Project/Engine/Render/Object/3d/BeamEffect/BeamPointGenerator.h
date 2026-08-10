@@ -7,7 +7,7 @@ namespace MadoEngine::Beam {
 	/// @brief 始点と終点からBeam用Ribbon Point列を生成する
 	class BeamPointGenerator final {
 	public:
-		/// @brief Beam用Point列を生成する
+		/// @brief Beam用Point列を生成
 		/// @param startPosition 始点
 		/// @param endPosition 終点
 		/// @param geometry 形状設定
@@ -23,7 +23,7 @@ namespace MadoEngine::Beam {
 		) const;
 
 	private:
-		/// @brief 1次元の連続したValue Noiseを評価する
+		/// @brief 1次元の連続したValue Noiseを評価
 		/// @param coordinate Noise座標
 		/// @param seed Noise Seed
 		/// @return -1から1のNoise値

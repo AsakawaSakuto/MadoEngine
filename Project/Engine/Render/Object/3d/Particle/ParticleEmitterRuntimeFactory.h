@@ -15,7 +15,7 @@ namespace MadoEngine::Particle {
 	/// @brief Emitter設定に応じてCPU/GPU Runtimeを生成するFactory
 	class ParticleEmitterRuntimeFactory final {
 	public:
-		/// @brief Factoryを初期化する
+		/// @brief Factoryを初期化
 		/// @param device D3D12 Device
 		/// @param computePsoRegistry Compute PSO Registry
 		/// @param isGpuBackendAvailable GPU Backendを利用できる場合はtrue
@@ -25,7 +25,7 @@ namespace MadoEngine::Particle {
 			bool isGpuBackendAvailable
 		);
 
-		/// @brief Emitter Runtimeを生成する
+		/// @brief Emitter Runtimeを生成
 		/// @param config Emitter設定
 		/// @param randomSeed Emitter専用乱数Seed
 		/// @param backendOverride 再生単位のBackend上書き
@@ -38,7 +38,7 @@ namespace MadoEngine::Particle {
 			std::string& outFallbackReason
 		) const;
 
-		/// @brief GPU Backendを利用できるか取得する
+		/// @brief GPU Backendを利用できるか取得
 		/// @return 利用できる場合はtrue
 		bool IsGpuBackendAvailable() const { return isGpuBackendAvailable_; }
 

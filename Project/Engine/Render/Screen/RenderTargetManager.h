@@ -17,7 +17,7 @@ namespace MadoEngine::Render {
 	/// @brief RenderTextureの生成・取得・描画先切り替えを名前付きで管理するクラス
 	class RenderTargetManager {
 	public:
-		/// @brief RenderTargetManagerを初期化する
+		/// @brief RenderTargetManagerを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param rtvManager RTVManagerのポインタ
 		/// @param srvManager SRVManagerのポインタ
@@ -36,18 +36,18 @@ namespace MadoEngine::Render {
 			bool resizeWithWindow = true;
 		};
 
-		/// @brief 名前付きレンダーターゲットを作成する
+		/// @brief 名前付きレンダーターゲットを作成
 		/// @param name レンダーターゲット名
 		/// @param desc 作成設定
 		/// @return 作成済み、または既存のRenderTextureポインタ
 		RenderTexture* Create(const std::string& name, const Desc& desc);
 
-		/// @brief 名前付きレンダーターゲットを作成する
+		/// @brief 名前付きレンダーターゲットを作成
 		/// @param name レンダーターゲット名
 		/// @param width 幅
 		/// @param height 高さ
 		/// @param format フォーマット
-		/// @param resizeWithWindow ウィンドウリサイズ時に追従するか
+		/// @param resizeWithWindow ウィンドウリサイズ時に追従する場合はtrue
 		/// @return 作成済み、または既存のRenderTextureポインタ
 		RenderTexture* Create(
 			const std::string& name,
@@ -57,32 +57,32 @@ namespace MadoEngine::Render {
 			bool resizeWithWindow = true
 		);
 
-		/// @brief 名前付きレンダーターゲットが存在するか確認する
+		/// @brief 名前付きレンダーターゲットが存在するか確認
 		/// @param name レンダーターゲット名
 		/// @return 存在する場合true
 		bool Contains(const std::string& name) const;
 
-		/// @brief 名前付きレンダーターゲットを取得する
+		/// @brief 名前付きレンダーターゲットを取得
 		/// @param name レンダーターゲット名
 		/// @return RenderTextureポインタ
 		RenderTexture* Get(const std::string& name);
 
-		/// @brief 名前付きレンダーターゲットを取得する
+		/// @brief 名前付きレンダーターゲットを取得
 		/// @param name レンダーターゲット名
 		/// @return RenderTextureポインタ
 		const RenderTexture* Get(const std::string& name) const;
 
-		/// @brief 指定したレンダーターゲットへの描画を開始する
+		/// @brief 指定したレンダーターゲットへの描画を開始
 		/// @param name レンダーターゲット名
 		/// @param commandList コマンドリスト
-		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル。不要な場合はnullptr
+		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル、不要な場合はnullptr
 		void Begin(
 			const std::string& name,
 			ID3D12GraphicsCommandList* commandList,
 			const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilHandle = nullptr
 		);
 
-		/// @brief 指定したレンダーターゲットへの描画を開始する
+		/// @brief 指定したレンダーターゲットへの描画を開始
 		/// @param name レンダーターゲット名
 		/// @param commandList コマンドリスト
 		/// @param depthStencilHandle 深度ステンシルビューのCPUハンドル
@@ -92,38 +92,38 @@ namespace MadoEngine::Render {
 			D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle
 		);
 
-		/// @brief 指定したレンダーターゲットへの描画を終了する
+		/// @brief 指定したレンダーターゲットへの描画を終了
 		/// @param name レンダーターゲット名
 		/// @param commandList コマンドリスト
 		void End(const std::string& name, ID3D12GraphicsCommandList* commandList);
 
-		/// @brief 指定したレンダーターゲットのGPU SRVハンドルを取得する
+		/// @brief 指定したレンダーターゲットのGPU SRVハンドルを取得
 		/// @param name レンダーターゲット名
 		/// @return GPU SRVハンドル
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle(const std::string& name) const;
 
-		/// @brief 指定したレンダーターゲットのCPU SRVハンドルを取得する
+		/// @brief 指定したレンダーターゲットのCPU SRVハンドルを取得
 		/// @param name レンダーターゲット名
 		/// @return CPU SRVハンドル
 		D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle(const std::string& name) const;
 
-		/// @brief 指定したレンダーターゲットのCPU RTVハンドルを取得する
+		/// @brief 指定したレンダーターゲットのCPU RTVハンドルを取得
 		/// @param name レンダーターゲット名
 		/// @return CPU RTVハンドル
 		D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCPUHandle(const std::string& name) const;
 
-		/// @brief 指定したレンダーターゲットをリサイズする
+		/// @brief 指定したレンダーターゲットをリサイズ
 		/// @param name レンダーターゲット名
 		/// @param width 幅
 		/// @param height 高さ
 		void Resize(const std::string& name, uint32_t width, uint32_t height);
 
-		/// @brief リサイズ追従設定が有効な全レンダーターゲットをリサイズする
+		/// @brief リサイズ追従設定が有効な全レンダーターゲットをリサイズ
 		/// @param width 幅
 		/// @param height 高さ
 		void ResizeAll(uint32_t width, uint32_t height);
 
-		/// @brief 管理中のレンダーターゲットをすべて解放する
+		/// @brief 管理中のレンダーターゲットをすべて解放
 		void Clear();
 
 	private:

@@ -28,7 +28,7 @@ struct PostEffectDefinition {
 	const PostEffectFloatParameterDefinition* parameters = nullptr;
 	std::size_t parameterCount = 0;
 
-	/// @brief Editor用floatパラメータ定義を取得する
+	/// @brief Editor用floatパラメータ定義を取得
 	/// @return floatパラメータ定義の範囲
 	[[nodiscard]] std::span<const PostEffectFloatParameterDefinition> GetParameters() const {
 		return { parameters, parameterCount };
@@ -38,22 +38,22 @@ struct PostEffectDefinition {
 /// @brief ポストエフェクト定義を一元管理するRegistry
 class PostEffectDefinitionRegistry {
 public:
-	/// @brief PostEffectTypeから定義を取得する
+	/// @brief PostEffectTypeから定義を取得
 	/// @param type 検索するEffect種別
-	/// @return 定義。範囲外の場合はnullptr
+	/// @return 定義、範囲外の場合はnullptr
 	[[nodiscard]] static const PostEffectDefinition* Find(PostEffectType type);
 
-	/// @brief Shaderキーから定義を取得する
+	/// @brief Shaderキーから定義を取得
 	/// @param shaderKey 検索するPixelShaderキー
-	/// @return 定義。見つからない場合はnullptr
+	/// @return 定義、見つからない場合はnullptr
 	[[nodiscard]] static const PostEffectDefinition* FindByShaderKey(std::string_view shaderKey);
 
-	/// @brief JSON用Effect種別名から定義を取得する
+	/// @brief JSON用Effect種別名から定義を取得
 	/// @param typeName 検索するEffect種別名
-	/// @return 定義。見つからない場合はnullptr
+	/// @return 定義、見つからない場合はnullptr
 	[[nodiscard]] static const PostEffectDefinition* FindByTypeName(std::string_view typeName);
 
-	/// @brief 登録済みの全Effect定義を取得する
+	/// @brief 登録済みの全Effect定義を取得
 	/// @return Effect定義の範囲
 	[[nodiscard]] static std::span<const PostEffectDefinition> GetAll();
 };

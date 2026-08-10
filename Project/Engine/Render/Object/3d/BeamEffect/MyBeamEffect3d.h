@@ -6,12 +6,12 @@ namespace MadoEngine::Beam {
 	/// @brief ゲーム側からBeam Effectを扱う薄いHandle Wrapper
 	class MyBeamEffect3d final {
 	public:
-		/// @brief Wrapper破棄時に再生中Beamを即時停止する
+		/// @brief Wrapper破棄時に再生中Beamを即時停止
 		~MyBeamEffect3d() {
 			Stop(BeamStopMode::Immediate);
 		}
 
-		/// @brief Beam Effectを再生する
+		/// @brief Beam Effectを再生
 		/// @param assetName 再生するAsset名
 		/// @param desc 再生設定
 		/// @return 再生に成功した場合はtrue
@@ -21,7 +21,7 @@ namespace MadoEngine::Beam {
 			return handle_.HasValue();
 		}
 
-		/// @brief 再生中Beamを停止する
+		/// @brief 再生中Beamを停止
 		/// @param mode 停止方式
 		void Stop(BeamStopMode mode = BeamStopMode::Finish) {
 			if (handle_.HasValue()) {
@@ -30,7 +30,7 @@ namespace MadoEngine::Beam {
 			}
 		}
 
-		/// @brief 始点と終点を更新する
+		/// @brief 始点と終点を更新
 		/// @param startPosition 新しい始点
 		/// @param endPosition 新しい終点
 		/// @return 更新に成功した場合はtrue
@@ -38,27 +38,27 @@ namespace MadoEngine::Beam {
 			return BeamEffectSystem3d::GetInstance().SetEndpoints(handle_, startPosition, endPosition);
 		}
 
-		/// @brief 始点を更新する
+		/// @brief 始点を更新
 		/// @param position 新しい始点
 		/// @return 更新に成功した場合はtrue
 		bool SetStartPosition(const Vector3& position) {
 			return BeamEffectSystem3d::GetInstance().SetStartPosition(handle_, position);
 		}
 
-		/// @brief 終点を更新する
+		/// @brief 終点を更新
 		/// @param position 新しい終点
 		/// @return 更新に成功した場合はtrue
 		bool SetEndPosition(const Vector3& position) {
 			return BeamEffectSystem3d::GetInstance().SetEndPosition(handle_, position);
 		}
 
-		/// @brief Beamが再生中か確認する
+		/// @brief Beamが再生中か確認
 		/// @return 再生中の場合はtrue
 		bool IsAlive() const {
 			return BeamEffectSystem3d::GetInstance().IsAlive(handle_);
 		}
 
-		/// @brief 内部Handleを取得する
+		/// @brief 内部Handleを取得
 		/// @return Beam Effect Handle
 		BeamEffectHandle GetHandle() const {
 			return handle_;

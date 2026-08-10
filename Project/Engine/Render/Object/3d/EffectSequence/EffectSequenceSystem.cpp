@@ -10,7 +10,7 @@ namespace {
 
 	constexpr std::size_t kMaximumEffectSequenceAssetNameLength = 100;
 
-	/// @brief UTF-8文字列からFilesystem Pathを生成する
+	/// @brief UTF-8文字列からFilesystem Pathを生成
 	/// @param value UTF-8文字列
 	/// @return 生成したPath
 	std::filesystem::path MakeUtf8Path(const std::string& value) {
@@ -18,7 +18,7 @@ namespace {
 		return std::filesystem::path(std::u8string(begin, begin + value.size()));
 	}
 
-	/// @brief Filesystem PathをUTF-8文字列へ変換する
+	/// @brief Filesystem PathをUTF-8文字列へ変換
 	/// @param path 変換対象Path
 	/// @return UTF-8文字列
 	std::string PathToUtf8String(const std::filesystem::path& path) {
@@ -26,7 +26,7 @@ namespace {
 		return std::string(reinterpret_cast<const char*>(value.data()), value.size());
 	}
 
-	/// @brief Asset名から保存先Pathを安全に生成する
+	/// @brief Asset名から保存先Pathを安全に生成
 	/// @param directoryPath Asset Directory
 	/// @param assetName UTF-8 Asset名
 	/// @param outFilePath 生成したPathの出力先
@@ -43,7 +43,7 @@ namespace {
 		}
 	}
 
-	/// @brief Windowsで使用可能なAsset名か確認する
+	/// @brief Windowsで使用可能なAsset名か確認
 	/// @param assetName 確認対象名
 	/// @return 使用可能な場合はtrue
 	bool IsValidAssetName(const std::string& assetName) {
@@ -82,7 +82,7 @@ namespace {
 		);
 	}
 
-	/// @brief JSONファイルがAsset Directory直下にあるか確認する
+	/// @brief JSONファイルがAsset Directory直下にあるか確認
 	/// @param filePath 確認対象ファイル
 	/// @param directoryPath Asset Directory
 	/// @return Directory直下のJSONの場合はtrue
@@ -98,7 +98,7 @@ namespace {
 		return !error && canonicalFile.extension() == ".json" && canonicalFile.parent_path() == canonicalDirectory;
 	}
 
-	/// @brief Asset JSONをTrash Directoryへ退避する
+	/// @brief Asset JSONをTrash Directoryへ退避
 	/// @param sourcePath 退避元JSON
 	/// @param assetDirectoryPath Asset Directory
 	/// @param outTrashPath 退避先Pathの出力先

@@ -5,7 +5,7 @@
 
 namespace {
 
-	/// @brief ログ出力用のパス文字列を取得する
+	/// @brief ログ出力用のパス文字列を取得
 	/// @param filePath 変換するファイルパス
 	/// @return ログに使用する文字列
 	std::string ToLogPath(const std::filesystem::path& filePath) {

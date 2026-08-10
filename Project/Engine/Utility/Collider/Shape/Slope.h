@@ -16,7 +16,7 @@ struct Slope {
 	float bottomExtendY = 0.0f; // 斜面角度を変えずに底面だけ下へ伸ばす量
 	SlopeDirection direction = SlopeDirection::PulsX;
 
-	/// @brief 底面延長を含む最小ワールド座標を取得する
+	/// @brief 底面延長を含む最小ワールド座標を取得
 	/// @return 底面延長後の最小ワールド座標
 	Vector3 GetMinWorld() const {
 		Vector3 worldMin = center + min;
@@ -24,13 +24,13 @@ struct Slope {
 		return worldMin;
 	}
 
-	/// @brief 最大ワールド座標を取得する
+	/// @brief 最大ワールド座標を取得
 	/// @return 最大ワールド座標
 	Vector3 GetMaxWorld() const {
 		return center + max;
 	}
 
-	/// @brief 斜面の低い端に使う最小ワールド座標を取得する
+	/// @brief 斜面の低い端に使う最小ワールド座標を取得
 	/// @return 底面延長を含まない最小ワールド座標
 	Vector3 GetSurfaceMinWorld() const {
 		return center + min;

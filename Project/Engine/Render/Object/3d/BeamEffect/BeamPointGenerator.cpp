@@ -6,14 +6,14 @@ namespace {
 
 	constexpr float kDirectionEpsilon = 1.0e-6f;
 
-	/// @brief Vector3の全成分が有限値か確認する
+	/// @brief Vector3の全成分が有限値か確認
 	/// @param value 確認対象
 	/// @return 全成分が有限値の場合はtrue
 	bool IsFinite(const Vector3& value) {
 		return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
 	}
 
-	/// @brief 2つのVector3の外積を計算する
+	/// @brief 2つのVector3の外積を計算
 	/// @param lhs 左辺
 	/// @param rhs 右辺
 	/// @return 外積
@@ -25,7 +25,7 @@ namespace {
 		};
 	}
 
-	/// @brief Vector3を安全に正規化する
+	/// @brief Vector3を安全に正規化
 	/// @param value 正規化対象
 	/// @param fallback 正規化できない場合の値
 	/// @return 正規化後Vector3
@@ -37,7 +37,7 @@ namespace {
 		return value / std::sqrt(lengthSquared);
 	}
 
-	/// @brief 線形補間を行う
+	/// @brief 線形補間
 	/// @param lhs 始点
 	/// @param rhs 終点
 	/// @param rate 補間率

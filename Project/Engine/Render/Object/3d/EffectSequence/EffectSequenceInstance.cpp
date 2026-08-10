@@ -9,14 +9,14 @@ namespace {
 
 	constexpr float kSequenceTimeEpsilon = 0.000001f;
 
-	/// @brief Vector3が有限値だけで構成されているか確認する
+	/// @brief Vector3が有限値だけで構成されているか確認
 	/// @param value 確認対象Vector
 	/// @return 全要素が有限値の場合はtrue
 	bool IsFiniteVector3(const Vector3& value) {
 		return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
 	}
 
-	/// @brief 外部から渡されたRoot Transformを安全な範囲へ補正する
+	/// @brief 外部から渡されたRoot Transformを安全な範囲へ補正
 	/// @param transform 補正対象Transform
 	/// @return 補正後Transform
 	Transform3D NormalizeRootTransform(Transform3D transform) {
@@ -41,7 +41,7 @@ namespace {
 		return transform;
 	}
 
-	/// @brief Affine MatrixをTransform3Dへ分解する
+	/// @brief Affine MatrixをTransform3Dへ分解
 	/// @param matrix 分解対象Matrix
 	/// @return 分解後Transform
 	Transform3D DecomposeTransform(const Matrix4x4& matrix) {
@@ -77,7 +77,7 @@ namespace {
 		return NormalizeRootTransform(result);
 	}
 
-	/// @brief ParentからLocalへの順序でTransformを合成する
+	/// @brief ParentからLocalへの順序でTransformを合成
 	/// @param parentTransform 親World Transform
 	/// @param localTransform 子Local Transform
 	/// @return 子World Transform

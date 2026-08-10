@@ -21,7 +21,7 @@ static_assert(!SpriteHandle{}.IsValid());
 static_assert(!std::is_same_v<SpriteHandle, TextHandle>);
 static_assert(!std::is_same_v<ModelHandle, InstancedModelHandle>);
 
-/// @brief 削除後の次世代番号を取得する
+/// @brief 削除後の次世代番号を取得
 /// @param generation 現在の世代番号
 /// @return 0を除外した次の世代番号
 [[nodiscard]] constexpr uint32_t NextObjectGeneration(uint32_t generation) {

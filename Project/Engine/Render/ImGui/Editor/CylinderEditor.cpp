@@ -22,7 +22,7 @@ namespace {
 
 	using namespace MadoEngine::Effect;
 
-	/// @brief Track Editor内でKeyframeを識別するIDを発行する
+	/// @brief Track Editor内でKeyframeを識別するIDを発行
 	/// @return 新しいEditor用ID
 	uint32_t AllocateKeyframeEditorId() {
 		static uint32_t nextId = 1;
@@ -33,7 +33,7 @@ namespace {
 		return id;
 	}
 
-	/// @brief 文字列を固定長Bufferへコピーする
+	/// @brief 文字列を固定長Bufferへコピー
 	/// @tparam Size Bufferの要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
@@ -43,7 +43,7 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 新規Cylinder Assetに使用できる名前を生成する
+	/// @brief 新規Cylinder Assetに使用できる名前を生成
 	/// @param system 名前の使用状況を確認するPrimitive Effect System
 	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能なCylinder Asset名
@@ -131,7 +131,7 @@ namespace {
 		"None",
 	};
 
-	/// @brief イージング種類を選択するComboを描画する
+	/// @brief イージング種類を選択するComboを描画
 	/// @param label UI表示名
 	/// @param easing 編集対象のイージング種類
 	/// @return 値を変更した場合はtrue
@@ -153,12 +153,12 @@ namespace {
 		return true;
 	}
 
-	/// @brief Keyframe追加に使用できる空き時刻を求める
+	/// @brief Keyframe追加に使用できる空き時刻を算出
 	/// @tparam T Track値型
 	/// @param keyframes 時刻順のKeyframe一覧
 	/// @param maximumTime Track時刻上限
 	/// @param preferredIndex 優先して近傍を検索するKeyframe Index
-	/// @return 追加可能な時刻。空きがない場合はstd::nullopt
+	/// @return 追加可能な時刻、空きがない場合はstd::nullopt
 	template<class T>
 	std::optional<float> FindKeyframeInsertionTime(
 		const std::vector<EffectKeyframe<T>>& keyframes,
@@ -210,7 +210,7 @@ namespace {
 		return (largestGapStart + largestGapEnd) * 0.5f;
 	}
 
-	/// @brief 型付きエフェクトトラックを編集する
+	/// @brief 型付きエフェクトトラックを編集
 	/// @tparam T トラック値の型
 	/// @tparam ValueDrawer 値編集UIを描画する関数型
 	/// @param label UI表示名
@@ -445,7 +445,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief floatトラックを編集する
+	/// @brief floatトラックを編集
 	/// @param label UI表示名
 	/// @param track 編集対象トラック
 	/// @param duration エフェクトの再生時間
@@ -470,7 +470,7 @@ namespace {
 		);
 	}
 
-	/// @brief Vector2トラックを編集する
+	/// @brief Vector2トラックを編集
 	/// @param label UI表示名
 	/// @param track 編集対象トラック
 	/// @param duration エフェクトの再生時間
@@ -495,7 +495,7 @@ namespace {
 		);
 	}
 
-	/// @brief 色トラックを編集する
+	/// @brief 色トラックを編集
 	/// @param label UI表示名
 	/// @param track 編集対象トラック
 	/// @param duration エフェクトの再生時間
@@ -523,7 +523,7 @@ namespace {
 		);
 	}
 
-	/// @brief Cylinderの基本設定を編集する
+	/// @brief Cylinderの基本設定を編集
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawBasicEditor(CylinderEffectConfig& config) {
@@ -533,7 +533,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Cylinderの形状設定を編集する
+	/// @brief Cylinderの形状設定を編集
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawGeometryEditor(CylinderEffectConfig& config) {
@@ -568,12 +568,12 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Cylinderのグラデーション設定を編集する
+	/// @brief Cylinderのグラデーション設定を編集
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawGradientEditor(CylinderEffectConfig& config);
 
-	/// @brief Cylinderのマテリアル設定を編集する
+	/// @brief Cylinderのマテリアル設定を編集
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawMaterialEditor(CylinderEffectConfig& config) {
@@ -615,7 +615,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief CylinderのUV設定を編集する
+	/// @brief CylinderのUV設定を編集
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawUvEditor(CylinderEffectConfig& config) {
@@ -640,10 +640,10 @@ namespace {
 		return changed;
 	}
 
-	/// @brief グラデーション停止点を追加できる位置を求める
+	/// @brief グラデーション停止点を追加できる位置を算出
 	/// @param gradient 位置順に並んだグラデーション停止点
 	/// @param preferredIndex 優先して隣接位置を探す停止点番号
-	/// @return 追加可能な位置。空きがない場合はstd::nullopt
+	/// @return 追加可能な位置、空きがない場合はstd::nullopt
 	std::optional<float> FindGradientStopInsertionPosition(
 		const std::vector<CylinderColorStop>& gradient,
 		int preferredIndex) {
@@ -698,7 +698,7 @@ namespace {
 		return (largestGapBegin + largestGapEnd) * 0.5f;
 	}
 
-	/// @brief HDR色をグラデーションプレビュー用の色へ変換する
+	/// @brief HDR色をグラデーションプレビュー用の色へ変換
 	/// @param color 変換するHDR色
 	/// @return 0から1へ制限したImGui描画色
 	ImU32 ToGradientPreviewColor(const Vector4& color) {
@@ -713,7 +713,7 @@ namespace {
 		});
 	}
 
-	/// @brief 指定時刻のCylinderグラデーションを描画する
+	/// @brief 指定時刻のCylinderグラデーションを描画
 	/// @param gradient 描画するグラデーション停止点
 	/// @param previewTime 色トラックを評価する時刻
 	void DrawGradientPreview(
@@ -786,7 +786,7 @@ namespace {
 		);
 	}
 
-	/// @brief CylinderのGradient設定を編集する
+	/// @brief CylinderのGradient設定を編集
 	/// @param config 編集対象設定
 	/// @return 設定を変更した場合はtrue
 	bool DrawGradientEditor(CylinderEffectConfig& config) {
@@ -956,14 +956,14 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Cylinder Assetの編集状態を比較するためのスナップショットを生成する
+	/// @brief Cylinder Assetの編集状態を比較するためのスナップショットを生成
 	/// @param asset スナップショットを生成するCylinder Asset
 	/// @return JSON形式のスナップショット
 	std::string CreateCylinderAssetSnapshot(const CylinderEffectAsset& asset) {
 		return asset.ToJson().dump();
 	}
 
-	/// @brief Cylinder Editorのプレビューを再生する
+	/// @brief Cylinder Editorのプレビューを再生
 	/// @param system 再生に使用するPrimitive Effect System
 	/// @param assetName 再生するAsset名
 	/// @param transform プレビューのTransform
@@ -982,7 +982,7 @@ namespace {
 		return system.Play(assetName, desc);
 	}
 
-	/// @brief Cylinder Editorのプレビューを即時停止して状態を消去する
+	/// @brief Cylinder Editorのプレビューを即時停止して状態を消去
 	/// @param system 停止に使用するPrimitive Effect System
 	/// @param handle 停止するHandle
 	/// @param assetName プレビュー中Asset名

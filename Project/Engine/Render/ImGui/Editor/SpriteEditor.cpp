@@ -26,9 +26,9 @@ namespace {
 		Vector2 pixelSize{};
 	};
 
-	/// @brief テクスチャプレビューの描画情報を作成する
+	/// @brief テクスチャプレビューの描画情報を作成
 	/// @param textureName TextureManagerに登録されているテクスチャ名
-	/// @return 描画情報。テクスチャが見つからない場合はstd::nullopt
+	/// @return 描画情報、テクスチャが見つからない場合はstd::nullopt
 	std::optional<TexturePreviewData> CreateTexturePreviewData(const std::string& textureName) {
 		TextureManager& textureManager = TextureManager::GetInstance();
 		const uint32_t textureIndex = textureManager.GetTextureIndex(textureName);
@@ -49,7 +49,7 @@ namespace {
 		};
 	}
 
-	/// @brief 直前のImGui項目にカーソルが重なっている場合にテクスチャプレビューを表示する
+	/// @brief 直前のImGui項目にカーソルが重なっている場合にテクスチャプレビューを表示
 	/// @param textureName プレビュー対象のテクスチャ名
 	void DrawHoveredTexturePreview(const std::string& textureName) {
 		if (textureName.empty() || !ImGui::IsItemHovered()) {
@@ -72,7 +72,7 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列を固定長バッファへコピーする
+	/// @brief 文字列を固定長バッファへコピー
 	/// @tparam Size バッファサイズ
 	/// @param buffer コピー先バッファ
 	/// @param text コピー元文字列
@@ -82,7 +82,7 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 追加したSprite名を基準に次の未使用名を生成する
+	/// @brief 追加したSprite名を基準に次の未使用名を生成
 	/// @param manager Sprite名の使用状況を確認するManager
 	/// @param createdName 直前に追加したSprite名
 	/// @return 末尾の番号を繰り上げた未使用のSprite名
@@ -122,7 +122,7 @@ namespace {
 		}
 	}
 
-	/// @brief Sprite Editorで選択可能な静的テクスチャ名を取得する
+	/// @brief Sprite Editorで選択可能な静的テクスチャ名を取得
 	/// @return 名前順に並んだテクスチャ名一覧
 	std::vector<std::string> GetSelectableTextureNames() {
 		std::vector<std::string> names = TextureManager::GetInstance().GetTextureNames();
@@ -134,7 +134,7 @@ namespace {
 		return names;
 	}
 
-	/// @brief テクスチャ選択Comboを描画する
+	/// @brief テクスチャ選択Comboを描画
 	/// @param label ImGuiで使用するラベル
 	/// @param selectedName 現在選択中のテクスチャ名
 	/// @param textureNames 選択候補のテクスチャ名一覧
@@ -166,7 +166,7 @@ namespace {
 		return isChanged;
 	}
 
-	/// @brief Spriteの描画レイヤー選択Comboを描画する
+	/// @brief Spriteの描画レイヤー選択Comboを描画
 	/// @param sprite 編集対象のSprite
 	void DrawRenderLayerCombo(Sprite& sprite) {
 		const Render::RenderLayer currentLayer = sprite.GetRenderLayer();
@@ -185,7 +185,7 @@ namespace {
 		}
 	}
 
-	/// @brief Spriteの対象シーン選択Comboを描画する
+	/// @brief Spriteの対象シーン選択Comboを描画
 	/// @param sprite 編集対象のSprite
 	void DrawSceneCombo(Sprite& sprite) {
 		const SceneType currentScene = sprite.GetSceneType();
@@ -213,7 +213,7 @@ namespace {
 		}
 	}
 
-	/// @brief Spriteのアンカー選択Comboを描画する
+	/// @brief Spriteのアンカー選択Comboを描画
 	/// @param sprite 編集対象のSprite
 	void DrawAnchorCombo(Sprite& sprite) {
 		struct AnchorItem {
@@ -258,7 +258,7 @@ namespace {
 		}
 	}
 
-	/// @brief Spriteのテクスチャプレビューを描画する
+	/// @brief Spriteのテクスチャプレビューを描画
 	/// @param sprite 表示対象のSprite
 	void DrawTexturePreview(const Sprite& sprite) {
 		const std::optional<TexturePreviewData> previewData = CreateTexturePreviewData(sprite.GetTextureName());
@@ -273,7 +273,7 @@ namespace {
 		ImGui::Image(previewData->textureId, previewData->displaySize);
 	}
 
-	/// @brief Spriteのプロパティ編集UIを描画する
+	/// @brief Spriteのプロパティ編集UIを描画
 	/// @param sprite 編集対象のSprite
 	/// @param textureNames 選択候補のテクスチャ名一覧
 	void DrawSpriteProperties(Sprite& sprite, const std::vector<std::string>& textureNames) {

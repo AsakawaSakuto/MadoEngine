@@ -6,29 +6,29 @@ namespace MadoEngine::EffectSequence {
 	/// @brief Effect Sequence HandleをRAIIで管理する薄いWrapper
 	class MyEffectSequence3d final {
 	public:
-		/// @brief 空のWrapperを構築する
+		/// @brief 空のWrapperを構築
 		MyEffectSequence3d() = default;
 
-		/// @brief 所有SequenceをImmediate停止して破棄する
+		/// @brief 所有SequenceをImmediate停止して破棄
 		~MyEffectSequence3d() {
 			Stop(EffectSequenceStopMode::Immediate);
 		}
 
-		/// @brief Copy構築を禁止する
+		/// @brief Copy構築を禁止
 		MyEffectSequence3d(const MyEffectSequence3d&) = delete;
 
-		/// @brief Copy代入を禁止する
+		/// @brief Copy代入を禁止
 		/// @return 自身
 		MyEffectSequence3d& operator=(const MyEffectSequence3d&) = delete;
 
-		/// @brief WrapperをMove構築する
+		/// @brief WrapperをMove構築
 		/// @param other Move元Wrapper
 		MyEffectSequence3d(MyEffectSequence3d&& other) noexcept
 			: handle_(other.handle_) {
 			other.handle_ = {};
 		}
 
-		/// @brief WrapperへMove代入する
+		/// @brief WrapperへMove代入
 		/// @param other Move元Wrapper
 		/// @return 自身
 		MyEffectSequence3d& operator=(MyEffectSequence3d&& other) noexcept {
@@ -40,7 +40,7 @@ namespace MadoEngine::EffectSequence {
 			return *this;
 		}
 
-		/// @brief Effect Sequenceを再生してHandleを所有する
+		/// @brief Effect Sequenceを再生してHandleを所有
 		/// @param assetName 再生するAsset名
 		/// @param desc 再生設定
 		/// @return 再生に成功した場合はtrue
@@ -50,7 +50,7 @@ namespace MadoEngine::EffectSequence {
 			return EffectSequenceSystem::GetInstance().IsAlive(handle_);
 		}
 
-		/// @brief 所有Sequenceを停止する
+		/// @brief 所有Sequenceを停止
 		/// @param mode 停止方式
 		void Stop(EffectSequenceStopMode mode = EffectSequenceStopMode::Finish) {
 			if (EffectSequenceSystem::GetInstance().IsAlive(handle_)) {
@@ -61,45 +61,45 @@ namespace MadoEngine::EffectSequence {
 			}
 		}
 
-		/// @brief 所有Sequenceを一時停止する
+		/// @brief 所有Sequenceを一時停止
 		/// @return 一時停止できた場合はtrue
 		bool Pause() {
 			return EffectSequenceSystem::GetInstance().Pause(handle_);
 		}
 
-		/// @brief 所有Sequenceを再開する
+		/// @brief 所有Sequenceを再開
 		/// @return 再開できた場合はtrue
 		bool Resume() {
 			return EffectSequenceSystem::GetInstance().Resume(handle_);
 		}
 
-		/// @brief Sequence Root Transformを更新する
+		/// @brief Sequence Root Transformを更新
 		/// @param transform 新しいRoot Transform
 		/// @return 更新できた場合はtrue
 		bool SetTransform(const Transform3D& transform) {
 			return EffectSequenceSystem::GetInstance().SetTransform(handle_, transform);
 		}
 
-		/// @brief Sequence再生速度を更新する
+		/// @brief Sequence再生速度を更新
 		/// @param playbackSpeed 再生速度
 		/// @return 更新できた場合はtrue
 		bool SetPlaybackSpeed(float playbackSpeed) {
 			return EffectSequenceSystem::GetInstance().SetPlaybackSpeed(handle_, playbackSpeed);
 		}
 
-		/// @brief 所有Sequenceが再生中か確認する
+		/// @brief 所有Sequenceが再生中か確認
 		/// @return 再生中の場合はtrue
 		bool IsAlive() const {
 			return EffectSequenceSystem::GetInstance().IsAlive(handle_);
 		}
 
-		/// @brief 所有Sequenceが一時停止中か確認する
+		/// @brief 所有Sequenceが一時停止中か確認
 		/// @return 一時停止中の場合はtrue
 		bool IsPaused() const {
 			return EffectSequenceSystem::GetInstance().IsPaused(handle_);
 		}
 
-		/// @brief 所有Handleを取得する
+		/// @brief 所有Handleを取得
 		/// @return 所有Handle
 		EffectSequenceHandle GetHandle() const {
 			return handle_;

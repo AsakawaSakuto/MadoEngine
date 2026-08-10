@@ -11,26 +11,26 @@ namespace Player {
 	class Base : public IGameObject {
 	public:
 
-		/// @brief Playerを初期化する
+		/// @brief Playerを初期化
 		void Initialize();
 
-		/// @brief 入力と移動を更新する
+		/// @brief 入力と移動を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
-		/// @brief Collider更新後に接地状態と描画状態を解決する
+		/// @brief Collider更新後に接地状態と描画状態を解決
 		void ResolveAfterCollision();
 
-		/// @brief Playerのワールド座標を取得する
+		/// @brief Playerのワールド座標を取得
 		Vector3 GetPosition() const { return transform_.translate; }
 
-		/// @brief Playerの描画Model座標を取得する
+		/// @brief Playerの描画Model座標を取得
 		/// @return PlayerのModelワールド座標
 		Vector3 GetModelPosition() const;
 
 		void SetCamera(Camera* camera) { camera_ = camera; }
 
-		/// @brief 所持金を加算する
+		/// @brief 所持金を加算
 		/// @param amount 加算する所持金
 		void AddMoney(int amount);
 
@@ -38,7 +38,7 @@ namespace Player {
 		/// @param amount 加算する経験値
 		void AddExp(int amount);
 
-		/// @brief PlayerのHPを減らす
+		/// @brief PlayerのHPを減少
 		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
 

@@ -16,7 +16,7 @@ namespace MadoEngine::Screen {
 	/// @brief SwapChainを管理するクラス
 	class SwapChain {
 	public:
-		/// @brief SwapChainを初期化する
+		/// @brief SwapChainを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param commandManager CommandManagerのポインタ
 		/// @param hwnd ウィンドウハンドル
@@ -64,16 +64,16 @@ namespace MadoEngine::Screen {
 		/// @brief 画面をスワップする（Present）
 		void Present();
 
-		/// @brief スワップチェーンのバックバッファをリサイズする
+		/// @brief スワップチェーンのバックバッファをリサイズ
 		/// @param width 新しいバックバッファ幅
 		/// @param height 新しいバックバッファ高さ
 		void Resize(uint32_t width, uint32_t height);
 
-		/// @brief バックバッファ幅を取得する
+		/// @brief バックバッファ幅を取得
 		/// @return バックバッファ幅
 		uint32_t GetWidth() const { return width_; }
 
-		/// @brief バックバッファ高さを取得する
+		/// @brief バックバッファ高さを取得
 		/// @return バックバッファ高さ
 		uint32_t GetHeight() const { return height_; }
 
@@ -81,7 +81,7 @@ namespace MadoEngine::Screen {
 		/// @brief SwapChainの生成
 		void CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height);
 
-		/// @brief バックバッファとRTVを取得・再作成する
+		/// @brief バックバッファとRTVを取得・再作成
 		void CreateBackBufferViews();
 
 		Core::DxDevice* device_ = nullptr;

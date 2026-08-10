@@ -183,7 +183,7 @@ namespace MadoEngine::Particle {
 		uint32_t index = (std::numeric_limits<uint32_t>::max)();
 		uint32_t generation = 0;
 
-		/// @brief ハンドルが値を保持しているか確認する
+		/// @brief ハンドルが値を保持しているか確認
 		/// @return 値を保持している場合はtrue
 		bool HasValue() const {
 			return index != (std::numeric_limits<uint32_t>::max)() && generation != 0;

@@ -32,7 +32,7 @@ struct SpriteCreateDesc {
 /// @brief Spriteの所有と世代付き参照を管理するManager
 class SpriteManager {
 public:
-	/// @brief SpriteManagerのシングルトンを取得する
+	/// @brief SpriteManagerのシングルトンを取得
 	/// @return SpriteManagerのインスタンス
 	static SpriteManager& GetInstance();
 
@@ -41,78 +41,78 @@ public:
 	SpriteManager(SpriteManager&&) = delete;
 	SpriteManager& operator=(SpriteManager&&) = delete;
 
-	/// @brief SpriteManagerを初期化する
+	/// @brief SpriteManagerを初期化
 	/// @param device D3D12デバイス
 	/// @param commandList コマンドリスト
 	/// @param psoRegistry PSOレジストリ
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Render::PSORegistry* psoRegistry);
 
-	/// @brief 全Spriteと共有リソースを解放する
+	/// @brief 全Spriteと共有リソースを解放
 	void Finalize();
 
-	/// @brief 全Spriteへスクリーンサイズを設定する
+	/// @brief 全Spriteへスクリーンサイズを設定
 	/// @param width スクリーン幅
 	/// @param height スクリーン高さ
 	void SetScreenSize(float width, float height);
 
-	/// @brief Spriteを生成する
+	/// @brief Spriteを生成
 	/// @param name Sprite名
 	/// @param textureName テクスチャ名
 	/// @param sceneType 所属Scene
 	/// @param managementMode 管理方式
-	/// @return 生成したSpriteのHandle。失敗した場合は無効Handle
+	/// @return 生成したSpriteのHandle、失敗した場合は無効Handle
 	[[nodiscard]] SpriteHandle Create(
 		const std::string& name,
 		const std::string& textureName,
 		SceneType sceneType = SceneType::None,
 		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly);
 
-	/// @brief 指定した生成情報からSpriteを生成する
+	/// @brief 指定した生成情報からSpriteを生成
 	/// @param desc Sprite生成情報
-	/// @return 生成したSpriteのHandle。失敗した場合は無効Handle
+	/// @return 生成したSpriteのHandle、失敗した場合は無効Handle
 	[[nodiscard]] SpriteHandle Create(const SpriteCreateDesc& desc);
 
-	/// @brief 同じ条件のSpriteを取得し、存在しない場合だけ生成する
+	/// @brief 同じ条件のSpriteを取得し、存在しない場合だけ生成
 	/// @param desc Sprite生成情報
-	/// @return 取得または生成したSpriteのHandle。条件不一致または生成失敗時は無効Handle
+	/// @return 取得または生成したSpriteのHandle、条件不一致または生成失敗時は無効Handle
 	[[nodiscard]] SpriteHandle FindOrCreate(const SpriteCreateDesc& desc);
 
-	/// @brief JSONからEditor管理Spriteを生成または更新する
+	/// @brief JSONからEditor管理Spriteを生成または更新
 	/// @param json Sprite設定
-	/// @return 生成または更新したSpriteのHandle。失敗した場合は無効Handle
+	/// @return 生成または更新したSpriteのHandle、失敗した場合は無効Handle
 	[[nodiscard]] SpriteHandle CreateFromJson(const nlohmann::json& json);
 
-	/// @brief HandleからSpriteを一時参照として取得する
+	/// @brief HandleからSpriteを一時参照として取得
 	/// @param handle 取得対象のHandle
 	/// @return 有効な場合はSprite、無効な場合はnullptr
 	Sprite* TryGet(SpriteHandle handle);
 
-	/// @brief HandleからSpriteを読み取り専用の一時参照として取得する
+	/// @brief HandleからSpriteを読み取り専用の一時参照として取得
 	/// @param handle 取得対象のHandle
 	/// @return 有効な場合はSprite、無効な場合はnullptr
 	const Sprite* TryGet(SpriteHandle handle) const;
 
-	/// @brief 名前からSpriteのHandleを検索する
+	/// @brief 名前からSpriteのHandleを検索
 	/// @param name 検索する名前
-	/// @return 見つかったSpriteのHandle。見つからない場合は無効Handle
+	/// @return 見つかったSpriteのHandle、見つからない場合は無効Handle
 	[[nodiscard]] SpriteHandle Find(const std::string& name) const;
 
-	/// @brief Handleが現在のSpriteを参照しているか確認する
+	/// @brief Handleが現在のSpriteを参照しているか確認
 	/// @param handle 確認するHandle
 	/// @return 有効なSpriteを参照している場合はtrue
 	[[nodiscard]] bool IsValid(SpriteHandle handle) const;
 
 	/// @brief 名前からSpriteを一時参照として取得する互換API
 	/// @param name Sprite名
-	/// @return 見つかったSprite。見つからない場合はnullptr
+	/// @return 見つかったSprite、見つからない場合はnullptr
 	Sprite* Get(const std::string& name);
 
 	/// @brief 名前からSpriteを読み取り専用の一時参照として取得する互換API
 	/// @param name Sprite名
-	/// @return 見つかったSprite。見つからない場合はnullptr
+	/// @return 見つかったSprite、見つからない場合はnullptr
 	const Sprite* Get(const std::string& name) const;
 
-	/// @brief 名前を変更してもHandleを維持する
+	/// @brief 名前を変更してもHandleを維持
 	/// @param handle 名前を変更するSpriteのHandle
 	/// @param newName 新しい名前
 	/// @return 変更に成功した場合はtrue
@@ -124,7 +124,7 @@ public:
 	/// @return 変更に成功した場合はtrue
 	bool Rename(const std::string& currentName, const std::string& newName);
 
-	/// @brief GPUが対象を使用していないことが保証された時点でSpriteを即時削除する
+	/// @brief GPUが対象を使用していないことが保証された時点でSpriteを即時削除
 	/// @param handle 削除対象のHandle
 	/// @return 削除できた場合はtrue
 	bool Destroy(SpriteHandle handle);
@@ -134,7 +134,7 @@ public:
 	/// @return 削除できた場合はtrue
 	bool Destroy(const std::string& name);
 
-	/// @brief 描画中でも安全な時点までSpriteの削除を延期する
+	/// @brief 描画中でも安全な時点までSpriteの削除を延期
 	/// @param handle 削除対象のHandle
 	void RequestDestroy(SpriteHandle handle);
 
@@ -142,32 +142,32 @@ public:
 	/// @param name 削除対象の名前
 	void RequestDestroy(const std::string& name);
 
-	/// @brief 延期されているSprite削除を安全な時点で実行する
+	/// @brief 延期されているSprite削除を安全な時点で実行
 	void FlushPendingDestroys();
 
-	/// @brief 指定Sceneに属するSpriteを即時削除する
+	/// @brief 指定Sceneに属するSpriteを即時削除
 	/// @param sceneType 削除対象のScene
 	void DestroyByScene(SceneType sceneType);
 
-	/// @brief 現在Sceneで有効な全Spriteを更新する
+	/// @brief 現在Sceneで有効な全Spriteを更新
 	/// @param currentSceneType 現在のScene
 	void UpdateAll(SceneType currentSceneType);
 
-	/// @brief 現在Sceneで有効な全Spriteを描画する
+	/// @brief 現在Sceneで有効な全Spriteを描画
 	/// @param currentSceneType 現在のScene
 	void DrawAll(SceneType currentSceneType);
 
-	/// @brief 指定描画LayerのSpriteを描画する
+	/// @brief 指定描画LayerのSpriteを描画
 	/// @param currentSceneType 現在のScene
 	/// @param layer 描画Layer
 	void DrawLayer(SceneType currentSceneType, Render::RenderLayer layer);
 
-	/// @brief 指定描画LayerMaskのSpriteを描画する
+	/// @brief 指定描画LayerMaskのSpriteを描画
 	/// @param currentSceneType 現在のScene
 	/// @param layerMask 描画LayerMask
 	void DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask);
 
-	/// @brief 現在SceneのSpriteを元の描画順の連続レイヤーバッチとして描画する
+	/// @brief 現在SceneのSpriteを元の描画順の連続レイヤーバッチとして描画
 	/// @param currentSceneType 現在のScene
 	/// @param batchContext バッチ前後の描画処理を受け取るContext
 	void DrawInOrder(
@@ -175,50 +175,50 @@ public:
 		Render::IRenderLayerBatchContext& batchContext
 	);
 
-	/// @brief Editor管理SpriteをJSONへ変換する
+	/// @brief Editor管理SpriteをJSONへ変換
 	/// @return Sprite一覧を含むJSON
 	nlohmann::json ToJson() const;
 
-	/// @brief JSONからEditor管理Spriteを復元する
+	/// @brief JSONからEditor管理Spriteを復元
 	/// @param json Sprite一覧を含むJSON
 	void FromJson(const nlohmann::json& json);
 
-	/// @brief JSONから指定シーン所属のEditor管理Spriteを復元する
+	/// @brief JSONから指定シーン所属のEditor管理Spriteを復元
 	/// @param json Sprite一覧を含むJSON
-	/// @param sceneType 復元対象のシーン。SceneType::None所属のSpriteも復元する
+	/// @param sceneType 復元対象のシーン、SceneType::None所属のSpriteも復元
 	void FromJson(const nlohmann::json& json, SceneType sceneType);
 
-	/// @brief Editor管理SpriteをJSONファイルへ保存する
+	/// @brief Editor管理SpriteをJSONファイルへ保存
 	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath) const;
 
-	/// @brief 指定シーン所属のEditor管理SpriteをJSONファイルへ保存する
+	/// @brief 指定シーン所属のEditor管理SpriteをJSONファイルへ保存
 	/// @param filePath 保存先のファイルパス
-	/// @param sceneType 保存対象のシーン。SceneType::None所属のSpriteも保存する
+	/// @param sceneType 保存対象のシーン、SceneType::None所属のSpriteも保存
 	/// @return 保存に成功した場合はtrue
 	bool SaveToFile(const std::filesystem::path& filePath, SceneType sceneType) const;
 
-	/// @brief JSONファイルからEditor管理Spriteを読み込む
+	/// @brief JSONファイルからEditor管理Spriteを読み込み
 	/// @param filePath 読み込み元
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath);
 
-	/// @brief JSONファイルから指定シーン所属のEditor管理Spriteを読み込む
+	/// @brief JSONファイルから指定シーン所属のEditor管理Spriteを読み込み
 	/// @param filePath 読み込み元のファイルパス
-	/// @param sceneType 読み込み対象のシーン。SceneType::None所属のSpriteも読み込む
+	/// @param sceneType 読み込み対象のシーン、SceneType::None所属のSpriteも読み込み
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadFromFile(const std::filesystem::path& filePath, SceneType sceneType);
 
-	/// @brief 描画順でSprite名一覧を取得する
+	/// @brief 描画順でSprite名一覧を取得
 	/// @return Sprite名一覧
 	std::vector<std::string> GetNames() const;
 
-	/// @brief 管理中のSpriteインスタンス数を取得する
+	/// @brief 管理中のSpriteインスタンス数を取得
 	/// @return 管理中のSpriteインスタンス数
 	std::size_t GetSpriteCount() const;
 
-	/// @brief 描画順でEditor管理Sprite名一覧を取得する
+	/// @brief 描画順でEditor管理Sprite名一覧を取得
 	/// @return Editor管理Sprite名一覧
 	std::vector<std::string> GetEditorManagedNames() const;
 
@@ -235,9 +235,9 @@ private:
 	SpriteManager() = default;
 	~SpriteManager() = default;
 
-	/// @brief JSONからEditor管理Spriteを復元する
+	/// @brief JSONからEditor管理Spriteを復元
 	/// @param json Sprite一覧を含むJSON
-	/// @param sceneType 対象シーン。未指定の場合は全シーンを対象にする
+	/// @param sceneType 対象シーン、未指定の場合は全シーン
 	void FromJsonInternal(const nlohmann::json& json, std::optional<SceneType> sceneType);
 
 	ID3D12Device* device_ = nullptr;

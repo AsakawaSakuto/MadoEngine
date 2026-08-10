@@ -21,13 +21,13 @@ namespace Projectile {
 		void OnEnemyHit() override;
 
 	private:
-		/// @brief FireBallパーティクルのループ再生を開始する
+		/// @brief FireBallパーティクルのループ再生を開始
 		void StartParticle();
 
-		/// @brief FireBallパーティクルを現在位置へ追従させる
+		/// @brief FireBallパーティクルを現在位置へ追従
 		void UpdateParticleTransform();
 
-		/// @brief FireBallパーティクルを即時停止する
+		/// @brief FireBallパーティクルを即時停止
 		void StopParticle();
 
 		/// @brief 現在座標に爆発を生成

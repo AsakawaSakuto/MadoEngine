@@ -27,7 +27,7 @@ namespace Projectile {
 		}
 
 		/// @brief 削除対象かを取得
-		/// @return 削除対象の場合はtrueを返す
+		/// @return 削除対象の場合はtrue
 		bool IsDead() const { return isDead_; }
 
 		/// @brief Projectileの識別番号を取得
@@ -47,7 +47,7 @@ namespace Projectile {
 		const Vector3& GetPosition() const { return transform_.translate; }
 
 		/// @brief 跳弾可能かを取得
-		/// @return 跳弾回数が残っていればtrueを返す
+		/// @return 跳弾回数が残っていればtrue
 		bool CanBounce() const {
 			return disappearsUponCollision_ && remainingBounceCount_ > 0;
 		}
@@ -59,8 +59,8 @@ namespace Projectile {
 
 		/// @brief Enemyとの衝突を処理
 		/// @param enemyId 衝突したEnemyの識別番号
-		/// @param bounceTargetPosition 跳弾先の座標。跳弾先が存在しない場合はnullptr
-		/// @return ダメージを適用する新しい衝突の場合はtrueを返す
+		/// @param bounceTargetPosition 跳弾先の座標、跳弾先が存在しない場合はnullptr
+		/// @return ダメージを適用する新しい衝突の場合はtrue
 		bool HandleEnemyCollision(std::uint32_t enemyId, const Vector3* bounceTargetPosition) {
 			currentContactEnemyIds_.insert(enemyId);
 
@@ -120,7 +120,7 @@ namespace Projectile {
 
 		/// @brief 指定座標へ向かうよう移動方向を変更
 		/// @param position 新しい目標座標
-		/// @return 有効な移動方向を設定できた場合はtrueを返す
+		/// @return 有効な移動方向を設定できた場合はtrue
 		bool SetMoveDirectionTowards(const Vector3& position) {
 			constexpr float kMinDirectionLengthSq = 0.000001f;
 			const Vector3 toTarget = position - transform_.translate;

@@ -18,7 +18,7 @@ namespace {
 
 	using namespace MadoEngine::Particle;
 
-	/// @brief Particle Backendの日本語表示名を取得する
+	/// @brief Particle Backendの日本語表示名を取得
 	/// @param backend 表示するBackend
 	/// @return 日本語表示名
 	const char* GetParticleBackendDisplayName(ParticleBackend backend) {
@@ -36,10 +36,10 @@ namespace {
 		return "不明";
 	}
 
-	/// @brief 指定したEmitter名が既に使用されているか確認する
+	/// @brief 指定したEmitter名が既に使用されているか確認
 	/// @param emitters 確認対象のEmitter一覧
 	/// @param name 確認するEmitter名
-	/// @param ignoredIndex 確認対象から除外するIndex。負数の場合は除外しない
+	/// @param ignoredIndex 確認対象から除外するIndex、負数の場合は除外なし
 	/// @return 使用済みの場合はtrue
 	bool IsEmitterNameUsed(
 		const std::vector<EmitterConfig>& emitters,
@@ -54,7 +54,7 @@ namespace {
 		return false;
 	}
 
-	/// @brief Emitter一覧内で重複しない名前を生成する
+	/// @brief Emitter一覧内で重複しない名前を生成
 	/// @param emitters 名前の重複を確認するEmitter一覧
 	/// @param createdName 初期名または直前に作成した名前
 	/// @return 重複しないEmitter名
@@ -97,7 +97,7 @@ namespace {
 		}
 	}
 
-	/// @brief 新規Particle Assetに使用できる名前を生成する
+	/// @brief 新規Particle Assetに使用できる名前を生成
 	/// @param particleSystem 名前の使用状況を確認するParticleSystem
 	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能なParticle Asset名
@@ -140,7 +140,7 @@ namespace {
 		}
 	}
 
-	/// @brief 文字列を固定長Bufferへコピーする
+	/// @brief 文字列を固定長Bufferへコピー
 	/// @tparam Size Bufferの要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
@@ -150,7 +150,7 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief float範囲を編集する
+	/// @brief float範囲を編集
 	/// @param label UI表示名
 	/// @param range 編集対象範囲
 	/// @param speed Drag操作速度
@@ -176,7 +176,7 @@ namespace {
 		ImGui::PopID();
 	}
 
-	/// @brief Vector2範囲を編集する
+	/// @brief Vector2範囲を編集
 	/// @param label UI表示名
 	/// @param range 編集対象範囲
 	/// @param speed Drag操作速度
@@ -196,7 +196,7 @@ namespace {
 		ImGui::PopID();
 	}
 
-	/// @brief Vector3範囲を編集する
+	/// @brief Vector3範囲を編集
 	/// @param label UI表示名
 	/// @param range 編集対象範囲
 	/// @param speed Drag操作速度
@@ -219,7 +219,7 @@ namespace {
 		ImGui::PopID();
 	}
 
-	/// @brief Vector4色範囲を編集する
+	/// @brief Vector4色範囲を編集
 	/// @param label UI表示名
 	/// @param range 編集対象範囲
 	void DrawColorRange(const char* label, ValueRange<Vector4>& range) {
@@ -244,7 +244,7 @@ namespace {
 		ImGui::PopID();
 	}
 
-	/// @brief Emitter発生形状を編集する
+	/// @brief Emitter発生形状を編集
 	/// @param shape 編集対象形状
 	void DrawShapeEditor(ParticleShape& shape) {
 		const char* shapeNames[] = { "点", "線", "球", "ボックス", "平面", "リング" };
@@ -318,7 +318,7 @@ namespace {
 		}, shape);
 	}
 
-	/// @brief Emitter設定を編集する
+	/// @brief Emitter設定を編集
 	/// @param emitter 編集対象Emitter
 	void DrawEmitterEditor(EmitterConfig& emitter) {
 		const char* backendNames[] = { "自動", "CPU", "GPU" };
@@ -468,14 +468,14 @@ namespace {
 		}
 	}
 
-	/// @brief Particleアセットの編集状態を比較するためのスナップショットを生成する
+	/// @brief Particleアセットの編集状態を比較するためのスナップショットを生成
 	/// @param asset スナップショットを生成するParticleアセット
 	/// @return JSON形式のスナップショット
 	std::string CreateParticleAssetSnapshot(const ParticleEffectAsset& asset) {
 		return asset.ToJson().dump();
 	}
 
-	/// @brief Particle Editorのプレビューを再生する
+	/// @brief Particle Editorのプレビューを再生
 	/// @param particleSystem 再生に使用するParticleSystem
 	/// @param assetName 再生するParticleアセット名
 	/// @param position プレビューの再生位置

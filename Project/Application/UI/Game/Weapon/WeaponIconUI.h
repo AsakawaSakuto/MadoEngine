@@ -40,7 +40,7 @@ namespace UI::Game {
 
 		/// @brief 指定した武器スロットのレベル表示を更新
 		/// @param slotIndex 更新する武器スロットの番号
-		/// @param weapon スロットに装備されている武器。空きスロットの場合はnullptr
+		/// @param weapon スロットに装備されている武器、空きスロットの場合はnullptr
 		void UpdateWeaponLevelText(std::size_t slotIndex, const Weapon::BaseWeapon* weapon);
 
 		float fireAnimationDuration_ = 0.15f;    // 発射アニメーションの合計時間（秒）

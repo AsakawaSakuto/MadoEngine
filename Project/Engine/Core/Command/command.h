@@ -26,11 +26,11 @@ namespace MadoEngine::Core {
         ID3D12GraphicsCommandList* GetCommandList() const { return commandList_.Get(); }
         ID3D12CommandQueue* GetCommandQueue() const { return commandQueue_.Get(); }
 
-        /// @brief 次にSignalされるFence値を取得する
+        /// @brief 次にSignalされるFence値を取得
         /// @return 次回提出処理へ紐付けるFence値
         uint64_t GetNextFenceValue() const { return fenceValue_ + 1; }
 
-        /// @brief GPUが完了済みのFence値を取得する
+        /// @brief GPUが完了済みのFence値を取得
         /// @return 完了済みFence値
         uint64_t GetCompletedFenceValue() const {
             return fence_ ? fence_->GetCompletedValue() : 0;

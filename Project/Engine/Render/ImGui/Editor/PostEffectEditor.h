@@ -7,23 +7,23 @@
 #include "../../../RenderHeaders.h"
 namespace MadoEngine::Editor {
 
-/// @brief PostEffect EditorのJson設定を読み込む
+/// @brief PostEffect EditorのJson設定を読み込み
 /// @param postEffectManager 読み込み先のPostEffectManager
 /// @return 読み込みに成功した場合はtrue
 bool LoadPostEffectEditorJsonFromFile(Render::PostEffectManager& postEffectManager);
 
-/// @brief PostEffect EditorのJson設定を読み込む
+/// @brief PostEffect EditorのJson設定を読み込み
 /// @param postEffectManager 読み込み先のPostEffectManager
 /// @return 読み込みに成功した場合はtrue
 bool LoadPostEffectEditorJson(Render::PostEffectManager& postEffectManager);
 
 #ifdef USE_IMGUI
 
-/// @brief 予約されたPostEffect Editor操作を適用する
+/// @brief 予約されたPostEffect Editor操作を適用
 /// @param postEffectManager 適用対象のポストエフェクト管理クラス
 void ApplyPendingPostEffectEditorOperations(Render::PostEffectManager& postEffectManager);
 
-/// @brief PostEffect Editorを描画する
+/// @brief PostEffect Editorを描画
 /// @param postEffectManager 編集対象のポストエフェクト管理クラス
 void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager);
 

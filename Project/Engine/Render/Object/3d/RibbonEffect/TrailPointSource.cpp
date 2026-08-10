@@ -7,7 +7,7 @@ namespace {
 
 	constexpr float kRibbonPointDistanceEpsilon = 0.000001f;
 
-	/// @brief Vector3の全要素が有限値か確認する
+	/// @brief Vector3の全要素が有限値か確認
 	/// @param value 確認対象
 	/// @return 全要素が有限値の場合はtrue
 	bool IsFiniteVector3(const Vector3& value) {

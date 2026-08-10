@@ -6,7 +6,7 @@ namespace MadoEngine::Particle {
 	/// @brief Particle Emitterの発生形状をDebugLineへ登録するDrawer
 	class ParticleEmitterDebugDrawer3d final {
 	public:
-		/// @brief Emitterの発生形状をDebugLineへ登録する
+		/// @brief Emitterの発生形状をDebugLineへ登録
 		/// @param config 表示するEmitter設定
 		/// @param transform EmitterのTransform
 		/// @param color 発生形状の表示色

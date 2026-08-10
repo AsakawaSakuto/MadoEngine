@@ -12,17 +12,17 @@ namespace MadoEngine::Editor {
 
 namespace {
 
-	/// @brief バッファへ文字列をコピーします。
-	/// @tparam Size バッファサイズ。
-	/// @param buffer コピー先バッファ。
-	/// @param text コピーする文字列。
+	/// @brief バッファへ文字列をコピー
+	/// @tparam Size バッファサイズ
+	/// @param buffer コピー先バッファ
+	/// @param text コピーする文字列
 	template<size_t Size>
 	void CopyToBuffer(std::array<char, Size>& buffer, const std::string& text) {
 		buffer.fill('\0');
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 追加したText名を基準に次の未使用名を生成する
+	/// @brief 追加したText名を基準に次の未使用名を生成
 	/// @param manager Text名の使用状況を確認するManager
 	/// @param createdName 直前に追加したText名
 	/// @return 末尾の番号を繰り上げた未使用のText名
@@ -62,7 +62,7 @@ namespace {
 		}
 	}
 
-	/// @brief Textのアンカー選択Comboを描画する
+	/// @brief Textのアンカー選択Comboを描画
 	/// @param text 編集対象のText
 	void DrawAnchorCombo(Text& text) {
 		struct AnchorItem {
@@ -101,8 +101,8 @@ namespace {
 		}
 	}
 
-	/// @brief RenderLayerを選択するComboを描画します。
-	/// @param text 編集対象Text。
+	/// @brief RenderLayerを選択するComboを描画
+	/// @param text 編集対象Text
 	void DrawRenderLayerCombo(Text& text) {
 		const Render::RenderLayer current = text.GetRenderLayer();
 		const char* preview = Render::GetRenderLayerName(current);
@@ -122,8 +122,8 @@ namespace {
 		}
 	}
 
-	/// @brief SceneTypeを選択するComboを描画します。
-	/// @param text 編集対象Text。
+	/// @brief SceneTypeを選択するComboを描画
+	/// @param text 編集対象Text
 	void DrawSceneCombo(Text& text) {
 		struct SceneItem {
 			const char* label;
@@ -161,8 +161,8 @@ namespace {
 		}
 	}
 
-	/// @brief Textフォント選択Comboを描画します。
-	/// @param text 編集対象Text。
+	/// @brief Textフォント選択Comboを描画
+	/// @param text 編集対象Text
 	void DrawFontCombo(Text& text) {
 		const std::vector<TextFontAsset>& fontAssets = TextTextureGenerator::GetInstance().GetFontAssets();
 		const TextFontAsset* currentAsset = nullptr;
@@ -206,8 +206,8 @@ namespace {
 		}
 	}
 
-	/// @brief Text配置を選択するComboを描画します。
-	/// @param text 編集対象Text。
+	/// @brief Text配置を選択するComboを描画
+	/// @param text 編集対象Text
 	void DrawAlignmentControls(Text& text) {
 		const char* horizontalItems[] = { "左", "中央", "右" };
 		int horizontalIndex = static_cast<int>(text.GetHorizontalAlign());

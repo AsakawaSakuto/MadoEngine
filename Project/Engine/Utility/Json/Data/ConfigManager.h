@@ -16,11 +16,11 @@ namespace MadoEngine::Json {
 		bool isFullscreen = false;
 		bool isVsync = true;
 
-		/// @brief JsonからWindow設定を読み込む
+		/// @brief JsonからWindow設定を読み込み
 		/// @param json 読み込み元のJson
 		void FromJson(const nlohmann::json& json) override;
 
-		/// @brief Window設定をJsonへ変換する
+		/// @brief Window設定をJsonへ変換
 		/// @return 変換されたJson
 		nlohmann::json ToJson() const override;
 	};
@@ -28,50 +28,50 @@ namespace MadoEngine::Json {
 	/// @brief エンジン設定やアプリ設定のJson管理クラス
 	class ConfigManager {
 	public:
-		/// @brief 設定ファイルを読み込む
+		/// @brief 設定ファイルを読み込み
 		/// @param filePath 読み込む設定ファイル
 		/// @return 読み込みに成功した場合はtrue
 		bool Load(const std::filesystem::path& filePath);
 
-		/// @brief 設定ファイルを保存する
+		/// @brief 設定ファイルを保存
 		/// @param createBackup 上書き前にバックアップを作る場合はtrue
 		/// @return 保存に成功した場合はtrue
 		bool Save(bool createBackup = true) const;
 
-		/// @brief 設定ファイルを指定パスへ保存する
+		/// @brief 設定ファイルを指定パスへ保存
 		/// @param filePath 保存先の設定ファイル
 		/// @param createBackup 上書き前にバックアップを作る場合はtrue
 		/// @return 保存に成功した場合はtrue
 		bool SaveAs(const std::filesystem::path& filePath, bool createBackup = true);
 
-		/// @brief 設定を初期化する
+		/// @brief 設定を初期化
 		void Clear();
 
-		/// @brief Window設定を取得する
+		/// @brief Window設定を取得
 		/// @param defaultValue 設定が存在しない場合の値
 		/// @return Window設定
 		WindowConfig GetWindowConfig(const WindowConfig& defaultValue = {}) const;
 
-		/// @brief Window設定を登録する
+		/// @brief Window設定を登録
 		/// @param config 登録するWindow設定
 		void SetWindowConfig(const WindowConfig& config);
 
-		/// @brief 指定セクションが存在するか確認する
+		/// @brief 指定セクションが存在するか確認
 		/// @param sectionName セクション名
 		/// @return 存在する場合はtrue
 		bool ContainsSection(const std::string& sectionName) const;
 
-		/// @brief 指定セクションのJsonを取得する
+		/// @brief 指定セクションのJsonを取得
 		/// @param sectionName セクション名
 		/// @return セクションのJson
 		const nlohmann::json& GetSection(const std::string& sectionName) const;
 
-		/// @brief 指定セクションのJsonを設定する
+		/// @brief 指定セクションのJsonを設定
 		/// @param sectionName セクション名
 		/// @param json 設定するJson
 		void SetSection(const std::string& sectionName, const nlohmann::json& json);
 
-		/// @brief 指定キーの値を取得する
+		/// @brief 指定キーの値を取得
 		/// @param sectionName セクション名
 		/// @param key キー名
 		/// @param defaultValue 値が存在しない場合の値
@@ -95,7 +95,7 @@ namespace MadoEngine::Json {
 			}
 		}
 
-		/// @brief 指定キーの値を設定する
+		/// @brief 指定キーの値を設定
 		/// @param sectionName セクション名
 		/// @param key キー名
 		/// @param value 設定する値
@@ -104,7 +104,7 @@ namespace MadoEngine::Json {
 			root_[sectionName][key] = value;
 		}
 
-		/// @brief 管理中のJsonを取得する
+		/// @brief 管理中のJsonを取得
 		/// @return 管理中のJson
 		const nlohmann::json& GetRoot() const { return root_; }
 

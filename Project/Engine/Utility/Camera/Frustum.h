@@ -11,7 +11,7 @@ struct FrustumPlane {
 struct Frustum {
 	FrustumPlane planes[6]; // 6つの平面
 
-	/// @brief AABBが視錐台と交差しているか判定する
+	/// @brief AABBが視錐台と交差しているか判定
 	/// @param min AABBの最小座標
 	/// @param max AABBの最大座標
 	/// @return 視錐台内、または視錐台と交差している場合はtrue

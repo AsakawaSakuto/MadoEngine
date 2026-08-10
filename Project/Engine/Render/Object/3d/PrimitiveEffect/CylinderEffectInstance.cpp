@@ -6,14 +6,14 @@
 
 namespace {
 
-	/// @brief 度数法をラジアンへ変換する
+	/// @brief 度数法をラジアンへ変換
 	/// @param degrees 度数法の角度
 	/// @return ラジアン角度
 	float ToRadians(float degrees) {
 		return degrees * std::numbers::pi_v<float> / 180.0f;
 	}
 
-	/// @brief 色を描画可能な範囲へ補正する
+	/// @brief 色を描画可能な範囲へ補正
 	/// @param color 補正する色
 	/// @return 補正後の色
 	Vector4 NormalizeColor(const Vector4& color) {

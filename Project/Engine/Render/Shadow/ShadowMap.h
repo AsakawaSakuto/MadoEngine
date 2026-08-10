@@ -39,7 +39,7 @@ namespace MadoEngine::Render {
 		ShadowMap(ShadowMap&&) = default;
 		ShadowMap& operator=(ShadowMap&&) = default;
 
-		/// @brief シャドウマップ用の深度バッファを初期化する
+		/// @brief シャドウマップ用の深度バッファを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param dsvManager DSVManagerのポインタ
 		/// @param srvManager SRVManagerのポインタ
@@ -49,48 +49,48 @@ namespace MadoEngine::Render {
 			MadoEngine::Core::SRVManager* srvManager
 		);
 
-		/// @brief シャドウマップへの深度描画を開始する
+		/// @brief シャドウマップへの深度描画を開始
 		/// @param commandList 描画コマンドリスト
 		void Begin(ID3D12GraphicsCommandList* commandList);
 
-		/// @brief シャドウマップへの深度描画を終了し、SRV参照可能な状態にする
+		/// @brief シャドウマップへの深度描画を終了し、SRV参照可能な状態へ遷移
 		/// @param commandList 描画コマンドリスト
 		void End(ID3D12GraphicsCommandList* commandList);
 
-		/// @brief シャドウマップ生成用PSODescを作成する
+		/// @brief シャドウマップ生成用PSODescを作成
 		/// @return RTVなし、DSVのみ、VSのみのPSODesc
 		static PSODesc CreatePSODesc();
 
-		/// @brief DirectionalLightの方向からライト視点行列を更新する
+		/// @brief DirectionalLightの方向からライト視点行列を更新
 		/// @param directionalLight 影生成に使う平行光
 		/// @param focusPosition ライトが注視するワールド座標
 		void UpdateLightViewProjection(const DirectionalLight& directionalLight, Vector3 focusPosition = { 0.0f, 0.0f, 0.0f });
 
-		/// @brief ライトビュー行列を取得する
+		/// @brief ライトビュー行列を取得
 		/// @return ライトビュー行列
 		const Matrix4x4& GetLightViewMatrix() const { return lightViewMatrix_; }
 
-		/// @brief ライト射影行列を取得する
+		/// @brief ライト射影行列を取得
 		/// @return ライト射影行列
 		const Matrix4x4& GetLightProjectionMatrix() const { return lightProjectionMatrix_; }
 
-		/// @brief ライトビュー射影行列を取得する
+		/// @brief ライトビュー射影行列を取得
 		/// @return ライトビュー射影行列
 		const Matrix4x4& GetLightViewProjectionMatrix() const { return lightViewProjectionMatrix_; }
 
-		/// @brief シャドウマップSRVのGPUディスクリプタハンドルを取得する
+		/// @brief シャドウマップSRVのGPUディスクリプタハンドルを取得
 		/// @return GPUディスクリプタハンドル
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle() const;
 
-		/// @brief シャドウマップDSVのCPUディスクリプタハンドルを取得する
+		/// @brief シャドウマップDSVのCPUディスクリプタハンドルを取得
 		/// @return CPUディスクリプタハンドル
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUHandle() const;
 
-		/// @brief シャドウマップの幅を取得する
+		/// @brief シャドウマップの幅を取得
 		/// @return シャドウマップの幅
 		uint32_t GetWidth() const { return kShadowMapWidth; }
 
-		/// @brief シャドウマップの高さを取得する
+		/// @brief シャドウマップの高さを取得
 		/// @return シャドウマップの高さ
 		uint32_t GetHeight() const { return kShadowMapHeight; }
 

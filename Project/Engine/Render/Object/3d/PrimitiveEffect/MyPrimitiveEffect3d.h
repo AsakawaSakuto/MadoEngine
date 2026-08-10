@@ -3,7 +3,7 @@
 
 namespace MyPrimitiveEffect3d {
 
-	/// @brief Cylinderエフェクトを再生する
+	/// @brief Cylinderエフェクトを再生
 	/// @param assetName 再生するAsset名
 	/// @param desc 再生設定
 	/// @return 再生中Instanceを指すHandle
@@ -13,7 +13,7 @@ namespace MyPrimitiveEffect3d {
 		return MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Play(assetName, desc);
 	}
 
-	/// @brief Cylinderエフェクトを停止する
+	/// @brief Cylinderエフェクトを停止
 	/// @param handle 停止するInstance Handle
 	/// @param mode 停止方法
 	inline void Stop(
@@ -22,7 +22,7 @@ namespace MyPrimitiveEffect3d {
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Stop(handle, mode);
 	}
 
-	/// @brief CylinderエフェクトのTransformを変更する
+	/// @brief CylinderエフェクトのTransformを変更
 	/// @param handle 変更するInstance Handle
 	/// @param transform 設定するTransform
 	/// @return 変更に成功した場合はtrue

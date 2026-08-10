@@ -73,7 +73,7 @@ namespace Collision
         return IsHit(b, a);
     }
 
-    /// @brief Vector3 座標がAABBの最上面に乗っているかを判定する
+    /// @brief Vector3 座標がAABBの最上面に乗っているかを判定
     /// @param point 判定対象の座標
     /// @param box   対象のAABB
     /// @param tolerance Y方向の許容誤差（デフォルト: 0.01f）
@@ -99,10 +99,10 @@ namespace Collision
     /// </summary>
     namespace Detail
     {
-        /// @brief Get the slope top surface Y at the specified world position.
-        /// @param slope Target slope.
-        /// @param point World position used for XZ sampling.
-        /// @return Y coordinate of the slope top surface.
+        /// @brief 指定したワールド座標におけるSlope上面のY座標を取得
+        /// @param slope 対象のSlope
+        /// @param point XZサンプリングに使用するワールド座標
+        /// @return Slope上面のY座標
         inline float GetSlopeSurfaceY(const Slope& slope, const Vector3& point)
         {
             Vector3 worldMin = slope.GetSurfaceMinWorld();
@@ -131,9 +131,9 @@ namespace Collision
             return worldMin.y + height * rate;
         }
 
-        /// @brief Get the upward normal of the slope top surface.
-        /// @param slope Target slope.
-        /// @return Normalized upward normal.
+        /// @brief Slope上面の上向き法線を取得
+        /// @param slope 対象のSlope
+        /// @return 正規化済みの上向き法線
         inline Vector3 GetSlopeTopNormal(const Slope& slope)
         {
             Vector3 worldMin = slope.GetSurfaceMinWorld();
@@ -156,11 +156,11 @@ namespace Collision
             return Vector3{ 0.0f, 1.0f, 0.0f };
         }
 
-        /// @brief Check whether a point is inside the slope XZ footprint.
-        /// @param slope Target slope.
-        /// @param point World position.
-        /// @param margin Additional accepted margin.
-        /// @return True when the point is inside the slope XZ footprint.
+        /// @brief 点がSlopeのXZ領域内にあるかを判定
+        /// @param slope 対象のSlope
+        /// @param point ワールド座標
+        /// @param margin 許容する追加マージン
+        /// @return 点がSlopeのXZ領域内にある場合はtrue
         inline bool IsInsideSlopeXZ(const Slope& slope, const Vector3& point, float margin = 0.0f)
         {
             Vector3 worldMin = slope.GetMinWorld();
@@ -170,7 +170,7 @@ namespace Collision
         }
         /// <summary>
         /// OBBを指定された軸に投影した際の範囲を計算
-        /// OBBの8頂点をワールド空間で計算し、軸への投影範囲を求める
+        /// OBBの8頂点をワールド空間で計算し、軸への投影範囲を算出
         /// </summary>
         /// <param name="obb">対象のOBB</param>
         /// <param name="axis">投影する軸</param>
@@ -248,10 +248,10 @@ namespace Collision
     /// <summary>
     /// OBB × OBB 判定（分離軸定理）
     /// </summary>
-    /// @brief Check collision between a sphere and a slope.
-    /// @param sphere Target sphere.
-    /// @param slope Target slope.
-    /// @return True when the sphere intersects the slope volume.
+    /// @brief SphereとSlopeの衝突を判定
+    /// @param sphere 対象のSphere
+    /// @param slope 対象のSlope
+    /// @return SphereがSlope領域と交差する場合はtrue
     inline bool IsHit(const Sphere& sphere, const Slope& slope)
     {
         Vector3 worldMin = slope.GetMinWorld();
@@ -288,10 +288,10 @@ namespace Collision
         return diff.LengthSq() <= sphere.radius * sphere.radius;
     }
 
-    /// @brief Check collision between a slope and a sphere.
-    /// @param slope Target slope.
-    /// @param sphere Target sphere.
-    /// @return True when the sphere intersects the slope volume.
+    /// @brief SlopeとSphereの衝突を判定
+    /// @param slope 対象のSlope
+    /// @param sphere 対象のSphere
+    /// @return SphereがSlope領域と交差する場合はtrue
     inline bool IsHit(const Slope& slope, const Sphere& sphere)
     {
         return IsHit(sphere, slope);
@@ -445,7 +445,7 @@ namespace Collision
 
     /// <summary>
     /// OBB × Sphere 判定
-    /// OBBのローカル座標系での最近点を求める
+    /// OBBのローカル座標系での最近点を算出
     /// </summary>
     inline bool IsHit(const OBB& obb, const Sphere& sphere)
     {

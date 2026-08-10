@@ -24,7 +24,7 @@ namespace {
 	};
 	constexpr const char* kTextObjectNamePrefix = "ProjectileDamageText_";
 
-	/// @brief ダメージ量を表示用文字列へ変換する
+	/// @brief ダメージ量を表示用文字列へ変換
 	/// @param damage 表示するダメージ量
 	/// @return 小数点以下を切り捨てた文字列
 	std::string FormatDamage(float damage) {

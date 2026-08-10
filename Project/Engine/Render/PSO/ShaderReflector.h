@@ -17,7 +17,7 @@ namespace MadoEngine::Render {
 	/// @brief シェーダーリフレクションユーティリティ
 	class ShaderReflector {
 	public:
-		/// @brief シェーダーバイナリからバインディング情報を取得する
+		/// @brief シェーダーバイナリからバインディング情報を取得
 		/// @param shaderBytecode シェーダーバイナリ
 		/// @param bytecodeLength バイナリのサイズ
 		/// @return バインディング情報のリスト
@@ -26,7 +26,7 @@ namespace MadoEngine::Render {
 			SIZE_T bytecodeLength
 		);
 
-		/// @brief バインディング情報とRootSignatureDescの整合性を検証する
+		/// @brief バインディング情報とRootSignatureDescの整合性を検証
 		/// @param bindings シェーダーから取得したバインディング情報
 		/// @param rootSigDesc 検証対象のRootSignatureDesc
 		static void Validate(

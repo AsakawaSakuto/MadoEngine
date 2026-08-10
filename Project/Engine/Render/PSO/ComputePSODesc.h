@@ -10,7 +10,7 @@ namespace MadoEngine::Render {
 		std::string csKey;
 		std::string rootSigKey;
 
-		/// @brief 2つのCompute PSO記述子が同一か比較する
+		/// @brief 2つのCompute PSO記述子が同一か比較
 		/// @param other 比較対象のCompute PSO記述子
 		/// @return ShaderとRootSignatureのキーが同一の場合はtrue
 		bool operator==(const ComputePSODesc& other) const = default;
@@ -18,7 +18,7 @@ namespace MadoEngine::Render {
 
 	/// @brief ComputePSODescのハッシュ値を生成する
 	struct ComputePSODescHash {
-		/// @brief Compute PSO記述子からハッシュ値を生成する
+		/// @brief Compute PSO記述子からハッシュ値を生成
 		/// @param desc ハッシュ値を生成するCompute PSO記述子
 		/// @return 生成したハッシュ値
 		std::size_t operator()(const ComputePSODesc& desc) const noexcept {

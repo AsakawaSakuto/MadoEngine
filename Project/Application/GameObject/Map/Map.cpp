@@ -15,10 +15,10 @@
 namespace {
 constexpr float kRotationEpsilon = 1e-5f;
 
-/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返します。
-/// @param value 正規化するベクトルです。
-/// @param fallback 代替ベクトルです。
-/// @return 正規化済みのベクトルです。
+/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返却
+/// @param value 正規化するベクトル
+/// @param fallback 代替ベクトル
+/// @return 正規化済みのベクトル
 Vector3 NormalizeOrFallback(const Vector3& value, const Vector3& fallback) {
 	const float lengthSq = value.LengthSq();
 	if (lengthSq < kRotationEpsilon) {
@@ -28,25 +28,25 @@ Vector3 NormalizeOrFallback(const Vector3& value, const Vector3& fallback) {
 	return value * (1.0f / std::sqrt(lengthSq));
 }
 
-/// @brief 水平Yawから前方向ベクトルを作成します。
-/// @param yaw 水平Yaw角度です。
-/// @return 水平面上の前方向です。
+/// @brief 水平Yawから前方向ベクトルを作成
+/// @param yaw 水平Yaw角度
+/// @return 水平面上の前方向
 Vector3 CreateHorizontalForward(float yaw) {
 	return { std::sin(yaw), 0.0f, std::cos(yaw) };
 }
 
-/// @brief 水平Yawから右方向ベクトルを作成します。
-/// @param yaw 水平Yaw角度です。
-/// @return 水平面上の右方向です。
+/// @brief 水平Yawから右方向ベクトルを作成
+/// @param yaw 水平Yaw角度
+/// @return 水平面上の右方向
 Vector3 CreateHorizontalRight(float yaw) {
 	return { std::cos(yaw), 0.0f, -std::sin(yaw) };
 }
 
-/// @brief 回転行列の各軸からMakeAffineと同じ順序のEuler角を復元します。
-/// @param right ローカルX軸のワールド方向です。
-/// @param up ローカルY軸のワールド方向です。
-/// @param forward ローカルZ軸のワールド方向です。
-/// @return 復元したEuler角です。
+/// @brief 回転行列の各軸からMakeAffineと同じ順序のEuler角を復元
+/// @param right ローカルX軸のワールド方向
+/// @param up ローカルY軸のワールド方向
+/// @param forward ローカルZ軸のワールド方向
+/// @return 復元したEuler角
 Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& forward) {
 	Vector3 euler = {};
 	const float sinY = std::clamp(-right.z, -1.0f, 1.0f);
@@ -64,10 +64,10 @@ Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& 
 	return euler;
 }
 
-/// @brief Slope法線と水平向きに沿ったModel回転を作成します。
-/// @param yaw Modelの水平Yaw角度です。
-/// @param slopeNormal Slope上面の法線です。
-/// @return Slopeに沿ったModel回転です。
+/// @brief Slope法線と水平向きに沿ったModel回転を作成
+/// @param yaw Modelの水平Yaw角度
+/// @param slopeNormal Slope上面の法線
+/// @return Slopeに沿ったModel回転
 Vector3 CreateSlopeAlignedRotation(float yaw, const Vector3& slopeNormal) {
 	const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
 	const Vector3 desiredForward = CreateHorizontalForward(yaw);
@@ -84,13 +84,13 @@ Vector3 CreateSlopeAlignedRotation(float yaw, const Vector3& slopeNormal) {
 	return ExtractEulerXYZ(right, up, forward);
 }
 
-/// @brief 低い側がMap外周の壁を向いている坂か判定します。
-/// @param x Map上のX座標です。
-/// @param z Map上のZ座標です。
-/// @param mapWidth Mapの横幅です。
-/// @param mapHeight Mapの奥行きです。
-/// @param direction 坂の上り方向です。
-/// @return 低い側がMap外周の壁を向いていればtrueを返します。
+/// @brief 低い側がMap外周の壁を向いている坂か判定
+/// @param x Map上のX座標
+/// @param z Map上のZ座標
+/// @param mapWidth Mapの横幅
+/// @param mapHeight Mapの奥行き
+/// @param direction 坂の上り方向
+/// @return 低い側がMap外周の壁を向いていればtrue
 bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDirection direction) {
 	switch (direction) {
 	case SlopeDirection::PulsX:
@@ -106,12 +106,12 @@ bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDir
 	return false;
 }
 
-/// @brief MapObjectの配置Y座標を計算します。
-/// @param block 配置対象のMapBlockです。
-/// @param blockCenter 配置対象ブロックの中心座標です。
-/// @param blockSize ブロックサイズです。
-/// @param spawnPosition 配置予定座標です。
-/// @return 配置Y座標です。
+/// @brief MapObjectの配置Y座標を計算
+/// @param block 配置対象のMapBlock
+/// @param blockCenter 配置対象ブロックの中心座標
+/// @param blockSize ブロックサイズ
+/// @param spawnPosition 配置予定座標
+/// @return 配置Y座標
 float CalculateSpawnY(const MapBlock& block, const Vector3& blockCenter, const Vector3& blockSize, const Vector3& spawnPosition) {
 	if (block.GetType() != MapBlockType::Slope) {
 		return blockSize.y * static_cast<float>(block.GetHeight());
@@ -127,11 +127,11 @@ float CalculateSpawnY(const MapBlock& block, const Vector3& blockCenter, const V
 	return Collision::Detail::GetSlopeSurfaceY(slope, spawnPosition);
 }
 
-/// @brief MapObjectの配置回転を計算します。
-/// @param block 配置対象のMapBlockです。
-/// @param blockSize ブロックサイズです。
-/// @param yaw Modelの水平Yaw角度です。
-/// @return MapObjectの配置回転です。
+/// @brief MapObjectの配置回転を計算
+/// @param block 配置対象のMapBlock
+/// @param blockSize ブロックサイズ
+/// @param yaw Modelの水平Yaw角度
+/// @return MapObjectの配置回転
 Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize, float yaw) {
 	if (block.GetType() != MapBlockType::Slope) {
 		return { 0.0f, yaw, 0.0f };
@@ -146,7 +146,7 @@ Vector3 CalculateSpawnRotation(const MapBlock& block, const Vector3& blockSize, 
 	return CreateSlopeAlignedRotation(yaw, Collision::Detail::GetSlopeTopNormal(slope));
 }
 
-/// @brief Mapで使用するインスタンス描画バッチを破棄します。
+/// @brief Mapで使用するインスタンス描画バッチを破棄
 void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("MapBlock.Ground");
 	MyInstancedModel::Destroy("MapBlock.Slope");
@@ -162,8 +162,8 @@ void DestroyMapInstancedBatches() {
 
 }
 
-/// @brief 指定シードでMapを初期化します。
-/// @param seed Map生成に使用するシード値です。
+/// @brief 指定シードでMapを初期化
+/// @param seed Map生成に使用するシード値
 void Map::Initialize(uint32_t seed) {
 
 	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 100));

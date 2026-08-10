@@ -28,7 +28,7 @@ public:
 
 	/// @brief Chestに相互作用した時の処理を実行
 	/// @param player 相互作用したPlayer
-	/// @return ChestをMapから削除するためtrueを返す
+	/// @return ChestをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
 
 private:

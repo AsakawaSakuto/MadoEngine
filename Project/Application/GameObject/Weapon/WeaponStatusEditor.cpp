@@ -11,9 +11,9 @@
 namespace Weapon {
 
 	namespace {
-		/// @brief Json保存に使う名前へ変換します。
-		/// @param name 入力された名前です。
-		/// @return ファイル名として使用できる名前です。
+		/// @brief Json保存に使う名前へ変換
+		/// @param name 入力された名前
+		/// @return ファイル名として使用できる名前
 		std::string SanitizeJsonName(const char* name) {
 			std::string sanitizedName = name;
 			if (sanitizedName.empty()) {
@@ -31,9 +31,9 @@ namespace Weapon {
 		}
 
 #ifdef USE_IMGUI
-		/// @brief アップグレード値のImGuiテーブル行を描画します。
-		/// @param label 表示名です。
-		/// @param value 編集するアップグレード値です。
+		/// @brief アップグレード値のImGuiテーブル行を描画
+		/// @param label 表示名
+		/// @param value 編集するアップグレード値
 		void DrawUpgradeValueTableRow(const char* label, UpgradeValue& value) {
 			ImGui::PushID(label);
 			ImGui::TableNextRow();

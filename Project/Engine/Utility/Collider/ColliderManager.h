@@ -53,46 +53,46 @@ public:
 
 	// --- 公開インターフェース ---
 
-	/// @brief コライダーを登録する
+	/// @brief コライダーを登録
 	/// @param name 識別名（例: "Enemy_0001"）
 	/// @param tag グループ（例: CollisionTag::Enemy）
 	/// @param shape 形状データ（AABB, OBB, Sphere, OvalSphere, Plane, Segment, Lineのいずれか）
 	/// @param pPos アクターの現在座標へのポインタ（Shape内のcenterを自動更新するために必要）
 	/// @param callback 衝突時のコールバック関数（省略可）
-	/// @param weight 押し戻されにくさ（0.0: 通常, 1.0: 完全固定。省略可）
+	/// @param weight 押し戻されにくさ（0.0: 通常, 1.0: 完全固定、省略可）
 	void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.0f, CollisionCallback callback = nullptr);
 
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）
 	void RemoveCollider(const std::string& name);
 
-	/// @brief 登録されているすべてのコライダーを削除する
+	/// @brief 登録されているすべてのコライダーを削除
 	void RemoveColliderAll();
 
-	/// @brief 衝突ルールを登録する（初期化時に呼ぶ。Enemy vs Enemy も可能）
+	/// @brief 衝突ルールを登録する（初期化時に呼ぶ、Enemy vs Enemy も可能）
 	/// @param tagA グループA
 	/// @param tagB グループB
-	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする。デフォルトはfalse）
+	/// @param enableResolve 衝突解決（めり込み防止）を有効にするか（必要に応じてtrueにする、デフォルトはfalse）
 	void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve = false);
 
-	/// @brief 衝突ルールを詳細設定付きで登録する
+	/// @brief 衝突ルールを詳細設定付きで登録
 	/// @param tagA グループA
 	/// @param tagB グループB
 	/// @param setting 押し戻しやCCDの有効状態
 	void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, const CollisionPairSetting& setting);
 
-	/// @brief 衝突ルールを押し戻しとCCD指定付きで登録する
+	/// @brief 衝突ルールを押し戻しとCCD指定付きで登録
 	/// @param tagA グループA
 	/// @param tagB グループB
-	/// @param enableResolve 押し戻しを有効にするか
-	/// @param enableCCD 連続衝突判定を有効にするか
+	/// @param enableResolve 押し戻しを有効にする場合はtrue
+	/// @param enableCCD 連続衝突判定を有効にする場合はtrue
 	void RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve, bool enableCCD);
 
-	/// @brief 特定の個体同士が衝突しているか
+	/// @brief 特定の個体同士の衝突を判定
 	/// @param nameA 個体Aの識別名
 	/// @param nameB 個体Bの識別名
 	bool IsHitName(const std::string& nameA, const std::string& nameB);
 
-	/// @brief 特定の個体が、指定したTagを持つ誰かと衝突しているか
+	/// @brief 特定の個体と指定したTagを持つ個体との衝突を判定
 	/// @param name 個体の識別名
 	/// @param targetTag 対象のタグ
 	bool IsHitWithTag(const std::string& name, CollisionTag targetTag);
@@ -102,39 +102,39 @@ public:
 	/// @param tagB タグB
 	bool IsHitTags(CollisionTag tagA, CollisionTag tagB);
 
-	/// @brief 指定した個体が、対象タグのAABBの上面に乗っているかを判定する
+	/// @brief 指定した個体が、対象タグのAABBの上面に乗っているかを判定
 	/// @param name 個体の識別名
 	/// @param targetTag 床として扱うタグ
 	/// @return 床面に接触していればtrue
 	bool IsGroundContact(const std::string& name, CollisionTag targetTag);
 
-	/// @brief 指定したタグ同士で地面接触しているかを判定します。
-	/// @param selfTag 接地を判定する側のタグです。
-	/// @param targetTag 地面として扱う側のタグです。
-	/// @return 接地していればtrueを返します。
+	/// @brief 指定したタグ同士で地面接触しているかを判定
+	/// @param selfTag 接地を判定する側のタグ
+	/// @param targetTag 地面として扱う側のタグ
+	/// @return 接地していればtrue
 	bool IsGroundContact(CollisionTag selfTag, CollisionTag targetTag);
 
-	/// @brief Check whether the specified collider is on a slope surface.
-	/// @param name Target collider name.
-	/// @param targetTag Slope collider tag.
-	/// @return True when the collider is touching a slope surface.
+	/// @brief 指定したColliderがSlope表面に接地しているかを判定
+	/// @param name 対象のCollider名
+	/// @param targetTag Slopeコライダーのタグ
+	/// @return ColliderがSlope表面に接触している場合はtrue
 	bool IsSlopeGroundContact(const std::string& name, CollisionTag targetTag);
 
-	/// @brief 指定したタグ同士で坂地面に接触しているかを判定します。
-	/// @param selfTag 接地を判定する側のタグです。
-	/// @param targetTag 坂地面として扱う側のタグです。
-	/// @return 坂地面に接地していればtrueを返します。
+	/// @brief 指定したタグ同士で坂地面に接触しているかを判定
+	/// @param selfTag 接地を判定する側のタグ
+	/// @param targetTag 坂地面として扱う側のタグ
+	/// @return 坂地面に接地していればtrue
 	bool IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag);
 
-	/// @brief 指定座標の直下にある地表面のY座標を取得します。
-	/// @param origin 地表面を探す基準座標です。
-	/// @param targetTag 地面として扱う対象タグです。
-	/// @param outSurfaceY 見つかった地表面のY座標です。
-	/// @param maxDistance 下方向に探索する最大距離です。
-	/// @return 地表面が見つかった場合はtrueを返します。
+	/// @brief 指定座標の直下にある地表面のY座標を取得
+	/// @param origin 地表面を探す基準座標
+	/// @param targetTag 地面として扱う対象タグ
+	/// @param outSurfaceY 見つかった地表面のY座標
+	/// @param maxDistance 下方向に探索する最大距離
+	/// @return 地表面が見つかった場合はtrue
 	bool TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance);
 
-	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得する
+	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ
 	/// @param outCenterY Sphere中心に設定するY座標の出力先
@@ -142,37 +142,37 @@ public:
 	/// @return 追従できるSlopeが見つかればtrue
 	bool TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f);
 
-	/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得します。
-	/// @param selfTag Sphereコライダーとして扱う側のタグです。
-	/// @param targetTag Slopeとして扱う側のタグです。
-	/// @param outCenterY Sphere中心に設定するY座標の出力先です。
-	/// @param maxSnapDownDistance 下方向に追従できる最大距離です。
-	/// @return 追従できるSlopeが見つかればtrueを返します。
+	/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得
+	/// @param selfTag Sphereコライダーとして扱う側のタグ
+	/// @param targetTag Slopeとして扱う側のタグ
+	/// @param outCenterY Sphere中心に設定するY座標の出力先
+	/// @param maxSnapDownDistance 下方向に追従できる最大距離
+	/// @return 追従できるSlopeが見つかればtrue
 	bool TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance = 1.0f);
 
-	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得する
+	/// @brief Sphereコライダーが接地しているSlope上面の法線を取得
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ
 	/// @param outNormal Slope上面の法線の出力先
 	/// @return 接地しているSlopeが見つかればtrue
 	bool TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal);
 
-	/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得します。
-	/// @param selfTag Sphereコライダーとして扱う側のタグです。
-	/// @param targetTag Slopeとして扱う側のタグです。
-	/// @param outNormal Slope上面の法線の出力先です。
-	/// @return 接地しているSlopeが見つかればtrueを返します。
+	/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得
+	/// @param selfTag Sphereコライダーとして扱う側のタグ
+	/// @param targetTag Slopeとして扱う側のタグ
+	/// @param outNormal Slope上面の法線の出力先
+	/// @return 接地しているSlopeが見つかればtrue
 	bool TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal);
 
 	/// @brief 毎フレームの更新処理（裏で呼ぶ）
 	void Update();
 
-	/// @brief Collider処理の統計情報を取得します。
-	/// @return 直近のCollider処理統計です。
+	/// @brief Collider処理の統計情報を取得
+	/// @return 直近のCollider処理統計
 	const ProfileStats& GetProfileStats() const;
 
 #ifdef USE_IMGUI
-	/// @brief Collider処理の統計情報をImGuiへ表示します。
+	/// @brief Collider処理の統計情報をImGuiへ表示
 	void DrawImGui();
 #endif // USE_IMGUI
 
@@ -205,7 +205,7 @@ private:
 	void MarkStaticTerrainBVHDirtyIfNeeded(CollisionTag tag);
 	void RebuildStaticTerrainBVHIfNeeded();
 
-	/// @brief 静的地形BVHを検索し、BVH使用時と未使用時の検索統計を更新する
+	/// @brief 静的地形BVHを検索し、BVH使用時と未使用時の検索統計を更新
 	/// @param bounds 検索範囲
 	/// @param targetTag 総当たり時の比較対象となる静的地形タグ
 	/// @param outCandidates BVH検索で見つかった候補の出力先
@@ -213,35 +213,35 @@ private:
 	void ProcessCollisionPair(ColliderInfo& a, ColliderInfo& b, const CollisionRule& rule);
 	void ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynamicList, CollisionTag staticTag, const CollisionRule& rule);
 
-	/// @brief 指定したタグのコライダー名一覧を取得します。
-	/// @param tag 検索対象の衝突タグです。
-	/// @return コライダー名一覧へのポインタを返します。存在しない場合はnullptrを返します。
+	/// @brief 指定したタグのコライダー名一覧を取得
+	/// @param tag 検索対象の衝突タグ
+	/// @return コライダー名一覧へのポインタを返します、存在しない場合はnullptr
 	const std::vector<std::string>* FindColliderNames(CollisionTag tag) const;
 
-	/// @brief タグ別索引へコライダー名を追加します。
-	/// @param tag 追加先の衝突タグです。
-	/// @param name 追加するコライダー名です。
+	/// @brief タグ別索引へコライダー名を追加
+	/// @param tag 追加先の衝突タグ
+	/// @param name 追加するコライダー名
 	void AddColliderNameToTag(CollisionTag tag, const std::string& name);
 
-	/// @brief タグ別索引からコライダー名を削除します。
-	/// @param tag 削除対象の衝突タグです。
-	/// @param name 削除するコライダー名です。
+	/// @brief タグ別索引からコライダー名を削除
+	/// @param tag 削除対象の衝突タグ
+	/// @param name 削除するコライダー名
 	void RemoveColliderNameFromTag(CollisionTag tag, const std::string& name);
 
-	/// @brief 前回座標から現在座標への移動で連続衝突しているか判定する
+	/// @brief 前回座標から現在座標への移動で連続衝突しているか判定
 	/// @param a コライダーA
 	/// @param b コライダーB
 	/// @param hitTime 衝突時刻の出力先
 	/// @return 連続衝突していればtrue
 	bool CheckSweptCollision(ColliderInfo& a, ColliderInfo& b, float& hitTime);
 
-	/// @brief CCDで求めた衝突時刻へコライダー位置を戻す
+	/// @brief CCDで求めた衝突時刻へコライダー位置を復元
 	/// @param a コライダーA
 	/// @param b コライダーB
 	/// @param hitTime 衝突時刻
 	void ApplySweptCollision(ColliderInfo& a, ColliderInfo& b, float hitTime);
 
-	/// @brief 現在座標を次回CCD用の前回座標として保存する
+	/// @brief 現在座標を次回CCD用の前回座標として保存
 	void StorePreviousPositions();
 
 	void ResolveOverlap(ColliderInfo& a, ColliderInfo& b);

@@ -11,23 +11,23 @@ public:
 	/// @brief 更新処理（マウス入力によるカメラ操作）
 	void Update(float deltaTime) override;
 
-	/// @brief 回転感度を設定する
+	/// @brief 回転感度を設定
 	/// @param sensitivity 回転感度（デフォルト: 0.005f）
 	void SetRotateSensitivity(float sensitivity) { rotateSensitivity_ = sensitivity; }
 
-	/// @brief パン感度を設定する
+	/// @brief パン感度を設定
 	/// @param sensitivity パン感度（デフォルト: 0.01f）
 	void SetPanSensitivity(float sensitivity) { panSensitivity_ = sensitivity; }
 
-	/// @brief ドリー感度を設定する
+	/// @brief ドリー感度を設定
 	/// @param sensitivity ドリー感度（デフォルト: 1.0f）
 	void SetDollySensitivity(float sensitivity) { dollySensitivity_ = sensitivity; }
 
-	/// @brief ターゲット（注視点）を設定する
+	/// @brief ターゲット（注視点）を設定
 	/// @param target 注視点のワールド座標
 	void SetTarget(const Vector3& target) { target_ = target; }
 
-	/// @brief カメラとターゲット間の距離を設定する
+	/// @brief カメラとターゲット間の距離を設定
 	/// @param distance 距離
 	void SetDistance(float distance) { distance_ = distance; }
 
@@ -48,6 +48,6 @@ private:
 	float panSensitivity_ = 0.25f;    // パン感度
 	float dollySensitivity_ = 10.0f;     // ドリー感度
 
-	/// @brief 球面座標からカメラ位置・回転を計算してベースクラスへ反映する
+	/// @brief 球面座標からカメラ位置・回転を計算してベースクラスへ反映
 	void ApplySphericalCoord();
 };

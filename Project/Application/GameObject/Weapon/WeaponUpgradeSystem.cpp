@@ -22,9 +22,9 @@ namespace Weapon {
 			RarityWeight{ Rarity::Legendary, 5 },
 		};
 
-		/// @brief レアリティの日本語表示名を取得します。
-		/// @param rarity 表示名を取得するレアリティです。
-		/// @return レアリティの日本語表示名です。
+		/// @brief レアリティの日本語表示名を取得
+		/// @param rarity 表示名を取得するレアリティ
+		/// @return レアリティの日本語表示名
 		const char* GetRarityDisplayName(Rarity rarity) {
 			switch (rarity) {
 			case Rarity::Uncommon:  return "アンコモン";
@@ -35,9 +35,9 @@ namespace Weapon {
 			}
 		}
 
-		/// @brief レアリティの表示色を取得します。
-		/// @param rarity 表示色を取得するレアリティです。
-		/// @return RGBA形式の表示色です。
+		/// @brief レアリティの表示色を取得
+		/// @param rarity 表示色を取得するレアリティ
+		/// @return RGBA形式の表示色
 		std::array<float, 4> GetRarityDisplayColor(Rarity rarity) {
 			switch (rarity) {
 			case Rarity::Uncommon:  return { 0.20f, 0.85f, 0.30f, 1.0f };
@@ -48,10 +48,10 @@ namespace Weapon {
 			}
 		}
 
-		/// @brief 二つの強化加算値が表示精度内で一致するか確認します。
-		/// @param left 比較する加算値です。
-		/// @param right 比較する加算値です。
-		/// @return 一致する場合はtrueを返します。
+		/// @brief 二つの強化加算値が表示精度内で一致するか確認
+		/// @param left 比較する加算値
+		/// @param right 比較する加算値
+		/// @return 一致する場合はtrue
 		bool IsSameUpgradeAmount(float left, float right) {
 			if (!std::isfinite(left) || !std::isfinite(right)) {
 				return false;

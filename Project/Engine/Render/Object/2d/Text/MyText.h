@@ -4,13 +4,13 @@
 
 namespace MyText {
 
-/// @brief 表示内容と描画Layerを指定してTextを生成する
+/// @brief 表示内容と描画Layerを指定してTextを生成
 /// @param name Text名
 /// @param text 表示するUTF-8文字列
 /// @param sceneType 所属Scene
 /// @param managementMode 管理方式
 /// @param layer 描画Layer
-/// @return 生成したTextのHandle。失敗した場合は無効Handle
+/// @return 生成したTextのHandle、失敗した場合は無効Handle
 [[nodiscard]] inline MadoEngine::TextHandle Create(
 	const std::string& name,
 	const std::string& text,
@@ -26,12 +26,12 @@ namespace MyText {
 	return handle;
 }
 
-/// @brief 描画Layerを指定して実行時専用Textを生成する
+/// @brief 描画Layerを指定して実行時専用Textを生成
 /// @param name Text名
 /// @param text 表示するUTF-8文字列
 /// @param sceneType 所属Scene
 /// @param layer 描画Layer
-/// @return 生成したTextのHandle。失敗した場合は無効Handle
+/// @return 生成したTextのHandle、失敗した場合は無効Handle
 [[nodiscard]] inline MadoEngine::TextHandle Create(
 	const std::string& name,
 	const std::string& text,
@@ -40,28 +40,28 @@ namespace MyText {
 	return Create(name, text, sceneType, MadoEngine::EditorManagementMode::RuntimeOnly, layer);
 }
 
-/// @brief 名前からTextのHandleを取得する
+/// @brief 名前からTextのHandleを取得
 /// @param name Text名
-/// @return 見つかったTextのHandle。見つからない場合は無効Handle
+/// @return 見つかったTextのHandle、見つからない場合は無効Handle
 [[nodiscard]] inline MadoEngine::TextHandle Find(const std::string& name) {
 	return MadoEngine::TextManager::GetInstance().Find(name);
 }
 
 /// @brief 名前からTextのHandleを取得する互換API
 /// @param name Text名
-/// @return 見つかったTextのHandle。見つからない場合は無効Handle
+/// @return 見つかったTextのHandle、見つからない場合は無効Handle
 [[nodiscard]] inline MadoEngine::TextHandle Get(const std::string& name) {
 	return Find(name);
 }
 
-/// @brief HandleからTextを一時参照として取得する
+/// @brief HandleからTextを一時参照として取得
 /// @param handle TextのHandle
 /// @return 有効な場合はText、無効な場合はnullptr
 inline MadoEngine::Text* TryGet(MadoEngine::TextHandle handle) {
 	return MadoEngine::TextManager::GetInstance().TryGet(handle);
 }
 
-/// @brief Handleを指定してTextを即時削除する
+/// @brief Handleを指定してTextを即時削除
 /// @param handle 削除対象のHandle
 inline void Destroy(MadoEngine::TextHandle handle) {
 	MadoEngine::TextManager::GetInstance().Destroy(handle);

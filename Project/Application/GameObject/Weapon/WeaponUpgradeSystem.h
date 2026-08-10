@@ -45,7 +45,7 @@ namespace Weapon {
 		void UpdatePlayerLevel(int currentPlayerLevel, const Inventory& inventory);
 
 		/// @brief 武器アップグレード中か確認
-		/// @return 未処理アップグレードがある場合はtrueを返す
+		/// @return 未処理アップグレードがある場合はtrue
 		bool IsUpgrading() const { return pendingUpgradeCount_ > 0; }
 
 		/// @brief 未処理アップグレード回数を取得
@@ -60,13 +60,13 @@ namespace Weapon {
 		/// @param choiceIndex 適用する選択肢の番号
 		/// @param generation UIが取得した選択肢の世代番号
 		/// @param inventory 適用先の武器インベントリ
-		/// @return 選択肢の適用に成功した場合はtrueを返す
+		/// @return 選択肢の適用に成功した場合はtrue
 		bool SelectChoice(std::size_t choiceIndex, std::uint64_t generation, Inventory& inventory);
 
 	private:
 		/// @brief 現在の装備状態から三つの選択肢を生成
 		/// @param inventory 候補生成に使用する武器インベントリ
-		/// @return 候補生成に成功した場合はtrueを返す
+		/// @return 候補生成に成功した場合はtrue
 		bool GenerateChoices(const Inventory& inventory);
 
 		/// @brief ウェイトに従って武器強化レアリティを抽選

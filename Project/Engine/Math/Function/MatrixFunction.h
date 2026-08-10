@@ -8,7 +8,7 @@
 
 namespace Matrix {
 
-	/// @brief 単位行列を生成する
+	/// @brief 単位行列を生成
 	/// @return 4x4の単位行列（対角成分が1、それ以外が0）
 	Matrix4x4 MakeIdentity();
 
@@ -30,49 +30,49 @@ namespace Matrix {
 	/// @return 行列の乗算結果（m1 * m2）
 	Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 
-	/// @brief 移動行列を生成する
+	/// @brief 移動行列を生成
 	/// @param translate X, Y, Z 方向の移動量
 	/// @return 移動行列
 	Matrix4x4 MakeTranslate(const Vector3& translate);
 
-	/// @brief 拡大縮小行列を生成する
+	/// @brief 拡大縮小行列を生成
 	/// @param scale X, Y, Z 方向の拡大率
 	/// @return 拡大縮小行列
 	Matrix4x4 MakeScale(const Vector3& scale);
 
-	/// @brief X軸周りの回転行列を生成する
+	/// @brief X軸周りの回転行列を生成
 	/// @param rotate 回転角度（ラジアン）
 	/// @return X軸周りの回転行列
 	Matrix4x4 MakeRotateX(float rotate);
 
-	/// @brief Y軸周りの回転行列を生成する
+	/// @brief Y軸周りの回転行列を生成
 	/// @param rotate 回転角度（ラジアン）
 	/// @return Y軸周りの回転行列
 	Matrix4x4 MakeRotateY(float rotate);
 
-	/// @brief Z軸周りの回転行列を生成する
+	/// @brief Z軸周りの回転行列を生成
 	/// @param rotate 回転角度（ラジアン）
 	/// @return Z軸周りの回転行列
 	Matrix4x4 MakeRotateZ(float rotate);
 
-	/// @brief X, Y, Z軸周りの回転を合成した回転行列を生成する
+	/// @brief X, Y, Z軸周りの回転を合成した回転行列を生成
 	/// @param rotate X, Y, Z軸の回転角度（ラジアン）
 	/// @return 合成された回転行列
 	Matrix4x4 MakeRotateXYZ(const Vector3& rotate);
 
-	/// @brief アフィン変換行列を生成する
+	/// @brief アフィン変換行列を生成
 	/// @param scale 拡大縮小率
 	/// @param rotate 回転角度（ラジアン）
 	/// @param translate 移動量
 	/// @return アフィン変換行列（拡大縮小 → 回転 → 移動の順に変換を適用）
 	Matrix4x4 MakeAffine(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
-	/// @brief 逆行列を計算する
+	/// @brief 逆行列を計算
 	/// @param m 逆行列を求める行列
 	/// @return 逆行列
 	Matrix4x4 Inverse(const Matrix4x4& m);
 
-	/// @brief 透視投影行列を生成する
+	/// @brief 透視投影行列を生成
 	/// @param fovY 垂直視野角（ラジアン）
 	/// @param aspectRatio アスペクト比（幅/高さ）
 	/// @param nearClip ニアクリップ面までの距離
@@ -80,7 +80,7 @@ namespace Matrix {
 	/// @return 透視投影行列
 	Matrix4x4 MakePerspectiveFov(float fovY, float aspectRatio, float nearClip, float farClip);
 
-	/// @brief 平行投影行列を生成する
+	/// @brief 平行投影行列を生成
 	/// @param left 投影領域の左端
 	/// @param top 投影領域の上端
 	/// @param right 投影領域の右端
@@ -90,7 +90,7 @@ namespace Matrix {
 	/// @return 平行投影行列
 	Matrix4x4 MakeOrthographic(float left, float top, float right, float bottom, float nearClip, float farClip);
 
-	/// @brief 転置行列を計算する
+	/// @brief 転置行列を計算
 	/// @param m 転置する行列
 	/// @return 行と列を入れ替えた行列
 	Matrix4x4 Transpose(const Matrix4x4& m);
@@ -105,24 +105,24 @@ namespace Matrix {
 	/// @return ビューポート変換行列
 	Matrix4x4 MakeViewport(float left, float top, float width, float height, float minDepth, float maxDepth);
 
-	/// @brief 任意軸周りの回転行列を生成する
+	/// @brief 任意軸周りの回転行列を生成
 	/// @param axis 回転軸（正規化されたベクトル）
 	/// @param angle 回転角度（ラジアン）
 	/// @return 任意軸周りの回転行列
 	Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle);
 
-	/// @brief from方向からto方向へ向ける回転行列を生成する
+	/// @brief from方向からto方向へ向ける回転行列を生成
 	/// @param from 開始方向ベクトル
 	/// @param to 目標方向ベクトル
 	/// @return 方向変換の回転行列
 	Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);
 
-	/// @brief ベクトルを行列で変換する
+	/// @brief ベクトルを行列で変換
 	/// @param v 変換するベクトル
 	/// @param m 変換行列
 	/// @return 変換されたベクトル（同次座標として扱い、w成分は1として計算）
 	Vector3 Transform(const Vector3& v, const Matrix4x4& m);
 
-	/// @brief クォータニオンを回転行列に変換する
+	/// @brief クォータニオンを回転行列に変換
 	Matrix4x4 MakeAffineAnimation(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
 }

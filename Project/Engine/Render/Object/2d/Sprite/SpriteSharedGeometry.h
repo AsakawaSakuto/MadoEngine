@@ -13,7 +13,7 @@ struct SpriteSharedGeometry {
 	D3D12_VERTEX_BUFFER_VIEW vbv = {};
 	D3D12_INDEX_BUFFER_VIEW  ibv = {};
 
-	/// @brief 共有ジオメトリバッファを初期化する
+	/// @brief 共有ジオメトリバッファを初期化
 	/// @param device D3D12デバイス
 	void Initialize(ID3D12Device* device) {
 		// ユニットクワッド（0〜1）で固定。size・anchorPoint はSprite側の行列で反映する
@@ -40,7 +40,7 @@ struct SpriteSharedGeometry {
 		ibv.Format         = DXGI_FORMAT_R32_UINT;
 	}
 
-	/// @brief 共有ジオメトリバッファを解放する
+	/// @brief 共有ジオメトリバッファを解放
 	void Finalize() {
 		vertexResource.Reset();
 		indexResource.Reset();

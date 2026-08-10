@@ -28,28 +28,28 @@ constexpr Vector4 kDefaultCardBackgroundColor = { 0.055f, 0.07f, 0.11f, 0.96f };
 constexpr Vector4 kLegendaryCardBackgroundColor = { 0.22f, 0.13f, 0.025f, 0.98f };
 constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
-/// @brief 配列形式の色をVector4へ変換する
+/// @brief 配列形式の色をVector4へ変換
 /// @param color RGBA色
 /// @return Vector4形式のRGBA色
 Vector4 ToVector4(const std::array<float, 4>& color) {
 	return { color[0], color[1], color[2], color[3] };
 }
 
-/// @brief SpriteHandleを一時参照へ解決する
+/// @brief SpriteHandleを一時参照へ解決
 /// @param handle SpriteHandle
 /// @return 有効な場合はSprite、無効な場合はnullptr
 Sprite* ResolveSprite(MadoEngine::SpriteHandle handle) {
 	return MySprite::TryGet(handle);
 }
 
-/// @brief TextHandleを一時参照へ解決する
+/// @brief TextHandleを一時参照へ解決
 /// @param handle TextHandle
 /// @return 有効な場合はText、無効な場合はnullptr
 MadoEngine::Text* ResolveText(MadoEngine::TextHandle handle) {
 	return MyText::TryGet(handle);
 }
 
-/// @brief 基準位置を中心として座標を拡大する
+/// @brief 基準位置を中心として座標を拡大
 /// @param position 拡大する座標
 /// @param center 拡大の中心座標
 /// @param scale 拡大率

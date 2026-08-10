@@ -3,9 +3,9 @@
 
 namespace {
 
-/// @brief 坂の向きに対応するY軸回転角を取得します。
-/// @param direction 坂の向きです。
-/// @return Y軸回転角（ラジアン）です。
+/// @brief 坂の向きに対応するY軸回転角を取得
+/// @param direction 坂の向き
+/// @return Y軸回転角（ラジアン）
 float GetSlopeRotationY(SlopeDirection direction) {
 	switch (direction) {
 	case SlopeDirection::PulsZ:

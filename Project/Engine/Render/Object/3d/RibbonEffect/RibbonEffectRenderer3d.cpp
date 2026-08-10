@@ -20,14 +20,14 @@ namespace {
 	constexpr UINT kRibbonRootPerView = 0;
 	constexpr UINT kRibbonRootTexture = 1;
 
-	/// @brief Vector3の全要素が有限値か確認する
+	/// @brief Vector3の全要素が有限値か確認
 	/// @param value 確認対象
 	/// @return 全要素が有限値の場合はtrue
 	bool IsFiniteVector3(const Vector3& value) {
 		return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
 	}
 
-	/// @brief 2つのVector3の内積を求める
+	/// @brief 2つのVector3の内積を算出
 	/// @param left 左辺
 	/// @param right 右辺
 	/// @return 内積
@@ -35,7 +35,7 @@ namespace {
 		return left.x * right.x + left.y * right.y + left.z * right.z;
 	}
 
-	/// @brief 2つのVector3の外積を求める
+	/// @brief 2つのVector3の外積を算出
 	/// @param left 左辺
 	/// @param right 右辺
 	/// @return 外積
@@ -47,7 +47,7 @@ namespace {
 		};
 	}
 
-	/// @brief Vector3を安全に正規化する
+	/// @brief Vector3を安全に正規化
 	/// @param value 正規化対象
 	/// @param fallback 長さが不足する場合の値
 	/// @return 正規化済みVector3
@@ -59,7 +59,7 @@ namespace {
 		return value / std::sqrt(lengthSquared);
 	}
 
-	/// @brief Catmull-Rom補間位置を求める
+	/// @brief Catmull-Rom補間位置を算出
 	/// @param p0 1つ前の制御点
 	/// @param p1 Segment始点
 	/// @param p2 Segment終点
@@ -82,7 +82,7 @@ namespace {
 		) * 0.5f;
 	}
 
-	/// @brief Ribbon頂点色を安全な範囲へ補正する
+	/// @brief Ribbon頂点色を安全な範囲へ補正
 	/// @param color 補正対象色
 	/// @param globalAlpha 全体Alpha
 	/// @return 補正後色

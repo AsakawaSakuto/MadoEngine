@@ -19,7 +19,7 @@ namespace {
 // 既存設定との後方互換性を維持するため、JSONファイル名は変更しない。
 const std::filesystem::path kPostEffectEditorJsonPath = "Assets/Json/LayerEffectPassEditor.json";
 
-/// @brief レイヤーポストエフェクトの適用段階名を取得する
+/// @brief レイヤーポストエフェクトの適用段階名を取得
 /// @param stage 名前を取得する適用段階
 /// @return 適用段階名
 const char* GetLayerEffectStageName(Render::LayerEffectStage stage) {
@@ -34,9 +34,9 @@ const char* GetLayerEffectStageName(Render::LayerEffectStage stage) {
 	}
 }
 
-/// @brief 文字列からレイヤーポストエフェクトの適用段階を取得する
+/// @brief 文字列からレイヤーポストエフェクトの適用段階を取得
 /// @param value 変換する適用段階名
-/// @return 変換した適用段階。未定義名の場合はScene
+/// @return 変換した適用段階、未定義名の場合はScene
 Render::LayerEffectStage LayerEffectStageFromString(const std::string& value) {
 	if (value == "Transparent") {
 		return Render::LayerEffectStage::Transparent;
@@ -48,7 +48,7 @@ Render::LayerEffectStage LayerEffectStageFromString(const std::string& value) {
 	return Render::LayerEffectStage::Scene;
 }
 
-/// @brief フルスクリーンポストエフェクトの適用段階名を取得する
+/// @brief フルスクリーンポストエフェクトの適用段階名を取得
 /// @param stage 名前を取得する適用段階
 /// @return 適用段階名
 const char* GetScreenEffectStageName(Render::ScreenEffectStage stage) {
@@ -61,29 +61,29 @@ const char* GetScreenEffectStageName(Render::ScreenEffectStage stage) {
 	}
 }
 
-/// @brief 文字列からフルスクリーンポストエフェクトの適用段階を取得する
+/// @brief 文字列からフルスクリーンポストエフェクトの適用段階を取得
 /// @param value 変換する適用段階名
-/// @return 変換した適用段階。未定義名の場合はFinal
+/// @return 変換した適用段階、未定義名の場合はFinal
 Render::ScreenEffectStage ScreenEffectStageFromString(const std::string& value) {
 	return value == "Scene" ? Render::ScreenEffectStage::Scene : Render::ScreenEffectStage::Final;
 }
 
-/// @brief Passの適用先名を取得する
+/// @brief Passの適用先名を取得
 /// @param scope 名前を取得する適用先
 /// @return JSONへ保存する適用先名
 const char* GetPostEffectPassScopeName(Render::PostEffectPassScope scope) {
 	return scope == Render::PostEffectPassScope::Screen ? "Screen" : "Layer";
 }
 
-/// @brief Passに設定された登録済みポストエフェクト定義を取得する
+/// @brief Passに設定された登録済みポストエフェクト定義を取得
 /// @param pass 検索対象のPass
-/// @return 登録済み定義。未登録Shaderの場合はnullptr
+/// @return 登録済み定義、未登録Shaderの場合はnullptr
 const Render::PostEffectDefinition* FindPostEffectDefinition(const Render::PostEffectPass& pass) {
 	const auto effectType = pass.GetPostEffectType();
 	return effectType ? Render::PostEffectDefinitionRegistry::Find(*effectType) : nullptr;
 }
 
-/// @brief 指定したJSONパスのバックアップパスを作成する
+/// @brief 指定したJSONパスのバックアップパスを作成
 /// @param filePath バックアップ元のJSONパス
 /// @return .bakを付けたバックアップJSONパス
 std::filesystem::path CreateBackupJsonPath(const std::filesystem::path& filePath) {
@@ -92,9 +92,9 @@ std::filesystem::path CreateBackupJsonPath(const std::filesystem::path& filePath
 	return backupPath;
 }
 
-/// @brief JSONのEffect情報をRegistry定義へ解決する
+/// @brief JSONのEffect情報をRegistry定義へ解決
 /// @param passJson Pass設定を保持したJSON
-/// @return 解決したEffect定義。未定義の場合はCopyImage
+/// @return 解決したEffect定義、未定義の場合はCopyImage
 const Render::PostEffectDefinition& ResolvePostEffectDefinition(const nlohmann::json& passJson) {
 	const auto effectTypeIt = passJson.find("effectType");
 	if (effectTypeIt != passJson.end() && effectTypeIt->is_string()) {
@@ -117,7 +117,7 @@ const Render::PostEffectDefinition& ResolvePostEffectDefinition(const nlohmann::
 	return *Render::PostEffectDefinitionRegistry::Find(Render::PostEffectType::CopyImage);
 }
 
-/// @brief JSONから読み込んだパラメータ値をPassへ適用する
+/// @brief JSONから読み込んだパラメータ値をPassへ適用
 /// @param manager 適用先Passを管理するManager
 /// @param handle 適用先PassのHandle
 /// @param parameters パラメータ値を保持したJSON
@@ -148,7 +148,7 @@ void ApplyPostEffectParameters(
 	}
 }
 
-/// @brief 既存Passを更新するか新規生成してJSON設定を反映する
+/// @brief 既存Passを更新するか新規生成してJSON設定を反映
 /// @param manager 更新対象のManager
 /// @param passJson Pass設定を保持したJSON
 /// @param scope 読み込むPassの適用先
@@ -251,7 +251,7 @@ Render::PostEffectPassHandle UpsertPostEffectPassFromJson(
 	return handle;
 }
 
-/// @brief JSONのPass配列を差分更新して希望順序を取得する
+/// @brief JSONのPass配列を差分更新して希望順序を取得
 /// @param manager 更新対象のManager
 /// @param passList Pass配列を保持したJSON
 /// @param scope 読み込むPassの適用先
@@ -296,7 +296,7 @@ std::vector<Render::PostEffectPassHandle> LoadPostEffectPassListFromJson(
 	return order;
 }
 
-/// @brief JSONの順序をManagerの実行順へ反映する
+/// @brief JSONの順序をManagerの実行順へ反映
 /// @param manager 更新対象のManager
 /// @param scope 反映するPassの適用先
 /// @param order JSONから読み込んだHandle順序
@@ -314,7 +314,7 @@ void ApplyPostEffectPassOrder(
 	}
 }
 
-/// @brief PostEffect Editorの状態をJSONから差分読み込みする
+/// @brief PostEffect Editorの状態をJSONから差分読み込み
 /// @param manager 読み込み先のManager
 /// @param filePath 読み込むJSONパス
 /// @return 読み込みに成功した場合はtrue
@@ -362,7 +362,7 @@ bool LoadPostEffectEditorJsonInternal(
 
 #ifdef USE_IMGUI
 
-/// @brief PassのParameterをJSONへ変換する
+/// @brief PassのParameterをJSONへ変換
 /// @param pass 保存対象のPass
 /// @return パラメータkeyと値を保持したJSON
 nlohmann::json SerializePostEffectParameters(const Render::PostEffectPass& pass) {
@@ -381,7 +381,7 @@ nlohmann::json SerializePostEffectParameters(const Render::PostEffectPass& pass)
 	return parameters;
 }
 
-/// @brief PassのEditor設定をJSONへ変換する
+/// @brief PassのEditor設定をJSONへ変換
 /// @param pass 保存対象のPass
 /// @param scope Passの適用先
 /// @return Pass設定を保持したJSON
@@ -409,7 +409,7 @@ nlohmann::json SerializePostEffectPass(
 	return passJson;
 }
 
-/// @brief Handle順序のPass一覧をJSONへ変換する
+/// @brief Handle順序のPass一覧をJSONへ変換
 /// @param manager 保存対象のManager
 /// @param handles 保存するHandle順序
 /// @param scope Passの適用先
@@ -428,7 +428,7 @@ nlohmann::json SerializePostEffectPassList(
 	return list;
 }
 
-/// @brief PostEffect Editorの状態をJSONへ保存する
+/// @brief PostEffect Editorの状態をJSONへ保存
 /// @param manager 保存対象のManager
 /// @return 保存に成功した場合はtrue
 bool SavePostEffectEditorJson(const Render::PostEffectManager& manager) {
@@ -463,14 +463,14 @@ struct PostEffectEditorOperation {
 	std::filesystem::path filePath;
 };
 
-/// @brief 次フレームへ予約されたEditor操作一覧を取得する
+/// @brief 次フレームへ予約されたEditor操作一覧を取得
 /// @return 予約操作一覧
 std::vector<PostEffectEditorOperation>& GetPendingPostEffectEditorOperations() {
 	static std::vector<PostEffectEditorOperation> operations;
 	return operations;
 }
 
-/// @brief Effect変更を次フレームへ予約する
+/// @brief Effect変更を次フレームへ予約
 /// @param handle 変更対象のPass Handle
 /// @param effectType 適用するEffect種別
 void ReservePostEffectChange(Render::PostEffectPassHandle handle, Render::PostEffectType effectType) {
@@ -481,7 +481,7 @@ void ReservePostEffectChange(Render::PostEffectPassHandle handle, Render::PostEf
 	GetPendingPostEffectEditorOperations().push_back(operation);
 }
 
-/// @brief Pass並べ替えを次フレームへ予約する
+/// @brief Pass並べ替えを次フレームへ予約
 /// @param handle 移動対象のPass Handle
 /// @param scope Passの適用先
 /// @param newIndex 移動先index
@@ -498,7 +498,7 @@ void ReservePostEffectPassMove(
 	GetPendingPostEffectEditorOperations().push_back(operation);
 }
 
-/// @brief JSON設定読込を次フレームへ予約する
+/// @brief JSON設定読込を次フレームへ予約
 /// @param filePath 読み込むJSONパス
 void ReservePostEffectSettingsLoad(const std::filesystem::path& filePath) {
 	PostEffectEditorOperation operation{};
@@ -507,7 +507,7 @@ void ReservePostEffectSettingsLoad(const std::filesystem::path& filePath) {
 	GetPendingPostEffectEditorOperations().push_back(std::move(operation));
 }
 
-/// @brief 重複しないPassキーを作成する
+/// @brief 重複しないPassキーを作成
 /// @param manager 重複確認に使用するManager
 /// @param prefix Passキーの接頭辞
 /// @param nextId 次に試すID
@@ -524,7 +524,7 @@ std::string CreateUniquePostEffectPassKey(
 	return key;
 }
 
-/// @brief EditorからPassを追加する
+/// @brief EditorからPassを追加
 /// @param manager 追加先のManager
 /// @param scope 追加するPassの適用先
 /// @return 追加したPassのHandle
@@ -547,7 +547,7 @@ Render::PostEffectPassHandle AddPostEffectPassFromEditor(
 	return manager.CreateLayerPass(desc);
 }
 
-/// @brief 対象Layerの選択Comboを描画する
+/// @brief 対象Layerの選択Comboを描画
 /// @param pass 編集対象のPass
 void DrawLayerSelectionCombo(Render::PostEffectPass& pass) {
 	const Render::RenderLayerMask currentLayerMask = pass.GetTargetLayerMask();
@@ -571,7 +571,7 @@ void DrawLayerSelectionCombo(Render::PostEffectPass& pass) {
 	ImGui::EndCombo();
 }
 
-/// @brief Effect選択Comboを描画する
+/// @brief Effect選択Comboを描画
 /// @param handle 編集対象のPass Handle
 /// @param pass 編集対象の一時参照
 void DrawPostEffectSelectionCombo(
@@ -597,7 +597,7 @@ void DrawPostEffectSelectionCombo(
 	ImGui::EndCombo();
 }
 
-/// @brief パラメータkeyが指定文字で終わるか判定する
+/// @brief パラメータkeyが指定文字で終わるか判定
 /// @param value 判定する文字列
 /// @param suffix 末尾文字
 /// @return 指定文字で終わる場合はtrue
@@ -605,7 +605,7 @@ bool EndsWith(std::string_view value, char suffix) {
 	return !value.empty() && value.back() == suffix;
 }
 
-/// @brief 色成分keyから共通部分を取得する
+/// @brief 色成分keyから共通部分を取得
 /// @param value 色成分key
 /// @return 末尾のRGBAを除いたkey
 std::string GetColorBase(std::string_view value) {
@@ -615,7 +615,7 @@ std::string GetColorBase(std::string_view value) {
 	return std::string(value);
 }
 
-/// @brief Registry定義から色編集可能な連続成分数を取得する
+/// @brief Registry定義から色編集可能な連続成分数を取得
 /// @param parameters Parameter定義一覧
 /// @param startIndex 確認開始index
 /// @return RGBなら3、RGBAなら4、色でない場合は0
@@ -645,7 +645,7 @@ int GetColorComponentCount(
 	return 3;
 }
 
-/// @brief Registry定義を使って型非依存のParameter編集UIを描画する
+/// @brief Registry定義を使って型非依存のParameter編集UIを描画
 /// @param pass 編集対象のPass
 void DrawPostEffectParameterRows(Render::PostEffectPass& pass) {
 	const Render::PostEffectDefinition* definition = FindPostEffectDefinition(pass);
@@ -705,10 +705,10 @@ void DrawPostEffectParameterRows(Render::PostEffectPass& pass) {
 	}
 }
 
-/// @brief Handleの現在の実行順indexを取得する
+/// @brief Handleの現在の実行順indexを取得
 /// @param handles 検索対象のHandle順序
 /// @param handle 検索するHandle
-/// @return 見つかったindex。存在しない場合はhandles.size()
+/// @return 見つかったindex、存在しない場合はhandles.size()
 std::size_t FindHandleIndex(
 	const std::vector<Render::PostEffectPassHandle>& handles,
 	Render::PostEffectPassHandle handle)

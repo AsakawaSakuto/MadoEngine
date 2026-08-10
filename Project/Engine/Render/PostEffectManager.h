@@ -38,7 +38,7 @@ struct ScreenPostEffectPassCreateDesc {
 /// @brief ポストエフェクトPassを世代付きSlotで一元管理するクラス
 class PostEffectManager {
 public:
-	/// @brief PostEffectManagerのシングルトンインスタンスを取得する
+	/// @brief PostEffectManagerのシングルトンインスタンスを取得
 	/// @return PostEffectManagerの参照
 	static PostEffectManager& GetInstance();
 
@@ -47,113 +47,113 @@ public:
 	PostEffectManager(PostEffectManager&&) = delete;
 	PostEffectManager& operator=(PostEffectManager&&) = delete;
 
-	/// @brief ポストエフェクト管理を初期化する
+	/// @brief ポストエフェクト管理を初期化
 	/// @param basePostEffectDesc ポストエフェクト用の基本PSO設定
 	/// @param device D3D12デバイス
 	void Initialize(const PSODesc& basePostEffectDesc, ID3D12Device* device);
 
-	/// @brief GPU完了待機後に登録済みPassとデバイス参照を解放する
+	/// @brief GPU完了待機後に登録済みPassとデバイス参照を解放
 	void Finalize();
 
-	/// @brief 個別描画レイヤー向けPassを生成する
+	/// @brief 個別描画レイヤー向けPassを生成
 	/// @param desc 生成設定
-	/// @return 生成したPassのHandle。key重複や設定不正の場合は無効Handle
+	/// @return 生成したPassのHandle、key重複や設定不正の場合は無効Handle
 	[[nodiscard]] PostEffectPassHandle CreateLayerPass(const LayerPostEffectPassCreateDesc& desc);
 
-	/// @brief フルスクリーン向けPassを生成する
+	/// @brief フルスクリーン向けPassを生成
 	/// @param desc 生成設定
-	/// @return 生成したPassのHandle。key重複や設定不正の場合は無効Handle
+	/// @return 生成したPassのHandle、key重複や設定不正の場合は無効Handle
 	[[nodiscard]] PostEffectPassHandle CreateScreenPass(const ScreenPostEffectPassCreateDesc& desc);
 
-	/// @brief 内部キーからPassを検索する
+	/// @brief 内部キーからPassを検索
 	/// @param key 検索する不変の内部キー
-	/// @return 見つかったPassのHandle。存在しない場合は無効Handle
+	/// @return 見つかったPassのHandle、存在しない場合は無効Handle
 	[[nodiscard]] PostEffectPassHandle Find(const std::string& key) const;
 
-	/// @brief HandleからPassを一時参照として取得する
+	/// @brief HandleからPassを一時参照として取得
 	/// @param handle 取得対象のHandle
 	/// @return 有効な場合はPass、無効な場合はnullptr
 	PostEffectPass* TryGet(PostEffectPassHandle handle);
 
-	/// @brief HandleからPassを読み取り専用の一時参照として取得する
+	/// @brief HandleからPassを読み取り専用の一時参照として取得
 	/// @param handle 取得対象のHandle
 	/// @return 有効な場合はPass、無効な場合はnullptr
 	const PostEffectPass* TryGet(PostEffectPassHandle handle) const;
 
-	/// @brief Handleが現在のPassを参照しているか確認する
+	/// @brief Handleが現在のPassを参照しているか確認
 	/// @param handle 確認するHandle
 	/// @return 有効なPassを参照している場合はtrue
 	[[nodiscard]] bool IsValid(PostEffectPassHandle handle) const;
 
-	/// @brief Handleが参照するPassの適用先を取得する
+	/// @brief Handleが参照するPassの適用先を取得
 	/// @param handle 確認するHandle
-	/// @return 適用先。無効Handleの場合はCount
+	/// @return 適用先、無効Handleの場合はCount
 	[[nodiscard]] PostEffectPassScope GetScope(PostEffectPassHandle handle) const;
 
-	/// @brief GPUが対象を使用していないことが保証された時点でPassを即時削除する
+	/// @brief GPUが対象を使用していないことが保証された時点でPassを即時削除
 	/// @param handle 削除対象のHandle
 	/// @return 削除できた場合はtrue
 	bool Destroy(PostEffectPassHandle handle);
 
-	/// @brief 描画中でも安全なGPU完了待機後までPassの削除を延期する
+	/// @brief 描画中でも安全なGPU完了待機後までPassの削除を延期
 	/// @param handle 削除対象のHandle
 	void RequestDestroy(PostEffectPassHandle handle);
 
-	/// @brief GPU完了待機後に延期されているPass削除を実行する
+	/// @brief GPU完了待機後に延期されているPass削除を実行
 	void FlushPendingDestroys();
 
-	/// @brief 個別描画レイヤー向けPassをGPU安全時点で即時全削除する
+	/// @brief 個別描画レイヤー向けPassをGPU安全時点で即時全削除
 	void ClearLayerPasses();
 
-	/// @brief フルスクリーン向けPassをGPU安全時点で即時全削除する
+	/// @brief フルスクリーン向けPassをGPU安全時点で即時全削除
 	void ClearScreenPasses();
 
-	/// @brief 個別描画レイヤー向けPassの実行順Handle一覧を取得する
+	/// @brief 個別描画レイヤー向けPassの実行順Handle一覧を取得
 	/// @return 実行順Handle一覧
 	const std::vector<PostEffectPassHandle>& GetLayerPassHandles() const;
 
-	/// @brief フルスクリーン向けPassの実行順Handle一覧を取得する
+	/// @brief フルスクリーン向けPassの実行順Handle一覧を取得
 	/// @return 実行順Handle一覧
 	const std::vector<PostEffectPassHandle>& GetScreenPassHandles() const;
 
-	/// @brief 個別描画レイヤー向けPassの実行位置を変更する
+	/// @brief 個別描画レイヤー向けPassの実行位置を変更
 	/// @param handle 移動対象のHandle
 	/// @param newIndex 移動先index
 	/// @return 移動できた場合はtrue
 	bool MoveLayerPass(PostEffectPassHandle handle, std::size_t newIndex);
 
-	/// @brief フルスクリーン向けPassの実行位置を変更する
+	/// @brief フルスクリーン向けPassの実行位置を変更
 	/// @param handle 移動対象のHandle
 	/// @param newIndex 移動先index
 	/// @return 移動できた場合はtrue
 	bool MoveScreenPass(PostEffectPassHandle handle, std::size_t newIndex);
 
-	/// @brief Handleを維持したままEffect種別とParameterを既定値へ置き換える
+	/// @brief Handleを維持したままEffect種別とParameterを既定値へ置換
 	/// @param handle 変更対象のHandle
 	/// @param effectType 新しいEffect種別
 	/// @return 変更できた場合はtrue
 	bool SetEffectType(PostEffectPassHandle handle, PostEffectType effectType);
 
-	/// @brief Passの有効状態を変更する
+	/// @brief Passの有効状態を変更
 	/// @param handle 対象PassのHandle
 	/// @param enabled 有効にする場合はtrue
 	/// @return 変更できた場合はtrue
 	bool SetEnabled(PostEffectPassHandle handle, bool enabled);
 
-	/// @brief Passの有効状態を取得する
+	/// @brief Passの有効状態を取得
 	/// @param handle 対象PassのHandle
 	/// @param outEnabled 取得した有効状態の出力先
 	/// @return 取得できた場合はtrue
 	bool TryGetEnabled(PostEffectPassHandle handle, bool& outEnabled) const;
 
-	/// @brief Passのfloatパラメータを変更する
+	/// @brief Passのfloatパラメータを変更
 	/// @param handle 対象PassのHandle
 	/// @param parameterKey 対象パラメータキー
 	/// @param value 設定する値
 	/// @return 変更できた場合はtrue
 	bool SetFloatParameter(PostEffectPassHandle handle, const std::string& parameterKey, float value);
 
-	/// @brief Passのfloatパラメータを取得する
+	/// @brief Passのfloatパラメータを取得
 	/// @param handle 対象PassのHandle
 	/// @param parameterKey 対象パラメータキー
 	/// @param outValue 取得した値の出力先
@@ -186,7 +186,7 @@ public:
 	/// @return 取得できた場合はtrue
 	bool TryGetFloatParameter(const std::string& passKey, const std::string& parameterKey, float& outValue) const;
 
-	/// @brief Effect型を検証してParameterを設定する
+	/// @brief Effect型を検証してParameterを設定
 	/// @tparam T PostEffectParameterTraitsへ登録済みのParameter型
 	/// @param handle 対象PassのHandle
 	/// @param parameters 設定するParameter
@@ -203,7 +203,7 @@ public:
 		);
 	}
 
-	/// @brief Effect型を検証してParameterを取得する
+	/// @brief Effect型を検証してParameterを取得
 	/// @tparam T PostEffectParameterTraitsへ登録済みのParameter型
 	/// @param handle 対象PassのHandle
 	/// @param outParameters 取得先
@@ -220,7 +220,7 @@ public:
 		);
 	}
 
-	/// @brief 型付きParameterを短時間だけ編集して書き戻す
+	/// @brief 型付きParameterを短時間だけ編集して書き復元
 	/// @tparam T PostEffectParameterTraitsへ登録済みのParameter型
 	/// @tparam Callback T&を受け取るcallback型
 	/// @param handle 対象PassのHandle
@@ -237,21 +237,21 @@ public:
 		return SetParameters(handle, parameters);
 	}
 
-	/// @brief 有効な個別描画レイヤー向けPassの対象LayerMaskをまとめて取得する
+	/// @brief 有効な個別描画レイヤー向けPassの対象LayerMaskをまとめて取得
 	/// @return 有効なPassの対象LayerMask
 	RenderLayerMask GetEnabledLayerTargetMask() const;
 
-	/// @brief 指定段階で有効な個別描画レイヤー向けPassの対象LayerMaskをまとめて取得する
+	/// @brief 指定段階で有効な個別描画レイヤー向けPassの対象LayerMaskをまとめて取得
 	/// @param stage 対象の適用段階
 	/// @return 指定段階で有効なPassの対象LayerMask
 	RenderLayerMask GetEnabledLayerTargetMask(LayerEffectStage stage) const;
 
-	/// @brief 指定LayerMaskの描画にDepth無視マスクが必要か判定する
+	/// @brief 指定LayerMaskの描画にDepth無視マスクが必要か判定
 	/// @param layerMask 判定するLayerMask
 	/// @return Depth無視が必要な場合はtrue
 	bool NeedsIgnoreDepthMask(RenderLayerMask layerMask) const;
 
-	/// @brief 指定段階とLayerMaskの描画にDepth無視マスクが必要か判定する
+	/// @brief 指定段階とLayerMaskの描画にDepth無視マスクが必要か判定
 	/// @param layerMask 判定するLayerMask
 	/// @param stage 対象の適用段階
 	/// @return Depth無視が必要な場合はtrue
@@ -283,20 +283,20 @@ private:
 
 	PostEffectManager() = default;
 
-	/// @brief 共通設定から指定scopeのPassを生成する
+	/// @brief 共通設定から指定scopeのPassを生成
 	/// @param desc PostEffectPass互換の生成設定
 	/// @param scope Passの適用先
 	/// @return 生成したPassのHandle
 	[[nodiscard]] PostEffectPassHandle CreatePass(const PostEffectPass::Desc& desc, PostEffectPassScope scope);
 
-	/// @brief 指定実行順配列内でHandleを移動する
+	/// @brief 指定実行順配列内でHandleを移動
 	/// @param order 対象の実行順配列
 	/// @param handle 移動対象のHandle
 	/// @param newIndex 移動先index
 	/// @return 移動できた場合はtrue
 	static bool MovePass(std::vector<PostEffectPassHandle>& order, PostEffectPassHandle handle, std::size_t newIndex);
 
-	/// @brief 型とサイズを検証してParameterデータを設定する
+	/// @brief 型とサイズを検証してParameterデータを設定
 	/// @param handle 対象PassのHandle
 	/// @param expectedType 期待するEffect種別
 	/// @param data 設定するデータ
@@ -309,7 +309,7 @@ private:
 		std::size_t sizeInBytes
 	);
 
-	/// @brief 型とサイズを検証してParameterデータを取得する
+	/// @brief 型とサイズを検証してParameterデータを取得
 	/// @param handle 対象PassのHandle
 	/// @param expectedType 期待するEffect種別
 	/// @param outData 取得先
@@ -322,7 +322,7 @@ private:
 		std::size_t sizeInBytes
 	) const;
 
-	/// @brief 同一Handleと型のParameter不一致を一度だけLoggerへ出力する
+	/// @brief 同一Handleと型のParameter不一致を一度だけLoggerへ出力
 	/// @param handle 対象PassのHandle
 	/// @param expectedType APIが期待したEffect種別
 	/// @param reason 不一致理由

@@ -10,7 +10,7 @@
 
 namespace MadoEngine::Render {
 
-	/// @brief ワイド文字列をUTF-8文字列に変換する
+	/// @brief ワイド文字列をUTF-8文字列に変換
 	/// @param wstr 変換元のワイド文字列
 	/// @return UTF-8文字列
 	static std::string WStringToString(const std::wstring& wstr) {
@@ -24,7 +24,7 @@ namespace MadoEngine::Render {
 		return result;
 	}
 
-	/// @brief PSO生成失敗時の詳細をログ出力する
+	/// @brief PSO生成失敗時の詳細をログ出力
 	/// @param hr 失敗したHRESULT
 	/// @param desc 生成に使用したPSODesc
 	static void LogPipelineStateError(HRESULT hr, const PSODesc& desc) {

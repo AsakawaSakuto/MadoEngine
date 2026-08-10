@@ -19,7 +19,7 @@ namespace MadoEngine::Editor {
             LightHandle handle;
         };
 
-        /// @brief ライト種別の表示名を取得する
+        /// @brief ライト種別の表示名を取得
         /// @param type ライト種別
         /// @return ライト種別の表示名
         const char* GetLightTypeLabel(LightType type) {
@@ -35,15 +35,15 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief LightManager Jsonのバックアップパスを作成する。
-        /// @return LightManager Jsonのバックアップパス。
+        /// @brief LightManager Jsonのバックアップパスを作成
+        /// @return LightManager Jsonのバックアップパス
         std::filesystem::path CreateLightManagerBackupJsonPath() {
             std::filesystem::path backupPath = LightManager::kDefaultLightJsonPath;
             backupPath += ".bak";
             return backupPath;
         }
 
-        /// @brief 文字列を固定長バッファへコピーする
+        /// @brief 文字列を固定長バッファへコピー
         /// @tparam Size バッファサイズ
         /// @param buffer コピー先バッファ
         /// @param text コピー元文字列
@@ -53,7 +53,7 @@ namespace MadoEngine::Editor {
             strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
         }
 
-        /// @brief 追加したLight名を基準に次の未使用名を生成する
+        /// @brief 追加したLight名を基準に次の未使用名を生成
         /// @param lightManager Light名の使用状況を確認するManager
         /// @param createdName 直前に追加したLight名
         /// @return 末尾の番号を繰り上げた未使用のLight名
@@ -92,10 +92,10 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief Editorからライトを追加する
+        /// @brief Editorからライトを追加
         /// @param type 追加するライト種別
         /// @param name 追加するライト名
-        /// @return 追加したライトのハンドル。追加できなかった場合は無効なハンドル
+        /// @return 追加したライトのハンドル、追加できなかった場合は無効なハンドル
         LightHandle AddLightFromEditor(LightType type, const std::string& name) {
             LightManager& lightManager = LightManager::GetInstance();
             const bool isNameAlreadyUsed = lightManager.Find(name).IsValid();
@@ -147,7 +147,7 @@ namespace MadoEngine::Editor {
             return {};
         }
 
-        /// @brief SceneTypeの選択表示名を取得する
+        /// @brief SceneTypeの選択表示名を取得
         /// @param sceneType 表示するSceneType
         /// @return SceneTypeの選択表示名
         std::string GetSceneSelectionLabel(SceneType sceneType) {
@@ -158,7 +158,7 @@ namespace MadoEngine::Editor {
             return SceneTypeToString(sceneType);
         }
 
-        /// @brief ライトを使用するシーン選択Comboを描画する
+        /// @brief ライトを使用するシーン選択Comboを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawLightSceneSelectionCombo(LightManager& lightManager, LightHandle handle) {
@@ -193,7 +193,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief ライトレイヤー選択Comboを描画する
+        /// @brief ライトレイヤー選択Comboを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawLightLayerSelectionCombo(LightManager& lightManager, LightHandle handle) {
@@ -238,7 +238,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief ライト名編集InputTextを描画する
+        /// @brief ライト名編集InputTextを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawLightNameInput(LightManager& lightManager, LightHandle handle) {
@@ -252,7 +252,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief ライトパラメータ行のラベル列を開始する
+        /// @brief ライトパラメータ行のラベル列を開始
         /// @param label 表示するパラメータ名
         void BeginLightParameterRow(const char* label) {
             ImGui::TableNextRow();
@@ -262,7 +262,7 @@ namespace MadoEngine::Editor {
             ImGui::SetNextItemWidth(-1.0f);
         }
 
-        /// @brief 平行光源の値調整UIを描画する
+        /// @brief 平行光源の値調整UIを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawDirectionalLightParameterRows(LightManager& lightManager, LightHandle handle) {
@@ -295,7 +295,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief 点光源の値調整UIを描画する
+        /// @brief 点光源の値調整UIを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawPointLightParameterRows(LightManager& lightManager, LightHandle handle) {
@@ -327,7 +327,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief スポットライトの値調整UIを描画する
+        /// @brief スポットライトの値調整UIを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawSpotLightParameterRows(LightManager& lightManager, LightHandle handle) {
@@ -368,7 +368,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief ライト種別に応じた値調整UIを描画する
+        /// @brief ライト種別に応じた値調整UIを描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         void DrawLightParameterRows(LightManager& lightManager, LightHandle handle) {
@@ -387,7 +387,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief LightManager Editorの1行を描画する
+        /// @brief LightManager Editorの1行を描画
         /// @param lightManager 編集対象のLightManager
         /// @param handle 編集対象ライトのハンドル
         /// @param removeRequest 削除要求の出力先

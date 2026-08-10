@@ -11,7 +11,7 @@ namespace {
 
 	constexpr std::size_t kMaximumCylinderAssetNameLength = 100;
 
-	/// @brief UTF-8文字列からFilesystem Pathを生成する
+	/// @brief UTF-8文字列からFilesystem Pathを生成
 	/// @param value UTF-8文字列
 	/// @return 生成したFilesystem Path
 	std::filesystem::path MakeUtf8Path(const std::string& value) {
@@ -20,7 +20,7 @@ namespace {
 		return std::filesystem::path(std::u8string(begin, end));
 	}
 
-	/// @brief ファイルパスをUTF-8文字列へ変換する
+	/// @brief ファイルパスをUTF-8文字列へ変換
 	/// @param path 変換するファイルパス
 	/// @return UTF-8文字列
 	std::string PathToUtf8String(const std::filesystem::path& path) {
@@ -28,7 +28,7 @@ namespace {
 		return std::string(reinterpret_cast<const char*>(value.data()), value.size());
 	}
 
-	/// @brief Cylinder Asset名からJsonファイルパスを安全に生成する
+	/// @brief Cylinder Asset名からJsonファイルパスを安全に生成
 	/// @param directoryPath Cylinder Assetディレクトリ
 	/// @param assetName UTF-8のCylinder Asset名
 	/// @param outFilePath 生成したパスの出力先
@@ -46,7 +46,7 @@ namespace {
 		}
 	}
 
-	/// @brief Cylinder Asset名をJsonファイル名として使用できるか確認する
+	/// @brief Cylinder Asset名をJsonファイル名として使用できるか確認
 	/// @param assetName 確認するAsset名
 	/// @return 使用できる場合はtrue
 	bool IsValidCylinderAssetName(const std::string& assetName) {
@@ -95,7 +95,7 @@ namespace {
 		return true;
 	}
 
-	/// @brief JsonファイルがCylinder Assetディレクトリ直下にあるか確認する
+	/// @brief JsonファイルがCylinder Assetディレクトリ直下にあるか確認
 	/// @param filePath 確認するJsonファイル
 	/// @param directoryPath Cylinder Assetディレクトリ
 	/// @return 対象ディレクトリ直下のJsonファイルの場合はtrue
@@ -118,7 +118,7 @@ namespace {
 			canonicalFilePath.parent_path() == canonicalDirectoryPath;
 	}
 
-	/// @brief Cylinder AssetのJsonファイルをTrashディレクトリへ移動する
+	/// @brief Cylinder AssetのJsonファイルをTrashディレクトリへ移動
 	/// @param sourcePath 移動するJsonファイル
 	/// @param assetDirectoryPath Cylinder Assetディレクトリ
 	/// @param outTrashPath 移動先パスの出力先

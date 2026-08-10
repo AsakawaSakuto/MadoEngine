@@ -12,10 +12,10 @@ namespace MadoEngine {
 
 namespace {
 
-	/// @brief Json配列からVector2を読み込みます。
-	/// @param json 読み込むJson。
-	/// @param fallback 読み込みに失敗した場合の値。
-	/// @return 読み込まれたVector2。
+	/// @brief Json配列からVector2を読み込み
+	/// @param json 読み込むJson
+	/// @param fallback 読み込みに失敗した場合の値
+	/// @return 読み込まれたVector2
 	Vector2 ReadVector2(const nlohmann::json& json, const Vector2& fallback) {
 		if (!json.is_array() || json.size() < 2) {
 			return fallback;
@@ -26,10 +26,10 @@ namespace {
 		};
 	}
 
-	/// @brief Json配列からVector4を読み込みます。
-	/// @param json 読み込むJson。
-	/// @param fallback 読み込みに失敗した場合の値。
-	/// @return 読み込まれたVector4。
+	/// @brief Json配列からVector4を読み込み
+	/// @param json 読み込むJson
+	/// @param fallback 読み込みに失敗した場合の値
+	/// @return 読み込まれたVector4
 	Vector4 ReadVector4(const nlohmann::json& json, const Vector4& fallback) {
 		if (!json.is_array() || json.size() < 4) {
 			return fallback;

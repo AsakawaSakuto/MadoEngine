@@ -86,11 +86,11 @@ private:
 	TextTextureGenerator(const TextTextureGenerator&) = delete;
 	TextTextureGenerator& operator=(const TextTextureGenerator&) = delete;
 
-	/// @brief 指定ディレクトリ内のフォントファイルを読み込む
+	/// @brief 指定ディレクトリ内のフォントファイルを読み込み
 	/// @param fontDirectory フォントを検索するディレクトリ
 	void LoadFontAssets(const std::filesystem::path& fontDirectory);
 
-	/// @brief フォントファイルから専用DirectWriteコレクションを生成する
+	/// @brief フォントファイルから専用DirectWriteコレクションを生成
 	/// @param filePath 読み込むフォントファイルの絶対パス
 	/// @param outCollection 生成されたフォントコレクション
 	/// @param outFamilyName フォントファミリー名

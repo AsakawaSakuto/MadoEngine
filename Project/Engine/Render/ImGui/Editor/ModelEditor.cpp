@@ -22,7 +22,7 @@ namespace MadoEngine::Editor {
 		constexpr float kDefaultVertexMarkerRadius = 0.1f;
 		constexpr Vector4 kVertexMarkerColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 
-		/// @brief Modelアセットパスから表示用のModel名を取得する
+		/// @brief Modelアセットパスから表示用のModel名を取得
 		/// @param modelName Modelアセットパス
 		/// @return Editor表示用のModelアセット名
 		std::string GetModelDisplayName(const std::string& modelName) {
@@ -34,7 +34,7 @@ namespace MadoEngine::Editor {
 			return modelName;
 		}
 
-		/// @brief 文字列を固定長バッファへコピーする
+		/// @brief 文字列を固定長バッファへコピー
 		/// @tparam Size バッファサイズ
 		/// @param buffer コピー先バッファ
 		/// @param text コピー元文字列
@@ -44,7 +44,7 @@ namespace MadoEngine::Editor {
 			strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 		}
 
-		/// @brief 追加したModel名を基準に次の未使用名を生成する
+		/// @brief 追加したModel名を基準に次の未使用名を生成
 		/// @param manager Model名の使用状況を確認するManager
 		/// @param createdName 直前に追加したModel名
 		/// @return 末尾の番号を繰り上げた未使用のModel名
@@ -84,7 +84,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief Modelアセット選択Comboを描画する
+		/// @brief Modelアセット選択Comboを描画
 		/// @param label ImGuiで使用するラベル
 		/// @param selectedName 現在選択中のModelアセットパス
 		/// @param modelNames 選択候補のModelアセットパス一覧
@@ -115,7 +115,7 @@ namespace MadoEngine::Editor {
 			return isChanged;
 		}
 
-		/// @brief Modelの描画レイヤー選択Comboを描画する
+		/// @brief Modelの描画レイヤー選択Comboを描画
 		/// @param model 編集対象のModel
 		void DrawRenderLayerCombo(Model& model) {
 			const Render::RenderLayer currentLayer = model.GetRenderLayer();
@@ -134,7 +134,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief Modelの対象Scene選択Comboを描画する
+		/// @brief Modelの対象Scene選択Comboを描画
 		/// @param model 編集対象のModel
 		void DrawSceneCombo(Model& model) {
 			const SceneType currentScene = model.GetSceneType();
@@ -162,7 +162,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief Modelが受け取るLightレイヤーマスクを編集する
+		/// @brief Modelが受け取るLightレイヤーマスクを編集
 		/// @param model 編集対象のModel
 		void DrawReceiveLightMask(Model& model) {
 			LightLayerMask lightMask = model.GetReceiveLightMask();
@@ -184,7 +184,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief 指定した頂点Indexの検索UIとデバッグ表示を描画する
+		/// @brief 指定した頂点Indexの検索UIとデバッグ表示を描画
 		/// @param model 検索対象のModel
 		void DrawVertexSearch(Model& model) {
 			static int vertexIndex = 0;
@@ -272,7 +272,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 
-		/// @brief Modelのプロパティ編集UIを描画する
+		/// @brief Modelのプロパティ編集UIを描画
 		/// @param model 編集対象のModel
 		/// @param assetName Modelが使用しているアセットパス
 		void DrawModelProperties(Model& model, const std::string& assetName) {

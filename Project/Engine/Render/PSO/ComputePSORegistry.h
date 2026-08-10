@@ -20,26 +20,26 @@ namespace MadoEngine::Render {
 		ComputePSORegistry(ComputePSORegistry&&) = delete;
 		ComputePSORegistry& operator=(ComputePSORegistry&&) = delete;
 
-		/// @brief Compute PSO Registryを初期化する
+		/// @brief Compute PSO Registryを初期化
 		/// @param device Compute PSOの生成に使用するD3D12 Device
 		void Initialize(ID3D12Device* device);
 
-		/// @brief 保持しているCompute PSOを解放して終了する
+		/// @brief 保持しているCompute PSOを解放して終了
 		void Finalize();
 
-		/// @brief Compute PSOを取得し、未生成の場合は作成してキャッシュする
+		/// @brief Compute PSOを取得し、未生成の場合は作成してキャッシュ
 		/// @param desc Compute ShaderとRootSignatureの識別キー
-		/// @return Compute PSO。生成できない場合はnullptr
+		/// @return Compute PSO、生成できない場合はnullptr
 		ID3D12PipelineState* Get(const ComputePSODesc& desc);
 
-		/// @brief キャッシュ済みのCompute PSO数を取得する
+		/// @brief キャッシュ済みのCompute PSO数を取得
 		/// @return キャッシュ済みのCompute PSO数
 		std::size_t GetCachedCount() const;
 
 	private:
-		/// @brief Compute PSOを生成してキャッシュへ登録する
+		/// @brief Compute PSOを生成してキャッシュへ登録
 		/// @param desc Compute ShaderとRootSignatureの識別キー
-		/// @return 生成したCompute PSO。生成できない場合はnullptr
+		/// @return 生成したCompute PSO、生成できない場合はnullptr
 		ID3D12PipelineState* CreateAndCache(const ComputePSODesc& desc);
 
 		ID3D12Device* device_ = nullptr;

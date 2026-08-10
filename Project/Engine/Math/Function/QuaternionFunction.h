@@ -8,32 +8,32 @@
 
 namespace QuaternionFunc {
 
-	/// @brief Quaternion同士の積を返す
+	/// @brief Quaternion同士の積を返却
 	/// @param lhs 左辺のQuaternion
 	/// @param rhs 右辺のQuaternion
 	/// @return 積の結果のQuaternion
 	Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs);
 	
-	/// @brief 単位 Quaternionを返す
+	/// @brief 単位 Quaternionを返却
 	/// @return 単位 Quaternion
 	Quaternion IdentityQuaternion();
 
-	/// @brief 共役 Quaternionを返す
+	/// @brief 共役 Quaternionを返却
 	/// @param quaternion 対象のQuaternion
 	/// @return 共役 Quaternion
 	Quaternion Conjugate(const Quaternion& quaternion);
 
-	/// @brief Quaternionのノルムを返す
+	/// @brief Quaternionのノルムを返却
 	/// @param quaternion 対象のQuaternion
 	/// @return ノルム
 	float Norm(const Quaternion& quaternion);
 
-	/// @brief 正規化した Quaternionを返す
+	/// @brief 正規化した Quaternionを返却
 	/// @param quaternion 対象のQuaternion
 	/// @return 正規化された Quaternion
 	Quaternion Normalize(const Quaternion& quaternion);
 
-	/// @brief 逆 Quaternionを返す
+	/// @brief 逆 Quaternionを返却
 	/// @param quaternion 対象のQuaternion
 	/// @return 逆 Quaternion
 	Quaternion Inverse(const Quaternion& quaternion);
@@ -44,13 +44,13 @@ namespace QuaternionFunc {
 	/// @return 回転を表すQuaternion
 	Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
 
-	/// @brief ベクトルをQuaternionで回転させた結果のベクトルを求める
+	/// @brief ベクトルをQuaternionで回転させた結果のベクトルを算出
 	/// @param v 回転させるベクトル
 	/// @param q 回転を表すQuaternion
 	/// @return 回転後のベクトル
 	Vector3 RotateVector(const Vector3& v, const Quaternion& q);
 
-	/// @brief Quaternionから回転行列を求める
+	/// @brief Quaternionから回転行列を算出
 	/// @param q 対象のQuaternion
 	/// @return 回転行列
 	Matrix4x4 MakeRotateMatrix(const Quaternion& q);

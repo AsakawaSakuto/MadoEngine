@@ -7,7 +7,7 @@
 namespace MyAudio {
 
 	/// @brief 音声を再生
-	/// @param key ファイル名（拡張子なし）。例: "fire", "titleBGM"
+	/// @param key ファイル名（拡張子なし）、例: "fire", "titleBGM"
 	/// @param loop ループ再生するか（デフォルト: false）
 	inline void Play(const std::string& key, bool loop = false) {
 		MadoEngine::AudioManager::GetInstance().Play(key, loop);

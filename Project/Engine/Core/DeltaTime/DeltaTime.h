@@ -11,11 +11,11 @@ namespace MadoEngine
 
         void Update();
 
-		/// @brief 目標FPSを設定する
+		/// @brief 目標FPSを設定
         /// @param targetFPS 目標FPS
         void SetTargetFPS(double targetFPS = 60.0);
 
-		/// @brief FPS制限を有効/無効にする
+		/// @brief FPS制限の有効状態を設定
 		/// @param enable trueで有効、falseで無効
         void EnableFPSLimit(bool enable = true);
 
@@ -28,7 +28,7 @@ namespace MadoEngine
 		/// @return 目標FPS
         double GetTargetFPS() const { return m_targetFPS; }
 
-		/// @return FPS制限が有効かどうか
+		/// @return FPS制限が有効な場合はtrue
         bool IsFPSLimitEnabled() const { return m_enableFPSLimit; }
 
     private:

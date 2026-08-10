@@ -17,7 +17,7 @@ namespace MadoEngine {
 	/// @brief ImGuiの初期化・破棄・フレーム描画管理を行うクラス
 	class ImGuiManager {
 	public:
-		/// @brief ImGuiを初期化する
+		/// @brief ImGuiを初期化
 		/// @param device DxDeviceのポインタ
 		/// @param commandManager CommandManagerのポインタ（CommandQueueの取得に使用）
 		/// @param srvManager SRVManagerのポインタ（SRVコールバック経由でフォントSRVを管理）
@@ -27,30 +27,30 @@ namespace MadoEngine {
 						Core::SRVManager* srvManager, HWND hwnd, uint32_t bufferCount = 2);
 
 		/// @brief フレーム開始処理（NewFrame）
-		/// PreDraw の先頭で呼ぶこと
+	/// 呼び出しタイミングはPreDrawの先頭
 		void Begin();
 
 		/// @brief フレーム終了処理（Render + RenderDrawData）
-		/// ResourceBarrier で PRESENT に遷移させる直前に呼ぶこと
+	/// 呼び出しタイミングはResourceBarrierでPRESENTへ遷移させる直前
 		/// @param commandList 描画コマンドを積むコマンドリスト
 		void End(ID3D12GraphicsCommandList* commandList);
 
-		/// @brief エディタ用レイアウト（DockSpace + Game View）を描画する
+		/// @brief エディタ用レイアウト（DockSpace + Game View）を描画
 		/// @param gameViewSRV ゲーム画面オフスクリーンテクスチャのSRV GPUハンドル
 		void DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV);
 
-		/// @brief ImGuiのスタイルカラー編集ウィンドウを描画します。
+		/// @brief ImGuiのスタイルカラー編集ウィンドウを描画
 		void DrawStyleColorEditorUI();
 
-		/// @brief ImGuiのスタイルカラーをJsonへ保存します。
-		/// @return 保存できた場合はtrueを返します。
+		/// @brief ImGuiのスタイルカラーをJsonへ保存
+		/// @return 保存できた場合はtrue
 		bool SaveStyleColors() const;
 
-		/// @brief ImGuiのスタイルカラーをJsonから読み込みます。
-		/// @return 読み込めた場合はtrueを返します。
+		/// @brief ImGuiのスタイルカラーをJsonから読み込み
+		/// @return 読み込めた場合はtrue
 		bool LoadStyleColors();
 
-		/// @brief ImGuiを終了し全リソースを解放する
+		/// @brief ImGuiを終了し全リソースを解放
 		void Finalize();
 
 	private:
@@ -64,7 +64,7 @@ namespace MadoEngine {
 									D3D12_CPU_DESCRIPTOR_HANDLE cpu,
 									D3D12_GPU_DESCRIPTOR_HANDLE gpu);
 
-		/// @brief 既定のImGuiスタイルカラーを適用します。
+		/// @brief 既定のImGuiスタイルカラーを適用
 		void ApplyDefaultStyleColors();
 
 		Core::SRVManager* srvManager_ = nullptr;

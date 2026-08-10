@@ -3,9 +3,9 @@
 
 namespace {
 
-/// @brief Jarのサイズに対応するモデル名を取得します。
-/// @param size Jarのサイズです。
-/// @return 読み込むモデル名です。
+/// @brief Jarのサイズに対応するモデル名を取得
+/// @param size Jarのサイズ
+/// @return 読み込むモデル名
 const char* GetJarModelAssetName(JarSize size) {
 	switch (size) {
 	case JarSize::Big:
@@ -16,10 +16,10 @@ const char* GetJarModelAssetName(JarSize size) {
 	}
 }
 
-/// @brief Jarのインスタンス描画バッチ名を取得します。
-/// @param size Jarのサイズです。
-/// @param isOutline アウトライン表示用の場合はtrueです。
-/// @return インスタンス描画バッチ名です。
+/// @brief Jarのインスタンス描画バッチ名を取得
+/// @param size Jarのサイズ
+/// @param isOutline アウトライン表示用の場合はtrue
+/// @return インスタンス描画バッチ名
 const char* GetJarBatchName(JarSize size, bool isOutline) {
 	if (size == JarSize::Big) {
 		return isOutline ? "Jar.Big.Outline" : "Jar.Big.Normal";
@@ -28,9 +28,9 @@ const char* GetJarBatchName(JarSize size, bool isOutline) {
 	return isOutline ? "Jar.Small.Outline" : "Jar.Small.Normal";
 }
 
-/// @brief Jarの取得報酬量を計算します。
-/// @param size Jarのサイズです。
-/// @return プレイヤーに加算する報酬量です。
+/// @brief Jarの取得報酬量を計算
+/// @param size Jarのサイズ
+/// @return プレイヤーに加算する報酬量
 int CalculateRewardAmount(JarSize size) {
 	return size == JarSize::Big ? 20 : 10;
 }

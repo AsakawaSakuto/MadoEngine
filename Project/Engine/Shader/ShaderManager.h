@@ -12,7 +12,7 @@ namespace MadoEngine {
 	/// @brief HLSLシェーダーのコンパイル・キャッシュ・取得を管理するシングルトンクラス
 	class ShaderManager {
 	public:
-		/// @brief シングルトンインスタンスを取得する
+		/// @brief シングルトンインスタンスを取得
 		/// @return ShaderManagerの唯一のインスタンス
 		static ShaderManager& GetInstance();
 
@@ -22,30 +22,30 @@ namespace MadoEngine {
 		ShaderManager(ShaderManager&&) = delete;
 		ShaderManager& operator=(ShaderManager&&) = delete;
 
-		/// @brief 初期化。DXCの準備と "Assets/Shader" 内の全 .hlsl を走査しコンパイル・キャッシュを行う
+		/// @brief 初期化、DXCの準備と "Assets/Shader" 内の全 .hlsl を走査しコンパイル・キャッシュ
 		void Initialize();
 
-		/// @brief キーに対応するシェーダーバイトコードを取得する
+		/// @brief キーに対応するシェーダーバイトコードを取得
 		/// @param key シェーダーキー（例: "PostEffect/CopyImage.VS"）
 		/// @return D3D12_SHADER_BYTECODE（見つからない場合はサイズ0）
 		D3D12_SHADER_BYTECODE Get(const std::string& key) const;
 
-		/// @brief 指定した先頭文字列に一致するシェーダーキー一覧を取得する
+		/// @brief 指定した先頭文字列に一致するシェーダーキー一覧を取得
 		/// @param prefix 検索するシェーダーキーの先頭文字列
 		/// @return 条件に一致したシェーダーキー一覧
 		std::vector<std::string> GetKeysByPrefix(const std::string& prefix) const;
 
-		/// @brief 全シェーダーを解放する
+		/// @brief 全シェーダーを解放
 		void Finalize();
 
 	private:
 		ShaderManager() = default;
 		~ShaderManager() = default;
 
-		/// @brief DXCライブラリを初期化する
+		/// @brief DXCライブラリを初期化
 		void InitializeDxc();
 
-		/// @brief HLSLファイルをコンパイルしてバイトコードを返す
+		/// @brief HLSLファイルをコンパイルしてバイトコードを返却
 		/// @param filePath HLSLファイルパス（ワイド文字列）
 		/// @param profile シェーダープロファイル（例: L"vs_6_0"）
 		/// @return コンパイル済みバイトコード（失敗時はnullptr）
@@ -54,12 +54,12 @@ namespace MadoEngine {
 			const wchar_t* profile
 		);
 
-		/// @brief コンパイル済み .cso ファイルをBlobとして読み込む
+		/// @brief コンパイル済み .cso ファイルをBlobとして読み込み
 		/// @param csoPath CSOファイルパス（ワイド文字列）
 		/// @return 読み込んだ IDxcBlob（失敗時はnullptr）
 		Microsoft::WRL::ComPtr<IDxcBlob> LoadCso(const std::wstring& csoPath);
 
-		/// @brief .hlsl ファイルをコンパイルし .cso を .cache/ に保存する
+		/// @brief .hlsl ファイルをコンパイルし .cso を .cache/ に保存
 		/// @param hlslPath HLSLファイルのパス
 		/// @param csoPath  出力 CSOファイルのパス
 		/// @param profile  シェーダープロファイル（例: L"vs_6_0"）
@@ -70,14 +70,14 @@ namespace MadoEngine {
 			const wchar_t* profile
 		);
 
-		/// @brief ファイルパスからシェーダーキー文字列を生成する
+		/// @brief ファイルパスからシェーダーキー文字列を生成
 		/// @param relPath HLSLファイルパス（Assets/Shader/ からの相対）
 		/// @return キー文字列（例: "PostEffect/CopyImage.VS"）
 		static std::string MakeKey(const std::filesystem::path& relPath);
 
-		/// @brief ファイル名からシェーダープロファイルを判定する
+		/// @brief ファイル名からシェーダープロファイルを判定
 		/// @param filename ファイル名
-		/// @return プロファイル文字列ポインタ（例: L"vs_6_0"）。対象外なら nullptr
+		/// @return プロファイル文字列ポインタ（例: L"vs_6_0"）、対象外なら nullptr
 		static const wchar_t* ResolveProfile(const std::filesystem::path& filename);
 
 		// DXC

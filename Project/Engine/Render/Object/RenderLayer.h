@@ -38,21 +38,21 @@ namespace MadoEngine::Render {
 	static_assert(kRenderLayerCount == sizeof(kRenderLayerNames) / sizeof(kRenderLayerNames[0]));
 	static_assert(kRenderLayerCount <= sizeof(RenderLayerMask) * 8u, "RenderLayerMaskの上限を超えています");
 
-	/// @brief インデックスからRenderLayerを取得する
+	/// @brief インデックスからRenderLayerを取得
 	/// @param index 取得するRenderLayerのインデックス
 	/// @return インデックスに対応するRenderLayer
 	inline constexpr RenderLayer GetRenderLayerByIndex(uint32_t index) {
 		return static_cast<RenderLayer>(index);
 	}
 
-	/// @brief RenderLayerが有効な実レイヤーか確認する
+	/// @brief RenderLayerが有効な実レイヤーか確認
 	/// @param layer 確認するレイヤー
 	/// @return 実レイヤーの場合はtrue
 	inline constexpr bool IsValidRenderLayer(RenderLayer layer) {
 		return static_cast<uint32_t>(layer) < kRenderLayerCount;
 	}
 
-	/// @brief RenderLayerをマスク値へ変換する
+	/// @brief RenderLayerをマスク値へ変換
 	/// @param layer 変換対象のレイヤー
 	/// @return 指定レイヤーのみを含むマスク
 	inline constexpr RenderLayerMask ToRenderLayerMask(RenderLayer layer) {
@@ -63,7 +63,7 @@ namespace MadoEngine::Render {
 		return 1u << static_cast<uint32_t>(layer);
 	}
 
-	/// @brief 定義済みRenderLayerをすべて含むマスクを作成する
+	/// @brief 定義済みRenderLayerをすべて含むマスクを作成
 	/// @return 定義済みRenderLayerをすべて含むマスク
 	inline constexpr RenderLayerMask BuildAllRenderLayerMask() {
 		RenderLayerMask mask = 0;
@@ -76,9 +76,9 @@ namespace MadoEngine::Render {
 
 	inline constexpr RenderLayerMask kAllRenderLayers = BuildAllRenderLayerMask();
 
-	/// @brief RenderLayerの表示名を取得する
+	/// @brief RenderLayerの表示名を取得
 	/// @param layer 表示名を取得するレイヤー
-	/// @return レイヤーの表示名。未定義の場合はUnknown
+	/// @return レイヤーの表示名、未定義の場合はUnknown
 	inline constexpr const char* GetRenderLayerName(RenderLayer layer) {
 		if (!IsValidRenderLayer(layer)) {
 			return "Unknown";
@@ -87,9 +87,9 @@ namespace MadoEngine::Render {
 		return kRenderLayerNames[static_cast<uint32_t>(layer)];
 	}
 
-	/// @brief RenderLayerをシリアライズ用文字列へ変換する
+	/// @brief RenderLayerをシリアライズ用文字列へ変換
 	/// @param layer 変換対象のレイヤー
-	/// @return レイヤーのシリアライズ用文字列。未定義の場合はDefault
+	/// @return レイヤーのシリアライズ用文字列、未定義の場合はDefault
 	inline std::string RenderLayerToString(RenderLayer layer) {
 		if (!IsValidRenderLayer(layer)) {
 			return kRenderLayerNames[static_cast<uint32_t>(RenderLayer::Default)];
@@ -98,9 +98,9 @@ namespace MadoEngine::Render {
 		return GetRenderLayerName(layer);
 	}
 
-	/// @brief シリアライズ用文字列からRenderLayerへ変換する
+	/// @brief シリアライズ用文字列からRenderLayerへ変換
 	/// @param value 変換対象の文字列
-	/// @return 文字列に対応するレイヤー。未定義の場合はDefault
+	/// @return 文字列に対応するレイヤー、未定義の場合はDefault
 	inline RenderLayer RenderLayerFromString(const std::string& value) {
 		for (uint32_t index = 0; index < kRenderLayerCount; ++index) {
 			if (value == kRenderLayerNames[index]) {
@@ -111,9 +111,9 @@ namespace MadoEngine::Render {
 		return RenderLayer::Default;
 	}
 
-	/// @brief RenderLayerMaskの表示名を取得する
+	/// @brief RenderLayerMaskの表示名を取得
 	/// @param layerMask 表示名を取得するレイヤーマスク
-	/// @return レイヤーマスクの表示名。未定義の組み合わせの場合はCustom
+	/// @return レイヤーマスクの表示名、未定義の組み合わせの場合はCustom
 	inline constexpr const char* GetRenderLayerMaskName(RenderLayerMask layerMask) {
 		if (layerMask == kAllRenderLayers) {
 			return "All";
@@ -129,7 +129,7 @@ namespace MadoEngine::Render {
 		return "Custom";
 	}
 
-	/// @brief マスクに指定レイヤーが含まれているか確認する
+	/// @brief マスクに指定レイヤーが含まれているか確認
 	/// @param mask 判定対象のマスク
 	/// @param layer 判定対象のレイヤー
 	/// @return 含まれている場合はtrue
@@ -137,7 +137,7 @@ namespace MadoEngine::Render {
 		return (mask & ToRenderLayerMask(layer)) != 0;
 	}
 
-	/// @brief マスクから指定レイヤーを除外する
+	/// @brief マスクから指定レイヤーを除外
 	/// @param mask 元のマスク
 	/// @param layer 除外するレイヤー
 	/// @return 指定レイヤーを除外したマスク
@@ -145,7 +145,7 @@ namespace MadoEngine::Render {
 		return mask & ~ToRenderLayerMask(layer);
 	}
 
-	/// @brief マスクから指定レイヤーマスクを除外する
+	/// @brief マスクから指定レイヤーマスクを除外
 	/// @param mask 元のマスク
 	/// @param removeMask 除外するレイヤーマスク
 	/// @return 指定レイヤーマスクを除外したマスク

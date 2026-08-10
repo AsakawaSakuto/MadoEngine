@@ -16,14 +16,14 @@ namespace {
 		using TCallbacks::operator()...;
 	};
 
-	/// @brief TransformからAffine Matrixを生成する
+	/// @brief TransformからAffine Matrixを生成
 	/// @param transform 変換元Transform
 	/// @return 生成したMatrix
 	Matrix4x4 MakeMatrix(const Transform3D& transform) {
 		return Matrix::MakeAffine(transform.scale, transform.rotate, transform.translate);
 	}
 
-	/// @brief BeamのLocal始終点をWorld座標へ変換する
+	/// @brief BeamのLocal始終点をWorld座標へ変換
 	/// @param settings Beam固有設定
 	/// @param transform Node World Transform
 	/// @return World座標の始点と終点

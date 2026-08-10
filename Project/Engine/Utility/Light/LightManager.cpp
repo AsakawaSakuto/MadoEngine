@@ -9,14 +9,14 @@ namespace {
 const std::string kEmptyLightName;
 constexpr float kMinLightDirectionLengthSq = 0.000001f;
 
-/// @brief ライト方向として使用できる有限値か確認する
+/// @brief ライト方向として使用できる有限値か確認
 /// @param direction 確認する方向ベクトル
 /// @return 有限値のみで構成されている場合はtrue
 bool IsFiniteDirection(const Vector3& direction) {
 	return std::isfinite(direction.x) && std::isfinite(direction.y) && std::isfinite(direction.z);
 }
 
-/// @brief ライト方向を正規化する
+/// @brief ライト方向を正規化
 /// @param direction 正規化する方向ベクトル
 /// @return 正規化済みの方向ベクトル
 Vector3 NormalizeLightDirection(const Vector3& direction) {
@@ -33,19 +33,19 @@ Vector3 NormalizeLightDirection(const Vector3& direction) {
 	return { direction.x * invLength, direction.y * invLength, direction.z * invLength };
 }
 
-/// @brief 平行光源の方向を正規化する
+/// @brief 平行光源の方向を正規化
 /// @param light 正規化対象の平行光源
 void NormalizeDirectionalLight(DirectionalLight& light) {
 	light.direction = NormalizeLightDirection(light.direction);
 }
 
-/// @brief スポットライトの方向を正規化する
+/// @brief スポットライトの方向を正規化
 /// @param light 正規化対象のスポットライト
 void NormalizeSpotLight(SpotLight& light) {
 	light.direction = NormalizeLightDirection(light.direction);
 }
 
-/// @brief シーン種別の表示名を取得する
+/// @brief シーン種別の表示名を取得
 /// @param sceneType 表示するシーン種別
 /// @return シーン種別の表示名
 std::string GetSceneLabel(SceneType sceneType) {
@@ -55,7 +55,7 @@ std::string GetSceneLabel(SceneType sceneType) {
 	return SceneTypeToString(sceneType);
 }
 
-/// @brief Json保存用のシーン名を取得する
+/// @brief Json保存用のシーン名を取得
 /// @param sceneType 保存するSceneType
 /// @return Jsonへ保存するシーン名
 std::string GetSceneJsonName(SceneType sceneType) {
@@ -66,7 +66,7 @@ std::string GetSceneJsonName(SceneType sceneType) {
 	return SceneTypeToString(sceneType);
 }
 
-/// @brief 文字列からSceneTypeを取得する
+/// @brief 文字列からSceneTypeを取得
 /// @param sceneName 読み込むシーン名
 /// @return 文字列に対応するSceneType
 SceneType ParseSceneType(const std::string& sceneName) {
@@ -84,7 +84,7 @@ SceneType ParseSceneType(const std::string& sceneName) {
 	return SceneType::None;
 }
 
-/// @brief LightTypeをJson保存用の文字列へ変換する
+/// @brief LightTypeをJson保存用の文字列へ変換
 /// @param type 変換するLightType
 /// @return LightTypeの文字列
 const char* GetLightTypeJsonName(LightType type) {
@@ -100,7 +100,7 @@ const char* GetLightTypeJsonName(LightType type) {
 	}
 }
 
-/// @brief 文字列からLightTypeを取得する
+/// @brief 文字列からLightTypeを取得
 /// @param typeName 読み込むライト種別名
 /// @return 文字列に対応するLightType
 LightType ParseLightType(const std::string& typeName) {
@@ -117,7 +117,7 @@ LightType ParseLightType(const std::string& typeName) {
 	return LightType::None;
 }
 
-/// @brief 平行光源をJsonへ変換する
+/// @brief 平行光源をJsonへ変換
 /// @param light 変換する平行光源
 /// @return 変換されたJson
 nlohmann::json DirectionalLightToJson(const DirectionalLight& light) {
@@ -129,7 +129,7 @@ nlohmann::json DirectionalLightToJson(const DirectionalLight& light) {
 	};
 }
 
-/// @brief 点光源をJsonへ変換する
+/// @brief 点光源をJsonへ変換
 /// @param light 変換する点光源
 /// @return 変換されたJson
 nlohmann::json PointLightToJson(const PointLight& light) {
@@ -142,7 +142,7 @@ nlohmann::json PointLightToJson(const PointLight& light) {
 	};
 }
 
-/// @brief スポットライトをJsonへ変換する
+/// @brief スポットライトをJsonへ変換
 /// @param light 変換するスポットライト
 /// @return 変換されたJson
 nlohmann::json SpotLightToJson(const SpotLight& light) {
@@ -158,7 +158,7 @@ nlohmann::json SpotLightToJson(const SpotLight& light) {
 	};
 }
 
-/// @brief ライト共通情報をJsonへ追加する
+/// @brief ライト共通情報をJsonへ追加
 /// @param json 追加先のJson
 /// @param type 保存するライト種別
 /// @param meta 保存するライト共通情報
@@ -170,7 +170,7 @@ void AddLightMetaDataToJson(nlohmann::json& json, LightType type, const LightMet
 	json["enabled"] = meta.enabled;
 }
 
-/// @brief Jsonから平行光源を読み込む
+/// @brief Jsonから平行光源を読み込み
 /// @param json 読み込み元のJson
 /// @return 読み込んだ平行光源
 DirectionalLight DirectionalLightFromJson(const nlohmann::json& json) {
@@ -187,7 +187,7 @@ DirectionalLight DirectionalLightFromJson(const nlohmann::json& json) {
 	return light;
 }
 
-/// @brief Jsonから点光源を読み込む
+/// @brief Jsonから点光源を読み込み
 /// @param json 読み込み元のJson
 /// @return 読み込んだ点光源
 PointLight PointLightFromJson(const nlohmann::json& json) {
@@ -204,7 +204,7 @@ PointLight PointLightFromJson(const nlohmann::json& json) {
 	return light;
 }
 
-/// @brief Jsonからスポットライトを読み込む
+/// @brief Jsonからスポットライトを読み込み
 /// @param json 読み込み元のJson
 /// @return 読み込んだスポットライト
 SpotLight SpotLightFromJson(const nlohmann::json& json) {

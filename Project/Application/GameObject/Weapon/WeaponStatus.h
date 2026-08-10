@@ -89,7 +89,7 @@ namespace Weapon {
 	/// @brief 指定した強化ステータスの設定を取得
 	/// @param status 参照する武器ステータス
 	/// @param type 取得する強化ステータス
-	/// @return 設定が存在する場合はconstポインターを、存在しない場合はnullptrを返す
+	/// @return 設定が存在する場合はconstポインターを、存在しない場合はnullptr
 	inline const UpgradeValue* FindUpgradeValue(const UpgradeStatus& status, UpgradeStatType type) {
 		switch (type) {
 		case UpgradeStatType::Damage:           return &status.damage;
@@ -110,7 +110,7 @@ namespace Weapon {
 
 	/// @brief レアリティが武器強化の抽選対象か確認
 	/// @param rarity 確認するレアリティ
-	/// @return UncommonからLegendaryの場合はtrueを返す
+	/// @return UncommonからLegendaryの場合はtrue
 	inline bool IsWeaponUpgradeRarity(Rarity rarity) {
 		const int rarityValue = static_cast<int>(rarity);
 		return rarityValue >= static_cast<int>(Rarity::Uncommon) &&
@@ -132,7 +132,7 @@ namespace Weapon {
 	/// @brief Jsonからアップグレード値を読み込み
 	/// @param json 読み込み元のJson
 	/// @param value 読み込み先のアップグレード値
-	/// @return 有効な値を読み込めた場合はtrueを返す
+	/// @return 有効な値を読み込めた場合はtrue
 	inline bool UpgradeValueFromJson(const nlohmann::json& json, UpgradeValue& value) {
 		if (!json.is_object()) {
 			return false;
@@ -198,7 +198,7 @@ namespace Weapon {
 	/// @brief Jsonから武器の初期ステータスを読み込み
 	/// @param json 読み込み元のJson
 	/// @param status 読み込み先の初期ステータス
-	/// @return 有効なステータスを読み込めた場合はtrueを返す
+	/// @return 有効なステータスを読み込めた場合はtrue
 	inline bool UpgradeStatusFromJson(const nlohmann::json& json, UpgradeStatus& status) {
 		if (!json.is_object()) {
 			return false;

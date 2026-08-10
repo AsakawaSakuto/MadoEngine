@@ -17,14 +17,14 @@ enum class SceneType {
 
 inline constexpr uint32_t kSceneTypeCount = static_cast<uint32_t>(SceneType::Count);
 
-/// @brief インデックスからSceneTypeを取得する
+/// @brief インデックスからSceneTypeを取得
 /// @param index 取得するSceneTypeのインデックス
 /// @return インデックスに対応するSceneType
 constexpr SceneType GetSceneTypeByIndex(uint32_t index) {
 	return static_cast<SceneType>(index);
 }
 
-/// @brief SceneType を文字列に変換する
+/// @brief SceneType を文字列に変換
 /// @param type シーンの種類
 /// @return シーン名文字列
 inline std::string SceneTypeToString(SceneType type) {
@@ -38,9 +38,9 @@ inline std::string SceneTypeToString(SceneType type) {
 	}
 }
 
-/// @brief SceneTypeを文字列から取得します。
-/// @param value Scene名。
-/// @return SceneType。
+/// @brief SceneTypeを文字列から取得
+/// @param value Scene名
+/// @return SceneType
 inline SceneType SceneTypeFromString(const std::string& value) {
 	if (value == "Title") { return SceneType::Title; }
 	if (value == "Game") { return SceneType::Game; }

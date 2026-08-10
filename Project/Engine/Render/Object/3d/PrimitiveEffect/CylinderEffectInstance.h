@@ -11,63 +11,63 @@ namespace MadoEngine::Effect {
 	/// @brief Cylinder Effect Assetの1回分の再生状態
 	class CylinderEffectInstance final {
 	public:
-		/// @brief 再生状態を初期化する
+		/// @brief 再生状態を初期化
 		/// @param asset 再生するCylinder Effect Asset
 		/// @param desc 再生設定
 		void Initialize(std::shared_ptr<const CylinderEffectAsset> asset, const PrimitiveEffectPlayDesc& desc);
 
-		/// @brief 再生時刻を更新する
+		/// @brief 再生時刻を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime);
 
-		/// @brief エフェクトを停止する
+		/// @brief エフェクトを停止
 		/// @param mode 停止方法
 		void Stop(PrimitiveEffectStopMode mode);
 
-		/// @brief Cylinder Effectの時間進行を一時停止する
+		/// @brief Cylinder Effectの時間進行を一時停止
 		void Pause();
 
-		/// @brief Cylinder Effectの時間進行を再開する
+		/// @brief Cylinder Effectの時間進行を再開
 		void Resume();
 
-		/// @brief Cylinder Effectの再生速度を設定する
+		/// @brief Cylinder Effectの再生速度を設定
 		/// @param playbackSpeed 設定する再生速度
 		/// @return 有効な再生速度を設定できた場合はtrue
 		bool SetPlaybackSpeed(float playbackSpeed);
 
-		/// @brief Cylinder Effectが一時停止中か確認する
+		/// @brief Cylinder Effectが一時停止中か確認
 		/// @return 一時停止中の場合はtrue
 		bool IsPaused() const {
 			return isPaused_;
 		}
 
-		/// @brief 再生が終了したか確認する
+		/// @brief 再生が終了したか確認
 		/// @return 再生終了済みの場合はtrue
 		bool IsFinished() const;
 
-		/// @brief 描画条件に一致するか確認する
+		/// @brief 描画条件に一致するか確認
 		/// @param sceneType 描画対象Scene
 		/// @param layerMask 描画対象LayerMask
 		/// @return 描画条件に一致する場合はtrue
 		bool Matches(SceneType sceneType, MadoEngine::Render::RenderLayerMask layerMask) const;
 
-		/// @brief 現在値を評価してRendererへ登録する
+		/// @brief 現在値を評価してRendererへ登録
 		/// @param renderer 登録先Renderer
 		void SubmitRenderData(CylinderEffectRenderer3d& renderer) const;
 
-		/// @brief Transformを設定する
+		/// @brief Transformを設定
 		/// @param transform 設定するTransform
 		void SetTransform(const Transform3D& transform) {
 			transform_ = transform;
 		}
 
-		/// @brief Transformを取得する
+		/// @brief Transformを取得
 		/// @return 現在のTransform
 		const Transform3D& GetTransform() const {
 			return transform_;
 		}
 
-		/// @brief 所属Sceneを取得する
+		/// @brief 所属Sceneを取得
 		/// @return 所属Scene
 		SceneType GetSceneType() const {
 			return sceneType_;

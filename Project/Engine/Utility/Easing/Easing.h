@@ -76,7 +76,7 @@ namespace Easing {
         return startNorm * std::cos(theta) + relative * std::sin(theta);
     }
 
-    /// @brief 任意型の補間、行って帰ってくる
+    /// @brief 任意型の往復補間
     /// @param start         開始ベクトル/値
     /// @param end          中間ベクトル/値
     /// @param t               進行状況 0.0～1.0

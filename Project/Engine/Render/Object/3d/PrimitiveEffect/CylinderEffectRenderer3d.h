@@ -16,16 +16,16 @@ namespace MadoEngine::Effect {
 	/// @brief Cylinderエフェクトをバッチ描画するRenderer
 	class CylinderEffectRenderer3d final {
 	public:
-		/// @brief Rendererを構築する
+		/// @brief Rendererを構築
 		CylinderEffectRenderer3d() = default;
 
-		/// @brief 所有するGPUリソースを解放する
+		/// @brief 所有するGPUリソースを解放
 		~CylinderEffectRenderer3d();
 
 		CylinderEffectRenderer3d(const CylinderEffectRenderer3d&) = delete;
 		CylinderEffectRenderer3d& operator=(const CylinderEffectRenderer3d&) = delete;
 
-		/// @brief Rendererを初期化する
+		/// @brief Rendererを初期化
 		/// @param device D3D12Device
 		/// @param commandList 描画に使用するCommandList
 		/// @param psoRegistry PSO Registry
@@ -35,22 +35,22 @@ namespace MadoEngine::Effect {
 			MadoEngine::Render::PSORegistry* psoRegistry
 		);
 
-		/// @brief Rendererが所有するGPUリソースを解放する
+		/// @brief Rendererが所有するGPUリソースを解放
 		void Finalize();
 
-		/// @brief 1回分の描画データ登録を開始する
+		/// @brief 1回分の描画データ登録を開始
 		/// @param camera 描画に使用するCamera
 		void Begin(const Camera& camera);
 
-		/// @brief Cylinder描画データを登録する
+		/// @brief Cylinder描画データを登録
 		/// @param data 登録する描画データ
 		void Submit(const CylinderRenderData& data);
 
-		/// @brief 登録済みCylinderから対象Layerを描画する
+		/// @brief 登録済みCylinderから対象Layerを描画
 		/// @param layerMask 描画対象LayerMask
 		void Draw(MadoEngine::Render::RenderLayerMask layerMask);
 
-		/// @brief 登録済みInstance数を取得する
+		/// @brief 登録済みInstance数を取得
 		/// @return 登録済みInstance数
 		std::size_t GetPendingInstanceCount() const {
 			return instances_.size();
@@ -61,14 +61,14 @@ namespace MadoEngine::Effect {
 			uint32_t radialSegments = 0;
 			uint32_t heightSegments = 0;
 
-			/// @brief 2つのGeometryKeyを比較する
+			/// @brief 2つのGeometryKeyを比較
 			/// @param other 比較対象Key
 			/// @return 分割数が一致する場合はtrue
 			bool operator==(const GeometryKey& other) const = default;
 		};
 
 		struct GeometryKeyHash {
-			/// @brief GeometryKeyのHash値を計算する
+			/// @brief GeometryKeyのHash値を計算
 			/// @param key 計算対象Key
 			/// @return Hash値
 			std::size_t operator()(const GeometryKey& key) const;
@@ -106,21 +106,21 @@ namespace MadoEngine::Effect {
 			MadoEngine::Render::RenderLayer renderLayer = MadoEngine::Render::RenderLayer::Effect;
 		};
 
-		/// @brief InstanceBuffer容量を必要数以上へ拡張する
+		/// @brief InstanceBuffer容量を必要数以上へ拡張
 		/// @param requiredCount 必要なInstance数
 		void EnsureInstanceCapacity(std::size_t requiredCount);
 
-		/// @brief 分割数に対応する共有インデックスを取得する
+		/// @brief 分割数に対応する共有インデックスを取得
 		/// @param key 分割数キー
 		/// @return 共有インデックス
 		SharedGeometry& ResolveGeometry(const GeometryKey& key);
 
-		/// @brief テクスチャ名からTextureIndexを取得する
+		/// @brief テクスチャ名からTextureIndexを取得
 		/// @param textureName TextureManagerへ登録済みの名前
 		/// @return TextureIndex
 		uint32_t ResolveTextureIndex(const std::string& textureName);
 
-		/// @brief Cylinder用PSO設定を作成する
+		/// @brief Cylinder用PSO設定を作成
 		/// @param blendMode BlendMode
 		/// @param cullMode CullMode
 		/// @return Cylinder用PSO設定

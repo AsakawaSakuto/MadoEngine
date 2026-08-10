@@ -32,14 +32,14 @@ namespace {
         }
     }
 
-	/// @brief 保持件数を超えたログ履歴を削除する
+	/// @brief 保持件数を超えたログ履歴を削除
 	void TrimLogEntries() {
 		while (g_logEntries.size() > g_maxBufferedEntries) {
 			g_logEntries.pop_front();
 		}
 	}
 
-	/// @brief ログ履歴へログを追加する
+	/// @brief ログ履歴へログを追加
 	/// @param entry 追加するログ情報
 	void PushLogEntry(Logger::LogEntry entry) {
 		std::lock_guard<std::mutex> lock(g_logEntriesMutex);
@@ -92,7 +92,7 @@ namespace {
         return wideStr;
     }
 
-	/// @brief ログファイルのパスを生成する関数。既に同名のファイルが存在する場合は番号を付けて重複を避ける。
+	/// @brief ログファイルのパスを生成する関数、既に同名のファイルが存在する場合は番号を付けて重複を回避
     std::string GetLogFilePath() {
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
@@ -130,7 +130,7 @@ namespace {
         }
     }
 
-	/// @brief ログファイルを開く関数。必要に応じてディレクトリも作成する。
+	/// @brief ログファイルを開く関数、必要に応じてディレクトリも作成
     void OpenLogFile() {
         std::lock_guard<std::mutex> lock(g_logMutex);
 
@@ -154,7 +154,7 @@ namespace {
         }
     }
 
-	/// @brief ログメッセージをファイルに書き込む関数。スレッドセーフに実装されている。
+	/// @brief ログメッセージをファイルへ書き込むスレッドセーフな関数
     void WriteToFile(const std::string& message) {
         std::lock_guard<std::mutex> lock(g_logMutex);
 
@@ -166,7 +166,7 @@ namespace {
         g_logFile.flush();
     }
 
-	/// @brief ログファイルを閉じる関数。スレッドセーフに実装されている。
+	/// @brief ログファイルを閉じるスレッドセーフな関数
     void CloseLogFile() {
         std::lock_guard<std::mutex> lock(g_logMutex);
 

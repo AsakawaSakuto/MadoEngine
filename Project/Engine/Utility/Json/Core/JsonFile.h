@@ -7,18 +7,18 @@ namespace MadoEngine::Json {
 	/// @brief Jsonファイルの読み込みと保存を担当するユーティリティ
 	class JsonFile {
 	public:
-		/// @brief Jsonファイルが存在するか確認する
+		/// @brief Jsonファイルが存在するか確認
 		/// @param filePath 確認するファイルパス
 		/// @return ファイルが存在する場合はtrue
 		static bool Exists(const std::filesystem::path& filePath);
 
-		/// @brief Jsonファイルを読み込む
+		/// @brief Jsonファイルを読み込み
 		/// @param filePath 読み込むファイルパス
 		/// @param outJson 読み込んだJsonの出力先
 		/// @return 読み込みに成功した場合はtrue
 		static bool Load(const std::filesystem::path& filePath, nlohmann::json& outJson);
 
-		/// @brief Jsonファイルを保存する
+		/// @brief Jsonファイルを保存
 		/// @param filePath 保存先のファイルパス
 		/// @param json 保存するJson
 		/// @param indent インデント幅
@@ -31,7 +31,7 @@ namespace MadoEngine::Json {
 			bool createBackup = false
 		);
 
-		/// @brief Jsonファイルのバックアップを作成する
+		/// @brief Jsonファイルのバックアップを作成
 		/// @param filePath バックアップ元のファイルパス
 		/// @return バックアップに成功した場合はtrue
 		static bool CreateBackup(const std::filesystem::path& filePath);

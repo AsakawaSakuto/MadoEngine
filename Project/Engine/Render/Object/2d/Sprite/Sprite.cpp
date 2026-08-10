@@ -7,7 +7,7 @@
 
 namespace {
 
-	/// @brief Json配列からVector2を読み込む
+	/// @brief Json配列からVector2を読み込み
 	/// @param json 読み込むJson
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだVector2
@@ -22,7 +22,7 @@ namespace {
 		};
 	}
 
-	/// @brief Json配列からVector4を読み込む
+	/// @brief Json配列からVector4を読み込み
 	/// @param json 読み込むJson
 	/// @param fallback 読み込みに失敗した場合の値
 	/// @return 読み込んだVector4

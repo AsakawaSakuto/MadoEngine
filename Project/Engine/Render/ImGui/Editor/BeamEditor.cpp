@@ -36,7 +36,7 @@ namespace {
 		"EaseInBounce", "EaseOutBounce", "EaseInOutBounce", "EaseOutInBounce", "None",
 	};
 
-	/// @brief 文字列を固定長Bufferへコピーする
+	/// @brief 文字列を固定長Bufferへコピー
 	/// @tparam Size Buffer要素数
 	/// @param buffer コピー先Buffer
 	/// @param text コピー元文字列
@@ -46,7 +46,7 @@ namespace {
 		strncpy_s(buffer.data(), buffer.size(), text.c_str(), _TRUNCATE);
 	}
 
-	/// @brief 使用可能なBeam Asset名を生成する
+	/// @brief 使用可能なBeam Asset名を生成
 	/// @param system 名前を確認するSystem
 	/// @param createdName 初期名または直前に作成した名前
 	/// @return 使用可能な名前
@@ -86,7 +86,7 @@ namespace {
 		}
 	}
 
-	/// @brief イージング種類を選択するComboを描画する
+	/// @brief イージング種類を選択するComboを描画
 	/// @param label UI表示名
 	/// @param easing 編集対象イージング
 	/// @return 値を変更した場合はtrue
@@ -103,10 +103,10 @@ namespace {
 		return true;
 	}
 
-	/// @brief Keyframe追加に使う空き時刻を探す
+	/// @brief Keyframe追加に使う空き時刻を探索
 	/// @tparam T Track値型
 	/// @param keys 時刻順Keyframe
-	/// @return 追加時刻。空きがない場合はstd::nullopt
+	/// @return 追加時刻、空きがない場合はstd::nullopt
 	template<class T>
 	std::optional<float> FindInsertionTime(const std::vector<EffectKeyframe<T>>& keys) {
 		constexpr float minimumGap = 0.0001f;
@@ -134,7 +134,7 @@ namespace {
 			: std::nullopt;
 	}
 
-	/// @brief 操作しやすい表形式のEffect Track Editorを描画する
+	/// @brief 操作しやすい表形式のEffect Track Editorを描画
 	/// @tparam T Track値型
 	/// @tparam ValueDrawer 値編集関数型
 	/// @param label UI表示名
@@ -262,7 +262,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief float Track編集UIを描画する
+	/// @brief float Track編集UIを描画
 	/// @param label UI表示名
 	/// @param track 編集対象Track
 	/// @param minimumValue 値下限
@@ -278,7 +278,7 @@ namespace {
 		});
 	}
 
-	/// @brief Color Track編集UIを描画する
+	/// @brief Color Track編集UIを描画
 	/// @param label UI表示名
 	/// @param track 編集対象Track
 	/// @return 値を変更した場合はtrue
@@ -292,7 +292,7 @@ namespace {
 		});
 	}
 
-	/// @brief 基本設定を編集する
+	/// @brief 基本設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawBasicEditor(BeamEffectConfig& config) {
@@ -311,7 +311,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief 形状設定を編集する
+	/// @brief 形状設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawGeometryEditor(BeamEffectConfig& config) {
@@ -328,7 +328,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Noise設定を編集する
+	/// @brief Noise設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawNoiseEditor(BeamEffectConfig& config) {
@@ -345,7 +345,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Material設定を編集する
+	/// @brief Material設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawMaterialEditor(BeamEffectConfig& config) {
@@ -372,7 +372,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief UV設定を編集する
+	/// @brief UV設定を編集
 	/// @param config 編集対象設定
 	/// @return 値を変更した場合はtrue
 	bool DrawUvEditor(BeamEffectConfig& config) {
@@ -392,7 +392,7 @@ namespace {
 		return changed;
 	}
 
-	/// @brief Beam Previewを即時停止する
+	/// @brief Beam Previewを即時停止
 	/// @param system 停止に使用するSystem
 	/// @param handle 停止するHandle
 	void StopPreview(BeamEffectSystem3d& system, BeamEffectHandle& handle) {

@@ -15,12 +15,12 @@ namespace Enemy {
 		constexpr float kSideClimbCrestGraceTime = 0.25f; // 側面上昇補助の頂点での猶予時間
 		constexpr float kSideClimbCrestSpeedScale = 0.6f; // 側面上昇補助の頂点での速度倍率
 
-		/// @brief 水平方向の長さの2乗を取得する
+		/// @brief 水平方向の長さの2乗を取得
 		/// @param value 対象のベクトル
 		/// @return XZ平面での長さの2乗
 		float GetHorizontalLengthSq(const Vector3& value) { return value.x * value.x + value.z * value.z; }
 
-		/// @brief 長さがあれば正規化し、短すぎる場合は代替ベクトルを返す
+		/// @brief 長さがあれば正規化し、短すぎる場合は代替ベクトルを返却
 		/// @param value 正規化するベクトル
 		/// @param fallback 代替として使用するベクトル
 		/// @return 正規化済み、または代替のベクトル
@@ -34,17 +34,17 @@ namespace Enemy {
 			return value * invLength;
 		}
 
-		/// @brief 水平Yawから前方向ベクトルを作成する
+		/// @brief 水平Yawから前方向ベクトルを作成
 		/// @param yaw 水平Yaw角度
 		/// @return XZ平面上の前方向
 		Vector3 CreateHorizontalForward(float yaw) { return { std::sin(yaw), 0.0f, std::cos(yaw) }; }
 
-		/// @brief 水平Yawから右方向ベクトルを作成する
+		/// @brief 水平Yawから右方向ベクトルを作成
 		/// @param yaw 水平Yaw角度
 		/// @return XZ平面上の右方向
 		Vector3 CreateHorizontalRight(float yaw) { return { std::cos(yaw), 0.0f, -std::sin(yaw) }; }
 
-		/// @brief 回転行列の各軸からEuler角を復元する
+		/// @brief 回転行列の各軸からEuler角を復元
 		/// @param right ローカルX軸のワールド方向
 		/// @param up ローカルY軸のワールド方向
 		/// @param forward ローカルZ軸のワールド方向
@@ -66,7 +66,7 @@ namespace Enemy {
 			return euler;
 		}
 
-		/// @brief 坂の法線と向きに沿ったModel回転を作成する
+		/// @brief 坂の法線と向きに沿ったModel回転を作成
 		/// @param faceYaw Enemyが向いている水平Yaw角度
 		/// @param slopeNormal 坂上面の法線
 		/// @return 坂に沿ったModel回転
