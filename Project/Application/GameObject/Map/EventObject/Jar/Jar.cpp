@@ -79,6 +79,8 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	InstancedModel* normalBatch = MyInstancedModel::TryGet(normalBatchHandle);
 	InstancedModel* outlineBatch = MyInstancedModel::TryGet(outlineBatchHandle);
 	if (normalBatch && outlineBatch) {
+
+		// 強調表示をInstanceの表示切り替えだけで完結させるため同一Transformを二重登録
 		normalBatch->SetTexture("white16x16");
 		outlineBatch->SetTexture("white16x16");
 
@@ -104,6 +106,8 @@ void Jar::Update(float deltaTime) {
 }
 
 bool Jar::Interact(Player::Base& player) {
+
+	// Jar種別で付与先を分けつつサイズに応じた共通報酬量を適用
 	const int rewardAmount = CalculateRewardAmount(size_);
 	if (type_ == JarType::Exp) {
 		player.AddExp(rewardAmount);

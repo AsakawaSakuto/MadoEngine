@@ -40,6 +40,7 @@ namespace Enemy {
 		hitColliderName_ = CreateColliderName("EnemyHitBox");
 		modelName_ = CreateModelName();
 
+		// 移動解決とProjectile被弾で形状とTagを使い分けるためColliderを分離
 		MyCollider::RegisterCollider(movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate,
 									 0.0f);
 		MyCollider::RegisterCollider(hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
@@ -55,6 +56,8 @@ namespace Enemy {
 	}
 
 	void Base::Update(float deltaTime) {
+
+		// 死亡後も残る被弾間隔とDamage演出を破棄まで進行
 		UpdateProjectileDamageCooldowns(deltaTime);
 		UpdateAppearance(deltaTime);
 
@@ -97,6 +100,8 @@ namespace Enemy {
 
 	ProjectileDamageResult Base::TakeProjectileDamage(std::uint64_t projectileId, float damage) {
 		ProjectileDamageResult result;
+
+		// 不正なProjectile識別子と非有限Damageを状態へ反映しないため入力を検証
 		if (!isActive_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
 			return result;
 		}
@@ -105,6 +110,7 @@ namespace Enemy {
 			return result;
 		}
 
+		// 同じProjectileが接触中に毎フレームDamageを与えないよう識別子単位で待機時間を登録
 		const float healthBeforeDamage = status_.currentHealth;
 		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
 		projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
@@ -136,6 +142,7 @@ namespace Enemy {
 			return;
 		}
 
+		// erase後のIteratorを受け取りながら期限切れ要素を安全に除去
 		for (auto iterator = projectileDamageCooldowns_.begin(); iterator != projectileDamageCooldowns_.end();) {
 			iterator->second -= deltaTime;
 			if (iterator->second <= 0.0f) {
@@ -158,6 +165,8 @@ namespace Enemy {
 	void Base::UpdateAppearance(float deltaTime) {
 		const Vector4 baseColor = gamingColor_.Update(deltaTime, 1.0f);
 		if (damageFlashRemainingTime_ > 0.0f) {
+
+			// 通常色のAnimationより被弾Flashを優先して表示
 			if (std::isfinite(deltaTime) && deltaTime > 0.0f) {
 				damageFlashRemainingTime_ = std::max(0.0f, damageFlashRemainingTime_ - deltaTime);
 			}
@@ -174,6 +183,8 @@ namespace Enemy {
 	}
 
 	void Base::SpawnDeathReward() {
+
+		// Killの重複呼び出しで経験値Dropが複製されないよう一度だけ生成
 		if (isDeathRewardSpawned_) {
 			return;
 		}
@@ -194,6 +205,8 @@ namespace Enemy {
 	}
 
 	void Base::Release() {
+
+		// Destructorと明示解放の重複呼び出しからColliderとModelを保護
 		if (isReleased_) {
 			return;
 		}

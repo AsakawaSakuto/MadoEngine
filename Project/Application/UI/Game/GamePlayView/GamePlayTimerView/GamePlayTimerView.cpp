@@ -23,6 +23,8 @@ namespace UI::Game {
 		}
 
 		const int remainingSeconds = static_cast<int>(std::ceil((std::max)(0.0f, remainingTime)));
+
+		// 表示秒数が変化したFrameだけTextを更新
 		if (remainingSeconds == displayedRemainingSeconds_) {
 			return;
 		}

@@ -21,6 +21,8 @@ namespace Weapon {
 	}
 
 	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
+
+		// 各武器の射撃結果をUIと演出向けの一時イベント列へ集約
 		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
 			std::unique_ptr<BaseWeapon>& weapon = weapons_[slotIndex];
 			if (!weapon) {
@@ -57,6 +59,7 @@ namespace Weapon {
 			weapons_.resize(slotCount_);
 		}
 
+		// スロット順を維持するため先頭の空き領域へ追加
 		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
 			if (!weapons_[slotIndex] || weapons_[slotIndex]->GetProjectileType() == Projectile::Type::None) {
 				auto weapon = std::make_unique<BaseWeapon>();
@@ -66,6 +69,8 @@ namespace Weapon {
 				}
 
 				weapons_[slotIndex] = std::move(weapon);
+
+				// 強化候補など装備状態に依存する外部キャッシュを無効化
 				++revision_;
 				return true;
 			}
@@ -130,6 +135,8 @@ namespace Weapon {
 	}
 
 	std::vector<WeaponFiredEvent> Inventory::ConsumeWeaponFiredEvents() {
+
+		// 返却と同時に内部キューを空にして同一イベントの再処理を防止
 		std::vector<WeaponFiredEvent> events;
 		events.swap(weaponFiredEvents_);
 		return events;
@@ -147,6 +154,8 @@ namespace Weapon {
 
 		if (weapons_[weaponIndex]) {
 			weapons_[weaponIndex].reset();
+
+			// 装備削除を強化候補の世代管理へ通知
 			++revision_;
 		}
 	}
@@ -166,6 +175,7 @@ namespace Weapon {
 		ImGui::Text("武器スロット: %d / %d", weaponCount, slotCount_);
 		ImGui::Separator();
 
+		// 未装備かつ追加可能な武器だけをDebug操作の追加対象として有効化
 		const std::string selectedWeaponName = ProjectileTypeToString(selectedAddWeaponType_);
 		if (ImGui::BeginCombo("追加する武器", selectedWeaponName.c_str())) {
 			for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {

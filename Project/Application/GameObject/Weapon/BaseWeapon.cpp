@@ -26,6 +26,8 @@ namespace Weapon {
 		/// @param type 取得する強化ステータス
 		/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
 		UpgradeValue* FindMutableUpgradeValue(UpgradeStatus& status, UpgradeStatType type) {
+
+			// 選択TypeをUpgradeStatus内の唯一の更新先へ対応付け
 			switch (type) {
 			case UpgradeStatType::Damage:           return &status.damage;
 			case UpgradeStatType::ShotMaxCount:     return &status.shotMaxCount;
@@ -54,7 +56,7 @@ namespace Weapon {
 		const std::string weaponName = ProjectileTypeToString(type);
 		const std::string jsonPath = "Assets/Json/Weapon/" + Projectile::ProjectileTypeToJsonFileName(type) + ".json";
 
-		// 武器のステータスをJsonから読み込みます。
+		// 実行時の武器性能を外部調整可能なJsonから復元
 		nlohmann::json json;
 		if (!MadoEngine::Json::JsonFile::Load(jsonPath, json)) {
 			Logger::Output("[Assets] 武器ステータスの読み込みに失敗しました: " + jsonPath, Logger::Level::Error);
@@ -63,6 +65,8 @@ namespace Weapon {
 
 		const nlohmann::json* statusJson = &json;
 		if (json.is_object() && json.contains("upgradeStatus")) {
+
+			// Editorの保存形式とステータス単体形式の両方を受け入れ
 			statusJson = &json.at("upgradeStatus");
 		}
 
@@ -82,6 +86,7 @@ namespace Weapon {
 		shotNowCount_ = 0;
 		wasFiredThisFrame_ = false;
 
+		// 初弾を射撃可能にしつつ連射間隔Timerだけを待機状態で開始
 		intervalTimer_.Start(status_.shotIntervalTime.value, true);
 		cooldownTimer_.Reset();
 		return true;
@@ -98,6 +103,7 @@ namespace Weapon {
 				continue;
 			}
 
+			// 候補表示後の計算失敗を防ぐため全レアリティの加算値を事前検証
 			bool canUseForAllRarities = true;
 			for (int rarityValue = static_cast<int>(Rarity::Uncommon);
 				rarityValue <= static_cast<int>(Rarity::Legendary); ++rarityValue) {
@@ -118,6 +124,8 @@ namespace Weapon {
 
 	bool BaseWeapon::CalculateUpgradeAmount(UpgradeStatType statType, Rarity rarity, float& outAmount) const {
 		outAmount = 0.0f;
+
+		// 武器強化用Rarityと有限な設定値だけを計算対象として受付
 		if (!IsWeaponUpgradeRarity(rarity)) {
 			return false;
 		}
@@ -146,6 +154,7 @@ namespace Weapon {
 			return false;
 		}
 
+		// 候補生成時と適用時の値が一致する場合だけステータスを更新
 		UpgradeValue* value = FindMutableUpgradeValue(status_, statType);
 		if (!value) {
 			return false;
@@ -163,7 +172,8 @@ namespace Weapon {
 	}
 
 	void BaseWeapon::CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
-		// クールタイムが終了している場合射撃を開始する
+
+		// Burst間のCooldown終了後に次の射撃間隔Timerを再開
 		if (cooldownTimer_.IsFinished()) {
 			if (!intervalTimer_.IsActive()) {
 				intervalTimer_.Start(status_.shotIntervalTime.value, true);
@@ -171,7 +181,7 @@ namespace Weapon {
 			}
 		}
 
-		// 最大数射撃数に達していない場合、射撃間隔が終了したら射撃を行う
+		// 射撃間隔ごとに現在の強化値を反映したProjectileを生成
 		if (intervalTimer_.IsFinished()) {
 			shotNowCount_++;
 			projectileCount_++;
@@ -191,7 +201,7 @@ namespace Weapon {
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 			wasFiredThisFrame_ = true;
 
-			// 最大射撃数に達した場合、射撃数をリセットしてクールダウンを開始する
+			// 最大射撃数へ到達したBurstを閉じてCooldownへ遷移
 			if (shotNowCount_ >= static_cast<int>(status_.shotMaxCount.value)) {
 				shotNowCount_ = 0;
 				intervalTimer_.Reset();
@@ -199,6 +209,7 @@ namespace Weapon {
 			}
 		}
 
+		// 判定後にTimerを進めて完了イベントを次フレームの射撃へ反映
 		intervalTimer_.Update(deltaTime);
 		cooldownTimer_.Update(deltaTime);
 	}

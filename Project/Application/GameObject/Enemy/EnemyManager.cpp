@@ -28,6 +28,8 @@ namespace Enemy {
 	}
 
 	void Manager::ResolveAfterCollision() {
+
+		// 全EnemyへCollider解決結果を反映してから相互作用と削除をまとめて処理
 		for (std::unique_ptr<Base>& enemy : enemies_) {
 			if (enemy) {
 				enemy->ResolveAfterCollision();
@@ -62,6 +64,7 @@ namespace Enemy {
 		float nearestDistanceSq = 0.0f;
 		bool foundEnemy = false;
 
+		// 平方根を避けた距離比較で有効なEnemyだけを探索
 		for (const std::unique_ptr<Base>& enemy : enemies_) {
 			if (!enemy || !enemy->IsActive()) {
 				continue;
@@ -87,6 +90,8 @@ namespace Enemy {
 
 	std::vector<ProjectileDamageEvent> Manager::ConsumeProjectileDamageEvents() {
 		std::vector<ProjectileDamageEvent> events;
+
+		// 未処理Eventの所有権を定数時間で呼び出し側へ移動
 		events.swap(projectileDamageEvents_);
 		return events;
 	}
@@ -97,6 +102,8 @@ namespace Enemy {
 
 		std::unordered_map<std::uint32_t, Base*> enemiesById;
 		enemiesById.reserve(enemies_.size());
+
+		// Projectile側へ渡すSnapshotとHit結果を戻すID索引を同時に構築
 		for (std::unique_ptr<Base>& enemy : enemies_) {
 			if (!enemy || !enemy->IsActive()) {
 				continue;
@@ -142,6 +149,8 @@ namespace Enemy {
 			}
 
 			if (enemy->IsHitPlayer()) {
+
+				// 一度の接触でPlayerへのDamageとEnemy消滅を確定して連続Damageを防止
 				player_->TakeDamage(enemy->GetPower());
 				enemy->Kill();
 				continue;
@@ -154,6 +163,8 @@ namespace Enemy {
 	}
 
 	void Manager::RemoveInactiveEnemies() {
+
+		// 判定中のContainer無効化を避けるため全相互作用の完了後にまとめて削除
 		enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
 									  [](const std::unique_ptr<Base>& enemy) { return !enemy || !enemy->IsActive(); }),
 					   enemies_.end());

@@ -14,7 +14,7 @@ namespace Weapon {
 			int weight;
 		};
 
-		// Uniqueを含めず、武器強化専用の抽選テーブルを明示します。
+		// 新武器取得専用のUniqueを除外した武器強化用抽選テーブル
 		constexpr std::array<RarityWeight, 4> kRarityWeights = {
 			RarityWeight{ Rarity::Uncommon,  60 },
 			RarityWeight{ Rarity::Rare,      25 },
@@ -78,6 +78,8 @@ namespace Weapon {
 		bool levelIncreased = false;
 		if (currentPlayerLevel > previousPlayerLevel_) {
 			const int levelDifference = currentPlayerLevel - previousPlayerLevel_;
+
+			// 大きなレベル差でも未処理回数の整数Overflowを防止
 			if (pendingUpgradeCount_ <= std::numeric_limits<int>::max() - levelDifference) {
 				pendingUpgradeCount_ += levelDifference;
 			} else {
@@ -93,10 +95,12 @@ namespace Weapon {
 			);
 		}
 
-		// レベルが下がった場合も未処理回数は維持し、比較基準だけを同期します。
+		// レベル低下時も未処理回数を維持して次回差分の比較基準だけを同期
 		previousPlayerLevel_ = currentPlayerLevel;
 
 		if (!choices_.empty() && inventory.GetRevision() != choiceInventoryRevision_) {
+
+			// 装備変更前の候補を選択できないよう表示候補を破棄
 			choices_.clear();
 			hasGenerationAttempted_ = false;
 			Logger::Output("[Application] 装備状態が変化したため武器アップグレード候補を更新します。", Logger::Level::Debug);
@@ -108,6 +112,8 @@ namespace Weapon {
 
 		const bool inventoryChanged = !hasGenerationAttempted_ ||
 			lastGenerationAttemptRevision_ != inventory.GetRevision();
+
+		// 生成失敗を毎フレーム再試行せず状態変化時だけ再生成
 		if (levelIncreased || inventoryChanged) {
 			GenerateChoices(inventory);
 		}
@@ -120,6 +126,8 @@ namespace Weapon {
 
 		std::vector<Projectile::Type> candidateWeapons;
 		candidateWeapons.reserve(Projectile::kPlayableWeaponTypes.size());
+
+		// 所持武器は強化可能なもの、未所持武器は空きSlotがある場合だけ候補化
 		for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {
 			const BaseWeapon* weapon = inventory.GetWeapon(weaponType);
 			if (weapon) {
@@ -143,6 +151,7 @@ namespace Weapon {
 		choiceInventoryRevision_ = inventory.GetRevision();
 		choices_.reserve(kChoiceCount);
 
+		// 候補ごとに抽選済み武器を除外して三種類の武器を保証
 		for (std::size_t choiceIndex = 0; choiceIndex < kChoiceCount; ++choiceIndex) {
 			const int randomIndex = random_.Int(0, static_cast<int>(candidateWeapons.size()) - 1);
 			const Projectile::Type weaponType = candidateWeapons[static_cast<std::size_t>(randomIndex)];
@@ -155,6 +164,8 @@ namespace Weapon {
 
 			const BaseWeapon* weapon = inventory.GetWeapon(weaponType);
 			if (!weapon) {
+
+				// 未所持武器はステータス強化ではなく新規装備候補として構築
 				choice.choiceType = UpgradeChoiceType::NewWeapon;
 				choice.choiceTypeDisplayName = "新しい武器を装備";
 				choices_.push_back(std::move(choice));
@@ -176,6 +187,8 @@ namespace Weapon {
 			const Rarity rarity = DrawRarity();
 			float calculatedAmount = 0.0f;
 			if (!weapon->CalculateUpgradeAmount(statType, rarity, calculatedAmount)) {
+
+				// 不完全な候補群を表示しないよう生成全体を取り消し
 				choices_.clear();
 				if (!generationFailureLogged_) {
 					Logger::Output("[Application] 武器の強化加算値を計算できません。", Logger::Level::Error);
@@ -208,6 +221,8 @@ namespace Weapon {
 
 		const int draw = random_.Int(1, totalWeight);
 		int cumulativeWeight = 0;
+
+		// 累積区間へ抽選値を対応付けて重み付きレアリティを決定
 		for (const RarityWeight& entry : kRarityWeights) {
 			cumulativeWeight += entry.weight;
 			if (draw <= cumulativeWeight) {
@@ -235,6 +250,7 @@ namespace Weapon {
 			return false;
 		}
 
+		// 候補種別ごとに現在の装備状態を再検証してから適用
 		bool applied = false;
 		if (choice.choiceType == UpgradeChoiceType::NewWeapon) {
 			if (choice.statType || choice.rarity || inventory.HasWeapon(choice.weaponType) || !inventory.HasEmptySlot()) {
@@ -256,6 +272,8 @@ namespace Weapon {
 			}
 
 			float recalculatedAmount = 0.0f;
+
+			// 表示後の設定変更や不正な候補改変を適用直前の再計算で拒否
 			if (!weapon->CalculateUpgradeAmount(*choice.statType, *choice.rarity, recalculatedAmount) ||
 				!IsSameUpgradeAmount(recalculatedAmount, choice.calculatedAmount)) {
 				Logger::Output("[Application] 表示時と適用時の武器強化値が一致しません。", Logger::Level::Error);
@@ -276,6 +294,7 @@ namespace Weapon {
 			return false;
 		}
 
+		// 一回分を消費し、残数がある場合は新しい世代の候補を即時生成
 		--pendingUpgradeCount_;
 		Logger::Output(
 			"[Application] 武器アップグレードを適用しました: " + choice.weaponDisplayName +

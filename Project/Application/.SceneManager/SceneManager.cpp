@@ -37,6 +37,7 @@ namespace {
 		const Vector4 enabledSpotColor = { 0.1f, 0.8f, 1.0f, 1.0f };
 		const Vector4 disabledSpotColor = { 0.05f, 0.25f, 0.35f, 1.0f };
 
+		// Light種別と有効状態を色分けしてEditor上の配置確認を補助
 		for (LightHandle handle : lightManager.GetPointLightHandles()) {
 			const PointLight* light = lightManager.GetPointLightData(handle);
 			if (!light) {
@@ -75,6 +76,7 @@ SceneManager::~SceneManager() {
 		return;
 	}
 
+	// Scene本体を終了してから所属Resourceを管理Systemごとに一括破棄
 	const SceneType previousSceneType = currentSceneType_;
 	MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
@@ -103,7 +105,7 @@ void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
 void SceneManager::Initialize(SceneType initialScene) {
 	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
 
-	// 入力とコライダーの登録
+	// Scene生成前に共通入力Actionと衝突Pairを登録
 	RegisterInput();
 	RegisterColliderPair();
 
@@ -113,11 +115,15 @@ void SceneManager::Initialize(SceneType initialScene) {
 }
 
 void SceneManager::Update(float dt) {
+
+	// Scene処理が参照するCollider状態をFrame先頭で更新
 	ColliderManager::GetInstance().Update();
 
 	if (currentScene_) {
 		SceneType next = currentScene_->Update(dt);
 		if (next != currentSceneType_) {
+
+			// 更新中のResource破棄を避けるためScene変更を予約
 			RequestSceneChange(next);
 		}
 	}
@@ -125,6 +131,7 @@ void SceneManager::Update(float dt) {
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 	AddLightPositionDebugSpheres();
 
+	// Scene固有更新後のTransformを各描画Systemへ同期
 	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
 	MadoEngine::TextManager::GetInstance().UpdateAll(currentSceneType_);
 
@@ -150,6 +157,8 @@ void SceneManager::DrawLayer(MadoEngine::Render::RenderLayer layer) {
 }
 
 void SceneManager::DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {
+
+	// 不透明、透明、Overlayの順序を維持したLayerMask描画
 	DrawSceneLayerMask(layerMask);
 	DrawParticleLayerMask(layerMask);
 	DrawOverlayLayerMask(layerMask);
@@ -173,6 +182,8 @@ void SceneManager::DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask lay
 	}
 
 	const Camera camera = currentScene_->GetCamera();
+
+	// 透明系Effectを共通CameraとLayerMaskで同じ描画段階へ集約
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().DrawLayerMask(
 		currentSceneType_,
 		camera,
@@ -268,6 +279,7 @@ void SceneManager::DrawSceneManagerImGui() {
 			ImGui::TextDisabled("登録されているシーンはありません");
 		}
 
+		// 現在Sceneを除いた登録済みFactoryだけを遷移先として受付
 		for (const auto& sceneCreator : creators_) {
 			const SceneType type = sceneCreator.first;
 			const std::string sceneName = SceneTypeToString(type);
@@ -299,6 +311,8 @@ void SceneManager::ApplyPendingSceneChange() {
 	}
 
 	const SceneType nextSceneType = pendingSceneType_;
+
+	// ChangeScene中の再要求と混在しないよう予約状態を先に解除
 	hasPendingSceneChange_ = false;
 	pendingSceneType_ = SceneType::None;
 
@@ -311,6 +325,8 @@ void SceneManager::RequestSceneChange(SceneType type) {
 	}
 
 	if (creators_.find(type) == creators_.end()) {
+
+		// 未登録Typeによる現在Sceneの破棄を事前に阻止
 		Logger::Output("未登録のシーン遷移が要求されました: " + SceneTypeToString(type), Logger::Level::Error);
 		assert(false && "未登録のSceneTypeが指定されました。SceneManager::RegisterScene()で事前登録してください。");
 		return;
@@ -330,6 +346,8 @@ void SceneManager::ChangeScene(SceneType type) {
 	}
 
 	if (currentScene_) {
+
+		// 旧SceneのHandleが新Sceneへ残らないよう全所属Resourceを生成前に破棄
 		const SceneType previousSceneType = currentSceneType_;
 		MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
@@ -351,6 +369,7 @@ void SceneManager::ChangeScene(SceneType type) {
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}
 
+	// Editor管理Objectを復元してからScene固有初期化を実行
 	currentScene_ = it->second();
 	currentSceneType_ = type;
 	LoadEditorSceneObjects(currentSceneType_);

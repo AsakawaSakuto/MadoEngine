@@ -21,6 +21,8 @@ namespace Weapon {
 			}
 
 			const char* invalidCharacters = "\\/:*?\"<>|";
+
+			// Windowsで使用できないFile名文字を安全な区切りへ置換
 			for (char& character : sanitizedName) {
 				if (std::strchr(invalidCharacters, character)) {
 					character = '_';
@@ -35,6 +37,8 @@ namespace Weapon {
 		/// @param label 表示名
 		/// @param value 編集するアップグレード値
 		void DrawUpgradeValueTableRow(const char* label, UpgradeValue& value) {
+
+			// 一つの強化値を初期値、固定加算、Rarity加算、候補化の列へ展開
 			ImGui::PushID(label);
 			ImGui::TableNextRow();
 
@@ -64,6 +68,8 @@ namespace Weapon {
 	bool StatusEditor::SaveToJson() const {
 		const std::string filePath = GetJsonFilePath();
 		nlohmann::json json;
+
+		// Editor用の名前と実行時ステータスを一つのDocumentへ保存
 		json["name"] = SanitizeJsonName(statusName_);
 		json["upgradeStatus"] = UpgradeStatusToJson(editingStatus_);
 
@@ -78,6 +84,8 @@ namespace Weapon {
 	bool StatusEditor::LoadOrCreateJson() {
 		const std::string filePath = GetJsonFilePath();
 		if (!MadoEngine::Json::JsonFile::Exists(filePath)) {
+
+			// 初回選択時は現在の編集値を初期設定ファイルとして生成
 			Logger::Output("[Assets] 武器初期ステータスJsonが存在しないため作成します: " + filePath, Logger::Level::Assets);
 			return SaveToJson();
 		}
@@ -89,6 +97,8 @@ namespace Weapon {
 
 		const nlohmann::json* statusJson = &json;
 		if (json.is_object() && json.contains("upgradeStatus")) {
+
+			// Editor保存形式とステータス単体形式の両方へ対応
 			statusJson = &json.at("upgradeStatus");
 		}
 
@@ -111,6 +121,7 @@ namespace Weapon {
 
 		ImGui::Begin("武器初期ステータス");
 
+		// Jsonファイル名をPlayer向けの武器表示名へ変換
 		const char* selectedWeaponDisplayName = statusName_;
 		for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {
 			if (Projectile::ProjectileTypeToJsonFileName(weaponType) == statusName_) {
@@ -151,6 +162,8 @@ namespace Weapon {
 			ImGuiTableFlags_RowBg |
 			ImGuiTableFlags_Resizable |
 			ImGuiTableFlags_SizingStretchProp;
+
+		// 全武器で共通する初期値とレアリティ加算設定を一覧編集
 		if (ImGui::BeginTable("WeaponInitialStatusTable", 5, tableFlags, ImVec2(-1.0f, 0.0f))) {
 			ImGui::TableSetupColumn("ステータス", ImGuiTableColumnFlags_WidthFixed, 160.0f);
 			ImGui::TableSetupColumn("初期値", ImGuiTableColumnFlags_WidthStretch, 1.0f);

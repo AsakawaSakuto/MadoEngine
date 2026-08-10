@@ -34,6 +34,8 @@ namespace Enemy {
 		elapsedTime_ += deltaTime;
 		spawnTimer_ += deltaTime;
 		spawnInterval_ = std::max(spawnInterval_, kMinSpawnInterval);
+
+		// 長いFrameでも経過した生成周期を取りこぼさないようTimer残量を順次消費
 		while (spawnTimer_ >= spawnInterval_) {
 			spawnTimer_ -= spawnInterval_;
 			if (enemyManager_->GetEnemyCount() < spawnLimit_) {
@@ -52,6 +54,8 @@ namespace Enemy {
 		ImGui::DragFloat("生成間隔（秒）", &spawnInterval_, 0.1f, kMinSpawnInterval, 600.0f, "%.1f");
 		ImGui::DragFloat("体力・攻撃力強化率（毎分）", &healthPowerGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat("移動速度強化率（毎分）", &moveSpeedGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
+
+		// 直接入力されたDebug値も実行可能な範囲へ制限
 		spawnInterval_ = std::max(spawnInterval_, kMinSpawnInterval);
 		healthPowerGrowthRatePerMinute_ = std::max(healthPowerGrowthRatePerMinute_, 0.0f);
 		moveSpeedGrowthRatePerMinute_ = std::max(moveSpeedGrowthRatePerMinute_, 0.0f);
@@ -90,6 +94,7 @@ namespace Enemy {
 		Vector3 spawnPosition = { playerPosition.x + std::sin(angle) * radius, playerPosition.y + kSpawnHeightOffset,
 								  playerPosition.z + std::cos(angle) * radius };
 
+		// Player周囲の生成位置がMap外へ出ないよう最終座標を範囲内へ制限
 		spawnPosition.x = std::clamp(spawnPosition.x, mapLimit_.min.x, mapLimit_.max.x);
 		spawnPosition.y = std::clamp(spawnPosition.y, mapLimit_.min.y, mapLimit_.max.y);
 		spawnPosition.z = std::clamp(spawnPosition.z, mapLimit_.min.z, mapLimit_.max.z);
@@ -97,6 +102,8 @@ namespace Enemy {
 	}
 
 	Data::Status Spawner::CalculateSpawnStatus() const {
+
+		// 経過分数へ線形成長率を適用して長時間Play時の難易度を上昇
 		const float elapsedMinutes = elapsedTime_ / kSecondsPerMinute;
 		const float healthPowerMultiplier = 1.0f + elapsedMinutes * healthPowerGrowthRatePerMinute_;
 		const float moveSpeedMultiplier = 1.0f + elapsedMinutes * moveSpeedGrowthRatePerMinute_;

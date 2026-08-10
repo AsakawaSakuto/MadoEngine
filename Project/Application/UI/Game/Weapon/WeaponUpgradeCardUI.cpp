@@ -70,6 +70,7 @@ void WeaponUpgradeCardUI::Initialize(std::size_t cardIndex) {
 	const std::string suffix = std::to_string(cardIndex_);
 	const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
 
+	// Cardを構成するSpriteとTextをIndex付きの一意名で事前生成
 	cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)] = MySprite::Create(
 		std::string(kCardObjectNamePrefix) + "Border" + suffix,
 		"white16x16",
@@ -125,6 +126,8 @@ void WeaponUpgradeCardUI::Finalize() {
 	if (!isInitialized_) {
 		return;
 	}
+
+	// Scene管理側のResource破棄に任せてUI側はHandleと演出状態だけを解放
 	cardSprites_.fill({});
 	cardIconSprite_ = {};
 	weaponNameText_ = {};
@@ -146,6 +149,8 @@ void WeaponUpgradeCardUI::Finalize() {
 }
 
 void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
+
+	// 前候補の選択演出を持ち越さない初期状態へ復帰
 	scaleTransitionTimer_.Reset();
 	selectedPulseTimer_.Reset();
 	scaleTransitionStart_ = 1.0f;
@@ -163,6 +168,7 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 		weaponNameText->SetText(choice.weaponDisplayName);
 	}
 
+	// 所持武器強化と新規武器でCard配色と表示情報を切り替え
 	const bool isOwnedWeaponUpgrade = choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade;
 	accentColor_ = isOwnedWeaponUpgrade ? ToVector4(choice.rarityDisplayColor) : kNewWeaponColor;
 	const bool isLegendary = isOwnedWeaponUpgrade && choice.rarity &&
@@ -200,6 +206,8 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 
 void WeaponUpgradeCardUI::SetSelected(bool isSelected) {
 	if (isSelected_ != isSelected) {
+
+		// 現在Scaleから補間を開始して連続入力時の見た目の跳ねを防止
 		scaleTransitionStart_ = currentScale_;
 		scaleTransitionTimer_.Start(kScaleTransitionDuration, false);
 		selectedPulseTimer_.Reset();
@@ -211,6 +219,8 @@ void WeaponUpgradeCardUI::SetSelected(bool isSelected) {
 void WeaponUpgradeCardUI::SetVisible(bool isVisible) {
 	isVisible_ = isVisible;
 	if (!isVisible_) {
+
+		// 再表示時に前回の選択・決定Animationを残さない状態へ復帰
 		scaleTransitionTimer_.Reset();
 		selectedPulseTimer_.Reset();
 		decisionAnimationTimer_.Reset();
@@ -233,6 +243,8 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 	}
 	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
 	scaleTransitionTimer_.Update(safeDeltaTime);
+
+	// 選択状態の変化を現在Scaleから目標Scaleへ補間
 	const float transitionProgress = scaleTransitionTimer_.GetProgress();
 	const float targetScale = isSelected_ ? kSelectedCardScale : 1.0f;
 	const EaseType easeType = isSelected_ ? EaseType::EaseOutBack : EaseType::EaseOutCubic;
@@ -244,6 +256,8 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 
 	float displayScale = currentScale_;
 	if (isSelected_ && scaleTransitionTimer_.IsFinished() && !isDecisionAnimationPlaying_) {
+
+		// 選択中だけ周期的な微小拡縮を加えてFocusを表現
 		if (!selectedPulseTimer_.IsActive()) {
 			selectedPulseTimer_.Start(kSelectedCardPulseDuration, true);
 		}
@@ -253,6 +267,8 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 		displayScale += std::sin(pulseAngle) * kSelectedCardPulseScale;
 	}
 	if (isDecisionAnimationPlaying_) {
+
+		// 決定Cardを上方向へ退避させる確定演出
 		decisionAnimationTimer_.Update(safeDeltaTime);
 		decisionOffsetY_ = Easing::Lerp(
 			0.0f,
@@ -288,6 +304,8 @@ bool WeaponUpgradeCardUI::IsDecisionAnimationFinished() const {
 }
 
 void WeaponUpgradeCardUI::ApplyLayout() {
+
+	// 拡縮時の位置ずれを避けるため全構成要素のAnchorを中央へ統一
 	for (MadoEngine::SpriteHandle handle : cardSprites_) {
 		if (Sprite* sprite = ResolveSprite(handle)) {
 			sprite->SetAnchorPoint({ 0.5f, 0.5f });
@@ -346,6 +364,8 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 	const float cardPositionX = kCardBasePositionX + kCardPositionDifferenceX * static_cast<float>(cardIndex_);
 	const Vector2 cardPosition = { cardPositionX, kCardPositionY + decisionOffsetY_ };
+
+	// Card中心を基準に子要素の位置とScaleを同時変換
 	const Vector2 iconPosition = ScalePositionAroundCenter(
 		{ cardPositionX - 70.0f, 225.0f + decisionOffsetY_ }, cardPosition, scale);
 
@@ -394,6 +414,8 @@ void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 }
 
 void WeaponUpgradeCardUI::ApplyVisibility() {
+
+	// Card構成要素へ共通表示状態を反映し選択Labelだけを追加条件で制御
 	for (MadoEngine::SpriteHandle handle : cardSprites_) {
 		if (Sprite* sprite = ResolveSprite(handle)) {
 			sprite->SetVisible(isVisible_);

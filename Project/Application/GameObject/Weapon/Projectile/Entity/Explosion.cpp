@@ -23,6 +23,8 @@ namespace Projectile {
 		hitbox.radius = context.explosionRadius;
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
+
+		// 短い寿命中に範囲内の複数EnemyへHitできる衝突設定
 		disappearsUponCollision_ = false;
 
 		lifeTime_ = 0.1f;
@@ -32,6 +34,8 @@ namespace Projectile {
 	void Explosion::Update(float deltaTime) {
 
 		if (lifeTimer_.IsFinished()) {
+
+			// 一Frame限りではなく衝突収集可能な短時間を維持してから破棄
 			isDead_ = true;
 		}
 

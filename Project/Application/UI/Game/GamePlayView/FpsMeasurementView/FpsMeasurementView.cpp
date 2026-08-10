@@ -24,6 +24,8 @@ namespace UI::Game {
 
 		sampleTime_ += deltaTime;
 		++sampleFrameCount_;
+
+		// 毎Frameの文字列更新を避けて一定期間の平均FPSだけを表示
 		if (sampleTime_ < kTextUpdateInterval) {
 			return;
 		}

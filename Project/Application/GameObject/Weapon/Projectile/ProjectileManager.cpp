@@ -18,6 +18,7 @@ namespace Projectile {
 			const EnemyTargetInfo* nearestTarget = nullptr;
 			float nearestDistanceSq = 0.0f;
 
+			// 現在の衝突相手と方向を作れない同位置の候補を除外して距離比較
 			for (const EnemyTargetInfo& candidate : enemyTargets) {
 				if (candidate.enemyId == collidedEnemyId || candidate.colliderName.empty()) {
 					continue;
@@ -44,6 +45,8 @@ namespace Projectile {
 	}
 
 	void Manager::Update(float deltaTime) {
+
+		// Update中に派生Projectileが追加されてもContainerを無効化しない走査状態
 		isTraversingProjectiles_ = true;
 		for (auto& projectile : projectiles) {
 			if (projectile && !projectile->IsDead()) {
@@ -52,6 +55,7 @@ namespace Projectile {
 		}
 		isTraversingProjectiles_ = false;
 
+		// 全Projectileの更新完了後に寿命切れを一括破棄
 		projectiles.erase(
 			std::remove_if(projectiles.begin(), projectiles.end(), [](const std::unique_ptr<IProjectile>& projectile) {
 				return projectile->IsDead();
@@ -64,6 +68,8 @@ namespace Projectile {
 
 	void Manager::AddProjectile(Projectile::Type type, InitializeDesc context) {
 		if (isTraversingProjectiles_) {
+
+			// 走査中の再配置を避けるため生成要求だけを退避
 			pendingProjectileAddRequests_.push_back({ type, std::move(context) });
 			return;
 		}
@@ -72,6 +78,8 @@ namespace Projectile {
 	}
 
 	void Manager::AddProjectileImmediate(Projectile::Type type, InitializeDesc context) {
+
+		// 衝突結果を後から照合できるよう全種類で一意なIDを採番
 		context.projectileId = nextProjectileId_++;
 
 		switch (type) {
@@ -117,6 +125,8 @@ namespace Projectile {
 
 		std::vector<ProjectileAddRequest> requests = std::move(pendingProjectileAddRequests_);
 		pendingProjectileAddRequests_.clear();
+
+		// 元Bufferを先に空にして追加処理からの新規要求と分離
 		for (ProjectileAddRequest& request : requests) {
 			AddProjectileImmediate(request.type, std::move(request.context));
 		}
@@ -132,6 +142,8 @@ namespace Projectile {
 
 		outHitInfos.reserve(projectiles.size());
 		isTraversingProjectiles_ = true;
+
+		// Projectile単位で当Frameの接触履歴を管理して同一Enemyへの重複Hitを抑制
 		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
 			if (!projectile || projectile->IsDead() || projectile->GetColliderName().empty()) {
 				continue;
@@ -146,6 +158,8 @@ namespace Projectile {
 
 				const EnemyTargetInfo* bounceTarget = nullptr;
 				if (projectile->CanBounce()) {
+
+					// 現在の衝突相手を除いた最近傍Enemyへ跳弾方向を更新
 					bounceTarget = FindNearestBounceTarget(*projectile, enemyTarget.enemyId, enemyTargets);
 				}
 
@@ -154,6 +168,7 @@ namespace Projectile {
 					continue;
 				}
 
+				// 貫通数や跳弾状態の確定後にProjectile固有のHit効果を適用
 				projectile->OnEnemyHit();
 
 				outHitInfos.push_back({
@@ -170,6 +185,8 @@ namespace Projectile {
 			projectile->EndEnemyCollisionFrame();
 		}
 		isTraversingProjectiles_ = false;
+
+		// Hit時に派生生成されたExplosionなどを衝突走査完了後に反映
 		FlushPendingProjectiles();
 	}
 }

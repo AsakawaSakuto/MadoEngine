@@ -42,6 +42,8 @@ namespace DropObject {
 		}
 
 		colliderShape_ = aabb;
+
+		// 回収判定とPlayer本体への到達判定を分離するため専用Tagで登録
 		MyCollider::RegisterCollider(
 			colliderName_,
 			CollisionTag::DropObjectHitBox,
@@ -69,6 +71,8 @@ namespace DropObject {
 	}
 
 	void Base::UpdateInternal(float deltaTime, Player::Base* player) {
+
+		// 回収済みObjectのModelとColliderをManager削除まで更新対象外に設定
 		if (!isAlive_) {
 			return;
 		}
@@ -76,6 +80,8 @@ namespace DropObject {
 		Vector3 targetPosition = player->GetPosition();
 
 		if (isMoving_) {
+
+			// 回収開始直後は一度Playerから離して吸着軌道に溜めを作成
 			if (backTimer_.IsActive()) {
 				Vector3 toTarget = targetPosition - transform_.translate;
 				const float distance = toTarget.Length();
@@ -97,6 +103,7 @@ namespace DropObject {
 			}
 		}
 
+		// 広い回収範囲への侵入を契機にPlayerへの吸着を開始
 		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerDropObjectGetSphere)) {
 			if (!isMoving_) {
 				isMoving_ = true;
@@ -104,6 +111,7 @@ namespace DropObject {
 			}
 		}
 
+		// Player本体へ到達した時点で報酬を確定して生存状態を終了
 		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerHitBox)) {
 			if (player && type_ == Type::Exp) {
 				CollectExp(*player);
@@ -131,6 +139,8 @@ namespace DropObject {
 	}
 
 	void Base::Release() {
+
+		// Destructorと明示解放の重複呼び出しからリソースを保護
 		if (isReleased_) {
 			return;
 		}

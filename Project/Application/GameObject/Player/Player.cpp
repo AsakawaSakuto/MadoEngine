@@ -49,6 +49,7 @@ namespace Player {
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
 		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Game);
 		if (Model* shadowModel = MyModel::TryGet(shadowModel_)) {
+
 			// 地表へ重ねる簡易影として使用するためライティングとShadow処理を無効化
 			shadowModel->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
 			shadowModel->SetTexture("white16x16");
@@ -69,6 +70,7 @@ namespace Player {
 	}
 
 	void Base::AddMoney(int amount) {
+
 		// 不正な加算によって所持金が減少しないよう0以下を無視
 		if (amount <= 0) {
 			return;
@@ -78,6 +80,7 @@ namespace Player {
 	}
 
 	void Base::AddExp(int amount) {
+
 		// 不正な加算によって経験値が減少しないよう0以下を無視
 		if (amount <= 0) {
 			return;
@@ -118,6 +121,7 @@ namespace Player {
 	}
 
 	void Base::UpdateHealthRegeneration(float deltaTime) {
+
 		// 死亡中または最大HPが不正な状態では回復周期を停止
 		if (status_.currentHealth <= 0.0f || status_.maxHealth <= 0.0f) {
 			regenerationTimer_.Stop();
@@ -137,6 +141,7 @@ namespace Player {
 		}
 
 		regenerationTimer_.Update(deltaTime);
+
 		// 毎フレームではなく設定した回復間隔を迎えたフレームだけHPを加算
 		if (!regenerationTimer_.WasLoopedThisFrame()) {
 			return;
@@ -176,6 +181,7 @@ namespace Player {
 	}
 
 	void Base::ResolveAfterCollision() {
+
 		// Collider解決後の接地結果を移動状態とModel姿勢へ反映
 		const bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
@@ -261,6 +267,7 @@ namespace Player {
 #ifdef USE_IMGUI
 
 		ImGui::Begin("プレイヤー");
+
 		// 実際の移動へ使う速度成分を合成してデバッグ値を算出
 		const Vector3 slideVelocity = movement_.GetSlideVelocity();
 		const Vector3 jumpMoveVelocity = movement_.GetJumpMoveVelocity();

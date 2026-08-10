@@ -36,6 +36,8 @@ void Chest::Initialize(const InitializeDesc& desc) {
 	InstancedModel* normalBatch = MyInstancedModel::TryGet(normalBatchHandle);
 	InstancedModel* outlineBatch = MyInstancedModel::TryGet(outlineBatchHandle);
 	if (normalBatch && outlineBatch) {
+
+		// 強調表示をInstanceの表示切り替えだけで完結させるため同一Transformを二重登録
 		normalBatch-> SetTexture("Chest");
 		outlineBatch->SetTexture("Chest");
 

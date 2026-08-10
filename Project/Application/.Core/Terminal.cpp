@@ -6,6 +6,8 @@ Terminal::Terminal(HINSTANCE hInstance) {
 	execution_ = std::make_unique<MadoEngine::EngineExecution>();
 	execution_->Initialize(hInstance);
 	sceneManager_ = std::make_unique<SceneManager>();
+
+	// 初期Scene生成前に利用可能なSceneTypeとFactoryを登録
 	sceneManager_->RegisterScene(SceneType::Test,   []() { return std::make_unique<Test>(); });
 	sceneManager_->RegisterScene(SceneType::Title,  []() { return std::make_unique<Title>(); });
 	sceneManager_->RegisterScene(SceneType::Game,   []() { return std::make_unique<Game>(); });
@@ -20,6 +22,8 @@ void Terminal::ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage
 
 	const std::vector<MadoEngine::Render::PostEffectPassHandle>& layerEffectPassHandles =
 		execution_->GetLayerEffectPassHandles();
+
+	// 指定Stageで有効なPassだけを登録順に処理
 	for (std::size_t passIndex = 0; passIndex < layerEffectPassHandles.size(); ++passIndex) {
 		const MadoEngine::Render::PostEffectPass* layerEffectPass =
 			execution_->TryGetPostEffectPass(layerEffectPassHandles[passIndex]);
@@ -43,6 +47,7 @@ void Terminal::ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage
 		}
 		execution_->EndLayerEffectRender();
 
+		// 同じLayerMaskへ連続適用するPassを中間合成せず一つのChainへ集約
 		execution_->ApplyLayerEffectToChain(*layerEffectPass);
 		while (passIndex + 1 < layerEffectPassHandles.size()) {
 			const MadoEngine::Render::PostEffectPass* nextLayerEffectPass =
@@ -62,6 +67,7 @@ void Terminal::ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage
 			execution_->ApplyLayerEffectToChain(*nextLayerEffectPass);
 		}
 
+		// Chain単位で元の描画先へ合成してPass間の不要な往復を回避
 		execution_->CompositeLayerEffectChain();
 	}
 }
@@ -70,6 +76,7 @@ void Terminal::BeginRenderLayerBatch(MadoEngine::Render::RenderLayer layer) {
 	assert(!isOverlayEffectBatchActive_ && "前のOverlayレイヤーバッチが終了していません");
 	activeOverlayPassHandles_.clear();
 
+	// 描画順を維持するため現在Layerを対象に含むOverlay Passだけを収集
 	for (MadoEngine::Render::PostEffectPassHandle handle : execution_->GetLayerEffectPassHandles()) {
 		const MadoEngine::Render::PostEffectPass* pass = execution_->TryGetPostEffectPass(handle);
 		if (!pass || !pass->IsEnabled() ||
@@ -85,6 +92,7 @@ void Terminal::BeginRenderLayerBatch(MadoEngine::Render::RenderLayer layer) {
 		return;
 	}
 
+	// 通常Overlay描画を一時終了してLayer専用のEffect描画先へ切り替え
 	execution_->EndOverlayRender();
 	const MadoEngine::Render::PostEffectPass* firstPass =
 		execution_->TryGetPostEffectPass(activeOverlayPassHandles_.front());
@@ -107,6 +115,8 @@ void Terminal::EndRenderLayerBatch(MadoEngine::Render::RenderLayer layer) {
 
 	assert(layer == activeOverlayLayer_ && "開始時と異なるOverlayレイヤーバッチを終了しようとしています");
 	execution_->EndLayerEffectRender();
+
+	// 収集済みPassを同一Chainへ適用してからOverlay描画先へ復帰
 	for (MadoEngine::Render::PostEffectPassHandle handle : activeOverlayPassHandles_) {
 		const MadoEngine::Render::PostEffectPass* pass = execution_->TryGetPostEffectPass(handle);
 		assert(pass && "OverlayレイヤーバッチのPassが無効です");
@@ -128,6 +138,7 @@ void Terminal::Run() {
 
 		execution_->Update();
 
+		// Application停止要求後は描画を維持しつつGame状態の更新だけを停止
 		if (execution_->IsStopApplication()) {
 
 		} else {
@@ -142,6 +153,8 @@ void Terminal::Run() {
 		const MadoEngine::Render::RenderLayerMask sceneLayerEffectTargetMask =
 			execution_->GetEnabledLayerEffectTargetMask(MadoEngine::Render::LayerEffectStage::Scene);
 		if (sceneLayerEffectTargetMask != 0) {
+
+			// Scene Effect利用時だけ中間Color Targetを閉じてEffect Chainへ接続
 			sceneManager_->DrawSceneLayerMask(MadoEngine::Render::kAllRenderLayers);
 			sceneManager_->DrawCurrentScene();
 			execution_->EndSceneColorRender();
@@ -152,23 +165,27 @@ void Terminal::Run() {
 		}
 
 		execution_->BeginTransparentRender();
+
+		// 透明EffectをScene Colorから分離してBlend順序を維持
 		sceneManager_->DrawParticleLayerMask(MadoEngine::Render::kAllRenderLayers);
 		execution_->EndTransparentRender();
 		ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage::Transparent);
 
 		execution_->BeginOverlayRender();
+
+		// SpriteとTextの描画順を保ったままLayer単位のOverlay Effectを適用
 		sceneManager_->DrawOverlayInOrder(*this);
 		assert(!isOverlayEffectBatchActive_ && "Overlayレイヤーバッチが終了していません");
 		execution_->EndOverlayRender();
 
-		// DockSpaceを先に生成してから、シーンのImGuiウィンドウを作成する
+		// DockSpace生成後にScene固有のImGui Windowを構築
 		execution_->BeginImGuiLayout();
 
 		sceneManager_->DrawImGui();
 
 		execution_->PostDraw();
 
-		// シーン遷移の予約があれば、フレームの最後に遷移を実行する
+		// 描画中のResource破棄を避けるため予約済みScene遷移をFrame末尾で適用
 		sceneManager_->ApplyPendingSceneChange();
 	}
 

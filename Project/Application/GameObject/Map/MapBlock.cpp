@@ -7,6 +7,8 @@ namespace {
 /// @param direction 坂の向き
 /// @return Y軸回転角（ラジアン）
 float GetSlopeRotationY(SlopeDirection direction) {
+
+	// +Z向きのModelを各SlopeDirectionの上り方向へ回転
 	switch (direction) {
 	case SlopeDirection::PulsZ:
 		return 0.0f;
@@ -38,6 +40,7 @@ void MapBlock::Initialize(const InitializeDesc& desc) {
 		static_cast<float>(z_) * desc.blockSize.z
 	);
 
+	// 地形種別ごとに専用の衝突形状とCollisionTagを登録
 	if (type_ == MapBlockType::Slope) {
 		CreateSlopeShape(desc.blockSize);
 		MyCollider::RegisterCollider(CreateColliderName(), CollisionTag::MapSlope, &colliderShape_, &transform_.translate, 1.0f);
@@ -48,6 +51,7 @@ void MapBlock::Initialize(const InitializeDesc& desc) {
 		isColliderRegistered_ = true;
 	}
 
+	// 坂も土台部分を持つためGroundモデルを共通生成
 	CreateGroundModel(desc.blockSize);
 	if (type_ == MapBlockType::Slope) {
 		CreateSlopeModel(desc.blockSize);
@@ -62,6 +66,7 @@ void MapBlock::SetVisible(bool isVisible) {
 
 	isModelDraw_ = isVisible;
 
+	// GroundとSlopeの共有Batchへ同じ表示状態を反映
 	if (InstancedModel* model = MyInstancedModel::TryGet(groundInstancedModel_)) {
 		model->SetInstanceVisible(groundInstanceHandle_, isModelDraw_);
 	}
@@ -77,6 +82,7 @@ void MapBlock::DrawDebugLine() const {
 		return;
 	}
 
+	// 坂と平地のColliderを識別できる色で可視化
 	Vector4 lineColor = type_ == MapBlockType::Slope ?
 		Vector4(0.0f, 1.0f, 0.35f, 1.0f) :
 		Vector4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -111,6 +117,7 @@ void MapBlock::CreateGroundShape(const Vector3& blockSize) {
 
 void MapBlock::CreateSlopeShape(const Vector3& blockSize) {
 
+	// 現在の段から一段上までを坂面の高さ範囲として構築
 	Slope slopeShape;
 	slopeShape.min = Vector3(-blockSize.x / 2.0f, blockSize.y * static_cast<float>(height_), -blockSize.z / 2.0f);
 	slopeShape.max = Vector3(blockSize.x / 2.0f, blockSize.y * static_cast<float>(height_ + 1), blockSize.z / 2.0f);
@@ -133,8 +140,8 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 	}
 
 	groundModel->SetTexture("blockTexture2");
-	//groundInstancedModel_->SetReceiveShadow(false);
 
+	// 高さ分の土台をブロック中心から上方向へ拡張
 	InstancedModel::InstanceDesc instanceDesc;
 	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_), transform_.translate.z };
 	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f * static_cast<float>(height_), blockSize.z / 2.0f };
@@ -157,6 +164,7 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 
 	slopeModel->SetTexture("blockTexture2");
 
+	// 坂Modelの既定方向を上り方向へ合わせて土台上へ配置
 	InstancedModel::InstanceDesc instanceDesc;
 	instanceDesc.transform.translate = { transform_.translate.x, blockSize.y * static_cast<float>(height_ + 1), transform_.translate.z };
 	instanceDesc.transform.scale = { blockSize.x / 2.0f, blockSize.y / 2.0f, blockSize.z / 2.0f };

@@ -37,6 +37,7 @@ namespace UI::Game {
 	void ProjectileDamageView::Initialize() {
 		Finalize();
 
+		// 実行中の生成破棄を避ける固定数Text Poolを事前構築
 		for (std::size_t index = 0; index < slots_.size(); ++index) {
 			DamageTextSlot& slot = slots_[index];
 			slot.text = MyText::Create(
@@ -76,6 +77,7 @@ namespace UI::Game {
 			return;
 		}
 
+		// 連続表示が重ならないよう固定Sequenceから左右と高さのOffsetを分散
 		slot->worldPosition = worldPosition;
 		const std::size_t offsetIndex =
 			static_cast<std::size_t>(spawnSequence_ % kOffsetRates.size());
@@ -107,6 +109,7 @@ namespace UI::Game {
 			return;
 		}
 
+		// Activeな固定Slotだけを更新して表示中の動的確保を回避
 		for (DamageTextSlot& slot : slots_) {
 			MadoEngine::Text* text = MyText::TryGet(slot.text);
 			if (!slot.isActive || !text) {
@@ -126,6 +129,8 @@ namespace UI::Game {
 			const Vector3 displayWorldPosition =
 				slot.worldPosition + Vector3{ 0.0f, slot.verticalOffset, 0.0f };
 			Vector2 screenPosition;
+
+			// Camera外の座標は寿命を進めたまま描画だけを抑制
 			if (!WorldToScreen(displayWorldPosition, camera, screenPosition)) {
 				text->SetVisible(false);
 				continue;
@@ -133,6 +138,8 @@ namespace UI::Game {
 
 			const float progress =
 				std::clamp(slot.elapsedTime / displayLifeTime_, 0.0f, 1.0f);
+
+			// 寿命後半のFadeと初期拡大の収束を独立した進捗で計算
 			const float fadeProgress = std::clamp(
 				(progress - fadeStartProgress_) / (1.0f - fadeStartProgress_),
 				0.0f,
@@ -168,6 +175,7 @@ namespace UI::Game {
 			return;
 		}
 
+		// 非表示中もSlot寿命を保持し、再表示時に残存表示を継続
 		for (DamageTextSlot& slot : slots_) {
 			if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
 				text->SetVisible(false);
@@ -216,6 +224,7 @@ namespace UI::Game {
 			ImGui::DragFloat("フォントサイズ", &fontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::ColorEdit4("文字色", &damageTextColor_.x);
 
+		// 手入力を含む調整値をUpdate内の除算と補間が安全な範囲へ制限
 		displayLifeTime_ = std::clamp(displayLifeTime_, 0.05f, 5.0f);
 		fadeStartProgress_ = std::clamp(fadeStartProgress_, 0.0f, 0.99f);
 		scaleSettleProgress_ = std::clamp(scaleSettleProgress_, 0.01f, 1.0f);
@@ -246,6 +255,8 @@ namespace UI::Game {
 	}
 
 	ProjectileDamageView::DamageTextSlot* ProjectileDamageView::AcquireSlot() {
+
+		// 次回位置から未使用Slotを循環探索して表示順の偏りを防止
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
 			const std::size_t index = (nextSlotIndex_ + offset) % slots_.size();
 			DamageTextSlot& slot = slots_[index];
@@ -257,6 +268,7 @@ namespace UI::Game {
 			return &slot;
 		}
 
+		// 全Slot使用中は古い順に上書きしてPool容量を一定に維持
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
 			const std::size_t index = (nextSlotIndex_ + offset) % slots_.size();
 			DamageTextSlot& slot = slots_[index];
@@ -277,6 +289,8 @@ namespace UI::Game {
 		Vector2& outScreenPosition) const {
 		const Vector3 viewPosition =
 			Matrix::Transform(worldPosition, camera.GetViewMatrix());
+
+		// Camera前後範囲外と非有限値を射影前に除外
 		if (!std::isfinite(viewPosition.x) ||
 			!std::isfinite(viewPosition.y) ||
 			!std::isfinite(viewPosition.z) ||
@@ -287,6 +301,8 @@ namespace UI::Game {
 
 		const Vector3 normalizedDevicePosition =
 			Matrix::Transform(worldPosition, camera.GetViewProjectionMatrix());
+
+		// NDCの深度範囲外を除外して背面座標の画面反転を防止
 		if (!std::isfinite(normalizedDevicePosition.x) ||
 			!std::isfinite(normalizedDevicePosition.y) ||
 			!std::isfinite(normalizedDevicePosition.z) ||
@@ -300,6 +316,7 @@ namespace UI::Game {
 			(1.0f - normalizedDevicePosition.y) * 0.5f * kReferenceScreenHeight,
 		};
 
+		// 基準解像度のViewport内へ収まる座標だけを表示対象として返却
 		return outScreenPosition.x >= 0.0f &&
 			outScreenPosition.x <= kReferenceScreenWidth &&
 			outScreenPosition.y >= 0.0f &&

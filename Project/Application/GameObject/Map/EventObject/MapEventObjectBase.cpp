@@ -6,6 +6,8 @@ bool MapEventObjectBase::IsHitPlayer() const {
 }
 
 void MapEventObjectBase::SetHighlighted(bool isHighlighted) {
+
+	// 同一状態の再適用によるInstance更新を回避
 	if (isHighlighted_ == isHighlighted) {
 		return;
 	}
@@ -15,11 +17,14 @@ void MapEventObjectBase::SetHighlighted(bool isHighlighted) {
 	InstancedModel* normalModel = MyInstancedModel::TryGet(normalInstancedModel_);
 	InstancedModel* outlineModel = MyInstancedModel::TryGet(outlineInstancedModel_);
 	if (normalModel && outlineModel) {
+
+		// 同じTransformを持つ通常InstanceとOutline Instanceの表示を切り替え
 		normalModel->SetInstanceVisible(normalInstanceHandle_, !isHighlighted);
 		outlineModel->SetInstanceVisible(outlineInstanceHandle_, isHighlighted);
 		return;
 	}
 
+	// Instance描画を利用できないObjectは単体ModelのRenderLayerで代替
 	if (Model* model = MyModel::TryGet(model_)) {
 		model->SetRenderLayer(isHighlighted
 			? MadoEngine::Render::RenderLayer::MapEventObjectOutline
@@ -43,6 +48,8 @@ void MapEventObjectBase::SetInstancedDraw(
 }
 
 void MapEventObjectBase::HideInstancedDraw() {
+
+	// 破棄済みBatchを考慮して有効なInstanceだけを非表示化
 	if (InstancedModel* normalModel = MyInstancedModel::TryGet(normalInstancedModel_)) {
 		normalModel->SetInstanceVisible(normalInstanceHandle_, false);
 	}

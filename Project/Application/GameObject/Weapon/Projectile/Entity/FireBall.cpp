@@ -18,7 +18,7 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
-		//model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
+		// Modelを持たずParticleを本体表示として使用
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
 		lifeTimer_.Start(lifeTime_, false);
@@ -40,6 +40,7 @@ namespace Projectile {
 		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
 		UpdateParticleTransform();
 
+		// Map外への到達と寿命切れのどちらでも終端Explosionを生成
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox) || lifeTimer_.IsFinished()) {
 			SpawnExplosion();
 			isDead_ = true;
@@ -54,6 +55,8 @@ namespace Projectile {
 	}
 
 	void FireBall::OnEnemyHit() {
+
+		// 本体の貫通状態とは独立して接触地点へ範囲攻撃を生成
 		SpawnExplosion();
 	}
 
@@ -73,6 +76,8 @@ namespace Projectile {
 		}
 
 		if (!MyParticle3d::SetTransform(particleHandle_, particleTransform)) {
+
+			// Particle側でHandleが失効していた場合は追従表現を再生成
 			StartParticle();
 		}
 	}
@@ -87,6 +92,8 @@ namespace Projectile {
 	}
 
 	void FireBall::SpawnExplosion() {
+
+		// Manager走査中でも安全に追加できる生成要求としてExplosionを登録
 		Projectile::InitializeDesc context{};
 		context.projectileName = objectName_;
 		context.ownerPosition = transform_.translate;

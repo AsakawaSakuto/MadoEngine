@@ -11,7 +11,8 @@ void Result::Initialize() {
 }
 
 SceneType Result::Update(float dt) {
-	// スペースキーが押されたらタイトルシーンに遷移
+
+	// Result表示を維持しつつ決定入力だけをTitle遷移として受付
 	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
 		Logger::Output("スペースキーが押されました - Titleシーンへ遷移", Logger::Level::Application);
 		return SceneType::Title;
@@ -20,11 +21,9 @@ SceneType Result::Update(float dt) {
 }
 
 void Result::Draw() {
-	// リザルトシーンの描画処理
 }
 
 void Result::DrawImGui() {
-	// リザルトシーンのImGui描画処理
 }
 
 void Result::Finalize() {

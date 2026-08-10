@@ -17,6 +17,7 @@ namespace DropObject {
 			dropObject->Update(deltaTime, player);
 		}
 
+		// Update中に回収済みとなったObjectを全更新完了後にまとめて破棄
 		dropObjects_.erase(
 			std::remove_if(
 				dropObjects_.begin(),

@@ -61,6 +61,7 @@ namespace Enemy {
 				return euler;
 			}
 
+			// ジンバルロック付近ではZ回転を固定して不定な解を回避
 			euler.x = std::atan2(up.x * sinY, up.y);
 			euler.z = 0.0f;
 			return euler;
@@ -74,8 +75,11 @@ namespace Enemy {
 			const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
 			const Vector3 desiredForward = CreateHorizontalForward(faceYaw);
 
+			// 水平方向を斜面へ射影してModelの前方向を斜面上に拘束
 			Vector3 forward = desiredForward - up * Math::Dot(desiredForward, up);
 			if (forward.LengthSq() < kRotationEpsilon) {
+
+				// 前方向と法線が平行に近い場合は右方向から安定した前方向を再構築
 				const Vector3 horizontalRight = CreateHorizontalRight(faceYaw);
 				forward = Math::Cross(horizontalRight, up);
 			}
@@ -109,6 +113,8 @@ namespace Enemy {
 		lastMoveStartPosition_ = transform.translate;
 
 		const Vector3 direction = GetDirectionToTarget(transform.translate, targetPosition);
+
+		// Collider解決前の希望移動量を保持して側面で阻害された割合を後から判定
 		lastDesiredHorizontalMove_ = { direction.x * moveSpeed * lastDeltaTime_, 0.0f, direction.z * moveSpeed * lastDeltaTime_ };
 		transform.translate.x += lastDesiredHorizontalMove_.x;
 		transform.translate.z += lastDesiredHorizontalMove_.z;
@@ -127,6 +133,7 @@ namespace Enemy {
 			transform.rotate.y = faceYaw_;
 		}
 
+		// Map下限まで落下したEnemyをManager側でKillするため生存可能位置を返却
 		return transform.translate.y > mapLimit_.min.y;
 	}
 
@@ -141,6 +148,8 @@ namespace Enemy {
 
 		if (isSlopeGroundContact && velocityY_ <= 0.0f) {
 			float slopeCenterY = 0.0f;
+
+			// Collider解決で斜面から浮いた誤差だけを許容距離内で吸着補正
 			if (MyCollider::TryGetSlopeGroundCenterY(movementColliderName, CollisionTag::MapSlope, slopeCenterY, kSlopeSnapDistance) &&
 				transform.translate.y > slopeCenterY) {
 				transform.translate.y = slopeCenterY;
@@ -171,6 +180,7 @@ namespace Enemy {
 		const bool canContinueToCrest =
 			isSideClimbing_ && !canStartClimb && hasDesiredMove && sideClimbCrestTimer_ < kSideClimbCrestGraceTime;
 
+		// 側面阻害がなく頂点越えの猶予も不要な場合は補助状態を解除
 		if (!isSideBlocked && !canContinueToCrest) {
 			ResetSideClimbAssist(transform.translate);
 			return;
@@ -182,6 +192,8 @@ namespace Enemy {
 		}
 
 		if (!isSideClimbing_) {
+
+			// 上昇量の上限を測定する基準として補助開始時の高さを保存
 			isSideClimbing_ = true;
 			sideClimbBaseY_ = transform.translate.y;
 			sideClimbAmount_ = 0.0f;
@@ -201,6 +213,8 @@ namespace Enemy {
 		}
 
 		const float climbSpeed = isSideBlocked ? kSideClimbSpeed : kSideClimbSpeed * kSideClimbCrestSpeedScale;
+
+		// 頂点付近では速度を落として短時間だけ上昇を継続し段差を越える余裕を確保
 		const float climbStep = std::min(climbSpeed * deltaTime, remainClimbHeight);
 		transform.translate.y += climbStep;
 		sideClimbAmount_ += climbStep;
@@ -224,6 +238,8 @@ namespace Enemy {
 		const float desiredLength = std::sqrt(desiredLengthSq);
 		const Vector3 actualHorizontalMove = { currentPosition.x - lastMoveStartPosition_.x, 0.0f,
 											   currentPosition.z - lastMoveStartPosition_.z };
+
+		// 希望方向への実移動成分だけを比較して横滑りを前進量に含めないよう投影
 		const float actualProgress =
 			(actualHorizontalMove.x * lastDesiredHorizontalMove_.x + actualHorizontalMove.z * lastDesiredHorizontalMove_.z) / desiredLength;
 
@@ -237,6 +253,7 @@ namespace Enemy {
 			targetGroundNormal = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
 		}
 
+		// フレームレートに依存しない指数補間で斜面法線への追従を平滑化
 		const float normalT = std::clamp(1.0f - std::exp(-modelGroundNormalFollowSpeed_ * lastDeltaTime_), 0.0f, 1.0f);
 		currentGroundNormal_ = NormalizeOrFallback(Math::Lerp(currentGroundNormal_, targetGroundNormal, normalT), targetGroundNormal);
 		transform.rotate = CreateSlopeAlignedRotation(faceYaw_, currentGroundNormal_);

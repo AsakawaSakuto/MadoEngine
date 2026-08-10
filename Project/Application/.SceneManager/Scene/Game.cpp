@@ -17,6 +17,8 @@ Game::Game()
 Game::~Game() {}
 
 void Game::Initialize() {
+
+	// 同一Seedから地形と各Random処理を再現できるGame単位の乱数初期化
 	gameSeed_ = MyRand::CreateSeed();
 	MyRand::SetSeed(gameSeed_);
 
@@ -46,6 +48,8 @@ void Game::Initialize() {
 	mapLimitBox.center = { 0.0f,0.0f,0.0f };
 	mapLimitBoxPos_ = mapLimitBox.center;
 	mapLimitBox_ = mapLimitBox;
+
+	// ProjectileやEnemyの生存範囲を共通の包含Colliderとして登録
 	MyCollider::RegisterCollider("MapLimitBox", CollisionTag::MapLimitBox, &mapLimitBox_, &mapLimitBoxPos_, 1.0f);
 	
 	map_ = std::make_unique<Map>();
@@ -77,7 +81,7 @@ void Game::Initialize() {
 
 	fadeOutTimer_.Start(2.0f);
 
-	// System
+	// Game進行Phaseと制限時間を全Object初期化後に開始
 	inGameSession_ = std::make_unique<System::InGameSession>();
 	inGameSession_->Initialize(kGameSceneTimeLimit);
 
@@ -97,6 +101,8 @@ void Game::Initialize() {
 
 SceneType Game::Update(float dt) {
 	inGameSession_->Update(dt);
+
+	// Pauseと強化選択中はGameObjectへ渡す時間だけを停止
 	const float deltaTime = inGameSession_->IsPlaying() ? dt : 0.0f;
 
 	if (inGameSession_->IsPlaying()) {
@@ -105,7 +111,7 @@ SceneType Game::Update(float dt) {
 		enemyManager_->Update(deltaTime);
 		Projectile::Manager::GetInstance().Update(deltaTime);
 
-		// 全GameObjectの移動後にColliderを一度だけ更新してから衝突を解決する。
+		// 全GameObjectの移動後にColliderを一度だけ更新してから衝突を解決
 		MyCollider::Update();
 		player_->ResolveAfterCollision();
 		enemyManager_->ResolveAfterCollision();
@@ -117,6 +123,7 @@ SceneType Game::Update(float dt) {
 		map_->Update(*player_);
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
 
+		// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新
 		if (MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
 			Vector3 nearestEnemyPosition;
 			if (enemyManager_->TryGetNearestEnemyPosition(nearestEnemyPosition)) {
@@ -126,10 +133,11 @@ SceneType Game::Update(float dt) {
 	}
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
-	//enemyManager_->DrawDebugLine();
 
 	fadeOutTimer_.Update(deltaTime);
 	if (fadeOutTimer_.IsActive()) {
+
+		// Scene開始時の白FadeをGame時間と同期して徐々に透明化
 		if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
 			fadeSprite->SetColor({ 1.0f, 1.0f, 1.0f, fadeOutTimer_.GetReverseProgress() });
 		}
@@ -140,13 +148,14 @@ SceneType Game::Update(float dt) {
 
 	debugCamera_.Update(deltaTime);
 
-	// Mapとドロップ取得による経験値加算が完了してからレベル差分を確認する。
+	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
 	if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
 		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_);
 	}
 	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 
+	// 当Frameの射撃Eventを一度だけ消費して対応SlotのUI演出へ変換
 	for (const Weapon::WeaponFiredEvent& event :
 		weaponInventory_->ConsumeWeaponFiredEvents()) {
 		weaponIconUI_->PlayFireAnimation(event.slotIndex);
@@ -161,6 +170,8 @@ SceneType Game::Update(float dt) {
 
 	const int currentMoney = static_cast<int>(status.currentMoney);
 	if (currentMoney != displayedMoney_) {
+
+		// 所持金が変化したFrameだけText Handleを再解決して表示を更新
 		MadoEngine::Text* moneyText = MyText::TryGet(moneyText_);
 		if (!moneyText) {
 			moneyText_ = MyText::Find("MoneyText");
@@ -186,6 +197,8 @@ SceneType Game::Update(float dt) {
 	}
 
 	if (useDebugCamera_) {
+
+		// F9でDebugCameraとPlayer追従Cameraの描画参照を切り替え
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {
 			useDebugCamera_ = false;
 		}
@@ -207,12 +220,10 @@ void Game::Draw() {
 }
 
 void Game::DrawImGui() {
-	// ゲームシーンの描画処理
 #ifdef USE_IMGUI
 
+	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
 	tpsCamera_.DrawImGui();
-
-	//debugCamera_.DrawImGui();
 
 	player_->DrawImGui();
 
@@ -232,9 +243,6 @@ void Game::DrawImGui() {
 	ImGui::Text("game seed : %u", gameSeed_);
 
 	ImGui::End();
-
-	//expGauge_->DrawImGui();
-	//healthGauge_->DrawImGui();
 
 #endif // USE_IMGUI
 }
@@ -260,6 +268,7 @@ bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 void Game::Finalize() {
 	weaponUpgradeUI_.Finalize();
 
+	// Spawnerの参照先を破棄する前に生成予定とEnemy所有権を解放
 	if (enemySpawner_) {
 		enemySpawner_->Clear();
 	}

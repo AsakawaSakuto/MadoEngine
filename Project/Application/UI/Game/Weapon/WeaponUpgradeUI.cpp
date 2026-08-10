@@ -41,6 +41,8 @@ namespace UI::Game {
 			return;
 		}
 		if (isDecisionAnimationPlaying_) {
+
+			// 演出中に候補世代が変化した場合は古い選択の適用を中止
 			UpdateCards(deltaTime);
 			const bool isChoiceValid =
 				decisionChoiceIndex_ < visibleChoiceCount_ &&
@@ -54,6 +56,7 @@ namespace UI::Game {
 				return;
 			}
 
+			// 決定演出完了後に保持した世代番号付き候補を適用
 			const std::size_t choiceIndex = decisionChoiceIndex_;
 			const std::uint64_t generation = decisionGeneration_;
 			ResetDecisionAnimationState();
@@ -65,6 +68,8 @@ namespace UI::Game {
 		}
 
 		if (MyInput::Trigger(kUpgradeLeftAction)) {
+
+			// 端から反対側へ循環する候補選択
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + visibleChoiceCount_ - 1) % visibleChoiceCount_;
 		} else if (MyInput::Trigger(kUpgradeRightAction)) {
@@ -103,6 +108,7 @@ namespace UI::Game {
 			return;
 		}
 
+		// Runtimeと同じ選択状態を維持したまま候補詳細とDebug決定操作を表示
 		for (std::size_t choiceIndex = 0; choiceIndex < choices.size(); ++choiceIndex) {
 			const Weapon::UpgradeChoice& choice = choices[choiceIndex];
 			ImGui::PushID(static_cast<int>(choiceIndex));
@@ -162,6 +168,8 @@ namespace UI::Game {
 
 		const std::uint64_t currentGeneration = choices.front().generation;
 		if (selectedGeneration_ != currentGeneration) {
+
+			// 新世代の候補へ切り替わった場合だけCard内容と選択位置を再構築
 			ResetDecisionAnimationState();
 			selectedChoiceIndex_ = 0;
 			selectedGeneration_ = currentGeneration;
@@ -196,6 +204,7 @@ namespace UI::Game {
 			return;
 		}
 
+		// 演出中の候補変更に備えてIndexと世代番号を対で保持
 		selectedChoiceIndex_ = choiceIndex;
 		UpdateCards(0.0f);
 		decisionChoiceIndex_ = choiceIndex;

@@ -19,11 +19,16 @@ void Title::Initialize() {
 }
 
 SceneType Title::Update(float dt) {
-	// フェードイン処理
+
+	// Scene遷移中だけ進行する白Fadeの更新
 	fadeInTimer_.Update(dt);
-	
+
 	if (MyInput::Trigger("Decision")) {
-		if (!fadeInTimer_.IsActive()) { fadeInTimer_.Start(1.0f); }
+
+		// 連続入力でFadeの進捗を再開始しない一度限りの遷移受付
+		if (!fadeInTimer_.IsActive()) {
+			fadeInTimer_.Start(1.0f);
+		}
 	}
 
 	if (fadeInTimer_.IsActive()) {
@@ -44,11 +49,9 @@ SceneType Title::Update(float dt) {
 }
 
 void Title::Draw() {
-	// タイトルシーンの描画処理
 }
 
 void Title::DrawImGui() {
-	// タイトルシーンのImGui描画処理
 	debugCamera_.DrawImGui();
 }
 

@@ -35,6 +35,7 @@ namespace Projectile {
 
 		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
 
+		// MapLimitの包含領域を出たProjectileを即時失効
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
 			isDead_ = true;
 			return;
@@ -48,6 +49,8 @@ namespace Projectile {
 	}
 
 	void Rock::OnEnemyHit() {
+
+		// 連続Hitごとに威力を減衰させて貫通性能との釣り合いを維持
 		damage_ *= kHitDamageMultiplier;
 	}
 

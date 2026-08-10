@@ -15,6 +15,7 @@ namespace UI::Game {
 		weaponLevelTexts_.resize(slotCount);
 		animationStates_.resize(slotCount);
 
+		// 各Slotを背景、Cooldown Gauge、Frame、武器Iconの固定構成で生成
 		for (int i = 0; i < slotCount; i++) {
 
 			weaponIconsBG_[i] = MySprite::Create("weaponIconBG" + std::to_string(i), "white2x2", SceneType::Game);
@@ -59,6 +60,8 @@ namespace UI::Game {
 	}
 
 	void WeaponIconUI::Update(float deltaTime, const Weapon::Inventory& inventory) {
+
+		// Slot位置を固定したまま装備の有無と武器状態を表示へ同期
 		for (std::size_t slotIndex = 0; slotIndex < weaponIcons_.size(); ++slotIndex) {
 			const Weapon::BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
 			UpdateWeaponLevelText(slotIndex, weapon);
@@ -76,6 +79,8 @@ namespace UI::Game {
 			iconBackground->SetVisible(true);
 
 			if (!weapon) {
+
+				// 空Slotでは前武器のAnimationとGauge進捗を破棄
 				animationStates_[slotIndex] = {};
 				weaponIcon->SetScale(startIconScale);
 				shotGauge->SetScale({ shotGaugeSize_, 0.0f });
@@ -93,6 +98,8 @@ namespace UI::Game {
 				weapon->GetShotCooldownProgress(),
 				0.0f,
 				1.0f);
+
+			// Cooldown進捗を下Anchor基準の縦Gaugeへ変換
 			shotGauge->SetScale({
 				shotGaugeSize_,
 				shotGaugeSize_ * shotCooldownProgress,
@@ -110,6 +117,8 @@ namespace UI::Game {
 		MadoEngine::TextHandle& levelTextHandle = weaponLevelTexts_[slotIndex];
 		MadoEngine::Text* levelText = MyText::TryGet(levelTextHandle);
 		if (!levelText) {
+
+			// Editor管理Textの再生成に追従するため無効Handleだけを名前から再解決
 			levelTextHandle = MyText::Find("LevelText" + std::to_string(slotIndex));
 			levelText = MyText::TryGet(levelTextHandle);
 		}
@@ -141,6 +150,8 @@ namespace UI::Game {
 		}
 
 		state.elapsedTime += (std::max)(deltaTime, 0.0f);
+
+		// 射撃時の拡縮を一往復のEasingとして再生
 		const float progress = std::clamp(
 			state.elapsedTime / fireAnimationDuration_,
 			0.0f,

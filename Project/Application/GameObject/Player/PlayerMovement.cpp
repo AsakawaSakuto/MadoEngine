@@ -67,6 +67,7 @@ namespace {
 		// 水平方向を斜面へ射影してModelの前方向を斜面上に拘束
 		Vector3 forward = desiredForward - up * Math::Dot(desiredForward, up);
 		if (forward.LengthSq() < kRotationEpsilon) {
+
 			// 前方向と法線が平行に近い場合は右方向から安定した前方向を再構築
 			const Vector3 horizontalRight = CreateHorizontalRight(faceYaw);
 			forward = Math::Cross(horizontalRight, up);
@@ -89,6 +90,7 @@ namespace Player {
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
+
 		// 入力移動と重力落下を反映してから接地中の斜面追従で位置を補正
 		Move(deltaTime, transform, camera, input);
 		Jump(deltaTime, transform, input);
@@ -97,6 +99,7 @@ namespace Player {
 
 	void Movement::SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input) {
 		if (isGroundContact || isSlopeGroundContact) {
+
 			// 上昇中のジャンプ速度を維持するため落下中の速度だけ接地時に停止
 			if (velocityY_ < 0.0f) {
 				velocityY_ = 0.0f;
@@ -186,6 +189,7 @@ namespace Player {
 
 		const float slideSpeedSq = slideVelocity_.x * slideVelocity_.x + slideVelocity_.z * slideVelocity_.z;
 		if (isCrouching && hasMoveInput && slideSpeedSq > 1e-6f) {
+
 			// 操作入力ではスライド速度を変えず進行方向だけを補間
 			const float slideSpeed = std::sqrt(slideSpeedSq);
 			Vector3 currentDir = { slideVelocity_.x / slideSpeed, 0.0f, slideVelocity_.z / slideSpeed };
@@ -221,6 +225,7 @@ namespace Player {
 		}
 
 		const float friction = isCrouching ? movementParams_.slideFriction_ : slideReleaseFriction_;
+
 		// 斜面加速を摩擦で相殺しないよう斜面上では減速を弱める
 		ApplySlideFriction(deltaTime, isCrouchingOnSlope ? movementParams_.slideFriction_ * 0.35f : friction);
 	}
@@ -324,6 +329,7 @@ namespace Player {
 		}
 
 		float slopeCenterY = 0.0f;
+
 		// フレーム内の落下距離を許容範囲へ加えて高速移動時の斜面追従漏れを防止
 		float snapDistance = slopeSnapDistance_ + movementParams_.gravity_ * deltaTime * deltaTime;
 		if (!MyCollider::TryGetSlopeGroundCenterY(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope, slopeCenterY, snapDistance)) {
@@ -361,6 +367,7 @@ namespace Player {
 	}
 
 	void Movement::Jump(float deltaTime, Transform3D& transform, const MoveInput& input) {
+
 		// 接地するたびに多段ジャンプの使用回数を回復
 		if (isGrounded_) {
 			remainingJumpCount_ = movementParams_.jumpCount_;

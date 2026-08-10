@@ -30,7 +30,6 @@ void Test::Draw() {
 }
 
 void Test::DrawImGui() {
-	// テストシーンの描画処理
 #ifdef USE_IMGUI
 
 	tpsCamera_.DrawImGui();

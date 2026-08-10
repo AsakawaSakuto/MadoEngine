@@ -28,11 +28,15 @@ namespace UI::Game {
 	void PlayerExpGauge::IsUpgrade(bool isUpgrade, float deltaTime) {
 		if (Sprite* dopaGauge = MySprite::TryGet(dopaGauge_)) {
 			if (isUpgrade) {
+
+				// 強化選択中はUVを横へ流して待機状態を視覚化
 				dopaGauge->SetVisible(true);
 
 				uvOffsetX_ += uvSpeed_ * deltaTime;
 				dopaGauge->SetUVTranslate(Vector2{ uvOffsetX_, 0.0f });
 			} else {
+
+				// 次回表示を同じ位相から始めるためUV進捗を初期化
 				dopaGauge->SetVisible(false);
 				uvOffsetX_ = 0.0f;
 			}

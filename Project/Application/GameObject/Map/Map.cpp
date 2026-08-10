@@ -59,6 +59,7 @@ Vector3 ExtractEulerXYZ(const Vector3& right, const Vector3& up, const Vector3& 
 		return euler;
 	}
 
+	// ジンバルロック付近ではZ回転を固定して一意な姿勢へ収束
 	euler.x = std::atan2(up.x * sinY, up.y);
 	euler.z = 0.0f;
 	return euler;
@@ -72,8 +73,11 @@ Vector3 CreateSlopeAlignedRotation(float yaw, const Vector3& slopeNormal) {
 	const Vector3 up = NormalizeOrFallback(slopeNormal, { 0.0f, 1.0f, 0.0f });
 	const Vector3 desiredForward = CreateHorizontalForward(yaw);
 
+	// 水平方向を斜面へ射影してModelの前方向を斜面上に拘束
 	Vector3 forward = desiredForward - up * Math::Dot(desiredForward, up);
 	if (forward.LengthSq() < kRotationEpsilon) {
+
+		// 前方向と法線が平行に近い場合は右方向から安定した前方向を再構築
 		forward = Math::Cross(CreateHorizontalRight(yaw), up);
 	}
 	forward = NormalizeOrFallback(forward, { 0.0f, 0.0f, 1.0f });
@@ -92,6 +96,8 @@ Vector3 CreateSlopeAlignedRotation(float yaw, const Vector3& slopeNormal) {
 /// @param direction 坂の上り方向
 /// @return 低い側がMap外周の壁を向いていればtrue
 bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDirection direction) {
+
+	// 上り方向と反対側の低端が外周へ接する組み合わせを判定
 	switch (direction) {
 	case SlopeDirection::PulsX:
 		return x == 0;
@@ -166,6 +172,7 @@ void DestroyMapInstancedBatches() {
 /// @param seed Map生成に使用するシード値
 void Map::Initialize(uint32_t seed) {
 
+	// 地形とイベント配置を独立した乱数系列に分離して生成条件の変更による相互影響を防止
 	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 100));
 	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 200));
 	ClampHeightSettings();
@@ -182,6 +189,7 @@ void Map::Initialize(uint32_t seed) {
 				continue;
 			}
 
+			// 生成済みの隣接ブロックを基準にして急激な高低差を抑制
 			uint32_t baseHeight = 0;
 			if (x > 0 && z > 0) {
 				baseHeight = (GetBlockHeight(x - 1, z) + GetBlockHeight(x, z - 1)) / 2;
@@ -202,6 +210,7 @@ void Map::Initialize(uint32_t seed) {
 			SlopeDirection slopeDirection = SlopeDirection::PulsX;
 			bool useSlope = false;
 
+			// 一段高い隣接ブロックへ接続できる方向だけを坂の候補として選択
 			if (x + 1 < mapWidth_ && GetBlockHeight(x + 1, z) == currentHeight + 1 &&
 				!IsSlopeMinFacingMapWall(x, z, mapWidth_, mapHeight_, SlopeDirection::PulsX)) {
 				slopeDirection = SlopeDirection::PulsX;
@@ -224,6 +233,7 @@ void Map::Initialize(uint32_t seed) {
 				useSlope = false;
 			}
 
+			// 高さ確定後にColliderと描画インスタンスを一括生成
 			MapBlock::InitializeDesc desc;
 			desc.x = x;
 			desc.z = z;
@@ -249,6 +259,7 @@ void Map::Update(Player::Base& player) {
 	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {
 		isModelDraw_ = !isModelDraw_;
 
+		// 共有描画バッチの各インスタンスへ表示状態を同期
 		for (std::vector<MapBlock>& row : mapBlocks_) {
 			for (MapBlock& block : row) {
 				block.SetVisible(isModelDraw_);
@@ -272,6 +283,7 @@ void Map::DrawImGui() {
 
 	ImGui::Begin("Map");
 
+	// Editorからの直接入力を地形生成が扱える範囲へ即時補正
 	ClampHeightSettings();
 
 	ImGui::Separator();
@@ -306,6 +318,7 @@ void Map::DrawImGui() {
 
 void Map::GenerateJars() {
 
+	// Jar再生成時は既存イベントとハイライト参照を同時に破棄
 	eventObjects_.clear();
 	currentHitEventObject_ = nullptr;
 
@@ -320,6 +333,7 @@ void Map::GenerateJars() {
 	int retryCount = 0;
 	const int maxRetryCount = maxSpawnCount * 20;
 
+	// 配置不能な地形が多い場合でも無限試行にならない回数で打ち切り
 	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
 		++retryCount;
 
@@ -331,6 +345,7 @@ void Map::GenerateJars() {
 			continue;
 		}
 
+		// Jarの占有幅を除いたブロック内から配置座標を選択
 		const float jarHalfSize = 0.5f;
 		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - jarHalfSize);
 		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - jarHalfSize);
@@ -349,6 +364,7 @@ void Map::GenerateJars() {
 		};
 		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
 
+		// 坂では接地面の高さと傾斜へModel姿勢を一致
 		Jar::InitializeDesc desc;
 		desc.position = spawnPosition;
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, 0.0f);
@@ -379,6 +395,7 @@ void Map::GenerateChests() {
 	int retryCount = 0;
 	const int maxRetryCount = maxSpawnCount * 20;
 
+	// 配置不能な地形を考慮しつつ有限回の試行で生成数を確定
 	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
 		++retryCount;
 
@@ -396,6 +413,7 @@ void Map::GenerateChests() {
 		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
 		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
+		// Chestの占有幅を除いたブロック内から配置座標を選択
 		Vector3 spawnPosition = {
 			static_cast<float>(x) * blockSize_.x + offsetX,
 			0.0f,
@@ -408,6 +426,7 @@ void Map::GenerateChests() {
 		};
 		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
 
+		// 水平向きをランダム化しつつ坂の法線へ姿勢を整合
 		Chest::InitializeDesc desc;
 		desc.position = spawnPosition;
 		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
@@ -438,6 +457,7 @@ void Map::GenerateKarmas() {
 	int retryCount = 0;
 	const int maxRetryCount = maxSpawnCount * 20;
 
+	// 配置不能な地形が多い場合でも無限試行にならない回数で打ち切り
 	while (createdCount < maxSpawnCount && retryCount < maxRetryCount) {
 		++retryCount;
 
@@ -455,6 +475,7 @@ void Map::GenerateKarmas() {
 		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
 		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
+		// Karmaの占有幅を除いたブロック内から配置座標を選択
 		Vector3 spawnPosition = {
 			static_cast<float>(x) * blockSize_.x + offsetX,
 			0.0f,
@@ -467,6 +488,7 @@ void Map::GenerateKarmas() {
 		};
 		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
 
+		// 水平向きをランダム化しつつ坂の法線へ姿勢を整合
 		Karma::InitializeDesc desc;
 		desc.position = spawnPosition;
 		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
@@ -485,6 +507,7 @@ void Map::GenerateKarmas() {
 void Map::UpdateEventObjects(Player::Base& player) {
 	MapEventObjectBase* hitObject = nullptr;
 
+	// 複数接触時も一つだけを操作対象として選択
 	for (std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
 		object->Update(0.0f);
 
@@ -494,6 +517,8 @@ void Map::UpdateEventObjects(Player::Base& player) {
 	}
 
 	if (currentHitEventObject_ != hitObject) {
+
+		// 接触対象が変化したフレームだけOutline表示を切り替え
 		if (currentHitEventObject_) {
 			currentHitEventObject_->SetHighlighted(false);
 		}
@@ -513,6 +538,7 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 		return;
 	}
 
+	// 相互作用が成立したObjectだけを配置一覧から除去
 	MapEventObjectBase* interactedObject = currentHitEventObject_;
 	if (!interactedObject->Interact(player)) {
 		return;
