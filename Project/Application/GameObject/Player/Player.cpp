@@ -6,11 +6,11 @@
 
 namespace Player {
 	namespace {
-		constexpr float kShadowGroundOffset = 0.01f;
-		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>;
-		constexpr float kHealthRegenerationInterval = 6.0f;
-		constexpr float kHealthRegenerationAmount = 1.0f;
-		constexpr int kMapBlockCount = 20;
+		constexpr float kShadowGroundOffset = 0.01f;                        // 影の描画座標を地面より少し上にずらすことでZファイティングを回避
+		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>; // Modelの前方がZ軸負方向を向くため、Y軸回転を180度補正
+		constexpr float kHealthRegenerationInterval = 6.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
+		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
+		constexpr int kMapBlockCount = 20;                                  // MapBlockの分割数
 	}
 
 	void Base::Initialize() {
