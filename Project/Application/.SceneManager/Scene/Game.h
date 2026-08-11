@@ -80,6 +80,7 @@ private:
 	MadoEngine::SpriteHandle fadeSprite_{};
 	MadoEngine::TextHandle enemyCountText_{};
 	MadoEngine::TextHandle moneyText_{};
+	MadoEngine::TextHandle killCountText_{};
 	UI::Game::FpsMeasurementView fpsMeasurementView_;
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
 	UI::Game::ProjectileDamageView projectileDamageView_;

@@ -2,6 +2,7 @@
 #include "UtilityHeaders.h"
 #include "Projectile/ProjectileManager.h"
 #include "Projectile/ProjectileStatus.h"
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -33,9 +34,22 @@ namespace Weapon {
 
 		Projectile::Type GetProjectileType() const { return type_; }
 
+		/// @brief Weaponインスタンスの識別番号を取得
+		/// @return Weaponインスタンスの識別番号
+		std::uint64_t GetWeaponId() const { return weaponId_; }
+
 		int GetUpgradeLevel() const { return upgradeLevel_; }
 
 		int GetKillCount() const { return killCount_; }
+
+		/// @brief Weaponが与えた累計ダメージ量を取得
+		/// @return Enemyへ実際に適用した累計ダメージ量
+		float GetDamageCount() const { return damageCount_; }
+
+		/// @brief Enemyへ適用したダメージと撃破結果を戦績へ加算
+		/// @param appliedDamage Enemyへ実際に適用されたダメージ量
+		/// @param wasKilled このダメージでEnemyを倒した場合はtrue
+		void RecordDamage(float appliedDamage, bool wasKilled);
 
 		/// @brief 現在の武器ステータスを取得
 		/// @return 現在の武器ステータスへのconst参照
@@ -72,6 +86,7 @@ namespace Weapon {
 		
 		// 武器の種類
 		Projectile::Type type_ = Projectile::Type::None;
+		std::uint64_t weaponId_ = 0;
 
 		int killCount_ = 0;        // 武器の総キル数
 		float damageCount_ = 0.0f; // 武器の総ダメージ量

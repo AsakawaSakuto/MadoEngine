@@ -95,6 +95,7 @@ namespace Projectile {
 
 		// Manager走査中でも安全に追加できる生成要求としてExplosionを登録
 		Projectile::InitializeDesc context{};
+		context.sourceWeaponId = sourceWeaponId_;
 		context.projectileName = objectName_;
 		context.ownerPosition = transform_.translate;
 		context.damage = damage_;

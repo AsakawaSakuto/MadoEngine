@@ -131,7 +131,8 @@ namespace Enemy {
 
 			projectileDamageEvents_.push_back({
 				enemy->GetPosition(),
-				hitInfo.damage,
+				hitInfo.sourceWeaponId,
+				damageResult.appliedDamage,
 				damageResult.wasKilled,
 			});
 		}

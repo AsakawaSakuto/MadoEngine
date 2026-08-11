@@ -91,6 +91,7 @@ void Game::Initialize() {
 	}
 
 	moneyText_ = MyText::Find("MoneyText");
+	killCountText_ = MyText::Find("KillCountText");
 	displayedMoney_ = -1;
 
 	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
@@ -118,6 +119,7 @@ SceneType Game::Update(float dt) {
 		for (const Enemy::ProjectileDamageEvent& event :
 			enemyManager_->ConsumeProjectileDamageEvents()) {
 			projectileDamageView_.Spawn(event.damage, event.worldPosition);
+			weaponInventory_->RecordProjectileDamage(event.sourceWeaponId, event.damage, event.wasKilled);
 		}
 
 		map_->Update(*player_);
@@ -180,6 +182,19 @@ SceneType Game::Update(float dt) {
 		if (moneyText) {
 			moneyText->SetText(std::format("{}", currentMoney));
 			displayedMoney_ = currentMoney;
+		}
+	}
+
+	// 全Weaponの累計撃破数が変化したFrameだけText表示を更新
+	MadoEngine::Text* killCountText = MyText::TryGet(killCountText_);
+	if (!killCountText) {
+		killCountText_ = MyText::Find("KillCountText");
+		killCountText = MyText::TryGet(killCountText_);
+	}
+	if (killCountText) {
+		const std::string displayText = std::format("{}", weaponInventory_->GetTotalKillCount());
+		if (killCountText->GetText() != displayText) {
+			killCountText->SetText(displayText);
 		}
 	}
 
@@ -283,6 +298,7 @@ void Game::Finalize() {
 	projectileDamageView_.Finalize();
 	enemyCountText_ = {};
 	moneyText_ = {};
+	killCountText_ = {};
 	displayedMoney_ = -1;
 	fadeSprite_ = {};
 

@@ -108,6 +108,17 @@ namespace Weapon {
 		return weaponCount;
 	}
 
+	std::uint64_t Inventory::GetTotalKillCount() const {
+		std::uint64_t totalKillCount = 0;
+		for (const std::unique_ptr<BaseWeapon>& weapon : weapons_) {
+			if (weapon) {
+				totalKillCount += static_cast<std::uint64_t>(weapon->GetKillCount());
+			}
+		}
+
+		return totalKillCount;
+	}
+
 	BaseWeapon* Inventory::GetWeapon(Projectile::Type type) {
 		return const_cast<BaseWeapon*>(static_cast<const Inventory*>(this)->GetWeapon(type));
 	}
@@ -140,6 +151,23 @@ namespace Weapon {
 		std::vector<WeaponFiredEvent> events;
 		events.swap(weaponFiredEvents_);
 		return events;
+	}
+
+	void Inventory::RecordProjectileDamage(
+		std::uint64_t sourceWeaponId,
+		float appliedDamage,
+		bool wasKilled) {
+		if (sourceWeaponId == 0) {
+			return;
+		}
+
+		// 削除済みWeaponの遅延命中を別の装備へ加算しないようインスタンスIDで照合
+		for (const std::unique_ptr<BaseWeapon>& weapon : weapons_) {
+			if (weapon && weapon->GetWeaponId() == sourceWeaponId) {
+				weapon->RecordDamage(appliedDamage, wasKilled);
+				return;
+			}
+		}
 	}
 
 	void Inventory::RemoveWeapon(int slotIndex) {
@@ -216,11 +244,12 @@ namespace Weapon {
 
 			if (weapon && weapon->GetProjectileType() != Projectile::Type::None) {
 				const std::string weaponName = ProjectileTypeToString(weapon->GetProjectileType());
-				ImGui::Text("スロット %d: %s  Lv %d  Kill %d",
+				ImGui::Text("スロット %d: %s  Lv %d  Kill %d  Damage %.1f",
 					slotIndex + 1,
 					weaponName.c_str(),
 					weapon->GetUpgradeLevel(),
-					weapon->GetKillCount());
+					weapon->GetKillCount(),
+					weapon->GetDamageCount());
 				ImGui::SameLine();
 				if (ImGui::SmallButton("削除")) {
 					RemoveWeapon(slotIndex);

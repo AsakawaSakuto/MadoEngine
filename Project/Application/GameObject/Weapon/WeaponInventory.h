@@ -38,6 +38,10 @@ namespace Weapon {
 		/// @return 現在装備している武器数
 		std::size_t GetWeaponCount() const;
 
+		/// @brief 装備中Weaponが倒したEnemyの累計数を取得
+		/// @return 装備中Weaponが倒したEnemyの累計数
+		std::uint64_t GetTotalKillCount() const;
+
 		/// @brief 指定した種類の武器を取得
 		/// @param type 取得する武器種類
 		/// @return 所持している武器へのポインター、未所持の場合はnullptr
@@ -60,6 +64,12 @@ namespace Weapon {
 		/// @brief 未処理の武器発射イベントを取得してキューをクリア
 		/// @return 発生順に格納された武器発射イベント
 		std::vector<WeaponFiredEvent> ConsumeWeaponFiredEvents();
+
+		/// @brief Projectileによるダメージと撃破結果を発射元Weaponへ記録
+		/// @param sourceWeaponId 発射元Weaponインスタンスの識別番号
+		/// @param appliedDamage Enemyへ実際に適用されたダメージ量
+		/// @param wasKilled このダメージでEnemyを倒した場合はtrue
+		void RecordProjectileDamage(std::uint64_t sourceWeaponId, float appliedDamage, bool wasKilled);
 
 		/// @brief 指定したスロットの武器を削除
 		/// @param slotIndex 削除する武器スロットの番号

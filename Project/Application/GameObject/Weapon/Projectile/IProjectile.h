@@ -34,6 +34,10 @@ namespace Projectile {
 		/// @return Projectileの識別番号
 		std::uint64_t GetProjectileId() const { return projectileId_; }
 
+		/// @brief 発射元Weaponインスタンスの識別番号を取得
+		/// @return 発射元Weaponインスタンスの識別番号
+		std::uint64_t GetSourceWeaponId() const { return sourceWeaponId_; }
+
 		/// @brief Projectileのダメージ量を取得
 		/// @return Projectileのダメージ量
 		float GetDamage() const { return damage_; }
@@ -104,6 +108,7 @@ namespace Projectile {
 		/// @param colliderName Projectileのコライダー名
 		void InitializeCommonProperties(const InitializeDesc& context, const std::string& colliderName) {
 			projectileId_ = context.projectileId;
+			sourceWeaponId_ = context.sourceWeaponId;
 			colliderName_ = colliderName;
 			ownerPosition = context.ownerPosition;
 			targetPosition = context.targetPosition;
@@ -139,6 +144,7 @@ namespace Projectile {
 		}
 
 		std::uint64_t projectileId_ = 0; // Projectileの識別番号
+		std::uint64_t sourceWeaponId_ = 0; // 発射元Weaponインスタンスの識別番号
 		std::string colliderName_;       // Projectileのコライダー名
 
 		float damage_ = 10.0f;              // ダメージ量

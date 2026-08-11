@@ -10,10 +10,21 @@ namespace Player {
 		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>;
 		constexpr float kHealthRegenerationInterval = 6.0f;
 		constexpr float kHealthRegenerationAmount = 1.0f;
+		constexpr int kMapBlockCount = 20;
 	}
 
 	void Base::Initialize() {
-		transform_.translate = { 0.0f, 100.0f, 0.0f };
+		const int spawnBlockX = MyRand::GetInt(0, kMapBlockCount - 1);
+		const int spawnBlockZ = MyRand::GetInt(0, kMapBlockCount - 1);
+		const float blockSizeX = (mapLimit_.max.x - mapLimit_.min.x) / static_cast<float>(kMapBlockCount);
+		const float blockSizeZ = (mapLimit_.max.z - mapLimit_.min.z) / static_cast<float>(kMapBlockCount);
+
+		// 20x20から選んだBlockの境界開始位置へ半Block分を加算して中心へ配置
+		transform_.translate = {
+			mapLimit_.min.x + (static_cast<float>(spawnBlockX) + 0.5f) * blockSizeX,
+			100.0f,
+			mapLimit_.min.z + (static_cast<float>(spawnBlockZ) + 0.5f) * blockSizeZ
+		};
 		transform_.SetAllScale(0.5f);
 
 		AABB aabb;
@@ -267,8 +278,6 @@ namespace Player {
 #ifdef USE_IMGUI
 
 		ImGui::Begin("プレイヤー");
-
-		// 実際の移動へ使う速度成分を合成してデバッグ値を算出
 		const Vector3 slideVelocity = movement_.GetSlideVelocity();
 		const Vector3 jumpMoveVelocity = movement_.GetJumpMoveVelocity();
 		const float velocityY = movement_.GetVelocityY();

@@ -9,6 +9,7 @@ namespace Projectile {
 	
 	struct  InitializeDesc {
 		std::uint64_t projectileId = 0; // 投射物の一意なID
+		std::uint64_t sourceWeaponId = 0; // 発射元Weaponインスタンスの識別番号
 		std::string projectileName;     // 投射物の名前
 		int projectileCount;            // 投射物の生成順序番号
 		Vector3 ownerPosition;          // 投射物の生成元の座標

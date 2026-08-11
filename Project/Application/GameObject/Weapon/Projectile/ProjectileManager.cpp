@@ -174,6 +174,7 @@ namespace Projectile {
 				outHitInfos.push_back({
 					enemyTarget.enemyId,
 					projectile->GetProjectileId(),
+					projectile->GetSourceWeaponId(),
 					projectile->GetDamage()
 				});
 

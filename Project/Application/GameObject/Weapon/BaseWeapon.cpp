@@ -7,6 +7,14 @@
 
 namespace Weapon {
 	namespace {
+		std::uint64_t nextWeaponId = 1;
+
+		/// @brief Weaponインスタンスの識別番号を発行
+		/// @return 新しく発行した識別番号
+		std::uint64_t IssueWeaponId() {
+			return nextWeaponId++;
+		}
+
 		/// @brief 浮動小数点の強化値をProjectile用の回数へ変換
 		/// @param value 変換する強化値
 		/// @return 0以上の整数回数
@@ -77,11 +85,13 @@ namespace Weapon {
 
 		slotIndex_ = slotIndex;
 		type_ = type;
+		weaponId_ = IssueWeaponId();
 		status_ = loadedStatus;
 		weaponName_ = weaponName;
 
 		upgradeLevel_ = 1;
 		killCount_ = 0;
+		damageCount_ = 0.0f;
 		projectileCount_ = 0;
 		shotNowCount_ = 0;
 		wasFiredThisFrame_ = false;
@@ -90,6 +100,19 @@ namespace Weapon {
 		intervalTimer_.Start(status_.shotIntervalTime.value, true);
 		cooldownTimer_.Reset();
 		return true;
+	}
+
+	void BaseWeapon::RecordDamage(float appliedDamage, bool wasKilled) {
+
+		// 不正値による累計値の破損とダメージを伴わない撃破加算を防止
+		if (!std::isfinite(appliedDamage) || appliedDamage <= 0.0f) {
+			return;
+		}
+
+		damageCount_ += appliedDamage;
+		if (wasKilled) {
+			++killCount_;
+		}
 	}
 
 	std::vector<UpgradeStatType> BaseWeapon::GetSelectableUpgradeStatTypes() const {
@@ -187,6 +210,7 @@ namespace Weapon {
 			projectileCount_++;
 
 			Projectile::InitializeDesc context;
+			context.sourceWeaponId = weaponId_;
 			context.projectileName = weaponName_;
 			context.projectileCount = projectileCount_;
 			context.ownerPosition = ownerPosition;

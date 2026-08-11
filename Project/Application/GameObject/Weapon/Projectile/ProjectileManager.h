@@ -21,6 +21,7 @@ namespace Projectile {
 	struct HitInfo {
 		std::uint32_t enemyId = 0;
 		std::uint64_t projectileId = 0;
+		std::uint64_t sourceWeaponId = 0;
 		float damage = 0.0f;
 	};
 

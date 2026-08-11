@@ -14,6 +14,7 @@ namespace Enemy {
 	/// @brief Projectileによるダメージ表示へ渡すイベント情報
 	struct ProjectileDamageEvent {
 		Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
+		std::uint64_t sourceWeaponId = 0;
 		float damage = 0.0f;
 		bool wasKilled = false;
 	};

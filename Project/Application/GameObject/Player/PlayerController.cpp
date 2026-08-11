@@ -15,6 +15,7 @@ namespace Player {
 		input.y -= MyInput::Press("Down") ? 1.0f : 0.0f;
 
 		const float inputLengthSq = input.x * input.x + input.y * input.y;
+
 		if (inputLengthSq > 1.0f) {
 
 			// 斜め入力で移動量が増えないよう入力を単位円内へ正規化

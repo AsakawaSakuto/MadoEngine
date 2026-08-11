@@ -45,7 +45,7 @@ namespace Enemy {
 		SceneType sceneType_ = SceneType::None;
 		MapLimit mapLimit_;
 		Data::Status baseStatus_;
-		std::size_t spawnLimit_ = 2000;
+		std::size_t spawnLimit_ = 50;
 		float spawnInterval_ = 0.1f;
 		float spawnTimer_ = 0.0f;
 		float elapsedTime_ = 0.0f;
