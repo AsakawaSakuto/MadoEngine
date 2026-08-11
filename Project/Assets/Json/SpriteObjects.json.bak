@@ -24,7 +24,7 @@
                 1.0
             ],
             "scene": "Game",
-            "texture": "Money",
+            "texture": "Coin",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -54,7 +54,7 @@
             "layer": "Default",
             "name": "KillUI",
             "position": [
-                440.0,
+                760.0,
                 54.0
             ],
             "rotation": 0.0,

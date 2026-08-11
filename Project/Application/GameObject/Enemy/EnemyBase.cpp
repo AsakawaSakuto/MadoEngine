@@ -184,12 +184,13 @@ namespace Enemy {
 
 	void Base::SpawnDeathReward() {
 
-		// Killの重複呼び出しで経験値Dropが複製されないよう一度だけ生成
+		// Killの重複呼び出しで報酬Dropが複製されないよう一度だけ生成
 		if (isDeathRewardSpawned_) {
 			return;
 		}
 
 		DropObject::Manager::GetInstance().Spawn(DropObject::Type::Exp, transform_.translate);
+		DropObject::Manager::GetInstance().Spawn(DropObject::Type::Money, transform_.translate);
 		isDeathRewardSpawned_ = true;
 	}
 

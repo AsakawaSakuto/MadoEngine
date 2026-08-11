@@ -1,6 +1,7 @@
 {
     "emitters": [
         {
+            "backend": "auto",
             "colorOverLifetime": {
                 "end": {
                     "max": [
@@ -20,13 +21,13 @@
                     "max": [
                         1.0,
                         1.0,
-                        0.0,
+                        1.0,
                         1.0
                     ],
                     "min": [
                         1.0,
-                        0.0,
-                        0.0,
+                        1.0,
+                        1.0,
                         1.0
                     ]
                 }
@@ -38,7 +39,7 @@
                         "time": 0.0
                     }
                 ],
-                "duration": 0.0,
+                "duration": 0.009999999776482582,
                 "isLoop": false,
                 "maxParticles": 256,
                 "ratePerSecond": 0.0,
@@ -61,9 +62,9 @@
                         -15.0
                     ]
                 },
-                "directionMode": "shapeOutward",
+                "directionMode": "configured",
                 "lifeTime": {
-                    "max": 0.3499999940395355,
+                    "max": 0.5,
                     "min": 0.10000000149011612
                 },
                 "rotation": {
@@ -71,10 +72,11 @@
                     "min": 0.0
                 },
                 "speed": {
-                    "max": 2.5199999809265137,
-                    "min": 2.119999885559082
+                    "max": 2.0,
+                    "min": 2.0
                 }
             },
+            "isEnabled": true,
             "motion": {
                 "acceleration": [
                     0.0,
@@ -84,7 +86,7 @@
                 "drag": 0.0,
                 "gravity": [
                     0.0,
-                    0.0,
+                    -10.0,
                     0.0
                 ]
             },
@@ -96,7 +98,7 @@
             },
             "shape": {
                 "emitFromSurface": true,
-                "radius": 0.05000000074505806,
+                "radius": 0.009999999776482582,
                 "type": "sphere"
             },
             "simulationSpace": "world",
@@ -125,5 +127,5 @@
         }
     ],
     "name": "HitEffect",
-    "version": 1
+    "version": 2
 }

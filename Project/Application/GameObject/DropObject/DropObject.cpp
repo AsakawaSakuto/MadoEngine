@@ -5,9 +5,14 @@
 namespace DropObject {
 
 	namespace {
-		constexpr float kMoveSpeed = 12.0f;
-		constexpr float kArriveDistance = 0.05f;
-		constexpr int kExpAmount = 10;
+		constexpr float kMoveSpeed = 20.0f;      // DropObjectのPlayerへの吸着速度
+		constexpr float kArriveDistance = 0.05f; // DropObjectがPlayerに到達したと判定する距離
+		constexpr float kBackDuration = 0.2f;    // DropObjectがPlayerから後退する予備動作の継続時間
+
+		constexpr int kExpAmount = 10;           // DropObjectのExpがPlayerに加算する経験値量
+
+		constexpr float kMoneyRiseSpeed = 8.0f;  // DropObjectのMoneyが後退中に上昇する速度
+		constexpr int kMoneyAmount = 1;          // DropObjectのMoneyがPlayerに加算する所持金量
 	}
 
 	Base::~Base() {
@@ -18,7 +23,12 @@ namespace DropObject {
 		type_ = type;
 		transform_.translate = position;
 		transform_.scale = { 0.25f, 0.25f, 0.25f };
-		isMoving_ = false;
+		isMoving_ = type_ == Type::Money;
+		if (type_ == Type::Money) {
+
+			// 生成直後のMoneyに上昇しながら後退する予備動作を付与
+			backTimer_.Start(kBackDuration);
+		}
 		isAlive_ = true;
 		isReleased_ = false;
 		colliderName_ = "DropObject" + std::to_string(index);
@@ -27,14 +37,18 @@ namespace DropObject {
 		model_ = MyModel::Create(modelName_, "Plane", SceneType::Game);
 
 		AABB aabb;
+		aabb.center = transform_.translate;
+		aabb.min = { -0.125f, 0.0f, -0.125f };
+		aabb.max = { 0.125f, 0.25f, 0.125f };
 
 		std::string textureName;
 		switch (type_) {
 		case Type::Exp:
 			textureName = "Exp";
-			aabb.center = transform_.translate;
-			aabb.min = { -0.125f, 0.0f, -0.125f };
-			aabb.max = { 0.125f, 0.25f, 0.125f };
+			break;
+		case Type::Money:
+			textureName = "Coin";
+			transform_.scale = { 0.1f, 0.1f, 0.1f };
 			break;
 		case Type::Heal:
 			textureName = "Heal";
@@ -77,7 +91,7 @@ namespace DropObject {
 			return;
 		}
 
-		Vector3 targetPosition = player->GetPosition();
+		const Vector3 targetPosition = player ? player->GetPosition() : targetPosition_;
 
 		if (isMoving_) {
 
@@ -85,11 +99,15 @@ namespace DropObject {
 			if (backTimer_.IsActive()) {
 				Vector3 toTarget = targetPosition - transform_.translate;
 				const float distance = toTarget.Length();
-				if (distance <= kArriveDistance) {
-					transform_.translate = targetPosition;
-				} else {
+				if (distance > kArriveDistance) {
 					const float moveDistance = std::min(kMoveSpeed * deltaTime, distance);
 					transform_.translate -= toTarget / distance * moveDistance;
+				}
+
+				if (type_ == Type::Money) {
+
+					// 後退中だけ高さを加えて追尾開始前の跳ね上がりを表現
+					transform_.translate.y += kMoneyRiseSpeed * deltaTime;
 				}
 			} else {
 				Vector3 toTarget = targetPosition - transform_.translate;
@@ -104,17 +122,18 @@ namespace DropObject {
 		}
 
 		// 広い回収範囲への侵入を契機にPlayerへの吸着を開始
-		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerDropObjectGetSphere)) {
+		if (MyCollider::IsHitWithTag(colliderName_, CollisionTag::PlayerDropObjectGetSphere)) {
 			if (!isMoving_) {
 				isMoving_ = true;
-				backTimer_.Start(0.2f);
+				backTimer_.Start(kBackDuration);
 			}
 		}
 
 		// Player本体へ到達した時点で報酬を確定して生存状態を終了
-		if (MyCollider::IsHitWithTag(colliderName_,	CollisionTag::PlayerHitBox)) {
-			if (player && type_ == Type::Exp) {
-				CollectExp(*player);
+		const bool isMoneySpawnMotionActive = type_ == Type::Money && backTimer_.IsActive();
+		if (!isMoneySpawnMotionActive && MyCollider::IsHitWithTag(colliderName_, CollisionTag::PlayerHitBox)) {
+			if (player) {
+				Collect(*player);
 				return;
 			}
 
@@ -129,12 +148,23 @@ namespace DropObject {
 		backTimer_.Update(deltaTime);
 	}
 
-	void Base::CollectExp(Player::Base& player) {
+	void Base::Collect(Player::Base& player) {
 		if (!isAlive_) {
 			return;
 		}
 
-		player.AddExp(kExpAmount);
+		// 報酬の加算先をDropObjectの種類ごとに分離
+		switch (type_) {
+		case Type::Exp:
+			player.AddExp(kExpAmount);
+			break;
+		case Type::Money:
+			player.AddMoney(kMoneyAmount);
+			break;
+		case Type::Heal:
+			break;
+		}
+
 		isAlive_ = false;
 	}
 

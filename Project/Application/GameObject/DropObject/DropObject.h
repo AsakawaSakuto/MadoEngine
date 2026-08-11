@@ -27,7 +27,7 @@ namespace DropObject {
 
 		/// @brief Playerとの衝突判定を含めてDropObjectを更新
 		/// @param deltaTime 1フレームの経過時間
-		/// @param player 経験値を受け取るPlayer
+		/// @param player 報酬の受取先Player
 		void Update(float deltaTime, Player::Base& player);
 
 		/// @brief 移動状態を設定
@@ -49,12 +49,12 @@ namespace DropObject {
 
 		/// @brief Player参照を指定してDropObjectを更新
 		/// @param deltaTime 1フレームの経過時間
-		/// @param player 経験値を受け取るPlayer、nullptrの場合は経験値加算なし
+		/// @param player 報酬の受取先Player、nullptrの場合は報酬加算なし
 		void UpdateInternal(float deltaTime, Player::Base* player);
 
-		/// @brief Playerへ経験値を渡してDropObjectを取得済み状態へ変更
-		/// @param player 経験値を受け取るPlayer
-		void CollectExp(Player::Base& player);
+		/// @brief DropObjectの種類に応じた報酬をPlayerへ渡して取得済み状態へ変更
+		/// @param player 報酬の受取先Player
+		void Collect(Player::Base& player);
 
 		Type type_ = Type::Exp;
 		bool isMoving_ = false;
