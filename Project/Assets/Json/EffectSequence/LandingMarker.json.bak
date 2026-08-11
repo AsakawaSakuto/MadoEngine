@@ -1,0 +1,39 @@
+{
+    "duration": 2.0,
+    "isLoop": true,
+    "nodes": [
+        {
+            "displayName": "Cylinder",
+            "effectAssetName": "LandingMarker",
+            "isEnabled": true,
+            "localTransform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "nodeId": 1,
+            "nodeType": "primitiveEffect",
+            "parentNodeId": null,
+            "playbackSpeed": 1.0,
+            "renderLayer": null,
+            "settings": {
+                "primitiveType": "cylinder"
+            },
+            "startTime": 0.0
+        }
+    ],
+    "playbackSpeed": 1.0,
+    "version": 1
+}

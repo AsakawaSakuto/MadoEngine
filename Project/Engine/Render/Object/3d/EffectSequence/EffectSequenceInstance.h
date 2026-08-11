@@ -43,6 +43,10 @@ namespace MadoEngine::EffectSequence {
 		/// @param transform 新しいRoot Transform
 		void SetTransform(const Transform3D& transform);
 
+		/// @brief Sequenceと再生中の子Effectの表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief Sequence再生速度を設定
 		/// @param playbackSpeed 再生速度
 		/// @return 有効な再生速度を設定できた場合はtrue
@@ -147,6 +151,7 @@ namespace MadoEngine::EffectSequence {
 		float playbackSpeed_ = 1.0f;
 		bool isLoop_ = false;
 		bool isPaused_ = false;
+		bool isVisible_ = true;
 		bool isWaitingForChildren_ = false;
 		bool isFinished_ = true;
 	};

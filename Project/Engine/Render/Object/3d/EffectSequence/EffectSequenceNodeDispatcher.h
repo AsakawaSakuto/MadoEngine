@@ -45,6 +45,11 @@ namespace MadoEngine::EffectSequence {
 			const Transform3D& worldTransform
 		) const;
 
+		/// @brief 子Effectの表示状態を設定
+		/// @param handle 設定する子Handle
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(const EffectSequenceChildHandle& handle, bool isVisible) const;
+
 		/// @brief 子Effectの再生速度を設定
 		/// @param handle 設定する子Handle
 		/// @param playbackSpeed 再生速度

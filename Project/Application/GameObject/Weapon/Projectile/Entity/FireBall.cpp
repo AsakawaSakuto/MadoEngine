@@ -6,7 +6,7 @@
 namespace Projectile {
 
 	FireBall::~FireBall() {
-		StopParticle();
+		StopEffectSequence();
 
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
@@ -18,11 +18,11 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
-		// Modelを持たずParticleを本体表示として使用
+		// Modelを持たずEffect Sequenceを本体表示として使用
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
 		lifeTimer_.Start(lifeTime_, false);
-		StartParticle();
+		StartEffectSequence();
 
 		SetMoveDirectionTowards(targetPosition);
 
@@ -38,7 +38,7 @@ namespace Projectile {
 		lifeTimer_.Update(deltaTime);
 
 		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
-		UpdateParticleTransform();
+		UpdateEffectSequenceTransform();
 
 		// Map外への到達と寿命切れのどちらでも終端Explosionを生成
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox) || lifeTimer_.IsFinished()) {
@@ -60,35 +60,27 @@ namespace Projectile {
 		SpawnExplosion();
 	}
 
-	void FireBall::StartParticle() {
-		MadoEngine::Particle::PlayDesc desc;
-		desc.transform.translate = transform_.translate;
+	void FireBall::StartEffectSequence() {
+		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
+		desc.rootTransform.translate = transform_.translate;
 		desc.sceneType = SceneType::Game;
 		desc.loopOverride = true;
-		particleHandle_ = MyParticle3d::Play("FireBall", desc);
+		effectSequence_.Play("FireBall", desc);
 	}
 
-	void FireBall::UpdateParticleTransform() {
-		Transform3D particleTransform;
-		particleTransform.translate = transform_.translate;
-		if (!particleHandle_.HasValue()) {
-			return;
-		}
+	void FireBall::UpdateEffectSequenceTransform() {
+		Transform3D effectTransform;
+		effectTransform.translate = transform_.translate;
 
-		if (!MyParticle3d::SetTransform(particleHandle_, particleTransform)) {
+		if (!effectSequence_.SetTransform(effectTransform)) {
 
-			// Particle側でHandleが失効していた場合は追従表現を再生成
-			StartParticle();
+			// Sequence側でHandleが失効していた場合は追従表現を再生成
+			StartEffectSequence();
 		}
 	}
 
-	void FireBall::StopParticle() {
-		if (!particleHandle_.HasValue()) {
-			return;
-		}
-
-		MyParticle3d::Stop(particleHandle_, MadoEngine::Particle::StopMode::Immediate);
-		particleHandle_ = {};
+	void FireBall::StopEffectSequence() {
+		effectSequence_.Stop(MadoEngine::EffectSequence::EffectSequenceStopMode::Immediate);
 	}
 
 	void FireBall::SpawnExplosion() {

@@ -80,6 +80,13 @@ namespace MadoEngine::EffectSequence {
 			return EffectSequenceSystem::GetInstance().SetTransform(handle_, transform);
 		}
 
+		/// @brief 所有Sequenceと子Effectの表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		/// @return 設定できた場合はtrue
+		bool SetVisible(bool isVisible) {
+			return EffectSequenceSystem::GetInstance().SetVisible(handle_, isVisible);
+		}
+
 		/// @brief Sequence再生速度を更新
 		/// @param playbackSpeed 再生速度
 		/// @return 更新できた場合はtrue

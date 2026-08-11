@@ -1,6 +1,7 @@
 {
     "emitters": [
         {
+            "backend": "auto",
             "colorOverLifetime": {
                 "end": {
                     "max": [
@@ -75,6 +76,7 @@
                     "min": 4.0
                 }
             },
+            "isEnabled": true,
             "motion": {
                 "acceleration": [
                     0.0,
@@ -90,7 +92,7 @@
             },
             "name": "Sparks",
             "renderer": {
-                "blendMode": "add",
+                "blendMode": "normal",
                 "sortMode": "none",
                 "texture": "white2x2"
             },
@@ -125,5 +127,5 @@
         }
     ],
     "name": "DefaultExplosion",
-    "version": 1
+    "version": 2
 }

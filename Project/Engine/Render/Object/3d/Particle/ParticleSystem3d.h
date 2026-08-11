@@ -97,6 +97,12 @@ namespace MadoEngine::Particle {
 		/// @return 変更に成功した場合はtrue
 		bool SetTransform(EffectHandle handle, const Transform3D& transform);
 
+		/// @brief Particle Effectの表示状態を設定
+		/// @param handle 設定するEffect Handle
+		/// @param isVisible 表示する場合はtrue
+		/// @return 設定できた場合はtrue
+		bool SetVisible(EffectHandle handle, bool isVisible);
+
 		/// @brief 指定したParticle Effectを一時停止
 		/// @param handle 一時停止するEffect Handle
 		/// @return 一時停止できた場合はtrue
@@ -194,6 +200,7 @@ namespace MadoEngine::Particle {
 		struct EffectSlot {
 			std::unique_ptr<ParticleEffectInstance> instance;
 			uint32_t generation = 1;
+			bool isVisible = true;
 		};
 
 		struct RetiredEffectInstance {

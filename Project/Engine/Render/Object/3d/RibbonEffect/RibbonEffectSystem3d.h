@@ -115,6 +115,12 @@ namespace MadoEngine::Ribbon {
 		/// @return 更新に成功した場合はtrue
 		bool SetTransform(RibbonEffectHandle handle, const Transform3D& transform);
 
+		/// @brief Ribbon Effectの表示状態を設定
+		/// @param handle 設定するEffect Handle
+		/// @param isVisible 表示する場合はtrue
+		/// @return 設定できた場合はtrue
+		bool SetVisible(RibbonEffectHandle handle, bool isVisible);
+
 		/// @brief 指定したRibbon Effectを一時停止
 		/// @param handle 一時停止するEffect Handle
 		/// @return 一時停止できた場合はtrue
@@ -216,6 +222,7 @@ namespace MadoEngine::Ribbon {
 		struct EffectSlot {
 			std::unique_ptr<RibbonEffectInstance> instance;
 			uint32_t generation = 1;
+			bool isVisible = true;
 		};
 
 		/// @brief Singleton Systemを構築

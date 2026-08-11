@@ -410,6 +410,17 @@ namespace MadoEngine::EffectSequence {
 		return true;
 	}
 
+	bool EffectSequenceSystem::SetVisible(
+		EffectSequenceHandle handle,
+		bool isVisible) {
+		EffectSequenceInstance* instance = Resolve(handle);
+		if (!instance) {
+			return false;
+		}
+		instance->SetVisible(isVisible);
+		return true;
+	}
+
 	bool EffectSequenceSystem::SetPlaybackSpeed(
 		EffectSequenceHandle handle,
 		float playbackSpeed) {

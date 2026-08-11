@@ -5,6 +5,7 @@
 #include "PlayerMovement.h"
 #include "PlayerStatus.h"
 #include "../Map/MapLimit.h"
+#include "Render/Object/3d/EffectSequence/MyEffectSequence3d.h"
 
 namespace Player {
 
@@ -69,8 +70,8 @@ namespace Player {
 
 		Camera* camera_ = nullptr;
 
-		MadoEngine::ModelHandle shadowModel_{}; // 影モデル
 		Transform3D shadowTransform_;  // 影Transform
+		MadoEngine::EffectSequence::MyEffectSequence3d landingMarker_; // 着地点Marker
 
 		Status status_;                     // ステータス
 		StatusMultiplier statusMultiplier_; // ステータスの倍率

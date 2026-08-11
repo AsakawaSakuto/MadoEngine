@@ -120,6 +120,7 @@ namespace MadoEngine::EffectSequence {
 		finishReason_ = EffectSequenceFinishReason::Natural;
 		playbackTime_ = 0.0f;
 		isPaused_ = false;
+		isVisible_ = true;
 		isWaitingForChildren_ = false;
 		isFinished_ = !asset_;
 		if (!asset_) {
@@ -277,6 +278,13 @@ namespace MadoEngine::EffectSequence {
 		ApplyWorldTransformsToChildren();
 	}
 
+	void EffectSequenceInstance::SetVisible(bool isVisible) {
+		isVisible_ = isVisible;
+		for (ActiveChild& child : activeChildren_) {
+			dispatcher_->SetVisible(child.handle, isVisible_);
+		}
+	}
+
 	bool EffectSequenceInstance::SetPlaybackSpeed(float playbackSpeed) {
 		if (
 			!std::isfinite(playbackSpeed) ||
@@ -334,6 +342,7 @@ namespace MadoEngine::EffectSequence {
 		);
 		if (child.has_value()) {
 			activeChildren_.push_back({ node.nodeId, child.value() });
+			dispatcher_->SetVisible(activeChildren_.back().handle, isVisible_);
 			if (isPaused_) {
 				dispatcher_->Pause(activeChildren_.back().handle);
 			}

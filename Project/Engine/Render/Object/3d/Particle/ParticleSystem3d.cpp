@@ -486,6 +486,7 @@ namespace MadoEngine::Particle {
 		EffectSlot& slot = effectSlots_[slotIndex];
 		slot.instance = std::make_unique<ParticleEffectInstance>();
 		slot.instance->Initialize(found->second, resolvedDesc, runtimeFactory_);
+		slot.isVisible = true;
 		isRenderDataPrepared_ = false;
 		return { slotIndex, slot.generation };
 	}
@@ -504,6 +505,15 @@ namespace MadoEngine::Particle {
 		}
 
 		instance->SetTransform(transform);
+		isRenderDataPrepared_ = false;
+		return true;
+	}
+
+	bool ParticleSystem3d::SetVisible(EffectHandle handle, bool isVisible) {
+		if (!Resolve(handle)) {
+			return false;
+		}
+		effectSlots_[handle.index].isVisible = isVisible;
 		isRenderDataPrepared_ = false;
 		return true;
 	}
@@ -612,7 +622,8 @@ namespace MadoEngine::Particle {
 		if (!isRenderDataPrepared_ || preparedSceneType_ != sceneType) {
 			renderer_.Begin(camera, currentSubmissionFenceValue_);
 			for (const EffectSlot& slot : effectSlots_) {
-				if (!slot.instance || !slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
+				if (!slot.instance || !slot.isVisible ||
+					!slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
 					continue;
 				}
 				slot.instance->SubmitRenderData(renderer_);

@@ -1,0 +1,121 @@
+{
+    "emitters": [
+        {
+            "geometry": {
+                "cameraFacing": true,
+                "interpolation": "linear",
+                "smoothingSubdivision": 0,
+                "widthOverLifetime": {
+                    "default": 0.05000000074505806,
+                    "keys": []
+                }
+            },
+            "isEnabled": true,
+            "material": {
+                "blendMode": "normal",
+                "colorOverLifetime": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": [
+                        {
+                            "easing": 0,
+                            "time": 0.0,
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "easing": 0,
+                            "time": 1.0,
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                },
+                "cullMode": "none",
+                "globalAlpha": {
+                    "default": 1.0,
+                    "keys": []
+                },
+                "textureName": "white2x2",
+                "tileLength": 1.0,
+                "uvMode": "stretch",
+                "uvOffset": [
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0
+                ],
+                "uvScroll": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "playback": {
+                "duration": 1.0,
+                "isLoop": true,
+                "mode": "full",
+                "progress": {
+                    "default": 0.0,
+                    "keys": [
+                        {
+                            "easing": 0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "easing": 0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "sweepLength": 1.0
+            },
+            "trail": {
+                "defaultControlPoints": [
+                    [
+                        -3.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        -1.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        1.0,
+                        -0.5,
+                        0.0
+                    ],
+                    [
+                        3.0,
+                        0.5,
+                        0.0
+                    ]
+                ],
+                "generationMode": "transformHistory",
+                "maxPointCount": 128,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.3499999940395355,
+                "simulationSpace": "world"
+            }
+        }
+    ],
+    "version": 5
+}

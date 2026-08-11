@@ -100,6 +100,12 @@ namespace MadoEngine::Effect {
 		/// @return 変更に成功した場合はtrue
 		bool SetTransform(PrimitiveEffectHandle handle, const Transform3D& transform);
 
+		/// @brief Primitive Effectの表示状態を設定
+		/// @param handle 設定するEffect Handle
+		/// @param isVisible 表示する場合はtrue
+		/// @return 設定できた場合はtrue
+		bool SetVisible(PrimitiveEffectHandle handle, bool isVisible);
+
 		/// @brief 指定したPrimitive Effectを一時停止
 		/// @param handle 一時停止するEffect Handle
 		/// @return 一時停止できた場合はtrue
@@ -170,6 +176,7 @@ namespace MadoEngine::Effect {
 		struct EffectSlot {
 			std::unique_ptr<CylinderEffectInstance> instance;
 			uint32_t generation = 1;
+			bool isVisible = true;
 		};
 
 		/// @brief Systemを構築

@@ -117,6 +117,12 @@ namespace MadoEngine::EffectSequence {
 		/// @return 更新できた場合はtrue
 		bool SetTransform(EffectSequenceHandle handle, const Transform3D& transform);
 
+		/// @brief Sequenceと子Effectの表示状態を設定
+		/// @param handle 設定するSequence Handle
+		/// @param isVisible 表示する場合はtrue
+		/// @return 設定できた場合はtrue
+		bool SetVisible(EffectSequenceHandle handle, bool isVisible);
+
 		/// @brief Sequence再生速度を設定
 		/// @param handle 設定するSequence Handle
 		/// @param playbackSpeed 再生速度

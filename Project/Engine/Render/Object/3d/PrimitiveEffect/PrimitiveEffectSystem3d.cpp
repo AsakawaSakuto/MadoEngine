@@ -440,6 +440,7 @@ namespace MadoEngine::Effect {
 		EffectSlot& slot = effectSlots_[slotIndex];
 		slot.instance = std::make_unique<CylinderEffectInstance>();
 		slot.instance->Initialize(found->second, desc);
+		slot.isVisible = true;
 		isRenderDataPrepared_ = false;
 		return { slotIndex, slot.generation };
 	}
@@ -461,6 +462,17 @@ namespace MadoEngine::Effect {
 			return false;
 		}
 		instance->SetTransform(transform);
+		isRenderDataPrepared_ = false;
+		return true;
+	}
+
+	bool PrimitiveEffectSystem3d::SetVisible(
+		PrimitiveEffectHandle handle,
+		bool isVisible) {
+		if (!Resolve(handle)) {
+			return false;
+		}
+		effectSlots_[handle.index].isVisible = isVisible;
 		isRenderDataPrepared_ = false;
 		return true;
 	}
@@ -530,7 +542,8 @@ namespace MadoEngine::Effect {
 		if (!isRenderDataPrepared_ || preparedSceneType_ != sceneType) {
 			renderer_.Begin(camera);
 			for (const EffectSlot& slot : effectSlots_) {
-				if (!slot.instance || !slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
+				if (!slot.instance || !slot.isVisible ||
+					!slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
 					continue;
 				}
 				slot.instance->SubmitRenderData(renderer_);

@@ -129,6 +129,12 @@ namespace MadoEngine::Beam {
 			const Vector3& endPosition
 		);
 
+		/// @brief Beam Effectの表示状態を設定
+		/// @param handle 設定するEffect Handle
+		/// @param isVisible 表示する場合はtrue
+		/// @return 設定できた場合はtrue
+		bool SetVisible(BeamEffectHandle handle, bool isVisible);
+
 		/// @brief 始点を更新
 		/// @param handle 更新対象Handle
 		/// @param position 新しい始点
@@ -198,6 +204,7 @@ namespace MadoEngine::Beam {
 		struct EffectSlot {
 			std::unique_ptr<BeamEffectInstance> instance;
 			uint32_t generation = 1;
+			bool isVisible = true;
 		};
 
 		/// @brief Singleton Systemを構築

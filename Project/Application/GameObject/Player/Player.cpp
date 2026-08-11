@@ -53,25 +53,20 @@ namespace Player {
 		model_ = MyModel::Create("Player", "walk", SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
-			model->SetTexture("white16x16");
-			model->SetCastShadow(false);
+			model->SetTexture("white2x2");
 			animationController_.Initialize(*model);
 		}
 
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
-		shadowModel_ = MyModel::Create("PlayerShadow", "sphere", SceneType::Game);
-		if (Model* shadowModel = MyModel::TryGet(shadowModel_)) {
-
-			// 地表へ重ねる簡易影として使用するためライティングとShadow処理を無効化
-			shadowModel->SetRenderLayer(MadoEngine::Render::RenderLayer::Default);
-			shadowModel->SetTexture("white16x16");
-			shadowModel->SetColor({ 1.0f, 0.0f, 1.0f, 1.0f });
-			shadowModel->SetCastShadow(false);
-			shadowModel->SetReceiveShadow(false);
-			shadowModel->SetLightingEnabled(false);
-		}
 
 		movement_.Initialize();
+
+		// Loop再生を維持したまま空中時だけ描画する着地点Markerの初期化
+		MadoEngine::EffectSequence::EffectSequencePlayDesc landingMarkerDesc;
+		landingMarkerDesc.sceneType = SceneType::Game;
+		landingMarkerDesc.loopOverride = true;
+		landingMarker_.Play("LandingMarker", landingMarkerDesc);
+		landingMarker_.SetVisible(false);
 
 		MadoEngine::Particle::PlayDesc desc;
 		if (Model* model = MyModel::TryGet(model_)) {
@@ -233,11 +228,7 @@ namespace Player {
 	}
 
 	void Base::UpdateShadowTransform() {
-		Model* shadowModel = MyModel::TryGet(shadowModel_);
-		if (!shadowModel) {
-			return;
-		}
-
+		
 		const float maxGroundDistance = mapLimit_.max.y - mapLimit_.min.y;
 		float groundY = 0.0f;
 		float surfaceY = 0.0f;
@@ -255,7 +246,7 @@ namespace Player {
 			foundGround = true;
 		}
 
-		shadowModel->SetVisible(foundGround);
+		landingMarker_.SetVisible(foundGround && !movement_.IsGrounded());
 		if (!foundGround) {
 			return;
 		}
@@ -266,13 +257,10 @@ namespace Player {
 			transform_.translate.z
 		};
 		
-		shadowModel->SetPosition(shadowTransform_.translate);
-		if (Model* model = MyModel::TryGet(model_)) {
-			shadowModel->SetRotation(model->GetRotation());
-		} else {
-			shadowModel->SetRotation(transform_.rotate);
-		}
-		shadowModel->SetScale(shadowTransform_.scale);
+		// ShadowModelの拡縮に影響されないよう着地点Markerには地表座標だけを同期
+		Transform3D landingMarkerTransform;
+		landingMarkerTransform.translate = shadowTransform_.translate;
+		landingMarker_.SetTransform(landingMarkerTransform);
 	}
 
 	Vector3 Base::GetModelPosition() const {

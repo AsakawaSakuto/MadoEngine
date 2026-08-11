@@ -229,6 +229,17 @@ namespace MadoEngine::EffectSequence {
 		}, handle);
 	}
 
+	void EffectSequenceNodeDispatcher::SetVisible(
+		const EffectSequenceChildHandle& handle,
+		bool isVisible) const {
+		std::visit(Overloaded{
+			[isVisible](MadoEngine::Particle::EffectHandle child) { MadoEngine::Particle::ParticleSystem3d::GetInstance().SetVisible(child, isVisible); },
+			[isVisible](MadoEngine::Effect::PrimitiveEffectHandle child) { MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().SetVisible(child, isVisible); },
+			[isVisible](MadoEngine::Ribbon::RibbonEffectHandle child) { MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetVisible(child, isVisible); },
+			[isVisible](MadoEngine::Beam::BeamEffectHandle child) { MadoEngine::Beam::BeamEffectSystem3d::GetInstance().SetVisible(child, isVisible); },
+		}, handle);
+	}
+
 	void EffectSequenceNodeDispatcher::SetPlaybackSpeed(
 		const EffectSequenceChildHandle& handle,
 		float playbackSpeed) const {
