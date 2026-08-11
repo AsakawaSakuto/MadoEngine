@@ -35,6 +35,9 @@ private:
 	/// @brief Map上にKarmaをランダム配置
 	void GenerateKarmas();
 
+	/// @brief 通常ブロック上にBossSpawnerを配置
+	void GenerateBossSpawner();
+
 	/// @brief Map上のイベントオブジェクトを更新
 	/// @param player 相互作用するPlayer
 	void UpdateEventObjects(Player::Base& player);

@@ -160,6 +160,7 @@
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
@@ -687,6 +688,7 @@
     <ClInclude Include="Application\GameObject\Map\EventObject\Jar\JarType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "GameObject/Map/EventObject/BossSpawner/BossSpawner.h"
 #include "GameObject/Map/EventObject/Chest/Chest.h"
 #include "GameObject/Map/EventObject/Jar/Jar.h"
 #include "GameObject/Map/EventObject/Karma/Karma.h"
@@ -164,6 +165,8 @@ void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("Chest.Outline");
 	MyInstancedModel::Destroy("Karma.Normal");
 	MyInstancedModel::Destroy("Karma.Outline");
+	MyInstancedModel::Destroy("BossSpawner.Normal");
+	MyInstancedModel::Destroy("BossSpawner.Outline");
 }
 
 }
@@ -252,6 +255,7 @@ void Map::Initialize(uint32_t seed) {
 	GenerateJars();
 	GenerateChests();
 	GenerateKarmas();
+	GenerateBossSpawner();
 }
 
 void Map::Update(Player::Base& player) {
@@ -502,6 +506,43 @@ void Map::GenerateKarmas() {
 	}
 
 	Logger::Output("Map : Karmaを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+}
+
+void Map::GenerateBossSpawner() {
+	std::vector<Vector3> spawnCandidates;
+	spawnCandidates.reserve(static_cast<size_t>(mapWidth_) * static_cast<size_t>(mapHeight_));
+
+	// 坂を除外し、モデルの原点が接地する通常ブロック上面の中心を候補化
+	for (int z = 0; z < mapHeight_; ++z) {
+		for (int x = 0; x < mapWidth_; ++x) {
+			const MapBlock& block = mapBlocks_[z][x];
+			if (block.GetType() != MapBlockType::Ground) {
+				continue;
+			}
+
+			spawnCandidates.push_back({
+				static_cast<float>(x) * blockSize_.x,
+				blockSize_.y * static_cast<float>(block.GetHeight()),
+				static_cast<float>(z) * blockSize_.z
+			});
+		}
+	}
+
+	if (spawnCandidates.empty()) {
+		Logger::Output("Map : BossSpawnerを配置できる通常ブロックがありません", Logger::Level::Warning);
+		return;
+	}
+
+	// 地形シードから派生したイベント乱数で候補を一つだけ選択
+	const int spawnIndex = eventObjectRandom_.Int(0, static_cast<int>(spawnCandidates.size()) - 1);
+	BossSpawner::InitializeDesc desc;
+	desc.position = spawnCandidates[static_cast<size_t>(spawnIndex)];
+
+	std::unique_ptr<BossSpawner> bossSpawner = std::make_unique<BossSpawner>();
+	bossSpawner->Initialize(desc);
+	eventObjects_.push_back(std::move(bossSpawner));
+
+	Logger::Output("Map : BossSpawnerを1個配置しました", Logger::Level::Application);
 }
 
 void Map::UpdateEventObjects(Player::Base& player) {

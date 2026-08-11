@@ -146,6 +146,7 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Karma\Karma.cpp" />
@@ -335,6 +336,7 @@
     <ClInclude Include="Application\GameObject\Item\BaseItem.h" />
     <ClInclude Include="Application\GameObject\Item\ItemInventry.h" />
     <ClInclude Include="Application\GameObject\Item\ItemStatus.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Jar\Jar.h" />
