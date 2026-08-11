@@ -34,7 +34,7 @@ static const float2 kDofSampleOffsets[kDofSampleCount] = {
     float2(0.401f, -0.230f),
 };
 
-/// @brief Depth Of Fieldの焦点パラメータを取得する
+/// @brief Depth Of Fieldの焦点パラメータを取得
 /// @return x: 焦点距離, y: 焦点幅, z: ぼかし半径, w: 適用率
 float4 GetDofFocusParams() {
     if (all(gDofFocusParams == 0.0f)) {
@@ -44,7 +44,7 @@ float4 GetDofFocusParams() {
     return gDofFocusParams;
 }
 
-/// @brief Depth Of Fieldのカメラパラメータを取得する
+/// @brief Depth Of Fieldのカメラパラメータを取得
 /// @return x: NearClip, y: FarClip, z: 手前ぼけ強度, w: 奥ぼけ強度
 float4 GetDofCameraParams() {
     if (all(gDofCameraParams == 0.0f)) {
@@ -54,26 +54,28 @@ float4 GetDofCameraParams() {
     return gDofCameraParams;
 }
 
-/// @brief Depth値をView空間距離へ変換する
+/// @brief Depth値をView空間距離へ変換
 /// @param ndcDepth DepthBufferから取得した0から1の深度
 /// @param nearClip CameraのNearClip距離
 /// @param farClip CameraのFarClip距離
 /// @return CameraからのView空間距離
 float ConvertDepthToViewDistance(float ndcDepth, float nearClip, float farClip) {
+
+    // Perspective投影後の非線形DepthをCameraからの線形距離へ復元
     float safeNear = max(nearClip, 0.0001f);
     float safeFar = max(farClip, safeNear + 0.0001f);
     float denominator = max(safeFar - ndcDepth * (safeFar - safeNear), 0.0001f);
     return (safeNear * safeFar) / denominator;
 }
 
-/// @brief Depthが背景クリア値に近いか判定する
+/// @brief Depthが背景クリア値に近いか判定
 /// @param depth 判定する深度
 /// @return 背景に近い場合はtrue
 bool IsClearDepth(float depth) {
     return depth >= 0.9999f;
 }
 
-/// @brief 焦点距離からのずれをぼけ量へ変換する
+/// @brief 焦点距離からのずれをぼけ量へ変換
 /// @param viewDistance CameraからのView空間距離
 /// @param focusParams 焦点パラメータ
 /// @param cameraParams カメラパラメータ
@@ -87,7 +89,7 @@ float CalculateCircleOfConfusion(float viewDistance, float4 focusParams, float4 
     return saturate(blurRate * max(sideStrength, 0.0f));
 }
 
-/// @brief 指定UV周辺をぼけ量に応じてサンプリングする
+/// @brief 指定UV周辺をぼけ量に応じてサンプリング
 /// @param texcoord サンプリング中心UV
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param blurRadius ぼかし半径
@@ -98,6 +100,7 @@ float4 SampleDepthOfFieldBlur(float2 texcoord, float2 texelSize, float blurRadiu
     float4 sumColor = gTexture.Sample(gSamplerLinear, texcoord);
     float totalWeight = 1.0f;
 
+    // 規則的な格子模様を避けるPoisson Disk配置で周辺色を収集
     [unroll]
     for (int sampleIndex = 0; sampleIndex < kDofSampleCount; ++sampleIndex) {
         float2 offset = kDofSampleOffsets[sampleIndex];
@@ -110,7 +113,7 @@ float4 SampleDepthOfFieldBlur(float2 texcoord, float2 texelSize, float blurRadiu
     return sumColor / max(totalWeight, 0.0001f);
 }
 
-/// @brief 深度に応じたDepth Of Fieldを適用する
+/// @brief 深度に応じたDepth Of Fieldを適用
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return Depth Of Field適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -126,6 +129,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     float4 baseColor = gTexture.Sample(gSamplerLinear, input.texcoord);
     float sceneDepth = gSceneDepthTexture.Sample(gSamplerPoint, input.texcoord);
+
+    // Geometryを持たないClear DepthはFar Clip上の背景としてぼけ量を計算
     float viewDistance = IsClearDepth(sceneDepth)
         ? max(cameraParams.y, cameraParams.x + 0.0001f)
         : ConvertDepthToViewDistance(sceneDepth, cameraParams.x, cameraParams.y);

@@ -14,7 +14,7 @@ struct PixelShaderOutput
     float4 color : SV_TARGET0;
 };
 
-/// @brief Bloomの調整パラメータを取得する
+/// @brief Bloomの調整パラメータを取得
 /// @return x: 強度, y: しきい値, z: 半径, w: ソフトニー
 float4 GetBloomParams() {
     if (all(gBloomParams == 0.0f)) {
@@ -24,7 +24,7 @@ float4 GetBloomParams() {
     return gBloomParams;
 }
 
-/// @brief Bloomに乗算する発光色を取得する
+/// @brief Bloomに乗算する発光色を取得
 /// @return rgb: 発光色, a: 発光色の適用率
 float4 GetBloomColor() {
     if (all(gBloomColor == 0.0f)) {
@@ -34,14 +34,14 @@ float4 GetBloomColor() {
     return saturate(gBloomColor);
 }
 
-/// @brief 色の明るさを取得する
+/// @brief 色の明るさを取得
 /// @param color 入力色
 /// @return 色の最大成分
 float GetBrightness(float3 color) {
     return max(max(color.r, color.g), color.b);
 }
 
-/// @brief Bloom抽出色を取得する
+/// @brief Bloom抽出色を取得
 /// @param color 入力色
 /// @param params Bloomパラメータ
 /// @return しきい値を超えたBloom色
@@ -51,6 +51,8 @@ float3 ExtractBloomColor(float3 color, float4 params) {
     float knee = max(threshold * softKnee, 0.0001f);
 
     float brightness = GetBrightness(color);
+
+    // しきい値周辺をSoft Kneeで連続化してBloom境界の急な明滅を抑制
     float soft = brightness - threshold + knee;
     soft = clamp(soft, 0.0f, knee * 2.0f);
     soft = soft * soft / (4.0f * knee);
@@ -60,7 +62,7 @@ float3 ExtractBloomColor(float3 color, float4 params) {
     return color * saturate(contribution);
 }
 
-/// @brief ずらしたUVからBloom色を取得する
+/// @brief ずらしたUVからBloom色を取得
 /// @param texcoord サンプリング中心UV
 /// @param offset サンプリングオフセット
 /// @param params Bloomパラメータ
@@ -73,7 +75,7 @@ float4 SampleBloom(float2 texcoord, float2 offset, float4 params, float4 bloomCo
     return float4(tintedColor, GetBrightness(extractedColor));
 }
 
-/// @brief 画面色にBloomを加算する
+/// @brief 画面色にBloomを加算
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return Bloom適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -91,6 +93,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float radius = max(bloomParams.z, 0.0f);
     float2 offset = texelSize * radius;
 
+    // 中心、近傍、外周の合計Weightを1にした固定Tapで軽量なGlowを生成
     float4 bloom = 0.0f;
     bloom += SampleBloom(input.texcoord, float2(0.0f, 0.0f), bloomParams, bloomColor) * 0.20f;
 
@@ -110,6 +113,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
     bloom += SampleBloom(input.texcoord, offset * float2(0.0f, -2.0f), bloomParams, bloomColor) * 0.025f;
 
     float intensity = max(bloomParams.x, 0.0f);
+
+    // 抽出輝度をAlphaへ残して後続CompositeのEffect Maskとして共有
     float bloomMask = saturate(bloom.a * intensity);
     output.color = float4(saturate(texColor.rgb + bloom.rgb * intensity), max(texColor.a, bloomMask));
     return output;

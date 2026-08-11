@@ -35,6 +35,7 @@ namespace MadoEngine {
 			if (!entry.is_regular_file()) continue;
 
 			auto ext = entry.path().extension().string();
+
 			// 小文字に変換して比較
 			std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
@@ -47,7 +48,8 @@ namespace MadoEngine {
 	}
 
 	std::string AudioManager::MakeKey(const std::filesystem::path& filePath) const {
-		// ファイル名から拡張子を除いて小文字に変換したものをキーとする
+
+		// 拡張子を除いたFile名の小文字表現を検索Keyとして使用
 		std::string key = filePath.stem().string();
 		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 		return key;
@@ -80,6 +82,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::Play(const std::string& key, bool loop) {
+
 		// キーを小文字に変換して検索
 		std::string lowerKey = key;
 		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
@@ -107,6 +110,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::Stop(const std::string& key) {
+
 		// キーを小文字に変換して検索
 		std::string lowerKey = key;
 		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
@@ -130,6 +134,8 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::Update() {
+
+		// 再生中InstanceへMaster、Category、個別音量の最新積を毎Frame同期
 		for (auto& [key, audio] : audioMap_) {
 			if (audio) {
 				float typeVolume = 1.0f;
@@ -179,7 +185,8 @@ namespace MadoEngine {
 	}
 
 	AudioType AudioManager::DetermineTypeFromPath(const std::filesystem::path& filePath) const {
-		// ファイルパスの各ディレクトリ名をチェックし、SE / BGM / Voiceに一致するものを返す
+
+		// FilePath内で最初に一致するSE、BGM、VoiceのDirectory名を種別として採用
 		for (const auto& part : filePath) {
 			const std::string name = part.string();
 			if (name == "SE")    return AudioType::SE;
@@ -190,6 +197,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::SetVolume(const std::string& key, float volume) {
+
 		// キーを小文字に変換して検索
 		std::string lowerKey = key;
 		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
@@ -198,10 +206,12 @@ namespace MadoEngine {
 		if (it != volumeMap_.end()) {
 			Logger::Output("AudioManager : " + lowerKey + " の音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
 			it->second = volume;
+
 			// 即座に反映
 			auto audioIt = audioMap_.find(lowerKey);
 			if (audioIt != audioMap_.end() && audioIt->second) {
-				// 最終的な音量を計算して適用する
+
+				// MasterとCategoryとInstanceの倍率から最終音量を計算して適用
 				AudioType type = GetAudioType(lowerKey);
 				float categoryVol = (type == AudioType::SE) ? seVolume_ :
 					(type == AudioType::BGM) ? bgmVolume_ : voiceVolume_;
@@ -214,6 +224,7 @@ namespace MadoEngine {
 	}
 
 	float AudioManager::GetVolume(const std::string& key) const {
+
 		// キーを小文字に変換して検索
 		std::string lowerKey = key;
 		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
@@ -226,6 +237,7 @@ namespace MadoEngine {
 	}
 
 	bool AudioManager::IsLoaded(const std::string& key) const {
+
 		// キーを小文字に変換して検索
 		std::string lowerKey = key;
 		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);

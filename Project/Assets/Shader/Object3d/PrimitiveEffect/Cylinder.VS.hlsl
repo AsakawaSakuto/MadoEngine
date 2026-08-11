@@ -24,7 +24,7 @@ cbuffer PerView : register(b0)
     row_major float4x4 gViewProjection;
 };
 
-/// @brief 正規化グリッドからCylinder側面の頂点を生成する
+/// @brief 正規化グリッドからCylinder側面の頂点を生成
 /// @param vertexId インデックスバッファから渡される頂点番号
 /// @param instanceId 描画するCylinder Instance番号
 /// @return 変換済み頂点
@@ -33,6 +33,8 @@ VertexShaderOutput main(uint vertexId : SV_VertexID, uint instanceId : SV_Instan
     CylinderInstance instance = gInstances[instanceId];
     const uint radialSegments = max(instance.metadata.x, 3u);
     const uint heightSegments = max(instance.metadata.y, 1u);
+
+    // 円周端を重複させてUVの0と1を同一位置へ割り当てるSeam構成
     const uint columnCount = radialSegments + 1u;
     const uint radialIndex = vertexId % columnCount;
     const uint heightIndex = vertexId / columnCount;
@@ -47,6 +49,8 @@ VertexShaderOutput main(uint vertexId : SV_VertexID, uint instanceId : SV_Instan
     const float2 radii = lerp(instance.radii.xy, instance.radii.zw, v);
     float pivotOffset = 0.0f;
     const uint pivot = (uint)round(instance.effectParameters.w);
+
+    // 高さ方向の基準を中央、下端、上端から選択してTransform原点を維持
     if (pivot == 1u)
     {
         pivotOffset = -0.5f;

@@ -109,6 +109,8 @@ namespace MadoEngine::Editor {
             }
 
             constexpr float kAspect = 16.0f / 9.0f;
+
+            // Game View中央の16:9描画領域だけをGizmo操作座標として抽出
             if (contentSize.x / contentSize.y > kAspect) {
                 outImageSize.y = contentSize.y;
                 outImageSize.x = contentSize.y * kAspect;
@@ -409,7 +411,7 @@ namespace MadoEngine::Editor {
         }
 
         /// @brief Modelギズモ操作をUndo履歴に記録
-        /// @param selectedModel 現在選択されているModel
+        /// @param selectedModelHandle 現在選択されているModel Handle
         /// @param beforeDrawTransform ギズモ描画前のTransform
         /// @return 履歴が追加された場合はtrue
         bool UpdateModelGizmoHistory(ModelHandle selectedModelHandle, const Transform3D& beforeDrawTransform) {
@@ -420,12 +422,16 @@ namespace MadoEngine::Editor {
             bool isChanged = false;
 
             if (!state.wasUsing && isUsing && selectedModel) {
+
+                // Drag開始時のTransformを保持して一操作を一つのUndo Commandへ集約
                 state.isEditing = true;
                 state.target = selectedModelHandle;
                 state.beforeTransform = beforeDrawTransform;
             }
 
             if (state.wasUsing && !isUsing && state.isEditing) {
+
+                // Drag終了時に値が変化した場合だけ履歴へ追加
                 if (Model* target = manager.TryGet(state.target)) {
                     const Transform3D afterTransform = target->GetTransform();
                     if (!NearlyEqual(state.beforeTransform, afterTransform)) {
@@ -538,6 +544,8 @@ namespace MadoEngine::Editor {
             !ImGuizmo::IsUsing();
 
         if (canSelect) {
+
+            // Game View上のMouse座標からRayを生成して最前面Modelを選択
             Vector3 rayOrigin{};
             Vector3 rayDirection{};
             if (TryCreateRayFromGameView(camera, imageMin, imageSize, mousePosition, rayOrigin, rayDirection)) {

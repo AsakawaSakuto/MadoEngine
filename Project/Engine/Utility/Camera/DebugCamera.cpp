@@ -24,6 +24,7 @@ void DebugCamera::Update(float deltaTime) {
 		bool isShift = keybord && (keybord->IsPress(DIK_LSHIFT) || keybord->IsPress(DIK_RSHIFT));
 
 		if (isShift) {
+
 			// Shift + 中ドラッグ: カメラの向きに対して上下左右移動（パン）
 			// 水平方向: yaw_ から右ベクトルを算出
 			float cosY = std::cos(yaw_);
@@ -38,7 +39,8 @@ void DebugCamera::Update(float deltaTime) {
 			target_.y += right.y * panX + up.y * panY;
 			target_.z += right.z * panX + up.z * panY;
 		} else {
-			// 中ドラッグ: 注視点を中心にオービット回転
+
+				// 中ドラッグ: 注視点を中心にオービット回転
 				yaw_   += delta.x * rotateSensitivity_ * deltaTime;
 				pitch_ += delta.y * rotateSensitivity_ * deltaTime;
 
@@ -62,6 +64,7 @@ void DebugCamera::Update(float deltaTime) {
 }
 
 void DebugCamera::ApplySphericalCoord() {
+
 	// 球面座標 → デカルト座標でカメラ位置を計算
 	float cosP = std::cos(pitch_);
 	float sinP = std::sin(pitch_);

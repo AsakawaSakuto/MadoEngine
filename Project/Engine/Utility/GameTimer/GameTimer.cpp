@@ -12,6 +12,7 @@ void GameTimer::Update(float deltaTime) {
         return;
     }
 
+    // 完了とLoop通知を当Frameだけ有効なEventとして毎更新時に初期化
     loopedThisFrame_ = false;
     finished_ = false;
 
@@ -24,6 +25,8 @@ void GameTimer::Update(float deltaTime) {
     finished_ = true;
 
     if (loop_ && duration_ > 0.0f) {
+
+        // 大きなdeltaTimeでも超過分を次周期へ繰り越す剰余処理
         currentTime_ = std::fmod(currentTime_, duration_);
         loopedThisFrame_ = true;
         return;
@@ -111,6 +114,7 @@ float GameTimer::GetDuration() const {
 void GameTimer::SetDuration(float duration) {
     duration_ = (std::max)(0.0f, duration);
 
+    // 実行中TimerのDuration短縮で現在時刻が終端を越えた場合は即時確定
     if (currentTime_ < duration_ || state_ != State::Running) {
         return;
     }

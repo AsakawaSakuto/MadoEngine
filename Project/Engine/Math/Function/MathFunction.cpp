@@ -4,12 +4,10 @@
 
 namespace Math {
 
-    // クロス積
     float Cross(const Vector2& v1, const Vector2& v2) {
         return v1.x * v2.y - v1.y * v2.x;
     }
 
-    // クロス積
     Vector3 Cross(const Vector3& v1, const Vector3& v2) {
         return Vector3(
             v1.y * v2.z - v1.z * v2.y,
@@ -18,7 +16,6 @@ namespace Math {
         );
     }
 
-    // 加算
     Vector2 Add(const Vector2& v1, const Vector2& v2) {
         return Vector2{ v1.x + v2.x, v1.y + v2.y };
     }
@@ -29,7 +26,6 @@ namespace Math {
         return Vector4{ v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w };
     }
 
-    // 減算
     Vector2 Subtract(const Vector2& v1, const Vector2& v2) {
         return Vector2{ v1.x - v2.x, v1.y - v2.y };
     }
@@ -40,7 +36,6 @@ namespace Math {
         return Vector4{ v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w };
     }
 
-    // 乗算
     Vector2 Multiply(const Vector2& v1, const Vector2& v2) {
         return Vector2{ v1.x * v2.x, v1.y * v2.y };
     }
@@ -51,7 +46,6 @@ namespace Math {
         return Vector4{ v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w };
     }
 
-    // スカラー倍
     Vector2 Multiply(const Vector2& v, float scalar) {
         return Vector2{ scalar * v.x, scalar * v.y };
     }
@@ -62,7 +56,6 @@ namespace Math {
         return Vector4{ scalar * v.x, scalar * v.y, scalar * v.z, scalar * v.w };
     }
 
-    // 内積
     float Dot(const Vector2& v1, const Vector2& v2) {
         return v1.x * v2.x + v1.y * v2.y;
     }
@@ -73,7 +66,6 @@ namespace Math {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
     }
 
-    // 長さ
     float Length(const Vector2& v) {
         return std::sqrt(v.x * v.x + v.y * v.y);
     }
@@ -84,7 +76,6 @@ namespace Math {
         return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
     }
 
-    // 正規化
     Vector2 Normalize(const Vector2& v) {
         const float len = Length(v);
         if (len == 0.0f) { return Vector2{ 0.0f, 0.0f }; }
@@ -101,7 +92,6 @@ namespace Math {
         return Vector4{ v.x / len, v.y / len, v.z / len, v.w / len };
     }
 
-    // 正射影ベクトル
     Vector2 Project(const Vector2& v1, const Vector2& v2) {
         const float v2SqLength = Dot(v2, v2);
         if (v2SqLength == 0.0f) { return Vector2{ 0.0f, 0.0f }; }
@@ -121,7 +111,6 @@ namespace Math {
         return Multiply(v2, dot / v2SqLength);
     }
 
-    // 線形補間
     Vector2 Lerp(const Vector2& v1, const Vector2& v2, float t) {
         return Add(Multiply(v1, 1.0f - t), Multiply(v2, t));
     }
@@ -132,7 +121,6 @@ namespace Math {
         return Add(Multiply(v1, 1.0f - t), Multiply(v2, t));
     }
 
-    // 球面線形補間
     Vector2 Slerp(const Vector2& v1, const Vector2& v2, float t) {
         const float dot = std::clamp(Dot(v1, v2), -1.0f, 1.0f);
         const float theta = std::acos(dot) * t;

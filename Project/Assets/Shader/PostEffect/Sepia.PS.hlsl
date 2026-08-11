@@ -8,7 +8,7 @@ struct PixelShaderOutput
     float4 color : SV_TARGET0;
 };
 
-/// @brief 画面色をセピア調に変換する
+/// @brief 画面色をセピア調に変換
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return セピア調に変換したピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input)
@@ -18,6 +18,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float4 texColor = gTexture.Sample(gSampler, input.texcoord);
     float3 source = saturate(texColor.rgb);
 
+    // 古典的なSepia変換行列でRGB間の暖色寄与を再構成
     float3 sepia;
     sepia.r = dot(source, float3(0.393f, 0.769f, 0.189f));
     sepia.g = dot(source, float3(0.349f, 0.686f, 0.168f));

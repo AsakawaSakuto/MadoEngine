@@ -143,6 +143,8 @@ namespace MadoEngine::Effect {
 
 		if (!batches_.empty()) {
 			DrawBatch& lastBatch = batches_.back();
+
+			// GeometryとMaterial状態が連続するInstanceを同一Draw Callへ結合
 			if (lastBatch.geometryKey == geometryKey &&
 				lastBatch.textureIndex == textureIndex &&
 				lastBatch.blendMode == data.blendMode &&
@@ -173,6 +175,8 @@ namespace MadoEngine::Effect {
 		}
 
 		if (isInstanceDataDirty_) {
+
+			// 全Submit完了後に連続Instance Dataを一度だけGPU Bufferへ転送
 			EnsureInstanceCapacity(instances_.size());
 			std::memcpy(
 				mappedInstances_,
@@ -259,6 +263,8 @@ namespace MadoEngine::Effect {
 
 		const uint32_t columns = key.radialSegments + 1;
 		const uint32_t indexCount = key.radialSegments * key.heightSegments * 6;
+
+		// 分割数ごとのIndex Bufferを遅延生成して同一Geometry設定間で共有
 		SharedGeometry geometry;
 		uint32_t* indices = CreateMappedBuffer<uint32_t>(device_, geometry.indexResource, indexCount, false);
 		uint32_t writeIndex = 0;

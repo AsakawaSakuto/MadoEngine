@@ -1011,6 +1011,8 @@ namespace MadoEngine::Editor {
 	void DrawRibbonEffectEditorUI() {
 #ifdef USE_IMGUI
 		RibbonEffectSystem3d& system = RibbonEffectSystem3d::GetInstance();
+
+		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
 		static int selectedAssetIndex = 0;
 		static int selectedEmitterIndex = 0;
 		static int selectedSettingPage = 0;
@@ -1043,6 +1045,8 @@ namespace MadoEngine::Editor {
 		}
 
 		if (!system.IsAlive(previewHandle)) {
+
+			// Runtime側で終了したPreview HandleにEditor状態を結び付けたままにしない同期
 			previewHandle = {};
 			previewAssetName.clear();
 			previewAssetSnapshot.clear();

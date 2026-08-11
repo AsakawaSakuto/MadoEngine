@@ -29,6 +29,7 @@ namespace MadoEngine::Core {
         HRESULT hr = commandList_->Close();
         assert(SUCCEEDED(hr));
 
+        // 当FrameのCommandをQueueへ投入して完了確認用Fence値を発行
         ID3D12CommandList* commandLists[] = { commandList_.Get() };
         commandQueue_->ExecuteCommandLists(1, commandLists);
 
@@ -43,6 +44,8 @@ namespace MadoEngine::Core {
         }
 
         if (fence_->GetCompletedValue() < fenceValue_) {
+
+            // 最新の投入済みCommandが完了するまでEvent待機してCPU側の先行を防止
             const HRESULT hr = fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
             assert(SUCCEEDED(hr));
             WaitForSingleObject(fenceEvent_, INFINITE);
@@ -82,7 +85,7 @@ namespace MadoEngine::Core {
 
         Logger::Output("CommandListの生成が完了しました", Logger::Level::Engine);
 
-        // コマンドリストは初期状態で開いているので閉じる
+        // 初回Resetと記録開始に備え、生成直後の開いた状態を終了
         commandList_->Close();
     }
 

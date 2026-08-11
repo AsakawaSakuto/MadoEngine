@@ -503,6 +503,8 @@ namespace MadoEngine::Editor {
 	void DrawParticleSystemEditorUI() {
 #ifdef USE_IMGUI
 		ParticleSystem3d& particleSystem = ParticleSystem3d::GetInstance();
+
+		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
 		static int selectedAssetIndex = 0;
 		static int selectedEmitterIndex = 0;
 		static Vector3 previewPosition{};

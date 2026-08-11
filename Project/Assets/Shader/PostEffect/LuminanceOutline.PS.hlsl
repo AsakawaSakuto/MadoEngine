@@ -25,7 +25,7 @@ static const float kPrewittVerticalKernel[3][3] = {
     { 1.0f / 6.0f, 1.0f / 6.0f, 1.0f / 6.0f },
 };
 
-/// @brief 輝度ベース輪郭の色を取得する
+/// @brief 輝度ベース輪郭の色を取得
 /// @return 輪郭へ合成する色
 float4 GetOutlineColor() {
     if (all(gLuminanceOutlineColor == 0.0f)) {
@@ -35,7 +35,7 @@ float4 GetOutlineColor() {
     return gLuminanceOutlineColor;
 }
 
-/// @brief 輪郭の太さを取得する
+/// @brief 輪郭の太さを取得
 /// @return サンプリング間隔に掛ける太さ
 float GetOutlineThickness() {
     if (gLuminanceOutlineParams.x <= 0.0f) {
@@ -45,7 +45,7 @@ float GetOutlineThickness() {
     return max(gLuminanceOutlineParams.x, 0.25f);
 }
 
-/// @brief 輝度差分の感度を取得する
+/// @brief 輝度差分の感度を取得
 /// @return 輝度差分へ掛ける感度
 float GetLuminanceSensitivity() {
     if (gLuminanceOutlineParams.y <= 0.0f) {
@@ -55,7 +55,7 @@ float GetLuminanceSensitivity() {
     return gLuminanceOutlineParams.y;
 }
 
-/// @brief エッジ検出のしきい値を取得する
+/// @brief エッジ検出のしきい値を取得
 /// @return 輪郭として扱い始めるしきい値
 float GetEdgeThreshold() {
     if (gLuminanceOutlineParams.z <= 0.0f) {
@@ -65,7 +65,7 @@ float GetEdgeThreshold() {
     return gLuminanceOutlineParams.z;
 }
 
-/// @brief 輪郭の強さを取得する
+/// @brief 輪郭の強さを取得
 /// @return 輪郭の合成倍率
 float GetOutlineIntensity() {
     if (gLuminanceOutlineParams.w <= 0.0f) {
@@ -75,14 +75,14 @@ float GetOutlineIntensity() {
     return gLuminanceOutlineParams.w;
 }
 
-/// @brief RGBを輝度へ変換する
+/// @brief RGBを輝度へ変換
 /// @param color 輝度へ変換するRGB色
 /// @return 0から1の輝度
 float CalculateLuminance(float3 color) {
     return dot(color, float3(0.2125f, 0.7154f, 0.0721f));
 }
 
-/// @brief Prewittフィルタで輝度差分を計算する
+/// @brief Prewittフィルタで輝度差分を計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param thickness 輪郭の太さ
@@ -90,6 +90,7 @@ float CalculateLuminance(float3 color) {
 float2 CalculateLuminanceDifference(float2 texcoord, float2 texelSize, float thickness) {
     float2 difference = float2(0.0f, 0.0f);
 
+    // Point Samplingした3x3輝度へPrewitt Kernelを適用してXY勾配を抽出
     [unroll]
     for (int x = 0; x < 3; ++x) {
         [unroll]
@@ -105,7 +106,7 @@ float2 CalculateLuminanceDifference(float2 texcoord, float2 texelSize, float thi
     return difference;
 }
 
-/// @brief 輝度差分から滑らかな輪郭重みを計算する
+/// @brief 輝度差分から滑らかな輪郭重みを計算
 /// @param edgeValue 輝度差分の大きさ
 /// @param threshold 輪郭として扱い始めるしきい値
 /// @return 0から1の輪郭重み
@@ -114,7 +115,7 @@ float CalculateSmoothEdgeWeight(float edgeValue, float threshold) {
     return smoothstep(threshold, threshold + smoothWidth, edgeValue);
 }
 
-/// @brief 輝度ベースの輪郭重みを計算する
+/// @brief 輝度ベースの輪郭重みを計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @return 0から1の輪郭重み
@@ -126,7 +127,7 @@ float CalculateOutlineWeight(float2 texcoord, float2 texelSize) {
     return saturate(CalculateSmoothEdgeWeight(edgeValue, threshold) * GetOutlineIntensity());
 }
 
-/// @brief 輝度差分で検出した輪郭を画面色へ合成する
+/// @brief 輝度差分で検出した輪郭を画面色へ合成
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return 輝度ベース輪郭適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -141,6 +142,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float4 baseColor = gTexture.Sample(gSamplerLinear, input.texcoord);
     float4 outlineColor = GetOutlineColor();
 
+    // Outline色のAlphaは合成率にだけ使用してScene側Alphaを維持
     output.color.rgb = lerp(baseColor.rgb, outlineColor.rgb, outlineWeight * outlineColor.a);
     output.color.a = baseColor.a;
     return output;

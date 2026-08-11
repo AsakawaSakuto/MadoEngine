@@ -34,6 +34,8 @@ namespace MadoEngine::Json {
 
 	bool ConfigManager::Load(const std::filesystem::path& filePath) {
 		filePath_ = filePath;
+
+		// 読み込み失敗またはRoot型不一致時は部分的な設定を残さず空Objectへ復帰
 		if (!JsonFile::Load(filePath_, root_)) {
 			root_ = nlohmann::json::object();
 			return false;

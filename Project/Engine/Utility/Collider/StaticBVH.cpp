@@ -110,6 +110,8 @@ int FindLongestCentroidAxis(const std::vector<StaticBVH::Entry>& entries, uint32
 	}
 
 	const Vector3 extent = max - min;
+
+	// 中心分布が最も広い軸を分割軸として選びTreeの偏りを抑制
 	if (extent.x >= extent.y && extent.x >= extent.z) {
 		return 0;
 	}
@@ -148,6 +150,7 @@ void StaticBVH::Query(const AABB& bounds, std::vector<const std::string*>& outCa
 	stack.reserve(64);
 	stack.push_back(0);
 
+	// 再帰を避けた明示Stackで交差Nodeだけを探索
 	while (!stack.empty()) {
 		const uint32_t nodeIndex = stack.back();
 		stack.pop_back();
@@ -158,6 +161,8 @@ void StaticBVH::Query(const AABB& bounds, std::vector<const std::string*>& outCa
 		}
 
 		if (node.count > 0) {
+
+			// LeafではNode Boundsより細かいEntry単位の交差を再確認
 			for (uint32_t i = 0; i < node.count; ++i) {
 				const Entry& entry = entries_[node.first + i];
 				if (IsIntersectAABB(bounds, entry.bounds)) {
@@ -196,6 +201,8 @@ uint32_t StaticBVH::BuildNode(uint32_t first, uint32_t count) {
 	node.bounds = CalculateRangeBounds(entries_, first, count);
 
 	if (count <= kLeafEntryCount) {
+
+		// 少数Entryは分割Costを増やさず連続範囲のLeafとして保持
 		node.first = first;
 		node.count = count;
 		return nodeIndex;
@@ -203,6 +210,8 @@ uint32_t StaticBVH::BuildNode(uint32_t first, uint32_t count) {
 
 	const int splitAxis = FindLongestCentroidAxis(entries_, first, count);
 	const uint32_t mid = first + count / 2;
+
+	// 中央値だけを確定する部分Sortで左右SubtreeのEntry数を均等化
 	std::nth_element(
 		entries_.begin() + first,
 		entries_.begin() + mid,

@@ -135,6 +135,7 @@ namespace Matrix {
 
 		return result;
 	}
+
 	// 回転行列Y
 	Matrix4x4 MakeRotateY(float rotate) {
 		Matrix4x4 result{};
@@ -158,6 +159,7 @@ namespace Matrix {
 
 		return result;
 	}
+
 	// 回転行列Z
 	Matrix4x4 MakeRotateZ(float rotate) {
 		Matrix4x4 result{};
@@ -184,10 +186,12 @@ namespace Matrix {
 
 	// 回転行列XYZ
 	Matrix4x4 MakeRotateXYZ(const Vector3& rotate) {
+
 		// 各軸の回転行列を生成
 		Matrix4x4 rotX = MakeRotateX(rotate.x);
 		Matrix4x4 rotY = MakeRotateY(rotate.y);
 		Matrix4x4 rotZ = MakeRotateZ(rotate.z);
+
 		// ローカル空間の回転順 Z → Y → X（右から適用される）
 		return Multiply(Multiply(rotZ, rotY), rotX);
 	}
@@ -221,14 +225,13 @@ namespace Matrix {
 		return result;
 	};
 
-	// 逆行列
 	Matrix4x4 Inverse(const Matrix4x4& m)
 	{
 		Matrix4x4 result{};
 
-		float abs;//絶対値はint型にする
+		float abs;
 
-		// |A|
+		// 逆行列の分母に使用する四次行列式を余因子展開
 		abs = (m.m[0][0] * m.m[1][1] * m.m[2][2] * m.m[3][3]) + (m.m[0][0] * m.m[1][2] * m.m[2][3] * m.m[3][1]) + (m.m[0][0] * m.m[1][3] * m.m[2][1] * m.m[3][2])
 			- (m.m[0][0] * m.m[1][3] * m.m[2][2] * m.m[3][1]) - (m.m[0][0] * m.m[1][2] * m.m[2][1] * m.m[3][3]) - (m.m[0][0] * m.m[1][1] * m.m[2][3] * m.m[3][2])
 			- (m.m[0][1] * m.m[1][0] * m.m[2][2] * m.m[3][3]) - (m.m[0][2] * m.m[1][0] * m.m[2][3] * m.m[3][1]) - (m.m[0][3] * m.m[1][0] * m.m[2][1] * m.m[3][2])
@@ -239,7 +242,7 @@ namespace Matrix {
 			+ (m.m[0][3] * m.m[1][2] * m.m[2][1] * m.m[3][0]) + (m.m[0][2] * m.m[1][1] * m.m[2][3] * m.m[3][0]) + (m.m[0][1] * m.m[1][3] * m.m[2][2] * m.m[3][0]
 				);
 
-		// 1/A
+		// 余因子行列を行列式で除算して各要素を算出
 		result.m[0][0] = 1.0f / abs * (
 			(m.m[1][1] * m.m[2][2] * m.m[3][3]) + (m.m[1][2] * m.m[2][3] * m.m[3][1]) + (m.m[1][3] * m.m[2][1] * m.m[3][2])
 			- (m.m[1][3] * m.m[2][2] * m.m[3][1]) - (m.m[1][2] * m.m[2][1] * m.m[3][3]) - (m.m[1][1] * m.m[2][3] * m.m[3][2])
@@ -381,6 +384,7 @@ namespace Matrix {
 
 	// 任意軸回転行列
 	Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
+
 		// 正規化された軸ベクトルを使用
 		Vector3 n = Math::Normalize(axis);
 
@@ -433,6 +437,7 @@ namespace Matrix {
 
 		// 真逆方向（180度回転）
 		if (std::abs(dot + 1.0f) < 1e-6f) {
+
 			// from と最も垂直な軸を探す
 			Vector3 arbitraryAxis;
 			if (std::abs(f.x) < std::abs(f.y) && std::abs(f.x) < std::abs(f.z)) {

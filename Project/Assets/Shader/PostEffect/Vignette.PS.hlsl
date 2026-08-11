@@ -14,7 +14,7 @@ struct PixelShaderOutput
     float4 color : SV_TARGET0;
 };
 
-/// @brief Vignetteの調整パラメータを取得する
+/// @brief Vignetteの調整パラメータを取得
 /// @return x: 強度, y: 内側半径, z: 外側倍率, w: 未使用
 float4 GetVignetteParams() {
     if (all(gVignetteParams == 0.0f)) {
@@ -24,7 +24,7 @@ float4 GetVignetteParams() {
     return gVignetteParams;
 }
 
-/// @brief Vignetteの外周色を取得する
+/// @brief Vignetteの外周色を取得
 /// @return rgb: 外周色, a: 色の適用量
 float4 GetVignetteColor() {
     if (all(gVignetteColor == 0.0f)) {
@@ -34,7 +34,7 @@ float4 GetVignetteColor() {
     return gVignetteColor;
 }
 
-/// @brief 画面外周に指定色のVignetteを適用する
+/// @brief 画面外周に指定色のVignetteを適用
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return Vignette適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -48,6 +48,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float dist = length(input.texcoord - center);
 
     float innerRadius = saturate(vignetteParams.y);
+
+    // 内外半径に最小差を確保してSmoothstepの未定義範囲を回避
     float outerRadius = max(innerRadius + 0.0001f, saturate(vignetteParams.y * vignetteParams.z));
     float vignetteWeight = smoothstep(innerRadius, outerRadius, dist);
     vignetteWeight *= saturate(vignetteParams.x) * saturate(vignetteColor.a);

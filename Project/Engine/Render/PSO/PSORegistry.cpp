@@ -51,6 +51,8 @@ namespace MadoEngine::Render {
 	}
 
 	void PSORegistry::Finalize() {
+
+		// 非同期TaskがRegistryへアクセスしなくなるまで待機してからCacheを保存
 		while (!IsPrewarmComplete()) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
@@ -118,6 +120,8 @@ namespace MadoEngine::Render {
 
 		std::ifstream file(cachePath, std::ios::binary | std::ios::ate);
 		if (!file.is_open()) {
+
+			// 初回起動時は空Libraryを生成して以降のPSOを蓄積
 			Logger::Output("[Engine] PipelineLibraryキャッシュが見つからないため新規作成します。", Logger::Level::Assets);
 			Microsoft::WRL::ComPtr<ID3D12Device1> device1;
 			device_->GetDevice()->QueryInterface(IID_PPV_ARGS(&device1));
@@ -144,6 +148,8 @@ namespace MadoEngine::Render {
 
 		HRESULT hr = device1->CreatePipelineLibrary(buffer.data(), static_cast<SIZE_T>(size), IID_PPV_ARGS(&pipelineLibrary_));
 		if (FAILED(hr)) {
+
+			// DriverやShader変更で無効化されたCacheは空Libraryへ置換
 			Logger::Output("[Engine] PipelineLibraryキャッシュが無効なため再作成します。", Logger::Level::Assets);
 			device1->CreatePipelineLibrary(nullptr, 0, IID_PPV_ARGS(&pipelineLibrary_));
 			return;
@@ -180,6 +186,7 @@ namespace MadoEngine::Render {
 	ID3D12PipelineState* PSORegistry::CreateAndCache(const PSODesc& desc) {
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = factory_->Build(desc);
 
+		// 永続Libraryを先に検索してDriverによるPSO再構築を回避
 		if (pipelineLibrary_) {
 			const std::wstring key = MakeLibraryKey(desc);
 			Microsoft::WRL::ComPtr<ID3D12PipelineState> pso;
@@ -200,6 +207,8 @@ namespace MadoEngine::Render {
 		}
 
 		if (pipelineLibrary_) {
+
+			// 新規PSOをLibraryへ追加して終了時の永続化対象として記録
 			const std::wstring key = MakeLibraryKey(desc);
 			pipelineLibrary_->StorePipeline(key.c_str(), pso.Get());
 		}

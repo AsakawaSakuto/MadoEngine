@@ -13,8 +13,8 @@ struct PixelShaderOutput {
     float4 color : SV_TARGET0;
 };
 
-/// @brief Dissolve—pƒpƒ‰ƒ[ƒ^‚ğæ“¾‚·‚é
-/// @return x: is“x, y: ‹«ŠE•, z: ‹«ŠE”­Œõ‹­“x, w: ƒmƒCƒYŠg‘å—¦
+/// @brief Dissolveç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’å–å¾—
+/// @return x: é€²è¡Œåº¦, y: å¢ƒç•Œå¹…, z: å¢ƒç•Œç™ºå…‰å¼·åº¦, w: ãƒã‚¤ã‚ºæ‹¡å¤§ç‡
 float4 GetDissolveParams() {
     if (all(gDissolveParams == 0.0f)) {
         return float4(0.35f, 0.06f, 1.0f, 2.0f);
@@ -23,8 +23,8 @@ float4 GetDissolveParams() {
     return gDissolveParams;
 }
 
-/// @brief Dissolve‹«ŠEF‚ğæ“¾‚·‚é
-/// @return ‹«ŠEF
+/// @brief Dissolveå¢ƒç•Œè‰²ã‚’å–å¾—
+/// @return å¢ƒç•Œè‰²
 float4 GetDissolveEdgeColor() {
     if (all(gDissolveEdgeColor == 0.0f)) {
         return float4(1.0f, 0.45f, 0.05f, 1.0f);
@@ -33,19 +33,21 @@ float4 GetDissolveEdgeColor() {
     return gDissolveEdgeColor;
 }
 
-/// @brief ƒmƒCƒY’l‚ğæ“¾‚·‚é
-/// @param texcoord “ü—ÍUV
-/// @param noiseScale ƒmƒCƒYŠg‘å—¦
-/// @return 0‚©‚ç1‚ÌƒmƒCƒY’l
+/// @brief ãƒã‚¤ã‚ºå€¤ã‚’å–å¾—
+/// @param texcoord å…¥åŠ›UV
+/// @param noiseScale ãƒã‚¤ã‚ºæ‹¡å¤§ç‡
+/// @return 0ã‹ã‚‰1ã®ãƒã‚¤ã‚ºå€¤
 float SampleDissolveNoise(float2 texcoord, float noiseScale) {
+
+    // UVã‚’å‘¨æœŸå†…ã¸æŠ˜ã‚Šè¿”ã—ã¦æ‹¡å¤§ç‡å¤‰æ›´æ™‚ã‚‚Noise Textureå¤–ã‚’å‚ç…§ã—ãªã„åˆ¶ç´„
     float2 noiseUv = frac(texcoord * max(noiseScale, 0.001f));
     float3 noiseColor = gNoiseTexture.Sample(gSamplerLinear, noiseUv).rgb;
     return dot(noiseColor, float3(0.299f, 0.587f, 0.114f));
 }
 
-/// @brief ƒmƒCƒY‚É‚æ‚éDissolve‚ğ“K—p‚·‚é
-/// @param input ’¸“_ƒVƒF[ƒ_[‚©‚çó‚¯æ‚Á‚½‰æ–ÊÀ•W‚ÆUV
-/// @return Dissolve“K—pŒã‚ÌF
+/// @brief ãƒã‚¤ã‚ºã«ã‚ˆã‚‹Dissolveã‚’é©ç”¨
+/// @param input é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‹ã‚‰å—ã‘å–ã£ãŸç”»é¢åº§æ¨™ã¨UV
+/// @return Dissolveé©ç”¨å¾Œã®è‰²
 PixelShaderOutput main(VertexShaderOutput input) {
     PixelShaderOutput output;
 
@@ -59,10 +61,13 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float noiseScale = max(params.w, 0.001f);
 
     float noise = SampleDissolveNoise(input.texcoord, noiseScale);
+
+    // é€²è¡Œå¢ƒç•Œã®ä¸¡å´ã‚’Smoothstepã§é€£ç¶šåŒ–ã—ã¦æ™‚é–“å¤‰åŒ–ã®ã¡ã‚‰ã¤ãã‚’æŠ‘åˆ¶
     float visibleMask = smoothstep(dissolveAmount - edgeWidth, dissolveAmount + edgeWidth, noise);
     float edgeMask = 1.0f - saturate(abs(noise - dissolveAmount) / edgeWidth);
     edgeMask *= srcColor.a;
 
+    // å…ƒTextureã®Alphaã‚’ç¶­æŒã—ãªãŒã‚‰å¢ƒç•Œç™ºå…‰ã ã‘ã‚’å¯è¦–é ˜åŸŸã¸è¿½åŠ 
     float edgeBlend = saturate(edgeMask * edgeIntensity);
     output.color.rgb = lerp(srcColor.rgb, edgeColor.rgb * max(edgeIntensity, 1.0f), edgeBlend);
     output.color.a = max(srcColor.a * visibleMask, edgeMask * saturate(edgeColor.a));

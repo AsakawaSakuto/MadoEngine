@@ -48,6 +48,8 @@ namespace MadoEngine::EffectSequence {
 		MadoEngine::Render::RenderLayer defaultRenderLayer,
 		float playbackSpeed) const {
 		const MadoEngine::Render::RenderLayer renderLayer = node.renderLayer.value_or(defaultRenderLayer);
+
+		// Node種別ごとのSystemへ再生条件を統一して委譲し、HandleをVariantへ集約
 		switch (node.nodeType) {
 		case EffectSequenceNodeType::Particle: {
 			MadoEngine::Particle::PlayDesc desc;
@@ -95,6 +97,8 @@ namespace MadoEngine::EffectSequence {
 			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetPlaybackSpeed(handle, playbackSpeed);
 			if (const auto* settings = std::get_if<RibbonNodeSettings>(&node.settings)) {
 				if (settings->overrideManualControlPoints) {
+
+					// Asset側の制御点よりSequence Node固有の軌跡を優先
 					MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetLocalControlPoints(
 						handle,
 						settings->controlPoints
@@ -132,6 +136,8 @@ namespace MadoEngine::EffectSequence {
 	void EffectSequenceNodeDispatcher::Stop(
 		const EffectSequenceChildHandle& handle,
 		EffectSequenceStopMode mode) const {
+
+		// Variantが保持する実体のSystemへ共通停止Modeを変換して委譲
 		std::visit(Overloaded{
 			[mode](MadoEngine::Particle::EffectHandle child) {
 				MadoEngine::Particle::ParticleSystem3d::GetInstance().Stop(
@@ -190,6 +196,8 @@ namespace MadoEngine::EffectSequence {
 		const EffectSequenceNode& node,
 		const EffectSequenceChildHandle& handle,
 		const Transform3D& worldTransform) const {
+
+		// Effect固有の座標表現へ変換しながら親NodeのWorld Transformを反映
 		std::visit(Overloaded{
 			[&worldTransform](MadoEngine::Particle::EffectHandle child) {
 				MadoEngine::Particle::ParticleSystem3d::GetInstance().SetTransform(child, worldTransform);

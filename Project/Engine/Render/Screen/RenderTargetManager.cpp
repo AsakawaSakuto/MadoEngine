@@ -32,6 +32,8 @@ namespace MadoEngine::Render {
 		assert(desc.height > 0 && "RenderTargetの高さが0です");
 
 		if (auto it = renderTargets_.find(name); it != renderTargets_.end()) {
+
+			// 名前をResource識別子として扱い重複生成によるDescriptor Leakを防止
 			Logger::Output("既に存在するRenderTargetを返します: " + name, Logger::Level::Warning);
 			return it->second.texture.get();
 		}
@@ -134,6 +136,7 @@ namespace MadoEngine::Render {
 		assert(width > 0 && "RenderTargetの幅が0です");
 		assert(height > 0 && "RenderTargetの高さが0です");
 
+		// Window Sizeへ追従するTargetだけを再生成して固定解像度Targetを維持
 		for (auto& [name, entry] : renderTargets_) {
 			if (!entry.desc.resizeWithWindow) {
 				continue;

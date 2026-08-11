@@ -36,6 +36,8 @@ namespace {
 
 		Vector3 upAxis = up.Normalized();
 		if (upAxis.LengthSq() == 0.0f || std::abs(Math::Dot(upAxis, zAxis)) > 0.99f) {
+
+			// 視線と上方向の平行による外積の退化を避けるため代替軸へ切り替え
 			upAxis = { 0.0f, 0.0f, 1.0f };
 		}
 		if (std::abs(Math::Dot(upAxis, zAxis)) > 0.99f) {
@@ -74,10 +76,6 @@ namespace MadoEngine::Render {
 		lightViewProjectionMatrix_ = Matrix::MakeIdentity();
 	}
 
-	/// @brief シャドウマップ用の深度バッファを初期化
-	/// @param device DxDeviceのポインタ
-	/// @param dsvManager DSVManagerのポインタ
-	/// @param srvManager SRVManagerのポインタ
 	void ShadowMap::Initialize(
 		MadoEngine::Core::DxDevice* device,
 		MadoEngine::Core::DSVManager* dsvManager,
@@ -115,12 +113,11 @@ namespace MadoEngine::Render {
 		);
 	}
 
-	/// @brief シャドウマップへの深度描画を開始
-	/// @param commandList 描画コマンドリスト
 	void ShadowMap::Begin(ID3D12GraphicsCommandList* commandList) {
 		assert(isInitialized_ && "ShadowMapが未初期化です");
 		assert(commandList != nullptr && "commandListがnullptrです");
 
+		// 前FrameのShader参照状態からDepth書き込みへ遷移してDSVのみをBind
 		depthBuffer_.Transition(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		viewportScissor_.Apply(commandList);
 
@@ -136,17 +133,14 @@ namespace MadoEngine::Render {
 		);
 	}
 
-	/// @brief シャドウマップへの深度描画を終了し、SRV参照可能な状態へ遷移
-	/// @param commandList 描画コマンドリスト
 	void ShadowMap::End(ID3D12GraphicsCommandList* commandList) {
 		assert(isInitialized_ && "ShadowMapが未初期化です");
 		assert(commandList != nullptr && "commandListがnullptrです");
 
+		// 後続のModel描画でShadow Textureを参照できる状態へ遷移
 		depthBuffer_.Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
-	/// @brief シャドウマップ生成用PSODescを作成
-	/// @return RTVなし、DSVのみ、VSのみのPSODesc
 	PSODesc ShadowMap::CreatePSODesc() {
 		PSODesc desc{};
 		desc.blendMode = BlendMode::None;
@@ -167,10 +161,9 @@ namespace MadoEngine::Render {
 		return desc;
 	}
 
-	/// @brief DirectionalLightの方向からライト視点行列を更新
-	/// @param directionalLight 影生成に使う平行光
-	/// @param focusPosition ライトが注視するワールド座標
 	void ShadowMap::UpdateLightViewProjection(const DirectionalLight& directionalLight, Vector3 focusPosition) {
+
+		// Orthographic範囲中央へ注視点を置く距離からLight位置を決定
 		Vector3 lightDirection = NormalizeShadowLightDirection(directionalLight.direction);
 		Vector3 lightPosition = focusPosition - lightDirection * ((kShadowNearClip + kShadowFarClip) * 0.5f);
 
@@ -186,15 +179,11 @@ namespace MadoEngine::Render {
 		lightViewProjectionMatrix_ = Matrix::Multiply(lightViewMatrix_, lightProjectionMatrix_);
 	}
 
-	/// @brief シャドウマップSRVのGPUディスクリプタハンドルを取得
-	/// @return GPUディスクリプタハンドル
 	D3D12_GPU_DESCRIPTOR_HANDLE ShadowMap::GetSRVGPUHandle() const {
 		assert(isInitialized_ && "ShadowMapが未初期化です");
 		return depthBuffer_.GetSRVGPUHandle();
 	}
 
-	/// @brief シャドウマップDSVのCPUディスクリプタハンドルを取得
-	/// @return CPUディスクリプタハンドル
 	D3D12_CPU_DESCRIPTOR_HANDLE ShadowMap::GetDSVCPUHandle() const {
 		assert(isInitialized_ && "ShadowMapが未初期化です");
 		return depthBuffer_.GetDSVCPUHandle();

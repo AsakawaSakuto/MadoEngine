@@ -93,6 +93,7 @@ namespace MadoEngine::Screen {
 	}
 
 	void SwapChain::Present() {
+
 		// 画面のスワップを行う（垂直同期を待つ）
 		HRESULT hr = swapChain_->Present(1, 0);
 		assert(SUCCEEDED(hr));
@@ -130,6 +131,7 @@ namespace MadoEngine::Screen {
 	}
 
 	void SwapChain::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height) {
+
 		// SwapChainの設定
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 		swapChainDesc.Width = width;                                  // 画面の幅

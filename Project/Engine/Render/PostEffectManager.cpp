@@ -37,6 +37,8 @@ void PostEffectManager::Finalize() {
 	screenPassOrder_.clear();
 	freeSlots_.clear();
 	freeSlots_.reserve(slots_.size());
+
+	// 外部に残ったHandleを無効化するため全Slotの世代を更新
 	for (uint32_t index = 0; index < slots_.size(); ++index) {
 		PostEffectPassSlot& slot = slots_[index];
 		slot.pass.reset();
@@ -124,6 +126,8 @@ bool PostEffectManager::Destroy(PostEffectPassHandle handle) {
 	PostEffectPassSlot& slot = slots_[handle.index];
 	const std::string key = slot.key;
 	const std::string name = pass->GetName();
+
+	// 遅延削除と警告履歴から対象Handleを外して再利用後のSlotへ状態を持ち越さない構成
 	pendingDestroyHandles_.erase(
 		std::remove(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle),
 		pendingDestroyHandles_.end()
@@ -144,6 +148,8 @@ bool PostEffectManager::Destroy(PostEffectPassHandle handle) {
 	}
 
 	const PostEffectPassScope scope = slot.scope;
+
+	// 世代更新後に空きSlotへ戻して破棄済みHandleからの参照を拒否
 	slot.pass.reset();
 	slot.key.clear();
 	slot.scope = PostEffectPassScope::Layer;
@@ -391,6 +397,7 @@ PostEffectPassHandle PostEffectManager::CreatePass(const PostEffectPass::Desc& d
 		return {};
 	}
 
+	// 破棄済みSlotを優先的に再利用してHandle Indexの増加を抑制
 	uint32_t index = 0;
 	if (freeSlots_.empty()) {
 		if (slots_.size() >= static_cast<std::size_t>(kInvalidGenerationalHandleIndex)) {
@@ -416,6 +423,8 @@ PostEffectPassHandle PostEffectManager::CreatePass(const PostEffectPass::Desc& d
 
 	const PostEffectPassHandle handle{ index, slot.generation };
 	keyToHandle_.emplace(slot.key, handle);
+
+	// Layer用とScreen用で描画順を独立管理
 	if (scope == PostEffectPassScope::Layer) {
 		layerPassOrder_.push_back(handle);
 	} else {
@@ -454,6 +463,8 @@ bool PostEffectManager::SetTypedParameterData(
 	if (!pass) {
 		return false;
 	}
+
+	// 型とBuffer Sizeの双方を検証して誤った構造体のGPU転送を防止
 	const std::optional<PostEffectType> effectType = pass->GetPostEffectType();
 	if (!effectType || *effectType != expectedType) {
 		LogParameterWarningOnce(
@@ -518,6 +529,8 @@ void PostEffectManager::LogParameterWarningOnce(
 	const std::string& message) const
 {
 	const ParameterWarningKey warning{ handle, expectedType, reason };
+
+	// 毎フレーム呼ばれるParameter設定失敗を同一条件につき一度だけ通知
 	if (std::find(parameterWarningKeys_.begin(), parameterWarningKeys_.end(), warning) != parameterWarningKeys_.end()) {
 		return;
 	}

@@ -468,6 +468,7 @@ namespace MadoEngine::Particle {
 			return {};
 		}
 
+		// 再生終了済みSlotを再利用してHandle Indexの増加を抑制
 		uint32_t slotIndex = 0;
 		if (!freeSlotIndices_.empty()) {
 			slotIndex = freeSlotIndices_.front();
@@ -545,6 +546,8 @@ namespace MadoEngine::Particle {
 		}
 
 		isRenderDataPrepared_ = false;
+
+		// 大きなFrame間隔によるSimulation発散を防ぐDelta Time上限
 		const float safeDeltaTime = std::clamp(deltaTime, 0.0f, 0.1f);
 		for (uint32_t index = 0; index < effectSlots_.size(); ++index) {
 			EffectSlot& slot = effectSlots_[index];
@@ -583,6 +586,8 @@ namespace MadoEngine::Particle {
 				slot.instance->OnGpuFrameCompleted(completedFenceValue);
 			}
 		}
+
+		// 描画Commandから参照されなくなったInstanceだけをFence完了後に解放
 		for (RetiredEffectInstance& retired : retiredEffectInstances_) {
 			if (retired.fenceValue <= completedFenceValue) {
 				retired.instance->OnGpuFrameCompleted(completedFenceValue);

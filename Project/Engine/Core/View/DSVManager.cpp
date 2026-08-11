@@ -47,6 +47,7 @@ namespace MadoEngine::Core {
 			freeIndices_.pop();
 			Logger::Output("DSVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		} else {
+
 			// 新しいインデックスを割り当て
 			assert(nextIndex_ < maxDescriptors_ && "DSVデスクリプタヒープの容量を超えました");
 			index = nextIndex_++;
@@ -86,6 +87,7 @@ namespace MadoEngine::Core {
 
 		// フォーマットの決定
 		if (format == DXGI_FORMAT_UNKNOWN) {
+
 			// リソースフォーマットからDSVフォーマットに変換
 			if (resourceDesc.Format == DXGI_FORMAT_R24G8_TYPELESS) {
 				dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -105,9 +107,11 @@ namespace MadoEngine::Core {
 		// リソースの次元に応じて設定
 		if (resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D) {
 			if (resourceDesc.SampleDesc.Count > 1) {
+
 				// マルチサンプル
 				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
 			} else {
+
 				// 通常のテクスチャ
 				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 				dsvDesc.Texture2D.MipSlice = 0;

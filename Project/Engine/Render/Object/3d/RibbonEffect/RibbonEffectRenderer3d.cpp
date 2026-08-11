@@ -162,6 +162,7 @@ namespace MadoEngine::Ribbon {
 			return;
 		}
 
+		// Fence完了済みのFrame Resourceだけを選択してCPUによる頂点上書きを防止
 		for (uint32_t offset = 0; offset < kFrameResourceCount; ++offset) {
 			const uint32_t candidate = (nextFrameResourceIndex_ + offset) % kFrameResourceCount;
 			if (frameResources_[candidate].fenceValue > completedFenceValue_) {
@@ -194,6 +195,8 @@ namespace MadoEngine::Ribbon {
 		}
 
 		const std::vector<SmoothedPoint> smoothedPoints = BuildSmoothedPoints(data);
+
+		// 補間後のPathからPlayback Modeに応じた表示区間だけを切り出し
 		const std::vector<SmoothedPoint> points = BuildVisiblePoints(smoothedPoints, data);
 		if (points.size() < kMinimumRibbonPointCount) {
 			return;
@@ -207,6 +210,8 @@ namespace MadoEngine::Ribbon {
 		}
 
 		std::vector<float> cumulativeDistances(points.size(), 0.0f);
+
+		// UVとSweep範囲を頂点数ではなく実距離基準で均一化
 		for (std::size_t index = 1; index < points.size(); ++index) {
 			const float segmentLength = (points[index].position - points[index - 1].position).Length();
 			cumulativeDistances[index] = cumulativeDistances[index - 1] +
@@ -221,6 +226,8 @@ namespace MadoEngine::Ribbon {
 		const uint32_t firstIndex = static_cast<uint32_t>(indices_.size());
 		Vector3 previousTangent = { 0.0f, 0.0f, 1.0f };
 		Vector3 previousSide = cameraRight_;
+
+		// 各Pointの接線とSide方向からRibbon両端の頂点Pairを構築
 		for (std::size_t index = 0; index < points.size(); ++index) {
 			Vector3 tangent;
 			if (index == 0) {
@@ -299,6 +306,8 @@ namespace MadoEngine::Ribbon {
 		const uint32_t textureIndex = ResolveTextureIndex(data.textureName);
 		if (!batches_.empty()) {
 			DrawBatch& lastBatch = batches_.back();
+
+			// 同一Material状態で連続するIndex範囲を一つのDraw Batchへ結合
 			if (
 				lastBatch.firstIndex + lastBatch.indexCount == firstIndex &&
 				lastBatch.textureIndex == textureIndex &&
@@ -333,6 +342,8 @@ namespace MadoEngine::Ribbon {
 		}
 
 		FrameResource& frameResource = frameResources_[currentFrameResourceIndex_];
+
+		// 全Submit完了後に当該Frameの頂点とIndexを一括転送
 		std::memcpy(
 			frameResource.mappedVertices,
 			vertices_.data(),
@@ -399,6 +410,8 @@ namespace MadoEngine::Ribbon {
 		if (
 			data.interpolation == RibbonInterpolationMode::CatmullRom &&
 			smoothingSubdivision == 0) {
+
+			// Curve指定時に分割数0でも折れ線へ退化しない既定Subdivision
 			smoothingSubdivision = kDefaultRibbonCurveSubdivision;
 		}
 		if (source.size() < kMinimumRibbonPointCount || smoothingSubdivision == 0) {
@@ -467,6 +480,8 @@ namespace MadoEngine::Ribbon {
 
 		const float endDistance = totalLength * progress;
 		float startDistance = 0.0f;
+
+		// Sweep Modeでは先端から指定距離だけを可視区間として保持
 		if (data.playbackMode == RibbonPlaybackMode::Sweep) {
 			const float sweepLength = std::isfinite(data.sweepLength)
 				? (std::max)(0.0f, data.sweepLength)
@@ -477,6 +492,7 @@ namespace MadoEngine::Ribbon {
 			return {};
 		}
 
+		// 可視区間境界が既存Point間にある場合の距離基準補間
 		const auto sampleAtDistance = [&](float distance) {
 			if (distance <= 0.0f) {
 				return points.front();

@@ -7,9 +7,7 @@
 
 namespace MadoEngine::Render {
 
-	// ---------------------------------------------------------------
-	// 静的な入力レイアウト定義
-	// ---------------------------------------------------------------
+	// Vertex種別ごとの固定入力Layout
 	static const D3D12_INPUT_ELEMENT_DESC kTriangleLayout[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -45,8 +43,6 @@ namespace MadoEngine::Render {
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 	};
-
-	// ---------------------------------------------------------------
 
 	void PSOFactory::Initialize(Core::DxDevice* device) {
 		assert(device);
@@ -106,7 +102,7 @@ namespace MadoEngine::Render {
 		psoDesc.SampleMask       = D3D12_DEFAULT_SAMPLE_MASK;
 		psoDesc.SampleDesc.Count = 1;
 
-		// ShaderManagerから取得する
+		// Compile済みShaderをShaderManagerのCacheから取得
 		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance().Get(desc.vsKey);
 		psoDesc.PS             = desc.psKey.empty()
 			? D3D12_SHADER_BYTECODE{ nullptr, 0 }

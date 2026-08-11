@@ -449,6 +449,8 @@ namespace MadoEngine::Particle {
 	}
 
 	void ParticleEffectAsset::FromJson(const nlohmann::json& json) {
+
+		// 未知Fieldを無視しながらVersion既定値で旧Assetとの互換性を維持
 		version_ = ReadUInt(json, "version", kCurrentVersion);
 		if (version_ > kCurrentVersion) {
 			Logger::Output("新しいVersionのParticle Assetを読み込みます: " + std::to_string(version_), Logger::Level::Warning);
@@ -609,6 +611,8 @@ namespace MadoEngine::Particle {
 	}
 
 	void ParticleEffectAsset::Validate() {
+
+		// Editor入力と外部JSONをRuntimeが保証する範囲へ正規化
 		for (EmitterConfig& emitter : emitters_) {
 			if (emitter.backend == ParticleBackend::Count) {
 				emitter.backend = ParticleBackend::Auto;

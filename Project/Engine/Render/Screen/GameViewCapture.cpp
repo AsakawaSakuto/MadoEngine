@@ -41,6 +41,8 @@ namespace MadoEngine::Render {
 		}
 
 		DirectX::ScratchImage capturedImage;
+
+		// GPU完了待機を含むDirectXTexのCapture経路で描画TextureをCPUへ読み戻し
 		const HRESULT captureResult = DirectX::CaptureTexture(
 			commandQueue_,
 			sourceTexture.GetResource(),
@@ -67,6 +69,8 @@ namespace MadoEngine::Render {
 		}
 
 		const std::filesystem::path outputPath = CreateOutputPath();
+
+		// 表示時と同じ色解釈を維持するためsRGB指定でPNGへ保存
 		const HRESULT saveResult = DirectX::SaveToWICFile(
 			*image,
 			DirectX::WIC_FLAGS_FORCE_SRGB,
@@ -113,6 +117,8 @@ namespace MadoEngine::Render {
 		const std::string baseFileName = fileNameStream.str();
 		std::filesystem::path outputPath = outputDirectory_ / (baseFileName + ".png");
 		std::error_code existsError;
+
+		// 同一Millisecond内の連続Captureでも既存Fileを上書きしないSuffix付与
 		for (std::uint32_t suffix = 1; std::filesystem::exists(outputPath, existsError) && !existsError; ++suffix) {
 			outputPath = outputDirectory_ / (baseFileName + "_" + std::to_string(suffix) + ".png");
 		}

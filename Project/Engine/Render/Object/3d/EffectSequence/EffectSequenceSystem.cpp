@@ -353,6 +353,7 @@ namespace MadoEngine::EffectSequence {
 			return {};
 		}
 
+		// 再生終了済みSlotを再利用してHandle Indexの増加を抑制
 		uint32_t slotIndex = 0;
 		if (!freeSlotIndices_.empty()) {
 			slotIndex = freeSlotIndices_.front();
@@ -434,6 +435,8 @@ namespace MadoEngine::EffectSequence {
 		if (!isInitialized_) {
 			return;
 		}
+
+		// 全Node完了後にCallbackを確定してからSequence Slotを回収
 		for (uint32_t index = 0; index < sequenceSlots_.size(); ++index) {
 			SequenceSlot& slot = sequenceSlots_[index];
 			if (!slot.instance) {

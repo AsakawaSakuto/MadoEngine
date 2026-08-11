@@ -36,6 +36,8 @@ namespace MadoEngine::Core {
 		width_ = width;
 		height_ = height;
 		format_ = format;
+
+		// Resize後もDescriptor Indexを維持できるよう初期化時に一度だけ確保
 		dsvIndex_ = dsvManager_->Allocate();
 		if (srvManager_ != nullptr) {
 			srvIndex_ = srvManager_->Allocate();
@@ -65,6 +67,8 @@ namespace MadoEngine::Core {
 	}
 
 	void DepthStencilBuffer::CreateResourceAndView() {
+
+		// DSVとSRVの両形式へView変換できるTypeless Resourceとして生成
 		D3D12_RESOURCE_DESC desc{};
 		desc.Dimension          = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		desc.Alignment          = 0;
@@ -90,6 +94,7 @@ namespace MadoEngine::Core {
 		clearValue.DepthStencil.Depth   = 1.0f;
 		clearValue.DepthStencil.Stencil = 0;
 
+		// 同じDescriptor IndexへViewを再生成して外部HandleをResize前後で維持
 		textureResource_.Reset();
 		HRESULT hr = device_->GetDevice()->CreateCommittedResource(
 			&heapProps,
@@ -112,6 +117,8 @@ namespace MadoEngine::Core {
 		Logger::Output("[Engine] DSVを生成しました: " + std::to_string(dsvIndex_), Logger::Level::Engine);
 
 		if (srvManager_ != nullptr) {
+
+			// Depth参照を必要とするEffect向けに任意のSRVを併設
 			srvManager_->CreateShaderResourceView(textureResource_.Get(), srvIndex_, GetShaderResourceFormat());
 			Logger::Output("[Engine] 深度SRVを生成しました: " + std::to_string(srvIndex_), Logger::Level::Engine);
 		}

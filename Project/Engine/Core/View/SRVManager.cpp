@@ -47,6 +47,7 @@ namespace MadoEngine::Core {
 			freeIndices_.pop();
 			Logger::Output("SRVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		} else {
+
 			// 新しいインデックスを割り当て
 			assert(nextIndex_ < maxDescriptors_ && "SRVデスクリプタヒープの容量を超えました");
 			index = nextIndex_++;
@@ -90,7 +91,7 @@ namespace MadoEngine::Core {
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		D3D12_RESOURCE_DESC resourceDesc = resource->GetDesc();
 
-		// フォーマットの決定
+		// 明示Formatがある場合はResource FormatよりView側の解釈を優先
 		if (format == DXGI_FORMAT_UNKNOWN) {
 			srvDesc.Format = resourceDesc.Format;
 		} else {
@@ -99,7 +100,7 @@ namespace MadoEngine::Core {
 
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-		// リソースの次元に応じて設定
+		// Resource次元に一致するUnion Memberだけを設定して有効なSRV Descを構築
 		if (resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE1D) {
 			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
 			srvDesc.Texture1D.MipLevels = resourceDesc.MipLevels;
@@ -113,7 +114,6 @@ namespace MadoEngine::Core {
 			assert(false && "未対応のリソース次元です");
 		}
 
-		// SRVを作成
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCPUHandle(index);
 		device_->GetDevice()->CreateShaderResourceView(resource, &srvDesc, cpuHandle);
 

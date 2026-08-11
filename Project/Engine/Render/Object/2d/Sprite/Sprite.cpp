@@ -45,7 +45,7 @@ Sprite::Sprite(std::string objectName) {
 	objectName_ = std::move(objectName);
 }
 
-// 単独使用時: 自前でユニットクワッドVB・IBを生成する
+// 単独使用時は専用のUnit Quad Vertex BufferとIndex Bufferを生成
 void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName) {
 
 	device_ = device;
@@ -53,7 +53,7 @@ void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 
 	(void)SetTexture(textureName);
 
-	// ユニットクワッド（0〜1）で生成。size・anchorPoint の反映は Update() 側の行列で行う
+	// Unit Quadを0から1で生成しSizeとAnchorPointをUpdate側の行列へ委譲
 	SpriteVertexData* vertexData = CreateMappedBuffer<SpriteVertexData>(device_.Get(), vertexResource_, 4);
 	vertexData[0].position = { 0.0f, 1.0f, 0.0f, 1.0f }; // 左下
 	vertexData[1].position = { 0.0f, 0.0f, 0.0f, 1.0f }; // 左上
@@ -83,7 +83,7 @@ void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* command
 	InitializeCommonResources();
 }
 
-// SpriteManager経由: 共有ジオメトリバッファを参照する
+// SpriteManager経由では共有Geometry Bufferを参照
 void Sprite::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::string textureName, const SpriteSharedGeometry& sharedGeo) {
 
 	device_ = device;
@@ -155,14 +155,7 @@ void Sprite::Update() {
 	});
 	materialData_->uvTransformMatrix = uvScaleMatrix * uvRotateMatrix * uvTranslateMatrix;
 
-	// ユニットクワッド（0〜1）前提のワールド行列
-	//
-	// 変換順:
-	//   1. Scale(size * transform.scale)      ピクセルサイズに拡大
-	//   2. Translate(-anchor * size * scale)  アンカー分だけローカル原点をオフセット
-	//   3. RotateZ(transform.rotate)          Z軸回転
-	//   4. Translate(transform.translate)     ワールド配置
-
+	// Unit QuadをPixel Sizeへ拡大し、Anchor補正後に回転とWorld移動を適用
 	float sx = isFitToScreen_ ? screenWidth_ : size_.x * transform_.scale.x;
 	float sy = isFitToScreen_ ? screenHeight_ : size_.y * transform_.scale.y;
 
@@ -189,9 +182,7 @@ void Sprite::Draw() {
 		return;
 	}
 
-	// RootSignature・PSO・VBV・IBVはSpriteManagerがループ外で1回だけ設定済み
-
-	// b0: Material, b1: Transform, t0: Texture
+	// 共通PipelineはManager側でBind済みのためInstance固有Resourceだけを設定
 	commandList_->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(1, transformationResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));

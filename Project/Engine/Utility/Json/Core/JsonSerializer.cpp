@@ -81,6 +81,8 @@ namespace MadoEngine::Json {
 	}
 
 	Vector2 JsonSerializer::ToVector2(const nlohmann::json& json, const Vector2& defaultValue) {
+
+		// 配列形式と旧Object形式の両方を受け入れて欠損成分を既定値で補完
 		if (json.is_array()) {
 			return {
 				GetArrayFloat(json, 0, defaultValue.x),
@@ -99,6 +101,8 @@ namespace MadoEngine::Json {
 	}
 
 	Vector3 JsonSerializer::ToVector3(const nlohmann::json& json, const Vector3& defaultValue) {
+
+		// 配列形式と旧Object形式の両方を受け入れて欠損成分を既定値で補完
 		if (json.is_array()) {
 			return {
 				GetArrayFloat(json, 0, defaultValue.x),
@@ -119,6 +123,8 @@ namespace MadoEngine::Json {
 	}
 
 	Vector4 JsonSerializer::ToVector4(const nlohmann::json& json, const Vector4& defaultValue) {
+
+		// 配列形式と旧Object形式の両方を受け入れて欠損成分を既定値で補完
 		if (json.is_array()) {
 			return {
 				GetArrayFloat(json, 0, defaultValue.x),
@@ -141,6 +147,8 @@ namespace MadoEngine::Json {
 	}
 
 	Quaternion JsonSerializer::ToQuaternion(const nlohmann::json& json, const Quaternion& defaultValue) {
+
+		// 配列形式と旧Object形式の両方を受け入れて欠損成分を既定値で補完
 		if (json.is_array()) {
 			return {
 				GetArrayFloat(json, 0, defaultValue.x),

@@ -17,7 +17,7 @@ cbuffer PerView : register(b0)
     row_major float4x4 gViewProjection;
 };
 
-/// @brief World座標のRibbon頂点をViewProjection変換する
+/// @brief World座標のRibbon頂点をViewProjection変換
 /// @param input CPUで生成されたRibbon頂点
 /// @return Pixel Shaderへ渡す頂点
 VertexShaderOutput main(VertexShaderInput input)

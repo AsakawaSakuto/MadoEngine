@@ -16,6 +16,7 @@ void TPS_Camera::Update(float deltaTime) {
 }
 
 void TPS_Camera::HandleInput(float deltaTime) {
+
 	// --- マウス入力 ---
 	auto* mouse = MyInput::GetMouse();
 	if (mouse) {
@@ -67,7 +68,7 @@ Vector3 TPS_Camera::CalculateViewCenter() const {
 Vector3 TPS_Camera::CalculateBasePosition(const Vector3& viewCenter) const {
 	Vector3 forward = CalculateForwardDirection();
 
-	// 注視中心から一定距離だけ後ろにカメラを配置する
+	// 注視中心から一定距離だけ後方へCameraを配置
 	return viewCenter - forward * distance_;
 }
 

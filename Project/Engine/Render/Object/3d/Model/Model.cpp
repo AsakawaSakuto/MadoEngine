@@ -179,6 +179,8 @@ bool Model::TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition
 	Vector3 localPosition = GetVertexPosition(vertexIndex);
 	if (type_ == ModelType::Skinning &&
 		vertexIndex < skinClusterData_.mappedInfluence.size()) {
+
+		// JointごとのSkeleton空間変換をWeight合成して現在Poseの頂点位置を復元
 		const VertexInfluence& influence = skinClusterData_.mappedInfluence[vertexIndex];
 		Vector3 skinnedPosition{};
 		for (uint32_t influenceIndex = 0; influenceIndex < kNumMaxInfluence; ++influenceIndex) {
@@ -203,6 +205,8 @@ bool Model::TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition
 	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
 	Matrix4x4 worldMatrix = MakeWorldMatrix(billboardCamera);
 	if (type_ == ModelType::Animated) {
+
+		// Animation Root NodeのLocal変換をModel World変換より先に適用
 		worldMatrix = Matrix::Multiply(rootNode_.localMatrix, worldMatrix);
 	}
 
@@ -350,6 +354,7 @@ void Model::InitializeInstanceResources() {
 
 	useAnimationTimer_ = !sharedData_->animationData.nodeAnimations.empty();
 
+	// Skinning ModelだけにSkeletonとPalette SRVをInstance単位で確保
 	if (type_ == ModelType::Skinning) {
 		useAnimationTimer_ = true;
 		skeletonData_ = CreateSkeleton(sharedData_->modelData.rootNode);
@@ -417,12 +422,15 @@ void Model::Update() {
 
 	const Animation& animationData = sharedData_->animationData;
 
+	// Animation長で循環させてKeyframe探索時刻を有効範囲内に維持
 	if (useAnimationTimer_ && animationData.duration > 0.0f) {
 		animationTime_ += 1.0f / 60.0f;
 		animationTime_ = std::fmod(animationTime_, animationData.duration);
 	}
 
 	if (type_ == ModelType::Skinning && !skeletonData_.joints.empty()) {
+
+		// Local PoseからSkeleton行列とSkinning Paletteを順番に更新
 		ApplyAnimation(skeletonData_, animationData, animationTime_);
 		UpdateAnimation(skeletonData_);
 		UpdateCluster(skinClusterData_, skeletonData_);
@@ -430,6 +438,8 @@ void Model::Update() {
 
 	cameraData_->worldPosition = camera_.GetPosition();
 	if (type_ == ModelType::Animated) {
+
+		// Node AnimationはRoot Local行列へ反映してObject Transformと合成
 		Matrix4x4 localMatrix = rootNode_.localMatrix;
 		auto rootNodeIt = animationData.nodeAnimations.find(rootNode_.name);
 		if (rootNodeIt != animationData.nodeAnimations.end()) {
@@ -458,6 +468,7 @@ void Model::Update() {
 	trans.m[3][0] = uvTransform_.translate.x;
 	trans.m[3][1] = uvTransform_.translate.y;
 
+	// UV変換をScale、Rotation、Translation順で合成してMaterial Bufferへ反映
 	materialData_->color = color_;
 	materialData_->enableLighting = enableLighting_ ? 1 : 0;
 	materialData_->uvTransformMatrix = scale * rot * trans;
@@ -473,6 +484,7 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 	Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix_, camera.GetViewProjectionMatrix());
 	Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix_));
 
+	// Node Animation型だけRoot Local行列をWorld変換の前段へ追加
 	switch (type_) {
 	case ModelType::Animated:
 		transformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
@@ -489,8 +501,6 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 	transformationData_->WorldInverseTranspose = worldInverseTransposeMatrix;
 }
 
-/// @brief シャドウ描画用の変換行列をGPUバッファへ更新
-/// @param lightViewProjection ライト視点のビュー射影行列
 void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection, const Camera* billboardCamera) {
 	if (!shadowTransformationData_) {
 		return;
@@ -530,10 +540,6 @@ void Model::UpdateReceiveShadowGpuData() {
 	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
 }
 
-/// @brief モデルのワールド空間AABBを計算
-/// @param outMin ワールド空間AABBの最小座標
-/// @param outMax ワールド空間AABBの最大座標
-/// @return 計算できた場合はtrue
 bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* billboardCamera) const {
 	if (!sharedData_ || !sharedData_->modelData.bounds.isValid) {
 		return false;
@@ -541,6 +547,8 @@ bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* b
 
 	const ModelBounds& bounds = sharedData_->modelData.bounds;
 	Matrix4x4 cullingMatrix = MakeWorldMatrix(billboardCamera);
+
+	// Animated ModelのRoot Node変換も描画時と同じ順序で包含範囲へ反映
 	if (type_ == ModelType::Animated) {
 		cullingMatrix = Matrix::Multiply(rootNode_.localMatrix, cullingMatrix);
 	}
@@ -558,6 +566,8 @@ bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* b
 
 	outMin = { FLT_MAX, FLT_MAX, FLT_MAX };
 	outMax = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+	// Local AABBの8頂点を変換して回転後も包含するWorld AABBを再構築
 	for (const Vector3& corner : corners) {
 		const Vector3 world = Matrix::Transform(corner, cullingMatrix);
 		outMin.x = (std::min)(outMin.x, world.x);
@@ -571,9 +581,6 @@ bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* b
 	return true;
 }
 
-/// @brief モデルがカメラの視錐台内にあるか判定
-/// @param camera 判定に使用するカメラ
-/// @return 視錐台内、または視錐台と交差している場合はtrue
 bool Model::IsInsideCameraFrustum(const Camera& camera) const {
 	if (!enableFrustumCulling_) {
 		return true;
@@ -617,6 +624,7 @@ void Model::Draw(Camera& useCamera) {
 		return;
 	}
 
+	// Frustum内のModelだけGPU Constant BufferとPipelineを更新
 	UpdateTransformGpuData(useCamera);
 
 	assert(psoRegistry_);
@@ -625,6 +633,8 @@ void Model::Draw(Camera& useCamera) {
 	commandList_->SetPipelineState(psoRegistry_->Get(psoDesc_));
 
 	if (type_ == ModelType::Skinning) {
+
+		// Skinning PipelineではMesh属性とJoint Influenceを別Vertex SlotへBind
 		D3D12_VERTEX_BUFFER_VIEW vbvs[] = {
 			sharedData_->vertexBufferView,
 			skinClusterData_.influenceBufferView
@@ -659,6 +669,8 @@ void Model::Draw(Camera& useCamera) {
 
 	UpdateReceiveShadowGpuData();
 	const D3D12_GPU_DESCRIPTOR_HANDLE fallbackSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_);
+
+	// Shadow未設定時もRoot Descriptorを有効に保つためModel TextureをFallbackに使用
 	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = shadowMapSrvHandle_.ptr != 0 ? shadowMapSrvHandle_ : fallbackSrv;
 	if (type_ == ModelType::Skinning) {
 		commandList_->SetGraphicsRootConstantBufferView(kSkinningRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
@@ -669,6 +681,8 @@ void Model::Draw(Camera& useCamera) {
 	}
 
 	if (!sharedData_->modelData.subMeshes.empty()) {
+
+		// Material境界ごとにTextureを切り替えながら対応Index範囲だけを描画
 		for (const auto& subMesh : sharedData_->modelData.subMeshes) {
 			uint32_t texIndex = textureIndex_;
 			if (subMesh.materialIndex < textureIndices_.size()) {
@@ -683,8 +697,6 @@ void Model::Draw(Camera& useCamera) {
 	}
 }
 
-/// @brief シャドウマップ生成用にモデルを描画
-/// @param lightViewProjection ライト視点のビュー射影行列
 void Model::DrawShadow(const Matrix4x4& lightViewProjection) {
 	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
 	DrawShadowInternal(lightViewProjection, billboardCamera);
@@ -703,6 +715,7 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 	assert(psoRegistry_);
 	UpdateShadowTransformGpuData(lightViewProjection, billboardCamera);
 
+	// SkinningのPalette Bind有無に合わせてDepth専用Pipelineを選択
 	const MadoEngine::Render::PSODesc shadowPsoDesc = type_ == ModelType::Skinning
 		? CreateSkinningShadowPSODesc()
 		: MadoEngine::Render::ShadowMap::CreatePSODesc();

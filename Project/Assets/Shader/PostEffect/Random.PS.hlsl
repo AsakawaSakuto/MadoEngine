@@ -11,7 +11,7 @@ struct PixelShaderOutput {
     float4 color : SV_TARGET0;
 };
 
-/// @brief Random用パラメータを取得する
+/// @brief Random用パラメータを取得
 /// @return x: 時間, y: ノイズ拡大率, z: コントラスト, w: 適用率
 float4 GetRandomParams() {
     if (all(gRandomParams == 0.0f)) {
@@ -21,7 +21,7 @@ float4 GetRandomParams() {
     return gRandomParams;
 }
 
-/// @brief 2次元Seedから0以上1未満の疑似乱数を生成する
+/// @brief 2次元Seedから0以上1未満の疑似乱数を生成
 /// @param seed 乱数生成に使用する2次元Seed
 /// @return 0以上1未満の疑似乱数
 float Rand2dTo1d(float2 seed) {
@@ -29,7 +29,7 @@ float Rand2dTo1d(float2 seed) {
     return frac(random);
 }
 
-/// @brief 入力UVと時間から白黒乱数値を生成する
+/// @brief 入力UVと時間から白黒乱数値を生成
 /// @param texcoord 入力UV
 /// @param params Random用パラメータ
 /// @return 0から1の白黒乱数値
@@ -38,12 +38,13 @@ float CalculateRandomValue(float2 texcoord, float4 params) {
     float noiseScale = max(params.y, 0.0001f);
     float contrast = max(params.z, 0.0f);
 
+    // UV、Scale、時間を一つのSeedへ混合して画面上のNoise Patternを変化
     float2 seed = texcoord * noiseScale * time;
     float random = Rand2dTo1d(seed);
     return saturate((random - 0.5f) * contrast + 0.5f);
 }
 
-/// @brief GPUで生成した白黒乱数を画面へ出力する
+/// @brief GPUで生成した白黒乱数を画面へ出力
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return Random適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {

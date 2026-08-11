@@ -174,6 +174,8 @@ namespace MadoEngine::Particle {
 		isInstanceDataDirty_ = true;
 		cameraPosition_ = camera.GetPosition();
 		hasCurrentPerViewFrame_ = false;
+
+		// Fence完了済みのFrame Resourceだけを選択して永続Map領域の上書きを防止
 		for (uint32_t offset = 0; offset < kFrameResourceCount; ++offset) {
 			const uint32_t candidate =
 				(nextPerViewFrameIndex_ + offset) % kFrameResourceCount;
@@ -249,6 +251,8 @@ namespace MadoEngine::Particle {
 			sortable.instance.color = particle.color;
 
 			if (config.simulationSpace == SimulationSpace::Local) {
+
+				// Local Simulation結果を描画直前にEmitter World空間へ変換
 				sortable.instance.position = Matrix::Transform(particle.position, emitterMatrix);
 				sortable.instance.rotation += emitterTransform.rotate.z;
 				sortable.instance.scale.x *= std::abs(emitterTransform.scale.x);
@@ -261,6 +265,8 @@ namespace MadoEngine::Particle {
 		}
 
 		if (config.renderer.sortMode == SortMode::BackToFront) {
+
+			// Alpha Blendの合成順を安定させるCamera距離の降順Sort
 			std::sort(submitted.begin(), submitted.end(), [](const SortableParticleInstance& lhs, const SortableParticleInstance& rhs) {
 				return lhs.distanceSquared > rhs.distanceSquared;
 			});
@@ -314,6 +320,8 @@ namespace MadoEngine::Particle {
 		}
 
 		if (isInstanceDataDirty_ && !instances_.empty()) {
+
+			// CPU Simulation分だけを当該FrameのInstance Bufferへ一括転送
 			EnsureInstanceCapacity(
 				currentPerViewFrameIndex_,
 				instances_.size()

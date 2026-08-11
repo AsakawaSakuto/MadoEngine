@@ -138,7 +138,7 @@ namespace MadoEngine
 		);
 		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Initialize();
 
-		// Sprite/Textの座標系は実ウィンドウサイズではなく基準解像度に固定する
+		// SpriteとTextの座標系を実Windowサイズではなく基準解像度に固定
 		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 
@@ -219,6 +219,7 @@ namespace MadoEngine
 		MadoEngine::Editor::LoadPostEffectEditorJson(postEffectManager);
 		
 #ifdef USE_IMGUI
+
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
@@ -227,6 +228,7 @@ namespace MadoEngine
 	}
 
 	void EngineExecution::Update() {
+
 		// デルタタイムを計算
 		deltaTime_->Update();
 		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
@@ -277,7 +279,7 @@ namespace MadoEngine
 		renderWidth_ = width;
 		renderHeight_ = height;
 
-		// リサイズ時も2D座標系は基準解像度のまま維持する
+		// Resize後も2D座標系を基準解像度のまま維持
 		MadoEngine::SpriteManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 		MadoEngine::TextManager::GetInstance().SetScreenSize(static_cast<float>(winDesc_.width), static_cast<float>(winDesc_.height));
 		Logger::Output(
@@ -359,6 +361,7 @@ namespace MadoEngine
 		currentOverlayTargetName_.clear();
 
 #ifdef USE_IMGUI
+
 		// ImGuiフレーム開始
 		imguiManager_->Begin();
 #endif // USE_IMGUI
@@ -384,8 +387,7 @@ namespace MadoEngine
 			shadowFocusPosition
 		);
 
-		// オフスクリーンRTへ描画する
-		// オフスクリーンRTをPIXEL_SHADER_RESOURCE → RENDER_TARGET へ遷移し、RTV/DSVをセット・クリア
+		// PostEffect適用前のSceneをOffscreen RenderTargetへ集約
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencilBuffer_->GetDSVCPUHandle();
 		depthStencilBuffer_->Transition(commandManager_->GetCommandList(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		renderTargetManager_->Begin(kSceneColorTarget, commandManager_->GetCommandList(), dsvHandle);
@@ -399,7 +401,7 @@ namespace MadoEngine
 		const Vector3& shadowFocusPosition) {
 		assert(shadowMap_ && "ShadowMapが未初期化です");
 
-
+		// World Layerの先頭Directional LightをShadow生成の代表Lightとして採用
 		const std::vector<DirectionalLight> directionalLights =
 			LightManager::GetInstance().GetFilteredDirectionalLights(
 				currentSceneType,
@@ -407,6 +409,8 @@ namespace MadoEngine
 			);
 
 		if (directionalLights.empty() || directionalLights[0].useLight == 0) {
+
+			// 有効Lightがない場合もModel側へ空Handleを通知して前FrameのShadow参照を解除
 			MadoEngine::ModelManager::GetInstance().SetShadowMap(
 				currentSceneType,
 				{},
@@ -417,6 +421,7 @@ namespace MadoEngine
 			return;
 		}
 
+		// Light空間のDepthを描画し、同じ行列とSRVを後続のModel描画へ公開
 		auto* commandList = commandManager_->GetCommandList();
 		shadowMap_->UpdateLightViewProjection(directionalLights[0], shadowFocusPosition);
 		shadowMap_->Begin(commandList);
@@ -452,6 +457,7 @@ namespace MadoEngine
 		isLayerEffectChainResolved_ = false;
 		currentLayerEffectSourceName_ = kLayerColorTarget;
 
+		// OverlayまたはDepth無視LayerではScene Depthと分離したMask用Depthを選択
 		const MadoEngine::Render::LayerEffectStage stage = pass.GetLayerEffectStage();
 		const bool ignoreDepthForMask = stage == MadoEngine::Render::LayerEffectStage::Overlay ||
 			NeedsIgnoreDepthMask(pass.GetTargetLayerMask(), stage);
@@ -519,9 +525,12 @@ namespace MadoEngine
 			return;
 		}
 
+		// 各Stageを一Frame一度だけ適用して重複呼び出しによるEffectの多重化を防止
 		EndSceneColorRender();
 		MadoEngine::Render::PostEffectManager& manager =
 			MadoEngine::Render::PostEffectManager::GetInstance();
+
+		// 出力先を交互に切り替えて前Passの結果を次Passの入力へ接続
 		for (MadoEngine::Render::PostEffectPassHandle handle : manager.GetScreenPassHandles()) {
 			const MadoEngine::Render::PostEffectPass* pass = manager.TryGet(handle);
 			if (!pass || !pass->IsEnabled() || pass->GetScreenEffectStage() != stage) {
@@ -558,6 +567,7 @@ namespace MadoEngine
 		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
 		EndSceneColorRender();
 
+		// Composite済みSceneを新しいTargetへ複製して透明描画のBlend先を準備
 		currentTransparentTargetName_ = GetNextPostEffectOutputName();
 		ID3D12GraphicsCommandList* commandList = commandManager_->GetCommandList();
 		renderTargetManager_->Begin(currentTransparentTargetName_, commandList);
@@ -643,6 +653,7 @@ namespace MadoEngine
 		ResolveCompositeSource();
 
 #ifdef USE_IMGUI
+
 		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
@@ -658,8 +669,6 @@ namespace MadoEngine
 		ImGui::Checkbox("FPS Limit", &isStopApplication_);
 		ImGui::End();
 
-		//ImGui::ShowDemoWindow();
-
 		MadoEngine::Editor::DrawPostEffectEditorUI(
 			MadoEngine::Render::PostEffectManager::GetInstance());
 		MadoEngine::Editor::DrawAudioManagerUI();
@@ -673,7 +682,6 @@ namespace MadoEngine
 		MadoEngine::Editor::DrawBeamEffectEditorUI();
 		MadoEngine::Editor::DrawEffectSequenceEditorUI();
 
-		//MadoEngine::Editor::DrawLoggerEditorUI();
 		imguiManager_->DrawStyleColorEditorUI();
 
 #else
@@ -691,12 +699,16 @@ namespace MadoEngine
 		MadoEngine::Core::DepthStencilBuffer* maskDepthStencilBuffer)
 	{
 		auto* commandList = commandManager_->GetCommandList();
+
+		// Pass定義のRootSignatureとPSOへFullscreen Triangle用の共通入力を設定
 		commandList->SetGraphicsRootSignature(
 			MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey));
 		commandList->SetPipelineState(psoRegistry_->Get(desc));
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->SetGraphicsRootDescriptorTable(0, inputSrv);
 		if (desc.rootSigKey == "PostEffect.RootSig") {
+
+			// PostEffect共通RootSignatureだけDepth、Mask、Parameter、補助Textureを追加Binding
 			depthStencilBuffer_->Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->SetGraphicsRootDescriptorTable(1, depthStencilBuffer_->GetSRVGPUHandle());
 			MadoEngine::Core::DepthStencilBuffer* maskDepth =
@@ -704,6 +716,8 @@ namespace MadoEngine
 			maskDepth->Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->SetGraphicsRootDescriptorTable(2, maskDepth->GetSRVGPUHandle());
 			if (parameterBufferAddress == 0) {
+
+				// Parameter未指定Passでも有効なConstant BufferをBindingする既定値Fallback
 				assert(postEffectDefaultParameterResource_ && "ポストエフェクト用の既定ConstantBufferが未作成です");
 				parameterBufferAddress = postEffectDefaultParameterResource_->GetGPUVirtualAddress();
 			}
@@ -731,6 +745,8 @@ namespace MadoEngine
 		MadoEngine::Particle::ParticleFogParameters parameters{};
 		MadoEngine::Render::PostEffectManager& manager =
 			MadoEngine::Render::PostEffectManager::GetInstance();
+
+		// Scene Stageで有効なFog Passの設定をParticle描画用Parameterへ同期
 		for (MadoEngine::Render::PostEffectPassHandle handle : manager.GetScreenPassHandles()) {
 			const MadoEngine::Render::PostEffectPass* pass = manager.TryGet(handle);
 			if (!pass || !pass->IsEnabled() ||
@@ -746,6 +762,8 @@ namespace MadoEngine
 
 			parameters.color = fogParameters.color;
 			if (parameters.color == Vector4{}) {
+
+				// 旧設定や未初期化値を描画可能なFog既定値へ補完
 				parameters.color = { 0.58f, 0.68f, 0.74f, 1.0f };
 			}
 
@@ -804,6 +822,7 @@ namespace MadoEngine
 	void EngineExecution::PostDraw()
 	{
 #ifdef USE_IMGUI
+
 		// ImGui描画コマンドをコマンドリストに積む
 		imguiManager_->End(commandManager_->GetCommandList());
 #endif // USE_IMGUI
@@ -829,7 +848,7 @@ namespace MadoEngine
 			commandManager_->GetCompletedFenceValue()
 		);
 
-		// 描画で参照したリソースはGPU処理完了後に解放する
+		// 描画で参照したResourceをGPU処理完了後に解放
 		MadoEngine::SpriteManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::TextManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();

@@ -47,6 +47,7 @@ namespace MadoEngine::Core {
 			freeIndices_.pop();
 			Logger::Output("RTVデスクリプタを再利用しました。インデックス: " + std::to_string(index), Logger::Level::Engine);
 		} else {
+
 			// 新しいインデックスを割り当て
 			assert(nextIndex_ < maxDescriptors_ && "RTVデスクリプタヒープの容量を超えました");
 			index = nextIndex_++;
@@ -94,9 +95,11 @@ namespace MadoEngine::Core {
 		// リソースの次元に応じて設定
 		if (resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D) {
 			if (resourceDesc.SampleDesc.Count > 1) {
+
 				// マルチサンプル
 				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
 			} else {
+
 				// 通常のテクスチャ
 				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 				rtvDesc.Texture2D.MipSlice = 0;

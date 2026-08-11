@@ -5,6 +5,7 @@
 #pragma comment(lib, "gdiplus.lib")
 
 #ifdef USE_IMGUI
+
 // imgui_impl_win32.cpp が定義するウィンドウメッセージハンドラの前方宣言
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
@@ -15,7 +16,8 @@ namespace MadoEngine::Screen {
 	LRESULT CALLBACK WindowsAPI::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 #ifdef USE_IMGUI
-		// ImGuiにメッセージを転送し、ImGuiが処理した場合はここで終了する
+
+		// ImGuiが消費したWindow MessageをApplication側へ重複伝播しない早期終了
 		if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
 			return true;
 		}
@@ -59,6 +61,7 @@ namespace MadoEngine::Screen {
 			break;
 
 		case WM_SIZING:
+
 			// ウィンドウのリサイズ時にアスペクト比を維持
 			if (api && api->desc_.isResizable && !api->isFullscreen_ && api->aspectRatio_ > 0.0f) {
 				RECT* rect = reinterpret_cast<RECT*>(lparam);
@@ -81,6 +84,7 @@ namespace MadoEngine::Screen {
 				switch (wparam) {
 				case WMSZ_LEFT:
 				case WMSZ_RIGHT:
+
 					// 幅ベースで高さを調整
 					clientHeight = static_cast<int>(clientWidth / api->aspectRatio_);
 					rect->bottom = rect->top + clientHeight + frameHeight;
@@ -88,6 +92,7 @@ namespace MadoEngine::Screen {
 
 				case WMSZ_TOP:
 				case WMSZ_BOTTOM:
+
 					// 高さベースで幅を調整
 					clientWidth = static_cast<int>(clientHeight * api->aspectRatio_);
 					rect->right = rect->left + clientWidth + frameWidth;
@@ -97,6 +102,7 @@ namespace MadoEngine::Screen {
 				case WMSZ_TOPRIGHT:
 				case WMSZ_BOTTOMLEFT:
 				case WMSZ_BOTTOMRIGHT:
+
 					// 角のドラッグの場合、幅ベースで高さを調整
 					clientHeight = static_cast<int>(clientWidth / api->aspectRatio_);
 					if (wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT) {
@@ -159,7 +165,7 @@ namespace MadoEngine::Screen {
 			return hIcon ? hIcon : LoadIcon(nullptr, IDI_APPLICATION);
 		}
 
-		// ウィンドウを初期化する
+		// Client領域の作成と表示に必要なWindow初期化
 		void WindowsAPI::Initialize(WindowDesc& desc, HINSTANCE hInstance) {
 
 		Logger::Output("WindowsAPIを初期化しています", Logger::Level::Engine);
@@ -196,6 +202,7 @@ namespace MadoEngine::Screen {
 		// ウィンドウスタイルの設定（サイズ変更可否に基づく）
 		DWORD windowStyle = WS_OVERLAPPEDWINDOW;
 		if (!desc_.isResizable) {
+
 			// サイズ変更不可の場合、WS_THICKFRAMEとWS_MAXIMIZEBOXを除外
 			windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 			Logger::Output("ウィンドウサイズ変更を無効化しました", Logger::Level::Engine);
@@ -264,7 +271,7 @@ namespace MadoEngine::Screen {
 		return true;
 	}
 
-	// メッセージを処理する。アプリを継続する場合はtrue、終了する場合はfalseを返す
+	// Window Messageを処理しApplication継続時はtrue、終了時はfalse
 	bool WindowsAPI::ProcessMessage() {
 		MSG msg{};
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -286,6 +293,7 @@ namespace MadoEngine::Screen {
 		}
 
 		if (isFullscreen_) {
+
 			// フルスクリーンからウィンドウモードに戻す
 			Logger::Output("ウィンドウモードに切り替えています", Logger::Level::Engine);
 
@@ -306,7 +314,8 @@ namespace MadoEngine::Screen {
 			isFullscreen_ = false;
 			Logger::Output("ウィンドウモードに切り替えました", Logger::Level::Engine);
 		} else {
-			// ウィンドウモードからフルスクリーンにする
+
+			// Window Styleと配置を保持したままFullscreenへ切り替え
 			Logger::Output("フルスクリーンモードに切り替えています", Logger::Level::Engine);
 
 			// 現在のウィンドウスタイルと位置を保存
@@ -341,6 +350,7 @@ namespace MadoEngine::Screen {
 	void WindowsAPI::ProcessInput() {
 		auto* keyboard = MadoEngine::InputManager::GetInstance().GetKeybord();
 		if (keyboard) {
+
 			// ALT+Enterでフルスクリーン切り替え
 			bool altPressed = keyboard->IsPress(DIK_LMENU) || keyboard->IsPress(DIK_RMENU);
 			bool enterTriggered = keyboard->IsTrigger(DIK_RETURN);

@@ -216,6 +216,8 @@ namespace MadoEngine::EffectSequence {
 	}
 
 	void EffectSequenceAsset::FromJson(const nlohmann::json& json) {
+
+		// 読み込み前に既定構成へ戻して欠落Fieldへ前回値を残さない設計
 		config_ = EffectSequenceConfig{};
 		version_ = ReadUInt(json, "version", kCurrentVersion);
 		if (version_ > kCurrentVersion) {
@@ -384,6 +386,8 @@ namespace MadoEngine::EffectSequence {
 	}
 
 	void EffectSequenceAsset::Validate() {
+
+		// 再生時間とNode数をRuntime上限へ制限して極端な入力を排除
 		version_ = kCurrentVersion;
 		config_.duration = std::clamp(
 			std::isfinite(config_.duration) ? config_.duration : 1.0f,
@@ -400,6 +404,8 @@ namespace MadoEngine::EffectSequence {
 		}
 
 		std::unordered_set<uint32_t> usedIds;
+
+		// 0または重複IDを再採番してNode単位の発火管理を一意化
 		for (EffectSequenceNode& node : config_.nodes) {
 			if (node.nodeId == 0 || usedIds.contains(node.nodeId)) {
 				uint32_t candidateId = 1;

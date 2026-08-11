@@ -11,6 +11,9 @@
 
 namespace {
 
+/// @brief 文字列を小文字へ変換
+/// @param value 変換対象
+/// @return 小文字へ変換した文字列
 std::string ToLower(std::string value) {
 	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
 		return static_cast<char>(std::tolower(c));
@@ -18,6 +21,10 @@ std::string ToLower(std::string value) {
 	return value;
 }
 
+/// @brief 読み込んだDataから利用可能なModel種別を推定
+/// @param modelData Model Data
+/// @param animationData Animation Data
+/// @return 推定したModel種別
 ModelType InferModelType(const ModelData& modelData, const Animation& animationData) {
 	if (!modelData.skinClusterData.empty()) {
 		return ModelType::Skinning;
@@ -88,7 +95,9 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 	outData.type = (requestedType == ModelType::Auto) ? inferredType : requestedType;
 
 	if (outData.type == ModelType::Skinning && outData.modelData.skinClusterData.empty()) {
-		Logger::Output("ModelResource : Skinning data was not found, fallback to " + ModelTypeToString(inferredType) + " : " + outData.path, Logger::Level::Warning);
+
+		// Skin Clusterを持たないAssetをSkinning Pipelineへ渡さないため実データに合わせて降格
+		Logger::Output("ModelResource: Skinning Dataがないため" + ModelTypeToString(inferredType) + "へ切り替え: " + outData.path, Logger::Level::Warning);
 		outData.type = inferredType;
 	}
 
@@ -100,11 +109,14 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 		outData.textureNames[i] = std::filesystem::path(outData.modelData.materialPaths[i]).stem().string();
 		outData.textureIndices[i] = MadoEngine::TextureManager::GetInstance().GetTextureIndex(outData.textureNames[i]);
 		if (outData.textureIndices[i] == UINT32_MAX) {
+
+			// 欠損TextureでもDescriptor参照を有効に保つためChecker Textureへ置換
 			outData.textureNames[i] = "uvChecker";
 			outData.textureIndices[i] = MadoEngine::TextureManager::GetInstance().GetTextureIndex(outData.textureNames[i]);
 		}
 	}
 
+	// 全Instanceから共有する不変MeshをUpload Heapへ一度だけ展開
 	ModelVertexData* vertexData = CreateMappedBuffer<ModelVertexData>(device, outData.vertexResource, outData.modelData.vertices.size());
 	std::memcpy(vertexData, outData.modelData.vertices.data(), sizeof(ModelVertexData) * outData.modelData.vertices.size());
 

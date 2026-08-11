@@ -352,6 +352,8 @@ namespace MadoEngine::Beam {
 			Logger::Output("Beam Effect Assetが見つかりません: " + assetName, Logger::Level::Warning);
 			return {};
 		}
+
+		// 再生終了済みSlotを再利用してHandle Indexの増加を抑制
 		uint32_t slotIndex = 0;
 		if (!freeSlotIndices_.empty()) {
 			slotIndex = freeSlotIndices_.front();
@@ -450,6 +452,8 @@ namespace MadoEngine::Beam {
 			return;
 		}
 		isRenderDataPrepared_ = false;
+
+		// 終了判定とSlot回収を同じ走査内で行い次回再生へ即時再利用
 		for (uint32_t index = 0; index < effectSlots_.size(); ++index) {
 			EffectSlot& slot = effectSlots_[index];
 			if (!slot.instance) {

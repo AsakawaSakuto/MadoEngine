@@ -11,7 +11,8 @@ namespace MadoEngine::Core {
 
     void DxDevice::Initialize() {
 #ifdef _DEBUG
-        // Device生成前にDebug Layerを有効化する
+
+        // Device生成時点から検証を有効にするためDebug Layerを先行設定
         Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
         const HRESULT debugResult = D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
         if (SUCCEEDED(debugResult) && debugController) {

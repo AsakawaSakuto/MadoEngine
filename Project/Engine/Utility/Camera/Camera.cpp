@@ -56,6 +56,7 @@ void Camera::UpdateShake(float deltaTime) {
 	float rate = 1.0f - (shakeElapsedTime_ / shakeDuration_);
 	float currentPower = shakePower_ * rate;
 
+	// 終端へ向けて減衰する振幅内から指定軸ごとに独立したRandom Offsetを生成
 	shakeOffset_ = { 0.0f, 0.0f, 0.0f };
 	if (HasShakeAxisX(shakeType_)) {
 		shakeOffset_.x = MyRand::GetFloat(-currentPower, currentPower);
@@ -81,24 +82,30 @@ bool Camera::HasShakeAxisZ(ShakeType type) const {
 }
 
 void Camera::UpdateFrustum() {
+
 	// 6つの平面をビュープロジェクション行列の各列から抽出（行列転置なし、行優先）
 	const Matrix4x4& m = viewProjectionMatrix_;
 
 	// 左
 	frustum_.planes[0].normal = { m.m[0][3] + m.m[0][0], m.m[1][3] + m.m[1][0], m.m[2][3] + m.m[2][0] };
 	frustum_.planes[0].distance = m.m[3][3] + m.m[3][0];
+
 	// 右
 	frustum_.planes[1].normal = { m.m[0][3] - m.m[0][0], m.m[1][3] - m.m[1][0], m.m[2][3] - m.m[2][0] };
 	frustum_.planes[1].distance = m.m[3][3] - m.m[3][0];
+
 	// 下
 	frustum_.planes[2].normal = { m.m[0][3] + m.m[0][1], m.m[1][3] + m.m[1][1], m.m[2][3] + m.m[2][1] };
 	frustum_.planes[2].distance = m.m[3][3] + m.m[3][1];
+
 	// 上
 	frustum_.planes[3].normal = { m.m[0][3] - m.m[0][1], m.m[1][3] - m.m[1][1], m.m[2][3] - m.m[2][1] };
 	frustum_.planes[3].distance = m.m[3][3] - m.m[3][1];
+
 	// ニア
 	frustum_.planes[4].normal = { m.m[0][2], m.m[1][2], m.m[2][2] };
 	frustum_.planes[4].distance = m.m[3][2];
+
 	// ファー
 	frustum_.planes[5].normal = { m.m[0][3] - m.m[0][2], m.m[1][3] - m.m[1][2], m.m[2][3] - m.m[2][2] };
 	frustum_.planes[5].distance = m.m[3][3] - m.m[3][2];

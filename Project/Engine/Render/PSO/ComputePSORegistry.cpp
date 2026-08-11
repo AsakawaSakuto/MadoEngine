@@ -68,6 +68,8 @@ namespace MadoEngine::Render {
 
 	ID3D12PipelineState* ComputePSORegistry::Get(const ComputePSODesc& desc) {
 		std::lock_guard<std::mutex> lock(cacheMutex_);
+
+		// 初期化失敗を同じ記述子ごとに一度だけ記録してLogの連続出力を抑制
 		if (!device_) {
 			if (!failedDescs_.contains(desc)) {
 				LogComputePipelineError("Registryが初期化されていません", desc);
@@ -80,6 +82,8 @@ namespace MadoEngine::Render {
 		if (cached != psoCache_.end()) {
 			return cached->second.Get();
 		}
+
+		// 既知の生成失敗は毎フレームの再生成を避けて即座に失敗扱い
 		if (failedDescs_.contains(desc)) {
 			return nullptr;
 		}
@@ -93,6 +97,8 @@ namespace MadoEngine::Render {
 	}
 
 	ID3D12PipelineState* ComputePSORegistry::CreateAndCache(const ComputePSODesc& desc) {
+
+		// 生成前に参照Keyと取得Resourceを検証して失敗記述子をCache
 		if (desc.csKey.empty()) {
 			LogComputePipelineError("Compute Shaderのキーが空です", desc);
 			failedDescs_.insert(desc);
@@ -139,6 +145,8 @@ namespace MadoEngine::Render {
 		}
 
 		ID3D12PipelineState* resultPipelineState = pipelineState.Get();
+
+		// ComPtrをCacheへ移した後も返却Pointerの所有権をRegistry側で維持
 		psoCache_.emplace(desc, std::move(pipelineState));
 		return resultPipelineState;
 	}

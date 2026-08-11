@@ -52,6 +52,7 @@ void Line3d::AddLine(const Vector3& start, const Vector3& end, const Vector4& co
         Logger::Output("警告: Line3d頂点バッファ容量超過", Logger::Level::Warning);
         return;
     }
+
     // 頂点を追加
     vertices_.push_back({ start, color });
     vertices_.push_back({ end, color });
@@ -133,6 +134,7 @@ void Line3d::AddBox(const Vector3& center, const Vector3& size, const Vector4& c
 }
 
 void Line3d::AddBox(const AABB& aabb, const Vector4& color) {
+
     // AABBのワールド座標のmin/maxから8つの頂点を定義
     Vector3 worldMin = aabb.center + aabb.min;
     Vector3 worldMax = aabb.center + aabb.max;
@@ -168,6 +170,7 @@ void Line3d::AddBox(const AABB& aabb, const Vector4& color) {
 }
 
 void Line3d::AddBox(const OBB& obb, const Vector4& color) {
+
     // OBBのローカル座標系での8つの頂点を計算
     Vector3 center = obb.center;
 
@@ -186,6 +189,7 @@ void Line3d::AddBox(const OBB& obb, const Vector4& color) {
     // ワールド座標系へ変換（orientation行列を使用して回転し、centerで平行移動）
     Vector3 worldVertices[8];
     for (int i = 0; i < 8; ++i) {
+
         // orientation[0], orientation[1], orientation[2]はそれぞれX, Y, Z軸の基底ベクトル
         worldVertices[i] = {
             center.x + localVertices[i].x * obb.orientation[0].x + localVertices[i].y * obb.orientation[1].x + localVertices[i].z * obb.orientation[2].x,
@@ -412,6 +416,7 @@ void Line3d::AddRay(const Vector3& origin, const Vector3& direction, float lengt
 }
 
 void Line3d::AddSegment(const Segment& segment, const Vector4& color) {
+
     // Segmentは origin（始点）と diff（終点への差分ベクトル）で定義される
     Vector3 start = segment.origin;
     Vector3 end = {
@@ -423,11 +428,13 @@ void Line3d::AddSegment(const Segment& segment, const Vector4& color) {
 }
 
 void Line3d::AddLine(const Line& line, const Vector4& color) {
+
     // Line構造体は start（始点）と end（終点）で定義される
     AddLine(line.start, line.end, color);
 }
 
 void Line3d::AddPlane(const Plane& plane, int divisions, const Vector4& color) {
+
     // 平面の法線から、平面上の2つの接線ベクトルを計算
     Vector3 tangent;
     Vector3 bitangent;
@@ -709,6 +716,7 @@ void Line3d::CreateTransformBuffer() {
 }
 
 void Line3d::UpdateVertexBuffer() {
+
     // 頂点データをコピー
     std::memcpy(vertexData_, vertices_.data(), vertices_.size() * sizeof(LineVertex));
 }

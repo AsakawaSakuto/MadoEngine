@@ -4,6 +4,7 @@
 namespace Easing {
 
 	float Apply(float t, EaseType type) {
+
 		// tを0.0～1.0の範囲にClamp
 		t = std::clamp(t, 0.0f, 1.0f);
 

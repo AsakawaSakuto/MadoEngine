@@ -10,10 +10,13 @@
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
 
-// pShape から実体を取得してコピーを作るように変更
+/// @brief Collider情報から現在座標を反映したShapeを取得
+/// @param info 同期元Collider情報
+/// @return 現在座標を反映したShape
 static ColliderShape GetSyncedShape(const ColliderManager::ColliderInfo& info) {
-    if (!info.pShape) return {}; // 万が一ポインタがnullの場合は空を返すなどの保護
+    if (!info.pShape) return {};
 
+    // 判定中に登録元Shapeを変更しないCopy上でPositionだけを同期
     ColliderShape syncedShape = *(info.pShape);
     if (info.pPosition) {
         std::visit([&info](auto& s) {
@@ -119,6 +122,8 @@ static bool CanIgnoreAABBSideSeam(const Vector3& center, float radius, const Vec
 /// @param outPenetration 押し戻し量の出力先
 static void CalcSphereInsideAABBPush(const Vector3& center, float radius, const Vector3& aabbMin, const Vector3& aabbMax, Vector3& outPushDir, float& outPenetration) {
     static constexpr float kSkinWidth = 0.001f;
+
+    // AABB内部から最短距離で抜けられる面を押し出し方向として選択
     float nearest = center.x - aabbMin.x;
     outPushDir = { -1.0f, 0.0f, 0.0f };
 
@@ -178,6 +183,7 @@ static SweptAABBHit SweepPointAABB(const Vector3& start, const Vector3& end, con
     float exitTime = 1.0f;
     static constexpr float kEpsilon = 0.0001f;
 
+    // 各軸の進入・退出時刻が重なる区間から最初の衝突時刻を算出
     for (int axis = 0; axis < 3; ++axis) {
         float origin = start[axis];
         float direction = move[axis];
@@ -232,10 +238,13 @@ static bool CheckSweptSphereAABB(ColliderManager::ColliderInfo& sphereInfo, Coll
 
     Vector3 relativeStart = sphereInfo.previousPosition - aabbInfo.previousPosition;
     Vector3 relativeEnd = *(sphereInfo.pPosition) - *(aabbInfo.pPosition);
+
+    // 歩行中の上面接触を壁への連続衝突として扱わないため除外
     if (IsSphereMovingOnAABBTop(relativeStart, relativeEnd, aabb, sphere.radius)) {
         return false;
     }
 
+    // Sphere半径分AABBを拡張して相対移動する点として連続判定
     SweptAABBHit hit = SweepPointAABB(relativeStart, relativeEnd, aabb.min - radius, aabb.max + radius);
     if (!hit.isHit) {
         return false;
@@ -309,6 +318,8 @@ static bool TryGetSlopeTopPushVector(const Vector3& center, float radius, const 
     static constexpr float kSkinWidth = 0.001f;
     Vector3 worldMin = slope.GetMinWorld();
     Vector3 worldMax = slope.GetMaxWorld();
+
+    // Slope境界付近でも上面法線との距離を測れるようXZ座標を範囲内へ制限
     Vector3 samplePoint = {
         std::clamp(center.x, worldMin.x, worldMax.x),
         center.y,
@@ -385,6 +396,8 @@ static bool CheckSweptSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Col
     Vector3 broadMin = slopeMin - radius;
     Vector3 broadMax = slope.max + radius;
     bool isStartInsideBroad = IsPointInsideAABB(relativeStart, broadMin, broadMax);
+
+    // Slopeの外接AABBで精密判定を行う時間区間を限定
     SweptAABBHit broadHit = SweepPointAABB(relativeStart, relativeEnd, broadMin, broadMax);
     if (!broadHit.isHit && !isStartInsideBroad) {
         return false;
@@ -406,6 +419,7 @@ static bool CheckSweptSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Col
     float upper = searchStart;
     bool found = false;
 
+    // 時間区間を分割して最初に接触する区間を探索
     for (int i = 1; i <= kSearchSteps; ++i) {
         float t = searchStart + (searchEnd - searchStart) * (static_cast<float>(i) / static_cast<float>(kSearchSteps));
         if (IsSphereSlopeHitAtTime(sphereInfo, slopeInfo, t)) {
@@ -421,6 +435,8 @@ static bool CheckSweptSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Col
     }
 
     static constexpr int kBinarySearchCount = 8;
+
+    // 発見した区間を二分探索して衝突直前まで時刻を精密化
     for (int i = 0; i < kBinarySearchCount; ++i) {
         float mid = (lower + upper) * 0.5f;
         if (IsSphereSlopeHitAtTime(sphereInfo, slopeInfo, mid)) {
@@ -431,6 +447,8 @@ static bool CheckSweptSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Col
     }
 
     hitTime = upper;
+
+    // 歩行中の上面接触は接地処理へ委ねて側面衝突だけをCCD対象化
     if (IsSphereOnSlopeTopAtTime(sphereInfo, slopeInfo, hitTime)) {
         return false;
     }
@@ -453,6 +471,7 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
     float radius = sphere.radius;
     static constexpr float kSkinWidth = 0.001f;
 
+    // Sphere半径を含むSlope外接範囲外では押し戻し不要
     if (center.x < worldMin.x - radius || center.x > worldMax.x + radius ||
         center.y < worldMin.y - radius || center.y > worldMax.y + radius ||
         center.z < worldMin.z - radius || center.z > worldMax.z + radius) {
@@ -461,6 +480,7 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
 
     bool insideXZ = Collision::Detail::IsInsideSlopeXZ(slope, center);
 
+    // 上面との重なりを側面より優先して法線方向へ解消
     Vector3 topPushVec = { 0.0f, 0.0f, 0.0f };
     if (center.y + radius >= worldMin.y && TryGetSlopeTopPushVector(center, radius, slope, topPushVec)) {
         *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + topPushVec * factorSphere;
@@ -491,6 +511,7 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
     Vector3 pushDir = { 0.0f, 0.0f, 0.0f };
     float penetration = 0.0f;
 
+    // XZ内部では最短の側面、外部では最近接点から水平方向へ押し出し
     if (insideXZ) {
         float distMinX = center.x - worldMin.x;
         float distMaxX = worldMax.x - center.x;
@@ -530,9 +551,6 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
     }
 }
 
-/// @brief 指定したタグのコライダー名一覧を取得
-/// @param tag 検索対象の衝突タグ
-/// @return コライダー名一覧へのポインタを返します、存在しない場合はnullptr
 const std::vector<std::string>* ColliderManager::FindColliderNames(CollisionTag tag) const {
     auto it = m_colliderNamesByTag.find(tag);
     if (it == m_colliderNamesByTag.end()) {
@@ -576,6 +594,7 @@ static AABB MakeOBBBounds(const OBB& obb) {
     Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
     Vector3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
+    // 回転後の8頂点を包含するワールド空間AABBを構築
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
             for (int z = 0; z < 2; ++z) {
@@ -602,9 +621,6 @@ static AABB MakeOBBBounds(const OBB& obb) {
     return MakeWorldBounds(min, max);
 }
 
-/// @brief タグ別索引へコライダー名を追加
-/// @param tag 追加先の衝突タグ
-/// @param name 追加するコライダー名
 void ColliderManager::AddColliderNameToTag(CollisionTag tag, const std::string& name) {
     auto& names = m_colliderNamesByTag[tag];
     if (std::find(names.begin(), names.end(), name) != names.end()) {
@@ -614,9 +630,6 @@ void ColliderManager::AddColliderNameToTag(CollisionTag tag, const std::string& 
     names.push_back(name);
 }
 
-/// @brief タグ別索引からコライダー名を削除
-/// @param tag 削除対象の衝突タグ
-/// @param name 削除するコライダー名
 void ColliderManager::RemoveColliderNameFromTag(CollisionTag tag, const std::string& name) {
     auto it = m_colliderNamesByTag.find(tag);
     if (it == m_colliderNamesByTag.end()) {
@@ -625,6 +638,8 @@ void ColliderManager::RemoveColliderNameFromTag(CollisionTag tag, const std::str
 
     auto& names = it->second;
     names.erase(std::remove(names.begin(), names.end(), name), names.end());
+
+    // 空の索引を残さずタグ未登録状態をFind結果へ反映
     if (names.empty()) {
         m_colliderNamesByTag.erase(it);
     }
@@ -632,6 +647,8 @@ void ColliderManager::RemoveColliderNameFromTag(CollisionTag tag, const std::str
 
 void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight, CollisionCallback callback    ) {
     auto existing = m_colliders.find(name);
+
+    // 同名更新時に旧タグ側の逆引きだけが残る状態を防止
     if (existing != m_colliders.end()) {
         RemoveColliderNameFromTag(existing->second.tag, name);
     }
@@ -679,18 +696,10 @@ void ColliderManager::RemoveColliderAll() {
     Logger::Output("すべてのコライダーを削除しました", Logger::Level::Application);
 }
 
-/// @brief 衝突ルールを登録
-/// @param tagA グループA
-/// @param tagB グループB
-/// @param enableResolve 押し戻しを有効にする場合はtrue
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve) {
     RegisterCollisionPair(tagA, tagB, CollisionPairSetting{ enableResolve, false });
 }
 
-/// @brief 衝突ルールを詳細設定付きで登録
-/// @param tagA グループA
-/// @param tagB グループB
-/// @param setting 押し戻しやCCDの有効状態
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, const CollisionPairSetting& setting) {
     m_matrix[tagA][tagB] = { true, setting.enableResolve, setting.enableCCD };
     m_matrix[tagB][tagA] = { true, setting.enableResolve, setting.enableCCD };
@@ -702,11 +711,6 @@ void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB
     );
 }
 
-/// @brief 衝突ルールを押し戻しとCCD指定付きで登録
-/// @param tagA グループA
-/// @param tagB グループB
-/// @param enableResolve 押し戻しを有効にする場合はtrue
-/// @param enableCCD 連続衝突判定を有効にする場合はtrue
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, bool enableResolve, bool enableCCD) {
     RegisterCollisionPair(tagA, tagB, CollisionPairSetting{ enableResolve, enableCCD });
 }
@@ -726,6 +730,7 @@ bool ColliderManager::CheckVariantCollision(const ColliderShape& shapeA, const C
         ++profileStats_.sphereSlopeNarrowPhaseCount;
     }
 
+    // Shapeの並び順に依存しないよう利用可能なIsHit Overloadを双方向に解決
     return std::visit([](auto&& typeA, auto&& typeB) -> bool {
         if constexpr (requires { Collision::IsHit(typeA, typeB); }) return Collision::IsHit(typeA, typeB);
         else if constexpr (requires { Collision::IsHit(typeB, typeA); }) return Collision::IsHit(typeB, typeA);
@@ -739,6 +744,8 @@ bool ColliderManager::TryGetColliderBounds(const ColliderInfo& info, AABB& outBo
     }
 
     ColliderShape syncedShape = GetSyncedShape(info);
+
+    // BVHへ登録できるよう各Shapeを包含するワールド空間AABBへ統一
     return std::visit([&outBounds](auto&& shape) -> bool {
         using ShapeType = std::decay_t<decltype(shape)>;
         if constexpr (std::is_same_v<ShapeType, AABB>) {
@@ -823,6 +830,7 @@ void ColliderManager::RebuildStaticTerrainBVHIfNeeded() {
     staticTerrainEntries_.clear();
     staticTerrainEntries_.reserve(m_colliders.size());
 
+    // 頻繁に動かない地形だけをBVHへ集約して動的Colliderの探索量を削減
     for (const auto& [name, info] : m_colliders) {
         if (!IsStaticTerrainTag(info.tag)) {
             continue;
@@ -856,11 +864,6 @@ void ColliderManager::QueryStaticTerrainBVH(const AABB& bounds, CollisionTag tar
     profileStats_.bvhCandidateCount += static_cast<uint32_t>(outCandidates.size());
 }
 
-/// @brief 前回座標から現在座標への移動で連続衝突しているか判定
-/// @param a コライダーA
-/// @param b コライダーB
-/// @param hitTime 衝突時刻の出力先
-/// @return 連続衝突していればtrue
 bool ColliderManager::CheckSweptCollision(ColliderInfo& a, ColliderInfo& b, float& hitTime) {
     if (!a.pShape || !b.pShape || !a.pPosition || !b.pPosition) {
         return false;
@@ -873,6 +876,7 @@ bool ColliderManager::CheckSweptCollision(ColliderInfo& a, ColliderInfo& b, floa
     bool isASlope = std::holds_alternative<Slope>(*(a.pShape));
     bool isBSlope = std::holds_alternative<Slope>(*(b.pShape));
 
+    // 実装済みのShape組み合わせだけを連続判定へ振り分け
     if ((isASphere && isBAABB) || (isAAABB && isBSphere)) {
         ColliderInfo& sphereInfo = isASphere ? a : b;
         ColliderInfo& aabbInfo = isASphere ? b : a;
@@ -888,10 +892,6 @@ bool ColliderManager::CheckSweptCollision(ColliderInfo& a, ColliderInfo& b, floa
     return false;
 }
 
-/// @brief CCDで求めた衝突時刻へコライダー位置を復元
-/// @param a コライダーA
-/// @param b コライダーB
-/// @param hitTime 衝突時刻
 void ColliderManager::ApplySweptCollision(ColliderInfo& a, ColliderInfo& b, float hitTime) {
     if (!a.pPosition || !b.pPosition || !a.hasPreviousPosition || !b.hasPreviousPosition) {
         return;
@@ -909,7 +909,6 @@ void ColliderManager::ApplySweptCollision(ColliderInfo& a, ColliderInfo& b, floa
     SyncColliderShapePosition(b);
 }
 
-/// @brief 現在座標を次回CCD用の前回座標として保存
 void ColliderManager::StorePreviousPositions() {
     for (auto& [name, info] : m_colliders) {
         if (!info.pPosition) {
@@ -925,7 +924,7 @@ void ColliderManager::StorePreviousPositions() {
 void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     if (!a.pShape || !b.pShape || !a.pPosition || !b.pPosition) return;
 
-    // weight から mobility を計算し、押し戻し比率を決定する
+    // WeightからMobilityを算出して相互の押し戻し比率を決定
     float mobilityA = 1.0f - std::clamp(a.weight, 0.0f, 1.0f);
     float mobilityB = 1.0f - std::clamp(b.weight, 0.0f, 1.0f);
     float totalMobility = mobilityA + mobilityB;
@@ -936,9 +935,7 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     float factorA = mobilityA / totalMobility;
     float factorB = mobilityB / totalMobility;
 
-    // ==========================================
-    // 1. Sphere vs Sphere
-    // ==========================================
+    // Sphere同士を可動性の比率に応じて衝突軸方向へ分離
     if (std::holds_alternative<Sphere>(*(a.pShape)) && std::holds_alternative<Sphere>(*(b.pShape))) {
         auto& sphereA = std::get<Sphere>(*(a.pShape));
         auto& sphereB = std::get<Sphere>(*(b.pShape));
@@ -960,9 +957,7 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         return;
     }
 
-    // ==========================================
-    // 2. AABB vs AABB (互いに半分ずつ押し戻す)
-    // ==========================================
+    // AABB同士を貫通量が最小の軸だけで分離
     if (std::holds_alternative<AABB>(*(a.pShape)) && std::holds_alternative<AABB>(*(b.pShape))) {
         auto& aabbA = std::get<AABB>(*(a.pShape));
         auto& aabbB = std::get<AABB>(*(b.pShape));
@@ -979,6 +974,7 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
 
         // すべての軸でめり込んでいる場合のみ押し戻す（CheckCollisionを通っているので基本true）
         if (overlapX > 0 && overlapY > 0 && overlapZ > 0) {
+
             // 境界ぴったりスナップによる再めり込みを防ぐための微小オフセット
             static constexpr float kSkinWidth = 0.001f;
 
@@ -998,9 +994,7 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         return;
     }
 
-    // ==========================================
-    // 3. Sphere vs AABB (SphereとAABBの押し戻し)
-    // ==========================================
+    // SphereとAABBの最近接点から押し戻し方向を決定
     bool isASphere = std::holds_alternative<Sphere>(*(a.pShape));
     bool isBAABB = std::holds_alternative<AABB>(*(b.pShape));
     bool isAAABB = std::holds_alternative<AABB>(*(a.pShape));
@@ -1071,9 +1065,7 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         return;
     }
 
-    // ==========================================
-    // 4. Sphere vs Plane (Planeは静止物として扱い、Sphereを100%押し戻す)
-    // ==========================================
+    // Slopeを静止地形としてSphere側だけを上面方向へ押し戻し
     bool isASlope = std::holds_alternative<Slope>(*(a.pShape));
     bool isBSlope = std::holds_alternative<Slope>(*(b.pShape));
 
@@ -1128,9 +1120,7 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
     const auto* targetNames = FindColliderNames(targetTag);
     if (!targetNames) return false;
 
-    // ==========================================
-    // 1. プレイヤーが AABB の場合の接地判定（既存コード）
-    // ==========================================
+    // AABB底面と地面上面の許容差から接地を判定
     if (std::holds_alternative<AABB>(*(playerInfo.pShape))) {
         auto& playerAABB = std::get<AABB>(*(playerInfo.pShape));
         Vector3 aMin = playerAABB.GetMinWorld();
@@ -1162,9 +1152,8 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
             }
         }
     }
-    // ==========================================
-    // 2. プレイヤーが Sphere の場合の接地判定（ここを追加）
-    // ==========================================
+
+    // Sphere下端と地面上面の許容差から接地を判定
     else if (std::holds_alternative<Sphere>(*(playerInfo.pShape))) {
         auto& sphere = std::get<Sphere>(*(playerInfo.pShape));
         auto checkSlopeGround = [&playerInfo, &sphere](const Slope& slope) -> bool {
@@ -1174,7 +1163,8 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
         if (IsStaticTerrainTag(targetTag)) {
             AABB queryBounds;
             if (TryGetColliderBounds(playerInfo, queryBounds)) {
-                // 接地判定ではSphere下端がAABB上面より少し上にある状態も候補に含めます。
+
+                // Sphere下端がAABB上面よりわずかに高い状態も接地候補へ包含
                 queryBounds.min.y -= 0.08f;
                 QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
                 for (const std::string* candidateName : bvhQueryResults_) {
@@ -1229,6 +1219,7 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
 
             const ColliderInfo& otherInfo = otherIt->second;
             if (!otherInfo.pShape || !otherInfo.pPosition) continue;
+
             // 対象がAABB(MapBlock等)の場合のみ判定
             if (std::holds_alternative<Slope>(*(otherInfo.pShape))) {
                 if (checkSlopeGround(std::get<Slope>(*(otherInfo.pShape)))) {
@@ -1252,13 +1243,14 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
 
             // XZ平面上でAABBに乗っている（はみ出しの半径内含む）か
             if (distSqXZ <= sphere.radius * sphere.radius) {
+
                 // 壁張り付きを防止するため、球の中心がAABBの上面(あるいは極めてその近く)より上にあること
                 if (playerInfo.pPosition->y >= bMax.y - 0.05f) {
 
                     // 球の最下端座標を計算
                     float bottomY = playerInfo.pPosition->y - sphere.radius;
 
-                    // 最下端がAABB上面付近に接触・めり込んでいる場合を接地とする
+                    // Sphere最下端がAABB上面付近へ接触または侵入した状態を接地として採用
                     // （押し出し誤差等を吸収するために +0.05f の猶予を持たせる）
                     if (bottomY <= bMax.y + 0.05f) {
                         return true;
@@ -1271,10 +1263,6 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
     return false;
 }
 
-/// @brief 指定したタグ同士で地面接触しているかを判定
-/// @param selfTag 接地を判定する側のタグ
-/// @param targetTag 地面として扱う側のタグ
-/// @return 接地していればtrue
 bool ColliderManager::IsGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1290,10 +1278,6 @@ bool ColliderManager::IsGroundContact(CollisionTag selfTag, CollisionTag targetT
     return false;
 }
 
-/// @brief 指定した個体が、対象タグのスロープ面に接触しているかを判定
-/// @param name 個体の識別名
-/// @param targetTag スロープとして扱うタグ
-/// @return スロープ面に接触していればtrue
 bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1310,7 +1294,8 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
-            // Slope境界で下降側の上面が候補から外れないよう接地許容距離分だけ下へ広げます。
+
+            // Slope境界の下降側上面を候補へ残す接地許容距離分の下方拡張
             queryBounds.min.y -= 0.08f;
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
@@ -1353,10 +1338,6 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
     return false;
 }
 
-/// @brief 指定したタグ同士で坂地面に接触しているかを判定
-/// @param selfTag 接地を判定する側のタグ
-/// @param targetTag 坂地面として扱う側のタグ
-/// @return 坂地面に接地していればtrue
 bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag targetTag) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1372,12 +1353,6 @@ bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag ta
     return false;
 }
 
-/// @brief 指定座標の直下にある地表面のY座標を取得
-/// @param origin 地表面を探す基準座標
-/// @param targetTag 地面として扱う対象タグ
-/// @param outSurfaceY 見つかった地表面のY座標
-/// @param maxDistance 下方向に探索する最大距離
-/// @return 地表面が見つかった場合はtrue
 bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance) {
     if (maxDistance < 0.0f) {
         return false;
@@ -1391,6 +1366,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
     bool foundSurface = false;
     float bestSurfaceY = -FLT_MAX;
 
+    // 複数の地面候補から基準座標の直下にある最も高い表面を選択
     const auto evaluateCollider = [&](const ColliderInfo& colliderInfo) {
         if (!colliderInfo.pShape || !colliderInfo.pPosition) {
             return;
@@ -1472,12 +1448,6 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
     return true;
 }
 
-/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得
-/// @param name Sphereコライダーの識別名
-/// @param targetTag Slopeとして扱うタグ
-/// @param outCenterY Sphere中心に設定するY座標の出力先
-/// @param maxSnapDownDistance 下方向に追従できる最大距離
-/// @return 追従できるSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1498,7 +1468,8 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
-            // 下降先のSlopeを追従候補に含めるため許可されたスナップ距離分だけ下へ広げます。
+
+            // 下降先Slopeを追従候補へ含める許容Snap距離分の下方拡張
             queryBounds.min.y -= std::max(maxSnapDownDistance, 0.0f);
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
@@ -1579,12 +1550,6 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
     return true;
 }
 
-/// @brief 指定したタグ同士で追従できるSlope上面の中心Y座標を取得
-/// @param selfTag Sphereコライダーとして扱う側のタグ
-/// @param targetTag Slopeとして扱う側のタグ
-/// @param outCenterY Sphere中心に設定するY座標の出力先
-/// @param maxSnapDownDistance 下方向に追従できる最大距離
-/// @return 追従できるSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1600,11 +1565,6 @@ bool ColliderManager::TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTa
     return false;
 }
 
-/// @brief Sphereコライダーが接地しているSlope上面の法線を取得
-/// @param name Sphereコライダーの識別名
-/// @param targetTag Slopeとして扱うタグ
-/// @param outNormal Slope上面の法線の出力先
-/// @return 接地しているSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
     auto it = m_colliders.find(name);
     if (it == m_colliders.end()) return false;
@@ -1625,7 +1585,8 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
     if (IsStaticTerrainTag(targetTag)) {
         AABB queryBounds;
         if (TryGetColliderBounds(playerInfo, queryBounds)) {
-            // 接地判定と同じSlopeを法線取得でも候補に含めます。
+
+            // 接地判定と同じSlopeを法線取得候補へ包含
             queryBounds.min.y -= 0.08f;
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
@@ -1694,11 +1655,6 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
     return true;
 }
 
-/// @brief 指定したタグ同士で接地しているSlope上面の法線を取得
-/// @param selfTag Sphereコライダーとして扱う側のタグ
-/// @param targetTag Slopeとして扱う側のタグ
-/// @param outNormal Slope上面の法線の出力先
-/// @return 接地しているSlopeが見つかればtrue
 bool ColliderManager::TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag targetTag, Vector3& outNormal) {
     const auto* selfNames = FindColliderNames(selfTag);
     if (!selfNames) {
@@ -1755,6 +1711,8 @@ bool ColliderManager::IsHitTags(CollisionTag tagA, CollisionTag tagB) {
     }
 
     if (tagA == tagB) {
+
+        // 同一Collection内の自己衝突と対称な重複Pairを除外
         for (size_t i = 0; i < namesA->size(); ++i) {
             auto itA = m_colliders.find((*namesA)[i]);
             if (itA == m_colliders.end()) continue;
@@ -1802,6 +1760,8 @@ void ColliderManager::ProcessCollisionPair(ColliderInfo& a, ColliderInfo& b, con
     bool isSweptHit = false;
     float hitTime = 1.0f;
     if (!isHit && rule.enableCCD) {
+
+        // Frame終端で離れていても高速移動中の交差を取りこぼさないSweep判定
         isSweptHit = CheckSweptCollision(a, b, hitTime);
         if (isSweptHit && rule.enableResolve) {
             ApplySweptCollision(a, b, hitTime);
@@ -1812,6 +1772,7 @@ void ColliderManager::ProcessCollisionPair(ColliderInfo& a, ColliderInfo& b, con
         return;
     }
 
+    // 衝突成立を双方へ通知し、物理解決が有効なPairだけ重なりを解消
     if (a.onHit) a.onHit(b.tag, b.actorName);
     if (b.onHit) b.onHit(a.tag, a.actorName);
     if (rule.enableResolve) {
@@ -1832,6 +1793,7 @@ void ColliderManager::ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynam
             continue;
         }
 
+        // Dynamic ColliderのBoundsで静的地形BVHを絞り込みNarrow Phaseを削減
         QueryStaticTerrainBVH(queryBounds, staticTag, bvhQueryResults_);
         for (const std::string* candidateName : bvhQueryResults_) {
             if (!candidateName || *candidateName == dynamicInfo->actorName) {
@@ -1858,6 +1820,8 @@ void ColliderManager::Update() {
         const auto updateStartTime = std::chrono::high_resolution_clock::now();
         const uint32_t previousStaticColliderCount = profileStats_.staticBVHColliderCount;
         const uint32_t previousStaticNodeCount = profileStats_.staticBVHNodeCount;
+
+        // 再構築時だけ更新されるBVH規模を保持したままFrame統計を初期化
         profileStats_ = {};
         profileStats_.staticBVHColliderCount = previousStaticColliderCount;
         profileStats_.staticBVHNodeCount = previousStaticNodeCount;
@@ -1876,6 +1840,8 @@ void ColliderManager::Update() {
                     continue;
                 }
                 if (static_cast<int>(tagA) > static_cast<int>(tagB)) {
+
+                    // 対称登録されたCollision Matrixの同一Pairを一度だけ処理
                     continue;
                 }
 
@@ -1898,6 +1864,8 @@ void ColliderManager::Update() {
                 }
 
                 if (ShouldUseStaticTerrainBVH(tagA, tagB)) {
+
+                    // 静的地形を含むPairだけBVH経路へ分岐し動的Pairは総当たりを維持
                     if (IsStaticTerrainTag(tagA)) {
                         ProcessStaticTerrainPair(listB, tagA, rule);
                     } else {
@@ -1914,6 +1882,7 @@ void ColliderManager::Update() {
             }
         }
 
+        // 次FrameのCCD開始位置として全Colliderの解決後座標を保存
         StorePreviousPositions();
         const auto updateEndTime = std::chrono::high_resolution_clock::now();
         profileStats_.updateTimeMs = std::chrono::duration<double, std::milli>(updateEndTime - updateStartTime).count();
@@ -1931,6 +1900,7 @@ void ColliderManager::Update() {
     for (auto& [tagA, pairsMap] : m_matrix) {
         for (auto& [tagB, rule] : pairsMap) {
             if (!rule.isRegistered) continue;
+
             // 重複チェックを避けるため tagA <= tagB のみ処理
             if (static_cast<int>(tagA) > static_cast<int>(tagB)) continue;
 
@@ -1942,6 +1912,7 @@ void ColliderManager::Update() {
             auto& listB = itB->second;
 
             if (tagA == tagB) {
+
                 // 同タグ間（例: Enemy vs Enemy）
                 for (size_t i = 0; i < listA.size(); ++i) {
                     for (size_t j = i + 1; j < listA.size(); ++j) {
@@ -1949,6 +1920,7 @@ void ColliderManager::Update() {
                     }
                 }
             } else {
+
                 // 異タグ間（例: PlayerAABB vs MapBlock）
                 for (auto* pA : listA) {
                     for (auto* pB : listB) {

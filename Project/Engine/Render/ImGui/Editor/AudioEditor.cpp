@@ -160,19 +160,16 @@ namespace MadoEngine::Editor {
 #ifdef USE_IMGUI
 
     void DrawAudioManagerUI() {
-        //auto audioManager = AudioManager::GetInstance();
 
         if (!ImGui::Begin("Audio Editor")) {
             ImGui::End();
             return;
         }
 
-        // ---------------------------------------------------
-        // タブシステム (SE / BGM / Voice / Volume)
-        // ---------------------------------------------------
+        // 音声種別ごとの一覧と全体音量設定をTab単位で分離
         if (ImGui::BeginTabBar("AudioTypeTabs")) {
 
-            // 1. 音声リストタブ (SE, BGM, Voice)
+            // SE、BGM、Voiceで共通の再生操作UIを同一Loopで構築
             const char* tabNames[] = { "SE", "BGM", "Voice" };
             AudioType tabTypes[] = { AudioType::SE, AudioType::BGM, AudioType::Voice };
 
@@ -180,7 +177,7 @@ namespace MadoEngine::Editor {
                 if (ImGui::BeginTabItem(tabNames[i])) {
                     static std::unordered_map<std::string, bool> loopStates;
 
-                    // 【変更】列数を 3 から 4 に増やしました
+                    // 個別音量とLoop状態を音源単位で操作できる四列構成
                     if (ImGui::BeginTable("AudioTable", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
                         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
                         ImGui::TableSetupColumn("Volume", ImGuiTableColumnFlags_WidthFixed, 90.0f); // 【追加】個別ボリューム列
@@ -284,9 +281,7 @@ namespace MadoEngine::Editor {
         ImGui::Separator();
         ImGui::Spacing();
 
-        // ---------------------------------------------------
-        // 再生中の音源一覧とStopボタン
-        // ---------------------------------------------------
+        // 種別Tabとは別に再生中Instanceだけを集約して停止操作を提供
         ImGui::Text("再生中");
         ImGui::Spacing();
 

@@ -22,6 +22,8 @@ namespace MadoEngine::InputDevice
 
 	void Mouse::Update(HWND hwnd)
 	{
+
+		// TriggerとRelease判定用にButton状態を入力取得前へ退避
 		for (int i = 0; i < BUTTON_COUNT; ++i)
 		{
 			previousState_[i] = currentState_[i];
@@ -46,6 +48,8 @@ namespace MadoEngine::InputDevice
 
 		if (isRelativeMode_)
 		{
+
+			// Focus中だけCursorをClient領域へ拘束して中央からの相対移動量を計測
 			const bool hasFocus = GetForegroundWindow() == hwnd;
 			POINT center = {};
 			RECT clipRect = {};
@@ -87,11 +91,14 @@ namespace MadoEngine::InputDevice
 		}
 
 		currentWheelDelta_ = wheelDelta_;
+
+		// Window Messageで蓄積したWheel量を一Frame分として確定後に消費
 		wheelDelta_ = 0.0f;
 	}
 
 	bool Mouse::IsPress(int button) const
 	{
+
 		// マクロ値(0x10000-0x10002)を内部インデックス(0-2)に変換
 		int index = button - 0x10000;
 		if (index < 0 || index >= BUTTON_COUNT)
@@ -103,6 +110,7 @@ namespace MadoEngine::InputDevice
 
 	bool Mouse::IsTrigger(int button) const
 	{
+
 		// マクロ値(0x10000-0x10002)を内部インデックス(0-2)に変換
 		int index = button - 0x10000;
 		if (index < 0 || index >= BUTTON_COUNT)
@@ -114,6 +122,7 @@ namespace MadoEngine::InputDevice
 
 	bool Mouse::IsRelease(int button) const
 	{
+
 		// マクロ値(0x10000-0x10002)を内部インデックス(0-2)に変換
 		int index = button - 0x10000;
 		if (index < 0 || index >= BUTTON_COUNT)
@@ -160,6 +169,8 @@ namespace MadoEngine::InputDevice
 		}
 
 		isRelativeMode_ = enable;
+
+		// Mode切り替えFrameの大きな差分を防ぐため中央基準と移動量を初期化
 		isRelativeCenterInitialized_ = false;
 		relativeDelta_ = { 0.0f, 0.0f };
 
@@ -196,6 +207,8 @@ namespace MadoEngine::InputDevice
 
 		POINT leftTop = { rect.left, rect.top };
 		POINT rightBottom = { rect.right, rect.bottom };
+
+		// ClipCursorが要求するScreen座標へClient矩形の両端を変換
 		if (!ClientToScreen(hwnd, &leftTop) || !ClientToScreen(hwnd, &rightBottom))
 		{
 			return false;

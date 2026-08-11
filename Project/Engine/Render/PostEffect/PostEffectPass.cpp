@@ -17,6 +17,8 @@ namespace MadoEngine::Render {
 		if (desc_.key.empty()) {
 			desc_.key = desc_.name;
 		}
+
+		// 共通PSO記述子からPixel Shaderだけを差し替えてPass固有設定を構築
 		effectDesc_ = basePostEffectDesc;
 		effectDesc_.psKey = desc_.effectShaderKey;
 		device_ = device;
@@ -104,6 +106,7 @@ namespace MadoEngine::Render {
 			return;
 		}
 
+		// 未登録Shaderでは古いParameter Layoutを再利用せずParameterなしのPassへ退避
 		desc_.effectShaderKey = shaderKey;
 		effectDesc_.psKey = desc_.effectShaderKey;
 		effectType_.reset();
@@ -119,6 +122,7 @@ namespace MadoEngine::Render {
 		ClearFloatParameterControls();
 		ClearParameterData();
 
+		// Definitionが保持する既定値とEditor用Offsetを同じLayoutから再構築
 		if (definition.defaultParameterData && definition.parameterSize > 0) {
 			SetParameterData(definition.defaultParameterData, definition.parameterSize);
 		}
@@ -214,6 +218,8 @@ namespace MadoEngine::Render {
 	}
 
 	void PostEffectPass::ClearParameterData() {
+
+		// 永続Mapを解除してCPU側CopyとGPU Resourceの寿命を同時に終了
 		if (parameterResource_ && mappedParameter_) {
 			parameterResource_->Unmap(0, nullptr);
 		}
@@ -283,6 +289,8 @@ namespace MadoEngine::Render {
 		assert(device_ && "D3D12Deviceが空です");
 
 		const std::size_t alignedSize = AlignConstantBufferSize(sizeInBytes);
+
+		// 既存容量に収まる更新ではResource再生成と再Mapを回避
 		if (parameterResource_ && parameterBufferSizeInBytes_ >= alignedSize) {
 			return;
 		}
@@ -309,6 +317,7 @@ namespace MadoEngine::Render {
 	void PostEffectPass::UploadParameterData() {
 		assert(mappedParameter_ && "ConstantBufferがMapされていません");
 
+		// Alignment領域を0で埋めて未使用Byteに前回値を残さない転送
 		std::memset(mappedParameter_, 0, parameterBufferSizeInBytes_);
 		if (!parameterData_.empty()) {
 			std::memcpy(mappedParameter_, parameterData_.data(), parameterData_.size());

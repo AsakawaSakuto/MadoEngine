@@ -146,6 +146,8 @@ namespace MadoEngine::Editor {
 	}
 
 	void DrawLoggerEditorUI() {
+
+		// Filterと最終SequenceをFrame間で保持して新着Log時だけ自動Scroll
 		static std::array<bool, kLogLevelCount> levelFilters = []() {
 			std::array<bool, kLogLevelCount> filters{};
 			filters.fill(true);

@@ -149,6 +149,8 @@ namespace MadoEngine {
         if (it != textures_.end()) {
             TextureEntry& existing = it->second;
             if (existing.width != width || existing.height != height || !existing.resource) {
+
+                // Size変更時も既存SRV Indexを再利用して外部Texture参照を維持
                 existing.resource = CreateDynamicTextureResource(width, height);
                 if (!existing.resource) {
                     Logger::Output("[Engine] 動的テクスチャの再作成に失敗しました: " + key, Logger::Level::Error);
@@ -163,6 +165,7 @@ namespace MadoEngine {
             return existing.index;
         }
 
+        // 新規KeyだけResourceとSRV領域を追加確保
         Microsoft::WRL::ComPtr<ID3D12Resource> resource = CreateDynamicTextureResource(width, height);
         if (!resource) {
             Logger::Output("[Engine] 動的テクスチャの作成に失敗しました: " + key, Logger::Level::Error);
@@ -204,6 +207,7 @@ namespace MadoEngine {
             return false;
         }
 
+        // ResourceとDescriptorを再生成せずMap NodeのKeyだけを置換
         auto node = textures_.extract(currentIt);
         node.key() = newKey;
         textures_.insert(std::move(node));
@@ -220,6 +224,8 @@ namespace MadoEngine {
         }
 
         const uint32_t srvIndex = it->second.index;
+
+        // Texture所有権を破棄してから対応するSRV領域をAllocatorへ返却
         textures_.erase(it);
 
         if (srvManager_ && srvIndex != UINT32_MAX) {
@@ -245,7 +251,8 @@ namespace MadoEngine {
         DirectX::ScratchImage image;
         HRESULT hr = DirectX::LoadFromWICFile(
             filePath.c_str(),
-            // 色空間情報を持たない一般的な画像は sRGB として扱う
+
+            // 色空間情報を持たない一般画像をsRGBとして解釈
             DirectX::WIC_FLAGS_DEFAULT_SRGB,
             nullptr,
             image);
@@ -273,7 +280,7 @@ namespace MadoEngine {
         ID3D12Device* device,
         const DirectX::TexMetadata& metadata) const {
 
-        // リソースデスクを TexMetadata から設定
+        // 読み込み画像のDimensionとMip構成を保持したResource Descを構築
         D3D12_RESOURCE_DESC resourceDesc{};
         resourceDesc.Width = static_cast<UINT>(metadata.width);
         resourceDesc.Height = static_cast<UINT>(metadata.height);
@@ -283,7 +290,7 @@ namespace MadoEngine {
         resourceDesc.SampleDesc.Count = 1;
         resourceDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
 
-        // CUSTOM ヒープ（WRITE_BACK / L0）
+        // CPUから直接書き込むTexture向けのWRITE_BACK Custom Heap
         D3D12_HEAP_PROPERTIES heapProps{};
         heapProps.Type = D3D12_HEAP_TYPE_CUSTOM;
         heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
@@ -308,6 +315,8 @@ namespace MadoEngine {
     Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::CreateDynamicTextureResource(
         uint32_t width,
         uint32_t height) const {
+
+        // 頻繁な更新をCommand転送なしで反映できる単一MipのWRITE_BACK Texture
         D3D12_RESOURCE_DESC resourceDesc{};
         resourceDesc.Width = width;
         resourceDesc.Height = height;
@@ -351,6 +360,7 @@ namespace MadoEngine {
         box.bottom = height;
         box.back = 1;
 
+        // RGBA8のRow Pitchと全Slice Pitchを連続Pixel配列から算出
         texture->WriteToSubresource(
             0,
             &box,
@@ -365,6 +375,7 @@ namespace MadoEngine {
 
         const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
 
+        // DirectXTexが保持する各Mip固有のPitchをそのままSubresourceへ転送
         for (size_t mipLevel = 0; mipLevel < metadata.mipLevels; ++mipLevel) {
             const DirectX::Image* img = mipImage.GetImage(mipLevel, 0, 0);
             if (!img) {

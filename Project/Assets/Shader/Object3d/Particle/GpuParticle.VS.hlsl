@@ -33,7 +33,7 @@ cbuffer PerBatch : register(b1) {
 	uint gBlendMode;
 };
 
-/// @brief Alive Indexを介してGPU ParticleをBillboard描画へ変換する
+/// @brief Alive Indexを介してGPU ParticleをBillboard描画へ変換
 /// @param input QuadのVertex入力
 /// @param instanceId Alive List内のInstance ID
 /// @return Billboard変換とFog情報を設定したVertex出力
@@ -55,6 +55,7 @@ VertexShaderOutput main(
 	rotatedPosition.y =
 		scaledPosition.x * sine + scaledPosition.y * cosine;
 
+	// CameraのRightとUpを基底に使用してQuadを常に画面へ正対
 	float3 worldPosition = particle.position;
 	worldPosition += gCameraRight.xyz * rotatedPosition.x;
 	worldPosition += gCameraUp.xyz * rotatedPosition.y;
@@ -69,6 +70,8 @@ VertexShaderOutput main(
 	output.fogColor = gParticleFogColor;
 	output.fogFactor = 0.0f;
 	if (gParticleFogCameraParams.z > 0.5f) {
+
+		// Clip座標から画面UVとView距離を復元してPostEffectと同じFog式を共有
 		const float inverseW =
 			rcp(max(abs(output.position.w), 0.0001f));
 		const float ndcDepth =

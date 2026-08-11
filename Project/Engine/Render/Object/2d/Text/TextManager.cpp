@@ -82,6 +82,7 @@ TextHandle TextManager::Create(const TextCreateDesc& desc) {
 	text->SetSceneType(desc.sceneType);
 	text->SetScreenSize(screenWidth_, screenHeight_);
 
+	// 破棄済みSlotを再利用してHandle Indexの増加を抑制
 	uint32_t index = 0;
 	if (freeSlots_.empty()) {
 		index = static_cast<uint32_t>(slots_.size());
@@ -125,6 +126,8 @@ TextHandle TextManager::CreateFromJson(const nlohmann::json& json) {
 
 	const std::string name = json.value("name", "Text");
 	TextHandle handle = Find(name);
+
+	// JSON復元で実行時専用Textを上書きしない管理境界
 	if (handle.IsValid() && slots_[handle.index].managementMode == EditorManagementMode::RuntimeOnly) {
 		Logger::Output("実行時専用Textと同名のためJSON読み込みをスキップしました: " + name, Logger::Level::Warning);
 		return {};
@@ -198,6 +201,8 @@ bool TextManager::Rename(TextHandle handle, const std::string& newName) {
 	}
 
 	const std::string oldName = slot.name;
+
+	// 内部Texture Key変更の成功後に名前索引を切り替えてRollback不要の順序を維持
 	nameToHandle_.erase(oldName);
 	slot.name = newName;
 	nameToHandle_.emplace(newName, handle);
@@ -217,6 +222,8 @@ bool TextManager::Destroy(TextHandle handle) {
 
 	TextSlot& slot = slots_[handle.index];
 	const std::string name = slot.name;
+
+	// Texture Descriptorを解放する前に遅延削除Queueと名前索引を整理
 	pendingDestroyHandles_.erase(
 		std::remove(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle),
 		pendingDestroyHandles_.end());
@@ -229,6 +236,8 @@ bool TextManager::Destroy(TextHandle handle) {
 	slot.name.clear();
 	slot.managementMode = EditorManagementMode::RuntimeOnly;
 	slot.active = false;
+
+	// 旧Handleを無効化してからSlotを再利用候補へ返却
 	slot.generation = NextObjectGeneration(slot.generation);
 	freeSlots_.push_back(handle.index);
 
@@ -270,6 +279,7 @@ void TextManager::DestroyByScene(SceneType sceneType) {
 		return;
 	}
 
+	// 名前Mapの走査中にContainerを変更しないよう対象Handleを先に収集
 	std::vector<TextHandle> destroyHandles;
 	for (const auto& [name, handle] : nameToHandle_) {
 		(void)name;
@@ -285,6 +295,8 @@ void TextManager::DestroyByScene(SceneType sceneType) {
 }
 
 void TextManager::UpdateAll(SceneType currentSceneType) {
+
+	// Globalまたは現在Sceneに属する表示中Textだけを更新
 	for (const auto& [name, handle] : nameToHandle_) {
 		(void)name;
 		Text* text = TryGet(handle);
@@ -312,6 +324,8 @@ void TextManager::DrawLayer(SceneType currentSceneType, Render::RenderLayer laye
 
 void TextManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask, const std::string& targetScreen) {
 	bool isStateSet = false;
+
+	// 描画対象が見つかった時点で共通PSOとGeometryを一度だけBind
 	for (const auto& [name, handle] : nameToHandle_) {
 		(void)name;
 		Text* text = TryGet(handle);

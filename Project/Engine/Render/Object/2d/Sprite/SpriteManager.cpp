@@ -88,6 +88,7 @@ SpriteHandle SpriteManager::Create(const SpriteCreateDesc& desc) {
 	sprite->SetSceneType(desc.sceneType);
 	sprite->SetScreenSize(screenWidth_, screenHeight_);
 
+	// 破棄済みSlotを再利用してHandle Indexの増加を抑制
 	uint32_t index = 0;
 	if (freeSlots_.empty()) {
 		index = static_cast<uint32_t>(slots_.size());
@@ -138,6 +139,8 @@ SpriteHandle SpriteManager::CreateFromJson(const nlohmann::json& json) {
 	SpriteHandle handle = Find(name);
 	if (handle.IsValid()) {
 		SpriteSlot& slot = slots_[handle.index];
+
+		// JSON復元で実行時専用Spriteを上書きしない管理境界
 		if (slot.managementMode == EditorManagementMode::RuntimeOnly) {
 			Logger::Output("実行時専用Spriteと同名のためJSON読み込みをスキップしました: " + name, Logger::Level::Warning);
 			return {};
@@ -212,6 +215,8 @@ bool SpriteManager::Rename(SpriteHandle handle, const std::string& newName) {
 	}
 
 	const std::string oldName = slot.name;
+
+	// Sprite内部名と検索索引を同時に更新してHandle検索の一貫性を維持
 	nameToHandle_.erase(oldName);
 	slot.name = newName;
 	nameToHandle_.emplace(newName, handle);
@@ -232,6 +237,8 @@ bool SpriteManager::Destroy(SpriteHandle handle) {
 
 	SpriteSlot& slot = slots_[handle.index];
 	const std::string name = slot.name;
+
+	// 遅延削除Queueと描画順から対象Handleを外して破棄後の参照を防止
 	pendingDestroyHandles_.erase(
 		std::remove(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle),
 		pendingDestroyHandles_.end());
@@ -245,6 +252,8 @@ bool SpriteManager::Destroy(SpriteHandle handle) {
 	slot.textureName.clear();
 	slot.managementMode = EditorManagementMode::RuntimeOnly;
 	slot.active = false;
+
+	// 旧Handleを無効化してからSlotを再利用候補へ返却
 	slot.generation = NextObjectGeneration(slot.generation);
 	freeSlots_.push_back(handle.index);
 
@@ -287,6 +296,7 @@ void SpriteManager::DestroyByScene(SceneType sceneType) {
 		return;
 	}
 
+	// Draw Orderの走査中にContainerを変更しないよう対象Handleを先に収集
 	std::vector<SpriteHandle> destroyHandles;
 	for (SpriteHandle handle : drawOrder_) {
 		const Sprite* sprite = TryGet(handle);
@@ -301,6 +311,8 @@ void SpriteManager::DestroyByScene(SceneType sceneType) {
 }
 
 void SpriteManager::UpdateAll(SceneType currentSceneType) {
+
+	// Globalまたは現在Sceneに属する表示中Spriteだけを更新
 	for (SpriteHandle handle : drawOrder_) {
 		Sprite* sprite = TryGet(handle);
 		if (!sprite) {
@@ -327,6 +339,8 @@ void SpriteManager::DrawLayer(SceneType currentSceneType, Render::RenderLayer la
 
 void SpriteManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerMask layerMask) {
 	bool isStateSet = false;
+
+	// 描画対象が見つかった時点で共通PSOとGeometryを一度だけBind
 	for (SpriteHandle handle : drawOrder_) {
 		Sprite* sprite = TryGet(handle);
 		if (!sprite) {

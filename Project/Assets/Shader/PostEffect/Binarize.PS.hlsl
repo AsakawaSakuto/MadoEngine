@@ -15,7 +15,7 @@ struct PixelShaderOutput
     float4 color : SV_TARGET0;
 };
 
-/// @brief Binarizeの調整パラメータを取得する
+/// @brief Binarizeの調整パラメータを取得
 /// @return x: しきい値, y: 適用率, z: 未使用, w: 未使用
 float4 GetBinarizeParams() {
     if (all(gBinarizeParams == 0.0f)) {
@@ -25,13 +25,13 @@ float4 GetBinarizeParams() {
     return gBinarizeParams;
 }
 
-/// @brief 低輝度側の二値化色を取得する
+/// @brief 低輝度側の二値化色を取得
 /// @return 低輝度側の色
 float3 GetBinarizeLowColor() {
     return saturate(gBinarizeLowColor.rgb);
 }
 
-/// @brief 高輝度側の二値化色を取得する
+/// @brief 高輝度側の二値化色を取得
 /// @return 高輝度側の色
 float3 GetBinarizeHighColor() {
     if (all(gBinarizeHighColor == 0.0f)) {
@@ -41,14 +41,14 @@ float3 GetBinarizeHighColor() {
     return saturate(gBinarizeHighColor.rgb);
 }
 
-/// @brief 色の明るさを取得する
+/// @brief 色の明るさを取得
 /// @param color 入力色
 /// @return 輝度
 float GetLuminance(float3 color) {
     return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
 }
 
-/// @brief 画面色を指定した2色の二値化色へ変換する
+/// @brief 画面色を指定した2色の二値化色へ変換
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return 二値化後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -60,6 +60,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     float4 texColor = gTexture.Sample(gSampler, input.texcoord);
     float luminance = GetLuminance(texColor.rgb);
+
+    // Rec.709輝度としきい値の比較結果を二色間の選択Maskとして使用
     float binaryValue = step(threshold, luminance);
     float3 binaryColor = lerp(GetBinarizeLowColor(), GetBinarizeHighColor(), binaryValue);
 

@@ -21,7 +21,7 @@ namespace MadoEngine {
 			return;
 		}
 
-		// std::visit を使って型に応じた処理を実行
+		// Collider Shape Variantを対応するLine Geometry生成処理へ振り分け
 		std::visit([this, &color](auto&& arg) {
 			using T = std::decay_t<decltype(arg)>;
 
@@ -34,7 +34,7 @@ namespace MadoEngine {
 			} else if constexpr (std::is_same_v<T, OvalSphere>) {
 				line_->AddOvalSphere(arg, color);
 			} else if constexpr (std::is_same_v<T, Plane>) {
-				line_->AddPlane(arg, 10, color); // divisions = 10 をデフォルト
+				line_->AddPlane(arg, 10, color);
 			} else if constexpr (std::is_same_v<T, Segment>) {
 				line_->AddSegment(arg, color);
 			} else if constexpr (std::is_same_v<T, Line>) {
@@ -65,7 +65,7 @@ namespace MadoEngine {
 			}
 		}
 
-		// 描画
+		// 無効時は前FrameのLineを消去して再有効化時への残留を防止
 		if (isDrawing_) {
 			line_->Draw(camera);
 		} else {

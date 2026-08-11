@@ -20,6 +20,7 @@ namespace MadoEngine {
 	void RootSignatureManager::Register(const std::string& key, const D3D12_ROOT_SIGNATURE_DESC& desc) {
 		assert(device_);
 
+		// Key重複時に既存PSOが参照するRootSignatureを置換しない登録制約
 		if (rootSigMap_.contains(key)) {
 			Logger::Output(
 				std::format("既に登録済みのキーです（スキップ） : {}", key),
@@ -30,6 +31,8 @@ namespace MadoEngine {
 
 		Microsoft::WRL::ComPtr<ID3DBlob> sigBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errBlob;
+
+		// D3D12定義をBinary化してからDevice Resourceへ変換する二段階生成
 		HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &sigBlob, &errBlob);
 		if (FAILED(hr)) {
 			Logger::Output(
@@ -112,17 +115,20 @@ namespace MadoEngine {
 			srvRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 			D3D12_ROOT_PARAMETER rootParams[3]{};
-			// b0: SpriteMaterial
+
+			// b0へSprite Materialを登録
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 			rootParams[0].Descriptor.ShaderRegister = 0;
 			rootParams[0].Descriptor.RegisterSpace = 0;
 			rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-			// b1: SpriteTransformationMatrix
+
+			// b1へSprite Transformを登録
 			rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 			rootParams[1].Descriptor.ShaderRegister = 1;
 			rootParams[1].Descriptor.RegisterSpace = 0;
 			rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-			// t0: Texture (DescriptorTable)
+
+			// t0のDescriptor TableへTextureを登録
 			rootParams[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			rootParams[2].DescriptorTable.NumDescriptorRanges = 1;
 			rootParams[2].DescriptorTable.pDescriptorRanges = &srvRange;
@@ -153,7 +159,7 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("Sprite.RootSig", rootSigDesc);
 		}
 
-		// Model RootSignature
+		// Model描画用RootSignature
 		{
 			D3D12_DESCRIPTOR_RANGE textureRange{};
 			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -251,7 +257,7 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("Model.RootSig", rootSigDesc);
 		}
 
-		// InstancedModel RootSignature
+		// Instanced Model描画用RootSignature
 		{
 			D3D12_DESCRIPTOR_RANGE textureRange{};
 			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -356,7 +362,7 @@ namespace MadoEngine {
 			MadoEngine::RootSignatureManager::GetInstance().Register("InstancedModel.RootSig", rootSigDesc);
 		}
 
-		// SkinningModel RootSignature
+		// Skinning Model描画用RootSignature
 		{
 			D3D12_DESCRIPTOR_RANGE textureRange{};
 			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -631,7 +637,7 @@ namespace MadoEngine {
 		}
 
 		// GPU Particle Compute用 RootSignature
-		// u0: State、u1: Draw、t0: Alive Input、u2: Alive Output、u3-u7: Counter/Free/Indirect、b0-b1: Parameter
+		// Particle更新用のState、Alive List、Counter、Indirect、ParameterをRegisterへ配置
 		{
 			D3D12_ROOT_PARAMETER rootParams[11]{};
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
@@ -700,7 +706,7 @@ namespace MadoEngine {
 		}
 
 		// Ribbon Effect用 RootSignature
-		// b0: Camera、t0: Texture、s0: Sampler
+		// Ribbon描画用のCamera、Texture、SamplerをRegisterへ配置
 		{
 			D3D12_DESCRIPTOR_RANGE textureRange{};
 			textureRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -746,7 +752,7 @@ namespace MadoEngine {
 		}
 
 		// Cylinder Effect用 RootSignature
-		// t0: Cylinder Instance、b0: Camera、t1: Texture、s0: Sampler
+		// Cylinder描画用のInstance、Camera、Texture、SamplerをRegisterへ配置
 		{
 			D3D12_DESCRIPTOR_RANGE instanceRange{};
 			instanceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;

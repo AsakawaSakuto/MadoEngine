@@ -63,6 +63,8 @@ namespace MadoEngine::Particle {
 		config_ = config;
 		config_.emission.maxParticles = (std::max)(1u, config_.emission.maxParticles);
 		const uint64_t particleCount = config_.emission.maxParticles;
+
+		// Particle状態、Alive List、Free List、Indirect引数をGPU上へ固定容量で確保
 		const bool resourcesCreated =
 			CreateDefaultBuffer(
 				sizeof(GpuParticleState) * particleCount,
@@ -125,6 +127,7 @@ namespace MadoEngine::Particle {
 		std::memcpy(emitterParameterData, &emitterParameters, sizeof(emitterParameters));
 		emitterParameterBuffer_->Unmap(0, nullptr);
 
+		// GPU実行中のFrame DataをCPUが上書きしないようUploadとReadbackを多重化
 		for (uint32_t index = 0; index < kFrameResourceCount; ++index) {
 			void* perFrameData = nullptr;
 			if (!CreateUploadBuffer(
@@ -154,6 +157,8 @@ namespace MadoEngine::Particle {
 		float deltaTime,
 		const Transform3D& emitterTransform) {
 		pendingEmitterTransform_ = emitterTransform;
+
+		// GPU上のAlive数が0でも初回完了まではSimulationを継続して確定値を取得
 		const bool needsSimulation =
 			needsGpuInitialize_ ||
 			pendingEmitCount_ > 0 ||
@@ -179,6 +184,8 @@ namespace MadoEngine::Particle {
 		const uint64_t combinedCount =
 			static_cast<uint64_t>(pendingEmitCount_) +
 			static_cast<uint64_t>(count);
+
+		// 複数回のEmit要求を蓄積しつつEmitter最大数で飽和
 		pendingEmitCount_ = static_cast<uint32_t>(
 			(std::min)(
 				combinedCount,
@@ -232,6 +239,7 @@ namespace MadoEngine::Particle {
 			return;
 		}
 
+		// Fence未完了のReadback Slotを避けてCPU/GPU間のResource競合を防止
 		uint32_t frameResourceIndex = nextFrameResourceIndex_;
 		bool foundFrameResource = false;
 		for (uint32_t offset = 0; offset < kFrameResourceCount; ++offset) {
@@ -280,6 +288,8 @@ namespace MadoEngine::Particle {
 		commandList->SetComputeRootSignature(rootSignature);
 
 		if (needsGpuInitialize_) {
+
+			// Free ListとCounterを初期化して全Particleを再利用可能な状態へ復元
 			Transition(commandList, stateBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 			Transition(commandList, drawInstanceBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 			Transition(
@@ -321,6 +331,8 @@ namespace MadoEngine::Particle {
 
 		if (hasPendingUpdate_) {
 			const uint32_t nextAliveIndex = 1u - currentAliveIndex_;
+
+			// Alive IndexをPing-Pongして読み取り中Listと書き込み先Listを分離
 			Transition(
 				commandList,
 				aliveIndexBuffers_[currentAliveIndex_],
@@ -368,6 +380,8 @@ namespace MadoEngine::Particle {
 
 		if (pendingEmitCount_ > 0) {
 			const uint32_t unusedInputIndex = 1u - currentAliveIndex_;
+
+			// Update後のAlive ListへFree Listから新規Particle Indexを追記
 			Transition(
 				commandList,
 				aliveIndexBuffers_[unusedInputIndex],
@@ -418,6 +432,8 @@ namespace MadoEngine::Particle {
 			return;
 		}
 		const uint32_t unusedInputIndex = 1u - currentAliveIndex_;
+
+		// 最新Alive数からDrawIndirect引数をGPU上で生成してCPU同期を回避
 		Transition(
 			commandList,
 			aliveIndexBuffers_[unusedInputIndex],
@@ -435,6 +451,8 @@ namespace MadoEngine::Particle {
 		AddUavBarrier(commandList, indirectArgumentBuffer_.resource.Get());
 
 		BufferResource& currentCounter = aliveCounterBuffers_[currentAliveIndex_];
+
+		// Alive数だけをReadback Slotへ複製しFence完了後の状態判定に利用
 		Transition(commandList, currentCounter, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		commandList->CopyBufferRegion(
 			readbackSlots_[frameResourceIndex].resource.Get(),
@@ -460,6 +478,8 @@ namespace MadoEngine::Particle {
 		uint64_t latestSequence = lastAppliedReadbackSequence_;
 		uint32_t latestAliveCount = cachedAliveCount_;
 		bool appliedAny = false;
+
+		// 完了済みSlotのうちSequenceが最も新しいAlive数だけをCPU Cacheへ反映
 		for (ReadbackSlot& slot : readbackSlots_) {
 			if (!slot.isPending || slot.fenceValue > completedFenceValue) {
 				continue;
@@ -837,6 +857,8 @@ namespace MadoEngine::Particle {
 
 	void GpuParticleEmitterRuntime::TransitionForDraw(
 		ID3D12GraphicsCommandList* commandList) {
+
+		// Compute書き込み後のBufferをVertex ShaderとDrawIndirectから参照可能な状態へ遷移
 		Transition(
 			commandList,
 			drawInstanceBuffer_,

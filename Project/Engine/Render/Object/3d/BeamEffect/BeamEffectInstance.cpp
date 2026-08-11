@@ -75,6 +75,8 @@ namespace MadoEngine::Beam {
 			0.0f,
 			0.1f
 		);
+
+		// 大きなFrame間隔によるTrack補間の飛び越しを抑える時間上限
 		const float scaledDeltaTime = safeDeltaTime * playbackSpeed_;
 		for (EmitterState& emitter : emitters_) {
 			if (emitter.isFinished) {
@@ -83,6 +85,8 @@ namespace MadoEngine::Beam {
 			emitter.totalTime += scaledDeltaTime;
 			emitter.playbackTime += scaledDeltaTime;
 			const float duration = emitter.config.playback.duration;
+
+			// 停止要求後はLoopへ戻さず現在Cycleの終端で完了
 			if (emitter.isLoop && !emitter.isStopping) {
 				emitter.playbackTime = std::fmod(emitter.playbackTime, duration);
 				continue;

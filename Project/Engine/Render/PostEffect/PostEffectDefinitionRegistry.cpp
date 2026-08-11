@@ -7,6 +7,10 @@ namespace MadoEngine::Render {
 
 namespace {
 
+/// @brief Vector型Parameter内の要素Offsetを計算
+/// @param vectorOffset 構造体先頭からVector型ParameterまでのOffset
+/// @param componentIndex Vector内の要素Index
+/// @return 構造体先頭から対象要素までのOffset
 constexpr std::size_t VectorComponentOffset(std::size_t vectorOffset, std::size_t componentIndex) {
 	return vectorOffset + sizeof(float) * componentIndex;
 }
@@ -206,6 +210,13 @@ const PostEffectFloatParameterDefinition kVignetteParameters[] = {
 	{ "ColorA", "色A", VectorComponentOffset(offsetof(VignetteParameters, color), 3), 0.0f, 1.0f, 0.01f },
 };
 
+/// @brief 既定値と編集Parameterを持つPostEffect定義を作成
+/// @param type PostEffect種別
+/// @param typeName 種別名
+/// @param shaderKey Pixel Shader Key
+/// @param defaults Parameter既定値
+/// @param parameters 編集可能Parameter定義
+/// @return PostEffect定義
 template<class T, std::size_t N>
 constexpr PostEffectDefinition CreateDefinition(
 	PostEffectType type,
@@ -217,6 +228,11 @@ constexpr PostEffectDefinition CreateDefinition(
 	return { type, typeName, typeName, shaderKey, &defaults, sizeof(T), parameters, N };
 }
 
+/// @brief Parameterを持たないPostEffect定義を作成
+/// @param type PostEffect種別
+/// @param typeName 種別名
+/// @param shaderKey Pixel Shader Key
+/// @return PostEffect定義
 constexpr PostEffectDefinition CreateParameterlessDefinition(
 	PostEffectType type,
 	std::string_view typeName,

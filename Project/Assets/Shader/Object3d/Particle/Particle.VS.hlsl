@@ -42,6 +42,10 @@ cbuffer PerBatch : register(b1)
     uint gBlendMode;
 };
 
+/// @brief CPU管理ParticleをCamera正対のBillboardへ変換
+/// @param input Billboard用Quadの頂点情報
+/// @param instanceId 描画対象のInstance番号
+/// @return Billboard変換とFog情報を反映した頂点
 VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
 {
     ParticleInstance particle = gParticles[gFirstInstance + instanceId];
@@ -55,6 +59,7 @@ VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID
     rotatedPosition.x = scaledPosition.x * cosine - scaledPosition.y * sine;
     rotatedPosition.y = scaledPosition.x * sine + scaledPosition.y * cosine;
 
+    // CameraのRightとUpを基底に使用してQuadを常に画面へ正対
     float3 worldPosition = particle.position;
     worldPosition += gCameraRight.xyz * rotatedPosition.x;
     worldPosition += gCameraUp.xyz * rotatedPosition.y;
@@ -67,6 +72,8 @@ VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID
     output.fogFactor = 0.0f;
     if (gParticleFogCameraParams.z > 0.5f)
     {
+
+        // Clip座標から画面UVとView距離を復元してPostEffectと同じFog式を共有
         float inverseW = rcp(max(abs(output.position.w), 0.0001f));
         float ndcDepth = saturate(output.position.z * inverseW);
         float viewDistance = ConvertDepthToViewDistance(

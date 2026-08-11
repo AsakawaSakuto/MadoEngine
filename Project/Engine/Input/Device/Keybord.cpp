@@ -14,6 +14,7 @@ namespace MadoEngine::InputDevice
 
 	int Keybord::ConvertDIKToVK(int key) const
 	{
+
 		// DIK_XXXキーコードをVK_XXXに変換
 		switch (key)
 		{

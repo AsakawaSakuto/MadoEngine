@@ -1009,6 +1009,8 @@ namespace MadoEngine::Editor {
 	void DrawCylinderEffectEditorUI() {
 #ifdef USE_IMGUI
 		PrimitiveEffectSystem3d& system = PrimitiveEffectSystem3d::GetInstance();
+
+		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
 		static int selectedAssetIndex = 0;
 		static int selectedEmitterIndex = 0;
 		static int selectedSettingPage = 0;

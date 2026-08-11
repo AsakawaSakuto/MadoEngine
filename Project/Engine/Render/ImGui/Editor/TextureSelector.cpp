@@ -34,6 +34,8 @@ namespace {
 		const Vector2 pixelSize = textureManager.GetPixelSize(textureName);
 		const float width = (std::max)(1.0f, pixelSize.x);
 		const float height = (std::max)(1.0f, pixelSize.y);
+
+		// Aspect比を維持したまま指定最大Size内に収まるPreview倍率
 		const float scale = (std::min)(1.0f, previewMaxSize / (std::max)(width, height));
 		const D3D12_GPU_DESCRIPTOR_HANDLE handle = textureManager.GetSrvHandleGPU(textureIndex);
 
@@ -102,6 +104,8 @@ bool TextureSelector::Draw(const char* label, std::string& selectedTextureName) 
 	bool isChanged = false;
 
 	const bool isComboOpen = ImGui::BeginCombo(label, comboPreview);
+
+	// Combo閉鎖時は選択項目、展開時は各候補へ同じHover Previewを提供
 	if (!isComboOpen && isSelectedTextureAvailable) {
 		DrawHoveredTexturePreview(selectedTextureName, previewMaxSize_);
 	}

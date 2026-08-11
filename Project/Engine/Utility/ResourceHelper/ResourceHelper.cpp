@@ -6,6 +6,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device
 	assert(sizeInBytes > 0);
 
 	D3D12_HEAP_PROPERTIES heapProperties{};
+
+	// CPUから直接更新する定数・頂点Data向けのUpload Heapを採用
 	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
@@ -22,6 +24,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(ID3D12Device* device
 	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
 	resourceDesc.SampleDesc.Count = 1;
 	resourceDesc.SampleDesc.Quality = 0;
+
+	// Buffer Resourceに必須のRow Major LayoutとGeneric Read初期状態の組み合わせ
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
@@ -61,6 +65,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12D
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 
 	D3D12_CLEAR_VALUE depthClearValue{};
+
+	// Resource Formatと一致する最適化Clear値を生成時に指定
 	depthClearValue.DepthStencil.Depth = 1.0f;
 	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 

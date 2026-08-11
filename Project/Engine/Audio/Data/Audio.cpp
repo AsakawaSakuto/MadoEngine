@@ -1,6 +1,3 @@
-// Audio.cpp
-// AudioX実装。XAudio2エンジンとマスターボイスを作成し、PCM共有→インスタンス再生。
-
 #include "Audio.h"
 #include <cassert>
 
@@ -45,6 +42,7 @@ void AudioX::Update() {
 }
 
 void AudioX::Reset() {
+
     // まず全インスタンス停止→破棄
     for (auto& a : actives_) {
         if (a) a->Stop();
@@ -59,6 +57,7 @@ void AudioX::Reset() {
 }
 
 void AudioX::SetVolume(float volume) {
+
     // クランプ（0.0f～1.0fの範囲）
     if (volume < 0.0f) volume = 0.0f;
     if (volume > 1.0f) volume = 1.0f;
@@ -70,13 +69,14 @@ void AudioX::SetVolume(float volume) {
 }
 
 void AudioX::StopAll() {
+
     // 再生中のボイスを即停止→キュー破棄
     for (auto& a : actives_) {
         if (a) a->Stop();
     }
-    // DestroyVoice は unique_ptr のデリータが実行
+
+    // PCMとXAudio2を保持し、再生InstanceのVoiceだけをDeleter経由で破棄
     actives_.clear();
-    // PCM(pcmShared_)とXAudio2は残るので、すぐ PlayAudio() し直せる
 }
 
 void AudioX::StopLatest() {

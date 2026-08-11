@@ -77,11 +77,14 @@ namespace {
     std::mutex g_logMutex;
     std::string g_currentLogPath;
 
-	/// @brief UTF-8文字列をワイド文字列（UTF-16）に変換する関数
+    /// @brief UTF-8文字列をUTF-16文字列へ変換
+    /// @param utf8Str 変換対象文字列
+    /// @return UTF-16へ変換した文字列
     std::wstring Utf8ToWide(const std::string& utf8Str) {
         if (utf8Str.empty()) return L"";
         int size = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0);
-        // std::wstring のコンストラクタは終端文字を自動で考慮するため、size そのままでOK
+
+        // 終端文字領域を含むAPI要求SizeでBufferを確保
         std::wstring wideStr(size, L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, &wideStr[0], size);
 
@@ -101,7 +104,7 @@ namespace {
             return "";
         }
 
-		// ファイル名に使用するタイムスタンプを生成
+        // ファイル名に使用するタイムスタンプを生成
         char buf[64];
         sprintf_s(buf, "%04d-%02d-%02d_%02d-%02d-%02d",
             localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
@@ -110,7 +113,7 @@ namespace {
         std::string baseDir = "Assets/.Log/";
         std::string baseName = std::string(buf);
 
-        // ファイルが存在しない場合は番号なしで返す
+        // Fileが存在しない場合は連番を付けない基準Path
         std::string testPath = baseDir + baseName + ".Log";
         if (!std::filesystem::exists(Utf8ToWide(testPath))) {
             return testPath;
@@ -149,12 +152,14 @@ namespace {
                 g_currentLogPath = logPath;
             }
         }
+
+        // Log保存失敗を呼び出し側へ伝播させない方針
         catch (const std::exception&) {
-            // ディレクトリ作成やファイルオープンに失敗した場合は何もしない
         }
     }
 
-	/// @brief ログメッセージをファイルへ書き込むスレッドセーフな関数
+    /// @brief Log MessageをFileへThread Safeに書き込み
+    /// @param message 書き込むLog Message
     void WriteToFile(const std::string& message) {
         std::lock_guard<std::mutex> lock(g_logMutex);
 
@@ -216,9 +221,11 @@ namespace Logger {
 		PushLogEntry(std::move(entry));
 
 #ifdef NDEBUG
+
         // Releaseビルド時はファイルに出力
         WriteToFile(utf8Str);
 #else
+
         // Debugビルド時はデバッグウィンドウに出力
         // 2. UTF-8 -> ワイド文字列 (UTF-16) への変換
         int size = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0);

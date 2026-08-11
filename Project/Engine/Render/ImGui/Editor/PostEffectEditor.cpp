@@ -16,7 +16,7 @@ namespace MadoEngine::Editor {
 
 namespace {
 
-// 既存設定との後方互換性を維持するため、JSONファイル名は変更しない。
+// 既存設定との後方互換性を維持する固定Json File名
 const std::filesystem::path kPostEffectEditorJsonPath = "Assets/Json/LayerEffectPassEditor.json";
 
 /// @brief レイヤーポストエフェクトの適用段階名を取得
@@ -182,7 +182,8 @@ Render::PostEffectPassHandle UpsertPostEffectPassFromJson(
 	Render::PostEffectPassHandle handle = manager.Find(key);
 	bool wasCreated = false;
 	if (handle.IsValid() && manager.GetScope(handle) != scope) {
-		// JSONロードは前フレームのGPU完了待機後かつ描画開始前にだけ実行される。
+
+		// Json読み込みを前FrameのGPU完了待機後かつ描画開始前だけに限定
 		manager.Destroy(handle);
 		handle = {};
 	}
@@ -240,7 +241,8 @@ Render::PostEffectPassHandle UpsertPostEffectPassFromJson(
 	}
 
 	if (!wasCreated) {
-		// 既存Handleを維持しつつ、欠落ParameterもRegistry既定値へ戻して旧ロード結果を保つ。
+
+		// 既存Handleを維持しつつ欠落ParameterをRegistry既定値へ戻す旧形式互換
 		manager.SetEffectType(handle, definition.type);
 	}
 
@@ -350,7 +352,8 @@ bool LoadPostEffectEditorJsonInternal(
 	for (Render::PostEffectPassHandle handle : existingHandles) {
 		const Render::PostEffectPass* pass = manager.TryGet(handle);
 		if (pass && !usedKeys.contains(pass->GetKey())) {
-			// 読み込みはGPU完了待機後に実行されるため、差分削除を即時反映できる。
+
+			// GPU完了待機後の読み込みによる差分削除の即時反映
 			manager.Destroy(handle);
 		}
 	}
@@ -905,7 +908,8 @@ void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager) {
 	ImGui::EndChild();
 
 	if (removeRequest.IsValid()) {
-		// GPUリソースはPostDrawのGPU完了待機後まで保持し、次フレーム開始前に破棄する。
+
+		// GPU ResourceをPostDrawの完了待機後まで保持して次Frame開始前に破棄
 		postEffectManager.RequestDestroy(removeRequest);
 		if (selectedHandle == removeRequest) {
 			selectedHandle = {};

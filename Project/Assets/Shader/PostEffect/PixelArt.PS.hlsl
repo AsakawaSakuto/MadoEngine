@@ -13,7 +13,7 @@ struct PixelShaderOutput
     float4 color : SV_TARGET0;
 };
 
-/// @brief ドット絵風エフェクトのパラメータを取得する
+/// @brief ドット絵風エフェクトのパラメータを取得
 /// @return x: ピクセルサイズ, y: 色階調数, z: コントラスト, w: 適用率
 float4 GetPixelArtParams()
 {
@@ -25,7 +25,7 @@ float4 GetPixelArtParams()
     return gPixelArtParams;
 }
 
-/// @brief UVを粗いピクセル単位へ丸める
+/// @brief UVを粗いPixel単位へ丸め
 /// @param texcoord 入力UV
 /// @param textureSize テクスチャサイズ
 /// @param pixelSize ドット絵風にするための画面上のピクセル幅
@@ -33,11 +33,13 @@ float4 GetPixelArtParams()
 float2 SnapTexcoordToPixelGrid(float2 texcoord, float2 textureSize, float pixelSize)
 {
     float2 pixelCoord = texcoord * textureSize;
+
+    // 各Block中心をSampleして拡大時の境界揺れと隣接色の混入を抑制
     float2 snappedPixelCoord = floor(pixelCoord / pixelSize) * pixelSize + pixelSize * 0.5f;
     return saturate(snappedPixelCoord / textureSize);
 }
 
-/// @brief 色数を減らしてドット絵風の階調へ変換する
+/// @brief 色数を減らしてドット絵風の階調へ変換
 /// @param color 入力色
 /// @param colorSteps 色階調数
 /// @return 減色した色
@@ -48,7 +50,7 @@ float3 QuantizeColor(float3 color, float colorSteps)
     return floor(saturate(color) * maxIndex + 0.5f) / maxIndex;
 }
 
-/// @brief 中間色を基準にコントラストを調整する
+/// @brief 中間色を基準にコントラストを調整
 /// @param color 入力色
 /// @param contrast コントラスト
 /// @return コントラスト調整後の色
@@ -57,7 +59,7 @@ float3 ApplyContrast(float3 color, float contrast)
     return saturate((color - 0.5f) * max(contrast, 0.0f) + 0.5f);
 }
 
-/// @brief 画面色をドット絵風に変換する
+/// @brief 画面色をドット絵風に変換
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return ドット絵風に変換したピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input)
@@ -79,6 +81,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float2 snappedTexcoord = SnapTexcoordToPixelGrid(input.texcoord, textureSize, pixelSize);
     float4 pixelColor = gTexture.Sample(gSampler, snappedTexcoord);
 
+    // 減色後にContrastを適用して限られた階調の分離を強調
     float3 stylizedColor = QuantizeColor(pixelColor.rgb, colorSteps);
     stylizedColor = ApplyContrast(stylizedColor, contrast);
 

@@ -51,7 +51,7 @@ Animation LoadAnimationFile(const std::string& filename, int index)
 		NodeAnimation& nodeAnimation =
 			animation.nodeAnimations[nodeAnimationAssimp->mNodeName.C_Str()];
 
-		// --------- Translate ----------
+		// Nodeの位置Keyを秒単位のTrackへ変換
 		for (uint32_t keyIndex = 0;
 			keyIndex < nodeAnimationAssimp->mNumPositionKeys;
 			++keyIndex)
@@ -73,7 +73,7 @@ Animation LoadAnimationFile(const std::string& filename, int index)
 			nodeAnimation.translate.keyframes.push_back(keyframe);
 		}
 
-		// --------- Rotate ----------
+		// Nodeの回転KeyをQuaternion Trackへ変換
 		for (uint32_t keyIndex = 0;
 			keyIndex < nodeAnimationAssimp->mNumRotationKeys;
 			++keyIndex)
@@ -97,7 +97,7 @@ Animation LoadAnimationFile(const std::string& filename, int index)
 			nodeAnimation.rotate.keyframes.push_back(keyframe);
 		}
 
-		// --------- Scale ----------
+		// Nodeの拡縮Keyを秒単位のTrackへ変換
 		for (uint32_t keyIndex = 0;
 			keyIndex < nodeAnimationAssimp->mNumScalingKeys;
 			++keyIndex)
@@ -128,7 +128,7 @@ Skeleton CreateSkeleton(const ModelNode& rootNode) {
 	Skeleton skeleton;
 	skeleton.root = CreateJoint(rootNode, {}, skeleton.joints);
 
-	// 名前とindexのマッピングを行いアクセスしやすくする
+	// Joint名からIndexへ定数時間で参照できるMappingを構築
 	for (const Joint& joint : skeleton.joints) {
 		skeleton.jointMap.emplace(joint.name, joint.index);
 	}
@@ -146,7 +146,7 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
     skinCluster.paletteSrvHandle.first = MadoEngine::Core::SRVManager::GetInstance().GetCPUHandle(srvIndex);
 	skinCluster.paletteSrvHandle.second = MadoEngine::Core::SRVManager::GetInstance().GetGPUHandle(srvIndex);
 
-	// palette用のsrvを作成。StructuredBufferでアクセスできるようにする。
+	// Skinning PaletteをStructuredBufferとして参照するSRVを生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
 	paletteSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	paletteSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -157,7 +157,7 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	device->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-	// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
+	// 頂点ごとのInfluence情報を保持するResourceを確保
 	VertexInfluence* mappedInfluence = CreateMappedBuffer<VertexInfluence>(device.Get(), skinCluster.influenceResource, modelData.vertices.size());
 	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData.vertices.size());  // 0埋め。weightを0にしておく。
 	skinCluster.mappedInfluence = { mappedInfluence, modelData.vertices.size() };
@@ -212,7 +212,7 @@ int32_t CreateJoint(const ModelNode& node, const std::optional<int32_t>& parent,
 		joints[joint.index].children.push_back(childIndex);
 	}
 
-	// 自身のIndexを返す
+	// 現在のJoint Index
 	return joint.index;
 }
 
@@ -274,6 +274,7 @@ Quaternion CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, floa
 }
 
 void UpdateAnimation(Skeleton& skeleton) {
+
 	// すべてのJointを更新。親が若いので通常ループで処理可能になっている
 	for (Joint& joint : skeleton.joints) {
 		joint.localMatrix = Matrix::MakeAffineAnimation(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
@@ -297,7 +298,8 @@ void UpdateCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
 
 void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime) {
 	for (Joint& joint : skeleton.joints) {
-		// 対象のJointのAnimationがあれば、値の適用を行う。下記のif文はC++17から可能になった初期化付きif文。
+
+		// Animation Curveが存在するJointだけへ補間済みTransformを適用
 		if (auto it = animation.nodeAnimations.find(joint.name); it != animation.nodeAnimations.end()) {
 			const NodeAnimation& rootNodeAnimation = (*it).second;
 			joint.transform.translate = CalculateValue(rootNodeAnimation.translate.keyframes, animationTime);

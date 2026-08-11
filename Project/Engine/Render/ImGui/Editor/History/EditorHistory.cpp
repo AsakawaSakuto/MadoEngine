@@ -13,11 +13,14 @@ void EditorHistory::Push(std::unique_ptr<IEditorCommand> command) {
 		return;
 	}
 
+	// Undo後に別操作を確定した場合は分岐前のRedo履歴を破棄
 	undoStack_.push_back(std::move(command));
 	redoStack_.clear();
 }
 
 bool EditorHistory::Undo() {
+
+	// 編集対象が破棄済みのCommandを読み飛ばして操作可能な履歴を探索
 	while (!undoStack_.empty()) {
 		std::unique_ptr<IEditorCommand> command = std::move(undoStack_.back());
 		undoStack_.pop_back();
@@ -32,6 +35,8 @@ bool EditorHistory::Undo() {
 }
 
 bool EditorHistory::Redo() {
+
+	// 編集対象が破棄済みのCommandを読み飛ばして操作可能な履歴を探索
 	while (!redoStack_.empty()) {
 		std::unique_ptr<IEditorCommand> command = std::move(redoStack_.back());
 		redoStack_.pop_back();

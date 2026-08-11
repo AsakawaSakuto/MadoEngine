@@ -322,6 +322,7 @@ bool LightManager::IsValid(LightHandle handle) const {
 		return false;
 	}
 
+	// Index、Active状態、Generationを照合して再利用済みSlotへの古いHandleを拒否
 	switch (handle.type) {
 	case LightType::Directional:
 		return handle.index < directionalLights_.size() &&
@@ -348,6 +349,7 @@ bool LightManager::Destroy(LightHandle handle) {
 
 	EraseName(handle);
 
+	// Slotを非Active化してGenerationを進め既存Handleを即時無効化
 	switch (handle.type) {
 	case LightType::Directional:
 		directionalLights_[handle.index].active = false;
@@ -382,6 +384,7 @@ void LightManager::DestroyByScene(SceneType sceneType) {
 
 	size_t destroyCount = 0;
 
+	// RuntimeとEditor管理を問わず指定Scene所属だけを各Light種別から無効化
 	for (DirectionalSlot& slot : directionalLights_) {
 		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
 			continue;
@@ -435,6 +438,7 @@ bool LightManager::RenameLight(LightHandle handle, const std::string& newName) {
 		return true;
 	}
 
+	// 名前索引の一意性を検証してMetaDataと検索Mapを同時更新
 	auto nameIt = nameToHandle_.find(newName);
 	if (nameIt != nameToHandle_.end()) {
 		Logger::Output("ライト名を変更できません。同名のライトが存在します : " + newName, Logger::Level::Warning);
@@ -470,6 +474,7 @@ bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
 	root["version"] = 1;
 	root["lights"] = nlohmann::json::array();
 
+	// Runtime生成Lightを永続化せずEditor管理Lightだけを種別ごとにSerialize
 	for (const DirectionalSlot& slot : directionalLights_) {
 		if (!slot.active || slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::EditorManaged) {
 			continue;
@@ -525,6 +530,7 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		return false;
 	}
 
+	// Runtime Lightを保持したまま旧Editor管理Lightだけを読み込み結果と置換
 	ClearEditorManagedLights();
 
 	size_t loadCount = 0;
@@ -553,6 +559,7 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		const bool enabled = MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(lightJson, "enabled", true);
 		const nlohmann::json dataJson = lightJson.contains("data") ? lightJson.at("data") : nlohmann::json::object();
 
+		// 共通MetaDataを検証後に種別固有Dataへ変換して対応Slotへ登録
 		LightHandle handle;
 		switch (type) {
 		case LightType::Directional:
@@ -839,6 +846,8 @@ LightHandle LightManager::CreateLight(
 
 	auto nameIt = nameToHandle_.find(name);
 	if (nameIt != nameToHandle_.end()) {
+
+		// 異なる管理Modeで同名Lightが衝突する場合は所有境界を守るため登録拒否
 		const LightMetaData* existingMeta = GetMetaData(nameIt->second);
 		if (existingMeta && existingMeta->managementMode != entry.meta.managementMode) {
 			Logger::Output("同名のライトが異なる管理方法で既に登録されています : " + name, Logger::Level::Warning);
@@ -850,6 +859,8 @@ LightHandle LightManager::CreateLight(
 	}
 
 	uint32_t index = 0;
+
+	// 非Active Slotを優先再利用してHandle配列の無制限増加を抑制
 	for (; index < slots.size(); ++index) {
 		if (!slots[index].active) {
 			break;
@@ -912,6 +923,7 @@ const LightMetaData* LightManager::GetMetaData(LightHandle handle) const {
 void LightManager::ApplyEnabledToLight(LightHandle handle, bool enabled) {
 	const uint32_t useLight = enabled ? 1u : 0u;
 
+	// MetaDataの有効状態をShaderへ渡す種別固有useLightへ同期
 	switch (handle.type) {
 	case LightType::Directional:
 		directionalLights_[handle.index].entry.light.useLight = useLight;
@@ -937,6 +949,8 @@ void LightManager::EraseName(LightHandle handle) {
 void LightManager::AdvanceRevision() {
 	++revision_;
 	if (revision_ == 0) {
+
+		// Revision周回時は古いCache一致を避けるため1へ戻して全Cacheを破棄
 		revision_ = 1;
 		gpuDataCache_.clear();
 	}
@@ -978,6 +992,7 @@ std::vector<LightHandle> LightManager::GetActiveHandles(
 	std::vector<LightHandle> handles;
 	handles.reserve(slots.size());
 
+	// Generationを含む現在有効なHandleだけを要求管理Modeに応じて再構築
 	for (uint32_t index = 0; index < static_cast<uint32_t>(slots.size()); ++index) {
 		const TSlot& slot = slots[index];
 		if (!slot.active) {
@@ -1006,6 +1021,8 @@ bool LightManager::IsLightMatched(const LightMetaData& meta, SceneType sceneType
 		meta.sceneType == SceneType::None ||
 		sceneType == SceneType::None ||
 		meta.sceneType == sceneType;
+
+	// 共通Sceneまたは同一Sceneであり受光Layerが一つ以上重なるLightだけを採用
 	if (!isSceneMatched) {
 		return false;
 	}
@@ -1045,6 +1062,7 @@ uint32_t LightManager::FillGpuLights(
 	std::array<TLight, MaxLightCount>& outLights) const {
 	uint32_t count = 0;
 
+	// Shader側の固定配列上限まで有効かつSceneとLayerが一致するLightを詰め込み
 	for (const TSlot& slot : slots) {
 		if (count >= MaxLightCount) {
 			break;

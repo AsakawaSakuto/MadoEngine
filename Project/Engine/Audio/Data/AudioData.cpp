@@ -1,7 +1,3 @@
-// AudioData.cpp
-// WAV直読み ＋ Media FoundationでMP3→PCM16デコード。
-// 生成したPCMはstd::vectorで所有。リンクにはmfplat/mfreadwrite/mfuuidが必要。
-
 #include "AudioData.h"
 #include <fstream>
 #include <algorithm>
@@ -17,32 +13,36 @@
 
 using Microsoft::WRL::ComPtr;
 
-// 4CCヘッダ
+/// @brief RIFF Chunk Header
 struct ChunkHeader {
     char id[4];
     int32_t size;
 };
 
-// RIFF/WAVE
+/// @brief RIFF WAVE Header
 struct RiffHeader {
     ChunkHeader chunk; //"RIFF"
     char type[4];      //"WAVE"
 };
 
-// fmt チャンク
+/// @brief WAVE Format Chunk
 struct FormatChunk {
     ChunkHeader chunk; //"fmt "
     WAVEFORMATEX fmt;
 };
 
-// 小文字化
+/// @brief 文字列を小文字へ変換
+/// @param s 変換対象
+/// @return 小文字へ変換した文字列
 static std::string ToLower(std::string s) {
     std::transform(s.begin(), s.end(), s.begin(),
         [](unsigned char c) { return (char)std::tolower(c); });
     return s;
 }
 
-// UTF-8→UTF-16
+/// @brief UTF-8文字列をUTF-16文字列へ変換
+/// @param s 変換対象
+/// @return UTF-16へ変換した文字列
 static std::wstring ToWide(const std::string& s) {
     if (s.empty()) { return L""; }
     int len = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), (int)s.size(), nullptr, 0);
@@ -51,8 +51,10 @@ static std::wstring ToWide(const std::string& s) {
     return w;
 }
 
-// Media Foundation 一度だけ起動
+/// @brief Process終了時にMedia Foundationを終了
 static void MFShutdownAtExit() { MFShutdown(); }
+
+/// @brief Media FoundationをProcess内で一度だけ初期化
 static void EnsureMFStarted() {
     static std::once_flag once;
     std::call_once(once, []() {
@@ -62,7 +64,6 @@ static void EnsureMFStarted() {
         });
 }
 
-// WAV ロード（基本PCM前提）
 SoundData SoundLoadWave(const std::string& filePath) {
     std::ifstream file(filePath, std::ios::binary);
     assert(file.is_open() && "WAV file open failed");
@@ -96,11 +97,13 @@ SoundData SoundLoadWave(const std::string& filePath) {
     return sd;
 }
 
-// MP3→PCM16 デコード
+/// @brief MP3をPCM16へDecode
+/// @param filePath MP3 File Path
+/// @return Decode済み音声Data
 static SoundData SoundLoadMp3(const std::string& filePath) {
     EnsureMFStarted();
 
-    // ファイルパスの存在確認
+    // Source Reader生成前に欠損Pathを検出してDebug出力を具体化
     std::ifstream fileCheck(filePath);
     if (!fileCheck.is_open()) {
         char buffer[512];
@@ -124,13 +127,13 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
         assert(false && "MFCreateSourceReaderFromURL failed");
     }
 
-    // readerがnullでないことを確認
+    // COM生成成功でも無効Readerが返った場合を失敗扱い
     if (!reader) {
         OutputDebugStringA("SourceReader is null after creation\n");
         assert(false && "SourceReader is null");
     }
 
-    // 現在のメディアタイプを取得して確認
+    // 入力Formatを保存して出力PCMのChannel数とSample Rateへ継承
     ComPtr<IMFMediaType> nativeType;
     hr = reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &nativeType);
     if (FAILED(hr)) {
@@ -143,7 +146,7 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
         assert(false && "GetNativeMediaType failed");
     }
 
-    // 出力をPCM16に固定
+    // Decode後のBuffer処理を単純化するため出力をPCM16へ固定
     ComPtr<IMFMediaType> outType;
     hr = MFCreateMediaType(&outType);
     assert(SUCCEEDED(hr));
@@ -157,13 +160,13 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
     hr = outType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
     assert(SUCCEEDED(hr));
 
-    // ネイティブタイプからチャンネル数とサンプルレートを取得
     UINT32 channels = 0;
     hr = nativeType->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, &channels);
     if (SUCCEEDED(hr) && channels > 0) {
         outType->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, channels);
     } else {
-        // デフォルト値を設定（ステレオ）
+
+        // Channel情報がない圧縮FormatではStereoをFallback
         OutputDebugStringA("Warning: Could not get channel count, using default (2)\n");
         channels = 2;
         outType->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, channels);
@@ -174,13 +177,14 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
     if (SUCCEEDED(hr) && samplesPerSec > 0) {
         outType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, samplesPerSec);
     } else {
-        // デフォルト値を設定（44.1kHz）
+
+        // Sample Rate情報がない圧縮Formatでは44.1kHzをFallback
         OutputDebugStringA("Warning: Could not get sample rate, using default (44100)\n");
         samplesPerSec = 44100;
         outType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, samplesPerSec);
     }
 
-    // 部分的なメディアタイプを設定（Media Foundationが残りを補完する）
+    // 指定外属性をMedia Foundationに補完させる部分Media Type
     hr = reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, outType.Get());
     if (FAILED(hr)) {
         char buffer[512];
@@ -197,7 +201,7 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
         assert(false && "SetCurrentMediaType failed");
     }
 
-    // 実際のPCMフォーマット取得
+    // Negotiation後のFormatを採用して実Buffer Layoutと一致
     ComPtr<IMFMediaType> curType;
     hr = reader->GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, &curType);
     assert(SUCCEEDED(hr));
@@ -215,7 +219,7 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
     wf.nAvgBytesPerSec = wf.nBlockAlign * wf.nSamplesPerSec;
     CoTaskMemFree(pwfx);
 
-    // 全サンプル読み切り
+    // End Of StreamまでSample Bufferを連結して単一PCM配列を構築
     std::vector<BYTE> all;
     for (;;) {
         DWORD flags = 0;
@@ -242,7 +246,7 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
         assert(SUCCEEDED(hr));
     }
 
-    // 終端のブロック境界丸め（安全のため）
+    // XAudio2へ不完全Frameを渡さないよう末尾をBlock Alignへ切り下げ
     if (!all.empty()) {
         all.resize(all.size() - (all.size() % wf.nBlockAlign));
     }
@@ -252,7 +256,7 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
     sd.pcm = std::move(all);
     sd.name = filePath;
     
-    // 読み込み成功をログ出力
+    // Decode結果をDebug出力してMedia Type Negotiationの確認情報を提供
     char buffer[512];
     sprintf_s(buffer, "Successfully loaded MP3: %s (%u Hz, %u channels, %.2f sec)\n", 
               filePath.c_str(), 
@@ -264,9 +268,10 @@ static SoundData SoundLoadMp3(const std::string& filePath) {
     return sd;
 }
 
-// ディスパッチ
 SoundData SoundLoadAudio(const std::string& filePath) {
     std::string low = ToLower(filePath);
+
+    // 対応拡張子ごとに専用Decoderへ振り分け
     if (low.rfind(".wav") != std::string::npos) {
         return SoundLoadWave(filePath);
     }
@@ -279,8 +284,9 @@ SoundData SoundLoadAudio(const std::string& filePath) {
     }
 }
 
-// 互換維持：非推奨の即時再生関数（DestroyVoiceしないので乱発禁止）
 void SoundPlayWave(IXAudio2* xAudio2, const SoundData& sd) {
+
+    // Voiceの所有権を保持しない互換経路のため大量連続利用を禁止
     IXAudio2SourceVoice* v = nullptr;
     HRESULT hr = xAudio2->CreateSourceVoice(&v, &sd.wfex);
     assert(SUCCEEDED(hr));
@@ -292,5 +298,4 @@ void SoundPlayWave(IXAudio2* xAudio2, const SoundData& sd) {
     assert(SUCCEEDED(hr));
     hr = v->Start();
     assert(SUCCEEDED(hr));
-    // 注意：DestroyVoice未実施。使い捨て用途のみ。
 }

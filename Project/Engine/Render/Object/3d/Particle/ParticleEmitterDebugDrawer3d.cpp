@@ -138,6 +138,7 @@ namespace MadoEngine::Particle {
 			{}
 		);
 
+		// Shape Variantごとの幾何表現を共通のDebugLineへ変換
 		std::visit([&](const auto& shape) {
 			using ShapeType = std::decay_t<decltype(shape)>;
 			if constexpr (std::is_same_v<ShapeType, PointShape>) {
@@ -186,6 +187,8 @@ namespace MadoEngine::Particle {
 			} else if constexpr (std::is_same_v<ShapeType, PlaneShape>) {
 				SubmitPlane(shape, worldMatrix, rotationMatrix, color);
 			} else if constexpr (std::is_same_v<ShapeType, RingShape>) {
+
+				// 内外周と法線を同時表示してRingの幅と向きを可視化
 				SubmitCircle(shape.normal, shape.outerRadius, worldMatrix, color);
 				SubmitCircle(shape.normal, shape.innerRadius, worldMatrix, color);
 				const Vector3 center = Matrix::Transform({}, worldMatrix);

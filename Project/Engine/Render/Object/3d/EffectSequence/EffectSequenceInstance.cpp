@@ -148,6 +148,8 @@ namespace MadoEngine::EffectSequence {
 		RebuildWorldTransforms();
 		ApplyWorldTransformsToChildren();
 		RemoveFinishedChildren();
+
+		// 親Timeline終了後もFinish停止したChildが完了するまでSequenceを保持
 		if (isWaitingForChildren_) {
 			TryFinishWaitingSequence();
 			return;
@@ -163,6 +165,8 @@ namespace MadoEngine::EffectSequence {
 		);
 		float remainingTime = safeDeltaTime * playbackSpeed_;
 		const float duration = asset_->GetConfig().duration;
+
+		// 非Loop再生は終端を一度だけ通過して未発火Nodeを確実にDispatch
 		if (!isLoop_) {
 			const float previousTime = playbackTime_;
 			playbackTime_ = (std::min)(playbackTime_ + remainingTime, duration);
@@ -178,6 +182,8 @@ namespace MadoEngine::EffectSequence {
 		}
 
 		uint32_t processedLoopCount = 0;
+
+		// 一Frame内のLoop回数へ上限を設けて極端なDelta Timeでの無制限処理を防止
 		while (remainingTime > 0.0f && processedLoopCount < kMaximumEffectSequenceLoopsPerUpdate) {
 			const float timeToLoopEnd = duration - playbackTime_;
 			if (remainingTime + kSequenceTimeEpsilon < timeToLoopEnd) {
@@ -196,6 +202,8 @@ namespace MadoEngine::EffectSequence {
 
 		if (remainingTime > 0.0f) {
 			if (remainingTime >= duration) {
+
+				// 上限を超えたLoop分はChild状態を破棄して時間だけ高速に繰り越し
 				StopChildren(EffectSequenceStopMode::Immediate);
 				activeChildren_.clear();
 				firedNodeIds_.clear();

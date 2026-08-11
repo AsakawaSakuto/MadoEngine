@@ -55,6 +55,7 @@ void Gauge::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEn
 	sceneType_ = sceneType;
 	renderLayer_ = renderLayer;
 
+	// Sprite生成前に保存設定を復元して初回表示へ反映
 	LoadFromJson();
 
 	backgroundSprite_ = MadoEngine::SpriteManager::GetInstance().Create(backgroundSpriteName_, "white2x2", sceneType_);
@@ -177,6 +178,7 @@ bool Gauge::LoadFromJson() {
 		return false;
 	}
 
+	// 欠落項目は現在値を維持して旧形式を受け入れ、Sizeと値域だけを安全範囲へ補正
 	position_ = MadoEngine::Json::JsonSerializer::ToVector2(json.value("position", nlohmann::json::array()), position_);
 	size_ = MadoEngine::Json::JsonSerializer::ToVector2(json.value("size", nlohmann::json::array()), size_);
 	size_.x = std::max(0.0f, size_.x);
@@ -286,6 +288,7 @@ void Gauge::ApplyGaugeSprite() {
 	Vector2 gaugePosition = position_;
 	Vector2 gaugeSize = size_;
 
+	// 減少方向側の端点を固定するためSizeとPositionを組み合わせて調整
 	switch (direction_) {
 	case GaugeDirection::Right:
 		gaugeSize.x = size_.x * ratio;

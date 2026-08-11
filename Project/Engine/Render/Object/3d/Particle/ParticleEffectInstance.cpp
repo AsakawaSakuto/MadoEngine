@@ -53,11 +53,15 @@ namespace MadoEngine::Particle {
 		const float delay = config_->emission.startDelay;
 		const float previousLocalTime = previousTime - delay;
 		const float currentLocalTime = playbackTime_ - delay;
+
+		// Start Delay前の時間をEmission計算へ含めない待機区間
 		if (currentLocalTime < 0.0f) {
 			return;
 		}
 
 		float emissionDeltaTime = 0.0f;
+
+		// 非Loop時はDuration外のFrame時間を除いて総生成数の超過を防止
 		if (isLoop_) {
 			emissionDeltaTime = (std::max)(0.0f, currentLocalTime) - (std::max)(0.0f, previousLocalTime);
 		} else {
@@ -67,6 +71,7 @@ namespace MadoEngine::Particle {
 			emissionDeltaTime = (std::max)(0.0f, currentClamped - previousClamped);
 		}
 
+		// 小数Particleを次Frameへ持ち越してFrame Rate非依存の連続生成数を維持
 		spawnAccumulator_ += config_->emission.ratePerSecond * emissionDeltaTime;
 		const uint32_t continuousSpawnCount = static_cast<uint32_t>(spawnAccumulator_);
 		spawnAccumulator_ -= static_cast<float>(continuousSpawnCount);
@@ -78,6 +83,8 @@ namespace MadoEngine::Particle {
 		hasProcessedEmission_ = true;
 
 		if (!isLoop_ && currentLocalTime >= config_->emission.duration) {
+
+			// 生成終了後も既存Particleが消滅するまではInstanceを存続
 			isEmitting_ = false;
 		}
 	}

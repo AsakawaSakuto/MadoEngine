@@ -28,6 +28,7 @@ namespace MadoEngine::Render {
 		D3D12_SHADER_DESC shaderDesc{};
 		reflection->GetDesc(&shaderDesc);
 
+		// Shaderが要求する各ResourceをRootSignature検証用Descriptor種別へ変換
 		for (UINT i = 0; i < shaderDesc.BoundResources; ++i) {
 			D3D12_SHADER_INPUT_BIND_DESC bindDesc{};
 			reflection->GetResourceBindingDesc(i, &bindDesc);
@@ -71,6 +72,8 @@ namespace MadoEngine::Render {
 		const D3D12_ROOT_SIGNATURE_DESC& rootSigDesc)
 	{
 #ifdef _DEBUG
+
+		// 全Shader BindingがRoot ParameterまたはStatic Samplerに含まれることを検証
 		for (const auto& binding : bindings) {
 			bool found = false;
 
@@ -113,7 +116,7 @@ namespace MadoEngine::Render {
 				if (found) break;
 			}
 
-			// スタティックサンプラーをチェック
+			// Descriptor TableにないSamplerはStatic Sampler定義から探索
 			if (!found && binding.type == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER) {
 				for (UINT i = 0; i < rootSigDesc.NumStaticSamplers; ++i) {
 					if (rootSigDesc.pStaticSamplers[i].ShaderRegister == binding.bindPoint &&

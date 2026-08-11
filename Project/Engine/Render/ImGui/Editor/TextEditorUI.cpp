@@ -239,6 +239,7 @@ bool LoadTextEditorJson(SceneType sceneType) {
 void DrawTextManagerEditorUI(SceneType currentSceneType) {
 	TextManager& manager = TextManager::GetInstance();
 
+	// 選択Handleと編集中BufferをFrame間で維持するEditor Session状態
 	static std::array<char, 128> createName{};
 	static TextHandle selectedHandle{};
 	static TextHandle editingHandle{};

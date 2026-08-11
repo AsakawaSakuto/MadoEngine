@@ -25,6 +25,8 @@ namespace MadoEngine::Json {
 	}
 
 	bool JsonFile::Load(const std::filesystem::path& filePath, nlohmann::json& outJson) {
+
+		// File I/OとJson Parseの例外を境界内で処理して呼び出し側へboolで通知
 		if (!Exists(filePath)) {
 			Logger::Output("Jsonファイルが見つかりません : " + ToLogPath(filePath), Logger::Level::Warning);
 			return false;
@@ -57,6 +59,8 @@ namespace MadoEngine::Json {
 		int indent,
 		bool createBackup
 	) {
+
+		// 上書き前のBackupと親Directory生成を同じ保存処理内で実施
 		try {
 			const std::filesystem::path parentPath = filePath.parent_path();
 			if (!parentPath.empty()) {
@@ -89,6 +93,7 @@ namespace MadoEngine::Json {
 			return false;
 		}
 
+		// Backup名を固定して世代増加を避けつつ直前内容だけを保持
 		try {
 			std::filesystem::path backupPath = filePath;
 			backupPath += ".bak";

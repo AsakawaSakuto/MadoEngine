@@ -1,3 +1,4 @@
+// CPU側のLine頂点と定数Bufferに一致させる共有構造体
 struct LineVertexInput
 {
     float3 position : POSITION0;

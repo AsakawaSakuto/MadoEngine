@@ -411,6 +411,8 @@ namespace MadoEngine::Editor {
 	void DrawBeamEffectEditorUI() {
 #ifdef USE_IMGUI
 		BeamEffectSystem3d& system = BeamEffectSystem3d::GetInstance();
+
+		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
 		static int selectedAssetIndex = 0;
 		static int selectedEmitterIndex = 0;
 		static int selectedPage = 0;
@@ -441,6 +443,8 @@ namespace MadoEngine::Editor {
 			return;
 		}
 		if (!system.IsAlive(previewHandle)) {
+
+			// Runtime側で終了したPreview HandleにEditor状態を結び付けたままにしない同期
 			previewHandle = {};
 			previewAssetName.clear();
 		}

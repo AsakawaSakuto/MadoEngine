@@ -14,7 +14,7 @@ struct PixelShaderOutput {
 static const int kMaxGaussianFilterRadius = 8;
 static const float kPi = 3.14159265f;
 
-/// @brief GaussianFilterのパラメータを返す
+/// @brief GaussianFilterのパラメータを返却
 /// @return x: 標準偏差, y: 半径, z: 適用率
 float4 GetGaussianFilterParams() {
     if (all(gGaussianFilterParams == 0.0f)) {
@@ -24,7 +24,7 @@ float4 GetGaussianFilterParams() {
     return gGaussianFilterParams;
 }
 
-/// @brief 二次元ガウス関数の重みを返す
+/// @brief 二次元ガウス関数の重みを返却
 /// @param x 中心からのX方向距離
 /// @param y 中心からのY方向距離
 /// @param sigma 標準偏差
@@ -35,7 +35,7 @@ float CalculateGaussianWeight(float x, float y, float sigma) {
     return exp(exponent) / (2.0f * kPi * sigma2);
 }
 
-/// @brief 指定UVの周辺をガウス重みでぼかした色を返す
+/// @brief 指定UVの周辺をガウス重みでぼかした色を返却
 /// @param texcoord サンプリング中心UV
 /// @param texelSize 1テクセル分のUVサイズ
 /// @param sigma 標準偏差
@@ -45,6 +45,7 @@ float4 SampleGaussianFilter(float2 texcoord, float2 texelSize, float sigma, int 
     float4 sumColor = 0.0f;
     float totalWeight = 0.0f;
 
+    // Loop上限を固定したまま指定Radius外を除外してShader展開量を制限
     [loop]
     for (int y = -kMaxGaussianFilterRadius; y <= kMaxGaussianFilterRadius; ++y) {
         if (abs(y) > radius) {
@@ -64,10 +65,11 @@ float4 SampleGaussianFilter(float2 texcoord, float2 texelSize, float sigma, int 
         }
     }
 
+    // 切り取られたKernelの総Weightで正規化して画面輝度を維持
     return sumColor / max(totalWeight, 0.0001f);
 }
 
-/// @brief 画面色へGaussianFilterを適用する
+/// @brief 画面色へGaussianFilterを適用
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return GaussianFilter適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -79,6 +81,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     float4 params = GetGaussianFilterParams();
     float sigma = max(params.x, 0.001f);
+
+    // 小数入力を最寄りのPixel半径へ丸めて固定上限内に制限
     int radius = clamp((int)floor(params.y + 0.5f), 1, kMaxGaussianFilterRadius);
     float intensity = saturate(params.z);
     float2 texelSize = 1.0f / float2(max(textureWidth, 1), max(textureHeight, 1));

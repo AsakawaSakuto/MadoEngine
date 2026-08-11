@@ -376,6 +376,7 @@ namespace MadoEngine::Editor {
 		ModelManager& manager = ModelManager::GetInstance();
 		const std::vector<std::string> modelNames = manager.GetAvailableModelNames();
 
+		// 選択Handleと作成候補をFrame間で維持するEditor Session状態
 		static std::array<char, 128> createName{};
 		static std::string createModelName;
 		static ModelHandle selectedHandle{};

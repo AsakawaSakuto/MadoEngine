@@ -634,6 +634,8 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void RibbonEffectAsset::FromJson(const nlohmann::json& json) {
+
+		// Version差異を許容しつつEmitter数をEngine上限内で読み込み
 		version_ = ReadUInt(json, "version", kCurrentVersion);
 		if (version_ > kCurrentVersion) {
 			Logger::Output(
@@ -670,6 +672,8 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void RibbonEffectAsset::Validate() {
+
+		// 空Assetの既定Emitter補完と識別名の一意化を保存前に保証
 		version_ = kCurrentVersion;
 		if (emitters_.empty()) {
 			emitters_.push_back(RibbonEmitterConfig{});

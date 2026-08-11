@@ -8,7 +8,7 @@ namespace MadoEngine::Render {
 		assert(width  > 0 && "width は 0 より大きい値を指定してください");
 		assert(height > 0 && "height は 0 より大きい値を指定してください");
 
-		// --- ビューポートの設定 ---
+		// 描画対象全体をDepth範囲0から1で覆うViewport
 		viewport_.TopLeftX = 0.0f;
 		viewport_.TopLeftY = 0.0f;
 		viewport_.Width    = static_cast<FLOAT>(width);
@@ -16,7 +16,7 @@ namespace MadoEngine::Render {
 		viewport_.MinDepth = 0.0f;
 		viewport_.MaxDepth = 1.0f;
 
-		// --- シザー矩形の設定 ---
+		// Viewport外へのRasterizeを除外する同寸法のScissor矩形
 		scissorRect_.left   = 0;
 		scissorRect_.top    = 0;
 		scissorRect_.right  = static_cast<LONG>(width);

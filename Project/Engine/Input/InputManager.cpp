@@ -53,6 +53,7 @@ namespace MadoEngine
 
 	bool InputManager::IsPress(const std::string& actionName) const
 	{
+
 		// 小文字に変換して検索
 		std::string lowerActionName = ToLower(actionName);
 		auto it = inputActions_.find(lowerActionName);
@@ -64,14 +65,17 @@ namespace MadoEngine
 		bool result = CheckAnyPress(it->second);
 
 		if (useLogger_) {
+
 			// Pressが押されているとき
 			if (result) {
+
 				// まだログ出力していない場合のみ出力
 				if (pressLoggedFlags_[lowerActionName] == false) {
 					Logger::Output(" Actionが実行されました [Press]   : " + actionName, Logger::Level::Engine);
 					pressLoggedFlags_[lowerActionName] = true;
 				}
 			} else {
+
 				// 押されていないときはフラグをリセット
 				pressLoggedFlags_[lowerActionName] = false;
 			}
@@ -82,6 +86,7 @@ namespace MadoEngine
 
 	bool InputManager::IsTrigger(const std::string& actionName) const
 	{
+
 		// 小文字に変換して検索
 		auto it = inputActions_.find(ToLower(actionName));
 		if (it == inputActions_.end())
@@ -99,6 +104,7 @@ namespace MadoEngine
 
 	bool InputManager::IsRelease(const std::string& actionName) const
 	{
+
 		// 小文字に変換して検索
 		auto it = inputActions_.find(ToLower(actionName));
 		if (it == inputActions_.end())
@@ -116,6 +122,7 @@ namespace MadoEngine
 
 	bool InputManager::CheckAnyPress(const InputAction& action) const
 	{
+
 		// キーボードチェック
 		for (int key : action.keybordKeys)
 		{
@@ -148,6 +155,7 @@ namespace MadoEngine
 
 	bool InputManager::CheckAnyTrigger(const InputAction& action) const
 	{
+
 		// キーボードチェック
 		for (int key : action.keybordKeys)
 		{
@@ -180,6 +188,7 @@ namespace MadoEngine
 
 	bool InputManager::CheckAnyRelease(const InputAction& action) const
 	{
+
 		// キーボードチェック
 		for (int key : action.keybordKeys)
 		{

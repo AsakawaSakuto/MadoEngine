@@ -507,6 +507,8 @@ namespace MadoEngine::Beam {
 	}
 
 	void BeamEffectAsset::FromJson(const nlohmann::json& json) {
+
+		// 読み込んだVersionを保持して旧形式の移行判定へ利用
 		version_ = ReadUInt(json, "version", kCurrentVersion);
 		const uint32_t loadedVersion = version_;
 		if (version_ > kCurrentVersion) {
@@ -542,6 +544,8 @@ namespace MadoEngine::Beam {
 	}
 
 	void BeamEffectAsset::Validate() {
+
+		// 空Assetの既定Emitter補完と識別名の一意化を保存前に保証
 		version_ = kCurrentVersion;
 		if (emitters_.empty()) {
 			emitters_.push_back(BeamEmitterConfig{});

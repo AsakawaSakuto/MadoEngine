@@ -448,6 +448,8 @@ namespace MadoEngine::Editor {
 
     void DrawLightManagerEditorUI() {
         LightManager& lightManager = LightManager::GetInstance();
+
+        // 選択Handleと新規作成名をFrame間で維持するEditor Session状態
         static LightHandle selectedHandle{};
         static std::array<char, 128> createName{};
         static bool isInitialized = false;

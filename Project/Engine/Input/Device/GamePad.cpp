@@ -18,6 +18,7 @@ namespace MadoEngine::InputDevice
 
 	GamePad::~GamePad()
 	{
+
 		// 振動を停止
 		if (connected_)
 		{
@@ -157,6 +158,8 @@ namespace MadoEngine::InputDevice
 
 	float GamePad::NormalizeStickValue(SHORT value, SHORT deadzone) const
 	{
+
+		// Deadzone外の残り範囲を符号を保ったまま0から1へ再Mapping
 		if (value > deadzone)
 		{
 			return static_cast<float>(value - deadzone) / (32767.0f - deadzone);
@@ -203,6 +206,7 @@ namespace MadoEngine::InputDevice
 		}
 
 		if (vibrationDesc_.easeType != EaseType::None) {
+
 			// 振動を設定
 			XINPUT_VIBRATION vibration;
 			vibration.wLeftMotorSpeed = static_cast<WORD>(Easing::Lerp(1.0f, 0.0f, vibrationTimer_.GetProgress(), vibrationDesc_.easeType) * vibrationDesc_.LeftMotor * 65535.0f);

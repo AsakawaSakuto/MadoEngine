@@ -8,7 +8,7 @@ struct PixelShaderOutput
     float4 color : SV_TARGET0;
 };
 
-/// @brief 画面色を反転する
+/// @brief 画面色を反転
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return 反転したピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input)

@@ -21,7 +21,7 @@ StructuredBuffer<CylinderInstance> gInstances : register(t0);
 Texture2D<float4> gTexture : register(t1);
 SamplerState gSampler : register(s0);
 
-/// @brief Gradient停止位置を取得する
+/// @brief Gradient停止位置を取得
 /// @param instance Cylinder Instance
 /// @param index Gradient停止位置番号
 /// @return 正規化された停止位置
@@ -30,12 +30,14 @@ float GetGradientPosition(CylinderInstance instance, uint index)
     return instance.gradientPositions[index / 4u][index % 4u];
 }
 
-/// @brief 高さに対応するGradient色を評価する
+/// @brief 高さに対応するGradient色を評価
 /// @param instance Cylinder Instance
 /// @param position 正規化された高さ
 /// @return 補間された色
 float4 EvaluateGradient(CylinderInstance instance, float position)
 {
+
+    // CPU側設定が範囲外でも固定長Gradient配列を越えないよう停止数を制限
     const uint count = clamp(instance.metadata.z, 1u, 8u);
     if (count == 1u || position <= GetGradientPosition(instance, 0u))
     {
@@ -58,12 +60,14 @@ float4 EvaluateGradient(CylinderInstance instance, float position)
     return instance.gradientColors[count - 1u];
 }
 
-/// @brief UV方向設定を正規化パラメータへ適用する
+/// @brief UV方向設定を正規化パラメータへ適用
 /// @param parameter 円周方向と高さ方向の正規化値
 /// @param direction UV方向
 /// @return 方向適用後のUV
 float2 ResolveBaseUv(float2 parameter, uint direction)
 {
+
+    // 円周と高さの割り当てを切り替えてTexture方向をMesh再生成なしで変更
     if (direction == 1u)
     {
         return float2(parameter.x, parameter.y);
@@ -79,7 +83,7 @@ float2 ResolveBaseUv(float2 parameter, uint direction)
     return float2(parameter.x, 1.0f - parameter.y);
 }
 
-/// @brief テクスチャ、Gradient、端フェードを合成する
+/// @brief テクスチャ、Gradient、端フェードを合成
 /// @param input Pixel Shader入力
 /// @return 出力色
 float4 main(PixelShaderInput input) : SV_TARGET0
@@ -87,6 +91,7 @@ float4 main(PixelShaderInput input) : SV_TARGET0
     CylinderInstance instance = gInstances[input.instanceId];
     float2 uv = ResolveBaseUv(input.parameter, instance.metadata.w);
 
+    // UV中心を原点に移して回転後もTextureの基準位置を維持
     const float rotation = instance.effectParameters.x;
     float sine = 0.0f;
     float cosine = 1.0f;
@@ -102,6 +107,8 @@ float4 main(PixelShaderInput input) : SV_TARGET0
     float fade = 1.0f;
     const float bottomFadeRange = instance.effectParameters.y;
     const float topFadeRange = instance.effectParameters.z;
+
+    // 上下端を独立にFadeしてCylinderの出現と消失表現へ対応
     if (bottomFadeRange > 0.0001f)
     {
         fade *= saturate(input.parameter.y / bottomFadeRange);
@@ -116,6 +123,8 @@ float4 main(PixelShaderInput input) : SV_TARGET0
     color.a *= instance.geometry.w * fade;
     if (color.a <= 0.001f)
     {
+
+        // 微小Alphaを破棄して透明部分の不要なBlendを除外
         discard;
     }
     return color;

@@ -49,6 +49,8 @@ namespace MadoEngine::Ribbon {
 			0.0f,
 			0.1f
 		);
+
+		// 長時間停止後の復帰でTrail Pointが過剰生成されないFrame時間上限
 		const float scaledDeltaTime = safeDeltaTime * playbackSpeed_;
 		for (EmitterState& emitter : emitters_) {
 			if (emitter.isImmediatelyFinished || !emitter.pointSource) {
@@ -67,6 +69,8 @@ namespace MadoEngine::Ribbon {
 				continue;
 			}
 			if (emitter.playbackTime >= duration) {
+
+				// Finish停止では生成だけを終了して既存Trailの寿命消化を継続
 				emitter.playbackTime = duration;
 				emitter.isGenerating = false;
 				emitter.pointSource->Stop(RibbonStopMode::Finish);

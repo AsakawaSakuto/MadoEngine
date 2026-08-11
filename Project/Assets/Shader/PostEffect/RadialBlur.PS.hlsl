@@ -12,13 +12,13 @@ struct PixelShaderOutput {
     float4 color : SV_TARGET0;
 };
 
-/// @brief RadialBlurの既定値を使用するかを返す
+/// @brief RadialBlurの既定値を使用するかの判定
 /// @return 既定値を使用する場合はtrue
 bool UsesDefaultRadialBlurParams() {
     return all(gRadialBlurParams == 0.0f) && all(gRadialBlurCenterParams == 0.0f);
 }
 
-/// @brief RadialBlurの強度パラメータを返す
+/// @brief RadialBlurの強度パラメータを返却
 /// @return x: 強度, y: サンプル数, z: 半径, w: 距離減衰
 float4 GetRadialBlurParams() {
     if (UsesDefaultRadialBlurParams()) {
@@ -28,7 +28,7 @@ float4 GetRadialBlurParams() {
     return gRadialBlurParams;
 }
 
-/// @brief RadialBlurの中心座標を返す
+/// @brief RadialBlurの中心座標を返却
 /// @return 画面UV上の中心座標
 float2 GetRadialBlurCenter() {
     if (UsesDefaultRadialBlurParams()) {
@@ -38,7 +38,7 @@ float2 GetRadialBlurCenter() {
     return gRadialBlurCenterParams.xy;
 }
 
-/// @brief 中心方向へずらしたUVを作成する
+/// @brief 中心方向へずらしたUVを作成
 /// @param texcoord 入力UV
 /// @param center ブラー中心UV
 /// @param sampleRate サンプル位置
@@ -49,7 +49,7 @@ float2 CreateRadialBlurSampleTexcoord(float2 texcoord, float2 center, float samp
     return saturate(texcoord + directionToCenter * sampleRate * blurLength);
 }
 
-/// @brief 画面色へRadialBlurを適用する
+/// @brief 画面色へRadialBlurを適用
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return RadialBlur適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -65,11 +65,14 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     float2 directionToCenter = center - input.texcoord;
     float distanceFromCenter = length(directionToCenter);
+
+    // 中心ではBlurを抑え、外周ほど中心方向のSampling距離を拡大
     float blurLength = saturate(pow(saturate(distanceFromCenter * 2.0f), falloff) * radius);
 
     float4 blurColor = 0.0f;
     float totalWeight = 0.0f;
 
+    // Compile時の最大Loopを固定しつつ実行時Sample数で早期終了
     [loop]
     for (int sampleIndex = 0; sampleIndex < 64; ++sampleIndex) {
         if (sampleIndex >= sampleCount) {

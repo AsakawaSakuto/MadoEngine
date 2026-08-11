@@ -25,6 +25,8 @@ namespace MadoEngine::Ribbon {
 
 	void ManualRibbonPointSource::Update(float deltaTime) {
 		if (isGenerating_) {
+
+			// 再生中は手動制御点を固定形状として維持するため寿命を進めず更新
 			for (RibbonPoint& point : sourcePoints_) {
 				point.age = 0.0f;
 			}
@@ -32,6 +34,7 @@ namespace MadoEngine::Ribbon {
 			return;
 		}
 
+		// Finish停止後は既存形状だけを寿命に従って自然消滅
 		const float safeDeltaTime = std::clamp(
 			std::isfinite(deltaTime) ? deltaTime : 0.0f,
 			0.0f,
@@ -96,6 +99,8 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void ManualRibbonPointSource::RebuildWorldPoints() {
+
+		// 入力されたLocal制御点を保持したまま描画用CopyだけをWorld座標へ変換
 		worldPoints_ = sourcePoints_;
 		if (config_.simulationSpace != RibbonSimulationSpace::Local) {
 			return;

@@ -11,7 +11,7 @@ struct PixelShaderOutput {
     float4 color : SV_TARGET0;
 };
 
-/// @brief カラーフィルターのパラメータを取得する
+/// @brief カラーフィルターのパラメータを取得
 /// @return x: フィルター色R, y: フィルター色G, z: フィルター色B, w: 適用率
 float4 GetColorFilterParams() {
     if (all(gColorFilterParams == 0.0f)) {
@@ -21,7 +21,7 @@ float4 GetColorFilterParams() {
     return gColorFilterParams;
 }
 
-/// @brief 画面色へ指定色のカラーフィルターを適用する
+/// @brief 画面色へ指定色のカラーフィルターを適用
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return カラーフィルター適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {

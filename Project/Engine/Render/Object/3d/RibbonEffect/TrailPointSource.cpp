@@ -82,11 +82,15 @@ namespace MadoEngine::Ribbon {
 		if (!worldPoints_.empty()) {
 			const Vector3 difference = worldPosition - worldPoints_.back().position;
 			if (difference.LengthSq() < minimumDistance * minimumDistance) {
+
+				// 微小移動によるPoint過密化と不要なRibbon分割を抑制
 				return;
 			}
 		}
 
 		RibbonPoint point;
+
+		// Local Simulationでは初期Transform空間へ固定してEmitterの後続移動から分離
 		point.position = config_.simulationSpace == RibbonSimulationSpace::Local
 			? Matrix::Transform(worldPosition, worldToLocal_)
 			: worldPosition;
@@ -94,6 +98,7 @@ namespace MadoEngine::Ribbon {
 		point.lifetime = config_.pointLifetime;
 		sourcePoints_.push_back(point);
 
+		// 上限超過時は軌跡の先頭から破棄して最新区間を維持
 		while (sourcePoints_.size() > config_.maxPointCount) {
 			sourcePoints_.erase(sourcePoints_.begin());
 		}

@@ -29,7 +29,7 @@ static const float kPrewittVertical[3][3] = {
     { 1.0f / 6.0f, 1.0f / 6.0f, 1.0f / 6.0f },
 };
 
-/// @brief アウトラインの太さを取得する
+/// @brief アウトラインの太さを取得
 /// @return アウトラインの太さ
 float GetOutlineThickness()
 {
@@ -41,7 +41,7 @@ float GetOutlineThickness()
     return max(gOutlineParams.x, 0.25f);
 }
 
-/// @brief 深度エッジの感度を取得する
+/// @brief 深度エッジの感度を取得
 /// @return 深度エッジの感度
 float GetDepthSensitivity()
 {
@@ -53,7 +53,7 @@ float GetDepthSensitivity()
     return gOutlineParams.y;
 }
 
-/// @brief エッジ検出のしきい値を取得する
+/// @brief エッジ検出のしきい値を取得
 /// @return エッジ検出のしきい値
 float GetEdgeThreshold()
 {
@@ -65,7 +65,7 @@ float GetEdgeThreshold()
     return gOutlineParams.z;
 }
 
-/// @brief アウトラインの濃さを取得する
+/// @brief アウトラインの濃さを取得
 /// @return アウトラインの濃さ
 float GetOutlineIntensity()
 {
@@ -77,7 +77,7 @@ float GetOutlineIntensity()
     return gOutlineParams.w;
 }
 
-/// @brief 深度が背景クリア値に近いか判定する
+/// @brief 深度が背景クリア値に近いか判定
 /// @param depth 判定する深度
 /// @return 背景に近い場合はtrue
 bool IsClearDepth(float depth)
@@ -85,7 +85,7 @@ bool IsClearDepth(float depth)
     return depth >= 0.9999f;
 }
 
-/// @brief マスク深度がシーン深度より手前か判定する
+/// @brief マスク深度がシーン深度より手前か判定
 /// @param maskDepth マスク側の深度
 /// @param sceneDepth シーン側の深度
 /// @return マスクが見えている場合はtrue
@@ -94,7 +94,7 @@ bool IsMaskVisible(float maskDepth, float sceneDepth)
     return IsClearDepth(sceneDepth) || maskDepth <= sceneDepth + 0.0002f;
 }
 
-/// @brief Prewittフィルタで深度差分を計算する
+/// @brief Prewittフィルタで深度差分を計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param thickness アウトラインの太さ
@@ -119,7 +119,7 @@ float2 CalculateDepthDifference(float2 texcoord, float2 texelSize, float thickne
     return difference;
 }
 
-/// @brief Prewittフィルタでアルファ差分を計算する
+/// @brief Prewittフィルタでアルファ差分を計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param thickness アウトラインの太さ
@@ -144,7 +144,7 @@ float2 CalculateAlphaDifference(float2 texcoord, float2 texelSize, float thickne
     return difference;
 }
 
-/// @brief 差分から滑らかなエッジ重みを計算する
+/// @brief 差分から滑らかなエッジ重みを計算
 /// @param edgeValue エッジ差分値
 /// @param threshold しきい値
 /// @return 0から1のエッジ重み
@@ -154,7 +154,7 @@ float CalculateSmoothEdgeWeight(float edgeValue, float threshold)
     return smoothstep(threshold, threshold + smoothWidth, edgeValue);
 }
 
-/// @brief アウトラインの重みを計算する
+/// @brief アウトラインの重みを計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @return アウトラインの重み
@@ -163,6 +163,7 @@ float CalculateOutlineWeight(float2 texcoord, float2 texelSize)
     float thickness = GetOutlineThickness();
     float threshold = GetEdgeThreshold();
 
+    // 深度とAlphaの両方から輪郭を拾い、背景上の透明境界も検出
     float2 depthDifference = CalculateDepthDifference(texcoord, texelSize, thickness);
     float depthEdge = length(depthDifference) * GetDepthSensitivity();
     float depthWeight = CalculateSmoothEdgeWeight(depthEdge, threshold);
@@ -172,12 +173,14 @@ float CalculateOutlineWeight(float2 texcoord, float2 texelSize)
     float alphaWeight = CalculateSmoothEdgeWeight(alphaEdge, 0.02f);
 
     float centerDepth = gMaskDepthTexture.Sample(gSamplerPoint, texcoord);
+
+    // 背景Clear値ではAlpha輪郭を優先して不要な深度Edgeの広がりを抑制
     float depthGate = IsClearDepth(centerDepth) ? alphaWeight : saturate(alphaWeight * 2.0f + depthWeight * 0.25f);
     float outlineWeight = max(alphaWeight, depthWeight * depthGate);
     return saturate(outlineWeight * GetOutlineIntensity());
 }
 
-/// @brief 深度とアルファのPrewittアウトラインを描画する
+/// @brief 深度とアルファのPrewittアウトラインを描画
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return アウトライン適用後の色
 PixelShaderOutput main(VertexShaderOutput input)
@@ -194,6 +197,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     float4 srcColor = gTexture.Sample(gSamplerLinear, input.texcoord);
     float maskDepth = gMaskDepthTexture.Sample(gSamplerPoint, input.texcoord);
     float sceneDepth = gSceneDepthTexture.Sample(gSamplerPoint, input.texcoord);
+
+    // Sceneより奥のMask本体を消しつつ手前に見える輪郭だけを合成
     float visibleBody = IsMaskVisible(maskDepth, sceneDepth) ? srcColor.a : 0.0f;
     float outputAlpha = max(visibleBody, outlineWeight);
 

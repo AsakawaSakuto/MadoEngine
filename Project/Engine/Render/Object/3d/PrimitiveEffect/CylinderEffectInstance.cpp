@@ -59,6 +59,7 @@ namespace MadoEngine::Effect {
 			return;
 		}
 
+		// 大きなFrame間隔によるTrack補間の飛び越しを抑える時間上限
 		const float scaledDeltaTime = std::clamp(
 			std::isfinite(deltaTime) ? deltaTime : 0.0f,
 			0.0f,
@@ -129,6 +130,8 @@ namespace MadoEngine::Effect {
 			if (emitter.isFinished) {
 				continue;
 			}
+
+			// 再生時刻に全Trackを評価して不変なAssetとFrame単位の描画Dataを分離
 			const CylinderEmitterConfig& config = emitter.config;
 			const float playbackTime = emitter.playbackTime;
 			CylinderRenderData data;

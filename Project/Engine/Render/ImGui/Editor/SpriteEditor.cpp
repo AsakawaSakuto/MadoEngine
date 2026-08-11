@@ -337,6 +337,7 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 	SpriteManager& manager = SpriteManager::GetInstance();
 	const std::vector<std::string> textureNames = GetSelectableTextureNames();
 
+	// 選択Handleと作成候補をFrame間で維持するEditor Session状態
 	static std::array<char, 128> createName{};
 	static std::string createTextureName;
 	static SpriteHandle selectedHandle{};

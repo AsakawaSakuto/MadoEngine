@@ -11,6 +11,8 @@ Vector4 GamingColor::Update(float deltaTime, float changeTime) {
     }
 
     const double cycleDuration = static_cast<double>(changeTime) * 6.0;
+
+    // 長時間動作でも浮動小数点精度を保つため6色相区間の周期内へ時刻を折り返し
     elapsedTime_ = std::fmod(elapsedTime_, cycleDuration);
 
     const float phasePosition = static_cast<float>(elapsedTime_ / static_cast<double>(changeTime));
@@ -25,6 +27,7 @@ Vector4 GamingColor::CalculateColor(float phasePosition) const {
     const int phase = static_cast<int>(phasePosition);
     const float progress = phasePosition - static_cast<float>(phase);
 
+    // RGB Cubeの辺を順に補間して明度を落とさず色相を循環
     switch (phase) {
     case 0:
         return { 1.0f, progress, 0.0f, 1.0f };

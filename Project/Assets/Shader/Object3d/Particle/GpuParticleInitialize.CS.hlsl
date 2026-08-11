@@ -1,6 +1,6 @@
 #include "GpuParticleCommon.hlsli"
 
-/// @brief Particle BufferとFree Listを初期化する
+/// @brief Particle BufferとFree Listを初期化
 /// @param dispatchThreadId Dispatch全体のThread ID
 [numthreads(kGpuParticleThreadGroupSize, 1, 1)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
@@ -8,6 +8,8 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 	const uint maxParticles = gGpuParticleEmitterMetadata.x;
 
 	if (particleIndex == 0) {
+
+		// Global CounterとIndirect Argumentsは競合を避けるため先頭Threadだけで初期化
 		gGpuParticleCurrentCounter.Store(0, 0);
 		gGpuParticleNextCounter.Store(0, 0);
 		gGpuParticleFreeCounter.Store(0, maxParticles);
@@ -22,6 +24,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 		return;
 	}
 
+	// 全Slotを未使用状態に揃えてFree Listへ一対一で登録
 	GpuParticleState state = (GpuParticleState)0;
 	state.lifeTime = 1.0f;
 	gGpuParticleStates[particleIndex] = state;

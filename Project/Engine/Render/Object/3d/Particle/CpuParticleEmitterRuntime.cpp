@@ -30,6 +30,8 @@ namespace MadoEngine::Particle {
 	}
 
 	void CpuParticleEmitterRuntime::Stop(StopMode mode) {
+
+		// Immediateだけ生存Particleを破棄し、Finishでは寿命完了まで更新を継続
 		if (mode == StopMode::Immediate) {
 			simulator_.Reset();
 		}

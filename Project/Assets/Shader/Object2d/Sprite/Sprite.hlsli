@@ -1,5 +1,4 @@
-// 2D Sprite用の構造体定義（ライティング不要）
-
+// CPU側のSprite定数Bufferと入出力Layoutに一致させる共有構造体
 struct SpriteVertexInput
 {
     float4 position : POSITION0;

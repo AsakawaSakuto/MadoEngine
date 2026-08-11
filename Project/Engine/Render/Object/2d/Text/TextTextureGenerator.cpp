@@ -136,6 +136,7 @@ bool TextTextureGenerator::Initialize() {
 		return true;
 	}
 
+	// COM所有時だけFinalizeで解除し、既存Apartmentでは呼び出し側の所有を維持
 	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	if (SUCCEEDED(hr)) {
 		didInitializeCom_ = true;
@@ -203,6 +204,8 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 	const float layoutHeight = desc.areaSize.y > 0.0f ? desc.areaSize.y : 4096.0f;
 	IDWriteFontCollection* fontCollection = nullptr;
 	const wchar_t* fontFamily = desc.fontFamily.c_str();
+
+	// Asset Font指定時はSystem FontではなくFile単位のCollectionを選択
 	if (!desc.fontFilePath.empty()) {
 		for (size_t index = 0; index < fontAssets_.size(); ++index) {
 			if (fontAssets_[index].filePath == desc.fontFilePath) {
@@ -274,6 +277,8 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 
 	uint32_t width = 1;
 	uint32_t height = 1;
+
+	// Layout計測後に必要最小限のBitmap Sizeへ確定
 	ResolveTextureSize(textLayout.Get(), desc.areaSize, width, height);
 	textLayout->SetMaxWidth(static_cast<float>(width));
 	textLayout->SetMaxHeight(static_cast<float>(height));
@@ -312,6 +317,8 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 	}
 
 	renderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+
+	// 透明背景へ白文字を描き色付けはSprite Material側へ委譲
 	renderTarget->BeginDraw();
 	renderTarget->Clear(D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f));
 	renderTarget->DrawTextLayout(D2D1::Point2F(0.0f, 0.0f), textLayout.Get(), brush.Get());
@@ -329,6 +336,7 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 		return false;
 	}
 
+	// WICのPremultiplied BGRAをEngine Texture用のStraight Alpha RGBAへ変換
 	if (!ConvertPremultipliedBgraToRgba(bgraPixels, width, height, outPixels.pixels)) {
 		return false;
 	}
@@ -359,6 +367,8 @@ void TextTextureGenerator::LoadFontAssets(const std::filesystem::path& fontDirec
 		}
 		fontFilePaths.push_back(iterator->path());
 	}
+
+	// File Systemの列挙順に依存しない安定したEditor表示順へ整列
 	std::sort(fontFilePaths.begin(), fontFilePaths.end());
 
 	for (const std::filesystem::path& fontFilePath : fontFilePaths) {
@@ -382,6 +392,7 @@ void TextTextureGenerator::LoadFontAssets(const std::filesystem::path& fontDirec
 			error.clear();
 		}
 
+		// Meta DataとDirectWrite Collectionを同じIndexで保持して寿命を同期
 		fontAssets_.push_back({
 			WideToUtf8(relativePath.generic_wstring()),
 			WideToUtf8(fontFilePath.stem().wstring()),

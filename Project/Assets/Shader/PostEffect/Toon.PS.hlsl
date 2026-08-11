@@ -28,7 +28,7 @@ static const float kPrewittVertical[3][3] = {
     { 1.0f / 6.0f, 1.0f / 6.0f, 1.0f / 6.0f },
 };
 
-/// @brief トゥーン色調整パラメータを取得する
+/// @brief トゥーン色調整パラメータを取得
 /// @return x: 色階調数, y: 彩度, z: コントラスト, w: 適用率
 float4 GetToonColorParams() {
     if (all(gToonColorParams == 0.0f)) {
@@ -38,7 +38,7 @@ float4 GetToonColorParams() {
     return gToonColorParams;
 }
 
-/// @brief トゥーン輪郭パラメータを取得する
+/// @brief トゥーン輪郭パラメータを取得
 /// @return x: 輪郭太さ, y: 深度感度, z: 輪郭しきい値, w: 輪郭強度
 float4 GetToonEdgeParams() {
     if (all(gToonEdgeParams == 0.0f)) {
@@ -48,7 +48,7 @@ float4 GetToonEdgeParams() {
     return gToonEdgeParams;
 }
 
-/// @brief 輪郭色を取得する
+/// @brief 輪郭色を取得
 /// @return 輪郭色
 float4 GetToonOutlineColor() {
     if (all(gToonOutlineColor == 0.0f)) {
@@ -58,14 +58,14 @@ float4 GetToonOutlineColor() {
     return gToonOutlineColor;
 }
 
-/// @brief 深度が背景クリア値に近いか判定する
+/// @brief 深度が背景クリア値に近いか判定
 /// @param depth 判定する深度
 /// @return 背景に近い場合はtrue
 bool IsClearDepth(float depth) {
     return depth >= 0.9999f;
 }
 
-/// @brief マスク深度がシーン深度より手前か判定する
+/// @brief マスク深度がシーン深度より手前か判定
 /// @param maskDepth マスク側の深度
 /// @param sceneDepth シーン側の深度
 /// @return マスクが見えている場合はtrue
@@ -73,14 +73,14 @@ bool IsMaskVisible(float maskDepth, float sceneDepth) {
     return IsClearDepth(sceneDepth) || maskDepth <= sceneDepth + 0.0002f;
 }
 
-/// @brief 色の明るさを取得する
+/// @brief 色の明るさを取得
 /// @param color 入力色
 /// @return 輝度
 float GetLuminance(float3 color) {
     return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
 }
 
-/// @brief 彩度を調整する
+/// @brief 彩度を調整
 /// @param color 入力色
 /// @param saturation 彩度
 /// @return 彩度調整後の色
@@ -89,7 +89,7 @@ float3 ApplySaturation(float3 color, float saturation) {
     return saturate(lerp(float3(luminance, luminance, luminance), color, max(saturation, 0.0f)));
 }
 
-/// @brief コントラストを調整する
+/// @brief コントラストを調整
 /// @param color 入力色
 /// @param contrast コントラスト
 /// @return コントラスト調整後の色
@@ -97,7 +97,7 @@ float3 ApplyContrast(float3 color, float contrast) {
     return saturate((color - 0.5f) * max(contrast, 0.0f) + 0.5f);
 }
 
-/// @brief 輝度を段階化してトゥーン調の色へ変換する
+/// @brief 輝度を段階化してトゥーン調の色へ変換
 /// @param color 入力色
 /// @param colorSteps 色階調数
 /// @return 段階化後の色
@@ -106,10 +106,12 @@ float3 QuantizeByLuminance(float3 color, float colorSteps) {
     float maxIndex = steps - 1.0f;
     float luminance = max(GetLuminance(color), 0.0001f);
     float toonLuminance = floor(saturate(luminance) * maxIndex + 0.5f) / maxIndex;
+
+    // RGB比率を保ったまま輝度だけを段階化して色相のずれを抑制
     return saturate(color * (toonLuminance / luminance));
 }
 
-/// @brief Prewittフィルタで深度差分を計算する
+/// @brief Prewittフィルタで深度差分を計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param thickness 輪郭太さ
@@ -131,7 +133,7 @@ float2 CalculateDepthDifference(float2 texcoord, float2 texelSize, float thickne
     return difference;
 }
 
-/// @brief Prewittフィルタでアルファ差分を計算する
+/// @brief Prewittフィルタでアルファ差分を計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param thickness 輪郭太さ
@@ -153,7 +155,7 @@ float2 CalculateAlphaDifference(float2 texcoord, float2 texelSize, float thickne
     return difference;
 }
 
-/// @brief 差分から滑らかな輪郭重みを計算する
+/// @brief 差分から滑らかな輪郭重みを計算
 /// @param edgeValue エッジ差分値
 /// @param threshold しきい値
 /// @return 0から1の輪郭重み
@@ -162,7 +164,7 @@ float CalculateSmoothEdgeWeight(float edgeValue, float threshold) {
     return smoothstep(threshold, threshold + smoothWidth, edgeValue);
 }
 
-/// @brief 深度とアルファから輪郭重みを計算する
+/// @brief 深度とアルファから輪郭重みを計算
 /// @param texcoord サンプリングするUV座標
 /// @param texelSize 1ピクセル分のUVサイズ
 /// @param edgeParams 輪郭パラメータ
@@ -182,11 +184,13 @@ float CalculateOutlineWeight(float2 texcoord, float2 texelSize, float4 edgeParam
     float alphaWeight = CalculateSmoothEdgeWeight(alphaEdge, 0.02f);
 
     float centerDepth = gMaskDepthTexture.Sample(gSamplerPoint, texcoord);
+
+    // 背景Clear値ではAlpha輪郭を優先して不要な深度Edgeの広がりを抑制
     float depthGate = IsClearDepth(centerDepth) ? alphaWeight : saturate(alphaWeight * 2.0f + depthWeight * 0.25f);
     return saturate(max(alphaWeight, depthWeight * depthGate) * intensity);
 }
 
-/// @brief 画面色をトゥーン調に変換して輪郭を合成する
+/// @brief 画面色をトゥーン調に変換して輪郭を合成
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return トゥーン適用後の色
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -210,6 +214,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float outlineWeight = CalculateOutlineWeight(input.texcoord, texelSize, edgeParams);
     float maskDepth = gMaskDepthTexture.Sample(gSamplerPoint, input.texcoord);
     float sceneDepth = gSceneDepthTexture.Sample(gSamplerPoint, input.texcoord);
+
+    // Sceneより奥のMask本体を消しつつ手前に見える輪郭だけを合成
     float visibleBody = IsMaskVisible(maskDepth, sceneDepth) ? srcColor.a : 0.0f;
 
     output.color.rgb = lerp(toonColor, outlineColor.rgb, outlineWeight * outlineColor.a);

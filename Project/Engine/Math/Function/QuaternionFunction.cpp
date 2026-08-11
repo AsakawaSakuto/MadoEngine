@@ -29,17 +29,17 @@ namespace QuaternionFunc {
         return result;
     }
 
-    // 単位Quaternionを返す
+    // 回転なしを表す単位Quaternion
     Quaternion IdentityQuaternion() {
         return { 0.0f, 0.0f, 0.0f, 1.0f };
     }
 
-    // 共役Quaternionを返す
+    // 虚部の符号を反転した共役Quaternion
     Quaternion Conjugate(const Quaternion& quaternion) {
         return { -quaternion.x, -quaternion.y, -quaternion.z, quaternion.w };
     }
 
-    // Quaternionのnormを返す
+    // QuaternionのNorm
     float Norm(const Quaternion& quaternion) {
         return std::sqrt(
             quaternion.x * quaternion.x +
@@ -48,10 +48,11 @@ namespace QuaternionFunc {
             quaternion.w * quaternion.w);
     }
 
-    // 正規化したQuaternionを返す
+    // 長さを1へ揃えたQuaternion
     Quaternion Normalize(const Quaternion& quaternion) {
         float n = Norm(quaternion);
         if (n == 0.0f) {
+
             // 0除算を避ける。ここは課題の方針に合わせて変更してOK
             return { 0.0f, 0.0f, 0.0f, 0.0f };
         }
@@ -64,7 +65,7 @@ namespace QuaternionFunc {
         };
     }
 
-    // 逆Quaternionを返す
+    // 共役をNormの二乗で除算した逆Quaternion
     Quaternion Inverse(const Quaternion& quaternion) {
 
         float n2 =
@@ -74,7 +75,8 @@ namespace QuaternionFunc {
             quaternion.w * quaternion.w;
 
         if (n2 == 0.0f) {
-            // 逆が定義できないのでゼロを返す
+
+            // Normが0の場合は逆を定義できないためZero Quaternion
             return { 0.0f, 0.0f, 0.0f, 0.0f };
         }
 
@@ -166,18 +168,16 @@ namespace QuaternionFunc {
         return m;
     }
 
-    // 球面線形補間 Slerp
     Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
-        // q0, q1 は単位クォータニオン想定
 
-        // 内積
+        // 単位Quaternion同士の内積から回転経路と補間角を決定
         float dot =
             q0.x * q1.x +
             q0.y * q1.y +
             q0.z * q1.z +
             q0.w * q1.w;
 
-        // 反対向きの場合は片方を反転させて最短経路にする
+        // 反対向きの場合は片方を反転して最短経路を選択
         Quaternion q1Adj = q1;
         if (dot < 0.0f) {
             dot = -dot;

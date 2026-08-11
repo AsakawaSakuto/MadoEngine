@@ -159,6 +159,7 @@ namespace MadoEngine {
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
 		// ドッキング自由度の向上
 		io.ConfigDockingWithShift        = false; // Shiftキーなしで任意の場所にドッキング可能
 		io.ConfigDockingAlwaysTabBar     = true;  // ドックノードに常にタブバーを表示
@@ -206,7 +207,6 @@ namespace MadoEngine {
 		ImGuizmo::BeginFrame();
 	}
 
-	/// @brief 既定のImGuiスタイルカラーを適用
 	void ImGuiManager::ApplyDefaultStyleColors() {
 		ImGui::StyleColorsDark();
 		ImVec4* colors = ImGui::GetStyle().Colors;
@@ -224,8 +224,6 @@ namespace MadoEngine {
 		colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.32f, 0.42f, 1.0f);
 	}
 
-	/// @brief ImGuiのスタイルカラーをJsonへ保存
-	/// @return 保存できた場合はtrue
 	bool ImGuiManager::SaveStyleColors() const {
 		nlohmann::json root;
 		nlohmann::json colorsJson = nlohmann::json::object();
@@ -239,8 +237,6 @@ namespace MadoEngine {
 		return Json::JsonFile::Save(kStyleColorJsonPath, root, 4, true);
 	}
 
-	/// @brief ImGuiのスタイルカラーをJsonから読み込み
-	/// @return 読み込めた場合はtrue
 	bool ImGuiManager::LoadStyleColors() {
 		if (!Json::JsonFile::Exists(kStyleColorJsonPath)) {
 			return false;
@@ -279,7 +275,6 @@ namespace MadoEngine {
 		return loaded;
 	}
 
-	/// @brief ImGuiのスタイルカラー編集ウィンドウを描画
 	void ImGuiManager::DrawStyleColorEditorUI() {
 		ImGui::Begin("ImGui Style Color");
 
@@ -326,6 +321,7 @@ namespace MadoEngine {
 	}
 
 	void ImGuiManager::DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV) {
+
 		// 全画面 DockSpace ウィンドウの設定
 		ImGuiWindowFlags dockFlags =
 			ImGuiWindowFlags_NoDocking |
@@ -356,14 +352,17 @@ namespace MadoEngine {
 		constexpr float kAspect = 16.0f / 9.0f;
 		ImVec2 imageSize;
 		if (avail.x / avail.y > kAspect) {
+
 			// 横が余る → 高さ基準
 			imageSize.y = avail.y;
 			imageSize.x = avail.y * kAspect;
 		} else {
+
 			// 縦が余る → 幅基準
 			imageSize.x = avail.x;
 			imageSize.y = avail.x / kAspect;
 		}
+
 		// 余白をセンタリング
 		ImVec2 offset((avail.x - imageSize.x) * 0.5f, (avail.y - imageSize.y) * 0.5f);
 		ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + offset.x, ImGui::GetCursorPosY() + offset.y));

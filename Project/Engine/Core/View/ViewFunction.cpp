@@ -20,8 +20,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descrip
     D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
     handleCPU.ptr += (descriptorSize * index);
 
-    //Logger::Output("CPU DescriptorHandleの取得が完了しました", Logger::Level::Info);
-
     return handleCPU;
 }
 
@@ -29,8 +27,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 {
     D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     handleGPU.ptr += (descriptorSize * index);
-
-    //Logger::Output("GPU DescriptorHandleの取得が完了しました", Logger::Level::Info);
 
     return handleGPU;
 }

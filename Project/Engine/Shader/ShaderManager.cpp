@@ -45,6 +45,7 @@ namespace MadoEngine {
 
 			const wchar_t* profile = ResolveProfile(hlslPath.filename());
 			if (!profile) {
+
 				// VS/PS が判定できないファイルはスキップ
 				continue;
 			}
@@ -65,6 +66,7 @@ namespace MadoEngine {
 
 			bool needCompile = false;
 			if (!fs::exists(csoPath)) {
+
 				// .cso が存在しない → コンパイル必要
 				Logger::Output(
 					std::format("CSOが存在しないためコンパイルします : {}", key),
@@ -72,6 +74,7 @@ namespace MadoEngine {
 				);
 				needCompile = true;
 			} else {
+
 				// タイムスタンプ比較 : HLSL が新しければ再コンパイル
 				const auto hlslTime = fs::last_write_time(hlslPath);
 				const auto csoTime  = fs::last_write_time(csoPath);
@@ -94,6 +97,7 @@ namespace MadoEngine {
 					continue;
 				}
 			} else {
+
 				// .cso ファイルから読み込む
 				blob = LoadCso(csoPath.wstring());
 				if (!blob) {
@@ -182,7 +186,8 @@ namespace MadoEngine {
 	}
 
 	std::string ShaderManager::MakeKey(const std::filesystem::path& relPath) {
-		// 拡張子を除いた相対パスを / 区切りで返す
+
+		// 拡張子を除いた相対PathをSlash区切りへ正規化
 		// 例: PostEffect\CopyImage.VS.hlsl → "PostEffect/CopyImage.VS"
 		std::filesystem::path noExt = relPath;
 		noExt.replace_extension(); // .hlsl を除去
@@ -192,7 +197,8 @@ namespace MadoEngine {
 
 	const wchar_t* ShaderManager::ResolveProfile(const std::filesystem::path& filename) {
 		const std::string name = filename.string();
-		// *.VS.hlsl → vs_6_0、*.PS.hlsl → ps_6_0
+
+		// Shader拡張子に応じてVertexまたはPixel用Profileを選択
 		if (name.find(".VS.") != std::string::npos) { return L"vs_6_0"; }
 		if (name.find(".PS.") != std::string::npos) { return L"ps_6_0"; }
 		if (name.find(".GS.") != std::string::npos) { return L"gs_6_0"; }
@@ -218,6 +224,7 @@ namespace MadoEngine {
 		const std::wstring& filePath,
 		const wchar_t* profile)
 	{
+
 		// wstring → string 変換ヘルパー
 		auto toStr = [](const std::wstring& ws) -> std::string {
 			int size = WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);

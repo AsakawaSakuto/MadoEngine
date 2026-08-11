@@ -13,7 +13,7 @@ struct PixelShaderOutput {
 
 static const int kMaxBoxFilterRadius = 8;
 
-/// @brief BoxFilterのパラメータを返す
+/// @brief BoxFilterのパラメータを返却
 /// @return x: 半径, y: 適用率
 float4 GetBoxFilterParams() {
     if (all(gBoxFilterParams == 0.0f)) {
@@ -23,7 +23,7 @@ float4 GetBoxFilterParams() {
     return gBoxFilterParams;
 }
 
-/// @brief 指定UVの周辺を平均化した色を返す
+/// @brief 指定UVの周辺を平均化した色を返却
 /// @param texcoord サンプリング中心UV
 /// @param texelSize 1テクセル分のUVサイズ
 /// @param radius フィルタ半径
@@ -32,6 +32,7 @@ float4 SampleBoxFilter(float2 texcoord, float2 texelSize, int radius) {
     float4 sumColor = 0.0f;
     float sampleCount = 0.0f;
 
+    // Loop上限を固定したまま指定Radius外を除外してShader展開量を制限
     [loop]
     for (int y = -kMaxBoxFilterRadius; y <= kMaxBoxFilterRadius; ++y) {
         if (abs(y) > radius) {
@@ -53,7 +54,7 @@ float4 SampleBoxFilter(float2 texcoord, float2 texelSize, int radius) {
     return sumColor / max(sampleCount, 1.0f);
 }
 
-/// @brief 画面色へBoxFilterを適用する
+/// @brief 画面色へBoxFilterを適用
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return BoxFilter適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -64,6 +65,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
     gTexture.GetDimensions(textureWidth, textureHeight);
 
     float4 params = GetBoxFilterParams();
+
+    // 小数入力を最寄りのPixel半径へ丸めて固定上限内に制限
     int radius = clamp((int)floor(params.x + 0.5f), 1, kMaxBoxFilterRadius);
     float intensity = saturate(params.y);
     float2 texelSize = 1.0f / float2(max(textureWidth, 1), max(textureHeight, 1));

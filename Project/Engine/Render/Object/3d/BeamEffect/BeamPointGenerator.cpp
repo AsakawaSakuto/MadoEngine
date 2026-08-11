@@ -70,6 +70,8 @@ namespace MadoEngine::Beam {
 		const Vector3 referenceAxis = std::abs(direction.y) < 0.9f
 			? Vector3{ 0.0f, 1.0f, 0.0f }
 			: Vector3{ 1.0f, 0.0f, 0.0f };
+
+		// Beam方向との平行を避けた参照軸から安定したNoise平面を構築
 		const Vector3 noiseAxisX = SafeNormalize(Cross(direction, referenceAxis), { 1.0f, 0.0f, 0.0f });
 		const Vector3 noiseAxisY = SafeNormalize(Cross(direction, noiseAxisX), { 0.0f, 0.0f, 1.0f });
 
@@ -81,6 +83,8 @@ namespace MadoEngine::Beam {
 			const float rate = static_cast<float>(index) / static_cast<float>(segmentCount);
 			Vector3 position = Lerp(startPosition, endPosition, rate);
 			if (index != 0 && index != segmentCount && noise.amplitude > 0.0f) {
+
+				// 始終点を固定したまま中央ほど強くなる包絡線でNoiseを付与
 				const float envelope = std::sin(rate * 3.14159265358979323846f);
 				const float coordinate = rate * noise.frequency + noiseCoordinateOffset;
 				const float offsetX = EvaluateNoise(coordinate, noise.seed);
@@ -106,6 +110,8 @@ namespace MadoEngine::Beam {
 			static_cast<double>((std::numeric_limits<int32_t>::max)() - 1)
 		));
 		const float fraction = std::clamp(coordinate - floorCoordinate, 0.0f, 1.0f);
+
+		// 格子境界で傾きが不連続にならないSmoothstepによるHash値補間
 		const float smoothFraction = fraction * fraction * (3.0f - 2.0f * fraction);
 		const auto hashToSigned = [seed](int32_t index) {
 			uint32_t value = static_cast<uint32_t>(index) ^ seed;

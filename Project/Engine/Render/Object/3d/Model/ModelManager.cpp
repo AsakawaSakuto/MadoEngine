@@ -193,6 +193,7 @@ ModelHandle ModelManager::Create(const ModelCreateDesc& desc) {
 	model->SetPSORegistry(psoRegistry_);
 	model->SetSceneType(desc.sceneType);
 
+	// 破棄済みSlotを再利用してHandle Indexの増加を抑制
 	uint32_t index = 0;
 	if (freeModelSlots_.empty()) {
 		index = static_cast<uint32_t>(modelSlots_.size());
@@ -246,11 +247,15 @@ ModelHandle ModelManager::CreateFromJson(const nlohmann::json& json) {
 	ModelHandle handle = Find(name);
 	if (handle.IsValid()) {
 		ModelSlot& slot = modelSlots_[handle.index];
+
+		// JSON復元で実行時専用Objectを上書きしない管理境界
 		if (slot.managementMode == EditorManagementMode::RuntimeOnly) {
 			Logger::Output("実行時専用Modelと同名のためJSON読み込みをスキップしました: " + name, Logger::Level::Warning);
 			return {};
 		}
 		if (slot.assetName != ResolveModelPath(modelName)) {
+
+			// Asset差し替えでは共有DataとGPU Resourceの再初期化が必要なためInstanceを再生成
 			Destroy(handle);
 			handle = {};
 		}
@@ -320,6 +325,8 @@ bool ModelManager::Rename(ModelHandle handle, const std::string& newName) {
 	}
 
 	const std::string oldName = slot.name;
+
+	// Object本体と名前索引を同時に更新してHandle検索の一貫性を維持
 	modelNameToHandle_.erase(oldName);
 	slot.name = newName;
 	modelNameToHandle_.emplace(newName, handle);
@@ -339,6 +346,8 @@ bool ModelManager::Destroy(ModelHandle handle) {
 
 	ModelSlot& slot = modelSlots_[handle.index];
 	const std::string name = slot.name;
+
+	// 遅延削除Queueと名前索引を先に掃除して破棄中の再参照を防止
 	pendingDestroyModelHandles_.erase(
 		std::remove(pendingDestroyModelHandles_.begin(), pendingDestroyModelHandles_.end(), handle),
 		pendingDestroyModelHandles_.end());
@@ -351,6 +360,8 @@ bool ModelManager::Destroy(ModelHandle handle) {
 	slot.assetName.clear();
 	slot.managementMode = EditorManagementMode::RuntimeOnly;
 	slot.active = false;
+
+	// 旧Handleを無効化してからSlotを再利用候補へ返却
 	slot.generation = NextObjectGeneration(slot.generation);
 	freeModelSlots_.push_back(handle.index);
 	Logger::Output("Modelを削除しました: " + name, Logger::Level::Application);
@@ -404,6 +415,7 @@ InstancedModelHandle ModelManager::CreateInstanced(const InstancedModelCreateDes
 	model->SetPSORegistry(psoRegistry_);
 	model->SetSceneType(desc.sceneType);
 
+	// 通常Modelとは独立したSlot PoolでInstance描画用Handleを管理
 	uint32_t index = 0;
 	if (freeInstancedModelSlots_.empty()) {
 		index = static_cast<uint32_t>(instancedModelSlots_.size());

@@ -84,6 +84,7 @@ void Text::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandLi
 	device_ = device;
 	commandList_ = commandList;
 
+	// Managerを介さない単独利用向けにUnit Quad Geometryを所有
 	SpriteVertexData* vertexData = CreateMappedBuffer<SpriteVertexData>(device_.Get(), vertexResource_, 4);
 	vertexData[0].position = { 0.0f, 1.0f, 0.0f, 1.0f };
 	vertexData[1].position = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -118,6 +119,8 @@ void Text::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandLi
 
 	device_ = device;
 	commandList_ = commandList;
+
+	// Manager経由では共有Geometryを参照してTextごとのBuffer重複を回避
 	activeVBV_ = &sharedGeo.vbv;
 	activeIBV_ = &sharedGeo.ibv;
 
@@ -155,6 +158,8 @@ void Text::Update() {
 	Matrix4x4 anchorMatrix = Matrix::MakeTranslate({ -anchorPoint_.x * sx, -anchorPoint_.y * sy, 0.0f });
 	Matrix4x4 rotateMatrix = Matrix::MakeRotateZ(transform_.rotate);
 	Matrix4x4 transMatrix = Matrix::MakeTranslate({ transform_.translate.x, transform_.translate.y, 0.0f });
+
+	// Anchor補正をScale後かつRotation前に適用して指定位置を回転中心として維持
 	Matrix4x4 worldMatrix = Matrix::Multiply(
 		Matrix::Multiply(Matrix::Multiply(scaleMatrix, anchorMatrix), rotateMatrix),
 		transMatrix
@@ -374,12 +379,15 @@ void Text::RebuildTextureIfNeeded() {
 	desc.wordWrap = wordWrap_;
 
 	TextTexturePixels pixels{};
+
+	// 文字列やFont設定の変更時だけCPU RasterizeとGPU Texture更新を実行
 	if (!TextTextureGenerator::GetInstance().Generate(desc, pixels)) {
 		Logger::Output("[Engine] Textテクスチャの生成に失敗しました: " + objectName_, Logger::Level::Error);
 		textureIndex_ = UINT32_MAX;
 		return;
 	}
 
+	// 同じTexture Keyを更新してSprite側のDescriptor Indexを安定化
 	textureIndex_ = TextureManager::GetInstance().RegisterOrUpdateRGBA(
 		textureKey_,
 		pixels.width,

@@ -181,6 +181,7 @@ namespace MadoEngine::Particle {
 			{}
 		);
 
+		// 空き容量を上限として生存Particleを連続領域へ追加
 		for (uint32_t index = 0; index < spawnCount; ++index) {
 			const ShapeSample shapeSample = SampleShape(config.shape, random);
 			const Vector3 configuredDirection = NormalizeDirection(SampleRange(config.initial.direction, random));
@@ -203,6 +204,8 @@ namespace MadoEngine::Particle {
 			particle.color = particle.startColor;
 
 			if (config.simulationSpace == SimulationSpace::World) {
+
+				// 発生時点のEmitter変換を焼き込み、以後のEmitter移動からParticleを分離
 				particle.position = Matrix::Transform(particle.position, emitterMatrix);
 				particle.velocity = Matrix::Transform(particle.velocity, emitterRotation);
 				particle.rotation += emitterTransform.rotate.z;
@@ -228,6 +231,8 @@ namespace MadoEngine::Particle {
 			ParticleState& particle = particles_[index];
 			particle.age += deltaTime;
 			if (particle.age >= particle.lifeTime) {
+
+				// 末尾要素との交換削除で生存領域を詰め、走査中の線形Eraseを回避
 				particles_[index] = particles_[aliveCount_ - 1];
 				--aliveCount_;
 				continue;
@@ -238,6 +243,7 @@ namespace MadoEngine::Particle {
 			particle.position += particle.velocity * deltaTime;
 			particle.rotation += particle.angularVelocity * deltaTime;
 
+			// 寿命全体の正規化時間でScaleとColorを開始値から終了値へ補間
 			const float normalizedAge = std::clamp(particle.age / particle.lifeTime, 0.0f, 1.0f);
 			particle.scale = particle.startScale + (particle.endScale - particle.startScale) * normalizedAge;
 			particle.color = particle.startColor + (particle.endColor - particle.startColor) * normalizedAge;

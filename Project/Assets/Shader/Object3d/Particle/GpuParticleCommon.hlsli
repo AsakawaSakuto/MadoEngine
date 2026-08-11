@@ -1,6 +1,7 @@
 #ifndef MADO_ENGINE_GPU_PARTICLE_COMMON_HLSLI
 #define MADO_ENGINE_GPU_PARTICLE_COMMON_HLSLI
 
+// CPU側のEmitter設定と一致させる形状、空間、Direction Modeの識別値
 static const uint kGpuParticleShapePoint = 0;
 static const uint kGpuParticleShapeLine = 1;
 static const uint kGpuParticleShapeSphere = 2;
@@ -23,6 +24,7 @@ static const uint kGpuParticleEmitCountOffset = 28;
 static const float kGpuParticleEpsilon = 0.000001f;
 static const float kGpuParticleTwoPi = 6.28318530717958647692f;
 
+// CPU側構造体と同一順序・16byte境界を維持するParticle Buffer要素
 struct GpuParticleState {
 	float3 position;
 	float rotation;
@@ -49,22 +51,22 @@ struct GpuParticleDrawInstance {
 #ifndef MADO_ENGINE_GPU_PARTICLE_GRAPHICS
 
 cbuffer GpuParticleEmitterParameters : register(b0) {
-	// x: 最大数、y: 形状、z: SimulationSpace、w: DirectionMode
+	/// @brief x: 最大数、y: 形状、z: SimulationSpace、w: DirectionMode
 	uint4 gGpuParticleEmitterMetadata;
-	// x: 形状フラグ、y: Seed
+	/// @brief x: 形状Flag、y: Seed
 	uint4 gGpuParticleEmitterFlagsAndSeed;
 	float4 gGpuParticleShape0;
 	float4 gGpuParticleShape1;
 	float4 gGpuParticleDirectionMin;
 	float4 gGpuParticleDirectionMax;
-	// x: LifeTime最小、y: LifeTime最大、z: Speed最小、w: Speed最大
+	/// @brief x: LifeTime最小、y: LifeTime最大、z: Speed最小、w: Speed最大
 	float4 gGpuParticleLifeTimeSpeed;
-	// x: Rotation最小、y: Rotation最大、z: AngularVelocity最小、w: AngularVelocity最大
+	/// @brief x: Rotation最小、y: Rotation最大、z: AngularVelocity最小、w: AngularVelocity最大
 	float4 gGpuParticleRotationRange;
-	// xyz: Gravity、w: Drag
+	/// @brief xyz: Gravity、w: Drag
 	float4 gGpuParticleGravityDrag;
 	float4 gGpuParticleAcceleration;
-	// xy: 最小、zw: 最大
+	/// @brief xy: 最小、zw: 最大
 	float4 gGpuParticleStartScaleMinMax;
 	float4 gGpuParticleEndScaleMinMax;
 	float4 gGpuParticleStartColorMin;
@@ -76,7 +78,7 @@ cbuffer GpuParticleEmitterParameters : register(b0) {
 cbuffer GpuParticlePerFrameParameters : register(b1) {
 	row_major float4x4 gGpuParticleEmitterMatrix;
 	row_major float4x4 gGpuParticleEmitterRotationMatrix;
-	// xy: Emitter Scale、z: Emitter Z Rotation
+	/// @brief xy: Emitter Scale、z: Emitter Z Rotation
 	float4 gGpuParticleEmitterScaleRotation;
 	float gGpuParticleDeltaTime;
 	uint gGpuParticleEmitCount;
@@ -94,19 +96,21 @@ RWStructuredBuffer<uint> gGpuParticleFreeIndices : register(u5);
 RWByteAddressBuffer gGpuParticleFreeCounter : register(u6);
 RWByteAddressBuffer gGpuParticleIndirectArguments : register(u7);
 
-/// @brief ゼロに近いVectorを既定方向へ置き換えて正規化する
+/// @brief ゼロに近いVectorを既定方向へ置き換えて正規化
 /// @param value 正規化するVector
 /// @param fallback ゼロに近い場合に使用する既定方向
 /// @return 正規化したVector
 float3 NormalizeGpuParticleDirection(float3 value, float3 fallback) {
 	const float lengthSquared = dot(value, value);
 	if (lengthSquared <= kGpuParticleEpsilon) {
+
+		// rsqrtによるNaNを防ぐため長さを持たないVectorは既定方向へ置換
 		return fallback;
 	}
 	return value * rsqrt(lengthSquared);
 }
 
-/// @brief GPU Particle Stateから描画用Instanceを生成する
+/// @brief GPU Particle Stateから描画用Instanceを生成
 /// @param state 描画するParticle State
 /// @return Emitter Transformを反映した描画用Instance
 GpuParticleDrawInstance BuildGpuParticleDrawInstance(GpuParticleState state) {
@@ -118,6 +122,8 @@ GpuParticleDrawInstance BuildGpuParticleDrawInstance(GpuParticleState state) {
 	instance.color = state.color;
 
 	if (gGpuParticleEmitterMetadata.z == kGpuParticleSimulationSpaceLocal) {
+
+		// Local Simulationは描画時に現在のEmitter Transformへ追従
 		instance.position = mul(
 			float4(state.position, 1.0f),
 			gGpuParticleEmitterMatrix
@@ -128,11 +134,13 @@ GpuParticleDrawInstance BuildGpuParticleDrawInstance(GpuParticleState state) {
 	return instance;
 }
 
-/// @brief Alive Outputへ安全にParticle Indexを追加する
+/// @brief Alive Outputへ安全にParticle Indexを追加
 /// @param particleIndex 追加するParticle Index
 /// @return 追加できた場合はtrue
 bool AppendGpuParticleAliveIndex(uint particleIndex) {
 	const uint maxParticles = gGpuParticleEmitterMetadata.x;
+
+	// 複数Threadの同時追加でもIndexが重複しないようCASでCounterを確保
 	[loop]
 	while (true) {
 		const uint currentCount = gGpuParticleNextCounter.Load(0);
@@ -154,11 +162,13 @@ bool AppendGpuParticleAliveIndex(uint particleIndex) {
 	}
 }
 
-/// @brief Free Listへ安全にParticle Indexを追加する
+/// @brief Free Listへ安全にParticle Indexを追加
 /// @param particleIndex 解放するParticle Index
 /// @return 追加できた場合はtrue
 bool PushGpuParticleFreeIndex(uint particleIndex) {
 	const uint maxParticles = gGpuParticleEmitterMetadata.x;
+
+	// UpdateとEmitの並行解放でもSlotを失わないようCASで書き込み位置を確保
 	[loop]
 	while (true) {
 		const uint currentCount = gGpuParticleFreeCounter.Load(0);
@@ -180,11 +190,13 @@ bool PushGpuParticleFreeIndex(uint particleIndex) {
 	}
 }
 
-/// @brief Free Listから安全にParticle Indexを取得する
+/// @brief Free Listから安全にParticle Indexを取得
 /// @param particleIndex 取得したParticle Index
 /// @return 取得できた場合はtrue
 bool PopGpuParticleFreeIndex(out uint particleIndex) {
 	particleIndex = 0;
+
+	// Counterの減算に成功したThreadだけがFree List末尾のSlotを取得
 	[loop]
 	while (true) {
 		const uint currentCount = gGpuParticleFreeCounter.Load(0);
@@ -206,7 +218,7 @@ bool PopGpuParticleFreeIndex(out uint particleIndex) {
 	}
 }
 
-/// @brief 32bit値を疑似乱数用にHash化する
+/// @brief 32bit値を疑似乱数用にHash化
 /// @param value Hash化する値
 /// @return Hash化した値
 uint HashGpuParticleValue(uint value) {
@@ -218,7 +230,7 @@ uint HashGpuParticleValue(uint value) {
 	return value;
 }
 
-/// @brief GPU Particle用疑似乱数列の次の値を生成する
+/// @brief GPU Particle用疑似乱数列の次の値を生成
 /// @param state 疑似乱数列の内部状態
 /// @return 生成した32bit疑似乱数
 uint NextGpuParticleRandom(inout uint state) {
@@ -228,7 +240,7 @@ uint NextGpuParticleRandom(inout uint state) {
 	return (word >> 22) ^ word;
 }
 
-/// @brief 0以上1未満のGPU Particle用疑似乱数を生成する
+/// @brief 0以上1未満のGPU Particle用疑似乱数を生成
 /// @param state 疑似乱数列の内部状態
 /// @return 0以上1未満の疑似乱数
 float NextGpuParticleRandom01(inout uint state) {
@@ -236,7 +248,7 @@ float NextGpuParticleRandom01(inout uint state) {
 		(1.0f / 16777216.0f);
 }
 
-/// @brief float範囲からGPU Particle用疑似乱数を生成する
+/// @brief float範囲からGPU Particle用疑似乱数を生成
 /// @param minimum 範囲の最小値
 /// @param maximum 範囲の最大値
 /// @param state 疑似乱数列の内部状態
@@ -248,7 +260,7 @@ float SampleGpuParticleRange(
 	return lerp(minimum, maximum, NextGpuParticleRandom01(state));
 }
 
-/// @brief float2範囲からGPU Particle用疑似乱数を生成する
+/// @brief float2範囲からGPU Particle用疑似乱数を生成
 /// @param minimum 範囲の最小値
 /// @param maximum 範囲の最大値
 /// @param state 疑似乱数列の内部状態
@@ -263,7 +275,7 @@ float2 SampleGpuParticleRange(
 	);
 }
 
-/// @brief float3範囲からGPU Particle用疑似乱数を生成する
+/// @brief float3範囲からGPU Particle用疑似乱数を生成
 /// @param minimum 範囲の最小値
 /// @param maximum 範囲の最大値
 /// @param state 疑似乱数列の内部状態
@@ -279,7 +291,7 @@ float3 SampleGpuParticleRange(
 	);
 }
 
-/// @brief float4範囲からGPU Particle用疑似乱数を生成する
+/// @brief float4範囲からGPU Particle用疑似乱数を生成
 /// @param minimum 範囲の最小値
 /// @param maximum 範囲の最大値
 /// @param state 疑似乱数列の内部状態

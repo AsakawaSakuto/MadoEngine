@@ -13,7 +13,7 @@ struct PixelShaderOutput {
     float4 color : SV_TARGET0;
 };
 
-/// @brief Split Toningの暗部色を取得する
+/// @brief Split Toningの暗部色を取得
 /// @return rgb: 暗部に加える色, a: 暗部への適用量
 float4 GetSplitToningShadowColor() {
     if (all(gSplitToningShadowColor == 0.0f)) {
@@ -23,7 +23,7 @@ float4 GetSplitToningShadowColor() {
     return gSplitToningShadowColor;
 }
 
-/// @brief Split Toningの明部色を取得する
+/// @brief Split Toningの明部色を取得
 /// @return rgb: 明部に加える色, a: 明部への適用量
 float4 GetSplitToningHighlightColor() {
     if (all(gSplitToningHighlightColor == 0.0f)) {
@@ -33,7 +33,7 @@ float4 GetSplitToningHighlightColor() {
     return gSplitToningHighlightColor;
 }
 
-/// @brief Split Toningの調整パラメータを取得する
+/// @brief Split Toningの調整パラメータを取得
 /// @return x: 分岐位置, y: なじみ幅, z: 全体適用率, w: 輝度保持率
 float4 GetSplitToningParams() {
     if (all(gSplitToningParams == 0.0f)) {
@@ -43,14 +43,14 @@ float4 GetSplitToningParams() {
     return gSplitToningParams;
 }
 
-/// @brief 色の輝度を取得する
+/// @brief 色の輝度を取得
 /// @param color 輝度を求める色
 /// @return Rec.709係数による輝度
 float GetLuminance(float3 color) {
     return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
 }
 
-/// @brief 指定色でトーンを乗せる
+/// @brief 指定色によるトーン調整
 /// @param source 元の色
 /// @param tintColor 乗せる色
 /// @param preserveLuminance 輝度保持率
@@ -59,12 +59,14 @@ float3 ApplyToneColor(float3 source, float3 tintColor, float preserveLuminance) 
     float sourceLuminance = max(GetLuminance(source), 0.0001f);
     float3 tonedColor = saturate(source * max(tintColor, 0.0f) * 2.0f);
     float tonedLuminance = max(GetLuminance(tonedColor), 0.0001f);
+
+    // 色味適用前後の輝度比で補正して明暗構造の変化を抑制
     float3 luminancePreservedColor = saturate(tonedColor * (sourceLuminance / tonedLuminance));
 
     return lerp(tonedColor, luminancePreservedColor, saturate(preserveLuminance));
 }
 
-/// @brief 暗部と明部に別々の色味を加える
+/// @brief 暗部と明部への個別の色味追加
 /// @param input 頂点シェーダーから受け取った画面座標とUV
 /// @return Split Toning適用後のピクセルカラー
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -83,6 +85,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float preserveLuminance = saturate(params.w);
     float luminance = saturate(GetLuminance(source));
 
+    // -1から1のBalanceを輝度範囲へ移し、Softnessで暗部と明部を連続Blend
     float highlightWeight = smoothstep(balance - softness, balance + softness, luminance);
     float shadowWeight = 1.0f - highlightWeight;
 

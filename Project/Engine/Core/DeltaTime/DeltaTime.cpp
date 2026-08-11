@@ -16,6 +16,8 @@ namespace MadoEngine
 
     void DeltaTime::Update()
     {
+
+        // 計測前に前Frame基準の目標時刻まで待機してFrame Rateを制限
         if (m_enableFPSLimit)
         {
             WaitForTargetFrameTime();
@@ -28,6 +30,8 @@ namespace MadoEngine
 
         if (m_enableFPSLimit)
         {
+
+            // Sleep精度の揺らぎをGame側へ伝えず固定Stepとして扱う補正
             m_deltaTime = m_targetFrameTime;
         }
 
