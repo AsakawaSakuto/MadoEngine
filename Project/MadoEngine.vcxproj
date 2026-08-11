@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Assets\Model\Skining\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
     <ClCompile Include="Application\GameObject\Player\Player.cpp" />
+    <ClCompile Include="Application\GameObject\Player\PlayerAnimationController.cpp" />
     <ClCompile Include="Application\GameObject\Player\PlayerController.cpp" />
     <ClCompile Include="Application\GameObject\Player\PlayerMovement.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
@@ -228,6 +230,8 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationSet.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Animation\Animator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\InstancedModel.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
@@ -452,7 +456,9 @@
     <ClInclude Include="Engine\Render\Object\2d\Text\TextManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextTextureGenerator.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationFunction.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationSet.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationStruct.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Animation\Animator.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\DebugLineManager.h" />
     <ClInclude Include="Engine\Render\Object\3d\Line\MyDebugLine.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\Model.h" />
@@ -463,6 +469,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />
+    <ClInclude Include="Application\GameObject\Player\PlayerAnimationController.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.h" />

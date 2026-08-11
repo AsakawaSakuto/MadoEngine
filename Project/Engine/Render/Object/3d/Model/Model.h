@@ -1,11 +1,13 @@
 #pragma once
 #include "ModelSharedData.h"
+#include "../Animation/Animator.h"
 #include "Render/Object/IRenderObject3d.h"
 #include "Utility/Light/LightManager.h"
 #include "Utility/Json/Core/IJsonSerializable.h"
 #include ".SceneManager/SceneType.h"
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace MadoEngine {
 	class ModelManager;
@@ -19,7 +21,9 @@ public:
 
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
 
-	void Update() override;
+	/// @brief Model状態とAnimation Poseを更新
+	/// @param deltaTime 前フレームからの経過時間
+	void Update(float deltaTime) override;
 
 	void Draw(Camera& useCamera) override;
 
@@ -167,6 +171,30 @@ public:
 	/// @return 頂点を取得できた場合はtrue
 	bool TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition) const;
 
+	/// @brief 指定したAnimationClipへ遷移
+	/// @param clipName 再生するAnimationClip名
+	/// @param blendDuration 遷移時間、負数の場合はClipの標準値
+	/// @param restart 同じClipでも先頭から再生する場合はtrue
+	/// @return 再生を開始できた場合はtrue
+	bool PlayAnimation(std::string_view clipName, float blendDuration = -1.0f, bool restart = false);
+
+	/// @brief 指定したAnimationClipを再生可能か判定
+	/// @param clipName 確認するAnimationClip名
+	/// @return 再生可能な場合はtrue
+	bool HasAnimationClip(std::string_view clipName) const;
+
+	/// @brief 現在再生中のAnimationClip名を取得
+	/// @return 現在再生中のAnimationClip名
+	std::string_view GetCurrentAnimationName() const { return animator_.GetCurrentClipName(); }
+
+	/// @brief 現在のAnimationClipが終端へ到達したか判定
+	/// @return 終端へ到達した場合はtrue
+	bool IsAnimationFinished() const { return animator_.IsFinished(); }
+
+	/// @brief Animation再生速度倍率を設定
+	/// @param playbackSpeed 再生速度倍率
+	void SetAnimationPlaybackSpeed(float playbackSpeed) { animator_.SetPlaybackSpeed(playbackSpeed); }
+
 	const ModelSharedData* GetSharedData() const { return sharedData_; }
 
 private:
@@ -226,8 +254,7 @@ private:
 	bool enableLighting_ = true;
 	DirectionalLight directionalLight_;
 
-	bool useAnimationTimer_ = false;
-	float animationTime_ = 0.0f;
+	Animator animator_;
 	Skeleton skeletonData_;
 	SkinCluster skinClusterData_;
 	uint32_t skinClusterIndex_ = UINT32_MAX;

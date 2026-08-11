@@ -6,8 +6,13 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <unordered_set>
+#include <utility>
 
 namespace {
 
@@ -23,16 +28,137 @@ std::string ToLower(std::string value) {
 
 /// @brief 読み込んだDataから利用可能なModel種別を推定
 /// @param modelData Model Data
-/// @param animationData Animation Data
+/// @param animationSet Animation Set
 /// @return 推定したModel種別
-ModelType InferModelType(const ModelData& modelData, const Animation& animationData) {
+ModelType InferModelType(const ModelData& modelData, const AnimationSet& animationSet) {
 	if (!modelData.skinClusterData.empty()) {
 		return ModelType::Skinning;
 	}
-	if (!animationData.nodeAnimations.empty()) {
+	if (!animationSet.IsEmpty()) {
 		return ModelType::Animated;
 	}
 	return ModelType::Static;
+}
+
+/// @brief ModelNode階層のNode名を収集
+/// @param node 収集対象のModelNode
+/// @param outNodeNames 収集したNode名の出力先
+void CollectNodeNames(const ModelNode& node, std::unordered_set<std::string>& outNodeNames) {
+	outNodeNames.insert(node.name);
+	for (const ModelNode& child : node.children) {
+		CollectNodeNames(child, outNodeNames);
+	}
+}
+
+/// @brief AnimationClipとModelNode階層の互換性を検証
+/// @param rootNode 互換性の基準になるRootNode
+/// @param clip 検証するAnimationClip
+/// @param outUnknownNodeCount Modelに存在しないAnimation Node数の出力先
+/// @return すべてのAnimation NodeがModelと一致する場合はtrue
+bool ValidateAnimationClip(
+	const ModelNode& rootNode,
+	const AnimationClip& clip,
+	std::size_t& outUnknownNodeCount) {
+	std::unordered_set<std::string> nodeNames;
+	CollectNodeNames(rootNode, nodeNames);
+	outUnknownNodeCount = 0;
+	std::size_t matchedNodeCount = 0;
+	for (const auto& [nodeName, nodeAnimation] : clip.nodeAnimations) {
+		(void)nodeAnimation;
+		if (nodeNames.contains(nodeName)) {
+			++matchedNodeCount;
+		} else {
+			++outUnknownNodeCount;
+		}
+	}
+
+	return matchedNodeCount > 0 && outUnknownNodeCount == 0;
+}
+
+/// @brief AnimationClipの再生設定をJsonから反映
+/// @param json 再生設定を保持するJson
+/// @param clip 設定対象のAnimationClip
+void ApplyAnimationClipSettings(const nlohmann::json& json, AnimationClip& clip) {
+	clip.loop = json.value("loop", true);
+	const float playbackSpeed = json.value("playbackSpeed", 1.0f);
+	clip.playbackSpeed = std::isfinite(playbackSpeed) ? (std::max)(0.0f, playbackSpeed) : 1.0f;
+	const float blendDuration = json.value("blendDuration", 0.15f);
+	clip.blendDuration = std::isfinite(blendDuration) ? (std::max)(0.0f, blendDuration) : 0.15f;
+}
+
+/// @brief Modelに対応するAnimationSetを読み込み
+/// @param modelPath Modelファイルパス
+/// @param rootNode 互換性検証の基準になるRootNode
+/// @param outAnimationSet 読み込んだAnimationSetの出力先
+void LoadAnimationSet(
+	const std::filesystem::path& modelPath,
+	const ModelNode& rootNode,
+	AnimationSet& outAnimationSet) {
+	const std::filesystem::path manifestPath =
+		modelPath.parent_path() / (modelPath.stem().string() + ".animations.json");
+	if (!std::filesystem::exists(manifestPath)) {
+		AnimationClip clip = LoadAnimationFile(modelPath.generic_string());
+		if (!clip.nodeAnimations.empty()) {
+			const std::string clipName = modelPath.stem().string();
+			outAnimationSet.AddClip(clipName, std::move(clip));
+			outAnimationSet.SetDefaultClip(clipName);
+		}
+		return;
+	}
+
+	std::ifstream manifestFile(manifestPath);
+	if (!manifestFile.is_open()) {
+		Logger::Output("Animation設定ファイルを開けませんでした: " + manifestPath.generic_string(), Logger::Level::Warning);
+		return;
+	}
+
+	try {
+		nlohmann::json manifestJson;
+		manifestFile >> manifestJson;
+		const auto clipsIterator = manifestJson.find("clips");
+		if (clipsIterator == manifestJson.end() || !clipsIterator->is_object()) {
+			Logger::Output("Animation設定にclipsが存在しません: " + manifestPath.generic_string(), Logger::Level::Warning);
+			return;
+		}
+
+		// Clip名はAsset内部名ではなくManifestの用途名を採用
+		for (const auto& [clipName, clipJson] : clipsIterator->items()) {
+			if (!clipJson.is_object()) {
+				continue;
+			}
+
+			const std::string sourceFile = clipJson.value("file", modelPath.filename().generic_string());
+			const std::filesystem::path sourcePath = (manifestPath.parent_path() / sourceFile).lexically_normal();
+			const int animationIndex = clipJson.value("index", 0);
+			AnimationClip clip = LoadAnimationFile(sourcePath.generic_string(), animationIndex);
+			if (clip.nodeAnimations.empty()) {
+				Logger::Output("AnimationClipを読み込めませんでした: " + clipName + " / " + sourcePath.generic_string(), Logger::Level::Warning);
+				continue;
+			}
+
+			std::size_t unknownNodeCount = 0;
+			if (!ValidateAnimationClip(rootNode, clip, unknownNodeCount)) {
+				Logger::Output(
+					"Skeletonと互換性のないAnimationClipを除外しました: " + clipName + " 不一致Node数: " + std::to_string(unknownNodeCount),
+					Logger::Level::Warning
+				);
+				continue;
+			}
+
+			ApplyAnimationClipSettings(clipJson, clip);
+			outAnimationSet.AddClip(clipName, std::move(clip));
+		}
+
+		const std::string defaultClipName = manifestJson.value("defaultClip", std::string{});
+		if (!defaultClipName.empty() && !outAnimationSet.SetDefaultClip(defaultClipName)) {
+			Logger::Output("標準AnimationClipが見つかりません: " + defaultClipName, Logger::Level::Warning);
+		}
+	} catch (const nlohmann::json::exception& exception) {
+		Logger::Output(
+			"Animation設定の解析に失敗しました: " + manifestPath.generic_string() + " / " + exception.what(),
+			Logger::Level::Error
+		);
+	}
 }
 
 } // namespace
@@ -88,10 +214,10 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 
 	outData.modelData = LoadObject3dFile(outData.path);
 	if (extension == ".gltf" || extension == ".glb") {
-		outData.animationData = LoadAnimationFile(outData.path);
+		LoadAnimationSet(path, outData.modelData.rootNode, outData.animationSet);
 	}
 
-	const ModelType inferredType = InferModelType(outData.modelData, outData.animationData);
+	const ModelType inferredType = InferModelType(outData.modelData, outData.animationSet);
 	outData.type = (requestedType == ModelType::Auto) ? inferredType : requestedType;
 
 	if (outData.type == ModelType::Skinning && outData.modelData.skinClusterData.empty()) {

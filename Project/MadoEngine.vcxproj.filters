@@ -116,6 +116,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Line\DebugLineManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\InstancedModel.cpp" />
     <ClCompile Include="Application\GameObject\Player\Player.cpp" />
+    <ClCompile Include="Application\GameObject\Player\PlayerAnimationController.cpp" />
     <ClCompile Include="Application\GameObject\Player\PlayerController.cpp" />
     <ClCompile Include="Application\GameObject\Player\PlayerMovement.cpp" />
     <ClCompile Include="Engine\Utility\Camera\TPS_Camera.cpp" />
@@ -123,6 +124,8 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationSet.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Animation\Animator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
@@ -688,6 +691,9 @@
     <ClInclude Include="Application\GameObject\Map\EventObject\Jar\JarType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationSet.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Animation\Animator.h" />
+    <ClInclude Include="Application\GameObject\Player\PlayerAnimationController.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>

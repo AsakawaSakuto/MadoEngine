@@ -136,7 +136,8 @@ void InstancedModel::SetShadowMap(
 	UpdateReceiveShadowGpuData();
 }
 
-void InstancedModel::Update() {
+void InstancedModel::Update(float deltaTime) {
+	(void)deltaTime;
 	if (!materialData_) {
 		return;
 	}

@@ -1,7 +1,7 @@
 #pragma once
 #include "ModelData.h"
 #include "ModelType.h"
-#include "../Animation/AnimationStruct.h"
+#include "../Animation/AnimationSet.h"
 #include "Render/PSO/PSODesc.h"
 #include <cstdint>
 #include <d3d12.h>
@@ -15,7 +15,7 @@ struct ModelSharedData {
 	ModelType type = ModelType::Static;
 
 	ModelData modelData;
-	Animation animationData;
+	AnimationSet animationSet;
 
 	std::vector<std::string> textureNames;
 	std::vector<uint32_t> textureIndices;

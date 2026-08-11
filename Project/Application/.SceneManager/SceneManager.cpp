@@ -136,7 +136,7 @@ void SceneManager::Update(float dt) {
 	MadoEngine::TextManager::GetInstance().UpdateAll(currentSceneType_);
 
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
-	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_);
+	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_, dt);
 	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Update(dt);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);

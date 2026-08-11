@@ -33,14 +33,18 @@ struct NodeAnimation {
     AnimationCurve<Vector3> scale;
 };
 
-struct Animation {
-    float duration;  // アニメーション全体の尺（単位は秒）
-    // NodeAnimationの集合。Node名でひけるようにしておく
-    std::map<std::string, NodeAnimation> nodeAnimations;
+struct AnimationClip {
+	std::string name;
+	float duration = 0.0f;
+	bool loop = true;
+	float playbackSpeed = 1.0f;
+	float blendDuration = 0.15f;
+	std::map<std::string, NodeAnimation> nodeAnimations;
 };
 
 struct Joint {
-    QuaternionTransform transform; // Transform情報
+	QuaternionTransform bindTransform; // BindPoseのTransform情報
+	QuaternionTransform transform; // 現在PoseのTransform情報
     Matrix4x4 localMatrix;         // localMatrix
     Matrix4x4 skeletonSpaceMatrix; // skeletonSpaceでの変換行列
     std::string name;              // 名前
@@ -76,3 +80,5 @@ struct SkinCluster {
     std::span<WellForGPU> mappedPalette;
     std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandle;
 };
+
+using AnimationPose = std::vector<QuaternionTransform>;

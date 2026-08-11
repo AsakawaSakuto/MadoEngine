@@ -10,9 +10,8 @@
 #include "Core/View/SRVManager.h"
 #include <algorithm>
 #include <cstring>
-Animation LoadAnimationFile(const std::string& filename, int index)
-{
-	Animation animation; // 今回作るアニメーション
+AnimationClip LoadAnimationFile(const std::string& filename, int index) {
+	AnimationClip animation; // 今回作るアニメーション
 
 	animation.duration = 0.0f;
 
@@ -201,6 +200,7 @@ int32_t CreateJoint(const ModelNode& node, const std::optional<int32_t>& parent,
 	joint.name = node.name;
 	joint.localMatrix = node.localMatrix;
 	joint.skeletonSpaceMatrix = Matrix::MakeIdentity();
+	joint.bindTransform = node.transform;
 	joint.transform = node.transform;
 	joint.index = int32_t(joints.size()); // 現在登録されている数をIndexに
 	joint.parent = parent;
@@ -296,15 +296,87 @@ void UpdateCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
 	}
 }
 
-void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime) {
+void ApplyAnimation(Skeleton& skeleton, const AnimationClip& animation, float animationTime) {
 	for (Joint& joint : skeleton.joints) {
+		joint.transform = joint.bindTransform;
 
 		// Animation Curveが存在するJointだけへ補間済みTransformを適用
 		if (auto it = animation.nodeAnimations.find(joint.name); it != animation.nodeAnimations.end()) {
 			const NodeAnimation& rootNodeAnimation = (*it).second;
-			joint.transform.translate = CalculateValue(rootNodeAnimation.translate.keyframes, animationTime);
-			joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, animationTime);
-			joint.transform.scale = CalculateValue(rootNodeAnimation.scale.keyframes, animationTime);
+			if (!rootNodeAnimation.translate.keyframes.empty()) {
+				joint.transform.translate = CalculateValue(rootNodeAnimation.translate.keyframes, animationTime);
+			}
+			if (!rootNodeAnimation.rotate.keyframes.empty()) {
+				joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, animationTime);
+			}
+			if (!rootNodeAnimation.scale.keyframes.empty()) {
+				joint.transform.scale = CalculateValue(rootNodeAnimation.scale.keyframes, animationTime);
+			}
 		}
+	}
+}
+
+void CreateBindPose(const Skeleton& skeleton, AnimationPose& outPose) {
+	outPose.resize(skeleton.joints.size());
+	for (std::size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+		outPose[jointIndex] = skeleton.joints[jointIndex].bindTransform;
+	}
+}
+
+void SampleAnimationPose(const Skeleton& skeleton, const AnimationClip& animation, float animationTime, AnimationPose& outPose) {
+	CreateBindPose(skeleton, outPose);
+
+	// ClipにTrackがないJointはBindPoseを維持して前のAnimation Poseの残留を防止
+	for (std::size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+		const Joint& joint = skeleton.joints[jointIndex];
+		const auto nodeAnimationIterator = animation.nodeAnimations.find(joint.name);
+		if (nodeAnimationIterator == animation.nodeAnimations.end()) {
+			continue;
+		}
+
+		const NodeAnimation& nodeAnimation = nodeAnimationIterator->second;
+		QuaternionTransform& transform = outPose[jointIndex];
+		if (!nodeAnimation.translate.keyframes.empty()) {
+			transform.translate = CalculateValue(nodeAnimation.translate.keyframes, animationTime);
+		}
+		if (!nodeAnimation.rotate.keyframes.empty()) {
+			transform.rotate = CalculateValue(nodeAnimation.rotate.keyframes, animationTime);
+		}
+		if (!nodeAnimation.scale.keyframes.empty()) {
+			transform.scale = CalculateValue(nodeAnimation.scale.keyframes, animationTime);
+		}
+	}
+}
+
+void BlendAnimationPose(const AnimationPose& sourcePose, const AnimationPose& targetPose, float blendFactor, AnimationPose& outPose) {
+	assert(sourcePose.size() == targetPose.size());
+	const float normalizedBlendFactor = std::clamp(blendFactor, 0.0f, 1.0f);
+	outPose.resize(targetPose.size());
+
+	// ScaleとTranslateは線形補間し、Rotationは最短経路の球面線形補間
+	for (std::size_t jointIndex = 0; jointIndex < targetPose.size(); ++jointIndex) {
+		outPose[jointIndex].translate = Math::Lerp(
+			sourcePose[jointIndex].translate,
+			targetPose[jointIndex].translate,
+			normalizedBlendFactor
+		);
+		outPose[jointIndex].rotate = QuaternionFunc::Slerp(
+			sourcePose[jointIndex].rotate,
+			targetPose[jointIndex].rotate,
+			normalizedBlendFactor
+		);
+		outPose[jointIndex].scale = Math::Lerp(
+			sourcePose[jointIndex].scale,
+			targetPose[jointIndex].scale,
+			normalizedBlendFactor
+		);
+	}
+}
+
+void ApplyAnimationPose(Skeleton& skeleton, const AnimationPose& pose) {
+	assert(skeleton.joints.size() == pose.size());
+	const std::size_t jointCount = (std::min)(skeleton.joints.size(), pose.size());
+	for (std::size_t jointIndex = 0; jointIndex < jointCount; ++jointIndex) {
+		skeleton.joints[jointIndex].transform = pose[jointIndex];
 	}
 }

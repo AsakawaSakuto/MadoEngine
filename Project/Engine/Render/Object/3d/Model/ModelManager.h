@@ -322,7 +322,8 @@ public:
 
 	/// @brief 現在SceneのModelを更新
 	/// @param currentSceneType 現在のScene
-	void UpdateAll(SceneType currentSceneType);
+	/// @param deltaTime 前フレームからの経過時間
+	void UpdateAll(SceneType currentSceneType, float deltaTime);
 
 	/// @brief 現在SceneのModelを描画
 	/// @param currentSceneType 現在のScene

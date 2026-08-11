@@ -17,8 +17,9 @@ public:
 	/// @brief デストラクタ
 	virtual ~IRenderObject3d() = default;
 
-	/// @brief 更新処理（派生クラスでオーバーライド）
-	virtual void Update() = 0;
+	/// @brief 更新処理
+	/// @param deltaTime 前フレームからの経過時間
+	virtual void Update(float deltaTime) = 0;
 
 	/// @brief 描画処理（派生クラスでオーバーライド）
 	virtual void Draw(Camera& useCamera) = 0;

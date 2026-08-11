@@ -21,7 +21,9 @@ public:
 
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
 
-	void Update() override;
+	/// @brief Instance描画用データを更新
+	/// @param deltaTime 前フレームからの経過時間
+	void Update(float deltaTime) override;
 
 	void Draw(Camera& useCamera) override;
 

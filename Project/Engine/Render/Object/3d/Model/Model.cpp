@@ -352,16 +352,15 @@ void Model::InitializeInstanceResources() {
 		textureIndex_ = textureIndices_[0];
 	}
 
-	useAnimationTimer_ = !sharedData_->animationData.nodeAnimations.empty();
-
-	// Skinning ModelだけにSkeletonとPalette SRVをInstance単位で確保
-	if (type_ == ModelType::Skinning) {
-		useAnimationTimer_ = true;
+	// Animation対象ModelはPoseをInstance単位で保持し、SkinningだけPalette SRVも確保
+	if (type_ == ModelType::Skinning || type_ == ModelType::Animated) {
 		skeletonData_ = CreateSkeleton(sharedData_->modelData.rootNode);
-
-		skinClusterIndex_ = MadoEngine::Core::SRVManager::GetInstance().Allocate();
-		skinClusterData_ = CreateSkinCluster(device_, skeletonData_, sharedData_->modelData, skinClusterIndex_);
+		if (type_ == ModelType::Skinning) {
+			skinClusterIndex_ = MadoEngine::Core::SRVManager::GetInstance().Allocate();
+			skinClusterData_ = CreateSkinCluster(device_, skeletonData_, sharedData_->modelData, skinClusterIndex_);
+		}
 	}
+	animator_.Initialize(&sharedData_->animationSet, skeletonData_);
 
 	materialData_ = CreateMappedBuffer<ModelMaterial>(device_.Get(), materialResource_);
 	materialData_->color = color_;
@@ -415,41 +414,28 @@ void Model::UpdateLightGpuData() {
 	*lightGpuData_ = LightManager::GetInstance().GetCachedGpuData(sceneType_, receiveLightMask_);
 }
 
-void Model::Update() {
+void Model::Update(float deltaTime) {
 	if (!sharedData_ || !materialData_ || !transformationData_ || !cameraData_) {
 		return;
 	}
 
-	const Animation& animationData = sharedData_->animationData;
+	if (type_ != ModelType::Static && !skeletonData_.joints.empty()) {
 
-	// Animation長で循環させてKeyframe探索時刻を有効範囲内に維持
-	if (useAnimationTimer_ && animationData.duration > 0.0f) {
-		animationTime_ += 1.0f / 60.0f;
-		animationTime_ = std::fmod(animationTime_, animationData.duration);
-	}
-
-	if (type_ == ModelType::Skinning && !skeletonData_.joints.empty()) {
-
-		// Local PoseからSkeleton行列とSkinning Paletteを順番に更新
-		ApplyAnimation(skeletonData_, animationData, animationTime_);
+		// Animatorの合成済みPoseからSkeleton空間行列を更新
+		animator_.Update(deltaTime, skeletonData_);
 		UpdateAnimation(skeletonData_);
-		UpdateCluster(skinClusterData_, skeletonData_);
+		if (type_ == ModelType::Skinning) {
+			UpdateCluster(skinClusterData_, skeletonData_);
+		}
 	}
 
 	cameraData_->worldPosition = camera_.GetPosition();
-	if (type_ == ModelType::Animated) {
+	if (type_ == ModelType::Animated &&
+		skeletonData_.root >= 0 &&
+		static_cast<std::size_t>(skeletonData_.root) < skeletonData_.joints.size()) {
 
-		// Node AnimationはRoot Local行列へ反映してObject Transformと合成
-		Matrix4x4 localMatrix = rootNode_.localMatrix;
-		auto rootNodeIt = animationData.nodeAnimations.find(rootNode_.name);
-		if (rootNodeIt != animationData.nodeAnimations.end()) {
-			const NodeAnimation& rootNodeAnimation = rootNodeIt->second;
-			Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, animationTime_);
-			Quaternion rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, animationTime_);
-			Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, animationTime_);
-			localMatrix = Matrix::MakeAffineAnimation(scale, rotate, translate);
-		}
-		rootNode_.localMatrix = localMatrix;
+		// Node Animation ModelはRoot JointのLocal行列をObject Transformより先に適用
+		rootNode_.localMatrix = skeletonData_.joints[static_cast<std::size_t>(skeletonData_.root)].localMatrix;
 	}
 
 	UpdateTransformGpuData(camera_);
@@ -473,6 +459,14 @@ void Model::Update() {
 	materialData_->enableLighting = enableLighting_ ? 1 : 0;
 	materialData_->uvTransformMatrix = scale * rot * trans;
 	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+}
+
+bool Model::PlayAnimation(std::string_view clipName, float blendDuration, bool restart) {
+	return animator_.Play(clipName, blendDuration, restart);
+}
+
+bool Model::HasAnimationClip(std::string_view clipName) const {
+	return sharedData_ && sharedData_->animationSet.FindClip(clipName) != nullptr;
 }
 
 void Model::UpdateTransformGpuData(const Camera& camera) {

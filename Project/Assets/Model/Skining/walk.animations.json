@@ -1,0 +1,48 @@
+{
+  "model": "walk.gltf",
+  "defaultClip": "Idle",
+  "clips": {
+    "Idle": {
+      "file": "walk.gltf",
+      "index": 0,
+      "loop": true,
+      "playbackSpeed": 0.0,
+      "blendDuration": 0.15
+    },
+    "Walk": {
+      "file": "walk.gltf",
+      "index": 0,
+      "loop": true,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.15
+    },
+    "Crouching": {
+      "file": "Crouching.gltf",
+      "index": 0,
+      "loop": true,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.12
+    },
+    "Jump": {
+      "file": "jump.gltf",
+      "index": 0,
+      "loop": false,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.1
+    },
+    "Landing": {
+      "file": "landing.gltf",
+      "index": 0,
+      "loop": false,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.08
+    },
+    "Dash": {
+      "file": "Dash.gltf",
+      "index": 0,
+      "loop": false,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.08
+    }
+  }
+}

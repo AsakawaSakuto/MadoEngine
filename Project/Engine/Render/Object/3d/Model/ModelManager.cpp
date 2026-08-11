@@ -5,6 +5,9 @@
 #include <cassert>
 #include <cctype>
 #include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <unordered_set>
 #include <utility>
 
 namespace {
@@ -60,6 +63,63 @@ bool TryGetModelType(const std::filesystem::path& modelRoot, const std::filesyst
 		return true;
 	}
 	return false;
+}
+
+/// @brief Animation専用として参照されるModelファイルを収集
+/// @param modelRoot Modelルート
+/// @return 通常Model読み込みから除外する正規化済みパス集合
+std::unordered_set<std::string> CollectAnimationOnlyPaths(const std::filesystem::path& modelRoot) {
+	std::unordered_set<std::string> animationOnlyPaths;
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
+		if (!entry.is_regular_file() ||
+			!entry.path().filename().string().ends_with(".animations.json")) {
+			continue;
+		}
+
+		std::ifstream manifestFile(entry.path());
+		if (!manifestFile.is_open()) {
+			continue;
+		}
+
+		try {
+			nlohmann::json manifestJson;
+			manifestFile >> manifestJson;
+			const std::string modelFile = manifestJson.value("model", std::string{});
+			if (modelFile.empty()) {
+				continue;
+			}
+
+			const std::filesystem::path manifestDirectory = entry.path().parent_path();
+			const std::string baseModelPath = NormalizePath(manifestDirectory / modelFile);
+			const auto clipsIterator = manifestJson.find("clips");
+			if (clipsIterator == manifestJson.end() || !clipsIterator->is_object()) {
+				continue;
+			}
+
+			// 基準Modelと異なる参照先だけをAnimation専用Assetとして除外
+			for (const auto& [clipName, clipJson] : clipsIterator->items()) {
+				(void)clipName;
+				if (!clipJson.is_object()) {
+					continue;
+				}
+				const std::string sourceFile = clipJson.value("file", std::string{});
+				if (sourceFile.empty()) {
+					continue;
+				}
+				const std::string sourcePath = NormalizePath(manifestDirectory / sourceFile);
+				if (sourcePath != baseModelPath) {
+					animationOnlyPaths.insert(sourcePath);
+				}
+			}
+		} catch (const nlohmann::json::exception& exception) {
+			Logger::Output(
+				"Animation設定の解析に失敗しました: " + entry.path().generic_string() + " / " + exception.what(),
+				Logger::Level::Error
+			);
+		}
+	}
+
+	return animationOnlyPaths;
 }
 
 } // namespace
@@ -132,16 +192,21 @@ void ModelManager::LoadAllModels() {
 		Logger::Output("Assets/Modelフォルダが見つかりません", Logger::Level::Warning);
 		return;
 	}
+	const std::unordered_set<std::string> animationOnlyPaths = CollectAnimationOnlyPaths(modelRoot);
 
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
 		if (!entry.is_regular_file() || !IsModelExtension(entry.path())) {
+			continue;
+		}
+		const std::string normalizedPath = NormalizePath(entry.path());
+		if (animationOnlyPaths.contains(normalizedPath)) {
 			continue;
 		}
 		ModelType type = ModelType::Static;
 		if (!TryGetModelType(modelRoot, entry.path(), type)) {
 			continue;
 		}
-		LoadModelFile(NormalizePath(entry.path()), type);
+		LoadModelFile(normalizedPath, type);
 	}
 }
 
@@ -833,7 +898,7 @@ std::string ModelManager::ResolveModelPath(const std::string& modelName) const {
 	return aliasIt == aliases_.end() ? NormalizePath(modelName) : aliasIt->second;
 }
 
-void ModelManager::UpdateAll(SceneType currentSceneType) {
+void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime) {
 	for (const auto& [name, handle] : modelNameToHandle_) {
 		(void)name;
 		Model* model = TryGet(handle);
@@ -844,7 +909,7 @@ void ModelManager::UpdateAll(SceneType currentSceneType) {
 		if (modelScene != SceneType::None && modelScene != currentSceneType) {
 			continue;
 		}
-		model->Update();
+		model->Update(deltaTime);
 	}
 	for (const auto& [name, handle] : instancedModelNameToHandle_) {
 		(void)name;
@@ -856,7 +921,7 @@ void ModelManager::UpdateAll(SceneType currentSceneType) {
 		if (modelScene != SceneType::None && modelScene != currentSceneType) {
 			continue;
 		}
-		model->Update();
+		model->Update(deltaTime);
 	}
 }
 

@@ -87,9 +87,11 @@ namespace Player {
 	void Movement::Initialize() {
 		currentMotion_ = Player::Motion::Idle;
 		currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
+		jumpStartedThisFrame_ = false;
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
+		jumpStartedThisFrame_ = false;
 
 		// 入力移動と重力落下を反映してから接地中の斜面追従で位置を補正
 		Move(deltaTime, transform, camera, input);
@@ -376,6 +378,7 @@ namespace Player {
 		if (remainingJumpCount_ > 0 && input.isJumpTriggered) {
 			velocityY_ = movementParams_.jumpPower_;
 			isGrounded_ = false;
+			jumpStartedThisFrame_ = true;
 			AddJumpMoveBoost(input);
 			remainingJumpCount_--;
 			Logger::Output("[Engine] ジャンプ開始 残り回数: " + std::to_string(remainingJumpCount_), Logger::Level::Application);

@@ -55,10 +55,11 @@ namespace Player {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 			model->SetTexture("white16x16");
 			model->SetCastShadow(false);
+			animationController_.Initialize(*model);
 		}
 
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
-		shadowModel_ = MyModel::Create("PlayerShadow", "walk", SceneType::Game);
+		shadowModel_ = MyModel::Create("PlayerShadow", "sphere", SceneType::Game);
 		if (Model* shadowModel = MyModel::TryGet(shadowModel_)) {
 
 			// 地表へ重ねる簡易影として使用するためライティングとShadow処理を無効化
@@ -203,6 +204,16 @@ namespace Player {
 		if (model) {
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
 			model->SetScale(transform_.scale);
+			const Vector3 slideVelocity = movement_.GetSlideVelocity();
+			const bool isCrouchingMoving =
+				slideVelocity.x * slideVelocity.x + slideVelocity.z * slideVelocity.z > 1e-6f;
+			animationController_.Update(
+				movement_.GetCurrentMotion(),
+				isCrouchingMoving,
+				movement_.IsGrounded(),
+				movement_.WasJumpStartedThisFrame(),
+				*model
+			);
 		}
 
 		UpdateShadowTransform();

@@ -41,6 +41,14 @@ namespace Player {
 		/// @return Y方向速度
 		float GetVelocityY() const { return velocityY_; }
 
+		/// @brief Playerが接地中か判定
+		/// @return 接地中の場合はtrue
+		bool IsGrounded() const { return isGrounded_; }
+
+		/// @brief このフレームにJumpが成立したか判定
+		/// @return Jumpが成立した場合はtrue
+		bool WasJumpStartedThisFrame() const { return jumpStartedThisFrame_; }
+
 		/// @brief スライディング速度を取得
 		/// @return スライディング速度
 		Vector3 GetSlideVelocity() const { return slideVelocity_; }
@@ -100,6 +108,7 @@ namespace Player {
 
 		float velocityY_ = 0.0f;
 		bool isGrounded_ = false;
+		bool jumpStartedThisFrame_ = false;
 
 		float groundY_ = 0.0f;               // 接地している地面のY座標
 		float slopeSnapDistance_ = 1.0f;     // Slopeに足が届いているとみなす距離
