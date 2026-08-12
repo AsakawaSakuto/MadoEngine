@@ -16,6 +16,7 @@ namespace Enemy {
 		enemyId_ = enemyId;
 		status_ = desc.status;
 		type_ = desc.type;
+		sceneType_ = desc.sceneType;
 		projectileDamageCooldowns_.clear();
 		damageFlashRemainingTime_ = 0.0f;
 		gamingColor_.Reset();
@@ -119,6 +120,7 @@ namespace Enemy {
 		result.wasKilled = status_.currentHealth <= 0.0f;
 		if (result.wasApplied) {
 			StartDamageFlash();
+			PlayDamageEffect();
 		}
 		if (result.wasKilled) {
 			Kill();
@@ -160,6 +162,14 @@ namespace Enemy {
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetColor(kDamageFlashColor);
 		}
+	}
+
+	void Base::PlayDamageEffect() const {
+		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
+		desc.rootTransform.translate = transform_.translate;
+		desc.sceneType = sceneType_;
+		desc.loopOverride = false;
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play("EnemyHitEffect", desc);
 	}
 
 	void Base::UpdateAppearance(float deltaTime) {

@@ -101,6 +101,9 @@ namespace Enemy {
 		/// @brief 被ダメージ時の白色点滅を開始
 		void StartDamageFlash();
 
+		/// @brief 被ダメージEffect Sequenceを現在座標に再生
+		void PlayDamageEffect() const;
+
 		/// @brief 経過時間に応じて敵モデルの表示色を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateAppearance(float deltaTime);
@@ -126,6 +129,7 @@ namespace Enemy {
 		std::uint32_t enemyId_ = 0;
 		Data::Status status_;
 		Data::Type type_ = Data::Type::Normal;
+		SceneType sceneType_ = SceneType::None;
 		Movement movement_;
 		ColliderShape hitAABB_;
 		Player::Base* targetPlayer_ = nullptr;
