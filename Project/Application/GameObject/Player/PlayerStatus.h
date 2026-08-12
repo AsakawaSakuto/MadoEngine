@@ -48,6 +48,7 @@ namespace Player {
 		Walk,      // 歩いている状態 & 走ってる状態
 		Crouching, // しゃがんでいる状態
 		Jump,	   // ジャンプ中の状態
+		Climbing,  // 壁を登っている状態
 	};
 
 	/// @brief PlayerMotionを表示用文字列へ変換
@@ -63,6 +64,8 @@ namespace Player {
 			return "Crouching";
 		case Player::Motion::Jump:
 			return "Jump";
+		case Player::Motion::Climbing:
+			return "Climbing";
 		default:
 			return "Unknown";
 		}

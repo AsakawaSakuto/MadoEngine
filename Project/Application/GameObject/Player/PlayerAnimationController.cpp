@@ -13,6 +13,21 @@ namespace Player {
 	}
 
 	void AnimationController::Update(Motion motion, bool isMoving, bool isGrounded, bool isJumpStarted, Model& model) {
+		if (motion == Motion::Climbing) {
+			model.SetAnimationPlaybackSpeed(1.0f);
+			isJumpAnimationActive_ = false;
+			isLandingAnimationActive_ = false;
+
+			// 壁登り中は空中遷移の残存状態よりClimbing Clipを優先
+			if (!currentMotion_ || *currentMotion_ != Motion::Climbing) {
+				if (!model.PlayAnimation("Climbing", GetBlendDuration(Motion::Climbing))) {
+					Logger::Output("[Application] Player用AnimationClipが見つかりません: Climbing", Logger::Level::Warning);
+				}
+				currentMotion_ = Motion::Climbing;
+			}
+			return;
+		}
+
 		if (isJumpStarted) {
 
 			// 成立したJump入力を最優先し、空中での再入力も先頭Poseから即時再生
@@ -92,6 +107,8 @@ namespace Player {
 			return "Crouching";
 		case Motion::Jump:
 			return "Jump";
+		case Motion::Climbing:
+			return "Climbing";
 		default:
 			return "Idle";
 		}
@@ -102,6 +119,8 @@ namespace Player {
 		case Motion::Jump:
 			return 0.0f;
 		case Motion::Crouching:
+			return 0.12f;
+		case Motion::Climbing:
 			return 0.12f;
 		case Motion::Idle:
 		case Motion::Walk:

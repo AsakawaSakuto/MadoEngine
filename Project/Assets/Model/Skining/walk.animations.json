@@ -30,6 +30,13 @@
       "playbackSpeed": 1.0,
       "blendDuration": 0.1
     },
+    "Climbing": {
+      "file": "Climbing.gltf",
+      "index": 0,
+      "loop": true,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.12
+    },
     "Landing": {
       "file": "landing.gltf",
       "index": 0,

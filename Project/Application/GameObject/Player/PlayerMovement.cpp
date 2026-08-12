@@ -155,6 +155,7 @@ namespace Player {
 		velocityY_ = 0.0f;
 		isGrounded_ = true;
 		isWallClimbing_ = true;
+		currentMotion_ = Player::Motion::Climbing;
 	}
 
 	void Movement::Move(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
