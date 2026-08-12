@@ -188,6 +188,7 @@ namespace Player {
 		const bool isGroundContact = MyCollider::IsGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapBlock);
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, lastMoveInput_);
+		movement_.UpdateWallClimb(lastDeltaTime_, lastMoveInput_, transform_);
 		Model* model = MyModel::TryGet(model_);
 		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model, isSlopeGroundContact, kModelForwardYawOffset);
 
@@ -286,6 +287,7 @@ namespace Player {
 		ImGui::Text("水平速度: %.2f", horizontalSpeed);
 		ImGui::Text("Y速度: %.2f", velocityY);
 		ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
+		ImGui::Text("壁上り: %s", movement_.IsWallClimbing() ? "有効" : "無効");
 		ImGui::Separator();
 		ImGui::DragFloat("移動速度", &movementParams.moveSpeed_, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("ジャンプ力", &movementParams.jumpPower_, 0.1f, 0.0f, 100.0f);
@@ -297,6 +299,7 @@ namespace Player {
 		ImGui::DragFloat("スライド摩擦", &movementParams.slideFriction_, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("ジャンプ回数", &movementParams.jumpCount_, 1.0f, 0.0f, 1000.0f);
 		ImGui::DragFloat("ジャンプ横初速", &movementParams.jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("壁上り速度", &movementParams.wallClimbSpeed_, 0.1f, 0.0f, 100.0f);
 		ImGui::End();
 
 		ImGui::Begin("プレイヤーステータス");

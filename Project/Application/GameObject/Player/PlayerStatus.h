@@ -38,6 +38,7 @@ namespace Player {
 		float maxSlideSpeed_ = 25.0f;          // スライディングの最大速度
 		float slideFriction_ = 2.0f;           // スライディング中の摩擦
 		float jumpMoveBoostSpeed_ = 3.0f;      // ジャンプ時の水平初速
+		float wallClimbSpeed_ = 2.0f;          // Block側面を上る速度
 		float jumpCount_ = 1000.0f;			   // ジャンプ可能回数
 	};
 

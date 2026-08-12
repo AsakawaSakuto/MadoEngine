@@ -25,6 +25,12 @@ namespace Player {
 		/// @param input Playerの移動操作入力
 		void SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input);
 
+		/// @brief Collider解決後の移動量からBlock側面への壁上りを更新
+		/// @param deltaTime 1フレームの経過時間
+		/// @param input Playerの移動操作入力
+		/// @param transform 更新対象のTransform
+		void UpdateWallClimb(float deltaTime, const MoveInput& input, Transform3D& transform);
+
 		/// @brief PlayerのModel座標と回転を接地状態に合わせて更新
 		/// @param deltaTime 1フレームの経過時間
 		/// @param transform 更新対象のTransform
@@ -48,6 +54,10 @@ namespace Player {
 		/// @brief このフレームにJumpが成立したか判定
 		/// @return Jumpが成立した場合はtrue
 		bool WasJumpStartedThisFrame() const { return jumpStartedThisFrame_; }
+
+		/// @brief Block側面を上昇中か判定
+		/// @return 壁上り中の場合はtrue
+		bool IsWallClimbing() const { return isWallClimbing_; }
 
 		/// @brief スライディング速度を取得
 		/// @return スライディング速度
@@ -100,15 +110,24 @@ namespace Player {
 		/// @param friction 減速量
 		void ApplySlideFriction(float deltaTime, float friction);
 
+		/// @brief Collider解決によって希望する水平移動がBlock側面で阻害されたか判定
+		/// @param currentPosition Collider解決後のPlayer座標
+		/// @return Block側面で前進を阻害された場合はtrue
+		bool IsHorizontalMoveBlocked(const Vector3& currentPosition) const;
+
 	private:
 
 		Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 lastMoveDirection_ = { 0.0f, 0.0f, 0.0f };
+		Vector3 lastMoveStartPosition_ = { 0.0f, 0.0f, 0.0f };
+		Vector3 lastAttemptedHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
 
 		float velocityY_ = 0.0f;
 		bool isGrounded_ = false;
 		bool jumpStartedThisFrame_ = false;
+		bool hasWallClimbInput_ = false;
+		bool isWallClimbing_ = false;
 
 		float groundY_ = 0.0f;               // 接地している地面のY座標
 		float slopeSnapDistance_ = 1.0f;     // Slopeに足が届いているとみなす距離

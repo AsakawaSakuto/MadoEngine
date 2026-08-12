@@ -4,6 +4,7 @@
 
 namespace {
 	constexpr float kRotationEpsilon = 1e-5f;
+	constexpr float kBlockedProgressRate = 0.35f;
 
 	/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返却
 	/// @param value 正規化するベクトル
@@ -93,15 +94,33 @@ namespace Player {
 		velocityY_ = 0.0f;
 		isGrounded_ = true;
 		remainingJumpCount_ = movementParams_.jumpCount_;
+		lastMoveStartPosition_ = {};
+		lastAttemptedHorizontalMove_ = {};
+		hasWallClimbInput_ = false;
+		isWallClimbing_ = false;
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
 		jumpStartedThisFrame_ = false;
+		lastMoveStartPosition_ = transform.translate;
+		lastAttemptedHorizontalMove_ = {};
+		hasWallClimbInput_ = false;
 
 		// 入力移動と重力落下を反映してから接地中の斜面追従で位置を補正
 		Move(deltaTime, transform, camera, input);
+		hasWallClimbInput_ = hasMoveInput_ && !input.isCrouching;
+		if (!hasWallClimbInput_) {
+			isWallClimbing_ = false;
+		}
 		Jump(deltaTime, transform, input);
 		ApplySlopeGroundSnap(deltaTime, transform);
+
+		// Collider解決後の実移動量と比較するため解決前の水平移動量を保持
+		lastAttemptedHorizontalMove_ = {
+			transform.translate.x - lastMoveStartPosition_.x,
+			0.0f,
+			transform.translate.z - lastMoveStartPosition_.z
+		};
 	}
 
 	void Movement::SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input) {
@@ -122,6 +141,20 @@ namespace Player {
 		} else {
 			isGrounded_ = false;
 		}
+	}
+
+	void Movement::UpdateWallClimb(float deltaTime, const MoveInput& input, Transform3D& transform) {
+		const bool isBlocked = IsHorizontalMoveBlocked(transform.translate);
+		if (input.isCrouching || jumpStartedThisFrame_ || !hasWallClimbInput_ || !isBlocked) {
+			isWallClimbing_ = false;
+			return;
+		}
+
+		// 壁方向への入力がCollider解決で阻害され続けている間だけ重力を止めて低速上昇
+		transform.translate.y += std::max(0.0f, movementParams_.wallClimbSpeed_) * std::max(0.0f, deltaTime);
+		velocityY_ = 0.0f;
+		isGrounded_ = true;
+		isWallClimbing_ = true;
 	}
 
 	void Movement::Move(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
@@ -279,6 +312,28 @@ namespace Player {
 		slideVelocity_.z *= speedScale;
 	}
 
+	bool Movement::IsHorizontalMoveBlocked(const Vector3& currentPosition) const {
+		const float attemptedLengthSq =
+			lastAttemptedHorizontalMove_.x * lastAttemptedHorizontalMove_.x +
+			lastAttemptedHorizontalMove_.z * lastAttemptedHorizontalMove_.z;
+		if (attemptedLengthSq <= kRotationEpsilon) {
+			return false;
+		}
+
+		const float attemptedLength = std::sqrt(attemptedLengthSq);
+		const Vector3 actualHorizontalMove = {
+			currentPosition.x - lastMoveStartPosition_.x,
+			0.0f,
+			currentPosition.z - lastMoveStartPosition_.z
+		};
+
+		// 横滑りを前進量に含めないよう希望移動方向への実移動成分だけを比較
+		const float actualProgress =
+			(actualHorizontalMove.x * lastAttemptedHorizontalMove_.x +
+			 actualHorizontalMove.z * lastAttemptedHorizontalMove_.z) / attemptedLength;
+		return actualProgress < attemptedLength * kBlockedProgressRate;
+	}
+
 	void Movement::ApplyJumpMoveBoost(float deltaTime, Transform3D& transform) {
 		if (isGrounded_ && velocityY_ <= 0.0f) {
 			jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
@@ -331,7 +386,7 @@ namespace Player {
 	}
 
 	void Movement::ApplySlopeGroundSnap(float deltaTime, Transform3D& transform) {
-		if (!isGrounded_ || velocityY_ > 0.0f) {
+		if (!isGrounded_ || velocityY_ > 0.0f || isWallClimbing_) {
 			return;
 		}
 
