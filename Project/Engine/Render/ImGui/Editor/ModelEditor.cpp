@@ -14,6 +14,7 @@ namespace MadoEngine::Editor {
 	namespace {
 
 		const std::filesystem::path kModelEditorJsonPath = "Assets/Json/ModelObjects.json";
+		const std::filesystem::path kModelDirectoryPath = "Assets/Model";
 
 #ifdef USE_IMGUI
 
@@ -21,6 +22,19 @@ namespace MadoEngine::Editor {
 		constexpr float kDegreesToRadians = 0.017453292519943295f;
 		constexpr float kDefaultVertexMarkerRadius = 0.1f;
 		constexpr Vector4 kVertexMarkerColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+
+		/// @brief Modelアセット選択TreeのFile情報
+		struct ModelAssetItem {
+			std::string assetPath;
+			std::string fileName;
+		};
+
+		/// @brief Modelアセット選択TreeのDirectory情報
+		struct ModelAssetDirectory {
+			std::string name;
+			std::vector<ModelAssetDirectory> directories;
+			std::vector<ModelAssetItem> assets;
+		};
 
 		/// @brief Modelアセットパスから表示用のModel名を取得
 		/// @param modelName Modelアセットパス
@@ -84,6 +98,141 @@ namespace MadoEngine::Editor {
 			}
 		}
 
+		/// @brief Modelアセット階層内の子Directoryを取得または追加
+		/// @param parent 親Directory
+		/// @param directoryName 子Directory名
+		/// @return 取得または追加した子Directory
+		ModelAssetDirectory& FindOrAddModelAssetDirectory(
+			ModelAssetDirectory& parent,
+			const std::string& directoryName) {
+			const auto found = std::find_if(
+				parent.directories.begin(),
+				parent.directories.end(),
+				[&directoryName](const ModelAssetDirectory& directory) {
+					return directory.name == directoryName;
+				}
+			);
+			if (found != parent.directories.end()) {
+				return *found;
+			}
+
+			parent.directories.push_back(ModelAssetDirectory{ directoryName });
+			return parent.directories.back();
+		}
+
+		/// @brief Modelアセット階層をDirectory名とFile名で再帰的に整列
+		/// @param directory 整列対象Directory
+		void SortModelAssetDirectory(ModelAssetDirectory& directory) {
+			std::sort(
+				directory.directories.begin(),
+				directory.directories.end(),
+				[](const ModelAssetDirectory& left, const ModelAssetDirectory& right) {
+					return left.name < right.name;
+				}
+			);
+			std::sort(
+				directory.assets.begin(),
+				directory.assets.end(),
+				[](const ModelAssetItem& left, const ModelAssetItem& right) {
+					return left.fileName < right.fileName;
+				}
+			);
+			for (ModelAssetDirectory& child : directory.directories) {
+				SortModelAssetDirectory(child);
+			}
+		}
+
+		/// @brief ModelManagerのAsset Path一覧から選択Treeを構築
+		/// @param modelNames Modelアセットパス一覧
+		/// @return Assets/Modelからの相対階層へ変換した選択Tree
+		ModelAssetDirectory CreateModelAssetTree(
+			const std::vector<std::string>& modelNames) {
+			ModelAssetDirectory root;
+			root.name = kModelDirectoryPath.generic_string();
+			for (const std::string& modelName : modelNames) {
+				const std::filesystem::path modelPath(modelName);
+				const std::filesystem::path relativePath =
+					modelPath.lexically_relative(kModelDirectoryPath);
+				const std::filesystem::path displayPath = relativePath.empty()
+					? modelPath.filename()
+					: relativePath;
+
+				ModelAssetDirectory* directory = &root;
+				for (const std::filesystem::path& component : displayPath.parent_path()) {
+					directory = &FindOrAddModelAssetDirectory(*directory, component.string());
+				}
+				directory->assets.push_back(ModelAssetItem{
+					modelName,
+					displayPath.filename().string(),
+				});
+			}
+			SortModelAssetDirectory(root);
+			return root;
+		}
+
+		/// @brief Directory配下に選択中Modelアセットが存在するか確認
+		/// @param directory 確認対象Directory
+		/// @param selectedName 選択中Modelアセットパス
+		/// @return 選択中Modelアセットが存在する場合はtrue
+		bool ContainsSelectedModelAsset(
+			const ModelAssetDirectory& directory,
+			const std::string& selectedName) {
+			if (std::any_of(
+				directory.assets.begin(),
+				directory.assets.end(),
+				[&selectedName](const ModelAssetItem& asset) {
+					return asset.assetPath == selectedName;
+				})) {
+				return true;
+			}
+			return std::any_of(
+				directory.directories.begin(),
+				directory.directories.end(),
+				[&selectedName](const ModelAssetDirectory& child) {
+					return ContainsSelectedModelAsset(child, selectedName);
+				}
+			);
+		}
+
+		/// @brief ModelアセットDirectory配下の選択項目を再帰的に描画
+		/// @param directory 描画対象Directory
+		/// @param selectedName 現在選択中のModelアセットパス
+		/// @return 選択が変更された場合はtrue
+		bool DrawModelAssetDirectory(
+			const ModelAssetDirectory& directory,
+			std::string& selectedName) {
+			bool isChanged = false;
+			for (const ModelAssetDirectory& child : directory.directories) {
+				ImGui::PushID(child.name.c_str());
+				if (ContainsSelectedModelAsset(child, selectedName)) {
+					ImGui::SetNextItemOpen(true, ImGuiCond_Appearing);
+				}
+				if (ImGui::TreeNodeEx(
+					"##ModelAssetDirectory",
+					ImGuiTreeNodeFlags_SpanAvailWidth,
+					"%s",
+					child.name.c_str())) {
+					isChanged |= DrawModelAssetDirectory(child, selectedName);
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+
+			for (const ModelAssetItem& asset : directory.assets) {
+				ImGui::PushID(asset.assetPath.c_str());
+				const bool isSelected = asset.assetPath == selectedName;
+				if (ImGui::Selectable(asset.fileName.c_str(), isSelected)) {
+					selectedName = asset.assetPath;
+					isChanged = true;
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+				ImGui::PopID();
+			}
+			return isChanged;
+		}
+
 		/// @brief Modelアセット選択Comboを描画
 		/// @param label ImGuiで使用するラベル
 		/// @param selectedName 現在選択中のModelアセットパス
@@ -97,19 +246,10 @@ namespace MadoEngine::Editor {
 			const char* preview = selectedName.empty() ? "Modelを選択" : displayName.c_str();
 			bool isChanged = false;
 			if (ImGui::BeginCombo(label, preview)) {
-				for (const std::string& modelName : modelNames) {
-					const bool isSelected = modelName == selectedName;
-					const std::string itemDisplayName = GetModelDisplayName(modelName);
-					ImGui::PushID(modelName.c_str());
-					if (ImGui::Selectable(itemDisplayName.c_str(), isSelected)) {
-						selectedName = modelName;
-						isChanged = true;
-					}
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-					ImGui::PopID();
-				}
+				const ModelAssetDirectory tree = CreateModelAssetTree(modelNames);
+				ImGui::TextDisabled("%s", tree.name.c_str());
+				ImGui::Separator();
+				isChanged |= DrawModelAssetDirectory(tree, selectedName);
 				ImGui::EndCombo();
 			}
 			return isChanged;
