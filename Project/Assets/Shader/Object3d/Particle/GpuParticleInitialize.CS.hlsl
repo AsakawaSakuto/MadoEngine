@@ -31,5 +31,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 
 	GpuParticleDrawInstance drawInstance = (GpuParticleDrawInstance)0;
 	gGpuParticleDrawInstances[particleIndex] = drawInstance;
+	gGpuParticleTrailSamples[particleIndex] =
+		BuildGpuParticleTrailSample(state);
 	gGpuParticleFreeIndices[particleIndex] = particleIndex;
 }

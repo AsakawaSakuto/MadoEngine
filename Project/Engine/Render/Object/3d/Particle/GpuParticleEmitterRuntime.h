@@ -1,9 +1,11 @@
 #pragma once
 #include "GpuParticleTypes.h"
 #include "IParticleEmitterRuntime.h"
+#include "ParticleTrailHistory.h"
 #include "Render/PSO/ComputePSORegistry.h"
 #include <array>
 #include <cstdint>
+#include <vector>
 #include <wrl/client.h>
 
 namespace MadoEngine::Particle {
@@ -70,10 +72,10 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		) const override;
 
-		/// @brief GPU BackendではParticle Trail描画登録なし
-		/// @param renderer 未使用
-		/// @param emitterTransform 未使用
-		/// @param renderLayer 未使用
+		/// @brief GPU ParticleからReadbackしたTrailをRibbon Rendererへ登録
+		/// @param renderer 登録先Ribbon Renderer
+		/// @param emitterTransform 現在のEmitter Transform
+		/// @param renderLayer 描画Layer
 		void SubmitTrailRenderData(
 			MadoEngine::Ribbon::RibbonEffectRenderer3d& renderer,
 			const Transform3D& emitterTransform,
@@ -203,11 +205,14 @@ namespace MadoEngine::Particle {
 		BufferResource freeIndexBuffer_;
 		BufferResource freeCounterBuffer_;
 		BufferResource indirectArgumentBuffer_;
+		BufferResource trailSampleBuffer_;
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> emitterParameterBuffer_;
 		std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, kFrameResourceCount> perFrameBuffers_;
 		std::array<GpuParticlePerFrameParameters*, kFrameResourceCount> mappedPerFrameParameters_{};
 		std::array<ReadbackSlot, kFrameResourceCount> readbackSlots_;
+		ParticleTrailHistory trailHistory_;
+		std::vector<ParticleTrailSample> trailSamples_;
 
 		Transform3D pendingEmitterTransform_;
 		float pendingDeltaTime_ = 0.0f;
@@ -219,6 +224,10 @@ namespace MadoEngine::Particle {
 		uint64_t gpuBufferCapacityBytes_ = 0;
 		uint64_t nextReadbackSequence_ = 1;
 		uint64_t lastAppliedReadbackSequence_ = 0;
+		uint64_t lastAppliedTrailReadbackSequence_ = 0;
+		uint64_t aliveIndexReadbackOffset_ = 0;
+		uint64_t trailSampleReadbackOffset_ = 0;
+		uint64_t readbackBufferSize_ = sizeof(uint32_t);
 		bool isInitialized_ = false;
 		bool needsGpuInitialize_ = true;
 		bool hasPendingUpdate_ = false;

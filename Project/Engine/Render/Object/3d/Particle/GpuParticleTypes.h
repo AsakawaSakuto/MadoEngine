@@ -29,8 +29,16 @@ namespace MadoEngine::Particle {
 		Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Vector4 startColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Vector4 endColor = { 1.0f, 1.0f, 1.0f, 0.0f };
+		uint32_t identifier = 0;
+		uint32_t padding[3]{};
 	};
-	static_assert(sizeof(GpuParticleState) == 112, "GPU Particle StateのLayoutがHLSLと一致していません。");
+	static_assert(sizeof(GpuParticleState) == 128, "GPU Particle StateのLayoutがHLSLと一致していません。");
+
+	struct alignas(16) GpuParticleTrailSample {
+		Vector3 position{};
+		uint32_t identifier = 0;
+	};
+	static_assert(sizeof(GpuParticleTrailSample) == 16, "GPU Particle Trail SampleのLayoutがHLSLと一致していません。");
 
 	struct alignas(16) GpuParticleDrawInstance {
 		Vector3 position{};

@@ -132,6 +132,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterDebugDrawer3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEmitterRuntimeFactory.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleTrailHistory.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.cpp" />
@@ -609,6 +610,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectAsset.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleEffectInstance.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleRenderer3d.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleTrailHistory.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleSystem3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\Particle\ParticleTypes.h" />
     <ClInclude Include="Engine\Render\Object\3d\PrimitiveEffect\CylinderEffectAsset.h" />

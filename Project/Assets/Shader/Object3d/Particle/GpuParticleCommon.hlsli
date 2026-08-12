@@ -38,6 +38,13 @@ struct GpuParticleState {
 	float4 color;
 	float4 startColor;
 	float4 endColor;
+	uint identifier;
+	uint3 padding;
+};
+
+struct GpuParticleTrailSample {
+	float3 position;
+	uint identifier;
 };
 
 struct GpuParticleDrawInstance {
@@ -95,6 +102,7 @@ RWByteAddressBuffer gGpuParticleNextCounter : register(u4);
 RWStructuredBuffer<uint> gGpuParticleFreeIndices : register(u5);
 RWByteAddressBuffer gGpuParticleFreeCounter : register(u6);
 RWByteAddressBuffer gGpuParticleIndirectArguments : register(u7);
+RWStructuredBuffer<GpuParticleTrailSample> gGpuParticleTrailSamples : register(u8);
 
 /// @brief ゼロに近いVectorを既定方向へ置き換えて正規化
 /// @param value 正規化するVector
@@ -132,6 +140,16 @@ GpuParticleDrawInstance BuildGpuParticleDrawInstance(GpuParticleState state) {
 		instance.scale *= abs(gGpuParticleEmitterScaleRotation.xy);
 	}
 	return instance;
+}
+
+/// @brief GPU Particle StateからTrail Readback用Sampleを生成
+/// @param state Particle State
+/// @return Trail Readback用Sample
+GpuParticleTrailSample BuildGpuParticleTrailSample(GpuParticleState state) {
+	GpuParticleTrailSample sample;
+	sample.position = state.position;
+	sample.identifier = state.identifier;
+	return sample;
 }
 
 /// @brief Alive Outputへ安全にParticle Indexを追加

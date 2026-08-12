@@ -1,8 +1,8 @@
 #pragma once
 #include "CpuParticleSimulator.h"
 #include "IParticleEmitterRuntime.h"
+#include "ParticleTrailHistory.h"
 #include "Utility/Random.h"
-#include <unordered_map>
 #include <vector>
 
 namespace MadoEngine::Particle {
@@ -90,32 +90,14 @@ namespace MadoEngine::Particle {
 		uint64_t GetGpuBufferCapacityBytes() const override { return 0; }
 
 	private:
-		struct TrailPoint {
-			Vector3 position{};
-			float age = 0.0f;
-		};
-
-		struct TrailState {
-			std::vector<TrailPoint> points;
-			Vector3 latestPosition{};
-			bool hasLatestPosition = false;
-			bool wasParticleAlive = false;
-			bool isParticleAlive = false;
-		};
-
 		/// @brief Particle位置からTrail履歴を更新
-		/// @param deltaTime 前フレームからの経過時間
-		void UpdateTrails(float deltaTime);
-
-		/// @brief 最小間隔を満たすTrail Pointを追加
-		/// @param state 追加対象Trail状態
-		/// @param position 追加候補位置
-		void TryAddTrailPoint(TrailState& state, const Vector3& position);
+		void UpdateTrailParticles();
 
 		EmitterConfig config_;
 		CpuParticleSimulator simulator_;
 		Random random_;
-		std::unordered_map<uint64_t, TrailState> trails_;
+		ParticleTrailHistory trailHistory_;
+		std::vector<ParticleTrailSample> trailSamples_;
 	};
 
 } // MadoEngine::Particle名前空間

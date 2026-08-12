@@ -23,6 +23,14 @@ namespace {
 		return (size + alignment - 1) & ~(alignment - 1);
 	}
 
+	/// @brief 指定境界へBuffer Offsetを切り上げ
+	/// @param offset 切り上げるOffset
+	/// @param alignment 境界Size
+	/// @return 切り上げ後のOffset
+	uint64_t AlignBufferOffset(uint64_t offset, uint64_t alignment) {
+		return (offset + alignment - 1) & ~(alignment - 1);
+	}
+
 	/// @brief Dispatch Group数を計算
 	/// @param itemCount 処理要素数
 	/// @return Dispatch Group数
@@ -110,6 +118,11 @@ namespace MadoEngine::Particle {
 				sizeof(GpuParticleDrawArguments),
 				D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 				indirectArgumentBuffer_
+			) &&
+			CreateDefaultBuffer(
+				sizeof(GpuParticleTrailSample) * particleCount,
+				D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+				trailSampleBuffer_
 			);
 		if (!resourcesCreated) {
 			return false;
@@ -127,6 +140,18 @@ namespace MadoEngine::Particle {
 		std::memcpy(emitterParameterData, &emitterParameters, sizeof(emitterParameters));
 		emitterParameterBuffer_->Unmap(0, nullptr);
 
+		aliveIndexReadbackOffset_ = AlignBufferOffset(
+			sizeof(uint32_t),
+			alignof(uint32_t)
+		);
+		trailSampleReadbackOffset_ = AlignBufferOffset(
+			aliveIndexReadbackOffset_ + sizeof(uint32_t) * particleCount,
+			alignof(GpuParticleTrailSample)
+		);
+		readbackBufferSize_ = config_.trail.isEnabled
+			? trailSampleReadbackOffset_ + sizeof(GpuParticleTrailSample) * particleCount
+			: sizeof(uint32_t);
+
 		// GPU実行中のFrame DataをCPUが上書きしないようUploadとReadbackを多重化
 		for (uint32_t index = 0; index < kFrameResourceCount; ++index) {
 			void* perFrameData = nullptr;
@@ -140,13 +165,16 @@ namespace MadoEngine::Particle {
 			mappedPerFrameParameters_[index] =
 				static_cast<GpuParticlePerFrameParameters*>(perFrameData);
 			if (!CreateReadbackBuffer(
-				sizeof(uint32_t),
+				readbackBufferSize_,
 				readbackSlots_[index].resource
 				)) {
 				return false;
 			}
 		}
 
+		trailHistory_.Initialize(config_.trail, config_.simulationSpace);
+		trailSamples_.clear();
+		trailSamples_.reserve(config_.emission.maxParticles);
 		CalculateGpuBufferCapacity();
 		isInitialized_ = true;
 		Reset();
@@ -157,6 +185,7 @@ namespace MadoEngine::Particle {
 		float deltaTime,
 		const Transform3D& emitterTransform) {
 		pendingEmitterTransform_ = emitterTransform;
+		trailHistory_.Advance(deltaTime);
 
 		// GPU上のAlive数が0でも初回完了まではSimulationを継続して確定値を取得
 		const bool needsSimulation =
@@ -215,6 +244,10 @@ namespace MadoEngine::Particle {
 		needsGpuInitialize_ = true;
 		hasCompletedSimulation_ = false;
 		suppressDraw_ = true;
+		cachedAliveCount_ = 0;
+		trailHistory_.Clear();
+		lastAppliedReadbackSequence_ = nextReadbackSequence_ - 1;
+		lastAppliedTrailReadbackSequence_ = nextReadbackSequence_ - 1;
 	}
 
 	void GpuParticleEmitterRuntime::Reset() {
@@ -227,6 +260,9 @@ namespace MadoEngine::Particle {
 		hasPendingUpdate_ = false;
 		hasCompletedSimulation_ = false;
 		suppressDraw_ = false;
+		trailHistory_.Clear();
+		lastAppliedReadbackSequence_ = nextReadbackSequence_ - 1;
+		lastAppliedTrailReadbackSequence_ = nextReadbackSequence_ - 1;
 	}
 
 	void GpuParticleEmitterRuntime::RecordGpuSimulation(
@@ -308,6 +344,7 @@ namespace MadoEngine::Particle {
 			Transition(commandList, freeIndexBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 			Transition(commandList, freeCounterBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 			Transition(commandList, indirectArgumentBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			Transition(commandList, trailSampleBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 			ID3D12PipelineState* initializePso = computePsoRegistry_->Get({
 				"Object3d/Particle/GpuParticleInitialize.CS",
@@ -462,6 +499,28 @@ namespace MadoEngine::Particle {
 			sizeof(uint32_t)
 		);
 		Transition(commandList, currentCounter, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		// Trail有効時のみAlive Indexと軽量SampleをReadbackしてParticle本体のGPU常駐を維持
+		if (config_.trail.isEnabled) {
+			BufferResource& currentAliveIndices = aliveIndexBuffers_[currentAliveIndex_];
+			Transition(commandList, currentAliveIndices, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			Transition(commandList, trailSampleBuffer_, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			commandList->CopyBufferRegion(
+				readbackSlots_[frameResourceIndex].resource.Get(),
+				aliveIndexReadbackOffset_,
+				currentAliveIndices.resource.Get(),
+				0,
+				sizeof(uint32_t) * config_.emission.maxParticles
+			);
+			commandList->CopyBufferRegion(
+				readbackSlots_[frameResourceIndex].resource.Get(),
+				trailSampleReadbackOffset_,
+				trailSampleBuffer_.resource.Get(),
+				0,
+				sizeof(GpuParticleTrailSample) * config_.emission.maxParticles
+			);
+			Transition(commandList, trailSampleBuffer_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		}
 		TransitionForDraw(commandList);
 
 		nextEmitSequence_ += pendingEmitCount_;
@@ -475,21 +534,65 @@ namespace MadoEngine::Particle {
 	}
 
 	void GpuParticleEmitterRuntime::OnGpuFrameCompleted(uint64_t completedFenceValue) {
+		std::array<ReadbackSlot*, kFrameResourceCount> completedSlots{};
+		uint32_t completedSlotCount = 0;
+		for (ReadbackSlot& slot : readbackSlots_) {
+			if (slot.isPending && slot.fenceValue <= completedFenceValue) {
+				completedSlots[completedSlotCount++] = &slot;
+			}
+		}
+		std::sort(
+			completedSlots.begin(),
+			completedSlots.begin() + completedSlotCount,
+			[](const ReadbackSlot* lhs, const ReadbackSlot* rhs) {
+				return lhs->sequence < rhs->sequence;
+			}
+		);
+
 		uint64_t latestSequence = lastAppliedReadbackSequence_;
 		uint32_t latestAliveCount = cachedAliveCount_;
 		bool appliedAny = false;
 
 		// 完了済みSlotのうちSequenceが最も新しいAlive数だけをCPU Cacheへ反映
-		for (ReadbackSlot& slot : readbackSlots_) {
-			if (!slot.isPending || slot.fenceValue > completedFenceValue) {
-				continue;
-			}
-
+		for (uint32_t slotIndex = 0; slotIndex < completedSlotCount; ++slotIndex) {
+			ReadbackSlot& slot = *completedSlots[slotIndex];
 			void* mappedData = nullptr;
-			const D3D12_RANGE readRange{ 0, sizeof(uint32_t) };
+			const D3D12_RANGE readRange{
+				0,
+				static_cast<SIZE_T>(readbackBufferSize_),
+			};
 			const HRESULT result = slot.resource->Map(0, &readRange, &mappedData);
 			if (SUCCEEDED(result) && mappedData) {
-				const uint32_t aliveCount = *static_cast<const uint32_t*>(mappedData);
+				const auto* readbackData = static_cast<const uint8_t*>(mappedData);
+				const uint32_t aliveCount = (std::min)(
+					*reinterpret_cast<const uint32_t*>(readbackData),
+					config_.emission.maxParticles
+				);
+
+				// Stable IDと位置だけをCPU履歴へ渡し、既存Ribbon描画経路をGPU Particleでも共有
+				if (
+					config_.trail.isEnabled &&
+					slot.sequence > lastAppliedTrailReadbackSequence_) {
+					const auto* aliveIndices = reinterpret_cast<const uint32_t*>(
+						readbackData + aliveIndexReadbackOffset_
+					);
+					const auto* gpuTrailSamples = reinterpret_cast<const GpuParticleTrailSample*>(
+						readbackData + trailSampleReadbackOffset_
+					);
+					trailSamples_.clear();
+					for (uint32_t aliveIndex = 0; aliveIndex < aliveCount; ++aliveIndex) {
+						const uint32_t particleIndex = aliveIndices[aliveIndex];
+						if (particleIndex >= config_.emission.maxParticles) {
+							continue;
+						}
+
+						const GpuParticleTrailSample& gpuSample = gpuTrailSamples[particleIndex];
+						trailSamples_.push_back({ gpuSample.identifier, gpuSample.position });
+					}
+					trailHistory_.UpdateParticles(trailSamples_);
+					lastAppliedTrailReadbackSequence_ = slot.sequence;
+				}
+
 				slot.resource->Unmap(0, nullptr);
 				if (slot.sequence > latestSequence) {
 					latestSequence = slot.sequence;
@@ -538,9 +641,7 @@ namespace MadoEngine::Particle {
 		MadoEngine::Ribbon::RibbonEffectRenderer3d& renderer,
 		const Transform3D& emitterTransform,
 		MadoEngine::Render::RenderLayer renderLayer) const {
-		(void)renderer;
-		(void)emitterTransform;
-		(void)renderLayer;
+		trailHistory_.SubmitRenderData(renderer, emitterTransform, renderLayer);
 	}
 
 	bool GpuParticleEmitterRuntime::IsIdle() const {
@@ -551,7 +652,8 @@ namespace MadoEngine::Particle {
 			!hasPendingUpdate_ &&
 			pendingEmitCount_ == 0 &&
 			!hasGpuWorkInFlight_ &&
-			cachedAliveCount_ == 0;
+			cachedAliveCount_ == 0 &&
+			trailHistory_.IsEmpty();
 	}
 
 	GpuParticleEmitterParameters GpuParticleEmitterRuntime::MakeEmitterParameters(
@@ -862,6 +964,10 @@ namespace MadoEngine::Particle {
 			emitterParameterBuffer_->GetGPUVirtualAddress()
 		);
 		commandList->SetComputeRootConstantBufferView(10, perFrameAddress);
+		commandList->SetComputeRootUnorderedAccessView(
+			11,
+			trailSampleBuffer_.resource->GetGPUVirtualAddress()
+		);
 	}
 
 	void GpuParticleEmitterRuntime::TransitionForDraw(
@@ -903,6 +1009,7 @@ namespace MadoEngine::Particle {
 		addResourceSize(freeIndexBuffer_.resource.Get());
 		addResourceSize(freeCounterBuffer_.resource.Get());
 		addResourceSize(indirectArgumentBuffer_.resource.Get());
+		addResourceSize(trailSampleBuffer_.resource.Get());
 		addResourceSize(emitterParameterBuffer_.Get());
 		for (const auto& buffer : perFrameBuffers_) {
 			addResourceSize(buffer.Get());

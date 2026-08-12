@@ -55,4 +55,6 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 	}
 	gGpuParticleDrawInstances[particleIndex] =
 		BuildGpuParticleDrawInstance(state);
+	gGpuParticleTrailSamples[particleIndex] =
+		BuildGpuParticleTrailSample(state);
 }

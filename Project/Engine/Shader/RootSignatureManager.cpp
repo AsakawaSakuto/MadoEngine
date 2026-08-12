@@ -639,7 +639,7 @@ namespace MadoEngine {
 		// GPU Particle Compute用 RootSignature
 		// Particle更新用のState、Alive List、Counter、Indirect、ParameterをRegisterへ配置
 		{
-			D3D12_ROOT_PARAMETER rootParams[11]{};
+			D3D12_ROOT_PARAMETER rootParams[12]{};
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
 			rootParams[0].Descriptor.ShaderRegister = 0;
 			rootParams[0].Descriptor.RegisterSpace = 0;
@@ -694,6 +694,11 @@ namespace MadoEngine {
 			rootParams[10].Descriptor.ShaderRegister = 1;
 			rootParams[10].Descriptor.RegisterSpace = 0;
 			rootParams[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+			rootParams[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			rootParams[11].Descriptor.ShaderRegister = 8;
+			rootParams[11].Descriptor.RegisterSpace = 0;
+			rootParams[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
 			rootSigDesc.NumParameters = _countof(rootParams);

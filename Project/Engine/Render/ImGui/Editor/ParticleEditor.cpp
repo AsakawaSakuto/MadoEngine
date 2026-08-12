@@ -483,7 +483,7 @@ namespace {
 		if (selectedSettingPage == 4) {
 			ImGui::SeparatorText("Particle Trail");
 			ImGui::Checkbox("トレイルを有効化", &emitter.trail.isEnabled);
-			ImGui::TextDisabled("Particle TrailはCPU Backendのみ対応しています");
+			ImGui::TextDisabled("GPU BackendではTrail用データのみCPUへ非同期転送します");
 			ImGui::BeginDisabled(!emitter.trail.isEnabled);
 			ImGui::DragFloat(
 				"軌跡の寿命",

@@ -165,8 +165,9 @@ GpuParticleShapeSample SampleGpuParticleShape(inout uint randomState) {
 
 /// @brief 新規Particle Stateを生成
 /// @param randomState 疑似乱数列の内部状態
+/// @param identifier Particle固有ID
 /// @return 初期値を設定したParticle State
-GpuParticleState CreateGpuParticleState(inout uint randomState) {
+GpuParticleState CreateGpuParticleState(inout uint randomState, uint identifier) {
 	const GpuParticleShapeSample shapeSample =
 		SampleGpuParticleShape(randomState);
 	const float3 configuredDirection = NormalizeGpuParticleDirection(
@@ -237,6 +238,8 @@ GpuParticleState CreateGpuParticleState(inout uint randomState) {
 		randomState
 	);
 	state.color = state.startColor;
+	state.identifier = identifier;
+	state.padding = uint3(0, 0, 0);
 
 	if (gGpuParticleEmitterMetadata.z ==
 		kGpuParticleSimulationSpaceWorld) {
@@ -296,9 +299,11 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 		HashGpuParticleValue(sequence)
 	);
 	const GpuParticleState state =
-		CreateGpuParticleState(randomState);
+		CreateGpuParticleState(randomState, sequence);
 	gGpuParticleStates[particleIndex] = state;
 	gGpuParticleAliveOutput[aliveListIndex] = particleIndex;
 	gGpuParticleDrawInstances[particleIndex] =
 		BuildGpuParticleDrawInstance(state);
+	gGpuParticleTrailSamples[particleIndex] =
+		BuildGpuParticleTrailSample(state);
 }
