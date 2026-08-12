@@ -15,11 +15,25 @@ public:
 	virtual void DrawImGui() = 0;
 	virtual void Finalize() = 0;
 
-	Camera GetCamera() const { return sceneCamera_; }
+	/// @brief 描画に使用するCameraを取得
+	/// @return Sceneの描画Camera
+	Camera& GetCamera() { return cameraManager_.GetRenderCamera(); }
+
+	/// @brief 描画に使用する読み取り専用Cameraを取得
+	/// @return Sceneの描画Camera
+	const Camera& GetCamera() const { return cameraManager_.GetRenderCamera(); }
+
+	/// @brief Scene内Cameraを管理するManagerを取得
+	/// @return SceneローカルCameraManager
+	CameraManager& GetCameraManager() { return cameraManager_; }
+
+	/// @brief Scene内Cameraを管理する読み取り専用Managerを取得
+	/// @return SceneローカルCameraManager
+	const CameraManager& GetCameraManager() const { return cameraManager_; }
 
 	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得
 	/// @return シャドウマップの注視点
-	virtual Vector3 GetShadowFocusPosition() const { return sceneCamera_.GetPosition(); }
+	virtual Vector3 GetShadowFocusPosition() const { return GetCamera().GetPosition(); }
 
 	/// @brief シャドウマップ確認用の対象座標を取得
 	/// @param outPosition 対象のワールド座標を受け取る変数
@@ -29,5 +43,6 @@ public:
 		return false;
 	}
 
-	Camera sceneCamera_;
+protected:
+	CameraManager cameraManager_;
 };

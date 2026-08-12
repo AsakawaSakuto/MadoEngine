@@ -24,7 +24,12 @@ void Game::Initialize() {
 
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 
-	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
+	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("GameDebugCamera");
+	tpsCameraHandle_ = cameraManager_.CreateCamera<TPS_Camera>("GamePlayerCamera");
+	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
+		debugCamera->SetPosition({ 0.0f, 10.0f, -20.0f });
+	}
+	cameraManager_.CutTo(tpsCameraHandle_);
 
 	expGauge_ = std::make_unique<UI::Game::PlayerExpGauge>();
 	expGauge_->Initialize();
@@ -54,7 +59,7 @@ void Game::Initialize() {
 	// 地形確定後に通常Block上面の中心を取得してPlayerの初期配置へ使用
 	player_ = std::make_unique<Player::Base>();
 	player_->Initialize(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
-	player_->SetCamera(&tpsCamera_);
+	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
 
 	enemyManager_ = std::make_unique<Enemy::Manager>();
 	enemyManager_->Initialize(player_.get());
@@ -146,10 +151,10 @@ SceneType Game::Update(float dt) {
 		}
 	}
 
-	tpsCamera_.SetTargetPosition(player_->GetPosition());
-	tpsCamera_.Update(deltaTime);
-
-	debugCamera_.Update(deltaTime);
+	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
+		tpsCamera->SetTargetPosition(player_->GetPosition());
+	}
+	cameraManager_.Update(deltaTime);
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
@@ -212,21 +217,21 @@ SceneType Game::Update(float dt) {
 		}
 	}
 
-	if (useDebugCamera_) {
+	const CameraHandle activeCameraHandle = cameraManager_.GetActiveCameraHandle();
+	if (activeCameraHandle == debugCameraHandle_) {
+		useDebugCamera_ = true;
+	} else if (activeCameraHandle == tpsCameraHandle_) {
+		useDebugCamera_ = false;
+	}
 
-		// F9でDebugCameraとPlayer追従Cameraの描画参照を切り替え
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {
-			useDebugCamera_ = false;
-		}
-		sceneCamera_ = debugCamera_;
-	} else {
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {
-			useDebugCamera_ = true;
-		}
-		sceneCamera_ = tpsCamera_;
+	if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {
+
+		// EditorやJson復元で変更されたActive Cameraと同期した上で二つの操作Cameraを交互に選択
+		useDebugCamera_ = !useDebugCamera_;
+		cameraManager_.CutTo(useDebugCamera_ ? debugCameraHandle_ : tpsCameraHandle_);
 	}
 	projectileDamageView_.SetVisible(inGameSession_->IsPlaying());
-	projectileDamageView_.Update(deltaTime, sceneCamera_);
+	projectileDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
 
 	return SceneType::Game;
 }
@@ -239,7 +244,9 @@ void Game::DrawImGui() {
 #ifdef USE_IMGUI
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
-	tpsCamera_.DrawImGui();
+	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
+		tpsCamera->DrawImGui();
+	}
 
 	player_->DrawImGui();
 
@@ -265,7 +272,7 @@ void Game::DrawImGui() {
 
 Vector3 Game::GetShadowFocusPosition() const {
 	if (!player_) {
-		return sceneCamera_.GetPosition();
+		return GetCamera().GetPosition();
 	}
 
 	return player_->GetPosition();
@@ -302,6 +309,12 @@ void Game::Finalize() {
 	killCountText_ = {};
 	displayedMoney_ = -1;
 	fadeSprite_ = {};
+	if (player_) {
+		player_->SetCamera(nullptr);
+	}
+	cameraManager_.Clear();
+	debugCameraHandle_ = {};
+	tpsCameraHandle_ = {};
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
 }

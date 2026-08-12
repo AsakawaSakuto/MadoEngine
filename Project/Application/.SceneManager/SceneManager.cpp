@@ -169,7 +169,7 @@ void SceneManager::DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerM
 		return;
 	}
 
-	Camera camera = currentScene_->GetCamera();
+	Camera& camera = currentScene_->GetCamera();
 	if (MadoEngine::Render::ContainsRenderLayer(layerMask, MadoEngine::Render::RenderLayer::Debug)) {
 		MadoEngine::DebugLineManager::GetInstance().Draw(camera);
 	}
@@ -181,7 +181,7 @@ void SceneManager::DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask lay
 		return;
 	}
 
-	const Camera camera = currentScene_->GetCamera();
+	const Camera& camera = currentScene_->GetCamera();
 
 	// 透明系Effectを共通CameraとLayerMaskで同じ描画段階へ集約
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().DrawLayerMask(
@@ -234,17 +234,23 @@ void SceneManager::DrawImGui() {
 #ifdef USE_IMGUI
 	DrawSceneManagerImGui();
 
-	MadoEngine::Editor::DrawModelGizmoOnGameView(currentScene_->GetCamera(), currentSceneType_, selectedModel_);
-
-	if (currentScene_) {
-		currentScene_->DrawImGui();
+	if (!currentScene_) {
+		return;
 	}
+
+	MadoEngine::Editor::DrawCameraManagerEditorUI(
+		currentScene_->GetCameraManager(),
+		currentSceneType_
+	);
+	MadoEngine::Editor::DrawModelGizmoOnGameView(currentScene_->GetCamera(), currentSceneType_, selectedModel_);
+	currentScene_->DrawImGui();
 #endif // USE_IMGUI
 }
 
-Camera SceneManager::GetCurrentCamera() const {
+const Camera& SceneManager::GetCurrentCamera() const {
 	if (!currentScene_) {
-		return {};
+		static const Camera fallbackCamera;
+		return fallbackCamera;
 	}
 
 	return currentScene_->GetCamera();
@@ -374,5 +380,12 @@ void SceneManager::ChangeScene(SceneType type) {
 	currentSceneType_ = type;
 	LoadEditorSceneObjects(currentSceneType_);
 	currentScene_->Initialize();
+
+	// Runtime Camera登録後にScene別Jsonを読み込み、Editor Cameraと保存済みActive状態を復元
+	const std::filesystem::path cameraJsonPath =
+		CameraManager::CreateDefaultJsonPath(SceneTypeToString(currentSceneType_));
+	if (MadoEngine::Json::JsonFile::Exists(cameraJsonPath)) {
+		currentScene_->GetCameraManager().LoadFromJson(cameraJsonPath);
+	}
 	Logger::Output("シーン遷移を完了しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 }

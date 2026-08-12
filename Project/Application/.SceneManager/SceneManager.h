@@ -75,7 +75,7 @@ public:
 
 	/// @brief 現在のシーンカメラを取得
 	/// @return 現在のシーンカメラ
-	Camera GetCurrentCamera() const;
+	const Camera& GetCurrentCamera() const;
 
 	/// @brief 現在のシーンがシャドウマップ生成で注視したい座標を取得
 	/// @return シャドウマップの注視点

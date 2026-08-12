@@ -1,6 +1,7 @@
 #pragma once
 #include "Render/ImGui/Editor/AudioEditor.h"
 #include "Render/ImGui/Editor/BeamEditor.h"
+#include "Render/ImGui/Editor/CameraManagerEditor.h"
 #include "Render/ImGui/Editor/CylinderEditor.h"
 #include "Render/ImGui/Editor/EffectSequenceEditor.h"
 #include "Render/ImGui/Editor/GuizmoEditor.h"

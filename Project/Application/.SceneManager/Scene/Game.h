@@ -54,8 +54,8 @@ public:
 private:
 	std::uint32_t gameSeed_ = 0;
 
-	DebugCamera debugCamera_;
-	TPS_Camera tpsCamera_;
+	CameraHandle debugCameraHandle_{};
+	CameraHandle tpsCameraHandle_{};
 
 	ColliderShape mapLimitBox_;
 	Vector3 mapLimitBoxPos_;

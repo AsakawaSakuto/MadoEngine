@@ -37,5 +37,5 @@ private:
 
 	GameTimer fadeInTimer_;
 
-	DebugCamera debugCamera_;
+	CameraHandle debugCameraHandle_{};
 };

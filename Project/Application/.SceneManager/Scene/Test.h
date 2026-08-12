@@ -51,6 +51,6 @@ public:
 	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
-	DebugCamera debugCamera_;
-	TPS_Camera tpsCamera_;
+	CameraHandle debugCameraHandle_{};
+	CameraHandle tpsCameraHandle_{};
 };

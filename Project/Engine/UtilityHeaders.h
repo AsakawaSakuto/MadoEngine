@@ -9,6 +9,7 @@
 #include "Utility/Logger/Logger.h"
 #include "Utility/Json/JsonHeaders.h"
 #include "Utility/Camera/Camera.h"
+#include "Utility/Camera/CameraManager.h"
 #include "Utility/Camera/DebugCamera.h"
 #include "Utility/Camera/TPS_Camera.h"
 #include "Utility/Camera/CameraForGPU.h"

@@ -15,7 +15,11 @@ void Title::Initialize() {
 		fadeSprite->SetFitToScreen(true);
 	}
 
-	debugCamera_.SetDistance(35.0f);
+	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("TitleDebugCamera");
+	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
+		debugCamera->SetDistance(35.0f);
+	}
+	cameraManager_.CutTo(debugCameraHandle_);
 }
 
 SceneType Title::Update(float dt) {
@@ -42,8 +46,7 @@ SceneType Title::Update(float dt) {
 		return SceneType::Game;
 	}
 
-	debugCamera_.Update(dt);
-	sceneCamera_ = debugCamera_;
+	cameraManager_.Update(dt);
 
 	return SceneType::Title;
 }
@@ -52,9 +55,13 @@ void Title::Draw() {
 }
 
 void Title::DrawImGui() {
-	debugCamera_.DrawImGui();
+	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
+		debugCamera->DrawImGui();
+	}
 }
 
 void Title::Finalize() {
+	cameraManager_.Clear();
+	debugCameraHandle_ = {};
 	Logger::Output("タイトルシーンの終了処理を実行しました", Logger::Level::Application);
 }
