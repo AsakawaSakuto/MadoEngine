@@ -528,6 +528,11 @@ namespace {
 	/// @return 設定を変更した場合はtrue
 	bool DrawBasicEditor(CylinderEffectConfig& config) {
 		bool changed = false;
+		changed |= ImGui::DragFloat3(
+			"エミッター位置オフセット",
+			&config.translateOffset.x,
+			0.01f
+		);
 		changed |= ImGui::DragFloat("再生時間", &config.duration, 0.01f, 0.001f, 3600.0f, "%.3f秒");
 		changed |= ImGui::Checkbox("ループ再生", &config.isLoop);
 		return changed;

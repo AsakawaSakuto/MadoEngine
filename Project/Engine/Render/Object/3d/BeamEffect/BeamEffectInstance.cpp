@@ -149,9 +149,11 @@ namespace MadoEngine::Beam {
 				continue;
 			}
 			const BeamEmitterConfig& config = emitter.config;
+			const Vector3 offsetStartPosition = startPosition_ + config.translateOffset;
+			const Vector3 offsetEndPosition = endPosition_ + config.translateOffset;
 			const std::vector<MadoEngine::Ribbon::RibbonPoint> points = pointGenerator_.Generate(
-				startPosition_,
-				endPosition_,
+				offsetStartPosition,
+				offsetEndPosition,
 				config.geometry,
 				config.noise,
 				emitter.totalTime

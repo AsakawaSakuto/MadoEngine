@@ -6,6 +6,29 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+
+	using namespace MadoEngine::Ribbon;
+
+	/// @brief Effect基準TransformへRibbon Emitter位置オフセットを合成
+	/// @param config Ribbon Emitter設定
+	/// @param effectTransform Effect基準Transform
+	/// @return 位置オフセットを合成したEmitter Transform
+	Transform3D CreateEmitterTransform(
+		const RibbonEmitterConfig& config,
+		const Transform3D& effectTransform) {
+		Transform3D emitterTransform = effectTransform;
+		const Matrix4x4 effectMatrix = Matrix::MakeAffine(
+			effectTransform.scale,
+			effectTransform.rotate,
+			effectTransform.translate
+		);
+		emitterTransform.translate = Matrix::Transform(config.translateOffset, effectMatrix);
+		return emitterTransform;
+	}
+
+} // namespace
+
 namespace MadoEngine::Ribbon {
 
 	void RibbonEffectInstance::Initialize(
@@ -30,10 +53,11 @@ namespace MadoEngine::Ribbon {
 			state.config = config;
 			state.isGenerating = true;
 			state.isLoop = desc.loopOverride.value_or(config.playback.isLoop);
+			const Transform3D emitterTransform = CreateEmitterTransform(config, transform_);
 			if (config.trail.generationMode == RibbonPointGenerationMode::Manual) {
-				state.pointSource = std::make_unique<ManualRibbonPointSource>(config.trail, transform_);
+				state.pointSource = std::make_unique<ManualRibbonPointSource>(config.trail, emitterTransform);
 			} else {
-				state.pointSource = std::make_unique<TrailPointSource>(config.trail, transform_);
+				state.pointSource = std::make_unique<TrailPointSource>(config.trail, emitterTransform);
 			}
 			emitters_.push_back(std::move(state));
 		}
@@ -179,7 +203,9 @@ namespace MadoEngine::Ribbon {
 		transform_ = transform;
 		for (EmitterState& emitter : emitters_) {
 			if (emitter.pointSource) {
-				emitter.pointSource->SetTransform(transform_);
+				emitter.pointSource->SetTransform(
+					CreateEmitterTransform(emitter.config, transform_)
+				);
 			}
 		}
 	}
@@ -196,21 +222,24 @@ namespace MadoEngine::Ribbon {
 	}
 
 	bool RibbonEffectInstance::SetLocalControlPoints(const std::vector<Vector3>& controlPoints) {
-		const Matrix4x4 world = Matrix::MakeAffine(
-			transform_.scale,
-			transform_.rotate,
-			transform_.translate
-		);
 		bool wasSet = false;
 		for (EmitterState& emitter : emitters_) {
 			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
 			if (!manualSource) {
 				continue;
 			}
+
+			// Local SimulationはPoint Source側、World Simulationは呼び出し側でEmitter Offsetを合成
 			if (emitter.config.trail.simulationSpace == RibbonSimulationSpace::Local) {
 				wasSet = manualSource->SetControlPoints(controlPoints) || wasSet;
 				continue;
 			}
+			const Transform3D emitterTransform = CreateEmitterTransform(emitter.config, transform_);
+			const Matrix4x4 world = Matrix::MakeAffine(
+				emitterTransform.scale,
+				emitterTransform.rotate,
+				emitterTransform.translate
+			);
 			std::vector<Vector3> worldControlPoints = controlPoints;
 			for (Vector3& point : worldControlPoints) {
 				point = Matrix::Transform(point, world);

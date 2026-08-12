@@ -76,6 +76,7 @@ namespace MadoEngine::Beam {
 	struct BeamEmitterConfig {
 		std::string name = "Emitter";
 		bool isEnabled = true;
+		Vector3 translateOffset{};
 		BeamPlaybackModule playback;
 		BeamGeometryModule geometry;
 		BeamNoiseModule noise;

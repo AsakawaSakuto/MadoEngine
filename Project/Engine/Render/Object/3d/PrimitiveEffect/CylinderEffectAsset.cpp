@@ -318,6 +318,12 @@ namespace {
 		CylinderEmitterConfig config;
 		config.name = ReadString(json, "name", config.name);
 		config.isEnabled = ReadBool(json, "isEnabled", config.isEnabled);
+		if (const JsonValue* value = FindValue(json, "translateOffset")) {
+			config.translateOffset = MadoEngine::Json::JsonSerializer::ToVector3(
+				*value,
+				config.translateOffset
+			);
+		}
 		config.duration = ReadFloat(json, "duration", config.duration);
 		config.isLoop = ReadBool(json, "loop", config.isLoop);
 
@@ -410,6 +416,7 @@ namespace {
 		return JsonValue{
 			{ "name", config.name },
 			{ "isEnabled", config.isEnabled },
+			{ "translateOffset", config.translateOffset },
 			{ "duration", config.duration },
 			{ "loop", config.isLoop },
 			{ "geometry", {
@@ -443,6 +450,9 @@ namespace {
 	/// @brief Cylinder Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateCylinderEmitter(CylinderEmitterConfig& config) {
+		config.translateOffset.x = std::isfinite(config.translateOffset.x) ? config.translateOffset.x : 0.0f;
+		config.translateOffset.y = std::isfinite(config.translateOffset.y) ? config.translateOffset.y : 0.0f;
+		config.translateOffset.z = std::isfinite(config.translateOffset.z) ? config.translateOffset.z : 0.0f;
 		config.duration = std::clamp(std::isfinite(config.duration) ? config.duration : 1.0f, 0.001f, 3600.0f);
 		config.geometry.radialSegments = std::clamp(config.geometry.radialSegments, 3u, 256u);
 		config.geometry.heightSegments = std::clamp(config.geometry.heightSegments, 1u, 64u);

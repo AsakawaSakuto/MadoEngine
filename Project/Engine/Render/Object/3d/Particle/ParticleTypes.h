@@ -153,6 +153,7 @@ namespace MadoEngine::Particle {
 	struct EmitterConfig {
 		std::string name = "Emitter";
 		bool isEnabled = true;
+		Vector3 translateOffset{};
 		EmissionModule emission;
 		ParticleShape shape = PointShape{};
 		SimulationSpace simulationSpace = SimulationSpace::World;

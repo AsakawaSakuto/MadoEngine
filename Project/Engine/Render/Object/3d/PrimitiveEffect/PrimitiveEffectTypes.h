@@ -74,6 +74,7 @@ namespace MadoEngine::Effect {
 	struct CylinderEmitterConfig {
 		std::string name = "Emitter";
 		bool isEnabled = true;
+		Vector3 translateOffset{};
 		float duration = 1.0f;
 		bool isLoop = false;
 		CylinderGeometryModule geometry;

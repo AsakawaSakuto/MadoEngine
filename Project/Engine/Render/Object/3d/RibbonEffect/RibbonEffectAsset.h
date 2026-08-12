@@ -9,7 +9,7 @@ namespace MadoEngine::Ribbon {
 	/// @brief Ribbon描画とPoint生成の変更されない設定を保持するAsset
 	class RibbonEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 5;
+		static constexpr uint32_t kCurrentVersion = 6;
 
 		/// @brief JsonファイルからAssetを読み込み
 		/// @param filePath 読み込むJsonファイル

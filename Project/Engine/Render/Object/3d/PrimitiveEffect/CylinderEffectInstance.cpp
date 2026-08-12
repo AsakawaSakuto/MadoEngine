@@ -1,10 +1,30 @@
 #include "CylinderEffectInstance.h"
 #include "CylinderEffectRenderer3d.h"
+#include "Math/Function/MatrixFunction.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
 
 namespace {
+
+	using namespace MadoEngine::Effect;
+
+	/// @brief Effect基準TransformへCylinder Emitter位置オフセットを合成
+	/// @param config Cylinder Emitter設定
+	/// @param effectTransform Effect基準Transform
+	/// @return 位置オフセットを合成したEmitter Transform
+	Transform3D CreateEmitterTransform(
+		const CylinderEmitterConfig& config,
+		const Transform3D& effectTransform) {
+		Transform3D emitterTransform = effectTransform;
+		const Matrix4x4 effectMatrix = Matrix::MakeAffine(
+			effectTransform.scale,
+			effectTransform.rotate,
+			effectTransform.translate
+		);
+		emitterTransform.translate = Matrix::Transform(config.translateOffset, effectMatrix);
+		return emitterTransform;
+	}
 
 	/// @brief 度数法をラジアンへ変換
 	/// @param degrees 度数法の角度
@@ -135,7 +155,7 @@ namespace MadoEngine::Effect {
 			const CylinderEmitterConfig& config = emitter.config;
 			const float playbackTime = emitter.playbackTime;
 			CylinderRenderData data;
-			data.transform = transform_;
+			data.transform = CreateEmitterTransform(config, transform_);
 			data.radialSegments = config.geometry.radialSegments;
 			data.heightSegments = config.geometry.heightSegments;
 			data.pivot = config.geometry.pivot;

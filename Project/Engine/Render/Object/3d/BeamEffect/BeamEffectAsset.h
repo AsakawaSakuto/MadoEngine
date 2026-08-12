@@ -9,7 +9,7 @@ namespace MadoEngine::Beam {
 	/// @brief Beamの再生、形状、Noise、Material設定を保持するAsset
 	class BeamEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 4;
+		static constexpr uint32_t kCurrentVersion = 5;
 
 		/// @brief JsonファイルからAssetを読み込み
 		/// @param filePath 読み込むJsonファイル

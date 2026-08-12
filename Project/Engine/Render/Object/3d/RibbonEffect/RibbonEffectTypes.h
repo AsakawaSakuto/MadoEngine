@@ -110,6 +110,7 @@ namespace MadoEngine::Ribbon {
 	struct RibbonEmitterConfig {
 		std::string name = "Emitter";
 		bool isEnabled = true;
+		Vector3 translateOffset{};
 		RibbonPlaybackModule playback;
 		RibbonTrailModule trail;
 		RibbonGeometryModule geometry;

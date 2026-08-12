@@ -1,8 +1,32 @@
 #include "ParticleEffectInstance.h"
+#include "Math/Function/MatrixFunction.h"
 #include "ParticleRenderer3d.h"
 #include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
+
+namespace {
+
+	using namespace MadoEngine::Particle;
+
+	/// @brief Effect基準TransformへEmitter位置オフセットを合成
+	/// @param config Emitter設定
+	/// @param effectTransform Effect基準Transform
+	/// @return 位置オフセットを合成したEmitter Transform
+	Transform3D CreateEmitterTransform(
+		const EmitterConfig& config,
+		const Transform3D& effectTransform) {
+		Transform3D emitterTransform = effectTransform;
+		const Matrix4x4 effectMatrix = Matrix::MakeAffine(
+			effectTransform.scale,
+			effectTransform.rotate,
+			effectTransform.translate
+		);
+		emitterTransform.translate = Matrix::Transform(config.translateOffset, effectMatrix);
+		return emitterTransform;
+	}
+
+} // namespace
 
 namespace MadoEngine::Particle {
 
@@ -28,7 +52,7 @@ namespace MadoEngine::Particle {
 		Reset();
 
 		if (config.emission.startDelay <= 0.0f) {
-			EmitBursts(0.0f, 0.0f, emitterTransform);
+			EmitBursts(0.0f, 0.0f, CreateEmitterTransform(config, emitterTransform));
 			hasProcessedEmission_ = true;
 		}
 	}
@@ -43,7 +67,8 @@ namespace MadoEngine::Particle {
 			return;
 		}
 
-		runtime_->Update(deltaTime, emitterTransform);
+		const Transform3D offsetEmitterTransform = CreateEmitterTransform(*config_, emitterTransform);
+		runtime_->Update(deltaTime, offsetEmitterTransform);
 		if (!isEmitting_) {
 			return;
 		}
@@ -76,10 +101,10 @@ namespace MadoEngine::Particle {
 		const uint32_t continuousSpawnCount = static_cast<uint32_t>(spawnAccumulator_);
 		spawnAccumulator_ -= static_cast<float>(continuousSpawnCount);
 		if (continuousSpawnCount > 0) {
-			runtime_->Emit(continuousSpawnCount, emitterTransform);
+			runtime_->Emit(continuousSpawnCount, offsetEmitterTransform);
 		}
 
-		EmitBursts(previousLocalTime, currentLocalTime, emitterTransform);
+		EmitBursts(previousLocalTime, currentLocalTime, offsetEmitterTransform);
 		hasProcessedEmission_ = true;
 
 		if (!isLoop_ && currentLocalTime >= config_->emission.duration) {
@@ -97,8 +122,8 @@ namespace MadoEngine::Particle {
 	}
 
 	void ParticleEmitterInstance::SetTransform(const Transform3D& emitterTransform) {
-		if (runtime_) {
-			runtime_->SetTransform(emitterTransform);
+		if (config_ && runtime_) {
+			runtime_->SetTransform(CreateEmitterTransform(*config_, emitterTransform));
 		}
 	}
 
@@ -138,7 +163,11 @@ namespace MadoEngine::Particle {
 			return;
 		}
 
-		runtime_->SubmitRenderData(renderer, emitterTransform, renderLayer);
+		runtime_->SubmitRenderData(
+			renderer,
+			CreateEmitterTransform(*config_, emitterTransform),
+			renderLayer
+		);
 	}
 
 	ParticleEmitterRuntimeInfo ParticleEmitterInstance::GetRuntimeInfo() const {

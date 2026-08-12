@@ -297,6 +297,11 @@ namespace {
 	/// @return 値を変更した場合はtrue
 	bool DrawBasicEditor(BeamEffectConfig& config) {
 		bool changed = false;
+		changed |= ImGui::DragFloat3(
+			"エミッター位置オフセット",
+			&config.translateOffset.x,
+			0.01f
+		);
 		changed |= ImGui::DragFloat("再生時間", &config.playback.duration, 0.01f, 0.001f, 3600.0f, "%.3f秒");
 		changed |= ImGui::Checkbox("ループ再生", &config.playback.isLoop);
 		ImGui::SeparatorText("再生時間トラック");

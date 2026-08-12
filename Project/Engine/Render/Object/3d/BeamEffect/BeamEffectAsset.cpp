@@ -94,6 +94,26 @@ namespace {
 		return { json[0].get<float>(), json[1].get<float>() };
 	}
 
+	/// @brief Json配列からVector3を読み込み
+	/// @param json 読み込み元Json
+	/// @param fallback 読み込み失敗時の値
+	/// @return 読み込んだVector3
+	Vector3 ReadVector3(const JsonValue& json, const Vector3& fallback) {
+		if (!json.is_array() || json.size() < 3) {
+			return fallback;
+		}
+		for (std::size_t index = 0; index < 3; ++index) {
+			if (!json[index].is_number()) {
+				return fallback;
+			}
+		}
+		return {
+			json[0].get<float>(),
+			json[1].get<float>(),
+			json[2].get<float>(),
+		};
+	}
+
 	/// @brief Json配列からVector4を読み込み
 	/// @param json 読み込み元Json
 	/// @param fallback 読み込み失敗時の値
@@ -120,6 +140,13 @@ namespace {
 	/// @return 変換後Json
 	JsonValue WriteVector2(const Vector2& value) {
 		return JsonValue::array({ value.x, value.y });
+	}
+
+	/// @brief Vector3をJson配列へ変換
+	/// @param value 変換対象
+	/// @return 変換後Json
+	JsonValue WriteVector3(const Vector3& value) {
+		return JsonValue::array({ value.x, value.y, value.z });
 	}
 
 	/// @brief Vector4をJson配列へ変換
@@ -281,6 +308,9 @@ namespace {
 		BeamEmitterConfig config;
 		config.name = ReadString(json, "name", config.name);
 		config.isEnabled = ReadBool(json, "isEnabled", config.isEnabled);
+		if (const JsonValue* value = FindValue(json, "translateOffset")) {
+			config.translateOffset = ReadVector3(*value, config.translateOffset);
+		}
 		bool hasExtensionTrack = false;
 		if (const JsonValue* playback = FindValue(json, "playback")) {
 			config.playback.duration = ReadFloat(*playback, "duration", config.playback.duration);
@@ -369,6 +399,7 @@ namespace {
 		return JsonValue{
 			{ "name", config.name },
 			{ "isEnabled", config.isEnabled },
+			{ "translateOffset", WriteVector3(config.translateOffset) },
 			{ "playback", {
 				{ "duration", config.playback.duration },
 				{ "isLoop", config.playback.isLoop },
@@ -406,6 +437,9 @@ namespace {
 	/// @brief Beam Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateBeamEmitter(BeamEmitterConfig& config) {
+		config.translateOffset.x = std::isfinite(config.translateOffset.x) ? config.translateOffset.x : 0.0f;
+		config.translateOffset.y = std::isfinite(config.translateOffset.y) ? config.translateOffset.y : 0.0f;
+		config.translateOffset.z = std::isfinite(config.translateOffset.z) ? config.translateOffset.z : 0.0f;
 		config.playback.duration = std::clamp(
 			std::isfinite(config.playback.duration) ? config.playback.duration : 1.0f,
 			0.001f,

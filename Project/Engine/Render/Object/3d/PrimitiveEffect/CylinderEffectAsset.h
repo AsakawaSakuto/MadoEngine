@@ -9,7 +9,7 @@ namespace MadoEngine::Effect {
 	/// @brief Cylinderエフェクトの変更されない設定を保持するAsset
 	class CylinderEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 3;
+		static constexpr uint32_t kCurrentVersion = 4;
 
 		/// @brief JsonファイルからAssetを読み込み
 		/// @param filePath 読み込むJsonファイルパス

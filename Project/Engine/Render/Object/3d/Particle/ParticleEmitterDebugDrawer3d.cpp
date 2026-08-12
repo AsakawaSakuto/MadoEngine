@@ -127,10 +127,19 @@ namespace MadoEngine::Particle {
 		const EmitterConfig& config,
 		const Transform3D& transform,
 		const Vector4& color) {
-		const Matrix4x4 worldMatrix = Matrix::MakeAffine(
+		const Matrix4x4 effectMatrix = Matrix::MakeAffine(
 			transform.scale,
 			transform.rotate,
 			transform.translate
+		);
+		const Vector3 emitterPosition = Matrix::Transform(
+			config.translateOffset,
+			effectMatrix
+		);
+		const Matrix4x4 worldMatrix = Matrix::MakeAffine(
+			transform.scale,
+			transform.rotate,
+			emitterPosition
 		);
 		const Matrix4x4 rotationMatrix = Matrix::MakeAffine(
 			{ 1.0f, 1.0f, 1.0f },

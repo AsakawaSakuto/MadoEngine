@@ -475,6 +475,7 @@ namespace MadoEngine::Particle {
 			EmitterConfig emitter;
 			emitter.name = ReadString(emitterJson, "name", emitter.name);
 			emitter.isEnabled = ReadBool(emitterJson, "isEnabled", emitter.isEnabled);
+			emitter.translateOffset = ReadVector3(emitterJson, "translateOffset", emitter.translateOffset);
 			emitter.backend = ParseParticleBackend(ReadString(emitterJson, "backend", "auto"));
 			emitter.simulationSpace = ParseSimulationSpace(ReadString(emitterJson, "simulationSpace", "world"));
 
@@ -563,6 +564,7 @@ namespace MadoEngine::Particle {
 			nlohmann::json emitterJson;
 			emitterJson["name"] = emitter.name;
 			emitterJson["isEnabled"] = emitter.isEnabled;
+			emitterJson["translateOffset"] = emitter.translateOffset;
 			emitterJson["backend"] = ToString(emitter.backend);
 			emitterJson["simulationSpace"] = ToString(emitter.simulationSpace);
 			emitterJson["emission"] = {

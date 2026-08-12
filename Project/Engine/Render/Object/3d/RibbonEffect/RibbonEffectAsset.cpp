@@ -371,6 +371,9 @@ namespace {
 		RibbonEmitterConfig config;
 		config.name = ReadString(json, "name", config.name);
 		config.isEnabled = ReadBool(json, "isEnabled", config.isEnabled);
+		if (const JsonValue* value = FindValue(json, "translateOffset")) {
+			config.translateOffset = ReadVector3(*value, config.translateOffset);
+		}
 		if (const JsonValue* playback = FindValue(json, "playback")) {
 			config.playback.duration = ReadFloat(*playback, "duration", config.playback.duration);
 			config.playback.isLoop = ReadBool(*playback, "isLoop", config.playback.isLoop);
@@ -462,6 +465,7 @@ namespace {
 		return JsonValue{
 			{ "name", config.name },
 			{ "isEnabled", config.isEnabled },
+			{ "translateOffset", WriteVector3(config.translateOffset) },
 			{ "playback", {
 				{ "duration", config.playback.duration },
 				{ "isLoop", config.playback.isLoop },
@@ -501,6 +505,9 @@ namespace {
 	/// @brief Ribbon Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateRibbonEmitter(RibbonEmitterConfig& config) {
+		config.translateOffset.x = std::isfinite(config.translateOffset.x) ? config.translateOffset.x : 0.0f;
+		config.translateOffset.y = std::isfinite(config.translateOffset.y) ? config.translateOffset.y : 0.0f;
+		config.translateOffset.z = std::isfinite(config.translateOffset.z) ? config.translateOffset.z : 0.0f;
 		switch (config.playback.mode) {
 		case RibbonPlaybackMode::Full:
 		case RibbonPlaybackMode::Reveal:

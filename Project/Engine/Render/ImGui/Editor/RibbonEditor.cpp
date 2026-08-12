@@ -555,6 +555,11 @@ namespace {
 	/// @return 値を変更した場合はtrue
 	bool DrawBasicEditor(RibbonEffectConfig& config) {
 		bool changed = false;
+		changed |= ImGui::DragFloat3(
+			"エミッター位置オフセット",
+			&config.translateOffset.x,
+			0.01f
+		);
 		changed |= ImGui::DragFloat(
 			"再生時間",
 			&config.playback.duration,
