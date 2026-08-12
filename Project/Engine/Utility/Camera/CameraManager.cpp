@@ -11,9 +11,13 @@
 namespace {
 
 	constexpr float kMinProjectionValue = 0.0001f;
+	constexpr float kMinCameraDistance = 1.0f;
+	constexpr float kMaxCameraDistance = 1000.0f;
+	constexpr float kMaxCameraSensitivity = 1000.0f;
+	constexpr float kCameraPitchLimit = std::numbers::pi_v<float> * 0.499f;
 	constexpr float kMaxShakePower = 100000.0f;
 	constexpr float kMaxShakeDuration = 300.0f;
-	constexpr int kCameraJsonVersion = 2;
+	constexpr int kCameraJsonVersion = 3;
 
 	/// @brief 二つの値を指定率で線形補間
 	/// @param source 補間開始値
@@ -293,6 +297,54 @@ bool CameraManager::ExecuteShake(CameraHandle handle) {
 	return true;
 }
 
+bool CameraManager::TryGetDebugCameraSettings(
+	CameraHandle handle,
+	DebugCameraSettings& outSettings) const {
+	const DebugCamera* camera = TryGetCamera<DebugCamera>(handle);
+	if (!camera) {
+		return false;
+	}
+
+	outSettings = camera->GetSettings();
+	return true;
+}
+
+bool CameraManager::SetDebugCameraSettings(
+	CameraHandle handle,
+	const DebugCameraSettings& settings) {
+	DebugCamera* camera = TryGetCamera<DebugCamera>(handle);
+	if (!camera) {
+		return false;
+	}
+
+	camera->ApplySettings(settings);
+	return true;
+}
+
+bool CameraManager::TryGetTPSCameraSettings(
+	CameraHandle handle,
+	TPSCameraSettings& outSettings) const {
+	const TPS_Camera* camera = TryGetCamera<TPS_Camera>(handle);
+	if (!camera) {
+		return false;
+	}
+
+	outSettings = camera->GetSettings();
+	return true;
+}
+
+bool CameraManager::SetTPSCameraSettings(
+	CameraHandle handle,
+	const TPSCameraSettings& settings) {
+	TPS_Camera* camera = TryGetCamera<TPS_Camera>(handle);
+	if (!camera) {
+		return false;
+	}
+
+	camera->ApplySettings(settings);
+	return true;
+}
+
 float CameraManager::GetBlendProgress() const {
 	if (!isBlending_ || blendDuration_ <= 0.0f) {
 		return 0.0f;
@@ -374,6 +426,7 @@ bool CameraManager::SaveToJson(const std::filesystem::path& filePath) const {
 	root["cameras"] = nlohmann::json::array();
 	root["transitions"] = nlohmann::json::array();
 	root["shakes"] = nlohmann::json::array();
+	root["typeSettings"] = nlohmann::json::array();
 
 	// Runtime Cameraを永続化せずEditorで配置した固定Cameraだけを保存
 	for (const CameraEntry& entry : cameraEntries_) {
@@ -418,6 +471,38 @@ bool CameraManager::SaveToJson(const std::filesystem::path& filePath) const {
 			{ "duration", shake.duration },
 			{ "type", ShakeTypeToString(shake.type) },
 		});
+
+		if (const DebugCamera* debugCamera = dynamic_cast<const DebugCamera*>(entry.camera.get())) {
+			const DebugCameraSettings settings = debugCamera->GetSettings();
+			root["typeSettings"].push_back({
+				{ "camera", entry.name },
+				{ "type", "Debug" },
+				{ "target", MadoEngine::Json::JsonSerializer::ToJson(settings.target) },
+				{ "distance", settings.distance },
+				{ "yaw", settings.yaw },
+				{ "pitch", settings.pitch },
+				{ "rotateSensitivity", settings.rotateSensitivity },
+				{ "panSensitivity", settings.panSensitivity },
+				{ "dollySensitivity", settings.dollySensitivity },
+			});
+		} else if (const TPS_Camera* tpsCamera = dynamic_cast<const TPS_Camera*>(entry.camera.get())) {
+			const TPSCameraSettings settings = tpsCamera->GetSettings();
+			root["typeSettings"].push_back({
+				{ "camera", entry.name },
+				{ "type", "TPS" },
+				{ "yaw", settings.yaw },
+				{ "pitch", settings.pitch },
+				{ "distance", settings.distance },
+				{ "minPitch", settings.minPitch },
+				{ "maxPitch", settings.maxPitch },
+				{ "mouseSensitivity", settings.mouseSensitivity },
+				{ "gamePadSensitivity", settings.gamePadSensitivity },
+				{ "followStrength", settings.followStrength },
+				{ "offset", MadoEngine::Json::JsonSerializer::ToJson(settings.offset) },
+				{ "useMouseInput", settings.useMouseInput },
+				{ "useGamePadInput", settings.useGamePadInput },
+			});
+		}
 	}
 
 	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, root, 4, true);
@@ -676,6 +761,100 @@ bool CameraManager::LoadFromJson(const std::filesystem::path& filePath) {
 				)
 			);
 			SetShakeSettings(ownerHandle, shake);
+		}
+	}
+
+	// Runtime Camera生成後に名前と実行時型を照合して派生Camera固有設定を復元
+	if (root.contains("typeSettings") && root.at("typeSettings").is_array()) {
+		for (const nlohmann::json& settingsJson : root.at("typeSettings")) {
+			if (!settingsJson.is_object()) {
+				continue;
+			}
+
+			const std::string ownerName =
+				MadoEngine::Json::JsonSerializer::GetOrDefault<std::string>(
+					settingsJson,
+					"camera",
+					""
+				);
+			const CameraHandle ownerHandle = Find(ownerName);
+			if (!ownerHandle.IsValid()) {
+				continue;
+			}
+
+			const std::string cameraType =
+				MadoEngine::Json::JsonSerializer::GetOrDefault<std::string>(
+					settingsJson,
+					"type",
+					""
+				);
+			if (cameraType == "Debug") {
+				DebugCameraSettings settings;
+				if (!TryGetDebugCameraSettings(ownerHandle, settings)) {
+					continue;
+				}
+
+				if (settingsJson.contains("target")) {
+					const Vector3 target = MadoEngine::Json::JsonSerializer::ToVector3(
+						settingsJson.at("target"),
+						settings.target
+					);
+					if (IsFiniteVector3(target)) {
+						settings.target = target;
+					}
+				}
+				settings.distance = ReadClampedFloat(
+					settingsJson, "distance", settings.distance, kMinCameraDistance, kMaxCameraDistance);
+				settings.yaw = ReadClampedFloat(
+					settingsJson, "yaw", settings.yaw, -100000.0f, 100000.0f);
+				settings.pitch = ReadClampedFloat(
+					settingsJson, "pitch", settings.pitch, -kCameraPitchLimit, kCameraPitchLimit);
+				settings.rotateSensitivity = ReadClampedFloat(
+					settingsJson, "rotateSensitivity", settings.rotateSensitivity, 0.0f, kMaxCameraSensitivity);
+				settings.panSensitivity = ReadClampedFloat(
+					settingsJson, "panSensitivity", settings.panSensitivity, 0.0f, kMaxCameraSensitivity);
+				settings.dollySensitivity = ReadClampedFloat(
+					settingsJson, "dollySensitivity", settings.dollySensitivity, 0.0f, kMaxCameraSensitivity);
+				SetDebugCameraSettings(ownerHandle, settings);
+			} else if (cameraType == "TPS") {
+				TPSCameraSettings settings;
+				if (!TryGetTPSCameraSettings(ownerHandle, settings)) {
+					continue;
+				}
+
+				settings.yaw = ReadClampedFloat(
+					settingsJson, "yaw", settings.yaw, -100000.0f, 100000.0f);
+				settings.pitch = ReadClampedFloat(
+					settingsJson, "pitch", settings.pitch, -kCameraPitchLimit, kCameraPitchLimit);
+				settings.distance = ReadClampedFloat(
+					settingsJson, "distance", settings.distance, kMinCameraDistance, kMaxCameraDistance);
+				settings.minPitch = ReadClampedFloat(
+					settingsJson, "minPitch", settings.minPitch, -kCameraPitchLimit, kCameraPitchLimit);
+				settings.maxPitch = ReadClampedFloat(
+					settingsJson, "maxPitch", settings.maxPitch, -kCameraPitchLimit, kCameraPitchLimit);
+				settings.mouseSensitivity = ReadClampedFloat(
+					settingsJson, "mouseSensitivity", settings.mouseSensitivity, 0.0f, kMaxCameraSensitivity);
+				settings.gamePadSensitivity = ReadClampedFloat(
+					settingsJson, "gamePadSensitivity", settings.gamePadSensitivity, 0.0f, kMaxCameraSensitivity);
+				settings.followStrength = ReadClampedFloat(
+					settingsJson, "followStrength", settings.followStrength, 0.0f, 1.0f);
+				if (settingsJson.contains("offset")) {
+					const Vector3 offset = MadoEngine::Json::JsonSerializer::ToVector3(
+						settingsJson.at("offset"),
+						settings.offset
+					);
+					if (IsFiniteVector3(offset)) {
+						settings.offset = offset;
+					}
+				}
+				settings.useMouseInput =
+					MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(
+						settingsJson, "useMouseInput", settings.useMouseInput);
+				settings.useGamePadInput =
+					MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(
+						settingsJson, "useGamePadInput", settings.useGamePadInput);
+				SetTPSCameraSettings(ownerHandle, settings);
+			}
 		}
 	}
 

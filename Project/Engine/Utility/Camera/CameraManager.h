@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Utility/Camera/Camera.h"
+#include "Utility/Camera/DebugCamera.h"
+#include "Utility/Camera/TPS_Camera.h"
 #include "Utility/EditorManagementMode.h"
 #include "Utility/Easing/EaseType.h"
 #include "Utility/Handle/GenerationalHandle.h"
@@ -240,6 +242,38 @@ public:
 	/// @param handle Shake設定を使用するCameraのHandle
 	/// @return Shakeを開始できた場合はtrue
 	bool ExecuteShake(CameraHandle handle);
+
+	/// @brief DebugCamera固有設定をCameraManager経由で取得
+	/// @param handle 取得対象DebugCameraのHandle
+	/// @param outSettings 取得した設定の出力先
+	/// @return HandleとCamera型が有効な場合はtrue
+	bool TryGetDebugCameraSettings(
+		CameraHandle handle,
+		DebugCameraSettings& outSettings) const;
+
+	/// @brief DebugCamera固有設定をCameraManager経由で更新
+	/// @param handle 更新対象DebugCameraのHandle
+	/// @param settings 適用するDebugCamera固有設定
+	/// @return HandleとCamera型が有効な場合はtrue
+	bool SetDebugCameraSettings(
+		CameraHandle handle,
+		const DebugCameraSettings& settings);
+
+	/// @brief TPS Camera固有設定をCameraManager経由で取得
+	/// @param handle 取得対象TPS CameraのHandle
+	/// @param outSettings 取得した設定の出力先
+	/// @return HandleとCamera型が有効な場合はtrue
+	bool TryGetTPSCameraSettings(
+		CameraHandle handle,
+		TPSCameraSettings& outSettings) const;
+
+	/// @brief TPS Camera固有設定をCameraManager経由で更新
+	/// @param handle 更新対象TPS CameraのHandle
+	/// @param settings 適用するTPS Camera固有設定
+	/// @return HandleとCamera型が有効な場合はtrue
+	bool SetTPSCameraSettings(
+		CameraHandle handle,
+		const TPSCameraSettings& settings);
 
 private:
 	struct CameraEntry {

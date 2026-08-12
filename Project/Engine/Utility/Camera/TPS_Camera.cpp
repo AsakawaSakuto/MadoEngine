@@ -2,10 +2,74 @@
 #include "Input/MyInput.h"
 #include "imguiHeaders.h"
 
+namespace {
+
+	constexpr float kMinDistance = 1.0f;
+	constexpr float kMaxDistance = 1000.0f;
+	constexpr float kMaxSensitivity = 1000.0f;
+	constexpr float kPitchAbsoluteLimit = static_cast<float>(M_PI) * 0.499f;
+
+} // namespace
+
 TPS_Camera::TPS_Camera() {
 	currentTarget_ = targetPosition_;
 	ApplySphericalCoord();
 	Camera::Update(1.0f / 60.0f);
+}
+
+TPSCameraSettings TPS_Camera::GetSettings() const {
+	return {
+		yaw_,
+		pitch_,
+		distance_,
+		minPitch_,
+		maxPitch_,
+		mouseSensitivity_,
+		gamePadSensitivity_,
+		followStrength_,
+		offset_,
+		useMouseInput_,
+		useGamePadInput_,
+	};
+}
+
+void TPS_Camera::ApplySettings(const TPSCameraSettings& settings) {
+
+	// Camera行列と入力計算へ非有限値を渡さないよう現在値をFallbackとして設定値を検証
+	yaw_ = std::isfinite(settings.yaw) ? settings.yaw : yaw_;
+	distance_ = std::isfinite(settings.distance)
+		? std::clamp(settings.distance, kMinDistance, kMaxDistance)
+		: distance_;
+	const float requestedMinPitch = std::isfinite(settings.minPitch)
+		? std::clamp(settings.minPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit)
+		: minPitch_;
+	const float requestedMaxPitch = std::isfinite(settings.maxPitch)
+		? std::clamp(settings.maxPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit)
+		: maxPitch_;
+	minPitch_ = (std::min)(requestedMinPitch, requestedMaxPitch);
+	maxPitch_ = (std::max)(requestedMinPitch, requestedMaxPitch);
+	pitch_ = std::isfinite(settings.pitch) ? settings.pitch : pitch_;
+	mouseSensitivity_ = std::isfinite(settings.mouseSensitivity)
+		? std::clamp(settings.mouseSensitivity, 0.0f, kMaxSensitivity)
+		: mouseSensitivity_;
+	gamePadSensitivity_ = std::isfinite(settings.gamePadSensitivity)
+		? std::clamp(settings.gamePadSensitivity, 0.0f, kMaxSensitivity)
+		: gamePadSensitivity_;
+	followStrength_ = std::isfinite(settings.followStrength)
+		? std::clamp(settings.followStrength, kMinFollowStrength, kMaxFollowStrength)
+		: followStrength_;
+	if (std::isfinite(settings.offset.x) &&
+		std::isfinite(settings.offset.y) &&
+		std::isfinite(settings.offset.z)) {
+		offset_ = settings.offset;
+	}
+	useMouseInput_ = settings.useMouseInput;
+	useGamePadInput_ = settings.useGamePadInput;
+	ClampPitch();
+
+	// Editor変更直後のViewとProjectionを次Frameまで待たず描画状態へ同期
+	ApplySphericalCoord();
+	Camera::Update(0.0f);
 }
 
 void TPS_Camera::Update(float deltaTime) {

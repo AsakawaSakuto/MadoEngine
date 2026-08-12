@@ -327,6 +327,98 @@ namespace {
 		}
 	}
 
+	/// @brief DebugCamera固有設定の編集UIを描画
+	/// @param cameraManager 編集対象Cameraを保持するManager
+	/// @param handle 編集対象DebugCameraのHandle
+	void DrawDebugCameraSettings(CameraManager& cameraManager, CameraHandle handle) {
+		DebugCameraSettings settings;
+		if (!cameraManager.TryGetDebugCameraSettings(handle, settings)) {
+			return;
+		}
+
+		ImGui::SeparatorText("Debug Camera設定");
+		bool isChanged = false;
+		isChanged |= ImGui::DragFloat3("注視点", &settings.target.x, 0.05f);
+		isChanged |= ImGui::DragFloat(
+			"距離", &settings.distance, 0.1f, 1.0f, 1000.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+		float yawDegrees = settings.yaw * kRadiansToDegrees;
+		float pitchDegrees = settings.pitch * kRadiansToDegrees;
+		if (ImGui::DragFloat("Yaw", &yawDegrees, 0.25f)) {
+			settings.yaw = yawDegrees * kDegreesToRadians;
+			isChanged = true;
+		}
+		if (ImGui::DragFloat(
+			"Pitch",
+			&pitchDegrees,
+			0.25f,
+			-89.82f,
+			89.82f,
+			"%.2f deg",
+			ImGuiSliderFlags_AlwaysClamp)) {
+			settings.pitch = pitchDegrees * kDegreesToRadians;
+			isChanged = true;
+		}
+		isChanged |= ImGui::DragFloat(
+			"回転感度", &settings.rotateSensitivity, 0.01f, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		isChanged |= ImGui::DragFloat(
+			"パン感度", &settings.panSensitivity, 0.01f, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		isChanged |= ImGui::DragFloat(
+			"ドリー感度", &settings.dollySensitivity, 0.01f, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		if (isChanged) {
+			cameraManager.SetDebugCameraSettings(handle, settings);
+		}
+	}
+
+	/// @brief TPS Camera固有設定の編集UIを描画
+	/// @param cameraManager 編集対象Cameraを保持するManager
+	/// @param handle 編集対象TPS CameraのHandle
+	void DrawTPSCameraSettings(CameraManager& cameraManager, CameraHandle handle) {
+		TPSCameraSettings settings;
+		if (!cameraManager.TryGetTPSCameraSettings(handle, settings)) {
+			return;
+		}
+
+		ImGui::SeparatorText("TPS Camera設定");
+		bool isChanged = false;
+		float yawDegrees = settings.yaw * kRadiansToDegrees;
+		float pitchDegrees = settings.pitch * kRadiansToDegrees;
+		float minPitchDegrees = settings.minPitch * kRadiansToDegrees;
+		float maxPitchDegrees = settings.maxPitch * kRadiansToDegrees;
+		if (ImGui::DragFloat("Yaw", &yawDegrees, 0.25f)) {
+			settings.yaw = yawDegrees * kDegreesToRadians;
+			isChanged = true;
+		}
+		if (ImGui::DragFloat(
+			"Pitch", &pitchDegrees, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
+			settings.pitch = pitchDegrees * kDegreesToRadians;
+			isChanged = true;
+		}
+		isChanged |= ImGui::DragFloat(
+			"距離", &settings.distance, 0.1f, 1.0f, 1000.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+		if (ImGui::DragFloat(
+			"最小Pitch", &minPitchDegrees, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
+			settings.minPitch = minPitchDegrees * kDegreesToRadians;
+			isChanged = true;
+		}
+		if (ImGui::DragFloat(
+			"最大Pitch", &maxPitchDegrees, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
+			settings.maxPitch = maxPitchDegrees * kDegreesToRadians;
+			isChanged = true;
+		}
+		isChanged |= ImGui::DragFloat3("オフセット", &settings.offset.x, 0.01f);
+		isChanged |= ImGui::SliderFloat("追従強度", &settings.followStrength, 0.0f, 1.0f);
+		isChanged |= ImGui::DragFloat(
+			"マウス感度", &settings.mouseSensitivity, 0.0001f, 0.0f, 1000.0f, "%.4f", ImGuiSliderFlags_AlwaysClamp);
+		isChanged |= ImGui::DragFloat(
+			"パッド感度", &settings.gamePadSensitivity, 0.01f, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+		isChanged |= ImGui::Checkbox("マウス入力", &settings.useMouseInput);
+		ImGui::SameLine();
+		isChanged |= ImGui::Checkbox("ゲームパッド入力", &settings.useGamePadInput);
+		if (isChanged) {
+			cameraManager.SetTPSCameraSettings(handle, settings);
+		}
+	}
+
 	/// @brief Camera一覧の選択項目を描画
 	/// @param cameraManager 表示対象のCameraManager
 	/// @param handle 表示対象CameraのHandle
@@ -559,6 +651,9 @@ void DrawCameraManagerEditorUI(CameraManager& cameraManager, SceneType currentSc
 	if (cameraManager.IsBlending()) {
 		ImGui::ProgressBar(cameraManager.GetBlendProgress(), ImVec2(-1.0f, 0.0f), "補間中");
 	}
+
+	DrawDebugCameraSettings(cameraManager, selectedHandle);
+	DrawTPSCameraSettings(cameraManager, selectedHandle);
 
 	ImGui::SeparatorText("Shake設定");
 	CameraShakeSettings shakeSettings = cameraManager.GetShakeSettings(selectedHandle);

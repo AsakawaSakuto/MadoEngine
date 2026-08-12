@@ -12,6 +12,21 @@ namespace {
 	constexpr float kDegreesToRadians = static_cast<float>(M_PI) / 180.0f;
 }
 
+/// @brief TPS Camera固有の操作・追従設定
+struct TPSCameraSettings {
+	float yaw = 0.0f;
+	float pitch = 0.3f;
+	float distance = 15.0f;
+	float minPitch = -0.1f;
+	float maxPitch = 1.5f;
+	float mouseSensitivity = 0.003f;
+	float gamePadSensitivity = 2.5f;
+	float followStrength = 0.5f;
+	Vector3 offset = { 0.0f, 2.0f, -10.0f };
+	bool useMouseInput = false;
+	bool useGamePadInput = true;
+};
+
 /// @brief TPSカメラクラス
 /// ターゲットを球面座標で追従し、肩越しオフセットに対応したサードパーソンカメラ。
 class TPS_Camera : public Camera {
@@ -101,6 +116,14 @@ public:
 	/// @brief ゲームパッド入力が有効かどうかを取得
 	/// @return 有効ならtrue
 	bool GetUseGamePadInput() const { return useGamePadInput_; }
+
+	/// @brief TPS Camera固有設定を取得
+	/// @return 現在のTPS Camera固有設定
+	[[nodiscard]] TPSCameraSettings GetSettings() const;
+
+	/// @brief TPS Camera固有設定を検証して適用
+	/// @param settings 適用するTPS Camera固有設定
+	void ApplySettings(const TPSCameraSettings& settings);
 
 	/// @brief ImGui描画処理
 	void DrawImGui();

@@ -1,0 +1,71 @@
+{
+    "activeCamera": "GamePlayerCamera",
+    "cameras": [],
+    "shakes": [
+        {
+            "camera": "GameDebugCamera",
+            "duration": 0.5,
+            "power": 0.25,
+            "type": "XYZ"
+        },
+        {
+            "camera": "GamePlayerCamera",
+            "duration": 0.5,
+            "power": 0.25,
+            "type": "XYZ"
+        }
+    ],
+    "transitions": [
+        {
+            "blendDuration": 0.5,
+            "blendEaseType": 7,
+            "camera": "GameDebugCamera",
+            "destination": "",
+            "mode": "Cut"
+        },
+        {
+            "blendDuration": 0.5,
+            "blendEaseType": 7,
+            "camera": "GamePlayerCamera",
+            "destination": "",
+            "mode": "Cut"
+        }
+    ],
+    "typeSettings": [
+        {
+            "camera": "GameDebugCamera",
+            "distance": 10.03979778289795,
+            "dollySensitivity": 10.0,
+            "panSensitivity": 0.25,
+            "pitch": 0.30000001192092896,
+            "rotateSensitivity": 0.25,
+            "target": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "type": "Debug",
+            "yaw": 0.0
+        },
+        {
+            "camera": "GamePlayerCamera",
+            "distance": 18.299999237060547,
+            "followStrength": 0.5,
+            "gamePadSensitivity": 2.5,
+            "maxPitch": 1.5,
+            "minPitch": -0.10000000149011612,
+            "mouseSensitivity": 0.003000000026077032,
+            "offset": [
+                0.0,
+                2.0,
+                -10.0
+            ],
+            "pitch": 0.30000001192092896,
+            "type": "TPS",
+            "useGamePadInput": true,
+            "useMouseInput": false,
+            "yaw": 0.0
+        }
+    ],
+    "version": 3
+}

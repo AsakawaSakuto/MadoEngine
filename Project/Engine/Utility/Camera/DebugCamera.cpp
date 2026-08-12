@@ -2,11 +2,63 @@
 #include "Input/MyInput.h"
 #include "imguiHeaders.h"
 #include <algorithm>
+#include <cmath>
 #include <corecrt_math_defines.h>
+
+namespace {
+
+	constexpr float kMinDistance = 1.0f;
+	constexpr float kMaxDistance = 1000.0f;
+	constexpr float kMaxSensitivity = 1000.0f;
+	constexpr float kPitchLimit = static_cast<float>(M_PI) * 0.499f;
+
+} // namespace
 
 DebugCamera::DebugCamera() {
 	ApplySphericalCoord();
 	Camera::Update(1.0f / 60.0f);
+}
+
+DebugCameraSettings DebugCamera::GetSettings() const {
+	return {
+		target_,
+		distance_,
+		yaw_,
+		pitch_,
+		rotateSensitivity_,
+		panSensitivity_,
+		dollySensitivity_,
+	};
+}
+
+void DebugCamera::ApplySettings(const DebugCameraSettings& settings) {
+
+	// JsonやEditor経由の非有限値がCamera行列へ伝播しないよう項目単位で現在値へFallback
+	if (std::isfinite(settings.target.x) &&
+		std::isfinite(settings.target.y) &&
+		std::isfinite(settings.target.z)) {
+		target_ = settings.target;
+	}
+	distance_ = std::isfinite(settings.distance)
+		? std::clamp(settings.distance, kMinDistance, kMaxDistance)
+		: distance_;
+	yaw_ = std::isfinite(settings.yaw) ? settings.yaw : yaw_;
+	pitch_ = std::isfinite(settings.pitch)
+		? std::clamp(settings.pitch, -kPitchLimit, kPitchLimit)
+		: pitch_;
+	rotateSensitivity_ = std::isfinite(settings.rotateSensitivity)
+		? std::clamp(settings.rotateSensitivity, 0.0f, kMaxSensitivity)
+		: rotateSensitivity_;
+	panSensitivity_ = std::isfinite(settings.panSensitivity)
+		? std::clamp(settings.panSensitivity, 0.0f, kMaxSensitivity)
+		: panSensitivity_;
+	dollySensitivity_ = std::isfinite(settings.dollySensitivity)
+		? std::clamp(settings.dollySensitivity, 0.0f, kMaxSensitivity)
+		: dollySensitivity_;
+
+	// 設定変更Frameから描画状態へ反映するため球面座標とCamera行列を即時更新
+	ApplySphericalCoord();
+	Camera::Update(0.0f);
 }
 
 void DebugCamera::Update(float deltaTime) {
@@ -45,7 +97,6 @@ void DebugCamera::Update(float deltaTime) {
 				pitch_ += delta.y * rotateSensitivity_ * deltaTime;
 
 			// ピッチ角をクランプ（真上・真下を超えないように）
-			constexpr float kPitchLimit = static_cast<float>(M_PI) * 0.499f;
 			pitch_ = std::clamp(pitch_, -kPitchLimit, kPitchLimit);
 		}
 	}
@@ -54,8 +105,6 @@ void DebugCamera::Update(float deltaTime) {
 	float wheel = mouse->GetWheelDelta();
 	if (wheel != 0.0f) {
 		distance_ -= wheel * dollySensitivity_ * distance_ * 0.1f * deltaTime;
-		constexpr float kMinDistance = 1.0f;
-		constexpr float kMaxDistance = 1000.0f;
 		distance_ = std::clamp(distance_, kMinDistance, kMaxDistance);
 	}
 
