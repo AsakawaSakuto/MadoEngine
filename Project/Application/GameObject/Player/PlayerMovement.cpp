@@ -88,6 +88,11 @@ namespace Player {
 		currentMotion_ = Player::Motion::Idle;
 		currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
 		jumpStartedThisFrame_ = false;
+
+		// 生成直後の重力落下で地形内部へ入らないよう初期状態を接地へ固定
+		velocityY_ = 0.0f;
+		isGrounded_ = true;
+		remainingJumpCount_ = movementParams_.jumpCount_;
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {

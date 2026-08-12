@@ -26,10 +26,6 @@ void Game::Initialize() {
 
 	debugCamera_.SetPosition({ 0.0f, 10.0f, -20.0f });
 
-	player_ = std::make_unique<Player::Base>();
-	player_->Initialize();
-	player_->SetCamera(&tpsCamera_);
-
 	expGauge_ = std::make_unique<UI::Game::PlayerExpGauge>();
 	expGauge_->Initialize();
 
@@ -54,6 +50,11 @@ void Game::Initialize() {
 	
 	map_ = std::make_unique<Map>();
 	map_->Initialize(gameSeed_);
+
+	// 地形確定後に通常Block上面の中心を取得してPlayerの初期配置へ使用
+	player_ = std::make_unique<Player::Base>();
+	player_->Initialize(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
+	player_->SetCamera(&tpsCamera_);
 
 	enemyManager_ = std::make_unique<Enemy::Manager>();
 	enemyManager_->Initialize(player_.get());

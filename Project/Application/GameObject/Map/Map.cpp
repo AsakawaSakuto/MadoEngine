@@ -258,6 +258,37 @@ void Map::Initialize(uint32_t seed) {
 	GenerateBossSpawner();
 }
 
+Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
+	std::vector<Vector3> spawnCandidates;
+	spawnCandidates.reserve(static_cast<size_t>(mapWidth_) * static_cast<size_t>(mapHeight_));
+
+	// Slopeを除外してPlayerが水平に接地できる通常Block上面の中心を候補化
+	for (int z = 0; z < mapHeight_; ++z) {
+		for (int x = 0; x < mapWidth_; ++x) {
+			const MapBlock& block = mapBlocks_[z][x];
+			if (block.GetType() != MapBlockType::Ground) {
+				continue;
+			}
+
+			spawnCandidates.push_back({
+				static_cast<float>(x) * blockSize_.x,
+				blockSize_.y * static_cast<float>(block.GetHeight()),
+				static_cast<float>(z) * blockSize_.z
+			});
+		}
+	}
+
+	if (spawnCandidates.empty()) {
+		Logger::Output("Map : Playerを配置できる通常Blockがありません", Logger::Level::Warning);
+		return {};
+	}
+
+	// 他用途の乱数消費に影響されない専用系列から配置Blockを選択
+	Random playerSpawnRandom(MyRand::MakeDerivedSeed(seed, 300));
+	const int spawnIndex = playerSpawnRandom.Int(0, static_cast<int>(spawnCandidates.size()) - 1);
+	return spawnCandidates[static_cast<size_t>(spawnIndex)];
+}
+
 void Map::Update(Player::Base& player) {
 
 	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {

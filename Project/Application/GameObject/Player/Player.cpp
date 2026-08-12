@@ -6,25 +6,18 @@
 
 namespace Player {
 	namespace {
+		constexpr float kMovementSphereRadius = 0.5f;
 		constexpr float kShadowGroundOffset = 0.01f;                        // 影の描画座標を地面より少し上にずらすことでZファイティングを回避
 		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>; // Modelの前方がZ軸負方向を向くため、Y軸回転を180度補正
 		constexpr float kHealthRegenerationInterval = 6.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
 		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
-		constexpr int kMapBlockCount = 20;                                  // MapBlockの分割数
 	}
 
-	void Base::Initialize() {
-		const int spawnBlockX = MyRand::GetInt(0, kMapBlockCount - 1);
-		const int spawnBlockZ = MyRand::GetInt(0, kMapBlockCount - 1);
-		const float blockSizeX = (mapLimit_.max.x - mapLimit_.min.x) / static_cast<float>(kMapBlockCount);
-		const float blockSizeZ = (mapLimit_.max.z - mapLimit_.min.z) / static_cast<float>(kMapBlockCount);
+	void Base::Initialize(const Vector3& spawnGroundPosition) {
+		transform_.translate = spawnGroundPosition;
 
-		// 20x20から選んだBlockの境界開始位置へ半Block分を加算して中心へ配置
-		transform_.translate = {
-			mapLimit_.min.x + (static_cast<float>(spawnBlockX) + 0.5f) * blockSizeX,
-			100.0f,
-			mapLimit_.min.z + (static_cast<float>(spawnBlockZ) + 0.5f) * blockSizeZ
-		};
+		// 球Colliderの下端を地表へ一致させて埋まりと初期落下を防止
+		transform_.translate.y += kMovementSphereRadius;
 		transform_.SetAllScale(0.5f);
 
 		AABB aabb;
@@ -33,7 +26,7 @@ namespace Player {
 		hitAABB_ = aabb;
 
 		Sphere s;
-		s.radius = 0.5f;
+		s.radius = kMovementSphereRadius;
 		colliderShape_ = s;
 
 		Sphere s2;
@@ -54,6 +47,8 @@ namespace Player {
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 			model->SetTexture("white2x2");
+			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
+			model->SetScale(transform_.scale);
 			animationController_.Initialize(*model);
 		}
 
@@ -197,7 +192,7 @@ namespace Player {
 		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model, isSlopeGroundContact, kModelForwardYawOffset);
 
 		if (model) {
-			model->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);
 			const Vector3 slideVelocity = movement_.GetSlideVelocity();
 			const bool isCrouchingMoving =
@@ -269,7 +264,7 @@ namespace Player {
 		}
 
 		// Modelが利用できない間もゲーム座標から同じ基準位置を返却
-		return transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f };
+		return transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f };
 	}
 
 	void Base::DrawImGui() {

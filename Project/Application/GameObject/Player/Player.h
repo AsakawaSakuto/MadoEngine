@@ -14,7 +14,8 @@ namespace Player {
 	public:
 
 		/// @brief Playerを初期化
-		void Initialize();
+		/// @param spawnGroundPosition Playerを配置する地表座標
+		void Initialize(const Vector3& spawnGroundPosition);
 
 		/// @brief 入力と移動を更新
 		/// @param deltaTime 前フレームからの経過時間

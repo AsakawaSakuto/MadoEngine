@@ -24,6 +24,11 @@ public:
 	/// @brief Map調整用のImGuiを描画
 	void DrawImGui();
 
+	/// @brief Playerを配置する通常Block上面の中心座標を生成
+	/// @param seed 配置Blockの選択に使用するシード値
+	/// @return Playerを配置する地表座標
+	Vector3 CreatePlayerSpawnGroundPosition(uint32_t seed) const;
+
 private:
 	
 	/// @brief Map上にJarをランダム配置
