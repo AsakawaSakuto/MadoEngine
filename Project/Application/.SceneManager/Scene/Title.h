@@ -1,5 +1,8 @@
 #pragma once
+#include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
+#include <cstddef>
+#include <optional>
 
 /// @brief タイトルシーン
 /// @details ゲームのタイトル画面を表示し、スペースキーでゲームシーンに遷移
@@ -7,7 +10,8 @@ class Title : public IScene
 {
 public:
 	/// @brief コンストラクタ
-	Title();
+	/// @param commonData Sceneをまたいで保持するApplication共通データ
+	explicit Title(CommonData& commonData);
 
 	/// @brief デストラクタ
 	~Title() override;
@@ -30,6 +34,9 @@ public:
 	void DrawImGui() override;
 
 private:
+	CommonData& commonData_;
+	std::optional<std::size_t> selectedSeedIndex_;
+
 	MadoEngine::SpriteHandle wallPaperSprite_{};
 	MadoEngine::SpriteHandle fadeSprite_{};
 

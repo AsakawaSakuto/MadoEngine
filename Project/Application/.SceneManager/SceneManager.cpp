@@ -105,9 +105,10 @@ void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
 void SceneManager::Initialize(SceneType initialScene) {
 	Logger::Output("SceneManagerを初期化しました", Logger::Level::Application);
 
-	// Scene生成前に共通入力Actionと衝突Pairを登録
+	// Scene生成前に共通入力Action、衝突Pair、永続Applicationデータを初期化
 	RegisterInput();
 	RegisterColliderPair();
+	commonData_.Initialize();
 
 	ChangeScene(initialScene);
 
@@ -376,7 +377,7 @@ void SceneManager::ChangeScene(SceneType type) {
 	}
 
 	// Editor管理Objectを復元してからScene固有初期化を実行
-	currentScene_ = it->second();
+	currentScene_ = it->second(commonData_);
 	currentSceneType_ = type;
 	LoadEditorSceneObjects(currentSceneType_);
 	currentScene_->Initialize();

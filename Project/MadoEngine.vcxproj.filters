@@ -212,6 +212,7 @@
     <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
+    <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\System\Fade\Fade.cpp" />
@@ -849,6 +850,7 @@
     <ClInclude Include="Application\System\InGameSession\InGameSession.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\System\GameSeed\GameSeedSystem.h" />
     <ClInclude Include="Application\System\InGameSession\InGamePhase.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

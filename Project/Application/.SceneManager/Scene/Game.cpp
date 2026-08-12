@@ -10,16 +10,15 @@ namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
 }
 
-Game::Game()
-
-{}
+Game::Game(CommonData& commonData)
+	: commonData_(commonData) {}
 
 Game::~Game() {}
 
 void Game::Initialize() {
 
-	// 同一Seedから地形と各Random処理を再現できるGame単位の乱数初期化
-	gameSeed_ = MyRand::CreateSeed();
+	// Titleの選択状態を消費し、未選択時だけ新規抽選と履歴登録を実行
+	gameSeed_ = commonData_.GetGameSeedSystem().BeginGame();
 	MyRand::SetSeed(gameSeed_);
 
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
@@ -244,10 +243,6 @@ void Game::DrawImGui() {
 #ifdef USE_IMGUI
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
-	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
-		tpsCamera->DrawImGui();
-	}
-
 	player_->DrawImGui();
 
 	weaponInventory_->DrawImGui();

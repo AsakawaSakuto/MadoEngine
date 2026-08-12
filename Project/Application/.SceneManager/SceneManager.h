@@ -1,4 +1,5 @@
 #pragma once
+#include "CommonData.h"
 #include "SceneType.h"
 #include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Render/Object/RenderLayer.h"
@@ -16,7 +17,7 @@ class SceneManager
 {
 public:
 	/// @brief シーン生成関数の型
-	using CreatorFunc = std::function<std::unique_ptr<IScene>()>;
+	using CreatorFunc = std::function<std::unique_ptr<IScene>(CommonData&)>;
 
 	/// @brief コンストラクタ
 	SceneManager();
@@ -101,6 +102,7 @@ private:
 	/// @param type 遷移先のシーンのタイプ
 	void ChangeScene(SceneType type);
 
+	CommonData commonData_;                     // Sceneをまたいで保持するApplication共通データ
 	std::map<SceneType, CreatorFunc> creators_;  // 登録されたシーン生成関数
 	std::unique_ptr<IScene> currentScene_;       // 現在のシーン
 	SceneType currentSceneType_;                 // 現在のシーンのタイプ

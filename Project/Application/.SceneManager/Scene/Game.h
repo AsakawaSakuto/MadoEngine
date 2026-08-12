@@ -1,4 +1,5 @@
 #pragma once
+#include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
 #include "GameObject/Map/Map.h"
@@ -21,7 +22,8 @@ class Game : public IScene
 {
 public:
 	/// @brief コンストラクタ
-	Game();
+	/// @param commonData Sceneをまたいで保持するApplication共通データ
+	explicit Game(CommonData& commonData);
 
 	/// @brief デストラクタ
 	~Game() override;
@@ -52,6 +54,7 @@ public:
 	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
+	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
 
 	CameraHandle debugCameraHandle_{};

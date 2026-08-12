@@ -2,7 +2,8 @@
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
-Title::Title() {}
+Title::Title(CommonData& commonData)
+	: commonData_(commonData) {}
 
 Title::~Title() {}
 
@@ -31,6 +32,15 @@ SceneType Title::Update(float dt) {
 
 		// 連続入力でFadeの進捗を再開始しない一度限りの遷移受付
 		if (!fadeInTimer_.IsActive()) {
+			const std::vector<System::GameSeedSystem::HistoryEntry>& history =
+				commonData_.GetGameSeedSystem().GetHistory();
+			std::optional<std::uint32_t> requestedSeed;
+			if (selectedSeedIndex_.has_value() && selectedSeedIndex_.value() < history.size()) {
+				requestedSeed = history[selectedSeedIndex_.value()].seed;
+			}
+
+			// Fade中の選択変更に影響されないよう遷移受付時のSeed要求を固定
+			commonData_.GetGameSeedSystem().RequestSeed(requestedSeed);
 			fadeInTimer_.Start(1.0f);
 		}
 	}
@@ -55,9 +65,48 @@ void Title::Draw() {
 }
 
 void Title::DrawImGui() {
-	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
-		debugCamera->DrawImGui();
+#ifdef USE_IMGUI
+	System::GameSeedSystem& gameSeedSystem = commonData_.GetGameSeedSystem();
+	const std::vector<System::GameSeedSystem::HistoryEntry>& history = gameSeedSystem.GetHistory();
+
+	ImGui::Begin("Seed History");
+	ImGui::TextDisabled("No selection: generate a new Seed");
+	ImGui::Separator();
+
+	if (history.empty()) {
+		ImGui::TextDisabled("No Seed history");
+	} else {
+		const bool isSelectionLocked = fadeInTimer_.IsActive();
+		ImGui::BeginDisabled(isSelectionLocked);
+
+		// 履歴の保存順は維持したままUIでは新しいSeedから表示
+		for (std::size_t displayIndex = 0; displayIndex < history.size(); ++displayIndex) {
+			const std::size_t historyIndex = history.size() - displayIndex - 1;
+			bool isSelected = selectedSeedIndex_ == historyIndex;
+			bool isFavorite = history[historyIndex].isFavorite;
+
+			ImGui::PushID(static_cast<int>(historyIndex));
+			ImGui::Text("%u", history[historyIndex].seed);
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Use", &isSelected)) {
+
+				// Checkboxの表示を使いながら選択状態を一件だけに限定
+				selectedSeedIndex_ = isSelected
+					? std::optional<std::size_t>{ historyIndex }
+					: std::nullopt;
+			}
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Favorite", &isFavorite)) {
+				gameSeedSystem.SetFavorite(historyIndex, isFavorite);
+			}
+			ImGui::PopID();
+		}
+
+		ImGui::EndDisabled();
 	}
+
+	ImGui::End();
+#endif // USE_IMGUI
 }
 
 void Title::Finalize() {
