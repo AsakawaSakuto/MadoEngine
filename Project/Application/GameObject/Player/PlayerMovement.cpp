@@ -436,7 +436,8 @@ namespace Player {
 			remainingJumpCount_ = movementParams_.jumpCount_;
 		}
 
-		if (remainingJumpCount_ > 0 && input.isJumpTriggered) {
+		// 壁登り中のJump入力は回数を消費せず、壁登り解除後まで無視
+		if (!isWallClimbing_ && remainingJumpCount_ > 0 && input.isJumpTriggered) {
 			velocityY_ = movementParams_.jumpPower_;
 			isGrounded_ = false;
 			jumpStartedThisFrame_ = true;

@@ -6,6 +6,7 @@
             "enabled": true,
             "ignoreDepthForMask": true,
             "key": "LayerEffectPass_2",
+            "layerEffectStage": "Scene",
             "name": "PlayerOutline",
             "parameters": {
                 "ColorA": 1.0,
@@ -26,6 +27,7 @@
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_3",
+            "layerEffectStage": "Scene",
             "name": "MapObjectOutline",
             "parameters": {
                 "ColorA": 1.0,
@@ -46,6 +48,7 @@
             "enabled": true,
             "ignoreDepthForMask": false,
             "key": "LayerEffectPass_5",
+            "layerEffectStage": "Scene",
             "name": "MapObjectBloom",
             "parameters": {
                 "BloomColorA": 1.0,
@@ -59,27 +62,6 @@
             },
             "scope": "Layer",
             "targetLayerMask": 8
-        },
-        {
-            "effectShaderKey": "PostEffect/Binarize.PS",
-            "effectType": "Binarize",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_1",
-            "layerEffectStage": "Overlay",
-            "name": "Test",
-            "parameters": {
-                "HighColorB": 1.0,
-                "HighColorG": 1.0,
-                "HighColorR": 1.0,
-                "Intensity": 1.0,
-                "LowColorB": 0.0,
-                "LowColorG": 0.0,
-                "LowColorR": 0.0,
-                "Threshold": 0.5
-            },
-            "scope": "Layer",
-            "targetLayerMask": 256
         }
     ],
     "screenPasses": [
