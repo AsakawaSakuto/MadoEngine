@@ -575,19 +575,10 @@ namespace MadoEngine::Editor {
 			}
 		}
 		ImGui::SeparatorText("プレビュー");
-		if (ImGui::BeginTable("BeamPreviewSettings", 2, ImGuiTableFlags_SizingStretchProp)) {
-			ImGui::TableSetupColumn("始点", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-			ImGui::TableSetupColumn("終点", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-			ImGui::TableHeadersRow();
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::DragFloat3("##PreviewStart", &previewStart.x, 0.05f);
-			ImGui::TableSetColumnIndex(1);
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::DragFloat3("##PreviewEnd", &previewEnd.x, 0.05f);
-			ImGui::EndTable();
-		}
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat3("始点", &previewStart.x, 0.05f);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat3("終点", &previewEnd.x, 0.05f);
 		const bool previewLoopChanged = ImGui::Checkbox("プレビューをループ", &previewLoop);
 		if (ImGui::Button("プレビューを再生")) {
 			StopPreview(system, previewHandle);

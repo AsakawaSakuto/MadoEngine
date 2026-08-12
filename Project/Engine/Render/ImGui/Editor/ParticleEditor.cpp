@@ -775,28 +775,17 @@ namespace MadoEngine::Editor {
 		}
 
 		ImGui::SeparatorText("プレビュー");
-		const ImGuiTableFlags previewTableFlags = ImGuiTableFlags_SizingStretchProp;
-		if (ImGui::BeginTable("PreviewSettings", 2, previewTableFlags)) {
-			ImGui::TableSetupColumn("位置", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-			ImGui::TableSetupColumn("表示", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::DragFloat3("プレビュー位置", &previewPosition.x, 0.05f);
-			ImGui::TableSetColumnIndex(1);
-			ImGui::Checkbox("プレビューをループ", &previewLoop);
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(1);
-			ImGui::Checkbox("発生形状を表示", &showEmitterShape);
-			if (showEmitterShape) {
-				ImGui::SameLine();
-				ImGui::ColorEdit4("##EmitterShapeColor", &emitterShapeColor.x, ImGuiColorEditFlags_NoInputs);
-				if (ImGui::IsItemHovered()) {
-					ImGui::SetTooltip("発生形状の表示色");
-				}
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat3("プレビュー位置", &previewPosition.x, 0.05f);
+		ImGui::Checkbox("発生形状を表示", &showEmitterShape);
+		if (showEmitterShape) {
+			ImGui::SameLine();
+			ImGui::ColorEdit4("##EmitterShapeColor", &emitterShapeColor.x, ImGuiColorEditFlags_NoInputs);
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("発生形状の表示色");
 			}
-			ImGui::EndTable();
 		}
+		ImGui::Checkbox("プレビューをループ", &previewLoop);
 		if (ImGui::Button("プレビューを再生")) {
 			if (particleSystem.IsAlive(previewHandle)) {
 				particleSystem.Stop(previewHandle, StopMode::Immediate);

@@ -1267,9 +1267,8 @@ namespace MadoEngine::Editor {
 
 		ImGui::SeparatorText("プレビュー");
 		bool previewLoopChanged = false;
-		if (ImGui::BeginTable("RibbonPreviewSettings", 2, ImGuiTableFlags_SizingStretchProp)) {
-			ImGui::TableSetupColumn("位置", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-			ImGui::TableSetupColumn("再生", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+		if (ImGui::BeginTable("RibbonPreviewSettings", 1, ImGuiTableFlags_SizingStretchProp)) {
+			ImGui::TableSetupColumn("位置", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			ImGui::SetNextItemWidth(-FLT_MIN);
@@ -1278,11 +1277,10 @@ namespace MadoEngine::Editor {
 				&previewPosition.x,
 				0.05f
 			);
-			ImGui::TableSetColumnIndex(1);
-			previewLoopChanged = ImGui::Checkbox("プレビューをループ", &previewLoop);
 			ImGui::EndTable();
 		}
 
+		previewLoopChanged = ImGui::Checkbox("プレビューをループ", &previewLoop);
 		if (ImGui::Button("プレビューを再生")) {
 			StopRibbonPreview(
 				system,

@@ -1258,15 +1258,12 @@ namespace MadoEngine::Editor {
 		ImGui::SeparatorText("プレビュー");
 		const ImGuiTableFlags previewTableFlags = ImGuiTableFlags_SizingStretchProp;
 		bool previewLoopChanged = false;
-		if (ImGui::BeginTable("CylinderPreviewSettings", 2, previewTableFlags)) {
-			ImGui::TableSetupColumn("Transform", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-			ImGui::TableSetupColumn("再生", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+		if (ImGui::BeginTable("CylinderPreviewSettings", 1, previewTableFlags)) {
+			ImGui::TableSetupColumn("Transform", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			ImGui::SetNextItemWidth(-FLT_MIN);
 			ImGui::DragFloat3("位置", &previewTransform.translate.x, 0.05f);
-			ImGui::TableSetColumnIndex(1);
-			previewLoopChanged = ImGui::Checkbox("プレビューをループ", &previewLoop);
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			float rotationDegrees[3] = {
@@ -1289,6 +1286,7 @@ namespace MadoEngine::Editor {
 			ImGui::EndTable();
 		}
 
+		previewLoopChanged = ImGui::Checkbox("プレビューをループ", &previewLoop);
 		if (ImGui::Button("プレビューを再生")) {
 			StopCylinderPreview(
 				system,

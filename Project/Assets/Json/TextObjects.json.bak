@@ -234,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.6",
+            "text": "FPS : 61.2",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -381,6 +381,46 @@
             "name": "MoneyText",
             "position": [
                 400.0,
+                50.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "0",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 40.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "KillCountText",
+            "position": [
+                840.0,
                 50.0
             ],
             "rotation": 0.0,
