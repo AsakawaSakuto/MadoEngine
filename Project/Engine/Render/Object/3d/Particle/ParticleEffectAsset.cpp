@@ -284,6 +284,22 @@ namespace {
 		return value == SortMode::BackToFront ? "backToFront" : "none";
 	}
 
+	/// @brief 文字列からParticle Trail補間方式を取得
+	/// @param value 変換元文字列
+	/// @return 変換したParticle Trail補間方式
+	ParticleTrailInterpolation ParseParticleTrailInterpolation(const std::string& value) {
+		return value == "catmullRom"
+			? ParticleTrailInterpolation::CatmullRom
+			: ParticleTrailInterpolation::Linear;
+	}
+
+	/// @brief Particle Trail補間方式を文字列へ変換
+	/// @param value 変換するParticle Trail補間方式
+	/// @return 変換した文字列
+	const char* ToString(ParticleTrailInterpolation value) {
+		return value == ParticleTrailInterpolation::CatmullRom ? "catmullRom" : "linear";
+	}
+
 	/// @brief 文字列からBlendModeを取得
 	/// @param value 変換元文字列
 	/// @return 変換したBlendMode
@@ -548,6 +564,28 @@ namespace MadoEngine::Particle {
 				emitter.renderer.sortMode = ParseSortMode(ReadString(*renderer, "sortMode", "none"));
 			}
 
+			if (const nlohmann::json* trail = FindValue(emitterJson, "trail")) {
+				emitter.trail.isEnabled = ReadBool(*trail, "isEnabled", emitter.trail.isEnabled);
+				emitter.trail.pointLifetime = ReadFloat(*trail, "pointLifetime", emitter.trail.pointLifetime);
+				emitter.trail.minPointDistance = ReadFloat(*trail, "minPointDistance", emitter.trail.minPointDistance);
+				emitter.trail.maxPointCount = ReadUInt(*trail, "maxPointCount", emitter.trail.maxPointCount);
+				emitter.trail.startWidth = ReadFloat(*trail, "startWidth", emitter.trail.startWidth);
+				emitter.trail.endWidth = ReadFloat(*trail, "endWidth", emitter.trail.endWidth);
+				emitter.trail.startColor = ReadVector4(*trail, "startColor", emitter.trail.startColor);
+				emitter.trail.endColor = ReadVector4(*trail, "endColor", emitter.trail.endColor);
+				emitter.trail.interpolation = ParseParticleTrailInterpolation(
+					ReadString(*trail, "interpolation", "linear")
+				);
+				emitter.trail.smoothingSubdivision = ReadUInt(
+					*trail,
+					"smoothingSubdivision",
+					emitter.trail.smoothingSubdivision
+				);
+				emitter.trail.cameraFacing = ReadBool(*trail, "cameraFacing", emitter.trail.cameraFacing);
+				emitter.trail.textureName = ReadString(*trail, "texture", emitter.trail.textureName);
+				emitter.trail.blendMode = ParseBlendMode(ReadString(*trail, "blendMode", "add"));
+			}
+
 			emitters_.push_back(std::move(emitter));
 		}
 
@@ -606,6 +644,21 @@ namespace MadoEngine::Particle {
 				{ "blendMode", ToString(emitter.renderer.blendMode) },
 				{ "sortMode", ToString(emitter.renderer.sortMode) },
 			};
+			emitterJson["trail"] = {
+				{ "isEnabled", emitter.trail.isEnabled },
+				{ "pointLifetime", emitter.trail.pointLifetime },
+				{ "minPointDistance", emitter.trail.minPointDistance },
+				{ "maxPointCount", emitter.trail.maxPointCount },
+				{ "startWidth", emitter.trail.startWidth },
+				{ "endWidth", emitter.trail.endWidth },
+				{ "startColor", emitter.trail.startColor },
+				{ "endColor", emitter.trail.endColor },
+				{ "interpolation", ToString(emitter.trail.interpolation) },
+				{ "smoothingSubdivision", emitter.trail.smoothingSubdivision },
+				{ "cameraFacing", emitter.trail.cameraFacing },
+				{ "texture", emitter.trail.textureName },
+				{ "blendMode", ToString(emitter.trail.blendMode) },
+			};
 			json["emitters"].push_back(std::move(emitterJson));
 		}
 
@@ -644,6 +697,51 @@ namespace MadoEngine::Particle {
 			emitter.initial.lifeTime.min = (std::max)(0.001f, emitter.initial.lifeTime.min);
 			emitter.initial.lifeTime.max = (std::max)(emitter.initial.lifeTime.min, emitter.initial.lifeTime.max);
 			emitter.motion.drag = (std::max)(0.0f, emitter.motion.drag);
+			emitter.trail.pointLifetime = std::clamp(
+				std::isfinite(emitter.trail.pointLifetime) ? emitter.trail.pointLifetime : 0.5f,
+				0.001f,
+				3600.0f
+			);
+			emitter.trail.minPointDistance = std::clamp(
+				std::isfinite(emitter.trail.minPointDistance) ? emitter.trail.minPointDistance : 0.05f,
+				0.0f,
+				100000.0f
+			);
+			emitter.trail.maxPointCount = std::clamp(
+				emitter.trail.maxPointCount,
+				kMinimumParticleTrailPointCount,
+				kMaximumParticleTrailPointCount
+			);
+			emitter.trail.startWidth = (std::max)(
+				0.0f,
+				std::isfinite(emitter.trail.startWidth) ? emitter.trail.startWidth : 0.25f
+			);
+			emitter.trail.endWidth = (std::max)(
+				0.0f,
+				std::isfinite(emitter.trail.endWidth) ? emitter.trail.endWidth : 0.0f
+			);
+			if (emitter.trail.interpolation != ParticleTrailInterpolation::Linear &&
+				emitter.trail.interpolation != ParticleTrailInterpolation::CatmullRom) {
+				emitter.trail.interpolation = ParticleTrailInterpolation::Linear;
+			}
+			emitter.trail.smoothingSubdivision = std::clamp(
+				emitter.trail.smoothingSubdivision,
+				0u,
+				kMaximumParticleTrailSmoothingSubdivision
+			);
+			if (emitter.trail.textureName.empty()) {
+				emitter.trail.textureName = "white2x2";
+			}
+			const Vector4 defaultStartTrailColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+			const Vector4 defaultEndTrailColor = { 1.0f, 1.0f, 1.0f, 0.0f };
+			const auto normalizeTrailColor = [](Vector4& color, const Vector4& fallback) {
+				color.x = std::isfinite(color.x) ? (std::max)(0.0f, color.x) : fallback.x;
+				color.y = std::isfinite(color.y) ? (std::max)(0.0f, color.y) : fallback.y;
+				color.z = std::isfinite(color.z) ? (std::max)(0.0f, color.z) : fallback.z;
+				color.w = std::isfinite(color.w) ? std::clamp(color.w, 0.0f, 1.0f) : fallback.w;
+			};
+			normalizeTrailColor(emitter.trail.startColor, defaultStartTrailColor);
+			normalizeTrailColor(emitter.trail.endColor, defaultEndTrailColor);
 
 			std::visit([](auto& shape) {
 				using ShapeType = std::decay_t<decltype(shape)>;

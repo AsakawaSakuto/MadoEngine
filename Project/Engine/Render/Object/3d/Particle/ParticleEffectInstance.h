@@ -8,6 +8,12 @@
 #include <optional>
 #include <vector>
 
+namespace MadoEngine::Ribbon {
+
+	class RibbonEffectRenderer3d;
+
+}
+
 namespace MadoEngine::Particle {
 
 	class ParticleRenderer3d;
@@ -63,10 +69,12 @@ namespace MadoEngine::Particle {
 
 		/// @brief 生存ParticleをRendererへ登録
 		/// @param renderer 登録先Renderer
+		/// @param trailRenderer Trail登録先Ribbon Renderer
 		/// @param emitterTransform EmitterのTransform
 		/// @param renderLayer 描画先Layer
 		void SubmitRenderData(
 			ParticleRenderer3d& renderer,
+			MadoEngine::Ribbon::RibbonEffectRenderer3d& trailRenderer,
 			const Transform3D& emitterTransform,
 			MadoEngine::Render::RenderLayer renderLayer
 		) const;
@@ -164,7 +172,11 @@ namespace MadoEngine::Particle {
 
 		/// @brief 全Emitterの生存ParticleをRendererへ登録
 		/// @param renderer 登録先Renderer
-		void SubmitRenderData(ParticleRenderer3d& renderer) const;
+		/// @param trailRenderer Trail登録先Ribbon Renderer
+		void SubmitRenderData(
+			ParticleRenderer3d& renderer,
+			MadoEngine::Ribbon::RibbonEffectRenderer3d& trailRenderer
+		) const;
 
 		/// @brief EffectのTransformを設定
 		/// @param transform 設定するTransform

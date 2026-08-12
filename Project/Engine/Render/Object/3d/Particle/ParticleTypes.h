@@ -16,6 +16,9 @@
 namespace MadoEngine::Particle {
 
 	inline constexpr uint32_t kMaximumParticleCountPerEmitter = 262144;
+	inline constexpr uint32_t kMinimumParticleTrailPointCount = 2;
+	inline constexpr uint32_t kMaximumParticleTrailPointCount = 256;
+	inline constexpr uint32_t kMaximumParticleTrailSmoothingSubdivision = 32;
 
 	template<class T>
 	struct ValueRange {
@@ -48,6 +51,11 @@ namespace MadoEngine::Particle {
 		Cpu,
 		Gpu,
 		Count,
+	};
+
+	enum class ParticleTrailInterpolation {
+		Linear,
+		CatmullRom,
 	};
 
 	struct PointShape {
@@ -150,6 +158,22 @@ namespace MadoEngine::Particle {
 		SortMode sortMode = SortMode::None;
 	};
 
+	struct ParticleTrailModule {
+		bool isEnabled = false;
+		float pointLifetime = 0.5f;
+		float minPointDistance = 0.05f;
+		uint32_t maxPointCount = 32;
+		float startWidth = 0.25f;
+		float endWidth = 0.0f;
+		Vector4 startColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		Vector4 endColor = { 1.0f, 1.0f, 1.0f, 0.0f };
+		ParticleTrailInterpolation interpolation = ParticleTrailInterpolation::Linear;
+		uint32_t smoothingSubdivision = 0;
+		bool cameraFacing = true;
+		std::string textureName = "white2x2";
+		MadoEngine::Render::BlendMode blendMode = MadoEngine::Render::BlendMode::Add;
+	};
+
 	struct EmitterConfig {
 		std::string name = "Emitter";
 		bool isEnabled = true;
@@ -162,10 +186,12 @@ namespace MadoEngine::Particle {
 		SizeOverLifetimeModule sizeOverLifetime;
 		ColorOverLifetimeModule colorOverLifetime;
 		ParticleRendererModule renderer;
+		ParticleTrailModule trail;
 		ParticleBackend backend = ParticleBackend::Auto;
 	};
 
 	struct ParticleState {
+		uint64_t identifier = 0;
 		Vector3 position{};
 		Vector3 velocity{};
 		Vector2 scale = { 1.0f, 1.0f };

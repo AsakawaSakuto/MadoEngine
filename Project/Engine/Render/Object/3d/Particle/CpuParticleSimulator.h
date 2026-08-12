@@ -45,6 +45,7 @@ namespace MadoEngine::Particle {
 	private:
 		std::vector<ParticleState> particles_;
 		uint32_t aliveCount_ = 0;
+		uint64_t nextParticleIdentifier_ = 1;
 	};
 
 } // namespace MadoEngine::Particle

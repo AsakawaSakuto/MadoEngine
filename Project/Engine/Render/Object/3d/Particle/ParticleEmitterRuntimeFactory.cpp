@@ -32,7 +32,12 @@ namespace MadoEngine::Particle {
 			requestedBackend == ParticleBackend::Auto ||
 			requestedBackend == ParticleBackend::Gpu;
 
-		if (requestsGpu && config.renderer.sortMode == SortMode::BackToFront) {
+		if (requestsGpu && config.trail.isEnabled) {
+
+			// Particle Trailの履歴管理はCPU Runtimeへ限定
+			outFallbackReason =
+				"Particle TrailはCPU Backendのみ対応しているためCPU Backendを使用しています。";
+		} else if (requestsGpu && config.renderer.sortMode == SortMode::BackToFront) {
 
 			// GPU側に未実装の描画順を保つためCPU Backendへ切り替え
 			outFallbackReason =

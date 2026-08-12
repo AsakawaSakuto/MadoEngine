@@ -2,6 +2,7 @@
 #include "ParticleEffectInstance.h"
 #include "ParticleEmitterRuntimeFactory.h"
 #include "ParticleRenderer3d.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectRenderer3d.h"
 #include "Render/PSO/ComputePSORegistry.h"
 #include <filesystem>
 #include <memory>
@@ -226,6 +227,7 @@ namespace MadoEngine::Particle {
 		void ReleaseSlot(uint32_t index);
 
 		ParticleRenderer3d renderer_;
+		MadoEngine::Ribbon::RibbonEffectRenderer3d trailRenderer_;
 		ParticleEmitterRuntimeFactory runtimeFactory_;
 		ID3D12GraphicsCommandList* commandList_ = nullptr;
 		std::unordered_map<std::string, std::shared_ptr<ParticleEffectAsset>> assets_;

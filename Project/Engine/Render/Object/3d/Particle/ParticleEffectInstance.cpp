@@ -1,6 +1,7 @@
 #include "ParticleEffectInstance.h"
 #include "Math/Function/MatrixFunction.h"
 #include "ParticleRenderer3d.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectRenderer3d.h"
 #include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
@@ -157,15 +158,22 @@ namespace MadoEngine::Particle {
 
 	void ParticleEmitterInstance::SubmitRenderData(
 		ParticleRenderer3d& renderer,
+		MadoEngine::Ribbon::RibbonEffectRenderer3d& trailRenderer,
 		const Transform3D& emitterTransform,
 		MadoEngine::Render::RenderLayer renderLayer) const {
 		if (!config_ || !runtime_) {
 			return;
 		}
 
+		const Transform3D resolvedEmitterTransform = CreateEmitterTransform(*config_, emitterTransform);
 		runtime_->SubmitRenderData(
 			renderer,
-			CreateEmitterTransform(*config_, emitterTransform),
+			resolvedEmitterTransform,
+			renderLayer
+		);
+		runtime_->SubmitTrailRenderData(
+			trailRenderer,
+			resolvedEmitterTransform,
 			renderLayer
 		);
 	}
@@ -329,9 +337,11 @@ namespace MadoEngine::Particle {
 		return matchesScene && MadoEngine::Render::ContainsRenderLayer(layerMask, renderLayer_);
 	}
 
-	void ParticleEffectInstance::SubmitRenderData(ParticleRenderer3d& renderer) const {
+	void ParticleEffectInstance::SubmitRenderData(
+		ParticleRenderer3d& renderer,
+		MadoEngine::Ribbon::RibbonEffectRenderer3d& trailRenderer) const {
 		for (const ParticleEmitterInstance& emitter : emitters_) {
-			emitter.SubmitRenderData(renderer, transform_, renderLayer_);
+			emitter.SubmitRenderData(renderer, trailRenderer, transform_, renderLayer_);
 		}
 	}
 

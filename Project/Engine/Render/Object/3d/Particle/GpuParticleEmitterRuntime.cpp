@@ -534,6 +534,15 @@ namespace MadoEngine::Particle {
 		renderer.SubmitGpu(renderData, config_, renderLayer);
 	}
 
+	void GpuParticleEmitterRuntime::SubmitTrailRenderData(
+		MadoEngine::Ribbon::RibbonEffectRenderer3d& renderer,
+		const Transform3D& emitterTransform,
+		MadoEngine::Render::RenderLayer renderLayer) const {
+		(void)renderer;
+		(void)emitterTransform;
+		(void)renderLayer;
+	}
+
 	bool GpuParticleEmitterRuntime::IsIdle() const {
 		return
 			isInitialized_ &&

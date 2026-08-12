@@ -4,6 +4,12 @@
 
 struct ID3D12GraphicsCommandList;
 
+namespace MadoEngine::Ribbon {
+
+	class RibbonEffectRenderer3d;
+
+}
+
 namespace MadoEngine::Particle {
 
 	class ParticleRenderer3d;
@@ -58,6 +64,16 @@ namespace MadoEngine::Particle {
 		/// @param renderLayer 描画Layer
 		virtual void SubmitRenderData(
 			ParticleRenderer3d& renderer,
+			const Transform3D& emitterTransform,
+			MadoEngine::Render::RenderLayer renderLayer
+		) const = 0;
+
+		/// @brief Particle Trail描画データをRibbon Rendererへ登録
+		/// @param renderer 登録先Ribbon Renderer
+		/// @param emitterTransform 現在のEmitter Transform
+		/// @param renderLayer 描画Layer
+		virtual void SubmitTrailRenderData(
+			MadoEngine::Ribbon::RibbonEffectRenderer3d& renderer,
 			const Transform3D& emitterTransform,
 			MadoEngine::Render::RenderLayer renderLayer
 		) const = 0;

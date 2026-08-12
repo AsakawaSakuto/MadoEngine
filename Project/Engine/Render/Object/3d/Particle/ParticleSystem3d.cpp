@@ -173,6 +173,7 @@ namespace MadoEngine::Particle {
 		Finalize();
 		commandList_ = commandList;
 		renderer_.Initialize(device, commandList, psoRegistry);
+		trailRenderer_.Initialize(device, commandList, psoRegistry);
 		bool isGpuBackendAvailable =
 			device != nullptr &&
 			computePsoRegistry != nullptr;
@@ -229,6 +230,7 @@ namespace MadoEngine::Particle {
 		retiredEffectInstances_.clear();
 		assets_.clear();
 		assetPaths_.clear();
+		trailRenderer_.Finalize();
 		renderer_.Finalize();
 		runtimeFactory_.Initialize(nullptr, nullptr, false);
 		commandList_ = nullptr;
@@ -591,6 +593,7 @@ namespace MadoEngine::Particle {
 		}
 
 		renderer_.OnGpuFrameCompleted(completedFenceValue);
+		trailRenderer_.OnGpuFrameCompleted(completedFenceValue);
 		for (EffectSlot& slot : effectSlots_) {
 			if (slot.instance) {
 				slot.instance->OnGpuFrameCompleted(completedFenceValue);
@@ -621,16 +624,18 @@ namespace MadoEngine::Particle {
 
 		if (!isRenderDataPrepared_ || preparedSceneType_ != sceneType) {
 			renderer_.Begin(camera, currentSubmissionFenceValue_);
+			trailRenderer_.Begin(camera, currentSubmissionFenceValue_);
 			for (const EffectSlot& slot : effectSlots_) {
 				if (!slot.instance || !slot.isVisible ||
 					!slot.instance->Matches(sceneType, MadoEngine::Render::kAllRenderLayers)) {
 					continue;
 				}
-				slot.instance->SubmitRenderData(renderer_);
+				slot.instance->SubmitRenderData(renderer_, trailRenderer_);
 			}
 			preparedSceneType_ = sceneType;
 			isRenderDataPrepared_ = true;
 		}
+		trailRenderer_.Draw(layerMask);
 		renderer_.Draw(layerMask);
 	}
 

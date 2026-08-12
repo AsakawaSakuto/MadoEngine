@@ -70,6 +70,16 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		) const override;
 
+		/// @brief GPU BackendではParticle Trail描画登録なし
+		/// @param renderer 未使用
+		/// @param emitterTransform 未使用
+		/// @param renderLayer 未使用
+		void SubmitTrailRenderData(
+			MadoEngine::Ribbon::RibbonEffectRenderer3d& renderer,
+			const Transform3D& emitterTransform,
+			MadoEngine::Render::RenderLayer renderLayer
+		) const override;
+
 		/// @brief 生存Particleと未完了GPU処理が存在しないか確認
 		/// @return Runtimeが空の場合はtrue
 		bool IsIdle() const override;

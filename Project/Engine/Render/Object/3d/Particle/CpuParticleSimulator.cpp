@@ -154,10 +154,12 @@ namespace MadoEngine::Particle {
 		particles_.clear();
 		particles_.resize((std::max)(1u, maxParticles));
 		aliveCount_ = 0;
+		nextParticleIdentifier_ = 1;
 	}
 
 	void CpuParticleSimulator::Reset() {
 		aliveCount_ = 0;
+		nextParticleIdentifier_ = 1;
 	}
 
 	void CpuParticleSimulator::Emit(
@@ -191,6 +193,10 @@ namespace MadoEngine::Particle {
 
 			ParticleState& particle = particles_[aliveCount_++];
 			particle = {};
+			particle.identifier = nextParticleIdentifier_++;
+			if (nextParticleIdentifier_ == 0) {
+				nextParticleIdentifier_ = 1;
+			}
 			particle.position = shapeSample.position;
 			particle.velocity = direction * SampleRange(config.initial.speed, random);
 			particle.lifeTime = SampleRange(config.initial.lifeTime, random);

@@ -2,6 +2,8 @@
 #include "CpuParticleSimulator.h"
 #include "IParticleEmitterRuntime.h"
 #include "Utility/Random.h"
+#include <unordered_map>
+#include <vector>
 
 namespace MadoEngine::Particle {
 
@@ -57,6 +59,16 @@ namespace MadoEngine::Particle {
 			MadoEngine::Render::RenderLayer renderLayer
 		) const override;
 
+		/// @brief CPU Particle TrailをRibbon Rendererへ登録
+		/// @param renderer 登録先Ribbon Renderer
+		/// @param emitterTransform 現在のEmitter Transform
+		/// @param renderLayer 描画Layer
+		void SubmitTrailRenderData(
+			MadoEngine::Ribbon::RibbonEffectRenderer3d& renderer,
+			const Transform3D& emitterTransform,
+			MadoEngine::Render::RenderLayer renderLayer
+		) const override;
+
 		/// @brief 生存Particleが存在しないか確認
 		/// @return 生存Particleが存在しない場合はtrue
 		bool IsIdle() const override;
@@ -78,9 +90,32 @@ namespace MadoEngine::Particle {
 		uint64_t GetGpuBufferCapacityBytes() const override { return 0; }
 
 	private:
+		struct TrailPoint {
+			Vector3 position{};
+			float age = 0.0f;
+		};
+
+		struct TrailState {
+			std::vector<TrailPoint> points;
+			Vector3 latestPosition{};
+			bool hasLatestPosition = false;
+			bool wasParticleAlive = false;
+			bool isParticleAlive = false;
+		};
+
+		/// @brief Particle位置からTrail履歴を更新
+		/// @param deltaTime 前フレームからの経過時間
+		void UpdateTrails(float deltaTime);
+
+		/// @brief 最小間隔を満たすTrail Pointを追加
+		/// @param state 追加対象Trail状態
+		/// @param position 追加候補位置
+		void TryAddTrailPoint(TrailState& state, const Vector3& position);
+
 		EmitterConfig config_;
 		CpuParticleSimulator simulator_;
 		Random random_;
+		std::unordered_map<uint64_t, TrailState> trails_;
 	};
 
 } // MadoEngine::Particle名前空間

@@ -342,9 +342,10 @@ namespace {
 		ImGui::Separator();
 
 		static int selectedSettingPage = 0;
-		const char* settingPageNames[] = { "発生", "形状", "動き", "見た目" };
+		const char* settingPageNames[] = { "発生", "形状", "動き", "見た目", "トレイル" };
 		const float settingPageButtonWidth =
-			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 3.0f) /
+			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x *
+				static_cast<float>(std::size(settingPageNames) - 1)) /
 			static_cast<float>(std::size(settingPageNames));
 		ImGui::PushID("EmitterSettingPageButtons");
 		for (int pageIndex = 0; pageIndex < static_cast<int>(std::size(settingPageNames)); ++pageIndex) {
@@ -475,6 +476,87 @@ namespace {
 			if (ImGui::Combo("並び替え", &sortMode, sortModes, static_cast<int>(std::size(sortModes)))) {
 				emitter.renderer.sortMode = sortMode == 0 ? SortMode::None : SortMode::BackToFront;
 			}
+		}
+
+		if (selectedSettingPage == 4) {
+			ImGui::SeparatorText("Particle Trail");
+			ImGui::Checkbox("トレイルを有効化", &emitter.trail.isEnabled);
+			ImGui::TextDisabled("Particle TrailはCPU Backendのみ対応しています");
+			ImGui::BeginDisabled(!emitter.trail.isEnabled);
+			ImGui::DragFloat(
+				"軌跡の寿命",
+				&emitter.trail.pointLifetime,
+				0.01f,
+				0.001f,
+				3600.0f
+			);
+			ImGui::DragFloat(
+				"点の最小間隔",
+				&emitter.trail.minPointDistance,
+				0.01f,
+				0.0f,
+				100000.0f
+			);
+			int maxPointCount = static_cast<int>(emitter.trail.maxPointCount);
+			if (ImGui::DragInt(
+				"最大点数",
+				&maxPointCount,
+				1.0f,
+				static_cast<int>(kMinimumParticleTrailPointCount),
+				static_cast<int>(kMaximumParticleTrailPointCount))) {
+				emitter.trail.maxPointCount = static_cast<uint32_t>(std::clamp(
+					maxPointCount,
+					static_cast<int>(kMinimumParticleTrailPointCount),
+					static_cast<int>(kMaximumParticleTrailPointCount)
+				));
+			}
+
+			ImGui::SeparatorText("形状");
+			ImGui::DragFloat("開始幅", &emitter.trail.startWidth, 0.01f, 0.0f, FLT_MAX);
+			ImGui::DragFloat("終了幅", &emitter.trail.endWidth, 0.01f, 0.0f, FLT_MAX);
+			ImGui::ColorEdit4("開始色##ParticleTrail", &emitter.trail.startColor.x);
+			ImGui::ColorEdit4("終了色##ParticleTrail", &emitter.trail.endColor.x);
+			const char* interpolationModes[] = { "直線", "Catmull-Rom" };
+			int interpolationMode = emitter.trail.interpolation == ParticleTrailInterpolation::Linear ? 0 : 1;
+			if (ImGui::Combo(
+				"補間方式",
+				&interpolationMode,
+				interpolationModes,
+				static_cast<int>(std::size(interpolationModes)))) {
+				emitter.trail.interpolation = interpolationMode == 0
+					? ParticleTrailInterpolation::Linear
+					: ParticleTrailInterpolation::CatmullRom;
+			}
+			if (emitter.trail.interpolation == ParticleTrailInterpolation::CatmullRom) {
+				int smoothingSubdivision = static_cast<int>(emitter.trail.smoothingSubdivision);
+				if (ImGui::DragInt(
+					"補間分割数",
+					&smoothingSubdivision,
+					1.0f,
+					0,
+					static_cast<int>(kMaximumParticleTrailSmoothingSubdivision))) {
+					emitter.trail.smoothingSubdivision = static_cast<uint32_t>(std::clamp(
+						smoothingSubdivision,
+						0,
+						static_cast<int>(kMaximumParticleTrailSmoothingSubdivision)
+					));
+				}
+			}
+			ImGui::Checkbox("カメラへ向ける", &emitter.trail.cameraFacing);
+
+			ImGui::SeparatorText("描画");
+			const MadoEngine::Editor::TextureSelector trailTextureSelector;
+			trailTextureSelector.Draw("テクスチャ##ParticleTrail", emitter.trail.textureName);
+			const char* trailBlendModes[] = { "通常", "加算", "減算", "乗算", "ブレンドなし" };
+			int trailBlendMode = static_cast<int>(emitter.trail.blendMode);
+			if (ImGui::Combo(
+				"ブレンドモード##ParticleTrail",
+				&trailBlendMode,
+				trailBlendModes,
+				static_cast<int>(std::size(trailBlendModes)))) {
+				emitter.trail.blendMode = static_cast<MadoEngine::Render::BlendMode>(trailBlendMode);
+			}
+			ImGui::EndDisabled();
 		}
 	}
 
