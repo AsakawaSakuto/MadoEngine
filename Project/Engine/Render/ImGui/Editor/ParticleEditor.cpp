@@ -1,4 +1,5 @@
 #include "ParticleEditor.h"
+#include "EffectAssetEditorCommon.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
 #include "Render/Object/3d/Particle/ParticleEmitterDebugDrawer3d.h"
@@ -10,6 +11,7 @@
 #include <cstring>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 namespace {
@@ -455,12 +457,6 @@ namespace {
 		}
 
 		if (selectedSettingPage == 3) {
-			ImGui::SeparatorText("生存期間による変化");
-			DrawVector2Range("開始サイズ", emitter.sizeOverLifetime.start, 0.01f);
-			DrawVector2Range("終了サイズ", emitter.sizeOverLifetime.end, 0.01f);
-			DrawColorRange("開始色", emitter.colorOverLifetime.start);
-			DrawColorRange("終了色", emitter.colorOverLifetime.end);
-
 			ImGui::SeparatorText("描画");
 			const MadoEngine::Editor::TextureSelector textureSelector;
 			textureSelector.Draw("テクスチャ", emitter.renderer.textureName);
@@ -476,6 +472,12 @@ namespace {
 			if (ImGui::Combo("並び替え", &sortMode, sortModes, static_cast<int>(std::size(sortModes)))) {
 				emitter.renderer.sortMode = sortMode == 0 ? SortMode::None : SortMode::BackToFront;
 			}
+
+			ImGui::SeparatorText("生存期間による変化");
+			DrawVector2Range("開始サイズ", emitter.sizeOverLifetime.start, 0.01f);
+			DrawVector2Range("終了サイズ", emitter.sizeOverLifetime.end, 0.01f);
+			DrawColorRange("開始色", emitter.colorOverLifetime.start);
+			DrawColorRange("終了色", emitter.colorOverLifetime.end);
 		}
 
 		if (selectedSettingPage == 4) {
@@ -615,6 +617,7 @@ namespace MadoEngine::Editor {
 		static std::string emitterRenameAssetName;
 		static std::string emitterRenameOriginalName;
 		static std::string emitterCreateAssetName;
+		static std::unordered_map<std::string, std::string> savedAssetSnapshots;
 		static int renameEmitterIndex = -1;
 		static bool isNameBufferInitialized = false;
 		if (!isNameBufferInitialized) {
@@ -642,168 +645,133 @@ namespace MadoEngine::Editor {
 		}
 		std::string selectedAssetName = assetNames.empty() ? std::string{} : assetNames[selectedAssetIndex];
 
-		if (ImGui::CollapsingHeader("アセットの作成・複製", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-			ImGui::TextUnformatted("新規アセット名");
-			ImGui::SetNextItemWidth((std::max)(180.0f, ImGui::GetContentRegionAvail().x - 210.0f));
-		ImGui::InputText(
-			"##NewParticleAssetName",
-			newAssetNameBuffer.data(),
-			newAssetNameBuffer.size()
-		);
-		const std::string newAssetName = newAssetNameBuffer.data();
-		const bool isNewAssetNameEmpty = newAssetName.empty();
-		const bool isNewAssetNameAvailable = particleSystem.IsAssetNameAvailable(newAssetName);
-		ImGui::SameLine();
-		ImGui::BeginDisabled(isNewAssetNameEmpty || !isNewAssetNameAvailable);
-		if (ImGui::Button("新規作成")) {
-			if (particleSystem.CreateAsset(newAssetName)) {
-				assetNames = particleSystem.GetAssetNames();
-				const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
-				selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-				selectedAssetName = newAssetName;
-				assetRenameOriginalName.clear();
-				renameEmitterIndex = -1;
-				CopyToBuffer(
-					newAssetNameBuffer,
-					MakeAvailableParticleAssetName(particleSystem, newAssetName)
-				);
-			}
-		}
-		ImGui::EndDisabled();
-		ImGui::SameLine();
-		ImGui::BeginDisabled(
-			selectedAssetName.empty() ||
-			isNewAssetNameEmpty ||
-			!isNewAssetNameAvailable
-		);
-		if (ImGui::Button("選択中を複製")) {
-			if (particleSystem.DuplicateAsset(selectedAssetName, newAssetName)) {
-				assetNames = particleSystem.GetAssetNames();
-				const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
-				selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-				selectedAssetName = newAssetName;
-				assetRenameOriginalName.clear();
-				renameEmitterIndex = -1;
-				CopyToBuffer(
-					newAssetNameBuffer,
-					MakeAvailableParticleAssetName(particleSystem, newAssetName)
-				);
-			}
-		}
-		ImGui::EndDisabled();
-
-		if (isNewAssetNameEmpty) {
-			ImGui::TextDisabled("新規アセット名を入力してください。");
-		} else if (!isNewAssetNameAvailable) {
-			ImGui::TextDisabled("同名のアセットが存在するか、ファイル名に使用できない文字が含まれています。");
-		}
-			ImGui::Unindent();
-		}
-
-		if (assetNames.empty()) {
-			ImGui::TextDisabled("編集するパーティクルアセットを作成してください。");
-			ImGui::End();
-			return;
-		}
-
-		ImGui::SeparatorText("編集中のアセット");
-		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
-		ImGui::SetNextItemWidth((std::max)(240.0f, ImGui::GetContentRegionAvail().x * 0.5f));
-		selectedAssetName = assetNames[selectedAssetIndex];
-		if (ImGui::BeginCombo("アセット", assetNames[selectedAssetIndex].c_str())) {
-			for (int index = 0; index < static_cast<int>(assetNames.size()); ++index) {
-				const bool isSelected = index == selectedAssetIndex;
-				if (ImGui::Selectable(assetNames[index].c_str(), isSelected)) {
-					selectedAssetIndex = index;
-					selectedEmitterIndex = 0;
-					selectedAssetName = assetNames[index];
-					assetRenameOriginalName.clear();
-					renameEmitterIndex = -1;
-				}
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
-
-		if (ImGui::CollapsingHeader("アセット名の変更・削除", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-		if (assetRenameOriginalName != selectedAssetName) {
+		if (!selectedAssetName.empty() && assetRenameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			assetRenameOriginalName = selectedAssetName;
 		}
-		ImGui::SetNextItemWidth(240.0f);
-		ImGui::InputText(
-			"アセット名",
-			renameAssetNameBuffer.data(),
-			renameAssetNameBuffer.size()
-		);
+		ParticleEffectAsset* asset = selectedAssetName.empty()
+			? nullptr
+			: particleSystem.FindEditableAsset(selectedAssetName);
+		if (asset) {
+			savedAssetSnapshots.try_emplace(
+				selectedAssetName,
+				CreateParticleAssetSnapshot(*asset)
+			);
+		}
+		bool isDirty = asset &&
+			savedAssetSnapshots[selectedAssetName] != CreateParticleAssetSnapshot(*asset);
+		const std::string newAssetName = newAssetNameBuffer.data();
 		const std::string renameAssetName = renameAssetNameBuffer.data();
-		const bool isAssetRenameChanged = renameAssetName != selectedAssetName;
-		const bool isAssetRenameAvailable = particleSystem.IsAssetNameAvailable(renameAssetName);
-		ImGui::SameLine();
-		ImGui::BeginDisabled(
-			renameAssetName.empty() ||
-			!isAssetRenameChanged ||
-			!isAssetRenameAvailable
+		const Detail::EffectAssetManagementActions actions = Detail::DrawEffectAssetManagement(
+			"ParticleAssets",
+			assetNames,
+			selectedAssetIndex,
+			newAssetNameBuffer,
+			renameAssetNameBuffer,
+			newAssetName.empty(),
+			particleSystem.IsAssetNameAvailable(newAssetName),
+			renameAssetName.empty(),
+			renameAssetName != selectedAssetName,
+			particleSystem.IsAssetNameAvailable(renameAssetName),
+			isDirty
 		);
-		if (ImGui::Button("アセット名を変更")) {
+
+		if (actions.isSelectionChanged) {
+			selectedAssetIndex = actions.selectedAssetIndex;
+			selectedEmitterIndex = 0;
+			assetRenameOriginalName.clear();
+			renameEmitterIndex = -1;
+		}
+		if (actions.isCreateRequested && particleSystem.CreateAsset(newAssetName)) {
+			assetNames = particleSystem.GetAssetNames();
+			const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
+			selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+			assetRenameOriginalName.clear();
+			renameEmitterIndex = -1;
+			CopyToBuffer(
+				newAssetNameBuffer,
+				MakeAvailableParticleAssetName(particleSystem, newAssetName)
+			);
+		} else if (
+			actions.isDuplicateRequested &&
+			particleSystem.DuplicateAsset(selectedAssetName, newAssetName)) {
+			assetNames = particleSystem.GetAssetNames();
+			const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
+			selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+			assetRenameOriginalName.clear();
+			renameEmitterIndex = -1;
+			CopyToBuffer(
+				newAssetNameBuffer,
+				MakeAvailableParticleAssetName(particleSystem, newAssetName)
+			);
+		} else if (actions.isRenameRequested) {
 			const std::string oldAssetName = selectedAssetName;
 			if (particleSystem.RenameAsset(oldAssetName, renameAssetName)) {
 				if (previewAssetName == oldAssetName) {
 					previewAssetName = renameAssetName;
 				}
+				savedAssetSnapshots.erase(oldAssetName);
 				assetNames = particleSystem.GetAssetNames();
 				const auto selected = std::find(assetNames.begin(), assetNames.end(), renameAssetName);
 				selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-				selectedAssetName = renameAssetName;
-				assetRenameOriginalName = renameAssetName;
+				assetRenameOriginalName.clear();
 				renameEmitterIndex = -1;
 			}
 		}
-		ImGui::EndDisabled();
-		if (isAssetRenameChanged && !renameAssetName.empty() && !isAssetRenameAvailable) {
-			ImGui::TextDisabled("変更後の名前は使用できません。");
-		}
 
-		if (ImGui::Button("アセットを削除")) {
-			ImGui::OpenPopup("アセット削除確認");
-		}
-		if (ImGui::BeginPopupModal("アセット削除確認", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("「%s」を削除しますか？", selectedAssetName.c_str());
-			ImGui::TextDisabled("Jsonファイルは.trashディレクトリへ退避されます。");
-			if (ImGui::Button("削除する##Asset")) {
-				if (particleSystem.IsAlive(previewHandle)) {
-					particleSystem.Stop(previewHandle, StopMode::Immediate);
-				}
-				previewAssetName.clear();
-				previewAssetSnapshot.clear();
-				if (particleSystem.DeleteAsset(selectedAssetName)) {
-					assetNames = particleSystem.GetAssetNames();
-					selectedAssetIndex = assetNames.empty()
-						? 0
-						: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
-					selectedAssetName = assetNames.empty() ? std::string{} : assetNames[selectedAssetIndex];
-					assetRenameOriginalName.clear();
-					renameEmitterIndex = -1;
-				}
-				ImGui::CloseCurrentPopup();
+		if (actions.isDeleteRequested && !assetNames.empty()) {
+			selectedAssetName = assetNames[std::clamp(
+				actions.selectedAssetIndex,
+				0,
+				static_cast<int>(assetNames.size()) - 1
+			)];
+			if (particleSystem.IsAlive(previewHandle)) {
+				particleSystem.Stop(previewHandle, StopMode::Immediate);
 			}
-			ImGui::SameLine();
-			if (ImGui::Button("キャンセル##Asset")) {
-				ImGui::CloseCurrentPopup();
+			previewAssetName.clear();
+			previewAssetSnapshot.clear();
+			savedAssetSnapshots.erase(selectedAssetName);
+			if (particleSystem.DeleteAsset(selectedAssetName)) {
+				assetNames = particleSystem.GetAssetNames();
+				selectedAssetIndex = assetNames.empty()
+					? 0
+					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				assetRenameOriginalName.clear();
+				renameEmitterIndex = -1;
 			}
-			ImGui::EndPopup();
-		}
-			ImGui::Unindent();
 		}
 
 		if (assetNames.empty()) {
-			ImGui::TextDisabled("パーティクルアセットがありません。新規作成してください。");
 			ImGui::End();
 			return;
+		}
+
+		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		selectedAssetName = assetNames[selectedAssetIndex];
+		asset = particleSystem.FindEditableAsset(selectedAssetName);
+		if (!asset) {
+			ImGui::TextDisabled("編集可能なパーティクルアセットがありません。");
+			ImGui::End();
+			return;
+		}
+		savedAssetSnapshots.try_emplace(
+			selectedAssetName,
+			CreateParticleAssetSnapshot(*asset)
+		);
+		isDirty = savedAssetSnapshots[selectedAssetName] != CreateParticleAssetSnapshot(*asset);
+		if (actions.isSaveRequested) {
+			asset->Validate();
+			if (asset->SaveToFile()) {
+				savedAssetSnapshots[selectedAssetName] = CreateParticleAssetSnapshot(*asset);
+				isDirty = false;
+			}
+		}
+		if (actions.isLoadRequested && particleSystem.ReloadAsset(selectedAssetName)) {
+			asset = particleSystem.FindEditableAsset(selectedAssetName);
+			if (asset) {
+				savedAssetSnapshots[selectedAssetName] = CreateParticleAssetSnapshot(*asset);
+			}
+			renameEmitterIndex = -1;
 		}
 
 		ImGui::SeparatorText("プレビュー");
@@ -855,12 +823,6 @@ namespace MadoEngine::Editor {
 			previewAssetName.clear();
 			previewAssetSnapshot.clear();
 		}
-		ImGui::SameLine();
-		if (ImGui::Button("再読み込み")) {
-			particleSystem.ReloadAsset(selectedAssetName);
-			renameEmitterIndex = -1;
-		}
-
 		ImGui::Text(
 			"再生中: %zu エフェクト    生存中: %zu パーティクル",
 			particleSystem.GetActiveEffectCount(),
@@ -894,18 +856,6 @@ namespace MadoEngine::Editor {
 		}
 		ImGui::Separator();
 
-		ParticleEffectAsset* asset = particleSystem.FindEditableAsset(selectedAssetName);
-		if (!asset) {
-			ImGui::TextDisabled("編集可能なパーティクルアセットがありません。");
-			ImGui::End();
-			return;
-		}
-
-		if (ImGui::Button("アセットを保存")) {
-			asset->Validate();
-			asset->SaveToFile();
-		}
-
 		std::vector<EmitterConfig>& emitters = asset->GetEmitters();
 		if (emitterCreateAssetName != selectedAssetName) {
 			CopyToBuffer(
@@ -914,7 +864,6 @@ namespace MadoEngine::Editor {
 			);
 			emitterCreateAssetName = selectedAssetName;
 		}
-		ImGui::SameLine();
 		ImGui::TextDisabled("%zu エミッター", emitters.size());
 		const float emitterListWidth = std::clamp(
 			ImGui::GetContentRegionAvail().x * 0.28f,

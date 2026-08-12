@@ -1,4 +1,5 @@
 #include "RibbonEditor.h"
+#include "EffectAssetEditorCommon.h"
 #include "EffectEmitterEditorCommon.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
@@ -1069,228 +1070,140 @@ namespace MadoEngine::Editor {
 			? std::string{}
 			: assetNames[selectedAssetIndex];
 
-		if (ImGui::CollapsingHeader("アセットの作成・複製", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-			ImGui::TextUnformatted("新規アセット名");
-			ImGui::SetNextItemWidth((std::max)(180.0f, ImGui::GetContentRegionAvail().x - 220.0f));
-			ImGui::InputText(
-				"##NewRibbonAssetName",
-				newAssetNameBuffer.data(),
-				newAssetNameBuffer.size()
-			);
-			const std::string newAssetName = newAssetNameBuffer.data();
-			const bool isNewAssetNameEmpty = newAssetName.empty();
-			const bool isNewAssetNameAvailable = system.IsAssetNameAvailable(newAssetName);
-
-			ImGui::SameLine();
-			ImGui::BeginDisabled(isNewAssetNameEmpty || !isNewAssetNameAvailable);
-			if (ImGui::Button("新規作成")) {
-				if (system.CreateAsset(newAssetName)) {
-					StopRibbonPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-					assetNames = system.GetAssetNames();
-					const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
-					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-					selectedAssetName = newAssetName;
-					assetRenameOriginalName.clear();
-					if (const RibbonEffectAsset* createdAsset = system.FindAsset(newAssetName)) {
-						savedAssetSnapshots[newAssetName] = CreateRibbonAssetSnapshot(*createdAsset);
-					}
-					CopyToBuffer(
-						newAssetNameBuffer,
-						MakeAvailableAssetName(system, newAssetName)
-					);
-				}
-			}
-			ImGui::EndDisabled();
-
-			ImGui::SameLine();
-			ImGui::BeginDisabled(
-				selectedAssetName.empty() ||
-				isNewAssetNameEmpty ||
-				!isNewAssetNameAvailable
-			);
-			if (ImGui::Button("選択中を複製")) {
-				if (system.DuplicateAsset(selectedAssetName, newAssetName)) {
-					StopRibbonPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-					assetNames = system.GetAssetNames();
-					const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
-					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-					selectedAssetName = newAssetName;
-					assetRenameOriginalName.clear();
-					if (const RibbonEffectAsset* duplicatedAsset = system.FindAsset(newAssetName)) {
-						savedAssetSnapshots[newAssetName] = CreateRibbonAssetSnapshot(*duplicatedAsset);
-					}
-					CopyToBuffer(
-						newAssetNameBuffer,
-						MakeAvailableAssetName(system, newAssetName)
-					);
-				}
-			}
-			ImGui::EndDisabled();
-
-			if (isNewAssetNameEmpty) {
-				ImGui::TextDisabled("新規アセット名を入力してください。");
-			} else if (!isNewAssetNameAvailable) {
-				ImGui::TextDisabled("同名のアセットが存在するか、ファイル名に使用できない文字が含まれています。");
-			}
-			ImGui::Unindent();
+		if (!selectedAssetName.empty() && assetRenameOriginalName != selectedAssetName) {
+			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
+			assetRenameOriginalName = selectedAssetName;
 		}
-
-		if (assetNames.empty()) {
-			ImGui::TextDisabled("編集するRibbonエフェクトアセットを作成してください。");
-			ImGui::End();
-			return;
+		RibbonEffectAsset* asset = selectedAssetName.empty()
+			? nullptr
+			: system.FindEditableAsset(selectedAssetName);
+		if (asset) {
+			savedAssetSnapshots.try_emplace(
+				selectedAssetName,
+				CreateRibbonAssetSnapshot(*asset)
+			);
 		}
-
-		ImGui::SeparatorText("編集中のアセット");
-		selectedAssetIndex = std::clamp(
+		bool isDirty = asset &&
+			savedAssetSnapshots[selectedAssetName] != CreateRibbonAssetSnapshot(*asset);
+		const std::string newAssetName = newAssetNameBuffer.data();
+		const std::string renameAssetName = renameAssetNameBuffer.data();
+		const Detail::EffectAssetManagementActions actions = Detail::DrawEffectAssetManagement(
+			"RibbonAssets",
+			assetNames,
 			selectedAssetIndex,
-			0,
-			static_cast<int>(assetNames.size()) - 1
+			newAssetNameBuffer,
+			renameAssetNameBuffer,
+			newAssetName.empty(),
+			system.IsAssetNameAvailable(newAssetName),
+			renameAssetName.empty(),
+			renameAssetName != selectedAssetName,
+			system.IsAssetNameAvailable(renameAssetName),
+			isDirty
 		);
-		selectedAssetName = assetNames[selectedAssetIndex];
-		std::string assetComboPreview = selectedAssetName;
-		if (const RibbonEffectAsset* selectedAsset = system.FindAsset(selectedAssetName)) {
-			const auto saved = savedAssetSnapshots.find(selectedAssetName);
-			if (
-				saved != savedAssetSnapshots.end() &&
-				saved->second != CreateRibbonAssetSnapshot(*selectedAsset)) {
-				assetComboPreview += " *";
-			}
+
+		if (actions.isSelectionChanged) {
+
+			// Asset切替時に旧AssetのPreviewを停止して編集対象との不一致を防止
+			StopRibbonPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			selectedAssetIndex = actions.selectedAssetIndex;
+			selectedEmitterIndex = 0;
+			assetRenameOriginalName.clear();
 		}
-		ImGui::SetNextItemWidth((std::max)(240.0f, ImGui::GetContentRegionAvail().x * 0.5f));
-		if (ImGui::BeginCombo("アセット", assetComboPreview.c_str())) {
-			for (int index = 0; index < static_cast<int>(assetNames.size()); ++index) {
-				std::string displayName = assetNames[index];
-				if (const RibbonEffectAsset* listedAsset = system.FindAsset(assetNames[index])) {
-					const auto saved = savedAssetSnapshots.find(assetNames[index]);
-					if (
-						saved != savedAssetSnapshots.end() &&
-						saved->second != CreateRibbonAssetSnapshot(*listedAsset)) {
-						displayName += " *";
-					}
-				}
-				const bool isSelected = index == selectedAssetIndex;
-				if (ImGui::Selectable(displayName.c_str(), isSelected)) {
-					selectedAssetIndex = index;
-					selectedAssetName = assetNames[index];
-					assetRenameOriginalName.clear();
-					StopRibbonPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-				}
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
+		if (actions.isCreateRequested && system.CreateAsset(newAssetName)) {
+			StopRibbonPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			assetNames = system.GetAssetNames();
+			const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
+			selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+			assetRenameOriginalName.clear();
+			if (const RibbonEffectAsset* createdAsset = system.FindAsset(newAssetName)) {
+				savedAssetSnapshots[newAssetName] = CreateRibbonAssetSnapshot(*createdAsset);
 			}
-			ImGui::EndCombo();
+			CopyToBuffer(
+				newAssetNameBuffer,
+				MakeAvailableAssetName(system, newAssetName)
+			);
+		} else if (
+			actions.isDuplicateRequested &&
+			system.DuplicateAsset(selectedAssetName, newAssetName)) {
+			StopRibbonPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			assetNames = system.GetAssetNames();
+			const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
+			selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+			assetRenameOriginalName.clear();
+			if (const RibbonEffectAsset* duplicatedAsset = system.FindAsset(newAssetName)) {
+				savedAssetSnapshots[newAssetName] = CreateRibbonAssetSnapshot(*duplicatedAsset);
+			}
+			CopyToBuffer(
+				newAssetNameBuffer,
+				MakeAvailableAssetName(system, newAssetName)
+			);
 		}
 
-		if (ImGui::CollapsingHeader("アセット名の変更・削除", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-			if (assetRenameOriginalName != selectedAssetName) {
-				CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
-				assetRenameOriginalName = selectedAssetName;
-			}
-			ImGui::SetNextItemWidth(260.0f);
-			ImGui::InputText(
-				"アセット名",
-				renameAssetNameBuffer.data(),
-				renameAssetNameBuffer.size()
+		if (actions.isRenameRequested) {
+			const std::string oldAssetName = selectedAssetName;
+			StopRibbonPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
 			);
-			const std::string renameAssetName = renameAssetNameBuffer.data();
-			const bool isAssetRenameChanged = renameAssetName != selectedAssetName;
-			const bool isAssetRenameAvailable = system.IsAssetNameAvailable(renameAssetName);
-			ImGui::SameLine();
-			ImGui::BeginDisabled(
-				renameAssetName.empty() ||
-				!isAssetRenameChanged ||
-				!isAssetRenameAvailable
-			);
-			if (ImGui::Button("アセット名を変更")) {
-				const std::string oldAssetName = selectedAssetName;
-				StopRibbonPreview(
-					system,
-					previewHandle,
-					previewAssetName,
-					previewAssetSnapshot
-				);
-				if (system.RenameAsset(oldAssetName, renameAssetName)) {
-					savedAssetSnapshots.erase(oldAssetName);
-					assetNames = system.GetAssetNames();
-					const auto selected = std::find(assetNames.begin(), assetNames.end(), renameAssetName);
-					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-					selectedAssetName = renameAssetName;
-					assetRenameOriginalName = renameAssetName;
-					if (const RibbonEffectAsset* renamedAsset = system.FindAsset(renameAssetName)) {
-						savedAssetSnapshots[renameAssetName] = CreateRibbonAssetSnapshot(*renamedAsset);
-					}
+			if (system.RenameAsset(oldAssetName, renameAssetName)) {
+				savedAssetSnapshots.erase(oldAssetName);
+				assetNames = system.GetAssetNames();
+				const auto selected = std::find(assetNames.begin(), assetNames.end(), renameAssetName);
+				selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+				assetRenameOriginalName.clear();
+				if (const RibbonEffectAsset* renamedAsset = system.FindAsset(renameAssetName)) {
+					savedAssetSnapshots[renameAssetName] = CreateRibbonAssetSnapshot(*renamedAsset);
 				}
 			}
-			ImGui::EndDisabled();
-			if (isAssetRenameChanged && !renameAssetName.empty() && !isAssetRenameAvailable) {
-				ImGui::TextDisabled("変更後の名前は使用できません。");
-			}
+		}
 
-			if (ImGui::Button("アセットを削除")) {
-				ImGui::OpenPopup("RibbonAssetDeleteConfirmation");
+		if (actions.isDeleteRequested && !assetNames.empty()) {
+			selectedAssetName = assetNames[std::clamp(
+				actions.selectedAssetIndex,
+				0,
+				static_cast<int>(assetNames.size()) - 1
+			)];
+			StopRibbonPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			if (system.DeleteAsset(selectedAssetName)) {
+				savedAssetSnapshots.erase(selectedAssetName);
+				assetNames = system.GetAssetNames();
+				selectedAssetIndex = assetNames.empty()
+					? 0
+					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				assetRenameOriginalName.clear();
 			}
-			if (ImGui::BeginPopupModal(
-				"RibbonAssetDeleteConfirmation",
-				nullptr,
-				ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::Text("「%s」を削除しますか？", selectedAssetName.c_str());
-				ImGui::TextDisabled("JSONファイルは.trashディレクトリへ退避されます。");
-				if (ImGui::Button("削除する")) {
-					StopRibbonPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-					const std::string deletedAssetName = selectedAssetName;
-					if (system.DeleteAsset(deletedAssetName)) {
-						savedAssetSnapshots.erase(deletedAssetName);
-						assetNames = system.GetAssetNames();
-						selectedAssetIndex = assetNames.empty()
-							? 0
-							: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
-						selectedAssetName = assetNames.empty()
-							? std::string{}
-							: assetNames[selectedAssetIndex];
-						assetRenameOriginalName.clear();
-					}
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("キャンセル")) {
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
-			ImGui::Unindent();
 		}
 
 		if (assetNames.empty()) {
-			ImGui::TextDisabled("Ribbonエフェクトアセットがありません。新規作成してください。");
 			ImGui::End();
 			return;
 		}
 
-		RibbonEffectAsset* asset = system.FindEditableAsset(selectedAssetName);
+		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		selectedAssetName = assetNames[selectedAssetIndex];
+		asset = system.FindEditableAsset(selectedAssetName);
 		if (!asset) {
 			ImGui::TextDisabled("選択したRibbonエフェクトアセットを取得できませんでした。");
 			ImGui::End();
@@ -1300,35 +1213,22 @@ namespace MadoEngine::Editor {
 			selectedAssetName,
 			CreateRibbonAssetSnapshot(*asset)
 		);
-		bool isDirty = savedAssetSnapshots[selectedAssetName] != CreateRibbonAssetSnapshot(*asset);
-
-		if (ImGui::Button("アセットを保存")) {
+		isDirty = savedAssetSnapshots[selectedAssetName] != CreateRibbonAssetSnapshot(*asset);
+		if (actions.isSaveRequested) {
 			asset->Validate();
 			if (asset->SaveToFile({}, true)) {
 				savedAssetSnapshots[selectedAssetName] = CreateRibbonAssetSnapshot(*asset);
 				isDirty = false;
 			}
 		}
-		ImGui::SameLine();
 		bool reloadRequested = false;
-		if (ImGui::Button("再読み込み")) {
+		if (actions.isLoadRequested) {
 			if (isDirty) {
 				ImGui::OpenPopup("RibbonAssetReloadConfirmation");
 			} else {
 				reloadRequested = true;
 			}
 		}
-		ImGui::SameLine();
-		if (ImGui::Button("バックアップを読み込み")) {
-			ImGui::OpenPopup("RibbonAssetBackupConfirmation");
-		}
-		ImGui::SameLine();
-		if (isDirty) {
-			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "未保存");
-		} else {
-			ImGui::TextDisabled("保存済み");
-		}
-
 		if (ImGui::BeginPopupModal(
 			"RibbonAssetReloadConfirmation",
 			nullptr,
@@ -1345,37 +1245,16 @@ namespace MadoEngine::Editor {
 			ImGui::EndPopup();
 		}
 
-		bool backupRequested = false;
-		if (ImGui::BeginPopupModal(
-			"RibbonAssetBackupConfirmation",
-			nullptr,
-			ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::TextUnformatted("現在の編集内容を破棄してバックアップを読み込みますか？");
-			ImGui::TextDisabled("読み込んだ内容は保存するまでJSONへ反映されません。");
-			if (ImGui::Button("バックアップを読み込む")) {
-				backupRequested = true;
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("キャンセル")) {
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-		if (reloadRequested || backupRequested) {
+		if (reloadRequested) {
 			StopRibbonPreview(
 				system,
 				previewHandle,
 				previewAssetName,
 				previewAssetSnapshot
 			);
-			const bool loaded = backupRequested
-				? system.LoadAssetBackup(selectedAssetName)
-				: system.ReloadAsset(selectedAssetName);
-			if (loaded) {
+			if (system.ReloadAsset(selectedAssetName)) {
 				asset = system.FindEditableAsset(selectedAssetName);
-				if (asset && reloadRequested) {
+				if (asset) {
 					savedAssetSnapshots[selectedAssetName] = CreateRibbonAssetSnapshot(*asset);
 				}
 			}

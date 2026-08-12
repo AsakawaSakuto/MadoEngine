@@ -1,4 +1,5 @@
 #include "CylinderEditor.h"
+#include "EffectAssetEditorCommon.h"
 #include "EffectEmitterEditorCommon.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
@@ -1061,159 +1062,89 @@ namespace MadoEngine::Editor {
 			? std::string{}
 			: assetNames[selectedAssetIndex];
 
-		if (ImGui::CollapsingHeader("アセットの作成・複製", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-			ImGui::TextUnformatted("新規アセット名");
-			ImGui::SetNextItemWidth((std::max)(180.0f, ImGui::GetContentRegionAvail().x - 220.0f));
-			ImGui::InputText(
-				"##NewCylinderAssetName",
-				newAssetNameBuffer.data(),
-				newAssetNameBuffer.size()
-			);
-			const std::string newAssetName = newAssetNameBuffer.data();
-			const bool isNewAssetNameEmpty = newAssetName.empty();
-			const bool isNewAssetNameAvailable = system.IsAssetNameAvailable(newAssetName);
-
-			ImGui::SameLine();
-			ImGui::BeginDisabled(isNewAssetNameEmpty || !isNewAssetNameAvailable);
-			if (ImGui::Button("新規作成")) {
-				if (system.CreateAsset(newAssetName)) {
-					StopCylinderPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-					assetNames = system.GetAssetNames();
-					const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
-					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-					selectedAssetName = newAssetName;
-					assetRenameOriginalName.clear();
-					if (const CylinderEffectAsset* createdAsset = system.FindAsset(newAssetName)) {
-						savedAssetSnapshots[newAssetName] = CreateCylinderAssetSnapshot(*createdAsset);
-					}
-					CopyToBuffer(
-						newAssetNameBuffer,
-						MakeAvailableCylinderAssetName(system, newAssetName)
-					);
-				}
-			}
-			ImGui::EndDisabled();
-
-			ImGui::SameLine();
-			ImGui::BeginDisabled(
-				selectedAssetName.empty() ||
-				isNewAssetNameEmpty ||
-				!isNewAssetNameAvailable
-			);
-			if (ImGui::Button("選択中を複製")) {
-				if (system.DuplicateAsset(selectedAssetName, newAssetName)) {
-					StopCylinderPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-					assetNames = system.GetAssetNames();
-					const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
-					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-					selectedAssetName = newAssetName;
-					assetRenameOriginalName.clear();
-					if (const CylinderEffectAsset* duplicatedAsset = system.FindAsset(newAssetName)) {
-						savedAssetSnapshots[newAssetName] = CreateCylinderAssetSnapshot(*duplicatedAsset);
-					}
-					CopyToBuffer(
-						newAssetNameBuffer,
-						MakeAvailableCylinderAssetName(system, newAssetName)
-					);
-				}
-			}
-			ImGui::EndDisabled();
-
-			if (isNewAssetNameEmpty) {
-				ImGui::TextDisabled("新規アセット名を入力してください。");
-			} else if (!isNewAssetNameAvailable) {
-				ImGui::TextDisabled("同名のアセットが存在するか、ファイル名に使用できない文字が含まれています。");
-			}
-			ImGui::Unindent();
+		if (!selectedAssetName.empty() && assetRenameOriginalName != selectedAssetName) {
+			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
+			assetRenameOriginalName = selectedAssetName;
 		}
-
-		if (assetNames.empty()) {
-			ImGui::TextDisabled("編集するCylinder Effect Assetを作成してください。");
-			ImGui::End();
-			return;
+		CylinderEffectAsset* asset = selectedAssetName.empty()
+			? nullptr
+			: system.FindEditableAsset(selectedAssetName);
+		if (asset) {
+			savedAssetSnapshots.try_emplace(
+				selectedAssetName,
+				CreateCylinderAssetSnapshot(*asset)
+			);
 		}
-
-		ImGui::SeparatorText("編集中のアセット");
-		selectedAssetIndex = std::clamp(
+		bool isDirty = asset &&
+			savedAssetSnapshots[selectedAssetName] != CreateCylinderAssetSnapshot(*asset);
+		const std::string newAssetName = newAssetNameBuffer.data();
+		const std::string renameAssetName = renameAssetNameBuffer.data();
+		const Detail::EffectAssetManagementActions actions = Detail::DrawEffectAssetManagement(
+			"CylinderAssets",
+			assetNames,
 			selectedAssetIndex,
-			0,
-			static_cast<int>(assetNames.size()) - 1
+			newAssetNameBuffer,
+			renameAssetNameBuffer,
+			newAssetName.empty(),
+			system.IsAssetNameAvailable(newAssetName),
+			renameAssetName.empty(),
+			renameAssetName != selectedAssetName,
+			system.IsAssetNameAvailable(renameAssetName),
+			isDirty
 		);
-		selectedAssetName = assetNames[selectedAssetIndex];
-		std::string assetComboPreview = selectedAssetName;
-		if (const CylinderEffectAsset* selectedAsset = system.FindAsset(selectedAssetName)) {
-			const auto saved = savedAssetSnapshots.find(selectedAssetName);
-			if (
-				saved != savedAssetSnapshots.end() &&
-				saved->second != CreateCylinderAssetSnapshot(*selectedAsset)) {
-				assetComboPreview += " *";
-			}
-		}
-		ImGui::SetNextItemWidth((std::max)(240.0f, ImGui::GetContentRegionAvail().x * 0.5f));
-		if (ImGui::BeginCombo("アセット", assetComboPreview.c_str())) {
-			for (int index = 0; index < static_cast<int>(assetNames.size()); ++index) {
-				std::string displayName = assetNames[index];
-				if (const CylinderEffectAsset* listedAsset = system.FindAsset(assetNames[index])) {
-					const auto saved = savedAssetSnapshots.find(assetNames[index]);
-					if (
-						saved != savedAssetSnapshots.end() &&
-						saved->second != CreateCylinderAssetSnapshot(*listedAsset)) {
-						displayName += " *";
-					}
-				}
 
-				const bool isSelected = index == selectedAssetIndex;
-				if (ImGui::Selectable(displayName.c_str(), isSelected)) {
-					selectedAssetIndex = index;
-					selectedAssetName = assetNames[index];
-					assetRenameOriginalName.clear();
-					StopCylinderPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-				}
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
+		if (actions.isSelectionChanged) {
 
-		if (ImGui::CollapsingHeader("アセット名の変更・削除", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Indent();
-			if (assetRenameOriginalName != selectedAssetName) {
-				CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
-				assetRenameOriginalName = selectedAssetName;
+			// Asset切替時に旧AssetのPreviewを停止して編集対象との不一致を防止
+			StopCylinderPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			selectedAssetIndex = actions.selectedAssetIndex;
+			selectedEmitterIndex = 0;
+			assetRenameOriginalName.clear();
+		}
+		if (actions.isCreateRequested && system.CreateAsset(newAssetName)) {
+			StopCylinderPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			assetNames = system.GetAssetNames();
+			const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
+			selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+			assetRenameOriginalName.clear();
+			if (const CylinderEffectAsset* createdAsset = system.FindAsset(newAssetName)) {
+				savedAssetSnapshots[newAssetName] = CreateCylinderAssetSnapshot(*createdAsset);
 			}
-			ImGui::SetNextItemWidth(260.0f);
-			ImGui::InputText(
-				"アセット名",
-				renameAssetNameBuffer.data(),
-				renameAssetNameBuffer.size()
+			CopyToBuffer(
+				newAssetNameBuffer,
+				MakeAvailableCylinderAssetName(system, newAssetName)
 			);
-			const std::string renameAssetName = renameAssetNameBuffer.data();
-			const bool isAssetRenameChanged = renameAssetName != selectedAssetName;
-			const bool isAssetRenameAvailable = system.IsAssetNameAvailable(renameAssetName);
-			ImGui::SameLine();
-			ImGui::BeginDisabled(
-				renameAssetName.empty() ||
-				!isAssetRenameChanged ||
-				!isAssetRenameAvailable
+		} else if (
+			actions.isDuplicateRequested &&
+			system.DuplicateAsset(selectedAssetName, newAssetName)) {
+			StopCylinderPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
 			);
-			if (ImGui::Button("アセット名を変更")) {
+			assetNames = system.GetAssetNames();
+			const auto selected = std::find(assetNames.begin(), assetNames.end(), newAssetName);
+			selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
+			assetRenameOriginalName.clear();
+			if (const CylinderEffectAsset* duplicatedAsset = system.FindAsset(newAssetName)) {
+				savedAssetSnapshots[newAssetName] = CreateCylinderAssetSnapshot(*duplicatedAsset);
+			}
+			CopyToBuffer(
+				newAssetNameBuffer,
+				MakeAvailableCylinderAssetName(system, newAssetName)
+			);
+		} else if (actions.isRenameRequested) {
 				const std::string oldAssetName = selectedAssetName;
 				StopCylinderPreview(
 					system,
@@ -1226,64 +1157,42 @@ namespace MadoEngine::Editor {
 					assetNames = system.GetAssetNames();
 					const auto selected = std::find(assetNames.begin(), assetNames.end(), renameAssetName);
 					selectedAssetIndex = static_cast<int>(std::distance(assetNames.begin(), selected));
-					selectedAssetName = renameAssetName;
-					assetRenameOriginalName = renameAssetName;
+					assetRenameOriginalName.clear();
 					if (const CylinderEffectAsset* renamedAsset = system.FindAsset(renameAssetName)) {
 						savedAssetSnapshots[renameAssetName] = CreateCylinderAssetSnapshot(*renamedAsset);
 					}
 				}
-			}
-			ImGui::EndDisabled();
-			if (isAssetRenameChanged && !renameAssetName.empty() && !isAssetRenameAvailable) {
-				ImGui::TextDisabled("変更後の名前は使用できません。");
-			}
-
-			if (ImGui::Button("アセットを削除")) {
-				ImGui::OpenPopup("CylinderAssetDeleteConfirmation");
-			}
-			if (ImGui::BeginPopupModal(
-				"CylinderAssetDeleteConfirmation",
-				nullptr,
-				ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::Text("「%s」を削除しますか？", selectedAssetName.c_str());
-				ImGui::TextDisabled("Jsonファイルは.trashディレクトリへ退避されます。");
-				if (ImGui::Button("削除する")) {
-					StopCylinderPreview(
-						system,
-						previewHandle,
-						previewAssetName,
-						previewAssetSnapshot
-					);
-					const std::string deletedAssetName = selectedAssetName;
-					if (system.DeleteAsset(deletedAssetName)) {
-						savedAssetSnapshots.erase(deletedAssetName);
-						assetNames = system.GetAssetNames();
-						selectedAssetIndex = assetNames.empty()
-							? 0
-							: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
-						selectedAssetName = assetNames.empty()
-							? std::string{}
-							: assetNames[selectedAssetIndex];
-						assetRenameOriginalName.clear();
-					}
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("キャンセル")) {
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
-			ImGui::Unindent();
 		}
 
+		if (actions.isDeleteRequested && !assetNames.empty()) {
+			selectedAssetName = assetNames[std::clamp(
+				actions.selectedAssetIndex,
+				0,
+				static_cast<int>(assetNames.size()) - 1
+			)];
+			StopCylinderPreview(
+				system,
+				previewHandle,
+				previewAssetName,
+				previewAssetSnapshot
+			);
+			if (system.DeleteAsset(selectedAssetName)) {
+				savedAssetSnapshots.erase(selectedAssetName);
+				assetNames = system.GetAssetNames();
+				selectedAssetIndex = assetNames.empty()
+					? 0
+					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				assetRenameOriginalName.clear();
+			}
+		}
 		if (assetNames.empty()) {
-			ImGui::TextDisabled("Cylinder Effect Assetがありません。新規作成してください。");
 			ImGui::End();
 			return;
 		}
 
-		CylinderEffectAsset* asset = system.FindEditableAsset(selectedAssetName);
+		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		selectedAssetName = assetNames[selectedAssetIndex];
+		asset = system.FindEditableAsset(selectedAssetName);
 		if (!asset) {
 			ImGui::TextDisabled("選択したCylinder Effect Assetを取得できませんでした。");
 			ImGui::End();
@@ -1293,30 +1202,21 @@ namespace MadoEngine::Editor {
 			selectedAssetName,
 			CreateCylinderAssetSnapshot(*asset)
 		);
-		bool isDirty =
-			savedAssetSnapshots[selectedAssetName] != CreateCylinderAssetSnapshot(*asset);
-
-		if (ImGui::Button("アセットを保存")) {
+		isDirty = savedAssetSnapshots[selectedAssetName] != CreateCylinderAssetSnapshot(*asset);
+		if (actions.isSaveRequested) {
 			asset->Validate();
 			if (asset->SaveToFile()) {
 				savedAssetSnapshots[selectedAssetName] = CreateCylinderAssetSnapshot(*asset);
 				isDirty = false;
 			}
 		}
-		ImGui::SameLine();
 		bool reloadRequested = false;
-		if (ImGui::Button("再読み込み")) {
+		if (actions.isLoadRequested) {
 			if (isDirty) {
 				ImGui::OpenPopup("CylinderAssetReloadConfirmation");
 			} else {
 				reloadRequested = true;
 			}
-		}
-		ImGui::SameLine();
-		if (isDirty) {
-			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "未保存");
-		} else {
-			ImGui::TextDisabled("保存済み");
 		}
 
 		if (ImGui::BeginPopupModal(

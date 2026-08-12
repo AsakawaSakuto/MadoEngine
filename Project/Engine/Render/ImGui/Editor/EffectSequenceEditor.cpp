@@ -1,4 +1,5 @@
 #include "EffectSequenceEditor.h"
+#include "EffectAssetEditorCommon.h"
 #include "ImGuiHeaders.h"
 #include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
@@ -318,78 +319,62 @@ namespace MadoEngine::Editor {
 			selectedAssetName = assetNames[selectedAssetIndex];
 		}
 
-		if (ImGui::CollapsingHeader("アセット操作", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::SetNextItemWidth(260.0f);
-			ImGui::InputText("新規アセット名", newAssetNameBuffer.data(), newAssetNameBuffer.size());
-			const std::string newName = newAssetNameBuffer.data();
-			const bool canCreate = system.IsAssetNameAvailable(newName);
-			ImGui::SameLine();
-			ImGui::BeginDisabled(!canCreate);
-			if (ImGui::Button("新規作成")) {
-				if (system.CreateAsset(newName)) {
-					StopPreview(system, previewHandle);
-					assetNames = system.GetAssetNames();
-					selectedAssetIndex = static_cast<int>(std::distance(
-						assetNames.begin(),
-						std::find(assetNames.begin(), assetNames.end(), newName)
-					));
-					selectedNodeId = 0;
-					CopyToBuffer(newAssetNameBuffer, MakeAvailableAssetName(system, newName));
-				}
-			}
-			ImGui::EndDisabled();
-			ImGui::SameLine();
-			ImGui::BeginDisabled(selectedAssetName.empty() || !canCreate);
-			if (ImGui::Button("複製")) {
-				if (system.DuplicateAsset(selectedAssetName, newName)) {
-					StopPreview(system, previewHandle);
-					assetNames = system.GetAssetNames();
-					selectedAssetIndex = static_cast<int>(std::distance(
-						assetNames.begin(),
-						std::find(assetNames.begin(), assetNames.end(), newName)
-					));
-					selectedNodeId = 0;
-					CopyToBuffer(newAssetNameBuffer, MakeAvailableAssetName(system, newName));
-				}
-			}
-			ImGui::EndDisabled();
-		}
-
-		if (assetNames.empty()) {
-			ImGui::TextDisabled("編集するエフェクトシーケンスアセットを作成してください。");
-			ImGui::End();
-			return;
-		}
-
-		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
-		selectedAssetName = assetNames[selectedAssetIndex];
-		if (ImGui::BeginCombo("編集アセット", selectedAssetName.c_str())) {
-			for (int index = 0; index < static_cast<int>(assetNames.size()); ++index) {
-				const bool selected = index == selectedAssetIndex;
-				if (ImGui::Selectable(assetNames[index].c_str(), selected)) {
-					StopPreview(system, previewHandle);
-					selectedAssetIndex = index;
-					selectedAssetName = assetNames[index];
-					selectedNodeId = 0;
-					renameOriginalName.clear();
-				}
-				if (selected) {
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
-
-		if (renameOriginalName != selectedAssetName) {
+		if (!selectedAssetName.empty() && renameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			renameOriginalName = selectedAssetName;
 		}
-		ImGui::SetNextItemWidth(260.0f);
-		ImGui::InputText("アセット名", renameAssetNameBuffer.data(), renameAssetNameBuffer.size());
+		EffectSequenceAsset* asset = selectedAssetName.empty()
+			? nullptr
+			: system.FindEditableAsset(selectedAssetName);
+		if (asset) {
+			savedSnapshots.try_emplace(selectedAssetName, asset->ToJson().dump());
+		}
+		bool isDirty = asset && savedSnapshots[selectedAssetName] != asset->ToJson().dump();
+		const std::string newName = newAssetNameBuffer.data();
 		const std::string renameName = renameAssetNameBuffer.data();
-		ImGui::SameLine();
-		ImGui::BeginDisabled(renameName == selectedAssetName || !system.IsAssetNameAvailable(renameName));
-		if (ImGui::Button("名前変更")) {
+		const Detail::EffectAssetManagementActions actions = Detail::DrawEffectAssetManagement(
+			"EffectSequenceAssets",
+			assetNames,
+			selectedAssetIndex,
+			newAssetNameBuffer,
+			renameAssetNameBuffer,
+			newName.empty(),
+			system.IsAssetNameAvailable(newName),
+			renameName.empty(),
+			renameName != selectedAssetName,
+			system.IsAssetNameAvailable(renameName),
+			isDirty
+		);
+
+		if (actions.isSelectionChanged) {
+
+			// Asset切替時に旧AssetのPreviewとNode選択を切り離し
+			StopPreview(system, previewHandle);
+			selectedAssetIndex = actions.selectedAssetIndex;
+			selectedNodeId = 0;
+			renameOriginalName.clear();
+		}
+		if (actions.isCreateRequested && system.CreateAsset(newName)) {
+			StopPreview(system, previewHandle);
+			assetNames = system.GetAssetNames();
+			selectedAssetIndex = static_cast<int>(std::distance(
+				assetNames.begin(),
+				std::find(assetNames.begin(), assetNames.end(), newName)
+			));
+			selectedNodeId = 0;
+			renameOriginalName.clear();
+			CopyToBuffer(newAssetNameBuffer, MakeAvailableAssetName(system, newName));
+		} else if (actions.isDuplicateRequested && system.DuplicateAsset(selectedAssetName, newName)) {
+			StopPreview(system, previewHandle);
+			assetNames = system.GetAssetNames();
+			selectedAssetIndex = static_cast<int>(std::distance(
+				assetNames.begin(),
+				std::find(assetNames.begin(), assetNames.end(), newName)
+			));
+			selectedNodeId = 0;
+			renameOriginalName.clear();
+			CopyToBuffer(newAssetNameBuffer, MakeAvailableAssetName(system, newName));
+		} else if (actions.isRenameRequested) {
 			const std::string oldName = selectedAssetName;
 			StopPreview(system, previewHandle);
 			if (system.RenameAsset(oldName, renameName)) {
@@ -399,58 +384,48 @@ namespace MadoEngine::Editor {
 					assetNames.begin(),
 					std::find(assetNames.begin(), assetNames.end(), renameName)
 				));
-				selectedAssetName = renameName;
 				renameOriginalName.clear();
 			}
 		}
-		ImGui::EndDisabled();
-		ImGui::SameLine();
-		if (ImGui::Button("削除")) {
-			ImGui::OpenPopup("EffectSequenceDeleteConfirmation");
-		}
-		if (ImGui::BeginPopupModal("EffectSequenceDeleteConfirmation", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("「%s」を削除しますか？", selectedAssetName.c_str());
-			ImGui::TextDisabled("JSONファイルは.trashへ退避されます。");
-			if (ImGui::Button("削除する")) {
-				StopPreview(system, previewHandle);
-				savedSnapshots.erase(selectedAssetName);
-				system.DeleteAsset(selectedAssetName);
-				assetNames = system.GetAssetNames();
-				selectedAssetIndex = assetNames.empty()
-					? 0
-					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
-				selectedNodeId = 0;
-				renameOriginalName.clear();
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("キャンセル")) {
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
+
+		if (actions.isDeleteRequested && !assetNames.empty()) {
+			selectedAssetName = assetNames[std::clamp(
+				actions.selectedAssetIndex,
+				0,
+				static_cast<int>(assetNames.size()) - 1
+			)];
+			StopPreview(system, previewHandle);
+			savedSnapshots.erase(selectedAssetName);
+			system.DeleteAsset(selectedAssetName);
+			assetNames = system.GetAssetNames();
+			selectedAssetIndex = assetNames.empty()
+				? 0
+				: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+			selectedNodeId = 0;
+			renameOriginalName.clear();
 		}
 		if (assetNames.empty()) {
 			ImGui::End();
 			return;
 		}
 
-		selectedAssetName = assetNames[std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1)];
-		EffectSequenceAsset* asset = system.FindEditableAsset(selectedAssetName);
+		selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		selectedAssetName = assetNames[selectedAssetIndex];
+		asset = system.FindEditableAsset(selectedAssetName);
 		if (!asset) {
 			ImGui::End();
 			return;
 		}
 		savedSnapshots.try_emplace(selectedAssetName, asset->ToJson().dump());
-		bool isDirty = savedSnapshots[selectedAssetName] != asset->ToJson().dump();
-		if (ImGui::Button("保存")) {
+		isDirty = savedSnapshots[selectedAssetName] != asset->ToJson().dump();
+		if (actions.isSaveRequested) {
 			asset->Validate();
 			if (asset->SaveToFile({}, true)) {
 				savedSnapshots[selectedAssetName] = asset->ToJson().dump();
 				isDirty = false;
 			}
 		}
-		ImGui::SameLine();
-		if (ImGui::Button("再読み込み")) {
+		if (actions.isLoadRequested) {
 			StopPreview(system, previewHandle);
 			if (system.ReloadAsset(selectedAssetName)) {
 				asset = system.FindEditableAsset(selectedAssetName);
@@ -459,20 +434,6 @@ namespace MadoEngine::Editor {
 				}
 			}
 		}
-		ImGui::SameLine();
-		if (ImGui::Button("バックアップ読み込み")) {
-			StopPreview(system, previewHandle);
-			if (system.LoadAssetBackup(selectedAssetName)) {
-				asset = system.FindEditableAsset(selectedAssetName);
-			}
-		}
-		ImGui::SameLine();
-		if (isDirty) {
-			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "未保存");
-		} else {
-			ImGui::TextDisabled("保存済み");
-		}
-
 		bool changed = false;
 		EffectSequenceConfig& config = asset->GetConfig();
 		ImGui::SeparatorText("シーケンス設定");
