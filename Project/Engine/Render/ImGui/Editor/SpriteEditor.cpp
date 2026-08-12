@@ -5,7 +5,10 @@
 #include <array>
 #include <charconv>
 #include <cstring>
+#include <filesystem>
 #include <optional>
+#include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace MadoEngine::Editor {
@@ -19,11 +22,29 @@ namespace {
 	constexpr float kRadiansToDegrees = 57.29577951308232f;
 	constexpr float kDegreesToRadians = 0.017453292519943295f;
 	constexpr float kTexturePreviewMaxSize = 64.0f;
+	const std::filesystem::path kTextureDirectoryPath = "Assets/Texture";
 
 	struct TexturePreviewData {
 		ImTextureID textureId = ImTextureID_Invalid;
 		ImVec2 displaySize{};
 		Vector2 pixelSize{};
+	};
+
+	struct SpriteTextureItem {
+		std::string textureName;
+		std::string fileName;
+		std::string relativePath;
+	};
+
+	struct SpriteTextureDirectory {
+		std::string name;
+		std::vector<SpriteTextureDirectory> directories;
+		std::vector<SpriteTextureItem> textures;
+	};
+
+	struct SpriteTextureTree {
+		SpriteTextureDirectory root;
+		std::vector<std::string> otherTextureNames;
 	};
 
 	/// @brief テクスチャプレビューの描画情報を作成
@@ -134,6 +155,170 @@ namespace {
 		return names;
 	}
 
+	/// @brief Texture階層内の子Directoryを取得または追加
+	/// @param parent 親Directory
+	/// @param directoryName 子Directory名
+	/// @return 取得または追加した子Directory
+	SpriteTextureDirectory& FindOrAddTextureDirectory(
+		SpriteTextureDirectory& parent,
+		const std::string& directoryName) {
+		const auto found = std::find_if(
+			parent.directories.begin(),
+			parent.directories.end(),
+			[&directoryName](const SpriteTextureDirectory& directory) {
+				return directory.name == directoryName;
+			}
+		);
+		if (found != parent.directories.end()) {
+			return *found;
+		}
+
+		parent.directories.push_back(SpriteTextureDirectory{ directoryName });
+		return parent.directories.back();
+	}
+
+	/// @brief Texture階層をDirectory名とFile名で再帰的に整列
+	/// @param directory 整列対象Directory
+	void SortTextureDirectory(SpriteTextureDirectory& directory) {
+		std::sort(
+			directory.directories.begin(),
+			directory.directories.end(),
+			[](const SpriteTextureDirectory& left, const SpriteTextureDirectory& right) {
+				return left.name < right.name;
+			}
+		);
+		std::sort(
+			directory.textures.begin(),
+			directory.textures.end(),
+			[](const SpriteTextureItem& left, const SpriteTextureItem& right) {
+				return left.fileName < right.fileName;
+			}
+		);
+		for (SpriteTextureDirectory& child : directory.directories) {
+			SortTextureDirectory(child);
+		}
+	}
+
+	/// @brief Sprite Editor専用の実File階層に対応したTexture Treeを構築
+	/// @param textureNames TextureManagerに登録済みのTexture名一覧
+	/// @return 実File階層と実Fileを持たないTexture名一覧
+	SpriteTextureTree CreateSpriteTextureTree(const std::vector<std::string>& textureNames) {
+		SpriteTextureTree tree;
+		tree.root.name = kTextureDirectoryPath.generic_string();
+		const std::unordered_set<std::string> selectableNames(
+			textureNames.begin(),
+			textureNames.end()
+		);
+		std::unordered_set<std::string> mappedNames;
+		std::error_code errorCode;
+		std::filesystem::recursive_directory_iterator iterator(
+			kTextureDirectoryPath,
+			std::filesystem::directory_options::skip_permission_denied,
+			errorCode
+		);
+		const std::filesystem::recursive_directory_iterator end;
+		for (; !errorCode && iterator != end; iterator.increment(errorCode)) {
+			if (!iterator->is_regular_file(errorCode) || errorCode) {
+				continue;
+			}
+			const std::filesystem::path& filePath = iterator->path();
+			if (filePath.extension() != ".png") {
+				continue;
+			}
+
+			const std::string textureName = filePath.stem().string();
+			if (!selectableNames.contains(textureName)) {
+				continue;
+			}
+			const std::filesystem::path relativePath =
+				std::filesystem::relative(filePath, kTextureDirectoryPath, errorCode);
+			if (errorCode) {
+				break;
+			}
+
+			// TextureManagerの管理KeyはFile名のため、実Pathを表示用階層としてのみ保持
+			SpriteTextureDirectory* directory = &tree.root;
+			for (const std::filesystem::path& component : relativePath.parent_path()) {
+				directory = &FindOrAddTextureDirectory(*directory, component.string());
+			}
+			directory->textures.push_back(SpriteTextureItem{
+				textureName,
+				filePath.filename().string(),
+				relativePath.generic_string(),
+			});
+			mappedNames.insert(textureName);
+		}
+
+		for (const std::string& textureName : textureNames) {
+			if (!mappedNames.contains(textureName)) {
+				tree.otherTextureNames.push_back(textureName);
+			}
+		}
+		SortTextureDirectory(tree.root);
+		return tree;
+	}
+
+	/// @brief Directory配下に選択中Textureが存在するか確認
+	/// @param directory 確認対象Directory
+	/// @param selectedName 選択中Texture名
+	/// @return 選択中Textureが存在する場合はtrue
+	bool ContainsSelectedTexture(
+		const SpriteTextureDirectory& directory,
+		const std::string& selectedName) {
+		if (std::any_of(
+			directory.textures.begin(),
+			directory.textures.end(),
+			[&selectedName](const SpriteTextureItem& texture) {
+				return texture.textureName == selectedName;
+			})) {
+			return true;
+		}
+		return std::any_of(
+			directory.directories.begin(),
+			directory.directories.end(),
+			[&selectedName](const SpriteTextureDirectory& child) {
+				return ContainsSelectedTexture(child, selectedName);
+			}
+		);
+	}
+
+	/// @brief Texture Directory配下の選択項目を再帰的に描画
+	/// @param directory 描画対象Directory
+	/// @param selectedName 現在選択中のTexture名
+	/// @return 選択が変更された場合はtrue
+	bool DrawTextureDirectory(
+		const SpriteTextureDirectory& directory,
+		std::string& selectedName) {
+		bool isChanged = false;
+		for (const SpriteTextureDirectory& child : directory.directories) {
+			ImGui::PushID(child.name.c_str());
+			if (ContainsSelectedTexture(child, selectedName)) {
+				ImGui::SetNextItemOpen(true, ImGuiCond_Appearing);
+			}
+			const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+			if (ImGui::TreeNodeEx("##TextureDirectory", flags, "%s", child.name.c_str())) {
+				isChanged |= DrawTextureDirectory(child, selectedName);
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+		}
+
+		for (const SpriteTextureItem& texture : directory.textures) {
+			ImGui::PushID(texture.relativePath.c_str());
+			const bool isSelected = texture.textureName == selectedName;
+			if (ImGui::Selectable(texture.fileName.c_str(), isSelected)) {
+				selectedName = texture.textureName;
+				isChanged = true;
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+			DrawHoveredTexturePreview(texture.textureName);
+			ImGui::PopID();
+		}
+		return isChanged;
+	}
+
 	/// @brief テクスチャ選択Comboを描画
 	/// @param label ImGuiで使用するラベル
 	/// @param selectedName 現在選択中のテクスチャ名
@@ -150,16 +335,24 @@ namespace {
 			DrawHoveredTexturePreview(selectedName);
 		}
 		if (isComboOpen) {
-			for (const std::string& textureName : textureNames) {
-				const bool isSelected = textureName == selectedName;
-				if (ImGui::Selectable(textureName.c_str(), isSelected)) {
-					selectedName = textureName;
-					isChanged = true;
+			const SpriteTextureTree tree = CreateSpriteTextureTree(textureNames);
+			ImGui::TextDisabled("%s", tree.root.name.c_str());
+			ImGui::Separator();
+			isChanged |= DrawTextureDirectory(tree.root, selectedName);
+			if (!tree.otherTextureNames.empty()) {
+				if (ImGui::TreeNodeEx(
+					"その他",
+					ImGuiTreeNodeFlags_SpanAvailWidth)) {
+					for (const std::string& textureName : tree.otherTextureNames) {
+						const bool isSelected = textureName == selectedName;
+						if (ImGui::Selectable(textureName.c_str(), isSelected)) {
+							selectedName = textureName;
+							isChanged = true;
+						}
+						DrawHoveredTexturePreview(textureName);
+					}
+					ImGui::TreePop();
 				}
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
-				DrawHoveredTexturePreview(textureName);
 			}
 			ImGui::EndCombo();
 		}

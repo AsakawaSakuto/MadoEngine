@@ -24,7 +24,7 @@
                 1.0
             ],
             "scene": "Game",
-            "texture": "Coin",
+            "texture": "Money",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
