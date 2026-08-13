@@ -566,6 +566,11 @@ namespace MadoEngine::Particle {
 
 			if (const nlohmann::json* trail = FindValue(emitterJson, "trail")) {
 				emitter.trail.isEnabled = ReadBool(*trail, "isEnabled", emitter.trail.isEnabled);
+				emitter.trail.syncParticleColor = ReadBool(
+					*trail,
+					"syncParticleColor",
+					emitter.trail.syncParticleColor
+				);
 				emitter.trail.pointLifetime = ReadFloat(*trail, "pointLifetime", emitter.trail.pointLifetime);
 				emitter.trail.minPointDistance = ReadFloat(*trail, "minPointDistance", emitter.trail.minPointDistance);
 				emitter.trail.maxPointCount = ReadUInt(*trail, "maxPointCount", emitter.trail.maxPointCount);
@@ -646,6 +651,7 @@ namespace MadoEngine::Particle {
 			};
 			emitterJson["trail"] = {
 				{ "isEnabled", emitter.trail.isEnabled },
+				{ "syncParticleColor", emitter.trail.syncParticleColor },
 				{ "pointLifetime", emitter.trail.pointLifetime },
 				{ "minPointDistance", emitter.trail.minPointDistance },
 				{ "maxPointCount", emitter.trail.maxPointCount },

@@ -485,6 +485,7 @@ namespace {
 			ImGui::Checkbox("トレイルを有効化", &emitter.trail.isEnabled);
 			ImGui::TextDisabled("GPU BackendではTrail用データのみCPUへ非同期転送します");
 			ImGui::BeginDisabled(!emitter.trail.isEnabled);
+			ImGui::Checkbox("粒子の色と同期", &emitter.trail.syncParticleColor);
 			ImGui::DragFloat(
 				"軌跡の寿命",
 				&emitter.trail.pointLifetime,

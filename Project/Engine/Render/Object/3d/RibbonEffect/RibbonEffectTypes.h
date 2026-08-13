@@ -146,6 +146,7 @@ namespace MadoEngine::Ribbon {
 		Vector3 position{};
 		float age = 0.0f;
 		float lifetime = 1.0f;
+		Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	};
 
 	struct RibbonRenderData {

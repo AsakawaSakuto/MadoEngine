@@ -45,6 +45,7 @@ struct GpuParticleState {
 struct GpuParticleTrailSample {
 	float3 position;
 	uint identifier;
+	float4 color;
 };
 
 struct GpuParticleDrawInstance {
@@ -149,6 +150,7 @@ GpuParticleTrailSample BuildGpuParticleTrailSample(GpuParticleState state) {
 	GpuParticleTrailSample sample;
 	sample.position = state.position;
 	sample.identifier = state.identifier;
+	sample.color = state.color;
 	return sample;
 }
 

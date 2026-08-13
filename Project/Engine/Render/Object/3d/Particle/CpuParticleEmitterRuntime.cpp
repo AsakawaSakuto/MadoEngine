@@ -90,7 +90,7 @@ namespace MadoEngine::Particle {
 
 		trailSamples_.clear();
 		for (const ParticleState& particle : simulator_.GetParticles()) {
-			trailSamples_.push_back({ particle.identifier, particle.position });
+			trailSamples_.push_back({ particle.identifier, particle.position, particle.color });
 		}
 		trailHistory_.UpdateParticles(trailSamples_);
 	}

@@ -569,7 +569,7 @@ namespace MadoEngine::Particle {
 					config_.emission.maxParticles
 				);
 
-				// Stable IDと位置だけをCPU履歴へ渡し、既存Ribbon描画経路をGPU Particleでも共有
+				// Stable ID、位置、色だけをCPU履歴へ渡し、既存Ribbon描画経路をGPU Particleでも共有
 				if (
 					config_.trail.isEnabled &&
 					slot.sequence > lastAppliedTrailReadbackSequence_) {
@@ -587,7 +587,11 @@ namespace MadoEngine::Particle {
 						}
 
 						const GpuParticleTrailSample& gpuSample = gpuTrailSamples[particleIndex];
-						trailSamples_.push_back({ gpuSample.identifier, gpuSample.position });
+						trailSamples_.push_back({
+							gpuSample.identifier,
+							gpuSample.position,
+							gpuSample.color,
+						});
 					}
 					trailHistory_.UpdateParticles(trailSamples_);
 					lastAppliedTrailReadbackSequence_ = slot.sequence;

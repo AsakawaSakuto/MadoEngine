@@ -4,6 +4,7 @@
 #include <fstream>
 #include <format>
 #include <cassert>
+#include <unordered_set>
 
 #pragma comment(lib, "dxcompiler.lib")
 
@@ -33,6 +34,62 @@ namespace MadoEngine {
 
 		const fs::path shaderRoot(kShaderRoot);
 		const fs::path cacheRoot(kCacheDir);
+		const auto getLatestDependencyTime = [&shaderRoot](const fs::path& rootPath) {
+			std::unordered_set<std::string> visitedPaths;
+			fs::file_time_type latestTime = (fs::file_time_type::min)();
+			const auto visitDependency = [
+				&shaderRoot,
+				&visitedPaths,
+				&latestTime
+			](auto&& self, const fs::path& dependencyPath) -> void {
+				std::error_code pathError;
+				const fs::path normalizedPath = fs::weakly_canonical(dependencyPath, pathError);
+				if (pathError || !fs::is_regular_file(normalizedPath, pathError)) {
+					return;
+				}
+				const std::string pathKey = normalizedPath.generic_string();
+				if (!visitedPaths.insert(pathKey).second) {
+					return;
+				}
+
+				latestTime = (std::max)(latestTime, fs::last_write_time(normalizedPath, pathError));
+				if (pathError) {
+					return;
+				}
+
+				// 引用符形式のIncludeを再帰走査して共通定義変更時の古いCSO再利用を防止
+				std::ifstream sourceFile(normalizedPath);
+				std::string sourceLine;
+				while (std::getline(sourceFile, sourceLine)) {
+					const std::size_t includeDirective = sourceLine.find("#include");
+					if (includeDirective == std::string::npos) {
+						continue;
+					}
+					const std::size_t openingQuote = sourceLine.find('"', includeDirective + 8);
+					if (openingQuote == std::string::npos) {
+						continue;
+					}
+					const std::size_t closingQuote = sourceLine.find('"', openingQuote + 1);
+					if (closingQuote == std::string::npos) {
+						continue;
+					}
+
+					const fs::path includePath = sourceLine.substr(
+						openingQuote + 1,
+						closingQuote - openingQuote - 1
+					);
+					const fs::path relativeIncludePath = normalizedPath.parent_path() / includePath;
+					if (fs::exists(relativeIncludePath, pathError)) {
+						self(self, relativeIncludePath);
+						continue;
+					}
+					pathError.clear();
+					self(self, shaderRoot / includePath);
+				}
+			};
+			visitDependency(visitDependency, rootPath);
+			return latestTime;
+		};
 
 		// Assets/Shader 以下を再帰スキャン
 		for (const auto& entry : fs::recursive_directory_iterator(shaderRoot)) {
@@ -75,12 +132,12 @@ namespace MadoEngine {
 				needCompile = true;
 			} else {
 
-				// タイムスタンプ比較 : HLSL が新しければ再コンパイル
-				const auto hlslTime = fs::last_write_time(hlslPath);
+				// HLSL本体と参照Includeのどちらかが新しければ依存Shaderを再コンパイル
+				const auto dependencyTime = getLatestDependencyTime(hlslPath);
 				const auto csoTime  = fs::last_write_time(csoPath);
-				if (hlslTime > csoTime) {
+				if (dependencyTime > csoTime) {
 					Logger::Output(
-						std::format("HLSLが更新されているため再コンパイルします : {}", key),
+						std::format("HLSLまたは依存Includeが更新されているため再コンパイルします : {}", key),
 						Logger::Level::Assets
 					);
 					needCompile = true;

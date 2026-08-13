@@ -123,9 +123,39 @@
                         0.07999999821186066
                     ]
                 }
-            }
+            },
+            "trail": {
+                "blendMode": "normal",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": true,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.15000000596046448,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    0.5023255348205566,
+                    0.0,
+                    1.0
+                ],
+                "startWidth": 0.05000000074505806,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         }
     ],
     "name": "DefaultExplosion",
-    "version": 2
+    "version": 4
 }

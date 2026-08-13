@@ -160,6 +160,7 @@ namespace MadoEngine::Particle {
 
 	struct ParticleTrailModule {
 		bool isEnabled = false;
+		bool syncParticleColor = false;
 		float pointLifetime = 0.5f;
 		float minPointDistance = 0.05f;
 		uint32_t maxPointCount = 32;

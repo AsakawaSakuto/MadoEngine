@@ -37,8 +37,9 @@ namespace MadoEngine::Particle {
 	struct alignas(16) GpuParticleTrailSample {
 		Vector3 position{};
 		uint32_t identifier = 0;
+		Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	};
-	static_assert(sizeof(GpuParticleTrailSample) == 16, "GPU Particle Trail SampleのLayoutがHLSLと一致していません。");
+	static_assert(sizeof(GpuParticleTrailSample) == 32, "GPU Particle Trail SampleのLayoutがHLSLと一致していません。");
 
 	struct alignas(16) GpuParticleDrawInstance {
 		Vector3 position{};

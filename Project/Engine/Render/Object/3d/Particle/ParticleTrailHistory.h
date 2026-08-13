@@ -17,6 +17,7 @@ namespace MadoEngine::Particle {
 	struct ParticleTrailSample {
 		uint64_t identifier = 0;
 		Vector3 position{};
+		Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	};
 
 	/// @brief Backendに依存せずParticle Trail履歴を管理するクラス
@@ -59,11 +60,13 @@ namespace MadoEngine::Particle {
 		struct TrailPoint {
 			Vector3 position{};
 			float age = 0.0f;
+			Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		};
 
 		struct TrailState {
 			std::vector<TrailPoint> points;
 			Vector3 latestPosition{};
+			Vector4 latestColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 			bool hasLatestPosition = false;
 			bool wasParticleAlive = false;
 			bool isParticleAlive = false;
@@ -72,7 +75,8 @@ namespace MadoEngine::Particle {
 		/// @brief 最小間隔を満たすTrail Pointを追加
 		/// @param state 追加対象Trail状態
 		/// @param position 追加候補位置
-		void TryAddPoint(TrailState& state, const Vector3& position);
+		/// @param color Point生成時のParticle色
+		void TryAddPoint(TrailState& state, const Vector3& position, const Vector4& color);
 
 		ParticleTrailModule config_;
 		SimulationSpace simulationSpace_ = SimulationSpace::Local;

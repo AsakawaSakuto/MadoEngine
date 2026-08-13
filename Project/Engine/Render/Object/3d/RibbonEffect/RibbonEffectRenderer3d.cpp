@@ -274,7 +274,8 @@ namespace MadoEngine::Ribbon {
 					(1.0f - normalizedLifetime) / endAlphaFade
 				);
 			}
-			Vector4 sourceColor = data.colorOverLifetime.Evaluate(normalizedLifetime);
+			Vector4 sourceColor =
+				data.colorOverLifetime.Evaluate(normalizedLifetime) * points[index].color;
 			sourceColor.w *= std::clamp(lengthAlpha, 0.0f, 1.0f);
 			const Vector4 color = NormalizeColor(sourceColor, data.globalAlpha);
 
@@ -398,10 +399,11 @@ namespace MadoEngine::Ribbon {
 				const Vector3 difference = point.position - source.back().position;
 				if (difference.LengthSq() <= kRibbonGeometryEpsilon) {
 					source.back().normalizedLifetime = normalizedLifetime;
+					source.back().color = point.color;
 					continue;
 				}
 			}
-			source.push_back({ point.position, normalizedLifetime });
+			source.push_back({ point.position, normalizedLifetime, point.color });
 		}
 		uint32_t smoothingSubdivision = (std::min)(
 			data.smoothingSubdivision,
@@ -441,6 +443,7 @@ namespace MadoEngine::Ribbon {
 				result.push_back({
 					position,
 					left.normalizedLifetime * (1.0f - rate) + right.normalizedLifetime * rate,
+					left.color * (1.0f - rate) + right.color * rate,
 				});
 			}
 		}
@@ -518,6 +521,7 @@ namespace MadoEngine::Ribbon {
 				points[leftIndex].position * (1.0f - rate) + points[rightIndex].position * rate,
 				points[leftIndex].normalizedLifetime * (1.0f - rate) +
 					points[rightIndex].normalizedLifetime * rate,
+				points[leftIndex].color * (1.0f - rate) + points[rightIndex].color * rate,
 			};
 		};
 

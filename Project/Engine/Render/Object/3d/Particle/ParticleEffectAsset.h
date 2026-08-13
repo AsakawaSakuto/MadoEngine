@@ -10,7 +10,7 @@ namespace MadoEngine::Particle {
 	/// @brief パーティクルエフェクトの変更されない設定を保持するAsset
 	class ParticleEffectAsset final : public MadoEngine::Json::IJsonSerializable {
 	public:
-		static constexpr uint32_t kCurrentVersion = 4;
+		static constexpr uint32_t kCurrentVersion = 5;
 
 		/// @brief JsonファイルからAssetを読み込み
 		/// @param filePath 読み込むJsonファイルパス

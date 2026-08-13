@@ -101,8 +101,9 @@ namespace MadoEngine::Particle {
 			TrailState& state = trails_[sample.identifier];
 			state.isParticleAlive = true;
 			state.latestPosition = sample.position;
+			state.latestColor = sample.color;
 			state.hasLatestPosition = true;
-			TryAddPoint(state, sample.position);
+			TryAddPoint(state, sample.position, sample.color);
 		}
 
 		for (auto& [identifier, state] : trails_) {
@@ -110,7 +111,7 @@ namespace MadoEngine::Particle {
 			if (state.wasParticleAlive && !state.isParticleAlive && state.hasLatestPosition) {
 
 				// 粒子消滅時の最終位置を固定し、残存Trailだけを寿命まで減衰
-				TryAddPoint(state, state.latestPosition);
+				TryAddPoint(state, state.latestPosition, state.latestColor);
 			}
 		}
 		std::erase_if(trails_, [](const auto& entry) {
@@ -173,6 +174,7 @@ namespace MadoEngine::Particle {
 						: point.position,
 					point.age,
 					config_.pointLifetime,
+					config_.syncParticleColor ? point.color : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f },
 				});
 			}
 			if (appendLatestPosition) {
@@ -184,6 +186,7 @@ namespace MadoEngine::Particle {
 						: state.latestPosition,
 					0.0f,
 					config_.pointLifetime,
+					config_.syncParticleColor ? state.latestColor : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f },
 				});
 			}
 			if (renderData.points.size() < kMinimumParticleTrailPointCount) {
@@ -207,7 +210,8 @@ namespace MadoEngine::Particle {
 
 	void ParticleTrailHistory::TryAddPoint(
 		TrailState& state,
-		const Vector3& position) {
+		const Vector3& position,
+		const Vector4& color) {
 		if (!IsFiniteVector3(position)) {
 			return;
 		}
@@ -225,7 +229,7 @@ namespace MadoEngine::Particle {
 			}
 		}
 
-		state.points.push_back({ position, 0.0f });
+		state.points.push_back({ position, 0.0f, color });
 		while (state.points.size() > config_.maxPointCount) {
 			state.points.erase(state.points.begin());
 		}
