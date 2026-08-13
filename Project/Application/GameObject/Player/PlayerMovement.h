@@ -59,6 +59,10 @@ namespace Player {
 		/// @return 壁上り中の場合はtrue
 		bool IsWallClimbing() const { return isWallClimbing_; }
 
+		/// @brief 着地後からの壁登り経過時間を取得
+		/// @return 壁登り経過時間
+		float GetWallClimbElapsedTime() const { return wallClimbElapsedTime_; }
+
 		/// @brief スライディング速度を取得
 		/// @return スライディング速度
 		Vector3 GetSlideVelocity() const { return slideVelocity_; }
@@ -115,6 +119,9 @@ namespace Player {
 		/// @return Block側面で前進を阻害された場合はtrue
 		bool IsHorizontalMoveBlocked(const Vector3& currentPosition) const;
 
+		/// @brief 壁登り時間切れによる強制Jumpを開始
+		void StartWallClimbTimeoutJump();
+
 	private:
 
 		Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
@@ -128,12 +135,14 @@ namespace Player {
 		bool jumpStartedThisFrame_ = false;
 		bool hasWallClimbInput_ = false;
 		bool isWallClimbing_ = false;
+		bool wasGroundContact_ = true;
 
 		float groundY_ = 0.0f;               // 接地している地面のY座標
 		float slopeSnapDistance_ = 1.0f;     // Slopeに足が届いているとみなす距離
 		float jumpMoveBoostFriction_ = 0.0f; // ジャンプ時の水平初速に対する摩擦
 		float slideReleaseFriction_ = 10.0f; // スライディング解除時の摩擦
 		float remainingJumpCount_ = 0.0f;    // 残りジャンプ回数
+		float wallClimbElapsedTime_ = 0.0f;  // 着地後から累積した壁登り時間
 
 		Player::MovementParams movementParams_; // 移動に関するパラメータ
 

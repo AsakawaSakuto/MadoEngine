@@ -288,6 +288,11 @@ namespace Player {
 		ImGui::Text("Y速度: %.2f", velocityY);
 		ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
 		ImGui::Text("壁上り: %s", movement_.IsWallClimbing() ? "有効" : "無効");
+		ImGui::Text(
+			"壁上り時間: %.2f / %.2f",
+			movement_.GetWallClimbElapsedTime(),
+			movementParams.wallClimbMaxDuration_
+		);
 		ImGui::Separator();
 		ImGui::DragFloat("移動速度", &movementParams.moveSpeed_, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("ジャンプ力", &movementParams.jumpPower_, 0.1f, 0.0f, 100.0f);
@@ -300,6 +305,7 @@ namespace Player {
 		ImGui::DragFloat("ジャンプ回数", &movementParams.jumpCount_, 1.0f, 0.0f, 1000.0f);
 		ImGui::DragFloat("ジャンプ横初速", &movementParams.jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
 		ImGui::DragFloat("壁上り速度", &movementParams.wallClimbSpeed_, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("壁上り最大時間", &movementParams.wallClimbMaxDuration_, 0.1f, 0.0f, 60.0f);
 		ImGui::End();
 
 		ImGui::Begin("プレイヤーステータス");

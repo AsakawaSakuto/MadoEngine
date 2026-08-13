@@ -98,6 +98,8 @@ namespace Player {
 		lastAttemptedHorizontalMove_ = {};
 		hasWallClimbInput_ = false;
 		isWallClimbing_ = false;
+		wasGroundContact_ = true;
+		wallClimbElapsedTime_ = 0.0f;
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
@@ -124,7 +126,14 @@ namespace Player {
 	}
 
 	void Movement::SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input) {
-		if (isGroundContact || isSlopeGroundContact) {
+		const bool hasGroundContact = isGroundContact || isSlopeGroundContact;
+		if (hasGroundContact && !wasGroundContact_) {
+
+			// 空中または壁登り状態から地表へ着地した時点で利用可能時間を全回復
+			wallClimbElapsedTime_ = 0.0f;
+		}
+
+		if (hasGroundContact) {
 
 			// 上昇中のジャンプ速度を維持するため落下中の速度だけ接地時に停止
 			if (velocityY_ < 0.0f) {
@@ -141,20 +150,42 @@ namespace Player {
 		} else {
 			isGrounded_ = false;
 		}
+
+		wasGroundContact_ = hasGroundContact;
 	}
 
 	void Movement::UpdateWallClimb(float deltaTime, const MoveInput& input, Transform3D& transform) {
+		const bool wasWallClimbing = isWallClimbing_;
 		const bool isBlocked = IsHorizontalMoveBlocked(transform.translate);
 		if (input.isCrouching || jumpStartedThisFrame_ || !hasWallClimbInput_ || !isBlocked) {
 			isWallClimbing_ = false;
 			return;
 		}
 
-		// 壁方向への入力がCollider解決で阻害され続けている間だけ重力を止めて低速上昇
-		transform.translate.y += std::max(0.0f, movementParams_.wallClimbSpeed_) * std::max(0.0f, deltaTime);
+		const float maxDuration = std::max(0.0f, movementParams_.wallClimbMaxDuration_);
+		if (wallClimbElapsedTime_ >= maxDuration) {
+			isWallClimbing_ = false;
+			if (wasWallClimbing) {
+				StartWallClimbTimeoutJump();
+			}
+			return;
+		}
+
+		const float climbDeltaTime = std::min(
+			std::max(0.0f, deltaTime),
+			maxDuration - wallClimbElapsedTime_
+		);
+
+		// 上限までの残り時間だけ上昇へ反映してフレーム時間による超過を防止
+		transform.translate.y += std::max(0.0f, movementParams_.wallClimbSpeed_) * climbDeltaTime;
+		wallClimbElapsedTime_ += climbDeltaTime;
 		velocityY_ = 0.0f;
-		isGrounded_ = true;
-		isWallClimbing_ = true;
+		isWallClimbing_ = wallClimbElapsedTime_ < maxDuration;
+		if (!isWallClimbing_) {
+			StartWallClimbTimeoutJump();
+			return;
+		}
+
 		currentMotion_ = Player::Motion::Climbing;
 	}
 
@@ -335,6 +366,15 @@ namespace Player {
 		return actualProgress < attemptedLength * kBlockedProgressRate;
 	}
 
+	void Movement::StartWallClimbTimeoutJump() {
+
+		// 通常Jumpと分離して残り回数を参照または消費せず上向き初速だけを付与
+		velocityY_ = movementParams_.jumpPower_;
+		isGrounded_ = false;
+		jumpStartedThisFrame_ = true;
+		currentMotion_ = Player::Motion::Jump;
+	}
+
 	void Movement::ApplyJumpMoveBoost(float deltaTime, Transform3D& transform) {
 		if (isGrounded_ && velocityY_ <= 0.0f) {
 			jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
@@ -431,8 +471,8 @@ namespace Player {
 
 	void Movement::Jump(float deltaTime, Transform3D& transform, const MoveInput& input) {
 
-		// 接地するたびに多段ジャンプの使用回数を回復
-		if (isGrounded_) {
+		// 壁登りを接地回復に含めず実際の地面へ接地している場合だけ使用回数を回復
+		if (isGrounded_ && !isWallClimbing_) {
 			remainingJumpCount_ = movementParams_.jumpCount_;
 		}
 
@@ -446,7 +486,7 @@ namespace Player {
 			Logger::Output("[Engine] ジャンプ開始 残り回数: " + std::to_string(remainingJumpCount_), Logger::Level::Application);
 		}
 
-		if (!isGrounded_) {
+		if (!isGrounded_ && !isWallClimbing_) {
 			velocityY_ -= movementParams_.gravity_ * deltaTime;
 		}
 
