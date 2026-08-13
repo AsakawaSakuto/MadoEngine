@@ -173,7 +173,6 @@
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
-    <ClCompile Include="Application\System\Fade\Fade.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
@@ -382,7 +381,6 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
     <ClInclude Include="Application\InputRegister.h" />
-    <ClInclude Include="Application\System\Fade\Fade.h" />
     <ClInclude Include="Application\System\GameSeed\GameSeedSystem.h" />
     <ClInclude Include="Application\System\InGameSession\InGamePhase.h" />
     <ClInclude Include="Application\System\InGameSession\InGameSession.h" />

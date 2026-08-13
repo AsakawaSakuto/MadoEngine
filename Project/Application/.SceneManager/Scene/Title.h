@@ -38,7 +38,6 @@ private:
 	std::optional<std::size_t> selectedSeedIndex_;
 
 	MadoEngine::SpriteHandle wallPaperSprite_{};
-	MadoEngine::SpriteHandle fadeSprite_{};
 
 	MadoEngine::ModelHandle testModel_{};
 

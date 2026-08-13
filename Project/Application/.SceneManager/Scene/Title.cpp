@@ -10,12 +10,6 @@ Title::~Title() {}
 void Title::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
 
-	fadeSprite_ = MySprite::Create("TitleFade", "black2x2", SceneType::Title);
-	if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
-		fadeSprite->SetColor({1.0f,1.0f,1.0f,0.0f});
-		fadeSprite->SetFitToScreen(true);
-	}
-
 	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("TitleDebugCamera");
 	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
 		debugCamera->SetDistance(35.0f);
@@ -45,12 +39,6 @@ SceneType Title::Update(float dt) {
 		}
 	}
 
-	if (fadeInTimer_.IsActive()) {
-		if (Sprite* fadeSprite = MySprite::TryGet(fadeSprite_)) {
-			fadeSprite->SetColor({ 1.0f, 1.0f, 1.0f, fadeInTimer_.GetProgress() });
-		}
-	}
-    
 	if (fadeInTimer_.IsFinished()) {
 		Logger::Output("Decisionが押されました - ゲームシーンへ遷移", Logger::Level::Application);
 		return SceneType::Game;

@@ -80,7 +80,6 @@ private:
 	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
 	UI::Game::UpgradeUI weaponUpgradeUI_;
 
-	MadoEngine::SpriteHandle fadeSprite_{};
 	MadoEngine::TextHandle enemyCountText_{};
 	MadoEngine::TextHandle moneyText_{};
 	MadoEngine::TextHandle killCountText_{};
