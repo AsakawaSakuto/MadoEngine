@@ -3,7 +3,7 @@
 namespace UI::Game {
 
 	void PlayerExpGauge::Initialize() {
-		expGauge_ = std::make_unique<Gauge>();
+		expGauge_ = std::make_unique<Gauge2d>();
 		expGauge_->Initialize("PlayerExpGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
 
 		dopaGauge_ = MySprite::Create("PlayerExpDopaGauge", "DopaGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);

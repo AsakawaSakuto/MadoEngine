@@ -15,7 +15,7 @@ namespace UI::Game {
 		void IsUpgrade(bool isUpgrade, float deltaTime);
 	private:
 
-		std::unique_ptr<Gauge> expGauge_;
+		std::unique_ptr<Gauge2d> expGauge_;
 		MadoEngine::SpriteHandle dopaGauge_{};
 
 		float uvOffsetX_ = 0.0f;

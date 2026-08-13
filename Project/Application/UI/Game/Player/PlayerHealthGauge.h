@@ -30,8 +30,8 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
-		std::unique_ptr<Gauge> healthGauge2d_;
-		Gauge3d healthGauge3d_;
+		std::unique_ptr<Gauge2d> healthGauge2d_;
+		std::unique_ptr<Gauge3d> healthGauge3d_;
 	};
 
 } // namespace UI::Game

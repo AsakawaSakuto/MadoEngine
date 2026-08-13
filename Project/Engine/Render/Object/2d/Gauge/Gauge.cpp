@@ -38,15 +38,15 @@ namespace {
 
 } // namespace
 
-Gauge::Gauge(std::string objectName) {
+Gauge2d::Gauge2d(std::string objectName) {
 	objectName_ = std::move(objectName);
 }
 
-Gauge::~Gauge() {
+Gauge2d::~Gauge2d() {
 	Finalize();
 }
 
-void Gauge::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEngine::Render::RenderLayer renderLayer) {
+void Gauge2d::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEngine::Render::RenderLayer renderLayer) {
 	Finalize();
 
 	objectName_ = gaugeName.empty() ? objectName_ : gaugeName;
@@ -79,7 +79,7 @@ void Gauge::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEn
 	Logger::Output("[Engine] Gaugeを初期化しました: " + objectName_, Logger::Level::Engine);
 }
 
-void Gauge::Finalize() {
+void Gauge2d::Finalize() {
 	backgroundSpriteName_.clear();
 	gaugeSpriteName_.clear();
 	backgroundSprite_ = {};
@@ -87,7 +87,7 @@ void Gauge::Finalize() {
 	isInitialized_ = false;
 }
 
-void Gauge::Update() {
+void Gauge2d::Update() {
 	if (!isInitialized_) {
 		return;
 	}
@@ -97,17 +97,17 @@ void Gauge::Update() {
 	ApplyGaugeSprite();
 }
 
-void Gauge::Update(float currentValue, float maxValue) {
+void Gauge2d::Update(float currentValue, float maxValue) {
 	currentValue_ = currentValue;
 	maxValue_ = maxValue;
 	Update();
 }
 
-void Gauge::Update(int currentValue, int maxValue) {
+void Gauge2d::Update(int currentValue, int maxValue) {
 	Update(static_cast<float>(currentValue), static_cast<float>(maxValue));
 }
 
-void Gauge::DrawImGui(const char* name) {
+void Gauge2d::DrawImGui(const char* name) {
 #ifdef USE_IMGUI
 	if (!name) {
 		return;
@@ -143,7 +143,7 @@ void Gauge::DrawImGui(const char* name) {
 #endif
 }
 
-bool Gauge::SaveToJson() const {
+bool Gauge2d::SaveToJson() const {
 	if (objectName_.empty()) {
 		Logger::Output("[Engine] Gauge名が空のためJson保存をスキップしました", Logger::Level::Warning);
 		return false;
@@ -164,7 +164,7 @@ bool Gauge::SaveToJson() const {
 	return MadoEngine::Json::JsonFile::Save(GetJsonFilePath(), json, 4, true);
 }
 
-bool Gauge::LoadFromJson() {
+bool Gauge2d::LoadFromJson() {
 	if (objectName_.empty()) {
 		return false;
 	}
@@ -196,12 +196,12 @@ bool Gauge::LoadFromJson() {
 	return true;
 }
 
-void Gauge::SetPosition(const Vector2& position) {
+void Gauge2d::SetPosition(const Vector2& position) {
 	position_ = position;
 	Update();
 }
 
-void Gauge::SetSize(const Vector2& size) {
+void Gauge2d::SetSize(const Vector2& size) {
 	size_ = {
 		std::max(0.0f, size.x),
 		std::max(0.0f, size.y),
@@ -209,64 +209,64 @@ void Gauge::SetSize(const Vector2& size) {
 	Update();
 }
 
-void Gauge::SetBackgroundColor(const Vector4& color) {
+void Gauge2d::SetBackgroundColor(const Vector4& color) {
 	backgroundColor_ = color;
 	Update();
 }
 
-void Gauge::SetGaugeColor(const Vector4& color) {
+void Gauge2d::SetGaugeColor(const Vector4& color) {
 	gaugeColor_ = color;
 	Update();
 }
 
-void Gauge::SetDirection(GaugeDirection direction) {
+void Gauge2d::SetDirection(GaugeDirection direction) {
 	direction_ = direction;
 	Update();
 }
 
-void Gauge::SetDrawBackground(bool enabled) {
+void Gauge2d::SetDrawBackground(bool enabled) {
 	drawBackground_ = enabled;
 	Update();
 }
 
-void Gauge::SetVisible(bool visible) {
+void Gauge2d::SetVisible(bool visible) {
 	isVisible_ = visible;
 	Update();
 }
 
-void Gauge::SetCurrentValue(float value) {
+void Gauge2d::SetCurrentValue(float value) {
 	currentValue_ = value;
 	Update();
 }
 
-void Gauge::SetMaxValue(float value) {
+void Gauge2d::SetMaxValue(float value) {
 	maxValue_ = value;
 	Update();
 }
 
-void Gauge::SetSceneType(SceneType sceneType) {
+void Gauge2d::SetSceneType(SceneType sceneType) {
 	sceneType_ = sceneType;
 	ApplyRenderSettings();
 }
 
-void Gauge::SetRenderLayer(MadoEngine::Render::RenderLayer layer) {
+void Gauge2d::SetRenderLayer(MadoEngine::Render::RenderLayer layer) {
 	renderLayer_ = layer;
 	ApplyRenderSettings();
 }
 
-float Gauge::GetRatio() const {
+float Gauge2d::GetRatio() const {
 	if (maxValue_ <= 0.0f) {
 		return 0.0f;
 	}
 	return currentValue_ / maxValue_;
 }
 
-void Gauge::ClampValue() {
+void Gauge2d::ClampValue() {
 	maxValue_ = std::max(0.0f, maxValue_);
 	currentValue_ = std::clamp(currentValue_, 0.0f, maxValue_);
 }
 
-void Gauge::ApplyBackgroundSprite() {
+void Gauge2d::ApplyBackgroundSprite() {
 	Sprite* backgroundSprite = MadoEngine::SpriteManager::GetInstance().TryGet(backgroundSprite_);
 	if (!backgroundSprite) {
 		return;
@@ -278,7 +278,7 @@ void Gauge::ApplyBackgroundSprite() {
 	backgroundSprite->SetVisible(isVisible_ && drawBackground_);
 }
 
-void Gauge::ApplyGaugeSprite() {
+void Gauge2d::ApplyGaugeSprite() {
 	Sprite* gaugeSprite = MadoEngine::SpriteManager::GetInstance().TryGet(gaugeSprite_);
 	if (!gaugeSprite) {
 		return;
@@ -312,7 +312,7 @@ void Gauge::ApplyGaugeSprite() {
 	gaugeSprite->SetVisible(isVisible_ && ratio > 0.0f);
 }
 
-void Gauge::ApplyRenderSettings() {
+void Gauge2d::ApplyRenderSettings() {
 	if (Sprite* backgroundSprite = MadoEngine::SpriteManager::GetInstance().TryGet(backgroundSprite_)) {
 		backgroundSprite->SetSceneType(sceneType_);
 		backgroundSprite->SetRenderLayer(renderLayer_);
@@ -323,6 +323,6 @@ void Gauge::ApplyRenderSettings() {
 	}
 }
 
-std::string Gauge::GetJsonFilePath() const {
+std::string Gauge2d::GetJsonFilePath() const {
 	return "Assets/Json/Gauge/" + objectName_ + ".json";
 }

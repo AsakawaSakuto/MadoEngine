@@ -17,15 +17,15 @@ enum class GaugeDirection {
 };
 
 /// @brief 二枚のSpriteで構成する2Dゲージ
-class Gauge {
+class Gauge2d {
 public:
-	explicit Gauge(std::string objectName = "Gauge");
-	~Gauge();
+	explicit Gauge2d(std::string objectName = "Gauge");
+	~Gauge2d();
 
-	Gauge(const Gauge&) = delete;
-	Gauge& operator=(const Gauge&) = delete;
-	Gauge(Gauge&&) = delete;
-	Gauge& operator=(Gauge&&) = delete;
+	Gauge2d(const Gauge2d&) = delete;
+	Gauge2d& operator=(const Gauge2d&) = delete;
+	Gauge2d(Gauge2d&&) = delete;
+	Gauge2d& operator=(Gauge2d&&) = delete;
 
 	/// @brief ゲージ用Spriteを生成
 	/// @param gaugeName ゲージ名
