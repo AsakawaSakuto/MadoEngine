@@ -81,6 +81,14 @@ public:
 	/// @return ワールド空間の移動量
 	const Vector3& GetTranslateOffset() const { return translateOffset_; }
 
+	/// @brief Camera基底で基準座標へ加算する移動量を設定
+	/// @param cameraTranslateOffset XがCamera右方向、YがCamera上方向、ZがCamera前方向の移動量
+	void SetCameraTranslateOffset(const Vector3& cameraTranslateOffset);
+
+	/// @brief Camera基底で基準座標へ加算する移動量を取得
+	/// @return XがCamera右方向、YがCamera上方向、ZがCamera前方向の移動量
+	const Vector3& GetCameraTranslateOffset() const { return cameraTranslateOffset_; }
+
 	/// @brief ゲージのワールド空間サイズを設定
 	/// @param size 幅と高さ
 	void SetSize(const Vector2& size);
@@ -190,6 +198,7 @@ private:
 
 	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 translateOffset_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 cameraTranslateOffset_ = { 0.0f, 0.0f, 0.0f };
 	Vector2 size_ = { 2.0f, 0.2f };
 	float currentValue_ = 100.0f;
 	float maxValue_ = 100.0f;

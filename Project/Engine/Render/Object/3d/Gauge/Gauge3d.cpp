@@ -160,7 +160,6 @@ void Gauge3d::Update(const Camera& camera) {
 	const Matrix4x4 inverseView = Matrix::Inverse(camera.GetViewMatrix());
 	const Vector3 cameraRight = GetCameraBasis(inverseView, 0);
 	const Vector3 cameraUp = GetCameraBasis(inverseView, 1);
-	const Vector3 cameraForward = GetCameraBasis(inverseView, 2);
 
 	const Vector3 backgroundScale = {
 		size_.x * 0.5f,
@@ -169,7 +168,7 @@ void Gauge3d::Update(const Camera& camera) {
 	};
 	Vector3 gaugeScale = backgroundScale;
 
-	// 所有Objectの基準座標と編集可能な移動量を合成
+	// 所有Objectの基準座標とWorld基準の移動量を合成
 	const Vector3 displayPosition = position_ + translateOffset_;
 	Vector3 gaugePosition = displayPosition;
 
@@ -193,13 +192,17 @@ void Gauge3d::Update(const Camera& camera) {
 		break;
 	}
 
-	// 描画順に依存せず前景を表示するためCamera側へ僅かに分離
-	gaugePosition -= cameraForward * depthOffset_;
+	Vector3 gaugeCameraTranslateOffset = cameraTranslateOffset_;
+
+	// 背景と前景のCamera基準移動をModelへ委譲し、前景だけCamera側へ分離
+	gaugeCameraTranslateOffset.z -= depthOffset_;
 
 	backgroundModel->SetPosition(displayPosition);
 	backgroundModel->SetScale(backgroundScale);
+	backgroundModel->SetCameraTranslateOffset(cameraTranslateOffset_);
 	gaugeModel->SetPosition(gaugePosition);
 	gaugeModel->SetScale(gaugeScale);
+	gaugeModel->SetCameraTranslateOffset(gaugeCameraTranslateOffset);
 
 	isTransformReady_ = true;
 	ApplyVisibility();
@@ -222,6 +225,7 @@ void Gauge3d::DrawImGui(const char* name) {
 	bool settingsChanged = false;
 	settingsChanged |= ImGui::DragFloat3("Position", &position_.x, 0.05f);
 	settingsChanged |= ImGui::DragFloat3("Translate Offset", &translateOffset_.x, 0.05f);
+	settingsChanged |= ImGui::DragFloat3("Camera Translate Offset", &cameraTranslateOffset_.x, 0.05f);
 	settingsChanged |= ImGui::DragFloat2("Size", &size_.x, 0.01f, 0.0f, 1000.0f);
 	settingsChanged |= ImGui::DragFloat("Current", &currentValue_, 1.0f, 0.0f, (std::max)(0.0f, maxValue_));
 	settingsChanged |= ImGui::DragFloat("Max", &maxValue_, 1.0f, 0.0f, 999999.0f);
@@ -274,6 +278,7 @@ bool Gauge3d::SaveToJson() const {
 	json["name"] = objectName_;
 	json["position"] = MadoEngine::Json::JsonSerializer::ToJson(position_);
 	json["translateOffset"] = MadoEngine::Json::JsonSerializer::ToJson(translateOffset_);
+	json["cameraTranslateOffset"] = MadoEngine::Json::JsonSerializer::ToJson(cameraTranslateOffset_);
 	json["size"] = MadoEngine::Json::JsonSerializer::ToJson(size_);
 	json["currentValue"] = currentValue_;
 	json["maxValue"] = maxValue_;
@@ -309,6 +314,10 @@ bool Gauge3d::LoadFromJson() {
 	translateOffset_ = MadoEngine::Json::JsonSerializer::ToVector3(
 		json.value("translateOffset", nlohmann::json::array()),
 		translateOffset_
+	);
+	cameraTranslateOffset_ = MadoEngine::Json::JsonSerializer::ToVector3(
+		json.value("cameraTranslateOffset", nlohmann::json::array()),
+		cameraTranslateOffset_
 	);
 	size_ = MadoEngine::Json::JsonSerializer::ToVector2(
 		json.value("size", nlohmann::json::array()),
@@ -346,6 +355,10 @@ void Gauge3d::SetPosition(const Vector3& position) {
 
 void Gauge3d::SetTranslateOffset(const Vector3& translateOffset) {
 	translateOffset_ = translateOffset;
+}
+
+void Gauge3d::SetCameraTranslateOffset(const Vector3& cameraTranslateOffset) {
+	cameraTranslateOffset_ = cameraTranslateOffset;
 }
 
 void Gauge3d::SetSize(const Vector2& size) {

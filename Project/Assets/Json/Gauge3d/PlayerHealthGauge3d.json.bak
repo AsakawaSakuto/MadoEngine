@@ -1,39 +1,39 @@
 {
     "backgroundColor": [
-        0.12558138370513916,
-        0.12558138370513916,
-        0.12558138370513916,
+        0.1,
+        0.1,
+        0.1,
         1.0
     ],
     "cameraTranslateOffset": [
         0.0,
         0.0,
-        -2.5
+        -0.5
     ],
     "currentValue": 100.0,
-    "depthOffset": 0.009999999776482582,
+    "depthOffset": 0.001,
     "direction": "Right",
     "drawBackground": true,
     "gaugeColor": [
-        1.0,
         0.0,
+        1.0,
         0.0,
         1.0
     ],
     "maxValue": 100.0,
     "name": "PlayerHealthGauge3d",
     "position": [
-        212.15420532226563,
-        21.27035140991211,
-        251.07733154296875
+        0.0,
+        0.0,
+        0.0
     ],
     "size": [
-        0.75,
-        0.15000000596046448
+        1.5,
+        0.12
     ],
     "translateOffset": [
         0.0,
-        -0.5,
+        2.2,
         0.0
     ],
     "visible": true

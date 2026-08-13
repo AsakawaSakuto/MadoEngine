@@ -52,6 +52,14 @@ public:
 	/// @return 使用する場合はtrue
 	bool IsUseBillboard() const { return usebillbord_; }
 
+	/// @brief ビルボードCamera基底で加算する移動量を設定
+	/// @param offset XがCamera右方向、YがCamera上方向、ZがCamera前方向の移動量
+	void SetCameraTranslateOffset(const Vector3& offset) { cameraTranslateOffset_ = offset; }
+
+	/// @brief ビルボードCamera基底で加算する移動量を取得
+	/// @return XがCamera右方向、YがCamera上方向、ZがCamera前方向の移動量
+	const Vector3& GetCameraTranslateOffset() const { return cameraTranslateOffset_; }
+
 	/// @brief 他の3Dオブジェクトに影を落とすかを設定
 	/// @param enabled trueの場合はシャドウマップへ深度を書き込み
 	void SetCastShadow(bool enabled) { castShadow_ = enabled; }
@@ -272,6 +280,7 @@ private:
 	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);
 	bool enableFrustumCulling_ = true;
 	bool usebillbord_ = false;
+	Vector3 cameraTranslateOffset_ = { 0.0f, 0.0f, 0.0f };
 	bool castShadow_ = true;
 	bool receiveShadow_ = true;
 	std::string textureOverrideName_;

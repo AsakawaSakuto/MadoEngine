@@ -6,7 +6,6 @@
 #include "PlayerStatus.h"
 #include "../Map/MapLimit.h"
 #include "Render/Object/3d/EffectSequence/MyEffectSequence3d.h"
-#include "Render/Object/3d/Gauge/Gauge3d.h"
 
 namespace Player {
 
@@ -24,10 +23,6 @@ namespace Player {
 
 		/// @brief Collider更新後に接地状態と描画状態を解決
 		void ResolveAfterCollision();
-
-		/// @brief HPゲージをPlayer頭上へ同期
-		/// @param camera 描画に使用するCamera
-		void UpdateHealthGauge(const Camera& camera);
 
 		/// @brief Playerのワールド座標を取得
 		Vector3 GetPosition() const { return transform_.translate; }
@@ -78,7 +73,6 @@ namespace Player {
 
 		Transform3D shadowTransform_;  // 影Transform
 		MadoEngine::EffectSequence::MyEffectSequence3d landingMarker_; // 着地点Marker
-		Gauge3d healthGauge_; // 頭上表示用HPゲージ
 
 		Status status_;                     // ステータス
 		StatusMultiplier statusMultiplier_; // ステータスの倍率

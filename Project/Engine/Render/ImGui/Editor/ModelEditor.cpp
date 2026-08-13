@@ -477,6 +477,11 @@ namespace MadoEngine::Editor {
 				model.SetUseBillboard(useBillboard);
 			}
 
+			Vector3 cameraTranslateOffset = model.GetCameraTranslateOffset();
+			if (ImGui::DragFloat3("カメラ基準オフセット", &cameraTranslateOffset.x, 0.01f)) {
+				model.SetCameraTranslateOffset(cameraTranslateOffset);
+			}
+
 			bool castShadow = model.CanCastShadow();
 			if (ImGui::Checkbox("影を落とす", &castShadow)) {
 				model.SetCastShadow(castShadow);

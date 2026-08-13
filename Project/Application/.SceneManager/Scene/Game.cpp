@@ -137,7 +137,6 @@ SceneType Game::Update(float dt) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
 	}
 	cameraManager_.Update(deltaTime);
-	player_->UpdateHealthGauge(cameraManager_.GetRenderCamera());
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
@@ -157,7 +156,12 @@ SceneType Game::Update(float dt) {
 	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
 	expGauge_->IsUpgrade(inGameSession_->IsWaitingUpgradeSelection(), dt);
 
-	healthGauge_->Update(static_cast<float>(status.currentHealth), static_cast<float>(status.maxHealth));
+	healthGauge_->Update(
+		player_->GetPosition(),
+		static_cast<float>(status.currentHealth),
+		static_cast<float>(status.maxHealth),
+		cameraManager_.GetRenderCamera()
+	);
 
 	const int currentMoney = static_cast<int>(status.currentMoney);
 	if (currentMoney != displayedMoney_) {
@@ -228,6 +232,7 @@ void Game::DrawImGui() {
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
 	player_->DrawImGui();
+	healthGauge_->DrawImGui();
 
 	weaponInventory_->DrawImGui();
 	weaponStatusEditor_->DrawImGui();
@@ -269,6 +274,9 @@ bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 
 void Game::Finalize() {
 	weaponUpgradeUI_.Finalize();
+	if (healthGauge_) {
+		healthGauge_->Finalize();
+	}
 
 	// Spawnerの参照先を破棄する前に生成予定とEnemy所有権を解放
 	if (enemySpawner_) {

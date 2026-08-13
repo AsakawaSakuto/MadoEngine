@@ -1,24 +1,37 @@
 #pragma once
 #include "RenderHeaders.h"
 
+class Camera;
+
 namespace UI::Game {
 
-	class PlayerHealthGauge {
+	/// @brief Playerの2D表示と頭上3D表示を管理するHPゲージ
+	class PlayerHealthGauge final {
 	public:
-		/// @brief プレイヤーのHPゲージとHP数値表示を初期化
+		/// @brief Playerの2Dと3DのHP表示を初期化
 		void Initialize();
 
-		/// @brief プレイヤーのHPゲージとHP数値表示を更新
-		/// @param currentHealth 現在のHP
+		/// @brief Playerの座標とHPを2Dと3DのHP表示へ反映
+		/// @param playerPosition Playerのワールド座標
+		/// @param currentHealth 現在HP
 		/// @param maxHealth 最大HP
-		void Update(float currentHealth, float maxHealth);
+		/// @param camera 描画に使用するCamera
+		void Update(
+			const Vector3& playerPosition,
+			float currentHealth,
+			float maxHealth,
+			const Camera& camera
+		);
 
-		/// @brief プレイヤーのHP数値表示を終了
+		/// @brief Playerの2Dと3DのHP表示を解放
 		void Finalize();
 
-		/// @brief HPゲージのImGuiを描画
+		/// @brief 2Dと3DのHPゲージのImGuiを描画
 		void DrawImGui();
+
 	private:
-		std::unique_ptr<Gauge> healthGauge_;
+		std::unique_ptr<Gauge> healthGauge2d_;
+		Gauge3d healthGauge3d_;
 	};
-}
+
+} // namespace UI::Game

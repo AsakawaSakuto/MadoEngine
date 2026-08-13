@@ -224,6 +224,10 @@ void Model::FromJson(const nlohmann::json& json) {
 		json.value("layer", MadoEngine::Render::RenderLayerToString(GetRenderLayer()))));
 	SetVisible(json.value("visible", IsVisible()));
 	SetUseBillboard(json.value("billboard", IsUseBillboard()));
+	SetCameraTranslateOffset(ReadVector3(
+		json.value("cameraTranslateOffset", nlohmann::json::array()),
+		GetCameraTranslateOffset()
+	));
 	SetCastShadow(json.value("castShadow", CanCastShadow()));
 	SetReceiveShadow(json.value("receiveShadow", CanReceiveShadow()));
 	SetFrustumCullingEnabled(json.value("frustumCulling", IsFrustumCullingEnabled()));
@@ -249,6 +253,11 @@ nlohmann::json Model::ToJson() const {
 		{ "layer", MadoEngine::Render::RenderLayerToString(GetRenderLayer()) },
 		{ "visible", IsVisible() },
 		{ "billboard", IsUseBillboard() },
+		{ "cameraTranslateOffset", {
+			cameraTranslateOffset_.x,
+			cameraTranslateOffset_.y,
+			cameraTranslateOffset_.z
+		} },
 		{ "castShadow", CanCastShadow() },
 		{ "receiveShadow", CanReceiveShadow() },
 		{ "frustumCulling", IsFrustumCullingEnabled() },
@@ -396,6 +405,7 @@ Matrix4x4 Model::MakeWorldMatrix(const Camera* billboardCamera) const {
 
 	Matrix4x4 scaleMatrix = Matrix::MakeScale(transform_.scale);
 	Matrix4x4 rotateMatrix = Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, transform_.rotate, { 0.0f, 0.0f, 0.0f });
+	Matrix4x4 cameraTranslateMatrix = Matrix::MakeTranslate(cameraTranslateOffset_);
 	Matrix4x4 billboardMatrix = Matrix::Inverse(billboardCamera->GetViewMatrix());
 	billboardMatrix.m[3][0] = 0.0f;
 	billboardMatrix.m[3][1] = 0.0f;
@@ -403,7 +413,18 @@ Matrix4x4 Model::MakeWorldMatrix(const Camera* billboardCamera) const {
 	billboardMatrix.m[3][3] = 1.0f;
 
 	Matrix4x4 translateMatrix = Matrix::MakeTranslate(transform_.translate);
-	return Matrix::Multiply(Matrix::Multiply(Matrix::Multiply(scaleMatrix, rotateMatrix), billboardMatrix), translateMatrix);
+
+	// Model回転後のOffsetをBillboard回転してCamera基底のWorld移動へ変換
+	return Matrix::Multiply(
+		Matrix::Multiply(
+			Matrix::Multiply(
+				Matrix::Multiply(scaleMatrix, rotateMatrix),
+				cameraTranslateMatrix
+			),
+			billboardMatrix
+		),
+		translateMatrix
+	);
 }
 
 void Model::UpdateLightGpuData() {
@@ -596,7 +617,8 @@ bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float
 
 	Vector3 worldMin;
 	Vector3 worldMax;
-	if (!CalculateWorldAABB(worldMin, worldMax)) {
+	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	if (!CalculateWorldAABB(worldMin, worldMax, billboardCamera)) {
 		return false;
 	}
 
