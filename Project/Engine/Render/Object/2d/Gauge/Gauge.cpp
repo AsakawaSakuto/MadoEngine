@@ -287,22 +287,23 @@ void Gauge2d::ApplyGaugeSprite() {
 	const float ratio = std::clamp(GetRatio(), 0.0f, 1.0f);
 	Vector2 gaugePosition = position_;
 	Vector2 gaugeSize = size_;
+	const Vector2 textureSize = gaugeSprite->GetTextureSize();
 
-	// 減少方向側の端点を固定するためSizeとPositionを組み合わせて調整
+	// Scaleへ乗算されるテクスチャ寸法を位置補正にも反映して反対側の端点を固定
 	switch (direction_) {
 	case GaugeDirection::Right:
 		gaugeSize.x = size_.x * ratio;
 		break;
 	case GaugeDirection::Left:
 		gaugeSize.x = size_.x * ratio;
-		gaugePosition.x = position_.x + size_.x - gaugeSize.x;
+		gaugePosition.x = position_.x + (size_.x - gaugeSize.x) * textureSize.x;
 		break;
 	case GaugeDirection::Down:
 		gaugeSize.y = size_.y * ratio;
 		break;
 	case GaugeDirection::Up:
 		gaugeSize.y = size_.y * ratio;
-		gaugePosition.y = position_.y + size_.y - gaugeSize.y;
+		gaugePosition.y = position_.y + (size_.y - gaugeSize.y) * textureSize.y;
 		break;
 	}
 

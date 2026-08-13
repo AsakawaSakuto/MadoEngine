@@ -195,6 +195,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Gauge\Gauge3d.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerExpGauge.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerHealthGauge.cpp" />
+    <ClCompile Include="Application\UI\Game\Player\PlayerStaminaGauge.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
@@ -771,6 +772,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\Player\PlayerHealthGauge.h">
+      <Filter>�w�b�_�[ �t�%40�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\Game\Player\PlayerStaminaGauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.h">

@@ -187,6 +187,7 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerExpGauge.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerHealthGauge.cpp" />
+    <ClCompile Include="Application\UI\Game\Player\PlayerStaminaGauge.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -399,6 +400,7 @@
     <ClInclude Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerExpGauge.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerHealthGauge.h" />
+    <ClInclude Include="Application\UI\Game\Player\PlayerStaminaGauge.h" />
     <ClInclude Include="Engine\.Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\AudioType.h" />

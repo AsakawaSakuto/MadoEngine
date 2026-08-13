@@ -51,6 +51,18 @@ namespace Player {
 		/// @return 現在のPlayerレベル
 		int GetLevel() const { return status_.level; }
 
+		/// @brief 壁登り可能な残り時間を取得
+		/// @return 壁登り可能な残り時間
+		float GetWallClimbRemainingTime() const { return movement_.GetWallClimbRemainingTime(); }
+
+		/// @brief 壁登り可能な最大時間を取得
+		/// @return 壁登り可能な最大時間
+		float GetWallClimbMaxDuration() const { return movement_.GetWallClimbMaxDuration(); }
+
+		/// @brief 壁登り時間ゲージの表示状態を取得
+		/// @return ゲージを表示する場合はtrue
+		bool IsWallClimbGaugeVisible() const { return movement_.IsWallClimbGaugeVisible(); }
+
 		void DrawImGui();
 
 	private:

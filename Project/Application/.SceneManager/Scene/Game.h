@@ -77,6 +77,7 @@ private:
 	std::unique_ptr<UI::Game::PlayerIconUI> playerIconUI_;
 	std::unique_ptr<UI::Game::PlayerExpGauge> expGauge_;
 	std::unique_ptr<UI::Game::PlayerHealthGauge> healthGauge_;
+	std::unique_ptr<UI::Game::PlayerStaminaGauge> staminaGauge_;
 	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
 	UI::Game::UpgradeUI weaponUpgradeUI_;
 

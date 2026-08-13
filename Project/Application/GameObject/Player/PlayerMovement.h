@@ -63,6 +63,18 @@ namespace Player {
 		/// @return 壁登り経過時間
 		float GetWallClimbElapsedTime() const { return wallClimbElapsedTime_; }
 
+		/// @brief 壁登り可能な残り時間を取得
+		/// @return 壁登り可能な残り時間
+		float GetWallClimbRemainingTime() const;
+
+		/// @brief 壁登り可能な最大時間を取得
+		/// @return 壁登り可能な最大時間
+		float GetWallClimbMaxDuration() const;
+
+		/// @brief 壁登り時間ゲージの表示状態を取得
+		/// @return ゲージを表示する場合はtrue
+		bool IsWallClimbGaugeVisible() const { return hasWallClimbStartedSinceLanding_ && !isGrounded_; }
+
 		/// @brief スライディング速度を取得
 		/// @return スライディング速度
 		Vector3 GetSlideVelocity() const { return slideVelocity_; }
@@ -135,6 +147,7 @@ namespace Player {
 		bool jumpStartedThisFrame_ = false;
 		bool hasWallClimbInput_ = false;
 		bool isWallClimbing_ = false;
+		bool hasWallClimbStartedSinceLanding_ = false;
 		bool wasGroundContact_ = true;
 
 		float groundY_ = 0.0f;               // 接地している地面のY座標

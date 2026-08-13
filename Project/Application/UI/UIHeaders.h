@@ -6,6 +6,7 @@
 #include "Game/Player/PlayerExpGauge.h"
 #include "Game/Player/PlayerHealthGauge.h"
 #include "Game/Player/PlayerIconUI.h"
+#include "Game/Player/PlayerStaminaGauge.h"
 #include "Game/Weapon/WeaponIconUI.h"
 #include "Game/Weapon/WeaponUpgradeUI.h"
 #include "Title/PlayerSelectIcon/PLayerSclectIcon.h"

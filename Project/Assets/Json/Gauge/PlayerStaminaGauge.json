@@ -1,0 +1,28 @@
+{
+    "backgroundColor": [
+        0.20000000298023224,
+        0.20000000298023224,
+        0.20000000298023224,
+        1.0
+    ],
+    "currentValue": 3.0,
+    "direction": "Up",
+    "drawBackground": true,
+    "gaugeColor": [
+        1.0,
+        0.7534883618354797,
+        0.0,
+        1.0
+    ],
+    "maxValue": 3.0,
+    "name": "PlayerStaminaGauge",
+    "position": [
+        666.0,
+        400.0
+    ],
+    "size": [
+        4.0,
+        48.0
+    ],
+    "visible": false
+}

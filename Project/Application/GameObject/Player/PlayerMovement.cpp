@@ -98,6 +98,7 @@ namespace Player {
 		lastAttemptedHorizontalMove_ = {};
 		hasWallClimbInput_ = false;
 		isWallClimbing_ = false;
+		hasWallClimbStartedSinceLanding_ = false;
 		wasGroundContact_ = true;
 		wallClimbElapsedTime_ = 0.0f;
 	}
@@ -129,8 +130,9 @@ namespace Player {
 		const bool hasGroundContact = isGroundContact || isSlopeGroundContact;
 		if (hasGroundContact && !wasGroundContact_) {
 
-			// 空中または壁登り状態から地表へ着地した時点で利用可能時間を全回復
+			// 空中または壁登り状態から地表へ着地した時点で利用可能時間と開始履歴を初期化
 			wallClimbElapsedTime_ = 0.0f;
+			hasWallClimbStartedSinceLanding_ = false;
 		}
 
 		if (hasGroundContact) {
@@ -154,6 +156,15 @@ namespace Player {
 		wasGroundContact_ = hasGroundContact;
 	}
 
+	float Movement::GetWallClimbRemainingTime() const {
+		const float maxDuration = GetWallClimbMaxDuration();
+		return std::max(0.0f, maxDuration - wallClimbElapsedTime_);
+	}
+
+	float Movement::GetWallClimbMaxDuration() const {
+		return std::max(0.0f, movementParams_.wallClimbMaxDuration_);
+	}
+
 	void Movement::UpdateWallClimb(float deltaTime, const MoveInput& input, Transform3D& transform) {
 		const bool wasWallClimbing = isWallClimbing_;
 		const bool isBlocked = IsHorizontalMoveBlocked(transform.translate);
@@ -170,6 +181,9 @@ namespace Player {
 			}
 			return;
 		}
+
+		// 壁を離れた後も空中でゲージを表示できるよう着地まで開始履歴を維持
+		hasWallClimbStartedSinceLanding_ = true;
 
 		const float climbDeltaTime = std::min(
 			std::max(0.0f, deltaTime),

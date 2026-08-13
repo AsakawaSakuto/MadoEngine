@@ -36,6 +36,9 @@ void Game::Initialize() {
 	healthGauge_ = std::make_unique<UI::Game::PlayerHealthGauge>();
 	healthGauge_->Initialize();
 
+	staminaGauge_ = std::make_unique<UI::Game::PlayerStaminaGauge>();
+	staminaGauge_->Initialize();
+
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 	fpsMeasurementView_.Initialize();
 	gamePlayTimerView_.Initialize();
@@ -162,6 +165,11 @@ SceneType Game::Update(float dt) {
 		static_cast<float>(status.maxHealth),
 		cameraManager_.GetRenderCamera()
 	);
+	staminaGauge_->Update(
+		player_->GetWallClimbRemainingTime(),
+		player_->GetWallClimbMaxDuration(),
+		player_->IsWallClimbGaugeVisible()
+	);
 
 	const int currentMoney = static_cast<int>(status.currentMoney);
 	if (currentMoney != displayedMoney_) {
@@ -233,6 +241,7 @@ void Game::DrawImGui() {
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
 	player_->DrawImGui();
 	healthGauge_->DrawImGui();
+	staminaGauge_->DrawImGui();
 
 	weaponInventory_->DrawImGui();
 	weaponStatusEditor_->DrawImGui();
@@ -276,6 +285,9 @@ void Game::Finalize() {
 	weaponUpgradeUI_.Finalize();
 	if (healthGauge_) {
 		healthGauge_->Finalize();
+	}
+	if (staminaGauge_) {
+		staminaGauge_->Finalize();
 	}
 
 	// Spawnerの参照先を破棄する前に生成予定とEnemy所有権を解放
