@@ -11,6 +11,8 @@ namespace Player {
 		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>; // Modelの前方がZ軸負方向を向くため、Y軸回転を180度補正
 		constexpr float kHealthRegenerationInterval = 6.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
 		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
+		constexpr float kHealthGaugeHeightOffset = 2.2f;                   // Player基準座標からHPゲージまでの高さ
+		constexpr Vector2 kHealthGaugeSize = { 1.5f, 0.12f };               // HPゲージのワールド空間サイズ
 	}
 
 	void Base::Initialize(const Vector3& spawnGroundPosition) {
@@ -51,6 +53,18 @@ namespace Player {
 			model->SetScale(transform_.scale);
 			animationController_.Initialize(*model);
 		}
+
+		// Playerの描画Modelと独立した非ライティングビルボードとしてHPゲージを構成
+		healthGauge_.SetTranslateOffset({ 0.0f, kHealthGaugeHeightOffset, 0.0f });
+		healthGauge_.SetSize(kHealthGaugeSize);
+		healthGauge_.SetBackgroundColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		healthGauge_.SetGaugeColor({ 0.0f, 1.0f, 0.0f, 1.0f });
+		healthGauge_.SetDirection(Gauge3dDirection::Right);
+		healthGauge_.Initialize(
+			"PlayerHealthGauge3d",
+			SceneType::Game,
+			MadoEngine::Render::RenderLayer::World
+		);
 
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
 
@@ -223,6 +237,12 @@ namespace Player {
 		MyDebugLine::AddShape(std::get<Sphere>(attackRangeSphere_), Vector4{ 1.0f,0.0f,0.0f,1.0f });
 	}
 
+	void Base::UpdateHealthGauge(const Camera& camera) {
+		// Camera更新後の基底とCollider解決済みPlayer座標を同じFrameで反映
+		healthGauge_.SetPosition(transform_.translate);
+		healthGauge_.Update(camera, status_.currentHealth, status_.maxHealth);
+	}
+
 	void Base::UpdateShadowTransform() {
 		
 		const float maxGroundDistance = mapLimit_.max.y - mapLimit_.min.y;
@@ -314,6 +334,8 @@ namespace Player {
 		ImGui::Text("Money : %d", status_.currentMoney);
 
 		ImGui::End();
+
+		healthGauge_.DrawImGui("3D HPゲージ");
 
 #endif // USE_IMGUI
 	}

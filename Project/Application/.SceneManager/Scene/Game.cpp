@@ -137,6 +137,7 @@ SceneType Game::Update(float dt) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
 	}
 	cameraManager_.Update(deltaTime);
+	player_->UpdateHealthGauge(cameraManager_.GetRenderCamera());
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);

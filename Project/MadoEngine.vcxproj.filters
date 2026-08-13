@@ -192,6 +192,7 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Gauge\Gauge3d.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerExpGauge.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerHealthGauge.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
@@ -756,6 +757,7 @@
     <ClInclude Include="Engine\Render\Object\2d\Gauge\Gauge.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Gauge\Gauge3d.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextManager.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

@@ -17,6 +17,7 @@
 #include "Render/Object/3d/Model/ModelManager.h"
 #include "Render/Object/3d/Model/MyModel.h"
 #include "Render/Object/3d/Model/MyInstancedModel.h"
+#include "Render/Object/3d/Gauge/Gauge3d.h"
 #include "Render/Object/3d/Particle/ParticleEffectAsset.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/Particle/MyParticle3d.h"
