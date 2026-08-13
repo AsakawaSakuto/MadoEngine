@@ -74,6 +74,14 @@ public:
 	/// @return 現在のシーン種別
 	SceneType GetCurrentSceneType() const { return currentSceneType_; }
 
+	/// @brief シーン遷移Effectの進行度を取得
+	/// @return 0.0fから1.0fのEffect進行度
+	float GetSceneTransitionEffectProgress() const;
+
+	/// @brief シーン遷移演出中か確認
+	/// @return シーン遷移演出中の場合はtrue
+	bool IsSceneTransitioning() const;
+
 	/// @brief 現在のシーンカメラを取得
 	/// @return 現在のシーンカメラ
 	const Camera& GetCurrentCamera() const;
@@ -94,9 +102,13 @@ private:
 	/// @brief SceneManagerのデバッグ用ImGuiを描画
 	void DrawSceneManagerImGui();
 
-	/// @brief 現在のフレームの終了時にシーン遷移をリクエスト
+	/// @brief 遷移Effectを伴うシーン遷移を要求
 	/// @param type 遷移先のシーンのタイプ
 	void RequestSceneChange(SceneType type);
+
+	/// @brief Effect最大到達後のシーン切替をフレーム末尾へ予約
+	/// @param type 遷移先のシーンのタイプ
+	void QueueSceneChange(SceneType type);
 
 	/// @brief 指定されたシーンに変更
 	/// @param type 遷移先のシーンのタイプ

@@ -1,6 +1,14 @@
 #include "Terminal.h"
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+
+namespace {
+	constexpr const char* kSceneTransitionPassName = "PixelArt";
+	constexpr const char* kPixelSizeParameterKey = "PixelSize";
+	constexpr float kMinimumPixelSize = 1.0f;
+	constexpr float kMaximumPixelSize = 64.0f;
+}
 
 Terminal::Terminal(HINSTANCE hInstance) {
 	execution_ = std::make_unique<MadoEngine::EngineExecution>();
@@ -11,8 +19,34 @@ Terminal::Terminal(HINSTANCE hInstance) {
 	sceneManager_->RegisterScene(SceneType::Test,   [](CommonData&) { return std::make_unique<Test>(); });
 	sceneManager_->RegisterScene(SceneType::Title,  [](CommonData& commonData) { return std::make_unique<Title>(commonData); });
 	sceneManager_->RegisterScene(SceneType::Game,   [](CommonData& commonData) { return std::make_unique<Game>(commonData); });
-	sceneManager_->RegisterScene(SceneType::Result, [](CommonData&) { return std::make_unique<Result>(); });
+	sceneManager_->RegisterScene(SceneType::Result, [](CommonData& commonData) { return std::make_unique<Result>(commonData); });
 	sceneManager_->Initialize(SceneType::Title);
+}
+
+void Terminal::UpdateSceneTransitionPixelArt() {
+	MadoEngine::Render::PostEffectManager& postEffectManager = execution_->GetPostEffectManager();
+	const bool isTransitioning = sceneManager_->IsSceneTransitioning();
+	const float progress = std::clamp(
+		sceneManager_->GetSceneTransitionEffectProgress(),
+		0.0f,
+		1.0f
+	);
+	const float pixelSize =
+		kMinimumPixelSize + (kMaximumPixelSize - kMinimumPixelSize) * progress;
+
+	// Editorで内部キーが変更されても追従できるよう表示名とEffect種別の両方で対象を特定
+	for (MadoEngine::Render::PostEffectPassHandle handle : postEffectManager.GetScreenPassHandles()) {
+		MadoEngine::Render::PostEffectPass* pass = postEffectManager.TryGet(handle);
+		if (!pass || pass->GetName() != kSceneTransitionPassName ||
+			pass->GetPostEffectType() != MadoEngine::Render::PostEffectType::PixelArt) {
+			continue;
+		}
+
+		// 遷移完了時は通常描画の負荷を避けるためPixelArt Passを無効化
+		postEffectManager.SetFloatParameter(handle, kPixelSizeParameterKey, pixelSize);
+		postEffectManager.SetEnabled(handle, isTransitioning);
+		return;
+	}
 }
 
 void Terminal::ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage) {
@@ -144,11 +178,11 @@ void Terminal::Run() {
 		} else {
 			sceneManager_->Update(execution_->GetDeltaTime());
 		}
-
 		execution_->PreDraw(
 			sceneManager_->GetCurrentSceneType(),
 			sceneManager_->GetShadowFocusPosition()
 		);
+		UpdateSceneTransitionPixelArt();
 
 		const MadoEngine::Render::RenderLayerMask sceneLayerEffectTargetMask =
 			execution_->GetEnabledLayerEffectTargetMask(MadoEngine::Render::LayerEffectStage::Scene);

@@ -78,8 +78,6 @@ void Game::Initialize() {
 	weaponUpgradeSystem_->Initialize(player_->GetLevel(), gameSeed_);
 	weaponUpgradeUI_.Initialize();
 
-	fadeOutTimer_.Start(2.0f);
-
 	// Game進行Phaseと制限時間を全Object初期化後に開始
 	inGameSession_ = std::make_unique<System::InGameSession>();
 	inGameSession_->Initialize(kGameSceneTimeLimit);
@@ -135,8 +133,6 @@ SceneType Game::Update(float dt) {
 
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
 
-	fadeOutTimer_.Update(deltaTime);
-	
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
 	}

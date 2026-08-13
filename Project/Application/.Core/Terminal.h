@@ -15,6 +15,9 @@ public:
 	void Run();
 
 private:
+	/// @brief シーン遷移進行度をPixelArtのピクセルサイズへ反映
+	void UpdateSceneTransitionPixelArt();
+
 	/// @brief 指定段階のレイヤーポストエフェクトPassを実行
 	/// @param stage 実行する適用段階
 	void ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage);

@@ -1,4 +1,5 @@
 #pragma once
+#include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
 
 /// @brief リザルトシーン
@@ -7,7 +8,8 @@ class Result : public IScene
 {
 public:
 	/// @brief コンストラクタ
-	Result();
+	/// @param commonData Sceneをまたいで保持するApplication共通データ
+	explicit Result(CommonData& commonData);
 
 	/// @brief デストラクタ
 	~Result() override;
@@ -28,4 +30,7 @@ public:
 
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
+
+private:
+	CommonData& commonData_;
 };

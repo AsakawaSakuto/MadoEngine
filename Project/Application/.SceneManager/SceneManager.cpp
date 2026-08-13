@@ -116,6 +116,8 @@ void SceneManager::Initialize(SceneType initialScene) {
 }
 
 void SceneManager::Update(float dt) {
+	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
+	transitionController.Update(dt);
 
 	// Scene処理が参照するCollider状態をFrame先頭で更新
 	ColliderManager::GetInstance().Update();
@@ -124,9 +126,15 @@ void SceneManager::Update(float dt) {
 		SceneType next = currentScene_->Update(dt);
 		if (next != currentSceneType_) {
 
-			// 更新中のResource破棄を避けるためScene変更を予約
+			// Scene側は遷移先だけを通知し、Effect進行と実際の切替時期はManager側で管理
 			RequestSceneChange(next);
 		}
+	}
+
+	if (transitionController.IsSceneChangeReady() && !hasPendingSceneChange_) {
+
+		// Effect最大Frameを描画してから切り替えられるようフレーム末尾へ予約
+		QueueSceneChange(transitionController.GetDestinationSceneType());
 	}
 
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
@@ -324,6 +332,15 @@ void SceneManager::ApplyPendingSceneChange() {
 	pendingSceneType_ = SceneType::None;
 
 	ChangeScene(nextSceneType);
+	commonData_.GetSceneTransitionController().NotifySceneChanged(currentSceneType_);
+}
+
+float SceneManager::GetSceneTransitionEffectProgress() const {
+	return commonData_.GetSceneTransitionController().GetEffectProgress();
+}
+
+bool SceneManager::IsSceneTransitioning() const {
+	return commonData_.GetSceneTransitionController().IsTransitioning();
 }
 
 void SceneManager::RequestSceneChange(SceneType type) {
@@ -339,9 +356,20 @@ void SceneManager::RequestSceneChange(SceneType type) {
 		return;
 	}
 
+	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
+	if (transitionController.Request(type)) {
+		Logger::Output("シーン遷移演出を開始しました: " + SceneTypeToString(type), Logger::Level::Debug);
+	}
+}
+
+void SceneManager::QueueSceneChange(SceneType type) {
+	if (type == SceneType::None || type == currentSceneType_ || hasPendingSceneChange_) {
+		return;
+	}
+
 	pendingSceneType_ = type;
 	hasPendingSceneChange_ = true;
-	Logger::Output("シーン遷移を予約しました: " + SceneTypeToString(type), Logger::Level::Debug);
+	Logger::Output("遷移Effect最大到達後のシーン切替を予約しました: " + SceneTypeToString(type), Logger::Level::Debug);
 }
 
 void SceneManager::ChangeScene(SceneType type) {

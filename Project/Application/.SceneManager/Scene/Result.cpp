@@ -2,7 +2,8 @@
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
-Result::Result() {}
+Result::Result(CommonData& commonData)
+	: commonData_(commonData) {}
 
 Result::~Result() {}
 
@@ -13,7 +14,8 @@ void Result::Initialize() {
 SceneType Result::Update(float dt) {
 
 	// Result表示を維持しつつ決定入力だけをTitle遷移として受付
-	if (MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
+	if (!commonData_.GetSceneTransitionController().IsTransitioning() &&
+		MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
 		Logger::Output("スペースキーが押されました - Titleシーンへ遷移", Logger::Level::Application);
 		return SceneType::Title;
 	}

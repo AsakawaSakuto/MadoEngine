@@ -41,7 +41,5 @@ private:
 
 	MadoEngine::ModelHandle testModel_{};
 
-	GameTimer fadeInTimer_;
-
 	CameraHandle debugCameraHandle_{};
 };

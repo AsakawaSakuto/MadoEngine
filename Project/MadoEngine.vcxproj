@@ -159,6 +159,7 @@
     <ClCompile Include="Application\GameObject\Player\PlayerController.cpp" />
     <ClCompile Include="Application\GameObject\Player\PlayerMovement.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
@@ -360,6 +361,7 @@
     <ClInclude Include="Application\GameObject\Player\PlayerMovement.h" />
     <ClInclude Include="Application\.SceneManager\IScene.h" />
     <ClInclude Include="Application\.SceneManager\SceneManager.h" />
+    <ClInclude Include="Application\.SceneManager\SceneTransitionController.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Game.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Result.h" />
     <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
