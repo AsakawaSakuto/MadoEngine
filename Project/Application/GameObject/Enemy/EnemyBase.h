@@ -56,6 +56,11 @@ namespace Enemy {
 		/// @return Playerと接触していればtrue
 		bool IsHitPlayer() const;
 
+		/// @brief Playerとの接触ダメージを解決
+		/// @param player 接触ダメージを受けるPlayer
+		/// @return ダメージを適用した場合はtrue
+		bool ResolvePlayerCollision(Player::Base& player);
+
 		/// @brief Projectileからのダメージを適用
 		/// @param projectileId Projectileの識別番号
 		/// @param damage 適用するダメージ量
@@ -92,6 +97,59 @@ namespace Enemy {
 		/// @brief Playerへ与えるダメージ量を取得
 		/// @return Playerへ与えるダメージ量
 		float GetPower() const { return status_.power; }
+
+	protected:
+		/// @brief Enemy種類固有の初期状態を設定
+		virtual void OnInitialized() {}
+
+		/// @brief Enemy種類固有の行動を更新
+		/// @param deltaTime 前フレームからの経過時間
+		virtual void UpdateBehavior(float deltaTime) = 0;
+
+		/// @brief 使用するModelアセット名を取得
+		/// @return Modelアセット名
+		virtual std::string GetModelAssetName() const = 0;
+
+		/// @brief Modelの表示倍率を取得
+		/// @return Modelの表示倍率
+		virtual Vector3 GetModelScale() const = 0;
+
+		/// @brief Transform原点からModel原点への補正量を取得
+		/// @return Model原点の補正量
+		virtual Vector3 GetModelOffset() const = 0;
+
+		/// @brief 移動解決用Sphereを作成
+		/// @return 移動解決用Sphere
+		virtual Sphere CreateMovementCollider() const = 0;
+
+		/// @brief 被弾判定用AABBを作成
+		/// @return 被弾判定用AABB
+		virtual AABB CreateHitCollider() const = 0;
+
+		/// @brief Player接触時にEnemyを消滅させるか判定
+		/// @return Player接触時に消滅させる場合はtrue
+		virtual bool ShouldDisappearOnPlayerCollision() const = 0;
+
+		/// @brief Playerへ接触ダメージを再適用できるまでの時間を取得
+		/// @return 接触ダメージの待機時間
+		virtual float GetPlayerDamageInterval() const { return 0.5f; }
+
+		/// @brief 指定座標へ向かう移動と重力を更新
+		/// @param deltaTime 前フレームからの経過時間
+		/// @param targetPosition 移動目標のワールド座標
+		/// @param speedMultiplier 基礎移動速度へ適用する倍率
+		/// @return EnemyがMap内に存在していればtrue
+		bool MoveTowardPosition(float deltaTime, const Vector3& targetPosition, float speedMultiplier = 1.0f);
+
+		/// @brief Playerへ向かう移動と重力を更新
+		/// @param deltaTime 前フレームからの経過時間
+		/// @param speedMultiplier 基礎移動速度へ適用する倍率
+		/// @return EnemyがMap内に存在していればtrue
+		bool MoveTowardPlayer(float deltaTime, float speedMultiplier = 1.0f);
+
+		/// @brief 追跡対象Playerの座標を取得
+		/// @return Playerの座標、未設定の場合はEnemyの現在座標
+		Vector3 GetTargetPlayerPosition() const;
 
 	private:
 		/// @brief Projectileごとの再ダメージ待機時間を更新
@@ -138,6 +196,7 @@ namespace Enemy {
 		std::string modelName_;
 		float projectileDamageInterval_ = 0.5f; // Projectileからのダメージを受ける間隔（秒）
 		std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
+		float playerDamageCooldown_ = 0.0f;
 		float damageFlashRemainingTime_ = 0.0f;
 		bool isActive_ = true;
 		bool isDeathRewardSpawned_ = false;

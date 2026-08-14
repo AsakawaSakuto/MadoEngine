@@ -31,6 +31,10 @@ public:
 	/// @return ChestをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
 
+	/// @brief Chestの操作案内文を取得
+	/// @return 操作案内に表示するUTF-8文字列
+	std::string_view GetInteractionText() const override;
+
 private:
 	ChestType type_ = ChestType::Normal;
 	std::string modelName_ = "Chest";

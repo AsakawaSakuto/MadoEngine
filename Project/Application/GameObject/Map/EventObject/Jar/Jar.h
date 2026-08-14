@@ -28,6 +28,10 @@ public:
 	/// @return JarをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
 
+	/// @brief Jarの種別に対応する操作案内文を取得
+	/// @return 操作案内に表示するUTF-8文字列
+	std::string_view GetInteractionText() const override;
+
 private:
 	JarType type_ = JarType::Money;
 	JarSize size_ = JarSize::Small;

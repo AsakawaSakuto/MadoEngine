@@ -30,6 +30,10 @@ public:
 	/// @return Playerを配置する地表座標
 	Vector3 CreatePlayerSpawnGroundPosition(uint32_t seed) const;
 
+	/// @brief 未処理のMapイベント要求を取得してキューをクリア
+	/// @return 発生順に格納されたMapイベント要求
+	std::vector<MapEventRequest> ConsumeEventRequests();
+
 private:
 	
 	/// @brief Map上にJarをランダム配置
@@ -57,6 +61,9 @@ private:
 	/// @param deltaTime 前フレームからの経過時間
 	void UpdateInteractionMarker(float deltaTime);
 
+	/// @brief 操作案内Textの表示内容を現在の接触対象へ同期
+	void UpdateInteractionText();
+
 	/// @brief 地形生成用の高さ設定を有効範囲に補正
 	void ClampHeightSettings();
 
@@ -68,9 +75,11 @@ private:
 
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
+	std::vector<MapEventRequest> pendingEventRequests_;
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
 
 	MadoEngine::ModelHandle interactionMarkerModel_{};
+	MadoEngine::TextHandle interactionText_{};
 	Vector3 interactionMarkerStartScale_ = { 0.35f, 0.35f, 0.35f };
 	Vector3 interactionMarkerEndScale_ = { 0.5f, 0.5f, 0.5f };
 	GameTimer interactionMarkerScaleTimer_;

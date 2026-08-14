@@ -1,6 +1,8 @@
 #include "EnemyManager.h"
+#include "EnemyFactory.h"
 #include "GameObject/Player/Player.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
+#include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <unordered_map>
 
@@ -13,10 +15,26 @@ namespace Enemy {
 	}
 
 	void Manager::Spawn(const SpawnDesc& desc) {
-		std::unique_ptr<Base> enemy = std::make_unique<Base>();
+		std::unique_ptr<Base> enemy = Factory::Create(desc.type);
+		if (!enemy) {
+			Logger::Output("未対応の種類が指定されたためEnemyの生成に失敗しました", Logger::Level::Warning);
+			return;
+		}
+
 		enemy->Initialize(nextEnemyId_++, desc);
 		enemy->SetTargetPlayer(player_);
 		enemies_.push_back(std::move(enemy));
+	}
+
+	void Manager::SpawnBoss(const Vector3& position, SceneType sceneType) {
+		SpawnDesc desc;
+		desc.position = position;
+		desc.status = Factory::CreateDefaultStatus(Data::Type::Boss);
+		desc.type = Data::Type::Boss;
+		desc.sceneType = sceneType;
+		Spawn(desc);
+
+		Logger::Output("Bossを生成しました", Logger::Level::Application);
 	}
 
 	void Manager::Update(float deltaTime) {
@@ -149,13 +167,7 @@ namespace Enemy {
 				continue;
 			}
 
-			if (enemy->IsHitPlayer()) {
-
-				// 一度の接触でPlayerへのDamageとEnemy消滅を確定して連続Damageを防止
-				player_->TakeDamage(enemy->GetPower());
-				enemy->Kill();
-				continue;
-			}
+			enemy->ResolvePlayerCollision(*player_);
 
 			if (killAllEnemies) {
 				enemy->Kill();

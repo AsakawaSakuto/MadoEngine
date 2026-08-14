@@ -1,6 +1,7 @@
 #include "EnemyBase.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
+#include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
 
@@ -18,6 +19,7 @@ namespace Enemy {
 		type_ = desc.type;
 		sceneType_ = desc.sceneType;
 		projectileDamageCooldowns_.clear();
+		playerDamageCooldown_ = 0.0f;
 		damageFlashRemainingTime_ = 0.0f;
 		gamingColor_.Reset();
 		isActive_ = status_.currentHealth > 0.0f;
@@ -25,28 +27,34 @@ namespace Enemy {
 		isReleased_ = false;
 		transform_.translate = desc.position;
 		transform_.rotate = {};
-		transform_.SetAllScale(0.5f);
+		transform_.scale = GetModelScale();
 		movement_.Initialize();
 
-		AABB aabb;
-		aabb.min = { -0.5f, 0.0f, -0.5f };
-		aabb.max = { 0.5f, 2.0f, 0.5f };
-		hitAABB_ = aabb;
-
-		Sphere sphere;
-		sphere.radius = 0.5f;
-		colliderShape_ = sphere;
+		hitAABB_ = CreateHitCollider();
+		colliderShape_ = CreateMovementCollider();
 
 		movementColliderName_ = CreateColliderName("EnemyMovementSphere");
 		hitColliderName_ = CreateColliderName("EnemyHitBox");
 		modelName_ = CreateModelName();
 
 		// 移動解決とProjectile被弾で形状とTagを使い分けるためColliderを分離
-		MyCollider::RegisterCollider(movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate,
-									 0.0f);
-		MyCollider::RegisterCollider(hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
+		MyCollider::RegisterCollider(
+			movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate,0.0f);
 
-		model_ = MyModel::Create(modelName_, "enemy", desc.sceneType);
+		MyCollider::RegisterCollider(
+			hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
+
+		std::string modelAssetName = GetModelAssetName();
+		if (!MadoEngine::ModelManager::GetInstance().GetSharedData(modelAssetName)) {
+
+			// 専用Modelが未配置でもEnemyの当たり判定と行動を検証できるよう共通Modelへ代替
+			Logger::Output(
+				"Enemy用Modelアセットが見つからないためenemyへ切り替えます: " + modelAssetName,
+				Logger::Level::Warning);
+			modelAssetName = "enemy";
+		}
+
+		model_ = MyModel::Create(modelName_, modelAssetName, desc.sceneType);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 			model->SetTexture("white16x16");
@@ -54,6 +62,7 @@ namespace Enemy {
 		}
 
 		ApplyModelTransform();
+		OnInitialized();
 	}
 
 	void Base::Update(float deltaTime) {
@@ -61,14 +70,14 @@ namespace Enemy {
 		// 死亡後も残る被弾間隔とDamage演出を破棄まで進行
 		UpdateProjectileDamageCooldowns(deltaTime);
 		UpdateAppearance(deltaTime);
+		playerDamageCooldown_ = std::max(0.0f, playerDamageCooldown_ - std::max(0.0f, deltaTime));
 
 		if (!isActive_ || !targetPlayer_) {
 			return;
 		}
 
-		if (!movement_.Update(deltaTime, targetPlayer_->GetPosition(), status_.moveSpeed, transform_)) {
-			Kill();
-		}
+		// 共通状態の検証後に種類固有の行動へ更新を委譲
+		UpdateBehavior(deltaTime);
 	}
 
 	void Base::ResolveAfterCollision() {
@@ -97,6 +106,21 @@ namespace Enemy {
 		}
 
 		return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerHitBox);
+	}
+
+	bool Base::ResolvePlayerCollision(Player::Base& player) {
+		if (!IsHitPlayer() || playerDamageCooldown_ > 0.0f) {
+			return false;
+		}
+
+		// Bossの継続接触を考慮して種類別の待機時間をDamage適用前に確定
+		playerDamageCooldown_ = std::max(0.0f, GetPlayerDamageInterval());
+		player.TakeDamage(status_.power);
+		if (ShouldDisappearOnPlayerCollision()) {
+			Kill();
+		}
+
+		return true;
 	}
 
 	ProjectileDamageResult Base::TakeProjectileDamage(std::uint64_t projectileId, float damage) {
@@ -204,13 +228,31 @@ namespace Enemy {
 		isDeathRewardSpawned_ = true;
 	}
 
+	bool Base::MoveTowardPosition(float deltaTime, const Vector3& targetPosition, float speedMultiplier) {
+		const float moveSpeed = status_.moveSpeed * std::max(0.0f, speedMultiplier);
+		if (movement_.Update(deltaTime, targetPosition, moveSpeed, transform_)) {
+			return true;
+		}
+
+		Kill();
+		return false;
+	}
+
+	bool Base::MoveTowardPlayer(float deltaTime, float speedMultiplier) {
+		return MoveTowardPosition(deltaTime, GetTargetPlayerPosition(), speedMultiplier);
+	}
+
+	Vector3 Base::GetTargetPlayerPosition() const {
+		return targetPlayer_ ? targetPlayer_->GetPosition() : transform_.translate;
+	}
+
 	void Base::ApplyModelTransform() {
 		Model* model = MyModel::TryGet(model_);
 		if (!model) {
 			return;
 		}
 
-		model->SetPosition(transform_.translate + Vector3{ 0.0f, -0.5f, 0.0f });
+		model->SetPosition(transform_.translate + GetModelOffset());
 		model->SetRotation(transform_.rotate);
 		model->SetScale(transform_.scale);
 	}

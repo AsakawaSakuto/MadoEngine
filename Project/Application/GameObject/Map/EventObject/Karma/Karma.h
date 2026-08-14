@@ -23,4 +23,8 @@ public:
 	/// @param player 相互作用したPlayer
 	/// @return KarmaをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
+
+	/// @brief Karmaの操作案内文を取得
+	/// @return 操作案内に表示するUTF-8文字列
+	std::string_view GetInteractionText() const override;
 };

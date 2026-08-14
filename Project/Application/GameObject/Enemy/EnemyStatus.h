@@ -14,6 +14,8 @@ namespace Enemy {
 		enum class Type {
 			Normal, // 通常の敵
 			Speed,	// 速度が速い敵
+
+			Boss,	// ボス敵
 		};
 
 		/// @brief 特殊Enemy、倒された際にTypeの報酬を大量に落とす種類を表す列挙型

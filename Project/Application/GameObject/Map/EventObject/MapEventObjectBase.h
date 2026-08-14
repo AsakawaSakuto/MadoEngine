@@ -2,12 +2,25 @@
 #include "../../IGameObject.h"
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 namespace Player {
 	class Base;
 }
 
-/// @brief Map上でPlayerと相互作用できるイベントオブジェクトの基底クラスです。
+/// @brief Mapイベント相互作用からGameへ要求する処理種別
+enum class MapEventAction {
+	None,
+	SpawnBoss,
+};
+
+/// @brief Mapイベント相互作用によって発生した処理要求
+struct MapEventRequest {
+	MapEventAction action = MapEventAction::None;
+	Vector3 position = { 0.0f, 0.0f, 0.0f };
+};
+
+/// @brief Map上でPlayerと相互作用できるイベントオブジェクトの基底クラス
 class MapEventObjectBase : public IGameObject {
 public:
 	virtual ~MapEventObjectBase() = default;
@@ -33,6 +46,14 @@ public:
 	/// @return 相互作用後にMapから削除する場合はtrue
 	virtual bool Interact(Player::Base& player) = 0;
 
+	/// @brief Player接触中に表示する操作案内文を取得
+	/// @return 操作案内に表示するUTF-8文字列
+	virtual std::string_view GetInteractionText() const = 0;
+
+	/// @brief 相互作用成立時にGameへ渡す処理要求を取得
+	/// @return 相互作用によって発生する処理要求
+	virtual MapEventRequest GetInteractionRequest() const { return {}; }
+
 protected:
 	/// @brief Collider登録名を設定
 	/// @param colliderName Collider登録名
@@ -53,6 +74,7 @@ protected:
 	void HideInstancedDraw();
 
 	std::string colliderName_;
+
 	bool isHighlighted_ = false;
 	MadoEngine::InstancedModelHandle normalInstancedModel_{};
 	MadoEngine::InstancedModelHandle outlineInstancedModel_{};

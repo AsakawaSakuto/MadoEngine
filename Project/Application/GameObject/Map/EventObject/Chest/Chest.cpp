@@ -68,3 +68,7 @@ bool Chest::Interact(Player::Base& player) {
 
 	return true;
 }
+
+std::string_view Chest::GetInteractionText() const {
+	return "宝箱を開ける";
+}

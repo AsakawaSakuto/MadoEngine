@@ -50,8 +50,12 @@
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyBase.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyBoss.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyFactory.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyManager.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyNormal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemySpeed.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
@@ -226,8 +230,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\EnemyBase.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyBoss.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyFactory.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyManager.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyNormal.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemySpeed.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>

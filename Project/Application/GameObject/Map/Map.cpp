@@ -180,12 +180,17 @@ void Map::Initialize(uint32_t seed) {
 	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 200));
 	ClampHeightSettings();
 	eventObjects_.clear();
+	pendingEventRequests_.clear();
 	DestroyMapInstancedBatches();
 	currentHitEventObject_ = nullptr;
 	interactionMarkerModel_ = MyModel::Find("Interact_x");
+	interactionText_ = MyText::Find("InteractText");
 	interactionMarkerScaleTimer_.Reset();
 	if (Model* interactionMarkerModel = MyModel::TryGet(interactionMarkerModel_)) {
 		interactionMarkerModel->SetVisible(false);
+	}
+	if (MadoEngine::Text* interactionText = MyText::TryGet(interactionText_)) {
+		interactionText->SetVisible(false);
 	}
 
 	mapBlocks_.assign(mapHeight_, std::vector<MapBlock>(mapWidth_));
@@ -292,6 +297,14 @@ Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
 	Random playerSpawnRandom(MyRand::MakeDerivedSeed(seed, 300));
 	const int spawnIndex = playerSpawnRandom.Int(0, static_cast<int>(spawnCandidates.size()) - 1);
 	return spawnCandidates[static_cast<size_t>(spawnIndex)];
+}
+
+std::vector<MapEventRequest> Map::ConsumeEventRequests() {
+	std::vector<MapEventRequest> requests;
+
+	// 同じ相互作用を複数Frameで処理しないよう未処理要求の所有権を呼び出し側へ移動
+	requests.swap(pendingEventRequests_);
+	return requests;
 }
 
 void Map::Update(Player::Base& player, float deltaTime) {
@@ -610,6 +623,7 @@ void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {
 
 	HandleEventObjectInteraction(player);
 	UpdateInteractionMarker(deltaTime);
+	UpdateInteractionText();
 }
 
 void Map::HandleEventObjectInteraction(Player::Base& player) {
@@ -617,10 +631,15 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 		return;
 	}
 
-	// 相互作用が成立したObjectだけを配置一覧から除去
+	// 相互作用が成立したObjectの要求を保存してから配置一覧から除去
 	MapEventObjectBase* interactedObject = currentHitEventObject_;
 	if (!interactedObject->Interact(player)) {
 		return;
+	}
+
+	const MapEventRequest request = interactedObject->GetInteractionRequest();
+	if (request.action != MapEventAction::None) {
+		pendingEventRequests_.push_back(request);
 	}
 
 	auto it = std::find_if(eventObjects_.begin(), eventObjects_.end(), [interactedObject](const std::unique_ptr<MapEventObjectBase>& object) {
@@ -659,6 +678,22 @@ void Map::UpdateInteractionMarker(float deltaTime) {
 	}
 	interactionMarkerScaleTimer_.Update(deltaTime);
 	interactionMarkerModel->SetScale(Easing::Lerp(interactionMarkerStartScale_, interactionMarkerEndScale_, interactionMarkerScaleTimer_.GetProgress()));
+}
+
+void Map::UpdateInteractionText() {
+	MadoEngine::Text* interactionText = MyText::TryGet(interactionText_);
+	if (!interactionText) {
+		return;
+	}
+
+	const bool hasInteractionTarget = currentHitEventObject_ != nullptr;
+	interactionText->SetVisible(hasInteractionTarget);
+	if (!hasInteractionTarget) {
+		return;
+	}
+
+	// 文言の決定を各MapEventObjectへ委譲してObject固有の操作内容を表示
+	interactionText->SetText(std::string(currentHitEventObject_->GetInteractionText()));
 }
 
 void Map::ClampHeightSettings() {

@@ -30,6 +30,11 @@ namespace Enemy {
 		/// @param desc Enemyの生成情報
 		void Spawn(const SpawnDesc& desc);
 
+		/// @brief 指定座標へBossを生成して管理対象へ登録
+		/// @param position Bossの生成座標
+		/// @param sceneType Bossを所属させるシーン種別
+		void SpawnBoss(const Vector3& position, SceneType sceneType);
+
 		/// @brief 管理中のEnemyを一括更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime);

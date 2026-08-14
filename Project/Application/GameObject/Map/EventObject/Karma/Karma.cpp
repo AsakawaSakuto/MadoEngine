@@ -65,3 +65,7 @@ bool Karma::Interact(Player::Base& player) {
 
 	return true;
 }
+
+std::string_view Karma::GetInteractionText() const {
+	return "カルマを獲得";
+}

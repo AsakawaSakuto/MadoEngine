@@ -119,3 +119,7 @@ bool Jar::Interact(Player::Base& player) {
 
 	return true;
 }
+
+std::string_view Jar::GetInteractionText() const {
+	return type_ == JarType::Exp ? "経験値を獲得" : "お金を獲得";
+}

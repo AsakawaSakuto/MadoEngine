@@ -62,5 +62,13 @@ void BossSpawner::Update(float deltaTime) {
 bool BossSpawner::Interact(Player::Base& player) {
 	(void)player;
 
-	return false;
+	return true;
+}
+
+std::string_view BossSpawner::GetInteractionText() const {
+	return "ボスを召喚";
+}
+
+MapEventRequest BossSpawner::GetInteractionRequest() const {
+	return { MapEventAction::SpawnBoss, GetPosition() };
 }

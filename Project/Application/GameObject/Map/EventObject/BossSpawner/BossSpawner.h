@@ -22,6 +22,14 @@ public:
 
 	/// @brief BossSpawnerとの相互作用を処理
 	/// @param player 相互作用したPlayer
-	/// @return BossSpawnerをMap上へ維持するためfalse
+	/// @return BossSpawnerをMapから削除するためtrue
 	bool Interact(Player::Base& player) override;
+
+	/// @brief BossSpawnerの操作案内文を取得
+	/// @return 操作案内に表示するUTF-8文字列
+	std::string_view GetInteractionText() const override;
+
+	/// @brief Boss生成用のMapイベント要求を取得
+	/// @return BossSpawner上端を生成座標にしたBoss生成要求
+	MapEventRequest GetInteractionRequest() const override;
 };
