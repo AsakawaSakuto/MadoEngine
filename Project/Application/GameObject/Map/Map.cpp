@@ -15,6 +15,8 @@
 
 namespace {
 constexpr float kRotationEpsilon = 1e-5f;
+const Vector4 kInteractionTextDefaultColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+const Vector4 kInteractionTextUnavailableColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 /// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返却
 /// @param value 正規化するベクトル
@@ -444,6 +446,9 @@ void Map::GenerateChests() {
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
 
+	// すべての通常Chestで同じ費用段階を参照するためMap生成単位の状態を共有
+	const std::shared_ptr<Chest::OpenCostState> openCostState = std::make_shared<Chest::OpenCostState>();
+
 	int createdCount = 0;
 	int retryCount = 0;
 	const int maxRetryCount = maxSpawnCount * 20;
@@ -485,6 +490,7 @@ void Map::GenerateChests() {
 		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, yaw);
 		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
+		desc.openCostState = openCostState;
 		desc.modelName = "ChestModel_" + std::to_string(createdCount);
 		desc.colliderName = "ChestAABB_" + std::to_string(createdCount);
 
@@ -623,7 +629,7 @@ void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {
 
 	HandleEventObjectInteraction(player);
 	UpdateInteractionMarker(deltaTime);
-	UpdateInteractionText();
+	UpdateInteractionText(player);
 }
 
 void Map::HandleEventObjectInteraction(Player::Base& player) {
@@ -680,7 +686,7 @@ void Map::UpdateInteractionMarker(float deltaTime) {
 	interactionMarkerModel->SetScale(Easing::Lerp(interactionMarkerStartScale_, interactionMarkerEndScale_, interactionMarkerScaleTimer_.GetProgress()));
 }
 
-void Map::UpdateInteractionText() {
+void Map::UpdateInteractionText(const Player::Base& player) {
 	MadoEngine::Text* interactionText = MyText::TryGet(interactionText_);
 	if (!interactionText) {
 		return;
@@ -691,6 +697,11 @@ void Map::UpdateInteractionText() {
 	if (!hasInteractionTarget) {
 		return;
 	}
+
+	// 相互作用できない状態を赤色で通知し、対象変更時は通常色へ復帰
+	interactionText->SetColor(currentHitEventObject_->CanInteract(player)
+		? kInteractionTextDefaultColor
+		: kInteractionTextUnavailableColor);
 
 	// 文言の決定を各MapEventObjectへ委譲してObject固有の操作内容を表示
 	interactionText->SetText(std::string(currentHitEventObject_->GetInteractionText()));

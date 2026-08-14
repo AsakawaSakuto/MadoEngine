@@ -1,4 +1,24 @@
 #include "Chest.h"
+#include "GameObject/Player/Player.h"
+#include <algorithm>
+#include <limits>
+
+Chest::OpenCostState::OpenCostState(int initialCost, int costIncrease)
+	: currentCost_(std::max(0, initialCost)),
+	costIncrease_(std::max(0, costIncrease)) {
+}
+
+void Chest::OpenCostState::IncreaseCost() {
+
+	// 加算による符号反転を防ぎ、到達後は表現可能な最大費用を維持
+	const int maxCost = std::numeric_limits<int>::max();
+	if (currentCost_ > maxCost - costIncrease_) {
+		currentCost_ = maxCost;
+		return;
+	}
+
+	currentCost_ += costIncrease_;
+}
 
 Chest::~Chest() {
 	MyCollider::RemoveCollider(colliderName_);
@@ -10,6 +30,7 @@ Chest::~Chest() {
 
 void Chest::Initialize(const InitializeDesc& desc) {
 	type_ = desc.type;
+	openCostState_ = desc.openCostState ? desc.openCostState : std::make_shared<OpenCostState>();
 	modelName_ = desc.modelName;
 	SetColliderName(desc.colliderName);
 	transform_.translate = desc.position;
@@ -44,7 +65,11 @@ void Chest::Initialize(const InitializeDesc& desc) {
 		InstancedModel::InstanceDesc normalInstance;
 		normalInstance.transform = transform_;
 		normalInstance.transform.scale = { 0.75f, 0.75f, 0.75f };
-		normalInstance.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+		// 無料Chestを外見だけで識別できるよう黄色で着色
+		normalInstance.color = type_ == ChestType::Free
+			? Vector4{ 1.0f, 0.0f, 0.0f, 1.0f }
+			: Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
 		normalInstance.isVisible = true;
 
 		InstancedModel::InstanceDesc outlineInstance = normalInstance;
@@ -64,11 +89,43 @@ void Chest::Update(float deltaTime) {
 }
 
 bool Chest::Interact(Player::Base& player) {
-	(void)player;
 
+	// Freeは共有費用の支払いと増加を発生させず、そのまま開封成功
+	if (type_ == ChestType::Free) {
+		return true;
+	}
+
+	// 残高不足時は費用を据え置き、ChestをMap上に維持
+	if (!player.TrySpendMoney(openCostState_->GetCurrentCost())) {
+		return false;
+	}
+
+	// 支払い成立後に次の通常Chestへ適用する費用を更新
+	openCostState_->IncreaseCost();
 	return true;
 }
 
+bool Chest::CanInteract(const Player::Base& player) const {
+
+	// Freeは所持金に関係なく常に開封可能
+	if (type_ == ChestType::Free) {
+		return true;
+	}
+
+	return player.CanAfford(openCostState_->GetCurrentCost());
+}
+
 std::string_view Chest::GetInteractionText() const {
-	return "宝箱を開ける";
+	if (type_ == ChestType::Free) {
+		return "0G";
+	}
+
+	// 共有費用が変化した場合だけ案内文を再構築して毎フレームの文字列確保を抑制
+	const int currentOpenCost = openCostState_->GetCurrentCost();
+	if (displayedOpenCost_ != currentOpenCost) {
+		interactionText_ = std::to_string(currentOpenCost) + "G";
+		displayedOpenCost_ = currentOpenCost;
+	}
+
+	return interactionText_;
 }

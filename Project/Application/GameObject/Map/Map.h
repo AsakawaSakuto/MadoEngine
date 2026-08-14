@@ -62,7 +62,8 @@ private:
 	void UpdateInteractionMarker(float deltaTime);
 
 	/// @brief 操作案内Textの表示内容を現在の接触対象へ同期
-	void UpdateInteractionText();
+	/// @param player 相互作用するPlayer
+	void UpdateInteractionText(const Player::Base& player);
 
 	/// @brief 地形生成用の高さ設定を有効範囲に補正
 	void ClampHeightSettings();

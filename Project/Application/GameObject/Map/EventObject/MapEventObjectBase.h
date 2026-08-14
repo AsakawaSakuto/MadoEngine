@@ -46,6 +46,14 @@ public:
 	/// @return 相互作用後にMapから削除する場合はtrue
 	virtual bool Interact(Player::Base& player) = 0;
 
+	/// @brief 現在のPlayer状態で相互作用可能か判定
+	/// @param player 相互作用するPlayer
+	/// @return 相互作用可能な場合はtrue
+	virtual bool CanInteract(const Player::Base& player) const {
+		(void)player;
+		return true;
+	}
+
 	/// @brief Player接触中に表示する操作案内文を取得
 	/// @return 操作案内に表示するUTF-8文字列
 	virtual std::string_view GetInteractionText() const = 0;

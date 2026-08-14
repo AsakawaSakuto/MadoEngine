@@ -74,7 +74,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:12",
+            "text": "01:45",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -234,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.8",
+            "text": "FPS : 60.3",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -434,7 +434,7 @@
                 0.0,
                 0.0
             ],
-            "text": "0",
+            "text": "60",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -517,7 +517,7 @@
             "text": "宝箱を開ける",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {

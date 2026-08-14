@@ -81,6 +81,25 @@ namespace Player {
 		status_.currentMoney += amount;
 	}
 
+	bool Base::TrySpendMoney(int amount) {
+
+		// 不正な消費量または残高不足時は状態を変更せず失敗を通知
+		if (!CanAfford(amount)) {
+			return false;
+		}
+
+		status_.currentMoney -= static_cast<float>(amount);
+		return true;
+	}
+
+	bool Base::CanAfford(int amount) const {
+		if (amount < 0) {
+			return false;
+		}
+
+		return status_.currentMoney >= static_cast<float>(amount);
+	}
+
 	void Base::AddExp(int amount) {
 
 		// 不正な加算によって経験値が減少しないよう0以下を無視

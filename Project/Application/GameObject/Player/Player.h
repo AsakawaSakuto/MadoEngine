@@ -37,6 +37,16 @@ namespace Player {
 		/// @param amount 加算する所持金
 		void AddMoney(int amount);
 
+		/// @brief 所持金を消費
+		/// @param amount 消費する所持金
+		/// @return 消費できた場合はtrue
+		bool TrySpendMoney(int amount);
+
+		/// @brief 所持金で指定額を支払えるか判定
+		/// @param amount 支払いに必要な所持金
+		/// @return 支払い可能な場合はtrue
+		bool CanAfford(int amount) const;
+
 		/// @brief 経験値を加算
 		/// @param amount 加算する経験値
 		void AddExp(int amount);
