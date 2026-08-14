@@ -61,6 +61,10 @@ public:
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
 
+	/// @brief 武器アップグレード用のMapイベント要求を取得
+	/// @return 武器アップグレード開始要求
+	MapEventRequest GetInteractionRequest() const override;
+
 private:
 	ChestType type_ = ChestType::Normal;
 	std::shared_ptr<OpenCostState> openCostState_;

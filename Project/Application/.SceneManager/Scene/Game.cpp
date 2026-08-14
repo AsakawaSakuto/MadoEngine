@@ -125,10 +125,13 @@ SceneType Game::Update(float dt) {
 		map_->Update(*player_, deltaTime);
 		for (const MapEventRequest& request : map_->ConsumeEventRequests()) {
 
-			// MapはEnemy管理へ依存させずSceneでBoss生成要求を仲介
+			// Mapを各Game Systemへ依存させずSceneでイベント要求を仲介
 			switch (request.action) {
 			case MapEventAction::SpawnBoss:
 				enemyManager_->SpawnBoss(request.position, SceneType::Game);
+				break;
+			case MapEventAction::RequestWeaponUpgrade:
+				weaponUpgradeSystem_->RequestUpgrade(*weaponInventory_);
 				break;
 			case MapEventAction::None:
 				break;

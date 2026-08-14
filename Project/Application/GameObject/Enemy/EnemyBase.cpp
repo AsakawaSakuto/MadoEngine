@@ -153,14 +153,18 @@ namespace Enemy {
 		return result;
 	}
 
-	void Base::Kill() {
+	void Base::Kill(DeathReason reason) {
 		if (!isActive_) {
 			return;
 		}
 
 		isActive_ = false;
 		status_.currentHealth = 0.0f;
-		SpawnDeathReward();
+
+		// Map外への落下は撃破として扱わず、報酬を生成せずに管理対象から除外
+		if (reason == DeathReason::Defeated) {
+			SpawnDeathReward();
+		}
 	}
 
 	void Base::UpdateProjectileDamageCooldowns(float deltaTime) {
@@ -234,7 +238,7 @@ namespace Enemy {
 			return true;
 		}
 
-		Kill();
+		Kill(DeathReason::OutsideMap);
 		return false;
 	}
 

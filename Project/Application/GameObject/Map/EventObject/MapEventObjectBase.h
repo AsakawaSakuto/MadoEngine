@@ -12,6 +12,7 @@ namespace Player {
 enum class MapEventAction {
 	None,
 	SpawnBoss,
+	RequestWeaponUpgrade,
 };
 
 /// @brief Mapイベント相互作用によって発生した処理要求

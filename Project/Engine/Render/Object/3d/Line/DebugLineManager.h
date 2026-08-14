@@ -53,7 +53,7 @@ namespace MadoEngine {
 
     private:
         bool initialized_ = false;
-        bool isDrawing_ = true;
+        bool isDrawing_ = false;
         std::unique_ptr<Line3d> line_;
         MadoEngine::Render::PSORegistry* psoRegistry_ = nullptr;
     };

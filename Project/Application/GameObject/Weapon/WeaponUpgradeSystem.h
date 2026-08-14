@@ -44,6 +44,10 @@ namespace Weapon {
 		/// @param inventory 現在の武器インベントリ
 		void UpdatePlayerLevel(int currentPlayerLevel, const Inventory& inventory);
 
+		/// @brief 外部イベントによる武器アップグレードを追加
+		/// @param inventory 現在の武器インベントリ
+		void RequestUpgrade(const Inventory& inventory);
+
 		/// @brief 武器アップグレード中か確認
 		/// @return 未処理アップグレードがある場合はtrue
 		bool IsUpgrading() const { return pendingUpgradeCount_ > 0; }

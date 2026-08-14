@@ -119,6 +119,24 @@ namespace Weapon {
 		}
 	}
 
+	void UpgradeSystem::RequestUpgrade(const Inventory& inventory) {
+
+		// 大量の未処理要求が重なった場合も整数Overflowを防止
+		if (pendingUpgradeCount_ == std::numeric_limits<int>::max()) {
+			Logger::Output("[Application] 未処理アップグレード回数が上限に達しているため追加できません。", Logger::Level::Warning);
+			return;
+		}
+
+		++pendingUpgradeCount_;
+		if (choices_.empty()) {
+
+			// 選択待機へ直ちに遷移できるよう現在の装備状態から候補を生成
+			GenerateChoices(inventory);
+		}
+
+		Logger::Output("[Application] Chest開封による武器アップグレードを追加しました。", Logger::Level::Debug);
+	}
+
 	bool UpgradeSystem::GenerateChoices(const Inventory& inventory) {
 		hasGenerationAttempted_ = true;
 		lastGenerationAttemptRevision_ = inventory.GetRevision();

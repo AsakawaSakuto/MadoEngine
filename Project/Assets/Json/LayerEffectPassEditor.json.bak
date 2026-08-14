@@ -85,6 +85,21 @@
             },
             "scope": "Screen",
             "screenEffectStage": "Scene"
+        },
+        {
+            "effectShaderKey": "PostEffect/PixelArt.PS",
+            "effectType": "PixelArt",
+            "enabled": true,
+            "key": "ScreenEffectPass_1",
+            "name": "PixelArt",
+            "parameters": {
+                "ColorSteps": 32.0,
+                "Contrast": 1.149999976158142,
+                "Intensity": 1.0,
+                "PixelSize": 1.0
+            },
+            "scope": "Screen",
+            "screenEffectStage": "Final"
         }
     ],
     "version": 4

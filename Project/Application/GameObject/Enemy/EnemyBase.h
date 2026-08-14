@@ -12,6 +12,12 @@ namespace Player {
 
 namespace Enemy {
 
+	/// @brief Enemyが死亡状態へ移行した理由
+	enum class DeathReason {
+		Defeated,
+		OutsideMap,
+	};
+
 	/// @brief Enemy生成時に使用する初期化情報
 	struct SpawnDesc {
 		Vector3 position = { 0.0f, 0.0f, 0.0f };
@@ -67,8 +73,9 @@ namespace Enemy {
 		/// @return 実際に適用されたダメージと死亡状態
 		ProjectileDamageResult TakeProjectileDamage(std::uint64_t projectileId, float damage);
 
-		/// @brief Enemyを死亡状態にして報酬を生成
-		void Kill();
+		/// @brief Enemyを理由に応じた死亡状態へ移行
+		/// @param reason Enemyが死亡状態へ移行した理由
+		void Kill(DeathReason reason = DeathReason::Defeated);
 
 		/// @brief Enemyの有効状態を取得
 		/// @return 有効であればtrue
