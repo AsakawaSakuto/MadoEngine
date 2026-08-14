@@ -1,8 +1,17 @@
 #include "MapEventObjectBase.h"
 #include "Utility/Collider/MyCollider.h"
 
+
 bool MapEventObjectBase::IsHitPlayer() const {
 	return MyCollider::IsHitWithTag(colliderName_, CollisionTag::PlayerHitBox);
+}
+
+Vector3 MapEventObjectBase::GetPosition() const {
+	return transform_.translate + Vector3(0.0f, std::get<AABB>(colliderShape_).max.y, 0.0f);
+}
+
+Vector3 MapEventObjectBase::GetRotation() const {
+	return Vector3(transform_.rotate.x, 0.0f, transform_.rotate.z);
 }
 
 void MapEventObjectBase::SetHighlighted(bool isHighlighted) {

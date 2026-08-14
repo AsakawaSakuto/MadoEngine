@@ -19,7 +19,8 @@ public:
 
 	/// @brief Mapを更新
 	/// @param player 相互作用の対象になるPlayer
-	void Update(Player::Base& player);
+	/// @param deltaTime 前フレームからの経過時間
+	void Update(Player::Base& player, float deltaTime);
 
 	/// @brief Map調整用のImGuiを描画
 	void DrawImGui();
@@ -45,11 +46,16 @@ private:
 
 	/// @brief Map上のイベントオブジェクトを更新
 	/// @param player 相互作用するPlayer
-	void UpdateEventObjects(Player::Base& player);
+	/// @param deltaTime 前フレームからの経過時間
+	void UpdateEventObjects(Player::Base& player, float deltaTime);
 
 	/// @brief Playerとイベントオブジェクトの相互作用を処理
 	/// @param player 相互作用するPlayer
 	void HandleEventObjectInteraction(Player::Base& player);
+
+	/// @brief 操作案内Modelの表示と配置を現在の接触対象へ同期
+	/// @param deltaTime 前フレームからの経過時間
+	void UpdateInteractionMarker(float deltaTime);
 
 	/// @brief 地形生成用の高さ設定を有効範囲に補正
 	void ClampHeightSettings();
@@ -63,6 +69,12 @@ private:
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
+
+	MadoEngine::ModelHandle interactionMarkerModel_{};
+	Vector3 interactionMarkerStartScale_ = { 0.35f, 0.35f, 0.35f };
+	Vector3 interactionMarkerEndScale_ = { 0.5f, 0.5f, 0.5f };
+	GameTimer interactionMarkerScaleTimer_;
+
 	Random terrainRandom_;
 	Random eventObjectRandom_;
 	

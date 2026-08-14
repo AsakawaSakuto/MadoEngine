@@ -15,7 +15,7 @@ void Karma::Initialize(const InitializeDesc& desc) {
 
 	AABB aabb{};
 	aabb.min = { -0.75f, 0.0f, -0.75f };
-	aabb.max = { 0.75f, 2.0f, 0.75f };
+	aabb.max = { 0.75f, 2.5f, 0.75f };
 	colliderShape_ = aabb;
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);

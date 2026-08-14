@@ -122,7 +122,7 @@ SceneType Game::Update(float dt) {
 			weaponInventory_->RecordProjectileDamage(event.sourceWeaponId, event.damage, event.wasKilled);
 		}
 
-		map_->Update(*player_);
+		map_->Update(*player_, deltaTime);
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
 
 		// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新

@@ -1,88 +1,6 @@
 {
     "models": [
         {
-            "billboard": true,
-            "cameraTranslateOffset": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "castShadow": false,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "frustumCulling": true,
-            "layer": "Default",
-            "lighting": false,
-            "model": "Assets/Model/Static/Primitive/Plane.obj",
-            "name": "Interact_x",
-            "position": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "receiveLightMask": 1,
-            "receiveShadow": false,
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "texture": "xbox_x",
-            "type": "Model3D",
-            "visible": true
-        },
-        {
-            "billboard": true,
-            "cameraTranslateOffset": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "castShadow": false,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "frustumCulling": true,
-            "layer": "Default",
-            "lighting": false,
-            "model": "Assets/Model/Static/Primitive/Plane.obj",
-            "name": "Interact_x2",
-            "position": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "receiveLightMask": 1,
-            "receiveShadow": false,
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "texture": "xbox_x_Outline",
-            "type": "Model3D",
-            "visible": true
-        },
-        {
             "billboard": false,
             "cameraTranslateOffset": [
                 0.0,
@@ -139,12 +57,12 @@
             "frustumCulling": true,
             "layer": "Default",
             "lighting": false,
-            "model": "Assets/Model/Static/Primitive/Plane.obj",
+            "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                0.0,
-                0.0,
-                0.0
+                47.25200653076172,
+                13.37600326538086,
+                199.37310791015625
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -154,12 +72,12 @@
                 0.0
             ],
             "scale": [
-                1.0,
-                1.0,
+                0.5,
+                0.5,
                 1.0
             ],
             "scene": "Game",
-            "texture": "xbox_x",
+            "texture": "xbox_button_color_x_outline",
             "type": "Model3D",
             "visible": true
         },
@@ -180,7 +98,7 @@
             "frustumCulling": true,
             "layer": "Default",
             "lighting": false,
-            "model": "Assets/Model/Static/Primitive/Plane.obj",
+            "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x_Outline",
             "position": [
                 0.0,
@@ -200,7 +118,7 @@
                 1.0
             ],
             "scene": "Game",
-            "texture": "xbox_x_Outline",
+            "texture": "xbox_button_color_x_outline",
             "type": "Model3D",
             "visible": true
         }

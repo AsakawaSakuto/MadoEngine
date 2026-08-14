@@ -17,7 +17,7 @@ void Chest::Initialize(const InitializeDesc& desc) {
 
 	AABB aabb{};
 	aabb.min = { -2.0f, 0.0f, -2.0f };
-	aabb.max = { 2.0f, 1.0f, 2.0f };
+	aabb.max = { 2.0f, 1.5f, 2.0f };
 	colliderShape_ = aabb;
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);

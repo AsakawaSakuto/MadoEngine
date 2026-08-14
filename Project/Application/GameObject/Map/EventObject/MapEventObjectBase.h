@@ -16,6 +16,14 @@ public:
 	/// @return Playerと衝突していればtrue
 	bool IsHitPlayer() const;
 
+	/// @brief Objectのワールド座標を取得
+	/// @return Objectのワールド座標
+	Vector3 GetPosition() const;
+
+	/// @brief Objectの回転を取得
+	/// @return Objectの回転
+	Vector3 GetRotation() const;
+
 	/// @brief Player接触時の強調表示状態を設定
 	/// @param isHighlighted 強調表示する場合はtrue
 	void SetHighlighted(bool isHighlighted);

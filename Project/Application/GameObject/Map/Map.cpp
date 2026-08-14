@@ -182,6 +182,11 @@ void Map::Initialize(uint32_t seed) {
 	eventObjects_.clear();
 	DestroyMapInstancedBatches();
 	currentHitEventObject_ = nullptr;
+	interactionMarkerModel_ = MyModel::Find("Interact_x");
+	interactionMarkerScaleTimer_.Reset();
+	if (Model* interactionMarkerModel = MyModel::TryGet(interactionMarkerModel_)) {
+		interactionMarkerModel->SetVisible(false);
+	}
 
 	mapBlocks_.assign(mapHeight_, std::vector<MapBlock>(mapWidth_));
 
@@ -289,7 +294,7 @@ Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
 	return spawnCandidates[static_cast<size_t>(spawnIndex)];
 }
 
-void Map::Update(Player::Base& player) {
+void Map::Update(Player::Base& player, float deltaTime) {
 
 	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {
 		isModelDraw_ = !isModelDraw_;
@@ -309,7 +314,7 @@ void Map::Update(Player::Base& player) {
 		}
 	}
 
-	UpdateEventObjects(player);
+	UpdateEventObjects(player, deltaTime);
 }
 
 void Map::DrawImGui() {
@@ -576,7 +581,7 @@ void Map::GenerateBossSpawner() {
 	Logger::Output("Map : BossSpawnerを1個配置しました", Logger::Level::Application);
 }
 
-void Map::UpdateEventObjects(Player::Base& player) {
+void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {
 	MapEventObjectBase* hitObject = nullptr;
 
 	// 複数接触時も一つだけを操作対象として選択
@@ -589,6 +594,7 @@ void Map::UpdateEventObjects(Player::Base& player) {
 	}
 
 	if (currentHitEventObject_ != hitObject) {
+		interactionMarkerScaleTimer_.Reset();
 
 		// 接触対象が変化したフレームだけOutline表示を切り替え
 		if (currentHitEventObject_) {
@@ -603,6 +609,7 @@ void Map::UpdateEventObjects(Player::Base& player) {
 	}
 
 	HandleEventObjectInteraction(player);
+	UpdateInteractionMarker(deltaTime);
 }
 
 void Map::HandleEventObjectInteraction(Player::Base& player) {
@@ -626,6 +633,32 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 	}
 
 	currentHitEventObject_ = nullptr;
+}
+
+void Map::UpdateInteractionMarker(float deltaTime) {
+	Model* interactionMarkerModel = MyModel::TryGet(interactionMarkerModel_);
+	if (!interactionMarkerModel) {
+		return;
+	}
+
+	const bool hasInteractionTarget = currentHitEventObject_ != nullptr;
+	interactionMarkerModel->SetVisible(hasInteractionTarget);
+	if (!hasInteractionTarget) {
+		interactionMarkerScaleTimer_.Reset();
+		interactionMarkerModel->SetScale(interactionMarkerStartScale_);
+		return;
+	}
+
+	// ModelEditorで設定した見た目を基準に、接触対象の上端と傾きへ追従
+	interactionMarkerModel->SetPosition(currentHitEventObject_->GetPosition());
+	//interactionMarkerModel->SetRotation(currentHitEventObject_->GetRotation());
+
+	// 接触開始から一周期を繰り返すGameTimerで拡縮の位相を管理
+	if (!interactionMarkerScaleTimer_.IsActive()) {
+		interactionMarkerScaleTimer_.Start(1.0f, true);
+	}
+	interactionMarkerScaleTimer_.Update(deltaTime);
+	interactionMarkerModel->SetScale(Easing::Lerp(interactionMarkerStartScale_, interactionMarkerEndScale_, interactionMarkerScaleTimer_.GetProgress()));
 }
 
 void Map::ClampHeightSettings() {
