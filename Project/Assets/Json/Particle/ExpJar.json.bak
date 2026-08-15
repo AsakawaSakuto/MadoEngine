@@ -8,13 +8,13 @@
                         1.0,
                         1.0,
                         1.0,
-                        0.0
+                        1.0
                     ],
                     "min": [
                         1.0,
                         1.0,
                         1.0,
-                        0.0
+                        1.0
                     ]
                 },
                 "start": {
@@ -33,11 +33,16 @@
                 }
             },
             "emission": {
-                "bursts": [],
-                "duration": 1.0,
+                "bursts": [
+                    {
+                        "count": 16,
+                        "time": 0.0
+                    }
+                ],
+                "duration": 0.0,
                 "isLoop": false,
-                "maxParticles": 256,
-                "ratePerSecond": 10.0,
+                "maxParticles": 16,
+                "ratePerSecond": 0.0,
                 "startDelay": 0.0
             },
             "initial": {
@@ -47,28 +52,28 @@
                 },
                 "direction": {
                     "max": [
-                        0.0,
-                        1.0,
-                        0.0
+                        5.0,
+                        10.0,
+                        5.0
                     ],
                     "min": [
+                        -5.0,
                         0.0,
-                        1.0,
-                        0.0
+                        -5.0
                     ]
                 },
                 "directionMode": "configured",
                 "lifeTime": {
-                    "max": 1.0,
-                    "min": 1.0
+                    "max": 0.5,
+                    "min": 0.5
                 },
                 "rotation": {
                     "max": 0.0,
                     "min": 0.0
                 },
                 "speed": {
-                    "max": 1.0,
-                    "min": 1.0
+                    "max": 5.0,
+                    "min": 5.0
                 }
             },
             "isEnabled": true,
@@ -81,20 +86,20 @@
                 "drag": 0.0,
                 "gravity": [
                     0.0,
-                    0.0,
+                    -25.0,
                     0.0
                 ]
             },
             "name": "Emitter",
             "renderer": {
-                "blendMode": "add",
+                "blendMode": "normal",
                 "sortMode": "none",
-                "texture": "white2x2"
+                "texture": "Exp"
             },
             "shape": {
                 "offset": [
                     0.0,
-                    0.0,
+                    0.5,
                     0.0
                 ],
                 "type": "point"
@@ -103,22 +108,22 @@
             "sizeOverLifetime": {
                 "end": {
                     "max": [
-                        1.0,
-                        1.0
+                        0.15000000596046448,
+                        0.15000000596046448
                     ],
                     "min": [
-                        1.0,
-                        1.0
+                        0.15000000596046448,
+                        0.15000000596046448
                     ]
                 },
                 "start": {
                     "max": [
-                        1.0,
-                        1.0
+                        0.3499999940395355,
+                        0.3499999940395355
                     ],
                     "min": [
-                        1.0,
-                        1.0
+                        0.3499999940395355,
+                        0.3499999940395355
                     ]
                 }
             },

@@ -22,7 +22,7 @@ namespace DropObject {
 	void Base::Initialize(Type type, const Vector3& position, int index) {
 		type_ = type;
 		transform_.translate = position;
-		transform_.scale = { 0.25f, 0.25f, 0.25f };
+		transform_.scale = { 0.2f, 0.2f, 0.2f };
 		isMoving_ = type_ == Type::Money;
 		if (type_ == Type::Money) {
 

@@ -83,6 +83,10 @@ namespace Player {
 		/// @brief Player直下の地面へ影の描画座標を更新
 		void UpdateShadowTransform();
 
+		/// @brief Playerの移動イベントEffect Sequenceを足元で再生
+		/// @param assetName 再生するEffect Sequenceアセット名
+		void PlayMovementEffect(const std::string& assetName) const;
+
 		/// @brief 一定間隔でPlayerのHPを自動回復
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateHealthRegeneration(float deltaTime);

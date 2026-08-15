@@ -208,6 +208,14 @@ namespace Player {
 		const bool isSlopeGroundContact = MyCollider::IsSlopeGroundContact(CollisionTag::PlayerMovementSphere, CollisionTag::MapSlope);
 		movement_.SetGroundContact(isGroundContact, isSlopeGroundContact, lastMoveInput_);
 		movement_.UpdateWallClimb(lastDeltaTime_, lastMoveInput_, transform_);
+
+		// 瞬間的な移動状態の成立時だけ足元のEffect Sequenceを一度再生
+		if (movement_.WasJumpStartedThisFrame()) {
+			PlayMovementEffect("PlayerJump");
+		} else if (movement_.WasLandedThisFrame()) {
+			PlayMovementEffect("PlayerLanding");
+		}
+
 		Model* model = MyModel::TryGet(model_);
 		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model, isSlopeGroundContact, kModelForwardYawOffset);
 
@@ -276,6 +284,14 @@ namespace Player {
 		Transform3D landingMarkerTransform;
 		landingMarkerTransform.translate = shadowTransform_.translate;
 		landingMarker_.SetTransform(landingMarkerTransform);
+	}
+
+	void Base::PlayMovementEffect(const std::string& assetName) const {
+		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
+		desc.rootTransform.translate = transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f };
+		desc.sceneType = SceneType::Game;
+		desc.loopOverride = false;
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play(assetName, desc);
 	}
 
 	Vector3 Base::GetModelPosition() const {

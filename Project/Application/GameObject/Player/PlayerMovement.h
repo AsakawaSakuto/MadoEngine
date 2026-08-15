@@ -55,6 +55,10 @@ namespace Player {
 		/// @return Jumpが成立した場合はtrue
 		bool WasJumpStartedThisFrame() const { return jumpStartedThisFrame_; }
 
+		/// @brief このフレームに着地したか判定
+		/// @return 着地した場合はtrue
+		bool WasLandedThisFrame() const { return landedThisFrame_; }
+
 		/// @brief Block側面を上昇中か判定
 		/// @return 壁上り中の場合はtrue
 		bool IsWallClimbing() const { return isWallClimbing_; }
@@ -145,6 +149,7 @@ namespace Player {
 		float velocityY_ = 0.0f;
 		bool isGrounded_ = false;
 		bool jumpStartedThisFrame_ = false;
+		bool landedThisFrame_ = false;
 		bool hasWallClimbInput_ = false;
 		bool isWallClimbing_ = false;
 		bool hasWallClimbStartedSinceLanding_ = false;

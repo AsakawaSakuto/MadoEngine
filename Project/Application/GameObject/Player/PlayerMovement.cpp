@@ -89,6 +89,7 @@ namespace Player {
 		currentMotion_ = Player::Motion::Idle;
 		currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
 		jumpStartedThisFrame_ = false;
+		landedThisFrame_ = false;
 
 		// 生成直後の重力落下で地形内部へ入らないよう初期状態を接地へ固定
 		velocityY_ = 0.0f;
@@ -105,6 +106,7 @@ namespace Player {
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
 		jumpStartedThisFrame_ = false;
+		landedThisFrame_ = false;
 		lastMoveStartPosition_ = transform.translate;
 		lastAttemptedHorizontalMove_ = {};
 		hasWallClimbInput_ = false;
@@ -131,6 +133,7 @@ namespace Player {
 		if (hasGroundContact && !wasGroundContact_) {
 
 			// 空中または壁登り状態から地表へ着地した時点で利用可能時間と開始履歴を初期化
+			landedThisFrame_ = true;
 			wallClimbElapsedTime_ = 0.0f;
 			hasWallClimbStartedSinceLanding_ = false;
 		}

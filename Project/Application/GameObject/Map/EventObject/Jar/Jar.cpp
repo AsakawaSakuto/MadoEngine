@@ -35,6 +35,13 @@ int CalculateRewardAmount(JarSize size) {
 	return size == JarSize::Big ? 20 : 10;
 }
 
+/// @brief Jarの種別に対応するEffect Sequenceアセット名を取得
+/// @param type Jarの種別
+/// @return 再生するEffect Sequenceアセット名
+const char* GetJarEffectSequenceAssetName(JarType type) {
+	return type == JarType::Exp ? "ExpJar" : "MoneyJar";
+}
+
 }
 
 Jar::~Jar() {
@@ -116,6 +123,14 @@ bool Jar::Interact(Player::Base& player) {
 		player.AddMoney(rewardAmount);
 		Logger::Output("Jarを取得しました。所持金を" + std::to_string(rewardAmount) + "加算しました。", Logger::Level::Application);
 	}
+
+	// Jar削除後も破壊位置で演出を完走できるよう独立したSequenceとして再生
+	MadoEngine::EffectSequence::EffectSequencePlayDesc effectDesc;
+	effectDesc.rootTransform.translate = transform_.translate;
+	effectDesc.sceneType = SceneType::Game;
+	effectDesc.loopOverride = false;
+	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play(
+		GetJarEffectSequenceAssetName(type_), effectDesc);
 
 	return true;
 }
