@@ -72,6 +72,9 @@ namespace Enemy {
 		/// @brief PlayerとEnemyの接触結果を処理
 		void ProcessPlayerCollisions();
 
+		/// @brief Player周辺の削除範囲外にいるEnemyを無効化
+		void DeactivateEnemiesOutsidePlayerRange();
+
 		/// @brief 無効になったEnemyを管理対象から削除
 		void RemoveInactiveEnemies();
 

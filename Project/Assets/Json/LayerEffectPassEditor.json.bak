@@ -77,7 +77,7 @@
                 "ColorG": 0.6800000071525574,
                 "ColorR": 0.5799999833106995,
                 "Density": 1.0,
-                "EndDistance": 150.0,
+                "EndDistance": 125.0,
                 "FarClip": 1000.0,
                 "HeightStrength": 0.0,
                 "NearClip": 0.10000000149011612,
@@ -89,7 +89,7 @@
         {
             "effectShaderKey": "PostEffect/PixelArt.PS",
             "effectType": "PixelArt",
-            "enabled": true,
+            "enabled": false,
             "key": "ScreenEffectPass_1",
             "name": "PixelArt",
             "parameters": {
@@ -97,6 +97,24 @@
                 "Contrast": 1.149999976158142,
                 "Intensity": 1.0,
                 "PixelSize": 1.0
+            },
+            "scope": "Screen",
+            "screenEffectStage": "Final"
+        },
+        {
+            "effectShaderKey": "PostEffect/Vignette.PS",
+            "effectType": "Vignette",
+            "enabled": false,
+            "key": "ScreenEffectPass_3",
+            "name": "LowHealthVignette",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 0.0,
+                "ColorG": 0.0,
+                "ColorR": 1.0,
+                "InnerRadius": 0.699999988079071,
+                "Intensity": 1.0,
+                "OuterScale": 4.0
             },
             "scope": "Screen",
             "screenEffectStage": "Final"

@@ -13,7 +13,6 @@ namespace Enemy {
 		/// @brief Enemyの種類を表す列挙型
 		enum class Type {
 			Normal, // 通常の敵
-			Speed,	// 速度が速い敵
 
 			Boss,	// ボス敵
 		};

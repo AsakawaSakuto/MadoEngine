@@ -148,7 +148,6 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyNormal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\EnemySpeed.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.cpp" />
@@ -348,7 +347,6 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyNormal.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
-    <ClInclude Include="Application\GameObject\Enemy\EnemySpeed.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h" />
     <ClInclude Include="Application\GameObject\GameObjectHeaders.h" />
     <ClInclude Include="Application\GameObject\Item\BaseItem.h" />

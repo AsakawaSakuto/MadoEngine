@@ -34,14 +34,19 @@ namespace Player {
 		expGetSphere_ = s2;
 
 		Sphere s3;
-		s3.radius = 50.0f;
+		s3.radius = 37.5f;
 		attackRangeSphere_ = s3;
+
+		Sphere s4;
+		s4.radius = 75.0f;
+		enemyDeleteRangeSphere_ = s4;
 
 		// 移動解決、被弾、経験値回収、攻撃索引を独立させるため用途別Colliderを登録
 		MyCollider::RegisterCollider("PlayerMovementSphere", CollisionTag::PlayerMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerExpGetSphere", CollisionTag::PlayerDropObjectGetSphere, &expGetSphere_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerAttackRangeSphere", CollisionTag::PlayerAttackRangeSphere, &attackRangeSphere_, &transform_.translate, 0.0f);
+		MyCollider::RegisterCollider("PlayerEnemyDeleteRangeSphere", CollisionTag::EnemyDeleteRangeSphere, &enemyDeleteRangeSphere_, &transform_.translate, 0.0f);
 
 		model_ = MyModel::Create("Player", "walk", SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
@@ -248,6 +253,7 @@ namespace Player {
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(expGetSphere_), Vector4{ 0.0f,0.0f,1.0f,1.0f });
 		MyDebugLine::AddShape(std::get<Sphere>(attackRangeSphere_), Vector4{ 1.0f,0.0f,0.0f,1.0f });
+		MyDebugLine::AddShape(std::get<Sphere>(enemyDeleteRangeSphere_), Vector4{ 0.0f,1.0f,0.0f,1.0f });
 	}
 
 	void Base::UpdateShadowTransform() {

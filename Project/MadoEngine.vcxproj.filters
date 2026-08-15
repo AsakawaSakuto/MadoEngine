@@ -16,36 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleCommon.hlsli">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleInitialize.CS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleClearCounter.CS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleUpdate.CS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticlePrepareEmit.CS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleEmit.CS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticleBuildArgs.CS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\Particle\GpuParticle.VS.hlsl">
-      <Filter>Particle Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\RibbonEffect\Ribbon.VS.hlsl">
-      <Filter>Ribbon Shader</Filter>
-    </None>
-    <None Include="Assets\Shader\Object3d\RibbonEffect\Ribbon.PS.hlsl">
-      <Filter>Ribbon Shader</Filter>
-    </None>
+    <None Include="Assets\Model\Skining\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -55,7 +26,6 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyNormal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\EnemySpeed.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
@@ -222,7 +192,6 @@
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
-    <ClCompile Include="Application\System\Fade\Fade.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
     <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
@@ -235,7 +204,6 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyNormal.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
-    <ClInclude Include="Application\GameObject\Enemy\EnemySpeed.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
@@ -883,9 +851,6 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\EditorManagementMode.h">
-      <Filter>�w�b�_�[ �t�%40�C��</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\System\Fade\Fade.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.h">

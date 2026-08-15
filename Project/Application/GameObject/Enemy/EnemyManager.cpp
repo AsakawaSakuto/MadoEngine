@@ -54,6 +54,7 @@ namespace Enemy {
 			}
 		}
 
+		DeactivateEnemiesOutsidePlayerRange();
 		ProcessProjectileHits();
 		ProcessPlayerCollisions();
 		RemoveInactiveEnemies();
@@ -172,6 +173,24 @@ namespace Enemy {
 			if (killAllEnemies) {
 				enemy->Kill();
 			}
+		}
+	}
+
+	void Manager::DeactivateEnemiesOutsidePlayerRange() {
+
+		// 範囲外Enemyを相互作用処理より先に無効化して同Frameの撃破報酬生成を防止
+		for (std::unique_ptr<Base>& enemy : enemies_) {
+			if (!enemy || !enemy->IsActive()) {
+				continue;
+			}
+
+			// BossだけをPlayer周辺の管理範囲外でも維持
+			const Data::Type type = enemy->GetType();
+			if (type == Data::Type::Boss || enemy->IsInsidePlayerDeleteRange()) {
+				continue;
+			}
+
+			enemy->Kill(DeathReason::OutsidePlayerRange);
 		}
 	}
 

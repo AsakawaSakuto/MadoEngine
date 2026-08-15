@@ -108,6 +108,14 @@ namespace Enemy {
 		return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::PlayerHitBox);
 	}
 
+	bool Base::IsInsidePlayerDeleteRange() const {
+		if (!isActive_) {
+			return false;
+		}
+
+		return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::EnemyDeleteRangeSphere);
+	}
+
 	bool Base::ResolvePlayerCollision(Player::Base& player) {
 		if (!IsHitPlayer() || playerDamageCooldown_ > 0.0f) {
 			return false;
@@ -161,7 +169,7 @@ namespace Enemy {
 		isActive_ = false;
 		status_.currentHealth = 0.0f;
 
-		// Map外への落下は撃破として扱わず、報酬を生成せずに管理対象から除外
+		// Map外への落下とPlayer周辺の管理範囲外は撃破として扱わず報酬生成を抑制
 		if (reason == DeathReason::Defeated) {
 			SpawnDeathReward();
 		}

@@ -1,8 +1,8 @@
 {
     "categoryVolumes": {
-        "BGM": 0.5,
-        "SE": 0.5,
-        "Voice": 0.5
+        "BGM": 1.0,
+        "SE": 1.0,
+        "Voice": 1.0
     },
     "individualVolumes": {
         "bgm1": {
@@ -74,5 +74,5 @@
             "volume": 1.0
         }
     },
-    "masterVolume": 0.5
+    "masterVolume": 1.0
 }

@@ -16,6 +16,7 @@ namespace Enemy {
 	enum class DeathReason {
 		Defeated,
 		OutsideMap,
+		OutsidePlayerRange,
 	};
 
 	/// @brief Enemy生成時に使用する初期化情報
@@ -61,6 +62,10 @@ namespace Enemy {
 		/// @brief Playerと接触しているか判定
 		/// @return Playerと接触していればtrue
 		bool IsHitPlayer() const;
+
+		/// @brief Playerに追従するEnemy削除範囲内に存在するか判定
+		/// @return Enemy削除範囲内に存在する場合はtrue
+		bool IsInsidePlayerDeleteRange() const;
 
 		/// @brief Playerとの接触ダメージを解決
 		/// @param player 接触ダメージを受けるPlayer

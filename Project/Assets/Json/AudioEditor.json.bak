@@ -1,8 +1,8 @@
 {
     "categoryVolumes": {
-        "BGM": 0.6700000166893005,
-        "SE": 0.41999998688697815,
-        "Voice": 0.28999999165534973
+        "BGM": 1.0,
+        "SE": 1.0,
+        "Voice": 1.0
     },
     "individualVolumes": {
         "bgm1": {
@@ -27,7 +27,7 @@
         },
         "chest": {
             "type": "SE",
-            "volume": 0.25999999046325684
+            "volume": 1.0
         },
         "confirm": {
             "type": "SE",
@@ -35,7 +35,7 @@
         },
         "damage": {
             "type": "SE",
-            "volume": 0.07999999821186066
+            "volume": 1.0
         },
         "expget": {
             "type": "SE",
@@ -74,5 +74,5 @@
             "volume": 1.0
         }
     },
-    "masterVolume": 0.7200000286102295
+    "masterVolume": 1.0
 }
