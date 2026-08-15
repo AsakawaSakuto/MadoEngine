@@ -757,7 +757,7 @@ namespace MadoEngine {
 		}
 
 		// Cylinder Effect用 RootSignature
-		// Cylinder描画用のInstance、Camera、Texture、SamplerをRegisterへ配置
+		// Cylinder描画用のInstance、Camera、Texture、Instance Offset、SamplerをRegisterへ配置
 		{
 			D3D12_DESCRIPTOR_RANGE instanceRange{};
 			instanceRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -773,7 +773,7 @@ namespace MadoEngine {
 			textureRange.RegisterSpace = 0;
 			textureRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-			D3D12_ROOT_PARAMETER rootParams[3]{};
+			D3D12_ROOT_PARAMETER rootParams[4]{};
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			rootParams[0].DescriptorTable.NumDescriptorRanges = 1;
 			rootParams[0].DescriptorTable.pDescriptorRanges = &instanceRange;
@@ -788,6 +788,12 @@ namespace MadoEngine {
 			rootParams[2].DescriptorTable.NumDescriptorRanges = 1;
 			rootParams[2].DescriptorTable.pDescriptorRanges = &textureRange;
 			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+			rootParams[3].Constants.ShaderRegister = 1;
+			rootParams[3].Constants.RegisterSpace = 0;
+			rootParams[3].Constants.Num32BitValues = 1;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
 			D3D12_STATIC_SAMPLER_DESC sampler{};
 			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;

@@ -24,13 +24,19 @@ cbuffer PerView : register(b0)
     row_major float4x4 gViewProjection;
 };
 
+cbuffer PerDraw : register(b1)
+{
+    uint gInstanceOffset;
+};
+
 /// @brief 正規化グリッドからCylinder側面の頂点を生成
 /// @param vertexId インデックスバッファから渡される頂点番号
 /// @param instanceId 描画するCylinder Instance番号
 /// @return 変換済み頂点
 VertexShaderOutput main(uint vertexId : SV_VertexID, uint instanceId : SV_InstanceID)
 {
-    CylinderInstance instance = gInstances[instanceId];
+    const uint absoluteInstanceId = gInstanceOffset + instanceId;
+    CylinderInstance instance = gInstances[absoluteInstanceId];
     const uint radialSegments = max(instance.metadata.x, 3u);
     const uint heightSegments = max(instance.metadata.y, 1u);
 
@@ -70,6 +76,6 @@ VertexShaderOutput main(uint vertexId : SV_VertexID, uint instanceId : SV_Instan
     VertexShaderOutput output;
     output.position = mul(worldPosition, gViewProjection);
     output.parameter = float2(u, v);
-    output.instanceId = instanceId;
+    output.instanceId = absoluteInstanceId;
     return output;
 }

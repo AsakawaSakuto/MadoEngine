@@ -87,7 +87,7 @@
                         {
                             "easing": "Linear",
                             "time": 0.5,
-                            "value": 0.10000000149011612
+                            "value": 0.3499999940395355
                         }
                     ]
                 },
@@ -117,7 +117,7 @@
                         "position": 1.0
                     }
                 ],
-                "textureName": "Line",
+                "textureName": "Cylinder2",
                 "topFadeRange": {
                     "default": 0.0,
                     "keys": []
@@ -161,8 +161,13 @@
                     }
                 }
             },
-            "name": "Emitter"
+            "name": "Emitter",
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         }
     ],
-    "version": 3
+    "version": 4
 }

@@ -9,16 +9,16 @@
                 },
                 "bottomRadii": {
                     "default": [
-                        0.25,
-                        0.25
+                        0.75,
+                        0.75
                     ],
                     "keys": [
                         {
                             "easing": "Linear",
                             "time": 0.0,
                             "value": [
-                                0.25,
-                                0.25
+                                0.75,
+                                0.75
                             ]
                         },
                         {
@@ -33,14 +33,14 @@
                             "easing": "Linear",
                             "time": 1.0,
                             "value": [
-                                0.25,
-                                0.25
+                                0.75,
+                                0.75
                             ]
                         }
                     ]
                 },
                 "height": {
-                    "default": 1.0,
+                    "default": 0.800000011920929,
                     "keys": []
                 },
                 "heightSegments": 1,
@@ -52,16 +52,16 @@
                 },
                 "topRadii": {
                     "default": [
-                        0.25,
-                        0.25
+                        0.75,
+                        0.75
                     ],
                     "keys": [
                         {
                             "easing": "Linear",
                             "time": 0.0,
                             "value": [
-                                0.25,
-                                0.25
+                                0.75,
+                                0.75
                             ]
                         },
                         {
@@ -76,8 +76,8 @@
                             "easing": "Linear",
                             "time": 1.0,
                             "value": [
-                                0.25,
-                                0.25
+                                0.75,
+                                0.75
                             ]
                         }
                     ]
@@ -149,8 +149,13 @@
                     }
                 }
             },
-            "name": "Emitter"
+            "name": "Emitter",
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         }
     ],
-    "version": 3
+    "version": 4
 }

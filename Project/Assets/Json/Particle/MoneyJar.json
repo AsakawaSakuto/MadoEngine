@@ -108,11 +108,11 @@
             "sizeOverLifetime": {
                 "end": {
                     "max": [
-                        0.05000000074505806,
-                        0.05000000074505806
+                        0.10000000149011612,
+                        0.10000000149011612
                     ],
                     "min": [
-                        0.05000000074505806,
+                        0.10000000149011612,
                         0.05000000074505806
                     ]
                 },
@@ -128,28 +128,28 @@
                 }
             },
             "trail": {
-                "blendMode": "add",
+                "blendMode": "normal",
                 "cameraFacing": true,
                 "endColor": [
                     1.0,
                     1.0,
-                    1.0,
-                    0.0
+                    0.0,
+                    1.0
                 ],
                 "endWidth": 0.0,
                 "interpolation": "linear",
-                "isEnabled": false,
+                "isEnabled": true,
                 "maxPointCount": 32,
                 "minPointDistance": 0.05000000074505806,
-                "pointLifetime": 0.5,
+                "pointLifetime": 0.15000000596046448,
                 "smoothingSubdivision": 0,
                 "startColor": [
                     1.0,
                     1.0,
-                    1.0,
+                    0.0,
                     1.0
                 ],
-                "startWidth": 0.25,
+                "startWidth": 0.05000000074505806,
                 "syncParticleColor": false,
                 "texture": "white2x2"
             },

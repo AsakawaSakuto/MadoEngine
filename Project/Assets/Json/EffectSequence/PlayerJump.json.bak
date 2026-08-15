@@ -1,5 +1,5 @@
 {
-    "duration": 0.0010000000474974513,
+    "duration": 0.20000000298023224,
     "isLoop": false,
     "nodes": [
         {
@@ -31,6 +31,35 @@
             "settings": {
                 "primitiveType": "cylinder"
             },
+            "startTime": 0.0
+        },
+        {
+            "displayName": "Particle",
+            "effectAssetName": "PlayerJump",
+            "isEnabled": true,
+            "localTransform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "nodeId": 2,
+            "nodeType": "particle",
+            "parentNodeId": null,
+            "playbackSpeed": 1.0,
+            "renderLayer": null,
+            "settings": {},
             "startTime": 0.0
         }
     ],

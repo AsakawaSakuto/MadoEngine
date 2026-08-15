@@ -40,7 +40,7 @@
                     ]
                 },
                 "height": {
-                    "default": 1.0,
+                    "default": 0.75,
                     "keys": []
                 },
                 "heightSegments": 1,
@@ -149,8 +149,13 @@
                     }
                 }
             },
-            "name": "Emitter"
+            "name": "Emitter",
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         }
     ],
-    "version": 3
+    "version": 4
 }

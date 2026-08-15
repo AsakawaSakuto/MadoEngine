@@ -16,6 +16,7 @@ namespace {
 	constexpr UINT kCylinderRootInstances = 0;
 	constexpr UINT kCylinderRootPerView = 1;
 	constexpr UINT kCylinderRootTexture = 2;
+	constexpr UINT kCylinderRootInstanceOffset = 3;
 
 } // namespace
 
@@ -212,12 +213,19 @@ namespace MadoEngine::Effect {
 				kCylinderRootTexture,
 				MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(batch.textureIndex)
 			);
+
+			// SV_InstanceIDはDrawごとに0へ戻るため全体Instance Buffer内の先頭位置を明示
+			commandList_->SetGraphicsRoot32BitConstant(
+				kCylinderRootInstanceOffset,
+				batch.firstInstance,
+				0
+			);
 			commandList_->DrawIndexedInstanced(
 				geometry.indexCount,
 				batch.instanceCount,
 				0,
 				0,
-				batch.firstInstance
+				0
 			);
 		}
 	}
