@@ -8,13 +8,13 @@
                         1.0,
                         1.0,
                         1.0,
-                        1.0
+                        0.0
                     ],
                     "min": [
                         1.0,
                         1.0,
                         1.0,
-                        1.0
+                        0.0
                     ]
                 },
                 "start": {
@@ -33,16 +33,11 @@
                 }
             },
             "emission": {
-                "bursts": [
-                    {
-                        "count": 64,
-                        "time": 0.0
-                    }
-                ],
-                "duration": 0.009999999776482582,
+                "bursts": [],
+                "duration": 1.0,
                 "isLoop": false,
                 "maxParticles": 256,
-                "ratePerSecond": 0.0,
+                "ratePerSecond": 10.0,
                 "startDelay": 0.0
             },
             "initial": {
@@ -52,28 +47,28 @@
                 },
                 "direction": {
                     "max": [
-                        15.0,
-                        15.0,
-                        15.0
+                        0.0,
+                        1.0,
+                        0.0
                     ],
                     "min": [
-                        -15.0,
-                        -15.0,
-                        -15.0
+                        0.0,
+                        1.0,
+                        0.0
                     ]
                 },
                 "directionMode": "configured",
                 "lifeTime": {
-                    "max": 0.3499999940395355,
-                    "min": 0.10000000149011612
+                    "max": 1.0,
+                    "min": 1.0
                 },
                 "rotation": {
-                    "max": 3.140000104904175,
+                    "max": 0.0,
                     "min": 0.0
                 },
                 "speed": {
-                    "max": 5.0,
-                    "min": 5.0
+                    "max": 1.0,
+                    "min": 1.0
                 }
             },
             "isEnabled": true,
@@ -92,35 +87,38 @@
             },
             "name": "Emitter",
             "renderer": {
-                "blendMode": "normal",
+                "blendMode": "add",
                 "sortMode": "none",
-                "texture": "box2"
+                "texture": "white2x2"
             },
             "shape": {
-                "emitFromSurface": true,
-                "radius": 0.009999999776482582,
-                "type": "sphere"
+                "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "type": "point"
             },
             "simulationSpace": "world",
             "sizeOverLifetime": {
                 "end": {
                     "max": [
-                        0.0,
-                        0.0
+                        1.0,
+                        1.0
                     ],
                     "min": [
-                        0.0,
-                        0.0
+                        1.0,
+                        1.0
                     ]
                 },
                 "start": {
                     "max": [
-                        0.15000000596046448,
-                        0.15000000596046448
+                        1.0,
+                        1.0
                     ],
                     "min": [
-                        0.10000000149011612,
-                        0.10000000149011612
+                        1.0,
+                        1.0
                     ]
                 }
             },
@@ -152,11 +150,11 @@
             },
             "translateOffset": [
                 0.0,
-                0.5,
+                0.0,
                 0.0
             ]
         }
     ],
-    "name": "HitEffect",
+    "name": "ExpJar",
     "version": 5
 }

@@ -8,13 +8,13 @@
                         1.0,
                         1.0,
                         1.0,
-                        0.0
+                        1.0
                     ],
                     "min": [
                         1.0,
                         1.0,
                         1.0,
-                        0.0
+                        1.0
                     ]
                 },
                 "start": {
@@ -53,27 +53,27 @@
                 "direction": {
                     "max": [
                         15.0,
-                        20.0,
+                        15.0,
                         15.0
                     ],
                     "min": [
                         -15.0,
-                        0.0,
+                        -15.0,
                         -15.0
                     ]
                 },
                 "directionMode": "configured",
                 "lifeTime": {
-                    "max": 0.5,
+                    "max": 0.3499999940395355,
                     "min": 0.10000000149011612
                 },
                 "rotation": {
-                    "max": 0.0,
+                    "max": 3.140000104904175,
                     "min": 0.0
                 },
                 "speed": {
-                    "max": 2.0,
-                    "min": 2.0
+                    "max": 5.0,
+                    "min": 5.0
                 }
             },
             "isEnabled": true,
@@ -86,15 +86,15 @@
                 "drag": 0.0,
                 "gravity": [
                     0.0,
-                    -10.0,
+                    0.0,
                     0.0
                 ]
             },
             "name": "Emitter",
             "renderer": {
-                "blendMode": "normal",
+                "blendMode": "add",
                 "sortMode": "none",
-                "texture": "white2x2"
+                "texture": "box2"
             },
             "shape": {
                 "emitFromSurface": true,
@@ -105,8 +105,8 @@
             "sizeOverLifetime": {
                 "end": {
                     "max": [
-                        0.0,
-                        0.0
+                        0.10000000149011612,
+                        0.10000000149011612
                     ],
                     "min": [
                         0.0,
@@ -115,17 +115,48 @@
                 },
                 "start": {
                     "max": [
-                        0.10000000149011612,
-                        0.10000000149011612
+                        0.3499999940395355,
+                        0.3499999940395355
                     ],
                     "min": [
-                        0.10000000149011612,
-                        0.10000000149011612
+                        0.3499999940395355,
+                        0.3499999940395355
                     ]
                 }
-            }
+            },
+            "trail": {
+                "blendMode": "add",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": false,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.5,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "startWidth": 0.25,
+                "syncParticleColor": false,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.5,
+                0.0
+            ]
         }
     ],
     "name": "HitEffect",
-    "version": 2
+    "version": 5
 }
