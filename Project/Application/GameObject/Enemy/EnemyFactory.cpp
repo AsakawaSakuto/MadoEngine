@@ -18,7 +18,7 @@ namespace Enemy {
 	Data::Status Factory::CreateDefaultStatus(Data::Type type) {
 		switch (type) {
 		case Data::Type::Normal:
-			return { 100.0f, 1.0f, 3.0f };
+			return { 10.0f, 5.0f, 3.0f };
 		case Data::Type::Boss:
 			return { 1000.0f, 20.0f, 1.5f };
 		}

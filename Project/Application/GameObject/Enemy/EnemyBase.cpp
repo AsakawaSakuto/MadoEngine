@@ -17,6 +17,7 @@ namespace Enemy {
 		enemyId_ = enemyId;
 		status_ = desc.status;
 		type_ = desc.type;
+		bonusType_ = desc.bonusType;
 		sceneType_ = desc.sceneType;
 		projectileDamageCooldowns_.clear();
 		playerDamageCooldown_ = 0.0f;

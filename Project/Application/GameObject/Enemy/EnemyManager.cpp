@@ -31,6 +31,7 @@ namespace Enemy {
 		desc.position = position;
 		desc.status = Factory::CreateDefaultStatus(Data::Type::Boss);
 		desc.type = Data::Type::Boss;
+		desc.bonusType = Data::BonusType::None;
 		desc.sceneType = sceneType;
 		Spawn(desc);
 

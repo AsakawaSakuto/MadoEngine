@@ -637,7 +637,7 @@
             "text": "TitleScene",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -677,7 +677,7 @@
             "text": "でスタート",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         }
     ]

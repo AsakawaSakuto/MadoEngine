@@ -82,6 +82,7 @@ namespace Enemy {
 		desc.position = CreateSpawnPosition();
 		desc.status = CalculateSpawnStatus();
 		desc.type = Data::Type::Normal;
+		desc.bonusType = Data::BonusType::None;
 		desc.sceneType = sceneType_;
 		enemyManager_->Spawn(desc);
 	}

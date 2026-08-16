@@ -64,7 +64,7 @@ namespace UI::Game {
 	}
 
 	void ProjectileDamageView::Spawn(float damage, const Vector3& worldPosition) {
-		if (!std::isfinite(damage) || damage <= 0.0f) {
+		if (!std::isfinite(damage) || std::floor(damage) <= 0.0f) {
 			return;
 		}
 

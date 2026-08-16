@@ -24,6 +24,7 @@ namespace Enemy {
 		Vector3 position = { 0.0f, 0.0f, 0.0f };
 		Data::Status status;
 		Data::Type type = Data::Type::Normal;
+		Data::BonusType bonusType = Data::BonusType::None;
 		SceneType sceneType = SceneType::None;
 	};
 
@@ -93,6 +94,10 @@ namespace Enemy {
 		/// @brief Enemyの種類を取得
 		/// @return Enemyの種類
 		Data::Type GetType() const { return type_; }
+
+		/// @brief Enemyのボーナス種類を取得
+		/// @return Enemyのボーナス種類
+		Data::BonusType GetBonusType() const { return bonusType_; }
 
 		/// @brief Enemyの現在座標を取得
 		/// @return Enemyの現在座標
@@ -199,6 +204,7 @@ namespace Enemy {
 		std::uint32_t enemyId_ = 0;
 		Data::Status status_;
 		Data::Type type_ = Data::Type::Normal;
+		Data::BonusType bonusType_ = Data::BonusType::None;
 		SceneType sceneType_ = SceneType::None;
 		Movement movement_;
 		ColliderShape hitAABB_;
