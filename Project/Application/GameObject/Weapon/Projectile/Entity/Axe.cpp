@@ -20,7 +20,7 @@ namespace Projectile {
 		transform_.translate = ownerPosition;
 		transform_.scale = { 0.5f * sizeRate_, 0.5f * sizeRate_, 0.5f * sizeRate_ };
 
-		SetMoveDirectionTowards(targetPosition);
+		SetMoveDirectionTowards(targetPosition, true);
 
 		AABB hitbox;
 		float boxSize = 0.5f * sizeRate_;

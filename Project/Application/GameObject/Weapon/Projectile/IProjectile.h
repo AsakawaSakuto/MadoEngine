@@ -125,10 +125,18 @@ namespace Projectile {
 
 		/// @brief 指定座標へ向かうよう移動方向を変更
 		/// @param position 新しい目標座標
+		/// @param ignoresHeightDifference 高さの差を無視して水平面上の方向のみで向きを設定する場合はtrue
 		/// @return 有効な移動方向を設定できた場合はtrue
-		bool SetMoveDirectionTowards(const Vector3& position) {
+		bool SetMoveDirectionTowards(const Vector3& position, bool ignoresHeightDifference = false) {
 			constexpr float kMinDirectionLengthSq = 0.000001f;
-			const Vector3 toTarget = position - transform_.translate;
+			
+			Vector3 toTarget = position - transform_.translate;
+
+			// 高低差を移動方向へ反映しないProjectileはXZ平面へ射影
+			if (ignoresHeightDifference) {
+				toTarget.y = 0.0f;
+			}
+
 			if (toTarget.LengthSq() <= kMinDirectionLengthSq) {
 				return false;
 			}
