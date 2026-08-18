@@ -1,17 +1,17 @@
-#include "Rock.h"
+#include "Bow.h"
 #include "../../../Map/MapLimit.h"
 #include <cmath>
 
 namespace Projectile {
 
-	Rock::~Rock() {
+	Bow::~Bow() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
 			MyModel::RequestDestroy(model_);
 		}
 	}
 
-	void Rock::Initialize(InitializeDesc context) {
+	void Bow::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
@@ -31,7 +31,7 @@ namespace Projectile {
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 	}
 
-	void Rock::Update(float deltaTime) {
+	void Bow::Update(float deltaTime) {
 
 		transform_.translate += moveDirection_ * moveSpeed_ * deltaTime;
 
@@ -48,7 +48,7 @@ namespace Projectile {
 		MyDebugLine::AddShape(std::get<AABB>(hitbox_));
 	}
 
-	void Rock::OnEnemyHit() {
+	void Bow::OnEnemyHit() {
 
 		// 連続Hitごとに威力を減衰させて貫通性能との釣り合いを維持
 		damage_ *= kHitDamageMultiplier;

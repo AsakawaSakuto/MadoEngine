@@ -4,16 +4,16 @@
 
 namespace Projectile {
 
-	class Rock : public IProjectile {
+	class Bow : public IProjectile {
 	public:
-		/// @brief Rockのデストラクタ
-		~Rock() override;
+		/// @brief Bowのデストラクタ
+		~Bow() override;
 
-		/// @brief Rockを初期化
+		/// @brief Bowを初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
-		/// @brief Rockを更新
+		/// @brief Bowを更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 

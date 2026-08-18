@@ -1,5 +1,5 @@
 {
-    "name": "Rock",
+    "name": "Bow",
     "upgradeStatus": {
         "bounceCount": {
             "fixedAddValue": 1.0,
@@ -41,7 +41,7 @@
             "fixedAddValue": 1.0,
             "isSelected": false,
             "rarityAddValue": 0.10000000149011612,
-            "value": 0.0
+            "value": 99.0
         },
         "shotCooldown": {
             "fixedAddValue": 1.0,

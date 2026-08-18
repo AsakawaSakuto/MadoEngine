@@ -33,7 +33,7 @@ namespace Projectile {
 		Axe,
 		FireBall,
 		Pistol,
-		Rock,
+		Bow,
 
 		Explosion, // 爆発で使用される、武器ではない
 	};
@@ -41,7 +41,7 @@ namespace Projectile {
 	// ゲームロジックで使用できる武器を一か所で管理
 	inline constexpr std::array<Type, 4> kPlayableWeaponTypes = {
 		Type::Pistol,
-		Type::Rock,
+		Type::Bow,
 		Type::FireBall,
 		Type::Axe,
 	};
@@ -55,7 +55,7 @@ namespace Projectile {
 		case Type::Axe:      return "Axe";
 		case Type::FireBall: return "FireBall";
 		case Type::Pistol:   return "Pistol";
-		case Type::Rock:     return "Rock";
+		case Type::Bow:      return "Bow";
 		default:             return "Unknown";
 		}
 	}
@@ -93,7 +93,7 @@ namespace Projectile {
 		case Type::Axe:      return "Axe";
 		case Type::FireBall: return "FireBall";
 		case Type::Pistol:   return "Pistol";
-		case Type::Rock:     return "Rock";
+		case Type::Bow:      return "Bow";
 		default:             return "Unknown";
 		}
 	}

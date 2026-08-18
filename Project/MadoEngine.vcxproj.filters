@@ -178,7 +178,7 @@
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeUI.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.cpp" />
-    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Rock.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Bow.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
     <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
@@ -789,7 +789,7 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Rock.h">
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Bow.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileStatus.h">

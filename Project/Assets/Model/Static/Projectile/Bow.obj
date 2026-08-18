@@ -1,6 +1,6 @@
 # Blender 5.1.2
 # www.blender.org
-mtllib Rock.mtl
+mtllib Bow.mtl
 o ICO球
 v 0.000000 -1.000000 0.000000
 v 0.723607 -0.447220 0.525725

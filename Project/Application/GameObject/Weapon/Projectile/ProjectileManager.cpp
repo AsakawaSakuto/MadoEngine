@@ -95,10 +95,10 @@ namespace Projectile {
 			projectiles.push_back(std::move(pistol));
 			break;
 		}
-		case Projectile::Type::Rock: {
-			auto rock = std::make_unique<Rock>();
-			rock->Initialize(context);
-			projectiles.push_back(std::move(rock));
+		case Projectile::Type::Bow: {
+			auto bow = std::make_unique<Bow>();
+			bow->Initialize(context);
+			projectiles.push_back(std::move(bow));
 			break;
 		}
 		case Projectile::Type::FireBall: {
