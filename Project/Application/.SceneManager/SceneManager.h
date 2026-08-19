@@ -52,9 +52,9 @@ public:
 	/// @param layerMask 描画対象のレイヤーマスク
 	void DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
 
-	/// @brief 指定したレイヤーマスクに含まれる透過Effectを描画
+	/// @brief 指定したレイヤーマスクに含まれる透明Modelと透過Effectを描画
 	/// @param layerMask 描画対象のレイヤーマスク
-	void DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
+	void DrawTransparentLayerMask(MadoEngine::Render::RenderLayerMask layerMask);
 
 	/// @brief 指定したレイヤーマスクに含まれるSpriteとTextを描画
 	/// @param layerMask 描画対象のレイヤーマスク

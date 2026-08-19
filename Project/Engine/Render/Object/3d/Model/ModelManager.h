@@ -375,6 +375,18 @@ public:
 	/// @param layerMask 描画LayerMask
 	void DrawLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask);
 
+	/// @brief 指定CameraとLayerMaskで不透明Modelを描画
+	/// @param currentSceneType 現在のScene
+	/// @param camera Camera
+	/// @param layerMask 描画LayerMask
+	void DrawOpaqueLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask);
+
+	/// @brief 指定CameraとLayerMaskで透明Modelを奥から手前へ描画
+	/// @param currentSceneType 現在のScene
+	/// @param camera Camera
+	/// @param layerMask 描画LayerMask
+	void DrawTransparentLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask);
+
 	/// @brief 指定LayerMaskのModelをShadowMapへ描画
 	/// @param currentSceneType 現在のScene
 	/// @param lightViewProjection LightのViewProjection

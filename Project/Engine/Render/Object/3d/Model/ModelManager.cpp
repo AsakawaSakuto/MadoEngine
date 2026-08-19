@@ -29,6 +29,28 @@ std::string NormalizePath(const std::filesystem::path& path) {
 	return path.lexically_normal().generic_string();
 }
 
+/// @brief Modelが現在のSceneとLayerMaskの描画対象か判定
+/// @param model 判定するModel
+/// @param currentSceneType 現在のScene
+/// @param layerMask 描画対象のLayerMask
+/// @return 描画対象の場合はtrue
+template <typename ModelObject>
+bool IsDrawTarget(
+	const ModelObject& model,
+	SceneType currentSceneType,
+	MadoEngine::Render::RenderLayerMask layerMask) {
+	if (!model.IsVisible()) {
+		return false;
+	}
+
+	const SceneType modelScene = model.GetSceneType();
+	if (modelScene != SceneType::None && modelScene != currentSceneType) {
+		return false;
+	}
+
+	return model.IsRenderLayerIncluded(layerMask);
+}
+
 /// @brief 対応しているModel拡張子か確認
 /// @param path 確認するパス
 /// @return 対応している場合はtrue
@@ -963,18 +985,16 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayer
 }
 
 void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask) {
+	DrawOpaqueLayerMask(currentSceneType, camera, layerMask);
+	DrawTransparentLayerMask(currentSceneType, camera, layerMask);
+}
+
+void ModelManager::DrawOpaqueLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask) {
 	activeCamera_ = camera;
 	for (const auto& [name, handle] : modelNameToHandle_) {
 		(void)name;
 		Model* model = TryGet(handle);
-		if (!model || !model->IsVisible()) {
-			continue;
-		}
-		const SceneType modelScene = model->GetSceneType();
-		if (modelScene != SceneType::None && modelScene != currentSceneType) {
-			continue;
-		}
-		if (!model->IsRenderLayerIncluded(layerMask)) {
+		if (!model || !IsDrawTarget(*model, currentSceneType, layerMask) || model->RequiresTransparentPass()) {
 			continue;
 		}
 		model->Draw(camera);
@@ -982,16 +1002,42 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Ren
 	for (const auto& [name, handle] : instancedModelNameToHandle_) {
 		(void)name;
 		InstancedModel* model = TryGet(handle);
-		if (!model || !model->IsVisible()) {
+		if (!model || !IsDrawTarget(*model, currentSceneType, layerMask) || model->RequiresTransparentPass()) {
 			continue;
 		}
-		const SceneType modelScene = model->GetSceneType();
-		if (modelScene != SceneType::None && modelScene != currentSceneType) {
-			continue;
+		model->Draw(camera);
+	}
+}
+
+void ModelManager::DrawTransparentLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask) {
+	activeCamera_ = camera;
+	std::vector<IRenderObject3d*> drawTargets;
+	drawTargets.reserve(modelNameToHandle_.size() + instancedModelNameToHandle_.size());
+
+	for (const auto& [name, handle] : modelNameToHandle_) {
+		(void)name;
+		Model* model = TryGet(handle);
+		if (model && IsDrawTarget(*model, currentSceneType, layerMask) && model->RequiresTransparentPass()) {
+			drawTargets.push_back(model);
 		}
-		if (!model->IsRenderLayerIncluded(layerMask)) {
-			continue;
+	}
+
+	for (const auto& [name, handle] : instancedModelNameToHandle_) {
+		(void)name;
+		InstancedModel* model = TryGet(handle);
+		if (model && IsDrawTarget(*model, currentSceneType, layerMask) && model->RequiresTransparentPass()) {
+			drawTargets.push_back(model);
 		}
+	}
+
+	const Vector3 cameraPosition = camera.GetPosition();
+
+	// Alpha Blend結果を安定させるためカメラ距離の降順で透明Modelを描画
+	std::sort(drawTargets.begin(), drawTargets.end(), [&cameraPosition](const IRenderObject3d* lhs, const IRenderObject3d* rhs) {
+		return lhs->GetTransparentSortDistanceSq(cameraPosition) > rhs->GetTransparentSortDistanceSq(cameraPosition);
+	});
+
+	for (IRenderObject3d* model : drawTargets) {
 		model->Draw(camera);
 	}
 }

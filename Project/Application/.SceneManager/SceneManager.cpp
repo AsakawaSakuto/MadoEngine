@@ -169,7 +169,7 @@ void SceneManager::DrawLayerMask(MadoEngine::Render::RenderLayerMask layerMask) 
 
 	// 不透明、透明、Overlayの順序を維持したLayerMask描画
 	DrawSceneLayerMask(layerMask);
-	DrawParticleLayerMask(layerMask);
+	DrawTransparentLayerMask(layerMask);
 	DrawOverlayLayerMask(layerMask);
 }
 
@@ -182,17 +182,20 @@ void SceneManager::DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerM
 	if (MadoEngine::Render::ContainsRenderLayer(layerMask, MadoEngine::Render::RenderLayer::Debug)) {
 		MadoEngine::DebugLineManager::GetInstance().Draw(camera);
 	}
-	MadoEngine::ModelManager::GetInstance().DrawLayerMask(currentSceneType_, camera, layerMask);
+	MadoEngine::ModelManager::GetInstance().DrawOpaqueLayerMask(currentSceneType_, camera, layerMask);
 }
 
-void SceneManager::DrawParticleLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {
+void SceneManager::DrawTransparentLayerMask(MadoEngine::Render::RenderLayerMask layerMask) {
 	if (!currentScene_) {
 		return;
 	}
 
-	const Camera& camera = currentScene_->GetCamera();
+	Camera& camera = currentScene_->GetCamera();
 
-	// 透明系Effectを共通CameraとLayerMaskで同じ描画段階へ集約
+	// 背景が完成したColor Targetへ透明Modelを奥から手前の順でAlpha Blend
+	MadoEngine::ModelManager::GetInstance().DrawTransparentLayerMask(currentSceneType_, camera, layerMask);
+
+	// 透明系Effectを共通CameraとLayerMaskで同じ透明描画段階へ集約
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().DrawLayerMask(
 		currentSceneType_,
 		camera,

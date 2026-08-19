@@ -182,8 +182,14 @@ void InstancedModel::Draw(Camera& useCamera) {
 	}
 
 	assert(psoRegistry_);
-	commandList_->SetGraphicsRootSignature(MadoEngine::RootSignatureManager::GetInstance().Get(psoDesc_.rootSigKey));
-	commandList_->SetPipelineState(psoRegistry_->Get(psoDesc_));
+	MadoEngine::Render::PSODesc drawPsoDesc = psoDesc_;
+	if (RequiresTransparentPass()) {
+
+		// Batch内に透明Instanceがある場合は不透明Sceneの深度を参照しつつ書き込みを停止
+		drawPsoDesc.depthMode = MadoEngine::Render::DepthMode::ReadOnly;
+	}
+	commandList_->SetGraphicsRootSignature(MadoEngine::RootSignatureManager::GetInstance().Get(drawPsoDesc.rootSigKey));
+	commandList_->SetPipelineState(psoRegistry_->Get(drawPsoDesc));
 	commandList_->IASetVertexBuffers(0, 1, &sharedData_->vertexBufferView);
 	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -289,6 +295,30 @@ void InstancedModel::SetInstanceVisible(uint32_t handle, bool isVisible) {
 		return;
 	}
 	instances_[handle].isVisible = isVisible;
+}
+
+bool InstancedModel::RequiresTransparentPass() const {
+	if (IRenderObject3d::RequiresTransparentPass()) {
+		return true;
+	}
+
+	return std::any_of(instances_.begin(), instances_.end(), [](const InstanceDesc& instance) {
+		return instance.isVisible && instance.color.w < 1.0f;
+	});
+}
+
+float InstancedModel::GetTransparentSortDistanceSq(const Vector3& cameraPosition) const {
+	float farthestDistanceSq = 0.0f;
+	for (const InstanceDesc& instance : instances_) {
+		if (!instance.isVisible) {
+			continue;
+		}
+
+		// 単一DrawCallのInstance群を手前へ出し過ぎないよう最遠座標をBatchの基準に採用
+		const float distanceSq = (instance.transform.translate - cameraPosition).LengthSq();
+		farthestDistanceSq = (std::max)(farthestDistanceSq, distanceSq);
+	}
+	return farthestDistanceSq;
 }
 
 void InstancedModel::SetSceneType(SceneType sceneType) {

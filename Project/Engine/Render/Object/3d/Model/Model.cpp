@@ -644,9 +644,15 @@ void Model::Draw(Camera& useCamera) {
 	UpdateTransformGpuData(useCamera);
 
 	assert(psoRegistry_);
+	MadoEngine::Render::PSODesc drawPsoDesc = psoDesc_;
+	if (RequiresTransparentPass()) {
+
+		// 背景完成後のAlpha Blendで後続透明Modelを遮らないよう深度書き込みを停止
+		drawPsoDesc.depthMode = MadoEngine::Render::DepthMode::ReadOnly;
+	}
 	commandList_->SetGraphicsRootSignature(
-		MadoEngine::RootSignatureManager::GetInstance().Get(psoDesc_.rootSigKey));
-	commandList_->SetPipelineState(psoRegistry_->Get(psoDesc_));
+		MadoEngine::RootSignatureManager::GetInstance().Get(drawPsoDesc.rootSigKey));
+	commandList_->SetPipelineState(psoRegistry_->Get(drawPsoDesc));
 
 	if (type_ == ModelType::Skinning) {
 

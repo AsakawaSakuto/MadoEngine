@@ -74,7 +74,7 @@ void Terminal::ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage stage
 			sceneManager_->DrawSceneLayerMask(chainLayerMask);
 			break;
 		case MadoEngine::Render::LayerEffectStage::Transparent:
-			sceneManager_->DrawParticleLayerMask(chainLayerMask);
+			sceneManager_->DrawTransparentLayerMask(chainLayerMask);
 			break;
 		default:
 			break;
@@ -200,8 +200,8 @@ void Terminal::Run() {
 
 		execution_->BeginTransparentRender();
 
-		// 透明EffectをScene Colorから分離してBlend順序を維持
-		sceneManager_->DrawParticleLayerMask(MadoEngine::Render::kAllRenderLayers);
+		// 透明Modelと透明Effectを完成済みScene Colorへ合成して背景の透過を維持
+		sceneManager_->DrawTransparentLayerMask(MadoEngine::Render::kAllRenderLayers);
 		execution_->EndTransparentRender();
 		ApplyLayerEffectPasses(MadoEngine::Render::LayerEffectStage::Transparent);
 

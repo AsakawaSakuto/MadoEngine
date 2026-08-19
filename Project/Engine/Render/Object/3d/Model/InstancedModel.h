@@ -99,6 +99,15 @@ public:
 	/// @return 登録済みインスタンス数
 	size_t GetInstanceCount() const { return instances_.size(); }
 
+	/// @brief 透明描画パスが必要か判定
+	/// @return Materialまたは表示中InstanceのAlphaが1未満の場合はtrue
+	bool RequiresTransparentPass() const override;
+
+	/// @brief 透明描画のソートに使用するカメラ距離の二乗を取得
+	/// @param cameraPosition カメラのワールド座標
+	/// @return 表示中Instanceのうち最も遠いカメラ距離の二乗
+	float GetTransparentSortDistanceSq(const Vector3& cameraPosition) const override;
+
 	void SetSceneType(SceneType sceneType);
 	SceneType GetSceneType() const { return sceneType_; }
 	void SetReceiveLightMask(LightLayerMask receiveLightMask);

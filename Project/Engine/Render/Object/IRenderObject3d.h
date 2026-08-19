@@ -68,6 +68,17 @@ public:
 	/// @return 色（RGBA）
 	const Vector4& GetColor() const { return color_; }
 
+	/// @brief 透明描画パスが必要か判定
+	/// @return 色のAlphaが1未満の場合はtrue
+	virtual bool RequiresTransparentPass() const { return color_.w < 1.0f; }
+
+	/// @brief 透明描画のソートに使用するカメラ距離の二乗を取得
+	/// @param cameraPosition カメラのワールド座標
+	/// @return オブジェクトとカメラの距離の二乗
+	virtual float GetTransparentSortDistanceSq(const Vector3& cameraPosition) const {
+		return (transform_.translate - cameraPosition).LengthSq();
+	}
+
 	// ===== テクスチャ関連 =====
 
 	/// @brief オブジェクトのテクスチャを変更
