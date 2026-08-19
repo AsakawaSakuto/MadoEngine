@@ -20,6 +20,10 @@ namespace Weapon {
 
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
+		/// @brief 装備中の常時展開型Projectileを武器所有者へ同期
+		/// @param ownerPosition 武器所有者の座標
+		void SynchronizePersistentProjectiles(const Vector3& ownerPosition);
+
 		/// @brief 指定した種類の武器を一番左の空きスロットへ追加
 		/// @param type 追加する武器の種類
 		/// @return 武器を追加できた場合はtrue

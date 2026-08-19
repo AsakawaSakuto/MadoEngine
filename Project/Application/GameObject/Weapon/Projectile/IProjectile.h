@@ -22,6 +22,12 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		virtual void Update(float deltaTime) = 0;
 
+		/// @brief 常時展開中に所有者の状態を同期
+		/// @param context 同期するProjectile情報
+		virtual void SynchronizePersistentState(const InitializeDesc& context) {
+			(void)context;
+		}
+
 		/// @brief Enemy命中時の固有処理を実行
 		virtual void OnEnemyHit() {
 		}
@@ -29,6 +35,9 @@ namespace Projectile {
 		/// @brief 削除対象かを取得
 		/// @return 削除対象の場合はtrue
 		bool IsDead() const { return isDead_; }
+
+		/// @brief Projectileの破棄を予約
+		void RequestDestroy() { isDead_ = true; }
 
 		/// @brief Projectileの識別番号を取得
 		/// @return Projectileの識別番号

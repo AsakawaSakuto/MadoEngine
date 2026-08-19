@@ -39,6 +39,22 @@ namespace Weapon {
 		}
 	}
 
+	void Inventory::SynchronizePersistentProjectiles(const Vector3& ownerPosition) {
+
+		// 通常射撃のTarget有無と分離して常時展開型をPlayerへ追従
+		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
+			std::unique_ptr<BaseWeapon>& weapon = weapons_[slotIndex];
+			if (!weapon || !weapon->SynchronizePersistentProjectile(ownerPosition)) {
+				continue;
+			}
+
+			weaponFiredEvents_.push_back({
+				slotIndex,
+				weapon->GetProjectileType(),
+			});
+		}
+	}
+
 	bool Inventory::AddWeapon(Projectile::Type type) {
 		if (!Projectile::IsPlayableWeaponType(type)) {
 			Logger::Output("[Application] 無効な武器種類は追加できません。", Logger::Level::Warning);

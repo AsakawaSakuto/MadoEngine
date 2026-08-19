@@ -2,6 +2,7 @@
 #include "Entity/Explosion.h"
 #include "Entity/Pistol.h"
 #include "Entity/Bow.h"
+#include "Entity/Eye.h"
 #include "Entity/Axe.h"
 #include "Entity/FireBall.h"
 #include <cstdint>
@@ -39,6 +40,19 @@ namespace Projectile {
 		/// @param type 追加するProjectileの種類
 		/// @param context Projectileの初期化情報
 		void AddProjectile(Projectile::Type type, InitializeDesc context);
+
+		/// @brief 発射元Weaponの常時展開型Projectileを生成または同期
+		/// @param type 同期するProjectileの種類
+		/// @param context Projectileの最新情報
+		/// @return 新しくProjectileを生成した場合はtrue
+		bool SynchronizePersistentProjectile(Projectile::Type type, InitializeDesc context);
+
+		/// @brief 指定Weaponから生成されたProjectileの破棄を予約
+		/// @param sourceWeaponId 発射元Weaponインスタンスの識別番号
+		void RemoveProjectilesBySourceWeaponId(std::uint64_t sourceWeaponId);
+
+		/// @brief 管理中と生成待ちのProjectileをすべて破棄
+		void Clear();
 
 		/// @brief Enemyに接触しているProjectileの攻撃情報を収集して衝突時の挙動を更新
 		/// @param enemyTargets 衝突対象となるEnemy情報

@@ -110,6 +110,9 @@ SceneType Game::Update(float dt) {
 		player_->Update(deltaTime);
 		enemySpawner_->Update(deltaTime);
 		enemyManager_->Update(deltaTime);
+
+		// Targetが存在しないFrameも常時展開型ProjectileをPlayerへ追従
+		weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
 		Projectile::Manager::GetInstance().Update(deltaTime);
 
 		// 全GameObjectの移動後にColliderを一度だけ更新してから衝突を解決
@@ -313,6 +316,7 @@ void Game::Finalize() {
 	}
 
 	DropObject::Manager::GetInstance().Clear();
+	Projectile::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();

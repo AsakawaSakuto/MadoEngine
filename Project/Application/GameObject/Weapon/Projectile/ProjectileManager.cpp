@@ -77,6 +77,46 @@ namespace Projectile {
 		AddProjectileImmediate(type, std::move(context));
 	}
 
+	bool Manager::SynchronizePersistentProjectile(Projectile::Type type, InitializeDesc context) {
+		if (!IsPersistentWeaponType(type) || context.sourceWeaponId == 0) {
+			return false;
+		}
+
+		// 発射元Weaponごとに常時展開Projectileを一個へ限定
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
+			if (!projectile || projectile->IsDead() ||
+				projectile->GetSourceWeaponId() != context.sourceWeaponId) {
+				continue;
+			}
+
+			projectile->SynchronizePersistentState(context);
+			return false;
+		}
+
+		AddProjectile(type, std::move(context));
+		return true;
+	}
+
+	void Manager::RemoveProjectilesBySourceWeaponId(std::uint64_t sourceWeaponId) {
+		if (sourceWeaponId == 0) {
+			return;
+		}
+
+		// 管理列の走査状態に依存せず次回Updateの一括破棄へ集約
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
+			if (projectile && projectile->GetSourceWeaponId() == sourceWeaponId) {
+				projectile->RequestDestroy();
+			}
+		}
+	}
+
+	void Manager::Clear() {
+		pendingProjectileAddRequests_.clear();
+		projectiles.clear();
+		nextProjectileId_ = 1;
+		isTraversingProjectiles_ = false;
+	}
+
 	void Manager::AddProjectileImmediate(Projectile::Type type, InitializeDesc context) {
 
 		// 衝突結果を後から照合できるよう全種類で一意なIDを採番
@@ -99,6 +139,12 @@ namespace Projectile {
 			auto bow = std::make_unique<Bow>();
 			bow->Initialize(context);
 			projectiles.push_back(std::move(bow));
+			break;
+		}
+		case Projectile::Type::Eye: {
+			auto eye = std::make_unique<Eye>();
+			eye->Initialize(context);
+			projectiles.push_back(std::move(eye));
 			break;
 		}
 		case Projectile::Type::FireBall: {

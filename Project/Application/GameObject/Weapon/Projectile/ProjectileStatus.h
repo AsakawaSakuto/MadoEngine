@@ -34,16 +34,18 @@ namespace Projectile {
 		FireBall,
 		Pistol,
 		Bow,
+		Eye,
 
 		Explosion, // 爆発で使用される、武器ではない
 	};
 
 	// ゲームロジックで使用できる武器を一か所で管理
-	inline constexpr std::array<Type, 4> kPlayableWeaponTypes = {
+	inline constexpr std::array<Type, 5> kPlayableWeaponTypes = {
 		Type::Pistol,
 		Type::Bow,
 		Type::FireBall,
 		Type::Axe,
+		Type::Eye,
 	};
 
 	/// @brief 武器種類をリソース名へ変換
@@ -56,6 +58,7 @@ namespace Projectile {
 		case Type::FireBall: return "FireBall";
 		case Type::Pistol:   return "Pistol";
 		case Type::Bow:      return "Bow";
+		case Type::Eye:      return "Eye";
 		default:             return "Unknown";
 		}
 	}
@@ -84,6 +87,13 @@ namespace Projectile {
 		return false;
 	}
 
+	/// @brief 常時展開型の武器種類か確認
+	/// @param type 確認する武器種類
+	/// @return 常時展開型の武器種類の場合はtrue
+	inline bool IsPersistentWeaponType(Type type) {
+		return type == Type::Eye;
+	}
+
 	/// @brief 武器種類の日本語表示名を取得
 	/// @param type 表示名を取得する武器種類
 	/// @return 武器種類の日本語表示名
@@ -94,6 +104,7 @@ namespace Projectile {
 		case Type::FireBall: return "FireBall";
 		case Type::Pistol:   return "Pistol";
 		case Type::Bow:      return "Bow";
+		case Type::Eye:      return "Eye";
 		default:             return "Unknown";
 		}
 	}

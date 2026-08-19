@@ -10,6 +10,9 @@ namespace Weapon {
 	
 	class BaseWeapon {
 	public:
+		/// @brief 武器のデストラクタ
+		~BaseWeapon();
+
 		/// @brief 武器を初期化
 		/// @param type 初期化する武器種類
 		/// @param slotIndex 武器を格納するスロット番号
@@ -21,6 +24,11 @@ namespace Weapon {
 		/// @param ownerPosition 武器所有者の座標
 		/// @param targetPosition 射撃対象の座標
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
+
+		/// @brief 常時展開型Projectileを武器所有者の最新状態へ同期
+		/// @param ownerPosition 武器所有者の座標
+		/// @return 新しくProjectileを生成した場合はtrue
+		bool SynchronizePersistentProjectile(const Vector3& ownerPosition);
 
 		/// @brief 直前の更新でProjectileを射出したか確認
 		/// @return Projectileを射出した場合はtrue
@@ -80,6 +88,14 @@ namespace Weapon {
 		/// @param ownerPosition 武器所有者の座標
 		/// @param targetPosition 射撃対象の座標
 		void CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
+
+		/// @brief 現在の武器状態からProjectile初期化情報を生成
+		/// @param ownerPosition 武器所有者の座標
+		/// @param targetPosition 射撃対象の座標
+		/// @return Projectileの初期化情報
+		Projectile::InitializeDesc CreateProjectileInitializeDesc(
+			const Vector3& ownerPosition,
+			const Vector3& targetPosition) const;
 		
 		// 武器のステータス
 		UpgradeStatus status_;

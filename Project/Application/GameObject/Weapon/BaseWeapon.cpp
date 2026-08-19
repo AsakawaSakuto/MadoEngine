@@ -54,6 +54,12 @@ namespace Weapon {
 		}
 	}
 
+	BaseWeapon::~BaseWeapon() {
+		if (Projectile::IsPersistentWeaponType(type_)) {
+			Projectile::Manager::GetInstance().RemoveProjectilesBySourceWeaponId(weaponId_);
+		}
+	}
+
 	bool BaseWeapon::Initialize(Projectile::Type type, int slotIndex) {
 		if (!Projectile::IsPlayableWeaponType(type) || slotIndex < 0) {
 			Logger::Output("[Application] 武器の初期化引数が不正です。", Logger::Level::Error);
@@ -191,7 +197,24 @@ namespace Weapon {
 
 	void BaseWeapon::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
 		wasFiredThisFrame_ = false;
+		if (Projectile::IsPersistentWeaponType(type_)) {
+			return;
+		}
+
 		CreateProjectile(deltaTime, ownerPosition, targetPosition);
+	}
+
+	bool BaseWeapon::SynchronizePersistentProjectile(const Vector3& ownerPosition) {
+		if (!Projectile::IsPersistentWeaponType(type_)) {
+			return false;
+		}
+
+		Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, ownerPosition);
+		const bool wasCreated = Projectile::Manager::GetInstance().SynchronizePersistentProjectile(type_, context);
+		if (wasCreated) {
+			++projectileCount_;
+		}
+		return wasCreated;
 	}
 
 	void BaseWeapon::CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
@@ -209,18 +232,7 @@ namespace Weapon {
 			shotNowCount_++;
 			projectileCount_++;
 
-			Projectile::InitializeDesc context;
-			context.sourceWeaponId = weaponId_;
-			context.projectileName = weaponName_;
-			context.projectileCount = projectileCount_;
-			context.ownerPosition = ownerPosition;
-			context.targetPosition = targetPosition;
-			context.damage = status_.damage.value;
-			context.moveSpeed = status_.speed.value;
-			context.sizeRate = status_.size.value;
-			context.lifeTime = status_.lifeTime.value;
-			context.bounceCount = ConvertToProjectileCount(status_.bounceCount.value);
-			context.penetrationCount = ConvertToProjectileCount(status_.penetrationCount.value);
+			Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, targetPosition);
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 			wasFiredThisFrame_ = true;
@@ -236,5 +248,23 @@ namespace Weapon {
 		// 判定後にTimerを進めて完了イベントを次フレームの射撃へ反映
 		intervalTimer_.Update(deltaTime);
 		cooldownTimer_.Update(deltaTime);
+	}
+
+	Projectile::InitializeDesc BaseWeapon::CreateProjectileInitializeDesc(
+		const Vector3& ownerPosition,
+		const Vector3& targetPosition) const {
+		Projectile::InitializeDesc context;
+		context.sourceWeaponId = weaponId_;
+		context.projectileName = weaponName_;
+		context.projectileCount = projectileCount_;
+		context.ownerPosition = ownerPosition;
+		context.targetPosition = targetPosition;
+		context.damage = status_.damage.value;
+		context.moveSpeed = status_.speed.value;
+		context.sizeRate = status_.size.value;
+		context.lifeTime = status_.lifeTime.value;
+		context.bounceCount = ConvertToProjectileCount(status_.bounceCount.value);
+		context.penetrationCount = ConvertToProjectileCount(status_.penetrationCount.value);
+		return context;
 	}
 }
