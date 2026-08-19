@@ -43,7 +43,7 @@ namespace Projectile {
 		transform_.rotate.y += kRotationSpeed * deltaTime;
 		if (Model* model = MyModel::TryGet(model_)) {
 			// 所有者の座標を基準に少し上方へオフセットして表示
-			transform_.translate = ownerPosition + Vector3(0.0f, 0.1f, 0.0f);
+			transform_.translate = ownerPosition - Vector3(0.0f, 0.45f, 0.0f);
 			model->SetTransform(transform_);
 		}
 

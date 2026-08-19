@@ -18,9 +18,9 @@ namespace UI::Game {
 		/// @param slotCount 表示する武器スロットの数
 		void Initialize(int slotCount);
 
-		/// @brief 指定した武器アイコンの発射アニメーションを開始
-		/// @param slotIndex 発射した武器のスロット番号
-		void PlayFireAnimation(std::size_t slotIndex);
+		/// @brief 指定した武器アイコンの攻撃アニメーションを開始
+		/// @param slotIndex 攻撃した武器のスロット番号
+		void PlayAttackAnimation(std::size_t slotIndex);
 		
 		/// @brief 装備中の武器に合わせて武器アイコンの表示を更新
 		/// @param deltaTime 前フレームからの経過時間
@@ -33,19 +33,19 @@ namespace UI::Game {
 			bool isPlaying = false;
 		};
 
-		/// @brief 指定した武器アイコンの発射アニメーションを更新
+		/// @brief 指定した武器アイコンの攻撃アニメーションを更新
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param slotIndex 更新する武器スロットの番号
-		void UpdateFireAnimation(float deltaTime, std::size_t slotIndex);
+		void UpdateAttackAnimation(float deltaTime, std::size_t slotIndex);
 
 		/// @brief 指定した武器スロットのレベル表示を更新
 		/// @param slotIndex 更新する武器スロットの番号
 		/// @param weapon スロットに装備されている武器、空きスロットの場合はnullptr
 		void UpdateWeaponLevelText(std::size_t slotIndex, const Weapon::BaseWeapon* weapon);
 
-		float fireAnimationDuration_ = 0.15f;    // 発射アニメーションの合計時間（秒）
+		float attackAnimationDuration_ = 0.15f;  // 攻撃アニメーションの合計時間（秒）
 		Vector2 startIconScale = { 0.9f, 0.9f }; // 武器アイコンの通常時の拡縮率
-		Vector2 endIconScale = { 1.25f, 1.25f }; // 武器アイコンの発射アニメーション時の拡縮率
+		Vector2 endIconScale = { 1.25f, 1.25f }; // 武器アイコンの攻撃アニメーション時の拡縮率
 		float shotGaugeSize_ = 28.0f;            // 射撃待機ゲージの最大サイズ
 
 		std::vector<MadoEngine::SpriteHandle> weaponIcons_;

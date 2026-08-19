@@ -49,7 +49,7 @@ namespace UI::Game {
 	
 	}
 
-	void WeaponIconUI::PlayFireAnimation(std::size_t slotIndex) {
+	void WeaponIconUI::PlayAttackAnimation(std::size_t slotIndex) {
 		if (slotIndex >= animationStates_.size()) {
 			return;
 		}
@@ -105,7 +105,7 @@ namespace UI::Game {
 				shotGaugeSize_ * shotCooldownProgress,
 			});
 
-			UpdateFireAnimation(deltaTime, slotIndex);
+			UpdateAttackAnimation(deltaTime, slotIndex);
 		}
 	}
 
@@ -134,7 +134,7 @@ namespace UI::Game {
 		}
 	}
 
-	void WeaponIconUI::UpdateFireAnimation(float deltaTime, std::size_t slotIndex) {
+	void WeaponIconUI::UpdateAttackAnimation(float deltaTime, std::size_t slotIndex) {
 		if (slotIndex >= weaponIcons_.size() || slotIndex >= animationStates_.size()) {
 			return;
 		}
@@ -151,9 +151,9 @@ namespace UI::Game {
 
 		state.elapsedTime += (std::max)(deltaTime, 0.0f);
 
-		// 射撃時の拡縮を一往復のEasingとして再生
+		// 攻撃時の拡縮を一往復のEasingとして再生
 		const float progress = std::clamp(
-			state.elapsedTime / fireAnimationDuration_,
+			state.elapsedTime / attackAnimationDuration_,
 			0.0f,
 			1.0f);
 		const Vector2 scale = Easing::LerpBack(

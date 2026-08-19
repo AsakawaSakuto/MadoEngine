@@ -5,6 +5,7 @@
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
 #include <cstddef>
+#include <cmath>
 #include <string>
 
 namespace Weapon {
@@ -12,7 +13,7 @@ namespace Weapon {
 	void Inventory::Initialize(Projectile::Type type) {
 		weapons_.clear();
 		weapons_.resize(slotCount_);
-		weaponFiredEvents_.clear();
+		weaponAttackEvents_.clear();
 		revision_ = 0;
 
 		if (!AddWeapon(type)) {
@@ -31,7 +32,7 @@ namespace Weapon {
 
 			weapon->Update(deltaTime, ownerPosition, targetPosition);
 			if (weapon->WasFiredThisFrame()) {
-				weaponFiredEvents_.push_back({
+				weaponAttackEvents_.push_back({
 					slotIndex,
 					weapon->GetProjectileType(),
 				});
@@ -42,16 +43,10 @@ namespace Weapon {
 	void Inventory::SynchronizePersistentProjectiles(const Vector3& ownerPosition) {
 
 		// 通常射撃のTarget有無と分離して常時展開型をPlayerへ追従
-		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
-			std::unique_ptr<BaseWeapon>& weapon = weapons_[slotIndex];
-			if (!weapon || !weapon->SynchronizePersistentProjectile(ownerPosition)) {
-				continue;
+		for (const std::unique_ptr<BaseWeapon>& weapon : weapons_) {
+			if (weapon) {
+				weapon->SynchronizePersistentProjectile(ownerPosition);
 			}
-
-			weaponFiredEvents_.push_back({
-				slotIndex,
-				weapon->GetProjectileType(),
-			});
 		}
 	}
 
@@ -161,11 +156,11 @@ namespace Weapon {
 		return weapons_[slotIndex].get();
 	}
 
-	std::vector<WeaponFiredEvent> Inventory::ConsumeWeaponFiredEvents() {
+	std::vector<WeaponAttackEvent> Inventory::ConsumeWeaponAttackEvents() {
 
 		// 返却と同時に内部キューを空にして同一イベントの再処理を防止
-		std::vector<WeaponFiredEvent> events;
-		events.swap(weaponFiredEvents_);
+		std::vector<WeaponAttackEvent> events;
+		events.swap(weaponAttackEvents_);
 		return events;
 	}
 
@@ -178,11 +173,23 @@ namespace Weapon {
 		}
 
 		// 削除済みWeaponの遅延命中を別の装備へ加算しないようインスタンスIDで照合
-		for (const std::unique_ptr<BaseWeapon>& weapon : weapons_) {
-			if (weapon && weapon->GetWeaponId() == sourceWeaponId) {
-				weapon->RecordDamage(appliedDamage, wasKilled);
-				return;
+		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
+			BaseWeapon* weapon = weapons_[slotIndex].get();
+			if (!weapon || weapon->GetWeaponId() != sourceWeaponId) {
+				continue;
 			}
+
+			weapon->RecordDamage(appliedDamage, wasKilled);
+			if (weapon->GetProjectileType() == Projectile::Type::Eye &&
+				std::isfinite(appliedDamage) && appliedDamage > 0.0f) {
+
+				// Eyeは生成時ではなく実ダメージが発生した瞬間を攻撃演出として通知
+				weaponAttackEvents_.push_back({
+					slotIndex,
+					weapon->GetProjectileType(),
+				});
+			}
+			return;
 		}
 	}
 

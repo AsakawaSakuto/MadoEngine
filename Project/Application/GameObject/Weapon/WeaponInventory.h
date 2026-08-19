@@ -7,8 +7,8 @@
 
 namespace Weapon {
 
-	/// @brief 武器がProjectileを射出したときのイベント情報
-	struct WeaponFiredEvent {
+	/// @brief 武器アイコンの攻撃アニメーションへ渡すイベント情報
+	struct WeaponAttackEvent {
 		std::size_t slotIndex = 0;
 		Projectile::Type weaponType = Projectile::Type::None;
 	};
@@ -65,9 +65,9 @@ namespace Weapon {
 		/// @return 武器の追加または削除ごとに増える変更番号
 		std::uint64_t GetRevision() const { return revision_; }
 
-		/// @brief 未処理の武器発射イベントを取得してキューをクリア
-		/// @return 発生順に格納された武器発射イベント
-		std::vector<WeaponFiredEvent> ConsumeWeaponFiredEvents();
+		/// @brief 未処理の武器攻撃イベントを取得してキューをクリア
+		/// @return 発生順に格納された武器攻撃イベント
+		std::vector<WeaponAttackEvent> ConsumeWeaponAttackEvents();
 
 		/// @brief Projectileによるダメージと撃破結果を発射元Weaponへ記録
 		/// @param sourceWeaponId 発射元Weaponインスタンスの識別番号
@@ -86,7 +86,7 @@ namespace Weapon {
 		int slotCount_ = 4; // 武器スロットの数
 		Projectile::Type selectedAddWeaponType_ = Projectile::Type::Pistol;
 		std::vector<std::unique_ptr<BaseWeapon>> weapons_;
-		std::vector<WeaponFiredEvent> weaponFiredEvents_;
+		std::vector<WeaponAttackEvent> weaponAttackEvents_;
 		std::uint64_t revision_ = 0;
 	};
 }

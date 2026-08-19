@@ -165,10 +165,10 @@ SceneType Game::Update(float dt) {
 	}
 	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 
-	// 当Frameの射撃Eventを一度だけ消費して対応SlotのUI演出へ変換
-	for (const Weapon::WeaponFiredEvent& event :
-		weaponInventory_->ConsumeWeaponFiredEvents()) {
-		weaponIconUI_->PlayFireAnimation(event.slotIndex);
+	// 当Frameの攻撃Eventを一度だけ消費して対応SlotのUI演出へ変換
+	for (const Weapon::WeaponAttackEvent& event :
+		weaponInventory_->ConsumeWeaponAttackEvents()) {
+		weaponIconUI_->PlayAttackAnimation(event.slotIndex);
 	}
 	weaponIconUI_->Update(deltaTime, *weaponInventory_);
 
