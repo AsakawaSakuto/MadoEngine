@@ -26,9 +26,9 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("EyeTexture");
+			model->SetTexture("EyeTexture2");
 			model->SetTransform(transform_);
-			model->SetColor(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+			model->SetColor(Vector4(1.0f, 0.0f, 1.0f, 1.0f)); // 紫色に設定
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);
 		}
@@ -42,6 +42,8 @@ namespace Projectile {
 		// 常時展開中であることを視認できるよう所有者の周囲でEyeを回転
 		transform_.rotate.y += kRotationSpeed * deltaTime;
 		if (Model* model = MyModel::TryGet(model_)) {
+			// 所有者の座標を基準に少し上方へオフセットして表示
+			transform_.translate = ownerPosition + Vector3(0.0f, 0.1f, 0.0f);
 			model->SetTransform(transform_);
 		}
 
