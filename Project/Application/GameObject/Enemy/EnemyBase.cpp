@@ -8,6 +8,8 @@
 namespace Enemy {
 	namespace {
 		constexpr float kDamageFlashDuration = 6.0f / 60.0f;
+		constexpr float kEmergenceSpeed = 4.0f;
+		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	}
 
@@ -24,6 +26,8 @@ namespace Enemy {
 		damageFlashRemainingTime_ = 0.0f;
 		gamingColor_.Reset();
 		isActive_ = status_.currentHealth > 0.0f;
+		isEmerging_ = false;
+		areCollidersRegistered_ = false;
 		isDeathRewardSpawned_ = false;
 		isReleased_ = false;
 		transform_.translate = desc.position;
@@ -32,18 +36,20 @@ namespace Enemy {
 		movement_.Initialize();
 
 		hitAABB_ = CreateHitCollider();
-		colliderShape_ = CreateMovementCollider();
+		const Sphere movementCollider = CreateMovementCollider();
+		colliderShape_ = movementCollider;
+		emergenceTargetY_ = desc.groundSurfaceY + movementCollider.radius;
+		isEmerging_ = desc.emergeFromGround && std::isfinite(emergenceTargetY_) &&
+			transform_.translate.y < emergenceTargetY_;
 
 		movementColliderName_ = CreateColliderName("EnemyMovementSphere");
 		hitColliderName_ = CreateColliderName("EnemyHitBox");
 		modelName_ = CreateModelName();
 
-		// 移動解決とProjectile被弾で形状とTagを使い分けるためColliderを分離
-		MyCollider::RegisterCollider(
-			movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate,0.0f);
-
-		MyCollider::RegisterCollider(
-			hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
+		// 出現中の地形押し戻しと攻撃判定を避けるため地表面到達後までCollider登録を保留
+		if (!isEmerging_) {
+			RegisterColliders();
+		}
 
 		std::string modelAssetName = GetModelAssetName();
 		if (!MadoEngine::ModelManager::GetInstance().GetSharedData(modelAssetName)) {
@@ -77,6 +83,13 @@ namespace Enemy {
 			return;
 		}
 
+		if (isEmerging_) {
+
+			// 地中では追跡と重力を停止して地表面へ向かう出現移動だけを更新
+			UpdateEmergence(deltaTime);
+			return;
+		}
+
 		// 共通状態の検証後に種類固有の行動へ更新を委譲
 		UpdateBehavior(deltaTime);
 	}
@@ -86,7 +99,9 @@ namespace Enemy {
 			return;
 		}
 
-		movement_.ResolveAfterCollision(movementColliderName_, transform_);
+		if (!isEmerging_) {
+			movement_.ResolveAfterCollision(movementColliderName_, transform_);
+		}
 		ApplyModelTransform();
 	}
 
@@ -102,7 +117,7 @@ namespace Enemy {
 	}
 
 	bool Base::IsHitPlayer() const {
-		if (!isActive_) {
+		if (!isActive_ || isEmerging_) {
 			return false;
 		}
 
@@ -112,6 +127,11 @@ namespace Enemy {
 	bool Base::IsInsidePlayerDeleteRange() const {
 		if (!isActive_) {
 			return false;
+		}
+		if (isEmerging_) {
+
+			// Collider登録前の出現中Enemyを範囲外として誤削除しないため管理範囲内扱い
+			return true;
 		}
 
 		return MyCollider::IsHitWithTag(hitColliderName_, CollisionTag::EnemyDeleteRangeSphere);
@@ -136,7 +156,7 @@ namespace Enemy {
 		ProjectileDamageResult result;
 
 		// 不正なProjectile識別子と非有限Damageを状態へ反映しないため入力を検証
-		if (!isActive_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
+		if (!isActive_ || isEmerging_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
 			return result;
 		}
 
@@ -241,6 +261,34 @@ namespace Enemy {
 		isDeathRewardSpawned_ = true;
 	}
 
+	void Base::UpdateEmergence(float deltaTime) {
+		const float safeDeltaTime = std::isfinite(deltaTime) ? std::max(0.0f, deltaTime) : 0.0f;
+		transform_.translate.y =
+			std::min(emergenceTargetY_, transform_.translate.y + kEmergenceSpeed * safeDeltaTime);
+		if (transform_.translate.y < emergenceTargetY_ - kEmergenceCompletionEpsilon) {
+			return;
+		}
+
+		// 地表面到達時に座標誤差を除去して通常移動と衝突判定へ一度だけ遷移
+		transform_.translate.y = emergenceTargetY_;
+		isEmerging_ = false;
+		movement_.Initialize();
+		RegisterColliders();
+	}
+
+	void Base::RegisterColliders() {
+		if (areCollidersRegistered_) {
+			return;
+		}
+
+		// 移動解決とProjectile被弾で形状とTagを使い分けるためColliderを分離
+		MyCollider::RegisterCollider(
+			movementColliderName_, CollisionTag::EnemyMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
+		MyCollider::RegisterCollider(
+			hitColliderName_, CollisionTag::EnemyHitBox, &hitAABB_, &transform_.translate, 0.0f);
+		areCollidersRegistered_ = true;
+	}
+
 	bool Base::MoveTowardPosition(float deltaTime, const Vector3& targetPosition, float speedMultiplier) {
 		const float moveSpeed = status_.moveSpeed * std::max(0.0f, speedMultiplier);
 		if (movement_.Update(deltaTime, targetPosition, moveSpeed, transform_)) {
@@ -277,12 +325,13 @@ namespace Enemy {
 			return;
 		}
 
-		if (!movementColliderName_.empty()) {
+		if (areCollidersRegistered_ && !movementColliderName_.empty()) {
 			MyCollider::RemoveCollider(movementColliderName_);
 		}
-		if (!hitColliderName_.empty()) {
+		if (areCollidersRegistered_ && !hitColliderName_.empty()) {
 			MyCollider::RemoveCollider(hitColliderName_);
 		}
+		areCollidersRegistered_ = false;
 		if (!modelName_.empty()) {
 			MyModel::RequestDestroy(model_);
 			model_ = {};

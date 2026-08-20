@@ -26,6 +26,8 @@ namespace Enemy {
 		Data::Type type = Data::Type::Normal;
 		Data::BonusType bonusType = Data::BonusType::None;
 		SceneType sceneType = SceneType::None;
+		float groundSurfaceY = 0.0f;
+		bool emergeFromGround = false;
 	};
 
 	/// @brief Enemyへ適用したProjectileダメージの結果
@@ -86,6 +88,10 @@ namespace Enemy {
 		/// @brief Enemyの有効状態を取得
 		/// @return 有効であればtrue
 		bool IsActive() const { return isActive_; }
+
+		/// @brief Enemyが地中からの出現中か判定
+		/// @return 地中からの出現中であればtrue
+		bool IsEmerging() const { return isEmerging_; }
 
 		/// @brief Enemyの識別番号を取得
 		/// @return Enemyの識別番号
@@ -186,6 +192,13 @@ namespace Enemy {
 		/// @brief 死亡報酬を生成
 		void SpawnDeathReward();
 
+		/// @brief 地中から地表面までの出現移動を更新
+		/// @param deltaTime 前フレームからの経過時間
+		void UpdateEmergence(float deltaTime);
+
+		/// @brief 移動用と被弾用のColliderを登録
+		void RegisterColliders();
+
 		/// @brief Modelへ現在のTransformを反映
 		void ApplyModelTransform();
 
@@ -216,7 +229,10 @@ namespace Enemy {
 		std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
 		float playerDamageCooldown_ = 0.0f;
 		float damageFlashRemainingTime_ = 0.0f;
+		float emergenceTargetY_ = 0.0f;
 		bool isActive_ = true;
+		bool isEmerging_ = false;
+		bool areCollidersRegistered_ = false;
 		bool isDeathRewardSpawned_ = false;
 		bool isReleased_ = false;
 		GamingColor gamingColor_;

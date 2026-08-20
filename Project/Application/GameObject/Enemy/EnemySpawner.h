@@ -32,9 +32,11 @@ namespace Enemy {
 		/// @brief Enemyの生成要求を1件発行
 		void SpawnEnemy();
 
-		/// @brief Player周辺の生成位置を作成
-		/// @return Enemyの生成位置
-		Vector3 CreateSpawnPosition() const;
+		/// @brief Player周辺の地表面からEnemyの生成位置を作成
+		/// @param outPosition Enemyの生成位置
+		/// @param outGroundSurfaceY 生成地点の地表面Y座標
+		/// @return 生成可能な地表面が見つかった場合はtrue
+		bool TryCreateSpawnPosition(Vector3& outPosition, float& outGroundSurfaceY) const;
 
 		/// @brief 現在の経過時間に応じたEnemyステータスを計算
 		/// @return 新しく生成するEnemyのステータス

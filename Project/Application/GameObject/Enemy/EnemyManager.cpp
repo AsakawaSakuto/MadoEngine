@@ -86,7 +86,7 @@ namespace Enemy {
 
 		// 平方根を避けた距離比較で有効なEnemyだけを探索
 		for (const std::unique_ptr<Base>& enemy : enemies_) {
-			if (!enemy || !enemy->IsActive()) {
+			if (!enemy || !enemy->IsActive() || enemy->IsEmerging()) {
 				continue;
 			}
 
@@ -125,7 +125,7 @@ namespace Enemy {
 
 		// Projectile側へ渡すSnapshotとHit結果を戻すID索引を同時に構築
 		for (std::unique_ptr<Base>& enemy : enemies_) {
-			if (!enemy || !enemy->IsActive()) {
+			if (!enemy || !enemy->IsActive() || enemy->IsEmerging()) {
 				continue;
 			}
 

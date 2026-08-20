@@ -1,5 +1,6 @@
 #include "EnemySpawner.h"
 #include "GameObject/Player/Player.h"
+#include "Utility/Collider/MyCollider.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
@@ -10,9 +11,10 @@
 
 namespace {
 	constexpr float kPi = 3.14159265358979323846f;
-	constexpr float kSpawnHeightOffset = 1.0f;
+	constexpr float kSpawnBuriedDepth = 2.0f;
 	constexpr float kMinSpawnInterval = 0.1f;
 	constexpr float kSecondsPerMinute = 60.0f;
+	constexpr std::size_t kMaxSpawnPositionAttempts = 8;
 } // namespace
 
 namespace Enemy {
@@ -79,7 +81,14 @@ namespace Enemy {
 		}
 
 		SpawnDesc desc;
-		desc.position = CreateSpawnPosition();
+		float groundSurfaceY = 0.0f;
+		if (!TryCreateSpawnPosition(desc.position, groundSurfaceY)) {
+			return;
+		}
+
+		// 地形Colliderを無効化した出現状態で地表面直下から上昇
+		desc.emergeFromGround = true;
+		desc.groundSurfaceY = groundSurfaceY;
 		desc.status = CalculateSpawnStatus();
 		desc.type = Data::Type::Normal;
 		desc.bonusType = Data::BonusType::None;
@@ -87,19 +96,43 @@ namespace Enemy {
 		enemyManager_->Spawn(desc);
 	}
 
-	Vector3 Spawner::CreateSpawnPosition() const {
+	bool Spawner::TryCreateSpawnPosition(Vector3& outPosition, float& outGroundSurfaceY) const {
 		const Vector3 playerPosition = player_->GetPosition();
-		const float angle = MyRand::GetFloat(0.0f, kPi * 2.0f);
-		const float radius = MyRand::GetFloat(minSpawnRadius_, maxSpawnRadius_);
+		const float groundSearchDistance = mapLimit_.max.y - mapLimit_.min.y;
 
-		Vector3 spawnPosition = { playerPosition.x + std::sin(angle) * radius, playerPosition.y + kSpawnHeightOffset,
-								  playerPosition.z + std::cos(angle) * radius };
+		// 穴や地形未配置地点を避けるためPlayer周辺の候補を複数回探索
+		for (std::size_t attempt = 0; attempt < kMaxSpawnPositionAttempts; ++attempt) {
+			const float angle = MyRand::GetFloat(0.0f, kPi * 2.0f);
+			const float radius = MyRand::GetFloat(minSpawnRadius_, maxSpawnRadius_);
+			Vector3 groundQueryOrigin = {
+				playerPosition.x + std::sin(angle) * radius,
+				mapLimit_.max.y,
+				playerPosition.z + std::cos(angle) * radius,
+			};
 
-		// Player周囲の生成位置がMap外へ出ないよう最終座標を範囲内へ制限
-		spawnPosition.x = std::clamp(spawnPosition.x, mapLimit_.min.x, mapLimit_.max.x);
-		spawnPosition.y = std::clamp(spawnPosition.y, mapLimit_.min.y, mapLimit_.max.y);
-		spawnPosition.z = std::clamp(spawnPosition.z, mapLimit_.min.z, mapLimit_.max.z);
-		return spawnPosition;
+			// Player周囲の生成候補がMap外へ出ないようXZ座標を範囲内へ制限
+			groundQueryOrigin.x = std::clamp(groundQueryOrigin.x, mapLimit_.min.x, mapLimit_.max.x);
+			groundQueryOrigin.z = std::clamp(groundQueryOrigin.z, mapLimit_.min.z, mapLimit_.max.z);
+
+			float blockSurfaceY = 0.0f;
+			float slopeSurfaceY = 0.0f;
+			const bool foundBlock = MyCollider::TryGetGroundSurfaceY(
+				groundQueryOrigin, CollisionTag::MapBlock, blockSurfaceY, groundSearchDistance);
+			const bool foundSlope = MyCollider::TryGetGroundSurfaceY(
+				groundQueryOrigin, CollisionTag::MapSlope, slopeSurfaceY, groundSearchDistance);
+			if (!foundBlock && !foundSlope) {
+				continue;
+			}
+
+			// 境界上で複数の地形が見つかった場合は埋まりを避けるため高い表面を採用
+			outGroundSurfaceY = foundBlock && foundSlope ? std::max(blockSurfaceY, slopeSurfaceY) :
+				foundBlock ? blockSurfaceY : slopeSurfaceY;
+			outPosition = groundQueryOrigin;
+			outPosition.y = outGroundSurfaceY - kSpawnBuriedDepth;
+			return true;
+		}
+
+		return false;
 	}
 
 	Data::Status Spawner::CalculateSpawnStatus() const {
