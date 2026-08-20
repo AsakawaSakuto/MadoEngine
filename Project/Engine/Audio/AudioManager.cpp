@@ -13,9 +13,10 @@ namespace MadoEngine {
 	void AudioManager::Initialize() {
 		Logger::Output("AudioManager : 初期化を開始しました",Logger::Level::Engine);
 
-		// マップのクリア
+		// 再初期化時に以前の音声情報と遷移音量を持ち越さないため初期状態へ復帰
 		audioMap_.clear();
 		volumeMap_.clear();
+		bgmTransitionGain_ = 1.0f;
 
 		// Assets/Audio ディレクトリ内の全音声ファイルを自動ロード
 		std::filesystem::path audioDir(kAudioDirectory);
@@ -98,7 +99,7 @@ namespace MadoEngine {
 		auto typeIt = typeMap_.find(lowerKey);
 		if (typeIt != typeMap_.end()) {
 			switch (typeIt->second) {
-			case AudioType::BGM:   typeVolume = bgmVolume_;   break;
+			case AudioType::BGM:   typeVolume = bgmVolume_ * bgmTransitionGain_; break;
 			case AudioType::SE:    typeVolume = seVolume_;    break;
 			case AudioType::Voice: typeVolume = voiceVolume_; break;
 			default: break;
@@ -142,7 +143,7 @@ namespace MadoEngine {
 				auto typeIt = typeMap_.find(key);
 				if (typeIt != typeMap_.end()) {
 					switch (typeIt->second) {
-					case AudioType::BGM:   typeVolume = bgmVolume_;   break;
+					case AudioType::BGM:   typeVolume = bgmVolume_ * bgmTransitionGain_; break;
 					case AudioType::SE:    typeVolume = seVolume_;    break;
 					case AudioType::Voice: typeVolume = voiceVolume_; break;
 					default: break;
@@ -162,6 +163,22 @@ namespace MadoEngine {
 	void AudioManager::SetBGMVolume(float volume) {
 		Logger::Output("AudioManager : BGM音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
 		bgmVolume_ = volume;
+	}
+
+	void AudioManager::SetBGMTransitionGain(float gain) {
+		bgmTransitionGain_ = std::clamp(gain, 0.0f, 1.0f);
+
+		// 描画側の遷移進行度と同じFrameで音量を変化させるため再生中BGMへ即時同期
+		for (auto& [key, audio] : audioMap_) {
+			const auto typeIt = typeMap_.find(key);
+			if (!audio || typeIt == typeMap_.end() || typeIt->second != AudioType::BGM) {
+				continue;
+			}
+
+			const auto volumeIt = volumeMap_.find(key);
+			const float individualVolume = volumeIt != volumeMap_.end() ? volumeIt->second : 1.0f;
+			audio->SetVolume(individualVolume * masterVolume_ * bgmVolume_ * bgmTransitionGain_);
+		}
 	}
 
 	void AudioManager::SetSEVolume(float volume) {
@@ -214,7 +231,7 @@ namespace MadoEngine {
 				// MasterとCategoryとInstanceの倍率から最終音量を計算して適用
 				AudioType type = GetAudioType(lowerKey);
 				float categoryVol = (type == AudioType::SE) ? seVolume_ :
-					(type == AudioType::BGM) ? bgmVolume_ : voiceVolume_;
+					(type == AudioType::BGM) ? bgmVolume_ * bgmTransitionGain_ : voiceVolume_;
 
 				audioIt->second->SetVolume(volume * categoryVol * masterVolume_);
 			}

@@ -1,5 +1,6 @@
 #pragma once
 #include "CommonData.h"
+#include "SceneBgmController.h"
 #include "SceneType.h"
 #include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Render/Object/RenderLayer.h"
@@ -115,6 +116,7 @@ private:
 	void ChangeScene(SceneType type);
 
 	CommonData commonData_;                     // Sceneをまたいで保持するApplication共通データ
+	SceneBgmController sceneBgmController_;     // Scene固有BGMと遷移音量の管理
 	std::map<SceneType, CreatorFunc> creators_;  // 登録されたシーン生成関数
 	std::unique_ptr<IScene> currentScene_;       // 現在のシーン
 	SceneType currentSceneType_;                 // 現在のシーンのタイプ

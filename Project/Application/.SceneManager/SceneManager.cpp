@@ -72,6 +72,8 @@ SceneManager::SceneManager()
 	, hasPendingSceneChange_(false) {}
 
 SceneManager::~SceneManager() {
+	sceneBgmController_.Finalize();
+
 	if (!currentScene_) {
 		return;
 	}
@@ -118,6 +120,7 @@ void SceneManager::Initialize(SceneType initialScene) {
 void SceneManager::Update(float dt) {
 	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
 	transitionController.Update(dt);
+	sceneBgmController_.Update(transitionController.GetEffectProgress());
 
 	// Scene処理が参照するCollider状態をFrame先頭で更新
 	ColliderManager::GetInstance().Update();
@@ -412,6 +415,7 @@ void SceneManager::ChangeScene(SceneType type) {
 	currentSceneType_ = type;
 	LoadEditorSceneObjects(currentSceneType_);
 	currentScene_->Initialize();
+	sceneBgmController_.ChangeScene(currentSceneType_);
 
 	// Runtime Camera登録後にScene別Jsonを読み込み、Editor Cameraと保存済みActive状態を復元
 	const std::filesystem::path cameraJsonPath =

@@ -57,6 +57,10 @@ namespace MadoEngine {
 		/// @param volume 音量（0.0f～1.0f）
 		void SetBGMVolume(float volume);
 
+		/// @brief シーン遷移用のBGM音量係数を設定
+		/// @param gain 0.0fから1.0fの音量係数
+		void SetBGMTransitionGain(float gain);
+
 		/// @brief SE音量を設定
 		/// @param volume 音量（0.0f～1.0f）
 		void SetSEVolume(float volume);
@@ -68,6 +72,10 @@ namespace MadoEngine {
 		/// @brief BGM音量を取得
 		/// @return 現在のBGM音量
 		float GetBGMVolume() const { return bgmVolume_; }
+
+		/// @brief シーン遷移用のBGM音量係数を取得
+		/// @return 現在のシーン遷移用音量係数
+		float GetBGMTransitionGain() const { return bgmTransitionGain_; }
 
 		/// @brief SE音量を取得
 		/// @return 現在のSE音量
@@ -140,6 +148,7 @@ namespace MadoEngine {
 		float masterVolume_ = 0.5f;
 
 		float bgmVolume_ = 0.5f;
+		float bgmTransitionGain_ = 1.0f;
 		float seVolume_ = 0.5f;
 		float voiceVolume_ = 0.5f;
 

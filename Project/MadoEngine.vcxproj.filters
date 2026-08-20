@@ -27,6 +27,7 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyNormal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
@@ -406,6 +407,7 @@
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\.SceneManager\SceneTransitionController.h" />
+    <ClInclude Include="Application\.SceneManager\SceneBgmController.h" />
     <ClInclude Include="Application\.Core\Terminal.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
