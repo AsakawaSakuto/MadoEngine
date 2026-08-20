@@ -4,6 +4,7 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <limits>
 
 namespace MadoEngine::Render {
@@ -53,6 +54,26 @@ void PostEffectManager::Finalize() {
 	device_ = nullptr;
 	isInitialized_ = false;
 	Logger::Output("PostEffectManagerを終了しました", Logger::Level::Engine);
+}
+
+void PostEffectManager::UpdateRuntimeParameters(float deltaTime) {
+	if (!isInitialized_ || !std::isfinite(deltaTime) || deltaTime <= 0.0f) {
+		return;
+	}
+
+	// 長時間実行時もfloatの時間精度を維持するため一定周期で安全に折り返し
+	for (uint32_t index = 0; index < slots_.size(); ++index) {
+		const PostEffectPassSlot& slot = slots_[index];
+		if (!slot.active || !slot.pass || !slot.pass->IsEnabled() ||
+			slot.pass->GetPostEffectType() != PostEffectType::CRT) {
+			continue;
+		}
+
+		const PostEffectPassHandle handle{ index, slot.generation };
+		UpdateParameters<CRTParameters>(handle, [deltaTime](CRTParameters& parameters) {
+			parameters.time = std::fmod((std::max)(parameters.time, 0.0f) + deltaTime, 4096.0f);
+		});
+	}
 }
 
 PostEffectPassHandle PostEffectManager::CreateLayerPass(const LayerPostEffectPassCreateDesc& desc) {

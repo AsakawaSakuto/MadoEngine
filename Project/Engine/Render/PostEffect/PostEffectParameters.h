@@ -86,6 +86,25 @@ struct alignas(16) FXAAParameters {
 	float intensity = 1.0f;
 };
 
+struct alignas(16) CRTParameters {
+	float intensity = 1.0f;
+	float curvature = 0.08f;
+	float brightness = 1.03f;
+	float vignetteIntensity = 0.25f;
+	float scanlineIntensity = 0.18f;
+	float scanlineSpacing = 3.0f;
+	float scanlineThickness = 0.35f;
+	float scanlineSharpness = 4.0f;
+	float shadowMaskIntensity = 0.08f;
+	float shadowMaskScale = 1.0f;
+	float noiseIntensity = 0.015f;
+	float flickerIntensity = 0.015f;
+	float scanlineSpeed = 0.0f;
+	float flickerFrequency = 17.0f;
+	float borderSoftness = 0.015f;
+	float time = 0.0f;
+};
+
 struct alignas(16) GaussianFilterParameters {
 	float sigma = 1.6f;
 	float radius = 2.0f;
@@ -211,6 +230,7 @@ MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(DepthOfFieldParameters, DepthOfFi
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(DissolveParameters, Dissolve);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(FogParameters, Fog);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(FXAAParameters, FXAA);
+MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(CRTParameters, CRT);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(GaussianFilterParameters, GaussianFilter);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(DepthOutlineParameters, DepthOutline);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(LensDistortionParameters, LensDistortion);
@@ -238,6 +258,7 @@ MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(DepthOfFieldParameters, 32);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(DissolveParameters, 32);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(FogParameters, 48);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(FXAAParameters, 16);
+MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(CRTParameters, 64);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(GaussianFilterParameters, 16);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(DepthOutlineParameters, 32);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(LensDistortionParameters, 32);

@@ -30,6 +30,7 @@ enum class PostEffectType : uint32_t {
 	Vignette,
 	FXAA,
 	ToneMapping,
+	CRT,
 };
 
 } // namespace MadoEngine::Render

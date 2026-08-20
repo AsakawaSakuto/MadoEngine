@@ -55,6 +55,10 @@ public:
 	/// @brief GPU完了待機後に登録済みPassとデバイス参照を解放
 	void Finalize();
 
+	/// @brief 時間依存するポストエフェクトの実行時パラメータを更新
+	/// @param deltaTime 前フレームからの経過時間
+	void UpdateRuntimeParameters(float deltaTime);
+
 	/// @brief 個別描画レイヤー向けPassを生成
 	/// @param desc 生成設定
 	/// @return 生成したPassのHandle、key重複や設定不正の場合は無効Handle

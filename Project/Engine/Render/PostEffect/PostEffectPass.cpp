@@ -55,7 +55,8 @@ namespace MadoEngine::Render {
 	void PostEffectPass::SetScreenEffectStage(ScreenEffectStage stage) {
 		assert(IsValidScreenEffectStage(stage) && "ScreenEffectStageが範囲外です");
 		const bool requiresDisplayColor = effectType_ == PostEffectType::ToneMapping ||
-			effectType_ == PostEffectType::FXAA;
+			effectType_ == PostEffectType::FXAA ||
+			effectType_ == PostEffectType::CRT;
 		desc_.screenEffectStage = requiresDisplayColor
 			? ScreenEffectStage::Final
 			: stage;
@@ -123,7 +124,9 @@ namespace MadoEngine::Render {
 		desc_.effectShaderKey = std::string(definition.shaderKey);
 		effectDesc_.psKey = desc_.effectShaderKey;
 		effectType_ = definition.type;
-		if (definition.type == PostEffectType::ToneMapping || definition.type == PostEffectType::FXAA) {
+		if (definition.type == PostEffectType::ToneMapping ||
+			definition.type == PostEffectType::FXAA ||
+			definition.type == PostEffectType::CRT) {
 			desc_.screenEffectStage = ScreenEffectStage::Final;
 		}
 		ClearFloatParameterControls();

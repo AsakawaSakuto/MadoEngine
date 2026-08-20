@@ -24,6 +24,7 @@ const DepthOfFieldParameters kDepthOfFieldDefaults{};
 const DissolveParameters kDissolveDefaults{};
 const FogParameters kFogDefaults{};
 const FXAAParameters kFXAADefaults{};
+const CRTParameters kCRTDefaults{};
 const GaussianFilterParameters kGaussianFilterDefaults{};
 const DepthOutlineParameters kDepthOutlineDefaults{};
 const LensDistortionParameters kLensDistortionDefaults{};
@@ -118,6 +119,24 @@ const PostEffectFloatParameterDefinition kFXAAParameters[] = {
 	{ "MinEdgeThreshold", "最小エッジしきい値", offsetof(FXAAParameters, minEdgeThreshold), 0.001f, 0.0833f, 0.001f },
 	{ "SearchSpan", "輪郭探索範囲", offsetof(FXAAParameters, searchSpan), 2.0f, 16.0f, 0.5f },
 	{ "Intensity", "適用率", offsetof(FXAAParameters, intensity), 0.0f, 1.0f, 0.01f },
+};
+
+const PostEffectFloatParameterDefinition kCRTParameters[] = {
+	{ "Intensity", "全体適用率", offsetof(CRTParameters, intensity), 0.0f, 1.0f, 0.01f },
+	{ "Curvature", "画面湾曲", offsetof(CRTParameters, curvature), 0.0f, 0.3f, 0.001f },
+	{ "Brightness", "輝度補正", offsetof(CRTParameters, brightness), 0.5f, 2.0f, 0.01f },
+	{ "VignetteIntensity", "周辺減光", offsetof(CRTParameters, vignetteIntensity), 0.0f, 1.0f, 0.01f },
+	{ "ScanlineIntensity", "走査線強度", offsetof(CRTParameters, scanlineIntensity), 0.0f, 1.0f, 0.01f },
+	{ "ScanlineSpacing", "走査線間隔", offsetof(CRTParameters, scanlineSpacing), 1.0f, 12.0f, 0.1f },
+	{ "ScanlineThickness", "走査線太さ", offsetof(CRTParameters, scanlineThickness), 0.01f, 0.98f, 0.01f },
+	{ "ScanlineSharpness", "走査線硬さ", offsetof(CRTParameters, scanlineSharpness), 0.1f, 16.0f, 0.1f },
+	{ "ShadowMaskIntensity", "RGBマスク強度", offsetof(CRTParameters, shadowMaskIntensity), 0.0f, 1.0f, 0.01f },
+	{ "ShadowMaskScale", "RGBマスク幅", offsetof(CRTParameters, shadowMaskScale), 1.0f, 8.0f, 0.1f },
+	{ "NoiseIntensity", "ノイズ強度", offsetof(CRTParameters, noiseIntensity), 0.0f, 0.25f, 0.001f },
+	{ "FlickerIntensity", "ちらつき強度", offsetof(CRTParameters, flickerIntensity), 0.0f, 0.25f, 0.001f },
+	{ "ScanlineSpeed", "走査速度", offsetof(CRTParameters, scanlineSpeed), -500.0f, 500.0f, 1.0f },
+	{ "FlickerFrequency", "ちらつき周波数", offsetof(CRTParameters, flickerFrequency), 0.0f, 120.0f, 0.1f },
+	{ "BorderSoftness", "画面端ぼかし", offsetof(CRTParameters, borderSoftness), 0.001f, 0.1f, 0.001f },
 };
 
 const PostEffectFloatParameterDefinition kGaussianFilterParameters[] = {
@@ -297,6 +316,7 @@ const std::array kDefinitions = {
 	CreateDefinition(PostEffectType::Vignette, "Vignette", "PostEffect/Vignette.PS", kVignetteDefaults, kVignetteParameters),
 	CreateDefinition(PostEffectType::FXAA, "FXAA", "PostEffect/FXAA.PS", kFXAADefaults, kFXAAParameters),
 	CreateDefinition(PostEffectType::ToneMapping, "ToneMapping", "PostEffect/ToneMapping.PS", kToneMappingDefaults, kToneMappingParameters),
+	CreateDefinition(PostEffectType::CRT, "CRT", "PostEffect/CRT.PS", kCRTDefaults, kCRTParameters),
 };
 
 } // namespace

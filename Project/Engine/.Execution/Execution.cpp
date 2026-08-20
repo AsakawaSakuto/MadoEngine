@@ -257,6 +257,7 @@ namespace MadoEngine
 		// デルタタイムを計算
 		deltaTime_->Update();
 		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
+		MadoEngine::Render::PostEffectManager::GetInstance().UpdateRuntimeParameters(dt);
 
 		// ウィンドウリサイズ要求があれば描画リソースへ反映
 		HandleResize();
@@ -599,6 +600,7 @@ namespace MadoEngine
 		MadoEngine::Render::PostEffectManager& manager =
 			MadoEngine::Render::PostEffectManager::GetInstance();
 		std::vector<const MadoEngine::Render::PostEffectPass*> deferredFXAAPasses;
+		std::vector<const MadoEngine::Render::PostEffectPass*> deferredCRTPasses;
 
 		// 出力先を交互に切り替えて前Passの結果を次Passの入力へ接続
 		for (MadoEngine::Render::PostEffectPassHandle handle : manager.GetScreenPassHandles()) {
@@ -608,6 +610,13 @@ namespace MadoEngine
 			}
 			const std::optional<MadoEngine::Render::PostEffectType> effectType = pass->GetPostEffectType();
 			const bool isFXAAPass = effectType == MadoEngine::Render::PostEffectType::FXAA;
+			const bool isCRTPass = effectType == MadoEngine::Render::PostEffectType::CRT;
+			if (stage == MadoEngine::Render::ScreenEffectStage::Final && isCRTPass) {
+
+				// CRTのピクセルパターンを後続Effectで平滑化しないようFinal Chain末尾まで延期
+				deferredCRTPasses.push_back(pass);
+				continue;
+			}
 			if (stage == MadoEngine::Render::ScreenEffectStage::Final && isFXAAPass && !isToneMapped_) {
 
 				// FXAAをHDR色へ適用しないようTone Mappingの完了まで登録順を保持して延期
@@ -631,6 +640,11 @@ namespace MadoEngine
 			// Final EffectのHDR結果をUI合成前に表示色空間へ必ず変換
 			EnsureToneMappedCompositeSource();
 			for (const MadoEngine::Render::PostEffectPass* deferredPass : deferredFXAAPasses) {
+				ApplyScreenEffectPass(*deferredPass);
+			}
+
+			// CRTをTone MappingとFXAAの完了後へ固定して表示ピクセル基準の模様を維持
+			for (const MadoEngine::Render::PostEffectPass* deferredPass : deferredCRTPasses) {
 				ApplyScreenEffectPass(*deferredPass);
 			}
 		}
