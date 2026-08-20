@@ -1,0 +1,165 @@
+{
+    "emitters": [
+        {
+            "backend": "auto",
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [
+                    {
+                        "count": 16,
+                        "time": 0.0
+                    }
+                ],
+                "duration": 0.0,
+                "isLoop": false,
+                "maxParticles": 16,
+                "ratePerSecond": 0.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        8.0,
+                        8.0,
+                        8.0
+                    ],
+                    "min": [
+                        -8.0,
+                        -8.0,
+                        -8.0
+                    ]
+                },
+                "directionMode": "configured",
+                "lifeTime": {
+                    "max": 0.25,
+                    "min": 0.25
+                },
+                "rotation": {
+                    "max": 3.140000104904175,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 4.0,
+                    "min": 4.0
+                }
+            },
+            "isEnabled": true,
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "renderer": {
+                "blendMode": "add",
+                "sortMode": "none",
+                "texture": "white2x2"
+            },
+            "shape": {
+                "offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "type": "point"
+            },
+            "simulationSpace": "world",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        0.009999999776482582,
+                        0.009999999776482582
+                    ],
+                    "min": [
+                        0.009999999776482582,
+                        0.009999999776482582
+                    ]
+                },
+                "start": {
+                    "max": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ],
+                    "min": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ]
+                }
+            },
+            "trail": {
+                "blendMode": "add",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": false,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.05000000074505806,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "startWidth": 0.25,
+                "syncParticleColor": true,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "name": "ProjectileDelete",
+    "version": 5
+}

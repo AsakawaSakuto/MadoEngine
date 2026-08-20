@@ -224,12 +224,12 @@ namespace MadoEngine {
 			rootParams[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 			D3D12_STATIC_SAMPLER_DESC staticSamplers[2]{};
-			staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSamplers[0].Filter = D3D12_FILTER_ANISOTROPIC;
 			staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].MipLODBias = 0.0f;
-			staticSamplers[0].MaxAnisotropy = 0;
+			staticSamplers[0].MaxAnisotropy = D3D12_MAX_MAXANISOTROPY;
 			staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 			staticSamplers[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
 			staticSamplers[0].MinLOD = 0.0f;
@@ -245,6 +245,7 @@ namespace MadoEngine {
 			staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 			staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 			staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+			staticSamplers[1].MaxAnisotropy = 1;
 			staticSamplers[1].ShaderRegister = 1;
 
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
@@ -329,12 +330,12 @@ namespace MadoEngine {
 			rootParams[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 			D3D12_STATIC_SAMPLER_DESC staticSamplers[2]{};
-			staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSamplers[0].Filter = D3D12_FILTER_ANISOTROPIC;
 			staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].MipLODBias = 0.0f;
-			staticSamplers[0].MaxAnisotropy = 0;
+			staticSamplers[0].MaxAnisotropy = D3D12_MAX_MAXANISOTROPY;
 			staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 			staticSamplers[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
 			staticSamplers[0].MinLOD = 0.0f;
@@ -350,6 +351,7 @@ namespace MadoEngine {
 			staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 			staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 			staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+			staticSamplers[1].MaxAnisotropy = 1;
 			staticSamplers[1].ShaderRegister = 1;
 
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
@@ -439,12 +441,12 @@ namespace MadoEngine {
 			rootParams[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 			D3D12_STATIC_SAMPLER_DESC staticSamplers[2]{};
-			staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			staticSamplers[0].Filter = D3D12_FILTER_ANISOTROPIC;
 			staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			staticSamplers[0].MipLODBias = 0.0f;
-			staticSamplers[0].MaxAnisotropy = 0;
+			staticSamplers[0].MaxAnisotropy = D3D12_MAX_MAXANISOTROPY;
 			staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 			staticSamplers[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
 			staticSamplers[0].MinLOD = 0.0f;
@@ -460,6 +462,7 @@ namespace MadoEngine {
 			staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 			staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 			staticSamplers[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+			staticSamplers[1].MaxAnisotropy = 1;
 			staticSamplers[1].ShaderRegister = 1;
 
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};

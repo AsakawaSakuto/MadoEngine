@@ -1,10 +1,13 @@
 #include "ProjectileManager.h"
+#include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include <algorithm>
 #include <utility>
 
 namespace Projectile {
 	namespace {
+		// 跳弾先の方向を作るための最小距離の2乗
 		constexpr float kMinBounceDirectionLengthSq = 0.000001f;
+		constexpr const char* kProjectileDeleteEffectName = "ProjectileDelete";
 
 		/// @brief 衝突したEnemy以外で最も近い跳弾先を検索
 		/// @param projectile 跳弾するProjectile
@@ -55,10 +58,15 @@ namespace Projectile {
 		}
 		isTraversingProjectiles_ = false;
 
-		// 全Projectileの更新完了後に寿命切れを一括破棄
+		// 全Projectileの更新完了後に削除予約を確定し、実体の破棄前に終了Effectを発火
 		projectiles.erase(
-			std::remove_if(projectiles.begin(), projectiles.end(), [](const std::unique_ptr<IProjectile>& projectile) {
-				return projectile->IsDead();
+			std::remove_if(projectiles.begin(), projectiles.end(), [this](const std::unique_ptr<IProjectile>& projectile) {
+				if (!projectile || !projectile->IsDead()) {
+					return false;
+				}
+
+				PlayProjectileDeleteEffect(*projectile);
+				return true;
 			}),
 			projectiles.end()
 		);
@@ -176,6 +184,17 @@ namespace Projectile {
 		for (ProjectileAddRequest& request : requests) {
 			AddProjectileImmediate(request.type, std::move(request.context));
 		}
+	}
+
+	void Manager::PlayProjectileDeleteEffect(const IProjectile& projectile) const {
+		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
+		desc.rootTransform.translate = projectile.GetPosition();
+		desc.sceneType = SceneType::Game;
+		desc.loopOverride = false;
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play(
+			kProjectileDeleteEffectName,
+			desc
+		);
 	}
 
 	void Manager::CollectHitsAgainst(

@@ -75,6 +75,10 @@ namespace Projectile {
 		/// @brief 保留中のProjectile追加要求を処理
 		void FlushPendingProjectiles();
 
+		/// @brief Projectile破棄位置へ削除Effectを再生
+		/// @param projectile 破棄するProjectile
+		void PlayProjectileDeleteEffect(const IProjectile& projectile) const;
+
 		std::vector<std::unique_ptr<IProjectile>> projectiles;
 		std::vector<ProjectileAddRequest> pendingProjectileAddRequests_;
 		std::uint64_t nextProjectileId_ = 1;
