@@ -33,6 +33,7 @@ const RadialBlurParameters kRadialBlurDefaults{};
 const RandomParameters kRandomDefaults{};
 const SplitToningParameters kSplitToningDefaults{};
 const ToonParameters kToonDefaults{};
+const ToneMappingParameters kToneMappingDefaults{};
 const VignetteParameters kVignetteDefaults{};
 
 const PostEffectFloatParameterDefinition kBinarizeParameters[] = {
@@ -48,7 +49,7 @@ const PostEffectFloatParameterDefinition kBinarizeParameters[] = {
 
 const PostEffectFloatParameterDefinition kBloomParameters[] = {
 	{ "Intensity", "強度", offsetof(BloomParameters, intensity), 0.0f, 5.0f, 0.01f },
-	{ "Threshold", "しきい値", offsetof(BloomParameters, threshold), 0.0f, 1.0f, 0.01f },
+	{ "Threshold", "HDRしきい値", offsetof(BloomParameters, threshold), 0.0f, 32.0f, 0.01f },
 	{ "Radius", "半径", offsetof(BloomParameters, radius), 0.0f, 32.0f, 0.1f },
 	{ "SoftKnee", "ソフトニー", offsetof(BloomParameters, softKnee), 0.0f, 1.0f, 0.01f },
 	{ "BloomColorR", "発光色R", VectorComponentOffset(offsetof(BloomParameters, bloomColor), 0), 0.0f, 1.0f, 0.01f },
@@ -208,6 +209,28 @@ const PostEffectFloatParameterDefinition kToonParameters[] = {
 	{ "OutlineColorB", "輪郭色B", offsetof(ToonParameters, outlineColorB), 0.0f, 1.0f, 0.01f },
 };
 
+const std::string_view kToneMapperModeOptions[] = {
+	"Linear",
+	"Neutral",
+	"Filmic",
+};
+
+const PostEffectFloatParameterDefinition kToneMappingParameters[] = {
+	{
+		"ToneMapperMode",
+		"Tone Mapper",
+		offsetof(ToneMappingParameters, toneMapperMode),
+		0.0f,
+		2.0f,
+		1.0f,
+		kToneMapperModeOptions,
+		3,
+	},
+	{ "ExposureEV", "露出EV", offsetof(ToneMappingParameters, exposureEV), -10.0f, 10.0f, 0.01f },
+	{ "ReinhardWhitePoint", "Filmic Reinhard白レベル", offsetof(ToneMappingParameters, reinhardWhitePoint), 1.0f, 32.0f, 0.1f },
+	{ "ACESBlend", "Filmic ACES適用率", offsetof(ToneMappingParameters, acesBlend), 0.0f, 1.0f, 0.01f },
+};
+
 const PostEffectFloatParameterDefinition kVignetteParameters[] = {
 	{ "Intensity", "強度", offsetof(VignetteParameters, intensity), 0.0f, 1.0f, 0.01f },
 	{ "InnerRadius", "内側半径", offsetof(VignetteParameters, innerRadius), 0.0f, 1.0f, 0.01f },
@@ -273,6 +296,7 @@ const std::array kDefinitions = {
 	CreateDefinition(PostEffectType::Toon, "Toon", "PostEffect/Toon.PS", kToonDefaults, kToonParameters),
 	CreateDefinition(PostEffectType::Vignette, "Vignette", "PostEffect/Vignette.PS", kVignetteDefaults, kVignetteParameters),
 	CreateDefinition(PostEffectType::FXAA, "FXAA", "PostEffect/FXAA.PS", kFXAADefaults, kFXAAParameters),
+	CreateDefinition(PostEffectType::ToneMapping, "ToneMapping", "PostEffect/ToneMapping.PS", kToneMappingDefaults, kToneMappingParameters),
 };
 
 } // namespace

@@ -115,7 +115,9 @@ PixelShaderOutput main(VertexShaderOutput input)
         float3 ambient = albedo * kAmbientIntensity;
 
         // Shadowは直接光だけへ適用してAmbientと環境反射による最低照度を維持
-        output.color.rgb = saturate(ambient + (lightContribution.diffuse + lightContribution.specular) * shadowFactor + environmentReflection);
+        output.color.rgb = max(
+            ambient + (lightContribution.diffuse + lightContribution.specular) * shadowFactor + environmentReflection,
+            0.0f);
         output.color.a = gMaterial.color.a * input.color.a * textureColor.a;
     }
     else

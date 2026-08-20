@@ -120,10 +120,10 @@ namespace MadoEngine
 		/// @brief 透明オブジェクトの描画を終了
 		void EndTransparentRender();
 
-		/// @brief Scene段階のポストエフェクト結果へSpriteとTextを描画する準備
+		/// @brief Tone MappingとFXAAの結果へSpriteとTextを描画する準備
 		void BeginOverlayRender();
 
-		/// @brief SpriteとTextの描画を終了してFinal段階の入力を確定
+		/// @brief SpriteとTextの描画を終了して表示用入力を確定
 		void EndOverlayRender();
 
 		/// @brief ImGuiレイアウト開始（DockSpace・GameView生成）
@@ -172,6 +172,10 @@ namespace MadoEngine
 			MadoEngine::Core::DepthStencilBuffer* maskDepthStencilBuffer = nullptr
 		);
 
+		/// @brief 単一の画面全体ポストエフェクトを現在の合成済み画像へ適用
+		/// @param pass 適用するポストエフェクトPass
+		void ApplyScreenEffectPass(const MadoEngine::Render::PostEffectPass& pass);
+
 		/// @brief 指定段階とLayerMaskのチェーンにDepth無視マスクが必要か判定
 		/// @param layerMask 判定するLayerMask
 		/// @param stage 対象の適用段階
@@ -191,6 +195,9 @@ namespace MadoEngine
 
 		/// @brief 現在のシーンカラーをポストエフェクト入力として使用可能な状態へ確定
 		void ResolveCompositeSource();
+
+		/// @brief HDR合成結果を表示用LDRへ変換済みの状態に確定
+		void EnsureToneMappedCompositeSource();
 
 		/// @brief 次のポストエフェクト合成先RenderTarget名を取得
 		/// @return 次の合成先RenderTarget名
@@ -234,11 +241,14 @@ namespace MadoEngine
 		std::unique_ptr<MadoEngine::Render::GameViewCapture> gameViewCapture_;
 		std::unique_ptr<MadoEngine::Render::ShadowMap> shadowMap_;
 		MadoEngine::Render::PSODesc postEffectCopyDesc_;
+		MadoEngine::Render::PSODesc displayCopyDesc_;
 		MadoEngine::Render::PSODesc compositeDesc_;
+		MadoEngine::Render::PSODesc fallbackToneMappingDesc_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> postEffectDefaultParameterResource_;
 		std::string currentCompositeSourceName_ = "SceneColor";
 		std::string resolvedPostEffectTargetName_ = "PostEffectResult";
 		std::string currentLayerEffectSourceName_ = "LayerColor";
+		std::string currentLayerColorTargetName_ = "LayerColor";
 		std::string currentTransparentTargetName_;
 		std::string currentOverlayTargetName_;
 		SceneType currentSceneType_ = SceneType::None;
@@ -249,6 +259,8 @@ namespace MadoEngine
 		bool isOverlayRenderActive_ = false;
 		bool isSceneScreenEffectStageApplied_ = false;
 		bool isFinalScreenEffectStageApplied_ = false;
+		bool isToneMapped_ = false;
+		bool isCurrentLayerEffectDisplay_ = false;
 		bool isGameViewCaptureRequested_ = false;
 
 #ifdef USE_IMGUI

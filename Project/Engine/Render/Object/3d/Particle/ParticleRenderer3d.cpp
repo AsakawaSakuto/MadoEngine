@@ -537,7 +537,7 @@ namespace MadoEngine::Particle {
 		desc.topology = MadoEngine::Render::TopologyType::Triangle;
 		desc.inputLayout = MadoEngine::Render::InputLayoutType::Sprite;
 		desc.preserveRenderTargetAlpha = true;
-		desc.rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		desc.rtvFormat = MadoEngine::Render::kHdrRenderTargetFormat;
 		desc.dsvFormat = DXGI_FORMAT_D32_FLOAT;
 		desc.vsKey = "Object3d/Particle/Particle.VS";
 		desc.psKey = "Object3d/Particle/Particle.PS";

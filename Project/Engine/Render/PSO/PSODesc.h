@@ -6,6 +6,9 @@
 
 namespace MadoEngine::Render {
 
+	inline constexpr DXGI_FORMAT kHdrRenderTargetFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	inline constexpr DXGI_FORMAT kDisplayRenderTargetFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+
 	/// @brief ブレンドモード
 	enum class BlendMode {
 		Normal,
@@ -63,7 +66,7 @@ namespace MadoEngine::Render {
 		InputLayoutType inputLayout = InputLayoutType::StaticModel;
 		uint32_t        renderTargetCount = 1;
 		bool            preserveRenderTargetAlpha = false;
-		DXGI_FORMAT     rtvFormat   = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		DXGI_FORMAT     rtvFormat   = kHdrRenderTargetFormat;
 		DXGI_FORMAT     dsvFormat   = DXGI_FORMAT_D32_FLOAT;
 		int             depthBias = D3D12_DEFAULT_DEPTH_BIAS;
 		float           depthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;

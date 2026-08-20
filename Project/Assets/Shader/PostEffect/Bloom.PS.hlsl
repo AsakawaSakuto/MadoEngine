@@ -18,7 +18,7 @@ struct PixelShaderOutput
 /// @return x: 強度, y: しきい値, z: 半径, w: ソフトニー
 float4 GetBloomParams() {
     if (all(gBloomParams == 0.0f)) {
-        return float4(0.6f, 0.7f, 4.0f, 0.5f);
+        return float4(0.6f, 1.0f, 4.0f, 0.5f);
     }
 
     return gBloomParams;
@@ -46,7 +46,7 @@ float GetBrightness(float3 color) {
 /// @param params Bloomパラメータ
 /// @return しきい値を超えたBloom色
 float3 ExtractBloomColor(float3 color, float4 params) {
-    float threshold = saturate(params.y);
+    float threshold = max(params.y, 0.0f);
     float softKnee = saturate(params.w);
     float knee = max(threshold * softKnee, 0.0001f);
 
@@ -116,6 +116,6 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     // 抽出輝度をAlphaへ残して後続CompositeのEffect Maskとして共有
     float bloomMask = saturate(bloom.a * intensity);
-    output.color = float4(saturate(texColor.rgb + bloom.rgb * intensity), max(texColor.a, bloomMask));
+    output.color = float4(max(texColor.rgb + bloom.rgb * intensity, 0.0f), max(texColor.a, bloomMask));
     return output;
 }

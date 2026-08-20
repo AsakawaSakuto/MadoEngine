@@ -142,6 +142,7 @@ void Text::InitializeCommonResources() {
 	psoDesc_.depthMode = Render::DepthMode::Disable;
 	psoDesc_.dsvFormat = DXGI_FORMAT_D32_FLOAT;
 	psoDesc_.blendMode = Render::BlendMode::Normal;
+	psoDesc_.rtvFormat = Render::kDisplayRenderTargetFormat;
 
 	Logger::Output("[Engine] Textを初期化しました: " + objectName_, Logger::Level::Engine);
 }

@@ -4,6 +4,7 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <filesystem>
@@ -702,6 +703,29 @@ void DrawPostEffectParameterRows(Render::PostEffectPass& pass) {
 		ImGui::TableSetColumnIndex(2);
 		ImGui::SetNextItemWidth(-1.0f);
 		const std::string id = "##" + std::string(parameter.key);
+		const std::span<const std::string_view> selectionOptions = parameter.GetSelectionOptions();
+		if (!selectionOptions.empty()) {
+
+			// Shaderへ渡すfloat値を整数Indexとして扱い選択肢以外の値をEditorから生成しない制約
+			const int selectedIndex = std::clamp(
+				static_cast<int>(std::round(value)),
+				0,
+				static_cast<int>(selectionOptions.size() - 1)
+			);
+			if (ImGui::BeginCombo(id.c_str(), selectionOptions[selectedIndex].data())) {
+				for (std::size_t optionIndex = 0; optionIndex < selectionOptions.size(); ++optionIndex) {
+					const bool selected = static_cast<int>(optionIndex) == selectedIndex;
+					if (ImGui::Selectable(selectionOptions[optionIndex].data(), selected)) {
+						pass.SetFloatParameter(parameter.offset, static_cast<float>(optionIndex));
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			continue;
+		}
 		if (ImGui::DragFloat(id.c_str(), &value, parameter.speed, parameter.minValue, parameter.maxValue)) {
 			pass.SetFloatParameter(parameter.offset, value);
 		}

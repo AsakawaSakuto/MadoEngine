@@ -322,7 +322,7 @@ namespace MadoEngine::Effect {
 		desc.topology = MadoEngine::Render::TopologyType::Triangle;
 		desc.inputLayout = MadoEngine::Render::InputLayoutType::None;
 		desc.preserveRenderTargetAlpha = true;
-		desc.rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		desc.rtvFormat = MadoEngine::Render::kHdrRenderTargetFormat;
 		desc.dsvFormat = DXGI_FORMAT_D32_FLOAT;
 		desc.vsKey = "Object3d/PrimitiveEffect/Cylinder.VS";
 		desc.psKey = "Object3d/PrimitiveEffect/Cylinder.PS";

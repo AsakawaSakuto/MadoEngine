@@ -11,9 +11,14 @@ namespace {
 	const std::string kSceneColorTarget = "SceneColor";               // 通常のシーン全体を最初に描く
 	const std::string kPostEffectResultTarget = "PostEffectResult";   // ポストエフェクト後の結果を置く場所
 	const std::string kPostEffectWorkTarget = "PostEffectWork";       // 複数回ポストエフェクトするための作業用バッファ
+	const std::string kDisplayResultTarget = "DisplayResult";         // Tone Mapping後の表示用結果
+	const std::string kDisplayWorkTarget = "DisplayWork";             // 表示用ポストエフェクトの作業用バッファ
 	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
 	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
 	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
+	const std::string kOverlayLayerColorTarget = "OverlayLayerColor";               // 表示色空間の特定レイヤーだけを描く
+	const std::string kOverlayLayerEffectResultTarget = "OverlayLayerEffectResult"; // 表示色空間のレイヤー用ポストエフェクト結果
+	const std::string kOverlayLayerEffectWorkTarget = "OverlayLayerEffectWork";     // 表示色空間のレイヤー用作業バッファ
 
 	const std::filesystem::path kScreenshotOutputDirectory = "Assets/Screenshot"; // スクリーンショットの出力先ディレクトリ
 	constexpr int kGameViewCaptureKey = DIK_F11;                                  // スクリーンショットを撮るキー
@@ -156,29 +161,43 @@ namespace MadoEngine
 		MadoEngine::Render::RenderTargetManager::Desc sceneColorDesc{};
 		sceneColorDesc.width = renderWidth_;
 		sceneColorDesc.height = renderHeight_;
-		sceneColorDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		sceneColorDesc.format = MadoEngine::Render::kHdrRenderTargetFormat;
 		sceneColorDesc.clearColor = { 0.1f, 0.25f, 0.5f, 1.0f };
 		renderTargetManager_->Create(kSceneColorTarget, sceneColorDesc);
 
 		MadoEngine::Render::RenderTargetManager::Desc postEffectDesc{};
 		postEffectDesc.width = renderWidth_;
 		postEffectDesc.height = renderHeight_;
-		postEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		postEffectDesc.format = MadoEngine::Render::kHdrRenderTargetFormat;
 		postEffectDesc.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderTargetManager_->Create(kPostEffectResultTarget, postEffectDesc);
 		renderTargetManager_->Create(kPostEffectWorkTarget, postEffectDesc);
 
+		MadoEngine::Render::RenderTargetManager::Desc displayDesc{};
+		displayDesc.width = renderWidth_;
+		displayDesc.height = renderHeight_;
+		displayDesc.format = MadoEngine::Render::kDisplayRenderTargetFormat;
+		displayDesc.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		renderTargetManager_->Create(kDisplayResultTarget, displayDesc);
+		renderTargetManager_->Create(kDisplayWorkTarget, displayDesc);
+
+		MadoEngine::Render::RenderTargetManager::Desc overlayLayerDesc = displayDesc;
+		overlayLayerDesc.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+		renderTargetManager_->Create(kOverlayLayerColorTarget, overlayLayerDesc);
+		renderTargetManager_->Create(kOverlayLayerEffectResultTarget, overlayLayerDesc);
+		renderTargetManager_->Create(kOverlayLayerEffectWorkTarget, overlayLayerDesc);
+
 		MadoEngine::Render::RenderTargetManager::Desc layerColorDesc{};
 		layerColorDesc.width = renderWidth_;
 		layerColorDesc.height = renderHeight_;
-		layerColorDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		layerColorDesc.format = MadoEngine::Render::kHdrRenderTargetFormat;
 		layerColorDesc.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 		renderTargetManager_->Create(kLayerColorTarget, layerColorDesc);
 
 		MadoEngine::Render::RenderTargetManager::Desc layerEffectDesc{};
 		layerEffectDesc.width = renderWidth_;
 		layerEffectDesc.height = renderHeight_;
-		layerEffectDesc.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		layerEffectDesc.format = MadoEngine::Render::kHdrRenderTargetFormat;
 		layerEffectDesc.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 		renderTargetManager_->Create(kLayerEffectResultTarget, layerEffectDesc);
 		renderTargetManager_->Create(kLayerEffectWorkTarget, layerEffectDesc);
@@ -189,15 +208,21 @@ namespace MadoEngine
 		postEffectCopyDesc_.fillMode = MadoEngine::Render::FillMode::Solid;
 		postEffectCopyDesc_.topology = MadoEngine::Render::TopologyType::Triangle;
 		postEffectCopyDesc_.inputLayout = MadoEngine::Render::InputLayoutType::None;
-		postEffectCopyDesc_.rtvFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		postEffectCopyDesc_.rtvFormat = MadoEngine::Render::kHdrRenderTargetFormat;
 		postEffectCopyDesc_.dsvFormat = DXGI_FORMAT_UNKNOWN;
 		postEffectCopyDesc_.vsKey = "PostEffect/CopyImage.VS";
 		postEffectCopyDesc_.psKey = "PostEffect/CopyImage.PS";
 		postEffectCopyDesc_.rootSigKey = "PostEffect.RootSig";
 
+		displayCopyDesc_ = postEffectCopyDesc_;
+		displayCopyDesc_.rtvFormat = MadoEngine::Render::kDisplayRenderTargetFormat;
+
 		compositeDesc_ = postEffectCopyDesc_;
 		compositeDesc_.psKey = "PostEffect/Composite.PS";
 		compositeDesc_.rootSigKey = "PostEffect.Composite.RootSig";
+
+		fallbackToneMappingDesc_ = displayCopyDesc_;
+		fallbackToneMappingDesc_.psKey = "PostEffect/ToneMapping.PS";
 
 		postEffectDefaultParameterResource_ = CreateBufferResource(
 			dxDevice_->GetDevice(),
@@ -354,11 +379,14 @@ namespace MadoEngine
 		isOverlayRenderActive_ = false;
 		isSceneScreenEffectStageApplied_ = false;
 		isFinalScreenEffectStageApplied_ = false;
+		isToneMapped_ = false;
 		currentCompositeSourceName_ = kSceneColorTarget;
 		resolvedPostEffectTargetName_ = kPostEffectResultTarget;
 		currentLayerEffectSourceName_ = kLayerColorTarget;
+		currentLayerColorTargetName_ = kLayerColorTarget;
 		currentTransparentTargetName_.clear();
 		currentOverlayTargetName_.clear();
+		isCurrentLayerEffectDisplay_ = false;
 
 #ifdef USE_IMGUI
 
@@ -454,17 +482,23 @@ namespace MadoEngine
 		assert(pass.GetTargetLayerMask() != 0 && "Layer向けPostEffectPassの対象LayerMaskが0です");
 
 		EndSceneColorRender();
+		const MadoEngine::Render::LayerEffectStage stage = pass.GetLayerEffectStage();
 		isLayerEffectChainResolved_ = false;
-		currentLayerEffectSourceName_ = kLayerColorTarget;
+		isCurrentLayerEffectDisplay_ = stage == MadoEngine::Render::LayerEffectStage::Overlay;
+		currentLayerColorTargetName_ = isCurrentLayerEffectDisplay_
+			? kOverlayLayerColorTarget
+			: kLayerColorTarget;
+		currentLayerEffectSourceName_ = currentLayerColorTargetName_;
+		assert((!isCurrentLayerEffectDisplay_ || isToneMapped_) &&
+			"OverlayのLayer EffectはTone Mapping後に実行してください");
 
 		// OverlayまたはDepth無視LayerではScene Depthと分離したMask用Depthを選択
-		const MadoEngine::Render::LayerEffectStage stage = pass.GetLayerEffectStage();
 		const bool ignoreDepthForMask = stage == MadoEngine::Render::LayerEffectStage::Overlay ||
 			NeedsIgnoreDepthMask(pass.GetTargetLayerMask(), stage);
 		currentLayerMaskDepthStencilBuffer_ = ignoreDepthForMask ? layerDepthStencilBuffer_.get() : depthStencilBuffer_.get();
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = currentLayerMaskDepthStencilBuffer_->GetDSVCPUHandle();
 		currentLayerMaskDepthStencilBuffer_->Transition(commandManager_->GetCommandList(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		renderTargetManager_->Begin(kLayerColorTarget, commandManager_->GetCommandList(), dsvHandle);
+		renderTargetManager_->Begin(currentLayerColorTargetName_, commandManager_->GetCommandList(), dsvHandle);
 		if (ignoreDepthForMask) {
 			commandManager_->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 		}
@@ -472,7 +506,7 @@ namespace MadoEngine
 	}
 
 	void EngineExecution::EndLayerEffectRender() {
-		renderTargetManager_->End(kLayerColorTarget, commandManager_->GetCommandList());
+		renderTargetManager_->End(currentLayerColorTargetName_, commandManager_->GetCommandList());
 	}
 
 	void EngineExecution::ApplyLayerEffectAndComposite(const MadoEngine::Render::PostEffectPass& pass) {
@@ -487,9 +521,13 @@ namespace MadoEngine
 		const std::string& outputTargetName = GetNextLayerEffectOutputName();
 		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
 		viewportScissor_->Apply(commandManager_->GetCommandList());
+		MadoEngine::Render::PSODesc effectDesc = pass.GetEffectPSODesc();
+		effectDesc.rtvFormat = isCurrentLayerEffectDisplay_
+			? MadoEngine::Render::kDisplayRenderTargetFormat
+			: MadoEngine::Render::kHdrRenderTargetFormat;
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_),
-			pass.GetEffectPSODesc(),
+			effectDesc,
 			pass.GetParameterGPUVirtualAddress(),
 			currentLayerMaskDepthStencilBuffer_
 		);
@@ -516,6 +554,37 @@ namespace MadoEngine
 		isLayerEffectResolved_ = true;
 	}
 
+	void EngineExecution::ApplyScreenEffectPass(const MadoEngine::Render::PostEffectPass& pass) {
+		const std::optional<MadoEngine::Render::PostEffectType> effectType = pass.GetPostEffectType();
+		const bool isToneMappingPass = effectType == MadoEngine::Render::PostEffectType::ToneMapping;
+		if (isToneMappingPass && isToneMapped_) {
+			return;
+		}
+
+		// Tone Mapping Passから後続の出力先をHDR Targetから表示用Targetへ切り替え
+		if (isToneMappingPass) {
+			isToneMapped_ = true;
+		}
+
+		const std::string& outputTargetName = GetNextPostEffectOutputName();
+		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+		MadoEngine::Render::PSODesc effectDesc = pass.GetEffectPSODesc();
+		effectDesc.rtvFormat = isToneMapped_
+			? MadoEngine::Render::kDisplayRenderTargetFormat
+			: MadoEngine::Render::kHdrRenderTargetFormat;
+		DrawPostEffect(
+			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+			effectDesc,
+			pass.GetParameterGPUVirtualAddress()
+		);
+		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+
+		currentCompositeSourceName_ = outputTargetName;
+		resolvedPostEffectTargetName_ = outputTargetName;
+		isLayerEffectResolved_ = true;
+	}
+
 	void EngineExecution::ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage stage) {
 		assert(MadoEngine::Render::IsValidScreenEffectStage(stage) && "ScreenEffectStageが範囲外です");
 		if (stage == MadoEngine::Render::ScreenEffectStage::Scene && isSceneScreenEffectStageApplied_) {
@@ -529,6 +598,7 @@ namespace MadoEngine
 		EndSceneColorRender();
 		MadoEngine::Render::PostEffectManager& manager =
 			MadoEngine::Render::PostEffectManager::GetInstance();
+		std::vector<const MadoEngine::Render::PostEffectPass*> deferredFXAAPasses;
 
 		// 出力先を交互に切り替えて前Passの結果を次Passの入力へ接続
 		for (MadoEngine::Render::PostEffectPassHandle handle : manager.GetScreenPassHandles()) {
@@ -536,20 +606,33 @@ namespace MadoEngine
 			if (!pass || !pass->IsEnabled() || pass->GetScreenEffectStage() != stage) {
 				continue;
 			}
+			const std::optional<MadoEngine::Render::PostEffectType> effectType = pass->GetPostEffectType();
+			const bool isFXAAPass = effectType == MadoEngine::Render::PostEffectType::FXAA;
+			if (stage == MadoEngine::Render::ScreenEffectStage::Final && isFXAAPass && !isToneMapped_) {
 
-			const std::string& outputTargetName = GetNextPostEffectOutputName();
-			renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
-			viewportScissor_->Apply(commandManager_->GetCommandList());
-			DrawPostEffect(
-				renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
-				pass->GetEffectPSODesc(),
-				pass->GetParameterGPUVirtualAddress()
-			);
-			renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+				// FXAAをHDR色へ適用しないようTone Mappingの完了まで登録順を保持して延期
+				deferredFXAAPasses.push_back(pass);
+				continue;
+			}
 
-			currentCompositeSourceName_ = outputTargetName;
-			resolvedPostEffectTargetName_ = outputTargetName;
-			isLayerEffectResolved_ = true;
+			ApplyScreenEffectPass(*pass);
+			if (isToneMapped_ && !deferredFXAAPasses.empty()) {
+
+				// 明示Tone Mapping直後へ前方のFXAAを移動して表示色空間での輪郭判定を保証
+				for (const MadoEngine::Render::PostEffectPass* deferredPass : deferredFXAAPasses) {
+					ApplyScreenEffectPass(*deferredPass);
+				}
+				deferredFXAAPasses.clear();
+			}
+		}
+
+		if (stage == MadoEngine::Render::ScreenEffectStage::Final) {
+
+			// Final EffectのHDR結果をUI合成前に表示色空間へ必ず変換
+			EnsureToneMappedCompositeSource();
+			for (const MadoEngine::Render::PostEffectPass* deferredPass : deferredFXAAPasses) {
+				ApplyScreenEffectPass(*deferredPass);
+			}
 		}
 
 		if (stage == MadoEngine::Render::ScreenEffectStage::Scene) {
@@ -601,16 +684,17 @@ namespace MadoEngine
 	void EngineExecution::BeginOverlayRender() {
 		assert(!isTransparentRenderActive_ && "透明オブジェクト描画を終了してからOverlay描画を開始してください");
 		assert(!isOverlayRenderActive_ && "Overlay描画が既に開始されています");
-		assert(!isFinalScreenEffectStageApplied_ && "Final段階の後にOverlay描画は開始できません");
 
 		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
+		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Final);
+		EnsureToneMappedCompositeSource();
 		EndSceneColorRender();
 		currentOverlayTargetName_ = GetNextPostEffectOutputName();
 		renderTargetManager_->Begin(currentOverlayTargetName_, commandManager_->GetCommandList());
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
-			postEffectCopyDesc_
+			displayCopyDesc_
 		);
 		isOverlayRenderActive_ = true;
 	}
@@ -636,7 +720,29 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
-			postEffectCopyDesc_
+			isToneMapped_ ? displayCopyDesc_ : postEffectCopyDesc_
+		);
+		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
+		currentCompositeSourceName_ = outputTargetName;
+		resolvedPostEffectTargetName_ = outputTargetName;
+		isLayerEffectResolved_ = true;
+	}
+
+	void EngineExecution::EnsureToneMappedCompositeSource() {
+		if (isToneMapped_) {
+			return;
+		}
+
+		EndSceneColorRender();
+		isToneMapped_ = true;
+		const std::string& outputTargetName = GetNextPostEffectOutputName();
+		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
+		viewportScissor_->Apply(commandManager_->GetCommandList());
+
+		// 明示的なTone Mapping Passがない場合も同じShader既定値で表示可能範囲へ変換
+		DrawPostEffect(
+			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
+			fallbackToneMappingDesc_
 		);
 		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
 		currentCompositeSourceName_ = outputTargetName;
@@ -650,6 +756,7 @@ namespace MadoEngine
 
 		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Scene);
 		ApplyScreenEffectPasses(MadoEngine::Render::ScreenEffectStage::Final);
+		EnsureToneMappedCompositeSource();
 		ResolveCompositeSource();
 
 #ifdef USE_IMGUI
@@ -688,7 +795,7 @@ namespace MadoEngine
 		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
 		viewportScissor_->Apply(commandManager_->GetCommandList());
-		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_), postEffectCopyDesc_);
+		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_), displayCopyDesc_);
 #endif // USE_IMGUI
 	}
 
@@ -794,9 +901,13 @@ namespace MadoEngine
 
 	void EngineExecution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {
 		auto* commandList = commandManager_->GetCommandList();
+		MadoEngine::Render::PSODesc compositeDesc = compositeDesc_;
+		compositeDesc.rtvFormat = isToneMapped_
+			? MadoEngine::Render::kDisplayRenderTargetFormat
+			: MadoEngine::Render::kHdrRenderTargetFormat;
 		commandList->SetGraphicsRootSignature(
-			MadoEngine::RootSignatureManager::GetInstance().Get(compositeDesc_.rootSigKey));
-		commandList->SetPipelineState(psoRegistry_->Get(compositeDesc_));
+			MadoEngine::RootSignatureManager::GetInstance().Get(compositeDesc.rootSigKey));
+		commandList->SetPipelineState(psoRegistry_->Get(compositeDesc));
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->SetGraphicsRootDescriptorTable(0, sceneSrv);
 		commandList->SetGraphicsRootDescriptorTable(1, effectSrv);
@@ -804,6 +915,14 @@ namespace MadoEngine
 	}
 
 	const std::string& EngineExecution::GetNextPostEffectOutputName() const {
+		if (isToneMapped_) {
+			if (currentCompositeSourceName_ == kDisplayResultTarget) {
+				return kDisplayWorkTarget;
+			}
+
+			return kDisplayResultTarget;
+		}
+
 		if (currentCompositeSourceName_ == kPostEffectResultTarget) {
 			return kPostEffectWorkTarget;
 		}
@@ -812,6 +931,14 @@ namespace MadoEngine
 	}
 
 	const std::string& EngineExecution::GetNextLayerEffectOutputName() const {
+		if (isCurrentLayerEffectDisplay_) {
+			if (currentLayerEffectSourceName_ == kOverlayLayerEffectResultTarget) {
+				return kOverlayLayerEffectWorkTarget;
+			}
+
+			return kOverlayLayerEffectResultTarget;
+		}
+
 		if (currentLayerEffectSourceName_ == kLayerEffectResultTarget) {
 			return kLayerEffectWorkTarget;
 		}

@@ -17,7 +17,7 @@ struct alignas(16) BinarizeParameters {
 
 struct alignas(16) BloomParameters {
 	float intensity = 0.6f;
-	float threshold = 0.7f;
+	float threshold = 1.0f;
 	float radius = 4.0f;
 	float softKnee = 0.5f;
 	Vector4 bloomColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -175,6 +175,13 @@ struct alignas(16) ToonParameters {
 	float outlineColorA = 1.0f;
 };
 
+struct alignas(16) ToneMappingParameters {
+	float exposureEV = 0.0f;
+	float reinhardWhitePoint = 4.0f;
+	float acesBlend = 1.0f;
+	float toneMapperMode = 1.0f;
+};
+
 struct alignas(16) VignetteParameters {
 	float intensity = 0.8f;
 	float innerRadius = 0.35f;
@@ -213,6 +220,7 @@ MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(RadialBlurParameters, RadialBlur)
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(RandomParameters, Random);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(SplitToningParameters, SplitToning);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(ToonParameters, Toon);
+MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(ToneMappingParameters, ToneMapping);
 MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS(VignetteParameters, Vignette);
 
 #undef MADOENGINE_DEFINE_POST_EFFECT_PARAMETER_TRAITS
@@ -239,6 +247,7 @@ MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(RadialBlurParameters, 32);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(RandomParameters, 16);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(SplitToningParameters, 48);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(ToonParameters, 48);
+MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(ToneMappingParameters, 16);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(VignetteParameters, 32);
 
 #undef MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS

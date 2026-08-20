@@ -15,6 +15,14 @@ struct PostEffectFloatParameterDefinition {
 	float minValue = 0.0f;
 	float maxValue = 1.0f;
 	float speed = 0.01f;
+	const std::string_view* selectionOptions = nullptr;
+	std::size_t selectionOptionCount = 0;
+
+	/// @brief 選択式UIへ表示する項目一覧を取得
+	/// @return 選択項目の範囲、通常の数値Parameterの場合は空範囲
+	[[nodiscard]] std::span<const std::string_view> GetSelectionOptions() const {
+		return { selectionOptions, selectionOptionCount };
+	}
 };
 
 /// @brief ポストエフェクトのShaderとパラメータレイアウト定義

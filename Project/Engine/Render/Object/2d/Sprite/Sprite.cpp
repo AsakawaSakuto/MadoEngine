@@ -115,6 +115,7 @@ void Sprite::InitializeCommonResources() {
 	psoDesc_.depthMode = MadoEngine::Render::DepthMode::Disable;
 	psoDesc_.dsvFormat = DXGI_FORMAT_D32_FLOAT;
 	psoDesc_.blendMode = MadoEngine::Render::BlendMode::Normal;
+	psoDesc_.rtvFormat = MadoEngine::Render::kDisplayRenderTargetFormat;
 
 	Logger::Output(objectName_ + "の初期化が完了しました", Logger::Level::Application);
 }

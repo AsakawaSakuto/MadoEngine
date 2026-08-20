@@ -135,6 +135,21 @@
             },
             "scope": "Screen",
             "screenEffectStage": "Final"
+        },
+        {
+            "effectShaderKey": "PostEffect/ToneMapping.PS",
+            "effectType": "ToneMapping",
+            "enabled": true,
+            "key": "ScreenEffectPass_4",
+            "name": "ToneMapping",
+            "parameters": {
+                "ACESBlend": 1.0,
+                "ExposureEV": 0.0,
+                "ReinhardWhitePoint": 4.0,
+                "ToneMapperMode": 1.0
+            },
+            "scope": "Screen",
+            "screenEffectStage": "Final"
         }
     ],
     "version": 4
