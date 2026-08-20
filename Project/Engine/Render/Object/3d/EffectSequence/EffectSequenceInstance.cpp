@@ -16,6 +16,29 @@ namespace {
 		return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
 	}
 
+	/// @brief Vector4が有限値だけで構成されているか確認
+	/// @param value 確認対象Vector
+	/// @return 全要素が有限値の場合はtrue
+	bool IsFiniteVector4(const Vector4& value) {
+		return
+			std::isfinite(value.x) &&
+			std::isfinite(value.y) &&
+			std::isfinite(value.z) &&
+			std::isfinite(value.w);
+	}
+
+	/// @brief 色倍率を描画可能な範囲へ補正
+	/// @param colorMultiplier 補正対象の色倍率
+	/// @return 補正後の色倍率
+	Vector4 NormalizeColorMultiplier(const Vector4& colorMultiplier) {
+		return {
+			(std::max)(0.0f, colorMultiplier.x),
+			(std::max)(0.0f, colorMultiplier.y),
+			(std::max)(0.0f, colorMultiplier.z),
+			std::clamp(colorMultiplier.w, 0.0f, 1.0f),
+		};
+	}
+
 	/// @brief 外部から渡されたRoot Transformを安全な範囲へ補正
 	/// @param transform 補正対象Transform
 	/// @return 補正後Transform
@@ -112,6 +135,7 @@ namespace MadoEngine::EffectSequence {
 		nodeIndices_.clear();
 		worldTransforms_.clear();
 		rootTransform_ = NormalizeRootTransform(desc.rootTransform);
+		colorMultiplier_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		sceneType_ = desc.sceneType;
 		defaultRenderLayer_ = MadoEngine::Render::IsValidRenderLayer(desc.renderLayer)
 			? desc.renderLayer
@@ -285,6 +309,17 @@ namespace MadoEngine::EffectSequence {
 		}
 	}
 
+	bool EffectSequenceInstance::SetColorMultiplier(const Vector4& colorMultiplier) {
+		if (!IsFiniteVector4(colorMultiplier)) {
+			return false;
+		}
+		colorMultiplier_ = NormalizeColorMultiplier(colorMultiplier);
+		for (ActiveChild& child : activeChildren_) {
+			dispatcher_->SetColorMultiplier(child.handle, colorMultiplier_);
+		}
+		return true;
+	}
+
 	bool EffectSequenceInstance::SetPlaybackSpeed(float playbackSpeed) {
 		if (
 			!std::isfinite(playbackSpeed) ||
@@ -343,6 +378,7 @@ namespace MadoEngine::EffectSequence {
 		if (child.has_value()) {
 			activeChildren_.push_back({ node.nodeId, child.value() });
 			dispatcher_->SetVisible(activeChildren_.back().handle, isVisible_);
+			dispatcher_->SetColorMultiplier(activeChildren_.back().handle, colorMultiplier_);
 			if (isPaused_) {
 				dispatcher_->Pause(activeChildren_.back().handle);
 			}

@@ -106,6 +106,12 @@ namespace MadoEngine::Effect {
 		/// @return 設定できた場合はtrue
 		bool SetVisible(PrimitiveEffectHandle handle, bool isVisible);
 
+		/// @brief Primitive Effectの色倍率を設定
+		/// @param handle 設定するEffect Handle
+		/// @param colorMultiplier Assetの色へ乗算する色倍率
+		/// @return 設定できた場合はtrue
+		bool SetColorMultiplier(PrimitiveEffectHandle handle, const Vector4& colorMultiplier);
+
 		/// @brief 指定したPrimitive Effectを一時停止
 		/// @param handle 一時停止するEffect Handle
 		/// @return 一時停止できた場合はtrue

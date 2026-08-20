@@ -1,0 +1,122 @@
+{
+    "emitters": [
+        {
+            "duration": 8.0,
+            "geometry": {
+                "arcAngleDegrees": {
+                    "default": 360.0,
+                    "keys": []
+                },
+                "bottomRadii": {
+                    "default": [
+                        2.0,
+                        2.0
+                    ],
+                    "keys": []
+                },
+                "height": {
+                    "default": 1.0,
+                    "keys": []
+                },
+                "heightSegments": 1,
+                "pivot": "bottom",
+                "radialSegments": 32,
+                "startAngleDegrees": {
+                    "default": 0.0,
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 8.0,
+                            "value": 360.0
+                        }
+                    ]
+                },
+                "topRadii": {
+                    "default": [
+                        2.0,
+                        2.0
+                    ],
+                    "keys": []
+                }
+            },
+            "isEnabled": true,
+            "loop": false,
+            "material": {
+                "blendMode": "add",
+                "bottomFadeRange": {
+                    "default": 0.0,
+                    "keys": []
+                },
+                "cullMode": "none",
+                "globalAlpha": {
+                    "default": 1.0,
+                    "keys": []
+                },
+                "gradient": [
+                    {
+                        "color": {
+                            "default": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "keys": []
+                        },
+                        "position": 0.0
+                    },
+                    {
+                        "color": {
+                            "default": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "keys": []
+                        },
+                        "position": 1.0
+                    }
+                ],
+                "textureName": "Cylinder2",
+                "topFadeRange": {
+                    "default": 0.0,
+                    "keys": []
+                },
+                "uv": {
+                    "direction": "topToBottom",
+                    "offset": {
+                        "default": [
+                            0.0,
+                            0.0
+                        ],
+                        "keys": []
+                    },
+                    "rotationDegrees": {
+                        "default": 0.0,
+                        "keys": []
+                    },
+                    "scale": {
+                        "default": [
+                            5.0,
+                            0.8500000238418579
+                        ],
+                        "keys": []
+                    }
+                }
+            },
+            "name": "Emitter",
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "version": 4
+}

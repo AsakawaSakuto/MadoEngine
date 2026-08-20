@@ -56,6 +56,7 @@ namespace MadoEngine::Effect {
 		transform_ = desc.transform;
 		sceneType_ = desc.sceneType;
 		renderLayer_ = desc.renderLayer;
+		colorMultiplier_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		playbackSpeed_ = 1.0f;
 		isPaused_ = false;
 		emitters_.clear();
@@ -126,6 +127,18 @@ namespace MadoEngine::Effect {
 		return true;
 	}
 
+	bool CylinderEffectInstance::SetColorMultiplier(const Vector4& colorMultiplier) {
+		if (
+			!std::isfinite(colorMultiplier.x) ||
+			!std::isfinite(colorMultiplier.y) ||
+			!std::isfinite(colorMultiplier.z) ||
+			!std::isfinite(colorMultiplier.w)) {
+			return false;
+		}
+		colorMultiplier_ = NormalizeColor(colorMultiplier);
+		return true;
+	}
+
 	bool CylinderEffectInstance::IsFinished() const {
 		return !asset_ || std::all_of(
 			emitters_.begin(),
@@ -190,7 +203,9 @@ namespace MadoEngine::Effect {
 			));
 			for (uint32_t index = 0; index < data.gradientCount; ++index) {
 				data.gradient[index].position = config.material.gradient[index].position;
-				data.gradient[index].color = NormalizeColor(config.material.gradient[index].color.Evaluate(playbackTime));
+				data.gradient[index].color = NormalizeColor(
+					config.material.gradient[index].color.Evaluate(playbackTime) * colorMultiplier_
+				);
 			}
 			renderer.Submit(data);
 		}

@@ -47,6 +47,11 @@ namespace MadoEngine::EffectSequence {
 		/// @param isVisible 表示する場合はtrue
 		void SetVisible(bool isVisible);
 
+		/// @brief 再生中のPrimitive Effectへ色倍率を設定
+		/// @param colorMultiplier Assetの色へ乗算する色倍率
+		/// @return 有効な色倍率を設定できた場合はtrue
+		bool SetColorMultiplier(const Vector4& colorMultiplier);
+
 		/// @brief Sequence再生速度を設定
 		/// @param playbackSpeed 再生速度
 		/// @return 有効な再生速度を設定できた場合はtrue
@@ -143,6 +148,7 @@ namespace MadoEngine::EffectSequence {
 		std::unordered_map<uint32_t, std::size_t> nodeIndices_;
 		std::unordered_map<uint32_t, Transform3D> worldTransforms_;
 		Transform3D rootTransform_;
+		Vector4 colorMultiplier_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer defaultRenderLayer_ = MadoEngine::Render::RenderLayer::Effect;
 		EffectSequencePlaybackContext context_ = EffectSequencePlaybackContext::Game;

@@ -79,7 +79,7 @@
             ],
             "scene": "Title",
             "type": "Model3D",
-            "visible": false
+            "visible": true
         }
     ]
 }

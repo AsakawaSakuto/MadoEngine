@@ -35,6 +35,11 @@ namespace MadoEngine::Effect {
 		/// @return 有効な再生速度を設定できた場合はtrue
 		bool SetPlaybackSpeed(float playbackSpeed);
 
+		/// @brief Assetの色へ乗算する色倍率を設定
+		/// @param colorMultiplier 色倍率
+		/// @return 有効な色倍率を設定できた場合はtrue
+		bool SetColorMultiplier(const Vector4& colorMultiplier);
+
 		/// @brief Cylinder Effectが一時停止中か確認
 		/// @return 一時停止中の場合はtrue
 		bool IsPaused() const {
@@ -87,6 +92,7 @@ namespace MadoEngine::Effect {
 		Transform3D transform_;
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;
+		Vector4 colorMultiplier_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float playbackSpeed_ = 1.0f;
 		bool isPaused_ = false;
 	};

@@ -123,6 +123,12 @@ namespace MadoEngine::EffectSequence {
 		/// @return 設定できた場合はtrue
 		bool SetVisible(EffectSequenceHandle handle, bool isVisible);
 
+		/// @brief Sequence内のPrimitive Effectへ色倍率を設定
+		/// @param handle 設定するSequence Handle
+		/// @param colorMultiplier Assetの色へ乗算する色倍率
+		/// @return 設定できた場合はtrue
+		bool SetColorMultiplier(EffectSequenceHandle handle, const Vector4& colorMultiplier);
+
 		/// @brief Sequence再生速度を設定
 		/// @param handle 設定するSequence Handle
 		/// @param playbackSpeed 再生速度

@@ -50,6 +50,14 @@ namespace MadoEngine::EffectSequence {
 		/// @param isVisible 表示する場合はtrue
 		void SetVisible(const EffectSequenceChildHandle& handle, bool isVisible) const;
 
+		/// @brief 対応する子Effectの色倍率を設定
+		/// @param handle 設定する子Handle
+		/// @param colorMultiplier Assetの色へ乗算する色倍率
+		void SetColorMultiplier(
+			const EffectSequenceChildHandle& handle,
+			const Vector4& colorMultiplier
+		) const;
+
 		/// @brief 子Effectの再生速度を設定
 		/// @param handle 設定する子Handle
 		/// @param playbackSpeed 再生速度

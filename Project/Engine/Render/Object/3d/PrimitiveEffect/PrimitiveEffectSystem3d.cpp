@@ -477,6 +477,17 @@ namespace MadoEngine::Effect {
 		return true;
 	}
 
+	bool PrimitiveEffectSystem3d::SetColorMultiplier(
+		PrimitiveEffectHandle handle,
+		const Vector4& colorMultiplier) {
+		CylinderEffectInstance* instance = Resolve(handle);
+		if (!instance || !instance->SetColorMultiplier(colorMultiplier)) {
+			return false;
+		}
+		isRenderDataPrepared_ = false;
+		return true;
+	}
+
 	bool PrimitiveEffectSystem3d::Pause(PrimitiveEffectHandle handle) {
 		CylinderEffectInstance* instance = Resolve(handle);
 		if (!instance) {

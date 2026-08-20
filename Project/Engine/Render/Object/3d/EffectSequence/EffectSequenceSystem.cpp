@@ -421,6 +421,13 @@ namespace MadoEngine::EffectSequence {
 		return true;
 	}
 
+	bool EffectSequenceSystem::SetColorMultiplier(
+		EffectSequenceHandle handle,
+		const Vector4& colorMultiplier) {
+		EffectSequenceInstance* instance = Resolve(handle);
+		return instance && instance->SetColorMultiplier(colorMultiplier);
+	}
+
 	bool EffectSequenceSystem::SetPlaybackSpeed(
 		EffectSequenceHandle handle,
 		float playbackSpeed) {

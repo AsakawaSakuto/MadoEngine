@@ -87,6 +87,13 @@ namespace MadoEngine::EffectSequence {
 			return EffectSequenceSystem::GetInstance().SetVisible(handle_, isVisible);
 		}
 
+		/// @brief 所有Sequence内のPrimitive Effectへ色倍率を設定
+		/// @param colorMultiplier Assetの色へ乗算する色倍率
+		/// @return 設定できた場合はtrue
+		bool SetColorMultiplier(const Vector4& colorMultiplier) {
+			return EffectSequenceSystem::GetInstance().SetColorMultiplier(handle_, colorMultiplier);
+		}
+
 		/// @brief Sequence再生速度を更新
 		/// @param playbackSpeed 再生速度
 		/// @return 更新できた場合はtrue

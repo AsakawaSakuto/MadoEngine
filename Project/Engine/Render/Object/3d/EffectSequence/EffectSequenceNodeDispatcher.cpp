@@ -240,6 +240,24 @@ namespace MadoEngine::EffectSequence {
 		}, handle);
 	}
 
+	void EffectSequenceNodeDispatcher::SetColorMultiplier(
+		const EffectSequenceChildHandle& handle,
+		const Vector4& colorMultiplier) const {
+
+		// 現在色倍率に対応するPrimitive Effectだけへ反映し未対応Effect種別は維持
+		std::visit(Overloaded{
+			[](MadoEngine::Particle::EffectHandle) {},
+			[&colorMultiplier](MadoEngine::Effect::PrimitiveEffectHandle child) {
+				MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().SetColorMultiplier(
+					child,
+					colorMultiplier
+				);
+			},
+			[](MadoEngine::Ribbon::RibbonEffectHandle) {},
+			[](MadoEngine::Beam::BeamEffectHandle) {},
+		}, handle);
+	}
+
 	void EffectSequenceNodeDispatcher::SetPlaybackSpeed(
 		const EffectSequenceChildHandle& handle,
 		float playbackSpeed) const {
