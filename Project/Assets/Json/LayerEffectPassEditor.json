@@ -22,6 +22,23 @@
             "targetLayerMask": 16
         },
         {
+            "effectShaderKey": "PostEffect/FXAA.PS",
+            "effectType": "FXAA",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_4",
+            "layerEffectStage": "Scene",
+            "name": "PlayerFXAA",
+            "parameters": {
+                "EdgeThreshold": 0.125,
+                "Intensity": 1.0,
+                "MinEdgeThreshold": 0.031199999153614044,
+                "SearchSpan": 8.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 16
+        },
+        {
             "effectShaderKey": "PostEffect/DepthOutline.PS",
             "effectType": "DepthOutline",
             "enabled": true,

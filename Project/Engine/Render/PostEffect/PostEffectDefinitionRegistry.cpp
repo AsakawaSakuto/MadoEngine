@@ -23,6 +23,7 @@ const ColorFilterParameters kColorFilterDefaults{};
 const DepthOfFieldParameters kDepthOfFieldDefaults{};
 const DissolveParameters kDissolveDefaults{};
 const FogParameters kFogDefaults{};
+const FXAAParameters kFXAADefaults{};
 const GaussianFilterParameters kGaussianFilterDefaults{};
 const DepthOutlineParameters kDepthOutlineDefaults{};
 const LensDistortionParameters kLensDistortionDefaults{};
@@ -109,6 +110,13 @@ const PostEffectFloatParameterDefinition kFogParameters[] = {
 	{ "HeightStrength", "高さ強度", offsetof(FogParameters, heightStrength), 0.0f, 4.0f, 0.01f },
 	{ "NearClip", "NearClip", offsetof(FogParameters, nearClip), 0.001f, 100.0f, 0.01f },
 	{ "FarClip", "FarClip", offsetof(FogParameters, farClip), 1.0f, 10000.0f, 1.0f },
+};
+
+const PostEffectFloatParameterDefinition kFXAAParameters[] = {
+	{ "EdgeThreshold", "相対エッジしきい値", offsetof(FXAAParameters, edgeThreshold), 0.0312f, 0.333f, 0.001f },
+	{ "MinEdgeThreshold", "最小エッジしきい値", offsetof(FXAAParameters, minEdgeThreshold), 0.001f, 0.0833f, 0.001f },
+	{ "SearchSpan", "輪郭探索範囲", offsetof(FXAAParameters, searchSpan), 2.0f, 16.0f, 0.5f },
+	{ "Intensity", "適用率", offsetof(FXAAParameters, intensity), 0.0f, 1.0f, 0.01f },
 };
 
 const PostEffectFloatParameterDefinition kGaussianFilterParameters[] = {
@@ -264,6 +272,7 @@ const std::array kDefinitions = {
 	CreateDefinition(PostEffectType::SplitToning, "SplitToning", "PostEffect/SplitToning.PS", kSplitToningDefaults, kSplitToningParameters),
 	CreateDefinition(PostEffectType::Toon, "Toon", "PostEffect/Toon.PS", kToonDefaults, kToonParameters),
 	CreateDefinition(PostEffectType::Vignette, "Vignette", "PostEffect/Vignette.PS", kVignetteDefaults, kVignetteParameters),
+	CreateDefinition(PostEffectType::FXAA, "FXAA", "PostEffect/FXAA.PS", kFXAADefaults, kFXAAParameters),
 };
 
 } // namespace

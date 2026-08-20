@@ -28,6 +28,7 @@ enum class PostEffectType : uint32_t {
 	SplitToning,
 	Toon,
 	Vignette,
+	FXAA,
 };
 
 } // namespace MadoEngine::Render
