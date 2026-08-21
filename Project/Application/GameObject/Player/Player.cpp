@@ -14,10 +14,8 @@ namespace Player {
 	}
 
 	void Base::Initialize(const Vector3& spawnGroundPosition) {
-		transform_.translate = spawnGroundPosition;
-
-		// 球Colliderの下端を地表へ一致させて埋まりと初期落下を防止
-		transform_.translate.y += kMovementSphereRadius;
+		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
+		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
 
 		AABB aabb;
@@ -25,9 +23,7 @@ namespace Player {
 		aabb.max = { 0.5f, 2.0f, 0.5f };
 		hitAABB_ = aabb;
 
-		Sphere s;
-		s.radius = kMovementSphereRadius;
-		colliderShape_ = s;
+		colliderShape_ = movementCollider;
 
 		Sphere s2;
 		s2.radius = 2.5f;
@@ -74,6 +70,16 @@ namespace Player {
 		}
 		desc.sceneType = SceneType::Game;
 		desc.loopOverride = true;
+	}
+
+	Sphere Base::CreateSpawnMovementCollider(const Vector3& spawnGroundPosition) {
+		Sphere collider;
+		collider.center = spawnGroundPosition;
+
+		// 球Colliderの下端を地表へ一致させて埋まりと初期落下を防止
+		collider.center.y += kMovementSphereRadius;
+		collider.radius = kMovementSphereRadius;
+		return collider;
 	}
 
 	void Base::AddMoney(int amount) {

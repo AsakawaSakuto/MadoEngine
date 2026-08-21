@@ -38,6 +38,20 @@ public:
 	/// @return Objectの回転
 	Vector3 GetRotation() const;
 
+	/// @brief 指定ColliderとObjectのColliderが重なっているか判定
+	/// @param collider 判定対象のワールド座標反映済みCollider
+	/// @return Collider同士が重なっている場合はtrue
+	bool IsColliderOverlapping(const AABB& collider) const;
+
+	/// @brief 指定SphereとObjectのColliderが重なっているか判定
+	/// @param collider 判定対象のワールド座標反映済みSphere
+	/// @return Collider同士が重なっている場合はtrue
+	bool IsColliderOverlapping(const Sphere& collider) const;
+
+	/// @brief Playerの初期配置を妨げるObjectか判定
+	/// @return Playerの初期配置を妨げる場合はtrue
+	virtual bool ShouldBlockPlayerSpawn() const { return false; }
+
 	/// @brief Player接触時の強調表示状態を設定
 	/// @param isHighlighted 強調表示する場合はtrue
 	void SetHighlighted(bool isHighlighted);

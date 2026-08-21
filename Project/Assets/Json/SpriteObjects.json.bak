@@ -271,7 +271,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -310,7 +310,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         }
     ]
 }

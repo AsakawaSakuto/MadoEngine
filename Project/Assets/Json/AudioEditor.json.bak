@@ -7,23 +7,23 @@
     "individualVolumes": {
         "bgm1": {
             "type": "BGM",
-            "volume": 1.0
+            "volume": 0.10000000149011612
         },
         "bgm2": {
             "type": "BGM",
-            "volume": 1.0
+            "volume": 0.10000000149011612
         },
         "bgm3": {
             "type": "BGM",
-            "volume": 1.0
+            "volume": 0.10000000149011612
         },
         "bgm4": {
             "type": "BGM",
-            "volume": 1.0
+            "volume": 0.10000000149011612
         },
         "bgm5": {
             "type": "BGM",
-            "volume": 1.0
+            "volume": 0.10000000149011612
         },
         "chest": {
             "type": "SE",
@@ -57,6 +57,10 @@
             "type": "SE",
             "volume": 1.0
         },
+        "resultbgm": {
+            "type": "BGM",
+            "volume": 0.10000000149011612
+        },
         "select": {
             "type": "SE",
             "volume": 1.0
@@ -67,7 +71,7 @@
         },
         "titlebgm": {
             "type": "BGM",
-            "volume": 1.0
+            "volume": 0.10000000149011612
         },
         "upgrade": {
             "type": "SE",

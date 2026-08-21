@@ -282,11 +282,17 @@ Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
 				continue;
 			}
 
-			spawnCandidates.push_back({
+			const Vector3 spawnGroundPosition = {
 				static_cast<float>(x) * blockSize_.x,
 				blockSize_.y * static_cast<float>(block.GetHeight()),
 				static_cast<float>(z) * blockSize_.z
-			});
+			};
+			const Sphere playerSpawnCollider = Player::Base::CreateSpawnMovementCollider(spawnGroundPosition);
+			if (IsPlayerSpawnBlocked(playerSpawnCollider)) {
+				continue;
+			}
+
+			spawnCandidates.push_back(spawnGroundPosition);
 		}
 	}
 
@@ -371,6 +377,30 @@ void Map::DrawImGui() {
 
 }
 
+bool Map::IsEventObjectColliderOverlapping(const AABB& collider) const {
+
+	// 生成前の候補を配置済みの全種類と比較して異種Object間の重複も除外
+	for (const std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
+		if (object && object->IsColliderOverlapping(collider)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Map::IsPlayerSpawnBlocked(const Sphere& collider) const {
+
+	// Player配置を禁止するObjectだけを対象にして他のイベント配置ルールと分離
+	for (const std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
+		if (object && object->ShouldBlockPlayerSpawn() && object->IsColliderOverlapping(collider)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void Map::GenerateJars() {
 
 	// Jar再生成時は既存イベントとハイライト参照を同時に破棄
@@ -383,6 +413,9 @@ void Map::GenerateJars() {
 	}
 
 	eventObjects_.reserve(static_cast<size_t>(maxSpawnCount));
+	const AABB jarLocalCollider = Jar::CreatePlacementCollider({});
+	const float jarHalfSizeX = std::max(std::abs(jarLocalCollider.min.x), std::abs(jarLocalCollider.max.x));
+	const float jarHalfSizeZ = std::max(std::abs(jarLocalCollider.min.z), std::abs(jarLocalCollider.max.z));
 
 	int createdCount = 0;
 	int retryCount = 0;
@@ -401,9 +434,8 @@ void Map::GenerateJars() {
 		}
 
 		// Jarの占有幅を除いたブロック内から配置座標を選択
-		const float jarHalfSize = 0.5f;
-		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - jarHalfSize);
-		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - jarHalfSize);
+		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - jarHalfSizeX);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - jarHalfSizeZ);
 		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
 		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
@@ -418,6 +450,9 @@ void Map::GenerateJars() {
 			static_cast<float>(z) * blockSize_.z
 		};
 		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+		if (IsEventObjectColliderOverlapping(Jar::CreatePlacementCollider(spawnPosition))) {
+			continue;
+		}
 
 		// 坂では接地面の高さと傾斜へModel姿勢を一致
 		Jar::InitializeDesc desc;
@@ -445,6 +480,9 @@ void Map::GenerateChests() {
 	}
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
+	const AABB chestLocalCollider = Chest::CreatePlacementCollider({});
+	const float chestHalfSizeX = std::max(std::abs(chestLocalCollider.min.x), std::abs(chestLocalCollider.max.x));
+	const float chestHalfSizeZ = std::max(std::abs(chestLocalCollider.min.z), std::abs(chestLocalCollider.max.z));
 
 	// すべての通常Chestで同じ費用段階を参照するためMap生成単位の状態を共有
 	const std::shared_ptr<Chest::OpenCostState> openCostState = std::make_shared<Chest::OpenCostState>();
@@ -465,9 +503,8 @@ void Map::GenerateChests() {
 			continue;
 		}
 
-		const float chestHalfSize = 0.6f;
-		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - chestHalfSize);
-		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - chestHalfSize);
+		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - chestHalfSizeX);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - chestHalfSizeZ);
 		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
 		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
@@ -483,6 +520,9 @@ void Map::GenerateChests() {
 			static_cast<float>(z) * blockSize_.z
 		};
 		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+		if (IsEventObjectColliderOverlapping(Chest::CreatePlacementCollider(spawnPosition))) {
+			continue;
+		}
 
 		// 水平向きをランダム化しつつ坂の法線へ姿勢を整合
 		Chest::InitializeDesc desc;
@@ -511,6 +551,9 @@ void Map::GenerateKarmas() {
 	}
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
+	const AABB karmaLocalCollider = Karma::CreatePlacementCollider({});
+	const float karmaHalfSizeX = std::max(std::abs(karmaLocalCollider.min.x), std::abs(karmaLocalCollider.max.x));
+	const float karmaHalfSizeZ = std::max(std::abs(karmaLocalCollider.min.z), std::abs(karmaLocalCollider.max.z));
 
 	int createdCount = 0;
 	int retryCount = 0;
@@ -528,9 +571,8 @@ void Map::GenerateKarmas() {
 			continue;
 		}
 
-		const float karmaHalfSize = 0.75f;
-		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - karmaHalfSize);
-		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - karmaHalfSize);
+		const float spawnRangeX = std::max(0.0f, blockSize_.x / 2.0f - karmaHalfSizeX);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z / 2.0f - karmaHalfSizeZ);
 		const float offsetX = eventObjectRandom_.Float(-spawnRangeX, spawnRangeX);
 		const float offsetZ = eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ);
 
@@ -546,6 +588,9 @@ void Map::GenerateKarmas() {
 			static_cast<float>(z) * blockSize_.z
 		};
 		spawnPosition.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, spawnPosition);
+		if (IsEventObjectColliderOverlapping(Karma::CreatePlacementCollider(spawnPosition))) {
+			continue;
+		}
 
 		// 水平向きをランダム化しつつ坂の法線へ姿勢を整合
 		Karma::InitializeDesc desc;
@@ -588,16 +633,29 @@ void Map::GenerateBossSpawner() {
 		return;
 	}
 
-	// 地形シードから派生したイベント乱数で候補を一つだけ選択
-	const int spawnIndex = eventObjectRandom_.Int(0, static_cast<int>(spawnCandidates.size()) - 1);
-	BossSpawner::InitializeDesc desc;
-	desc.position = spawnCandidates[static_cast<size_t>(spawnIndex)];
 
-	std::unique_ptr<BossSpawner> bossSpawner = std::make_unique<BossSpawner>();
-	bossSpawner->Initialize(desc);
-	eventObjects_.push_back(std::move(bossSpawner));
+	// 重複候補を除去しながら乱数選択して全候補を有限回で探索
+	while (!spawnCandidates.empty()) {
+		const int spawnIndex = eventObjectRandom_.Int(0, static_cast<int>(spawnCandidates.size()) - 1);
+		const Vector3 spawnPosition = spawnCandidates[static_cast<size_t>(spawnIndex)];
+		if (IsEventObjectColliderOverlapping(BossSpawner::CreatePlacementCollider(spawnPosition))) {
+			spawnCandidates[static_cast<size_t>(spawnIndex)] = spawnCandidates.back();
+			spawnCandidates.pop_back();
+			continue;
+		}
 
-	Logger::Output("Map : BossSpawnerを1個配置しました", Logger::Level::Application);
+		BossSpawner::InitializeDesc desc;
+		desc.position = spawnPosition;
+
+		std::unique_ptr<BossSpawner> bossSpawner = std::make_unique<BossSpawner>();
+		bossSpawner->Initialize(desc);
+		eventObjects_.push_back(std::move(bossSpawner));
+
+		Logger::Output("Map : BossSpawnerを1個配置しました", Logger::Level::Application);
+		return;
+	}
+
+	Logger::Output("Map : 他のイベントオブジェクトと重ならないBossSpawner配置場所がありません", Logger::Level::Warning);
 }
 
 void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {

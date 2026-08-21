@@ -10,6 +10,7 @@ namespace MadoEngine::Render {
 	X(MapEventObject, "MapEventObject") \
 	X(MapEventObjectOutline, "MapEventObjectOutline") \
 	X(Player, "Player") \
+    X(Enemy, "Enemy") \
 	X(Effect, "Effect") \
 	X(UI, "UI") \
 	X(Debug, "Debug") \

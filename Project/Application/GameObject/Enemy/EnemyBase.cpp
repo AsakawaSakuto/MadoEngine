@@ -63,7 +63,7 @@ namespace Enemy {
 
 		model_ = MyModel::Create(modelName_, modelAssetName, desc.sceneType);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
+			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Enemy);
 			model->SetTexture("white16x16");
 			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		}

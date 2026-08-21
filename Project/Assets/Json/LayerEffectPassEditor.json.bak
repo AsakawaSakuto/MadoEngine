@@ -43,6 +43,44 @@
             "effectType": "DepthOutline",
             "enabled": true,
             "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_1",
+            "layerEffectStage": "Scene",
+            "name": "EnemyOutline",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 0.0,
+                "ColorG": 0.0,
+                "ColorR": 0.0,
+                "DepthSensitivity": 80.0,
+                "EdgeThreshold": 0.004999999888241291,
+                "Intensity": 1.0,
+                "Thickness": 1.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 32
+        },
+        {
+            "effectShaderKey": "PostEffect/FXAA.PS",
+            "effectType": "FXAA",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_6",
+            "layerEffectStage": "Scene",
+            "name": "EnemyFXAA",
+            "parameters": {
+                "EdgeThreshold": 0.125,
+                "Intensity": 1.0,
+                "MinEdgeThreshold": 0.031199999153614044,
+                "SearchSpan": 8.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 16
+        },
+        {
+            "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "effectType": "DepthOutline",
+            "enabled": true,
+            "ignoreDepthForMask": false,
             "key": "LayerEffectPass_3",
             "layerEffectStage": "Scene",
             "name": "MapObjectOutline",
@@ -147,32 +185,6 @@
                 "ExposureEV": 0.0,
                 "ReinhardWhitePoint": 4.0,
                 "ToneMapperMode": 1.0
-            },
-            "scope": "Screen",
-            "screenEffectStage": "Final"
-        },
-        {
-            "effectShaderKey": "PostEffect/CRT.PS",
-            "effectType": "CRT",
-            "enabled": false,
-            "key": "ScreenEffectPass_5",
-            "name": "CRT",
-            "parameters": {
-                "BorderSoftness": 0.015,
-                "Brightness": 1.03,
-                "Curvature": 0.08,
-                "FlickerFrequency": 17.0,
-                "FlickerIntensity": 0.015,
-                "Intensity": 1.0,
-                "NoiseIntensity": 0.015,
-                "ScanlineIntensity": 0.18,
-                "ScanlineSharpness": 4.0,
-                "ScanlineSpacing": 3.0,
-                "ScanlineSpeed": 0.0,
-                "ScanlineThickness": 0.35,
-                "ShadowMaskIntensity": 0.08,
-                "ShadowMaskScale": 1.0,
-                "VignetteIntensity": 0.25
             },
             "scope": "Screen",
             "screenEffectStage": "Final"

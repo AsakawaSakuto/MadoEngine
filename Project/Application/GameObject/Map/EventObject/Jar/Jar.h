@@ -19,6 +19,11 @@ public:
 	/// @param desc 初期化に使用する設定
 	void Initialize(const InitializeDesc& desc);
 
+	/// @brief 指定座標に配置するJarのColliderを作成
+	/// @param position 配置予定のワールド座標
+	/// @return ワールド座標反映済みCollider
+	static AABB CreatePlacementCollider(const Vector3& position);
+
 	/// @brief Jarを更新
 	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;

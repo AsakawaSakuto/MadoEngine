@@ -35,7 +35,16 @@ public:
 	std::vector<MapEventRequest> ConsumeEventRequests();
 
 private:
-	
+	/// @brief 配置候補Colliderが既存イベントオブジェクトと重なるか判定
+	/// @param collider 配置候補のワールド座標反映済みCollider
+	/// @return 既存Colliderと重なる場合はtrue
+	bool IsEventObjectColliderOverlapping(const AABB& collider) const;
+
+	/// @brief Player初期配置Colliderが配置禁止Objectと重なるか判定
+	/// @param collider Player初期配置時の移動Collider
+	/// @return 配置禁止Objectと重なる場合はtrue
+	bool IsPlayerSpawnBlocked(const Sphere& collider) const;
+
 	/// @brief Map上にJarをランダム配置
 	void GenerateJars();
 

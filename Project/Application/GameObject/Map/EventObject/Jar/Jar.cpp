@@ -60,10 +60,7 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	transform_.translate = desc.position;
 	transform_.rotate = desc.rotation;
 
-	AABB aabb{};
-	aabb.min = { -1.0f, 0.0f, -1.0f };
-	aabb.max = { 1.0f, 1.0f, 1.0f };
-	colliderShape_ = aabb;
+	colliderShape_ = CreatePlacementCollider(desc.position);
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
@@ -103,6 +100,14 @@ void Jar::Initialize(const InitializeDesc& desc) {
 		uint32_t outlineHandle = outlineBatch->AddInstance(outlineInstance);
 		SetInstancedDraw(normalBatchHandle, normalHandle, outlineBatchHandle, outlineHandle);
 	}
+}
+
+AABB Jar::CreatePlacementCollider(const Vector3& position) {
+	AABB collider;
+	collider.center = position;
+	collider.min = { -1.0f, 0.0f, -1.0f };
+	collider.max = { 1.0f, 1.0f, 1.0f };
+	return collider;
 }
 
 void Jar::Update(float deltaTime) {

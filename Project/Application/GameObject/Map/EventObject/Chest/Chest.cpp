@@ -36,10 +36,7 @@ void Chest::Initialize(const InitializeDesc& desc) {
 	transform_.translate = desc.position;
 	transform_.rotate = desc.rotation;
 
-	AABB aabb{};
-	aabb.min = { -2.0f, 0.0f, -2.0f };
-	aabb.max = { 2.0f, 1.5f, 2.0f };
-	colliderShape_ = aabb;
+	colliderShape_ = CreatePlacementCollider(desc.position);
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
@@ -79,6 +76,14 @@ void Chest::Initialize(const InitializeDesc& desc) {
 		uint32_t outlineHandle = outlineBatch->AddInstance(outlineInstance);
 		SetInstancedDraw(normalBatchHandle, normalHandle, outlineBatchHandle, outlineHandle);
 	}
+}
+
+AABB Chest::CreatePlacementCollider(const Vector3& position) {
+	AABB collider;
+	collider.center = position;
+	collider.min = { -2.0f, 0.0f, -2.0f };
+	collider.max = { 2.0f, 1.5f, 2.0f };
+	return collider;
 }
 
 void Chest::Update(float deltaTime) {

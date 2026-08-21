@@ -1,4 +1,5 @@
 #include "MapEventObjectBase.h"
+#include "Utility/Collider/CollisionFunction.h"
 #include "Utility/Collider/MyCollider.h"
 
 
@@ -12,6 +13,28 @@ Vector3 MapEventObjectBase::GetPosition() const {
 
 Vector3 MapEventObjectBase::GetRotation() const {
 	return Vector3(transform_.rotate.x, 0.0f, transform_.rotate.z);
+}
+
+bool MapEventObjectBase::IsColliderOverlapping(const AABB& collider) const {
+	if (!std::holds_alternative<AABB>(colliderShape_)) {
+		return false;
+	}
+
+	// ColliderManagerと同じ座標同期規則で登録ObjectのワールドAABBを構築
+	AABB objectCollider = std::get<AABB>(colliderShape_);
+	objectCollider.center = transform_.translate;
+	return Collision::IsHit(objectCollider, collider);
+}
+
+bool MapEventObjectBase::IsColliderOverlapping(const Sphere& collider) const {
+	if (!std::holds_alternative<AABB>(colliderShape_)) {
+		return false;
+	}
+
+	// ColliderManagerと同じ座標同期規則で登録ObjectのワールドAABBを構築
+	AABB objectCollider = std::get<AABB>(colliderShape_);
+	objectCollider.center = transform_.translate;
+	return Collision::IsHit(collider, objectCollider);
 }
 
 void MapEventObjectBase::SetHighlighted(bool isHighlighted) {

@@ -13,10 +13,7 @@ void Karma::Initialize(const InitializeDesc& desc) {
 	transform_.translate = desc.position;
 	transform_.rotate = desc.rotation;
 
-	AABB aabb{};
-	aabb.min = { -0.75f, 0.0f, -0.75f };
-	aabb.max = { 0.75f, 2.5f, 0.75f };
-	colliderShape_ = aabb;
+	colliderShape_ = CreatePlacementCollider(desc.position);
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
@@ -51,6 +48,14 @@ void Karma::Initialize(const InitializeDesc& desc) {
 		const uint32_t outlineHandle = outlineBatch->AddInstance(outlineInstance);
 		SetInstancedDraw(normalBatchHandle, normalHandle, outlineBatchHandle, outlineHandle);
 	}
+}
+
+AABB Karma::CreatePlacementCollider(const Vector3& position) {
+	AABB collider;
+	collider.center = position;
+	collider.min = { -0.75f, 0.0f, -0.75f };
+	collider.max = { 0.75f, 2.5f, 0.75f };
+	return collider;
 }
 
 void Karma::Update(float deltaTime) {
