@@ -13,7 +13,8 @@ namespace Player {
 		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
 	}
 
-	void Base::Initialize(const Vector3& spawnGroundPosition) {
+	void Base::Initialize(const Vector3& spawnGroundPosition, SceneType sceneType) {
+		sceneType_ = sceneType;
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
@@ -44,7 +45,7 @@ namespace Player {
 		MyCollider::RegisterCollider("PlayerAttackRangeSphere", CollisionTag::PlayerAttackRangeSphere, &attackRangeSphere_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerEnemyDeleteRangeSphere", CollisionTag::EnemyDeleteRangeSphere, &enemyDeleteRangeSphere_, &transform_.translate, 0.0f);
 
-		model_ = MyModel::Create("Player", "walk", SceneType::Game);
+		model_ = MyModel::Create("Player", "walk", sceneType_);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 			model->SetTexture("white2x2");
@@ -59,7 +60,7 @@ namespace Player {
 
 		// Loop再生を維持したまま空中時だけ描画する着地点Markerの初期化
 		MadoEngine::EffectSequence::EffectSequencePlayDesc landingMarkerDesc;
-		landingMarkerDesc.sceneType = SceneType::Game;
+		landingMarkerDesc.sceneType = sceneType_;
 		landingMarkerDesc.loopOverride = true;
 		landingMarker_.Play("LandingMarker", landingMarkerDesc);
 		landingMarker_.SetVisible(false);
@@ -68,7 +69,7 @@ namespace Player {
 		if (Model* model = MyModel::TryGet(model_)) {
 			desc.transform.translate = model->GetVertexPosition(218);
 		}
-		desc.sceneType = SceneType::Game;
+		desc.sceneType = sceneType_;
 		desc.loopOverride = true;
 	}
 
@@ -301,7 +302,7 @@ namespace Player {
 	void Base::PlayMovementEffect(const std::string& assetName) const {
 		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
 		desc.rootTransform.translate = transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f };
-		desc.sceneType = SceneType::Game;
+		desc.sceneType = sceneType_;
 		desc.loopOverride = false;
 		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play(assetName, desc);
 	}

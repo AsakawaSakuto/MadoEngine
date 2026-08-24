@@ -1,7 +1,9 @@
 #pragma once
 #include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
+#include "GameObject/Player/Player.h"
 #include <cstddef>
+#include <memory>
 #include <optional>
 
 /// @brief タイトルシーン
@@ -33,13 +35,25 @@ public:
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
 
+	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得
+	/// @return Playerのワールド座標
+	Vector3 GetShadowFocusPosition() const override;
+
+	/// @brief シャドウマップ確認用のPlayer描画座標を取得
+	/// @param outPosition PlayerのModelワールド座標を受け取る変数
+	/// @return Player座標を取得できた場合はtrue
+	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
+
 private:
 	CommonData& commonData_;
 	std::optional<std::size_t> selectedSeedIndex_;
 
 	MadoEngine::SpriteHandle wallPaperSprite_{};
 
-	MadoEngine::ModelHandle testModel_{};
-
 	CameraHandle debugCameraHandle_{};
+	CameraHandle tpsCameraHandle_{};
+
+	std::unique_ptr<Player::Base> player_;
+	ColliderShape groundCollider_;
+	Vector3 groundPosition_{};
 };

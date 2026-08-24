@@ -1,5 +1,6 @@
 #pragma once
 #include "../IGameObject.h"
+#include ".SceneManager/SceneType.h"
 #include "PlayerController.h"
 #include "PlayerAnimationController.h"
 #include "PlayerMovement.h"
@@ -15,7 +16,8 @@ namespace Player {
 
 		/// @brief Playerを初期化
 		/// @param spawnGroundPosition Playerを配置する地表座標
-		void Initialize(const Vector3& spawnGroundPosition);
+		/// @param sceneType Playerを所属させるScene
+		void Initialize(const Vector3& spawnGroundPosition, SceneType sceneType = SceneType::Game);
 
 		/// @brief 地表座標からPlayer初期配置時の移動Colliderを作成
 		/// @param spawnGroundPosition Playerを配置する地表座標
@@ -102,6 +104,7 @@ namespace Player {
 		ColliderShape enemyDeleteRangeSphere_;
 
 		Camera* camera_ = nullptr;
+		SceneType sceneType_ = SceneType::Game;
 
 		Transform3D shadowTransform_;  // 影Transform
 		MadoEngine::EffectSequence::MyEffectSequence3d landingMarker_; // 着地点Marker

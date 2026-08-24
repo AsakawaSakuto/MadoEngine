@@ -2,6 +2,10 @@
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
+namespace {
+	constexpr float kTitleGroundHalfSize = 300.0f;
+}
+
 Title::Title(CommonData& commonData)
 	: commonData_(commonData) {}
 
@@ -11,16 +15,43 @@ void Title::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
 
 	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("TitleDebugCamera");
+	tpsCameraHandle_ = cameraManager_.CreateCamera<TPS_Camera>("TitlePlayerCamera");
 	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
 		debugCamera->SetDistance(35.0f);
 	}
-	cameraManager_.CutTo(debugCameraHandle_);
+
+	// Title内だけでPlayerの接地と移動範囲を成立させるため専用地面を登録
+	AABB ground;
+	ground.min = { -kTitleGroundHalfSize, -1.0f, -kTitleGroundHalfSize };
+	ground.max = { kTitleGroundHalfSize, 0.0f, kTitleGroundHalfSize };
+	groundCollider_ = ground;
+	groundPosition_ = {};
+	MyCollider::RegisterCollider("TitleGround", CollisionTag::MapBlock, &groundCollider_, &groundPosition_, 1.0f);
+
+	player_ = std::make_unique<Player::Base>();
+	player_->Initialize({}, SceneType::Title);
+	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
+
+	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
+		tpsCamera->SetTargetPosition(player_->GetPosition());
+		tpsCamera->SetDistance(15.0f);
+		tpsCamera->SetOffset({ 0.0f, 2.0f, 0.0f });
+	}
+	cameraManager_.CutTo(tpsCameraHandle_);
 }
 
 SceneType Title::Update(float dt) {
 	SceneType nextSceneType = SceneType::Title;
 	const SceneTransitionController& transitionController =
 		commonData_.GetSceneTransitionController();
+
+	// Player移動後の座標でColliderと接地状態を確定して描画姿勢へ反映
+	player_->Update(dt);
+	MyCollider::Update();
+	player_->ResolveAfterCollision();
+	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
+		tpsCamera->SetTargetPosition(player_->GetPosition());
+	}
 
 	// 遷移中の連続入力でSeed要求と遷移先を上書きしないため決定操作を制限
 	if (!transitionController.IsTransitioning() && MyInput::Trigger("Decision")) {
@@ -47,6 +78,8 @@ void Title::Draw() {
 
 void Title::DrawImGui() {
 #ifdef USE_IMGUI
+	player_->DrawImGui();
+
 	System::GameSeedSystem& gameSeedSystem = commonData_.GetGameSeedSystem();
 	const std::vector<System::GameSeedSystem::HistoryEntry>& history = gameSeedSystem.GetHistory();
 
@@ -104,8 +137,31 @@ void Title::DrawImGui() {
 #endif // USE_IMGUI
 }
 
+Vector3 Title::GetShadowFocusPosition() const {
+	if (!player_) {
+		return GetCamera().GetPosition();
+	}
+
+	return player_->GetPosition();
+}
+
+bool Title::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
+	if (!player_) {
+		outPosition = {};
+		return false;
+	}
+
+	outPosition = player_->GetModelPosition();
+	return true;
+}
+
 void Title::Finalize() {
+	if (player_) {
+		player_->SetCamera(nullptr);
+	}
+	MyCollider::RemoveColliderAll();
 	cameraManager_.Clear();
 	debugCameraHandle_ = {};
+	tpsCameraHandle_ = {};
 	Logger::Output("タイトルシーンの終了処理を実行しました", Logger::Level::Application);
 }
