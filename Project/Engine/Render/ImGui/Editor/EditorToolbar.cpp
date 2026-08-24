@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdio>
 #include <filesystem>
 #include <limits>
 #include <nlohmann/json.hpp>
@@ -53,6 +54,23 @@ constexpr std::array<EditorWindowMenuItem, 20> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::EffectSequence, "Effect Sequence Editor" },
 	EditorWindowMenuItem{ EditorWindow::StyleColor, "ImGui Style Color" },
 	EditorWindowMenuItem{ EditorWindow::Logger, "Logger" },
+};
+
+constexpr std::array<const char*, 14> kDocumentLabels = {
+	"Camera",
+	"Scene",
+	"Post Effect",
+	"Audio",
+	"Light",
+	"Model",
+	"Sprite",
+	"Text",
+	"Particle",
+	"Cylinder",
+	"Ribbon",
+	"Beam",
+	"Effect Sequence",
+	"Style Color",
 };
 
 /// @brief enum classを配列添字へ変換
@@ -124,6 +142,7 @@ float EditorToolbar::Draw() {
 	DrawMainMenu();
 	const float toolbarHeight = DrawPlaybackToolbar();
 	DrawReloadConfirmationPopup();
+	DrawUnsavedConfirmationPopup();
 	return toolbarHeight;
 }
 
@@ -402,6 +421,53 @@ void EditorToolbar::MarkAllDocumentsSaved() {
 	dirtyDocuments_.fill(false);
 }
 
+void EditorToolbar::RequestProtectedAction(EditorProtectedAction action, std::uint64_t payload) {
+	if (action == EditorProtectedAction::None) {
+		return;
+	}
+
+	const EditorProtectedAction currentAction = pendingProtectedAction_ != EditorProtectedAction::None
+		? pendingProtectedAction_
+		: protectedActionResult_.action;
+	if (currentAction != EditorProtectedAction::None) {
+		if (currentAction == action &&
+			(pendingProtectedAction_ == EditorProtectedAction::None ||
+				pendingProtectedActionPayload_ == payload)) {
+			return;
+		}
+		if (currentAction == EditorProtectedAction::ApplicationExit ||
+			action != EditorProtectedAction::ApplicationExit) {
+			return;
+		}
+	}
+
+	// 終了要求を最優先にして保留中のScene遷移確認を置換
+	pendingProtectedAction_ = action;
+	pendingProtectedActionPayload_ = payload;
+	hasProtectedActionResult_ = false;
+	protectedActionResult_ = {};
+	if (!HasDirtyDocument()) {
+		protectedActionResult_ = { action, payload, false };
+		hasProtectedActionResult_ = true;
+		pendingProtectedAction_ = EditorProtectedAction::None;
+		pendingProtectedActionPayload_ = 0;
+		return;
+	}
+
+	openUnsavedConfirmation_ = true;
+}
+
+bool EditorToolbar::ConsumeProtectedActionResult(EditorProtectedActionResult& outResult) {
+	if (!hasProtectedActionResult_) {
+		return false;
+	}
+
+	outResult = protectedActionResult_;
+	protectedActionResult_ = {};
+	hasProtectedActionResult_ = false;
+	return true;
+}
+
 void EditorToolbar::NotifyDocumentOperationResult(const char* actionName, bool succeeded) {
 	NotifyOperationResult(actionName, succeeded);
 	if (succeeded) {
@@ -424,6 +490,11 @@ void EditorToolbar::ApplyDefaultSettings() {
 	stepRequested_ = false;
 	undoRequested_ = false;
 	redoRequested_ = false;
+	openUnsavedConfirmation_ = false;
+	hasProtectedActionResult_ = false;
+	pendingProtectedAction_ = EditorProtectedAction::None;
+	pendingProtectedActionPayload_ = 0;
+	protectedActionResult_ = {};
 	timeScale_ = 1.0f;
 	fixedStepDeltaTime_ = 1.0f / 60.0f;
 }
@@ -595,6 +666,39 @@ float EditorToolbar::DrawPlaybackToolbar() {
 		ImGuiSliderFlags_AlwaysClamp
 	);
 	ImGui::SameLine();
+	ImGui::SetNextItemWidth(110.0f);
+	ImGui::DragFloat(
+		"固定Δt",
+		&fixedStepDeltaTime_,
+		0.0001f,
+		kMinimumFixedStep,
+		kMaximumFixedStep,
+		"%.5f s",
+		ImGuiSliderFlags_AlwaysClamp
+	);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+		ImGui::SetTooltip("一時停止中の1フレーム実行に使用する時間");
+	}
+	ImGui::SameLine();
+	char fixedStepPresetLabel[32]{};
+	const int fixedStepFps = static_cast<int>(std::lround(1.0f / fixedStepDeltaTime_));
+	std::snprintf(fixedStepPresetLabel, sizeof(fixedStepPresetLabel), "%d FPS", fixedStepFps);
+	ImGui::SetNextItemWidth(82.0f);
+	if (ImGui::BeginCombo("##FixedStepPreset", fixedStepPresetLabel)) {
+		constexpr std::array<int, 3> fixedStepPresets = { 30, 60, 120 };
+		for (int presetFps : fixedStepPresets) {
+			const bool isSelected = fixedStepFps == presetFps;
+			const std::string label = std::to_string(presetFps) + " FPS";
+			if (ImGui::Selectable(label.c_str(), isSelected)) {
+				fixedStepDeltaTime_ = 1.0f / static_cast<float>(presetFps);
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::SameLine();
 	ImGui::TextColored(
 		isPaused_ ? ImVec4(1.0f, 0.75f, 0.2f, 1.0f) : ImVec4(0.2f, 1.0f, 0.35f, 1.0f),
 		isPaused_ ? "一時停止中" : "実行中"
@@ -648,6 +752,66 @@ void EditorToolbar::DrawReloadConfirmationPopup() {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("キャンセル", ImVec2(120.0f, 0.0f))) {
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::EndPopup();
+}
+
+void EditorToolbar::DrawUnsavedConfirmationPopup() {
+	if (openUnsavedConfirmation_) {
+		ImGui::OpenPopup("未保存の変更##EditorToolbar");
+		openUnsavedConfirmation_ = false;
+	}
+
+	if (!ImGui::BeginPopupModal(
+		"未保存の変更##EditorToolbar",
+		nullptr,
+		ImGuiWindowFlags_AlwaysAutoResize)) {
+		return;
+	}
+
+	const char* actionLabel = pendingProtectedAction_ == EditorProtectedAction::ApplicationExit
+		? "アプリケーションを終了"
+		: "シーンを遷移";
+	ImGui::Text("未保存の変更があります。%sしますか？", actionLabel);
+	ImGui::Spacing();
+	ImGui::TextDisabled("未保存のDocument");
+	for (std::size_t index = 0; index < dirtyDocuments_.size(); ++index) {
+		if (dirtyDocuments_[index]) {
+			ImGui::BulletText("%s", kDocumentLabels[index]);
+		}
+	}
+	ImGui::Spacing();
+
+	if (ImGui::Button("保存して続行", ImVec2(140.0f, 0.0f))) {
+
+		// 保存結果を呼び出し元で検証してから破棄操作を確定するため要求だけを返却
+		protectedActionResult_ = {
+			pendingProtectedAction_,
+			pendingProtectedActionPayload_,
+			true
+		};
+		hasProtectedActionResult_ = true;
+		pendingProtectedAction_ = EditorProtectedAction::None;
+		pendingProtectedActionPayload_ = 0;
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("保存せず続行", ImVec2(140.0f, 0.0f))) {
+		protectedActionResult_ = {
+			pendingProtectedAction_,
+			pendingProtectedActionPayload_,
+			false
+		};
+		hasProtectedActionResult_ = true;
+		pendingProtectedAction_ = EditorProtectedAction::None;
+		pendingProtectedActionPayload_ = 0;
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("キャンセル", ImVec2(100.0f, 0.0f))) {
+		pendingProtectedAction_ = EditorProtectedAction::None;
+		pendingProtectedActionPayload_ = 0;
 		ImGui::CloseCurrentPopup();
 	}
 	ImGui::EndPopup();

@@ -349,7 +349,10 @@ void SceneManager::DrawSceneManagerImGui() {
 			ImGui::PushID(static_cast<int>(type));
 			if (ImGui::Selectable(sceneName.c_str(), isCurrentScene) && !isCurrentScene) {
 				Logger::Output("ImGuiからシーン遷移を要求しました: " + sceneName, Logger::Level::Debug);
-				RequestSceneChange(type);
+				MadoEngine::Editor::EditorToolbar::GetInstance().RequestProtectedAction(
+					MadoEngine::Editor::EditorProtectedAction::SceneChange,
+					static_cast<std::uint64_t>(type)
+				);
 				ImGui::PopID();
 				break;
 			}
@@ -379,6 +382,10 @@ void SceneManager::ApplyPendingSceneChange() {
 
 	ChangeScene(nextSceneType);
 	commonData_.GetSceneTransitionController().NotifySceneChanged(currentSceneType_);
+}
+
+void SceneManager::RequestConfirmedEditorSceneChange(SceneType type) {
+	RequestSceneChange(type);
 }
 
 float SceneManager::GetSceneTransitionEffectProgress() const {
@@ -465,7 +472,9 @@ void SceneManager::ChangeScene(SceneType type) {
 	}
 #ifdef USE_IMGUI
 	CameraManager* cameraManager = &currentScene_->GetCameraManager();
-	MadoEngine::Editor::EditorToolbar::GetInstance().RegisterDocumentHistory(
+	MadoEngine::Editor::EditorToolbar& toolbar =
+		MadoEngine::Editor::EditorToolbar::GetInstance();
+	toolbar.RegisterDocumentHistory(
 		MadoEngine::Editor::EditorDocument::Camera,
 		[cameraManager]() { return cameraManager->ToJson().dump(); },
 		[cameraManager](const std::string& snapshot) {
@@ -475,6 +484,10 @@ void SceneManager::ChangeScene(SceneType type) {
 			}
 		}
 	);
+
+	// Scene固有Documentの入れ替え後を次の編集操作に対する履歴基準へ設定
+	toolbar.ClearHistory();
+	toolbar.SynchronizeHistorySnapshots();
 #endif // USE_IMGUI
 	Logger::Output("シーン遷移を完了しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 }

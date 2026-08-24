@@ -54,6 +54,20 @@ enum class EditorDocument {
 	Count,
 };
 
+/// @brief 未保存確認で保護するEditor操作種別
+enum class EditorProtectedAction {
+	None,
+	SceneChange,
+	ApplicationExit,
+};
+
+/// @brief 未保存確認で確定したEditor操作情報
+struct EditorProtectedActionResult {
+	EditorProtectedAction action = EditorProtectedAction::None;
+	std::uint64_t payload = 0;
+	bool shouldSave = false;
+};
+
 /// @brief Editor共通ツールバーの操作状態とウィンドウ表示状態を管理するクラス
 class EditorToolbar final {
 public:
@@ -152,6 +166,16 @@ public:
 	/// @brief 全Documentを保存済み状態へ設定
 	void MarkAllDocumentsSaved();
 
+	/// @brief 未保存状態を保護する操作を要求
+	/// @param action 要求する操作種別
+	/// @param payload 呼び出し元へ返却する操作固有値
+	void RequestProtectedAction(EditorProtectedAction action, std::uint64_t payload = 0);
+
+	/// @brief 未保存確認で確定した操作を取得して解除
+	/// @param outResult 確定した操作情報
+	/// @return 確定した操作がある場合はtrue
+	bool ConsumeProtectedActionResult(EditorProtectedActionResult& outResult);
+
 	/// @brief Save AllまたはReload Allの結果を通知
 	/// @param actionName 実行した操作名
 	/// @param succeeded 全対象で成功した場合はtrue
@@ -194,6 +218,9 @@ private:
 	/// @brief Reload All確認Popupを描画
 	void DrawReloadConfirmationPopup();
 
+	/// @brief 未保存状態での保護対象操作確認Popupを描画
+	void DrawUnsavedConfirmationPopup();
+
 	/// @brief 未保存Documentが存在するか確認
 	/// @return 未保存Documentが存在する場合はtrue
 	bool HasDirtyDocument() const;
@@ -232,6 +259,8 @@ private:
 	bool saveLayoutRequested_ = false;
 	bool resetLayoutRequested_ = false;
 	bool openReloadConfirmation_ = false;
+	bool openUnsavedConfirmation_ = false;
+	bool hasProtectedActionResult_ = false;
 	bool isInitialized_ = false;
 	float timeScale_ = 1.0f;
 	float fixedStepDeltaTime_ = 1.0f / 60.0f;
@@ -239,6 +268,9 @@ private:
 	bool operationStatusSucceeded_ = true;
 	double operationStatusExpireTime_ = 0.0;
 	std::uint64_t nextTransactionId_ = 1;
+	EditorProtectedAction pendingProtectedAction_ = EditorProtectedAction::None;
+	std::uint64_t pendingProtectedActionPayload_ = 0;
+	EditorProtectedActionResult protectedActionResult_{};
 };
 
 } // namespace MadoEngine::Editor

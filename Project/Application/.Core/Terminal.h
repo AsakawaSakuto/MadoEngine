@@ -15,6 +15,14 @@ public:
 	void Run();
 
 private:
+	/// @brief Engine共通と現在SceneのEditor Documentを一括保存
+	/// @return 全Documentの保存に成功した場合はtrue
+	bool SaveAllEditorDocuments();
+
+	/// @brief 未保存確認で確定したEditor操作を処理
+	/// @return アプリケーションを終了する場合はtrue
+	bool ProcessEditorProtectedAction();
+
 	/// @brief シーン遷移進行度をPixelArtのピクセルサイズへ反映
 	void UpdateSceneTransitionPixelArt();
 

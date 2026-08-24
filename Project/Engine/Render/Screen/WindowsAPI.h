@@ -49,6 +49,13 @@ namespace MadoEngine::Screen {
 		/// @brief 右上の×ボタンが押されたかどうかを取得
 		bool IsPushCloseButton() const { return isPushCloseBottom_; }
 
+		/// @brief 未処理のアプリケーション終了要求を取得して解除
+		/// @return 終了要求がある場合はtrue
+		bool ConsumeCloseRequest();
+
+		/// @brief 保留中の終了要求を確定してWindowを破棄
+		void ConfirmClose();
+
 		/// @brief フルスクリーンモードかどうかを取得
 		bool IsFullscreen() const { return isFullscreen_; }
 
@@ -75,6 +82,7 @@ namespace MadoEngine::Screen {
 		HICON hIcon_ = nullptr;                  // アイコンハンドル
 		bool isFullscreen_ = false;              // フルスクリーンモードにするかどうか
 		bool isPushCloseBottom_ = false;         // 右上の×ボタンが押されたかどうか
+		bool hasCloseRequest_ = false;           // Editor確認待ちの終了要求があるかどうか
 		bool hasResizeRequest_ = false;          // 未処理のリサイズ要求があるかどうか
 		int pendingResizeWidth_ = 0;             // 次に反映するクライアント領域の幅
 		int pendingResizeHeight_ = 0;            // 次に反映するクライアント領域の高さ

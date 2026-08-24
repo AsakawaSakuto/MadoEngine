@@ -165,6 +165,9 @@ namespace MadoEngine
 		/// @brief ゲームループを継続するかどうかを取得
 		bool IsRunning();
 
+		/// @brief Editorで確認済みのアプリケーション終了を確定
+		void ConfirmApplicationExit();
+
 		/// @brief 1フレームの経過時間を取得
 		/// @return 経過時間（秒）
 		float GetDeltaTime() const { return static_cast<float>(deltaTime_->GetDeltaTime()); }

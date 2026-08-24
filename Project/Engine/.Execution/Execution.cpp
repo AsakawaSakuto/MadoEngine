@@ -1428,6 +1428,23 @@ namespace MadoEngine
 	}
 
 	bool EngineExecution::IsRunning() {
-		return windowsAPI_->ProcessMessage();
+		if (!windowsAPI_->ProcessMessage()) {
+			return false;
+		}
+
+#ifdef USE_IMGUI
+		if (windowsAPI_->ConsumeCloseRequest()) {
+
+			// Window破棄をEditorの未保存確認結果まで延期
+			MadoEngine::Editor::EditorToolbar::GetInstance().RequestProtectedAction(
+				MadoEngine::Editor::EditorProtectedAction::ApplicationExit
+			);
+		}
+#endif // USE_IMGUI
+		return true;
+	}
+
+	void EngineExecution::ConfirmApplicationExit() {
+		windowsAPI_->ConfirmClose();
 	}
 }

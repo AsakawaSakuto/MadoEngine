@@ -28,8 +28,20 @@ namespace MadoEngine::Screen {
 
 		// ウィンドウが閉じられたときの処理
 		switch (msg) {
+		case WM_CLOSE:
+#ifdef USE_IMGUI
+			if (api) {
+
+				// 未保存確認が完了するまでDefWindowProcによる即時破棄を抑止
+				api->hasCloseRequest_ = true;
+				return 0;
+			}
+#endif // USE_IMGUI
+			DestroyWindow(hwnd);
+			return 0;
+
 		case WM_DESTROY:
-			Logger::Output("ウィンドウの閉じるボタンが押されました", Logger::Level::Engine);
+			Logger::Output("ウィンドウの終了を確定しました", Logger::Level::Engine);
 			if (api) {
 				api->isPushCloseBottom_ = true;
 			}
@@ -269,6 +281,19 @@ namespace MadoEngine::Screen {
 		height = static_cast<uint32_t>(pendingResizeHeight_);
 		hasResizeRequest_ = false;
 		return true;
+	}
+
+	bool WindowsAPI::ConsumeCloseRequest() {
+		const bool requested = hasCloseRequest_;
+		hasCloseRequest_ = false;
+		return requested;
+	}
+
+	void WindowsAPI::ConfirmClose() {
+		hasCloseRequest_ = false;
+		if (hWnd_ && IsWindow(hWnd_)) {
+			DestroyWindow(hWnd_);
+		}
 	}
 
 	// Window Messageを処理しApplication継続時はtrue、終了時はfalse

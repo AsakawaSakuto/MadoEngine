@@ -78,8 +78,7 @@ void Title::Draw() {
 
 void Title::DrawImGui() {
 #ifdef USE_IMGUI
-	player_->DrawImGui();
-
+	
 	System::GameSeedSystem& gameSeedSystem = commonData_.GetGameSeedSystem();
 	const std::vector<System::GameSeedSystem::HistoryEntry>& history = gameSeedSystem.GetHistory();
 

@@ -107,6 +107,10 @@ public:
 	/// @brief 保留中のシーン遷移を適用
 	void ApplyPendingSceneChange();
 
+	/// @brief Editorの未保存確認で確定したシーン遷移を要求
+	/// @param type 遷移先のシーンのタイプ
+	void RequestConfirmedEditorSceneChange(SceneType type);
+
 private:
 	/// @brief SceneManagerのデバッグ用ImGuiを描画
 	void DrawSceneManagerImGui();

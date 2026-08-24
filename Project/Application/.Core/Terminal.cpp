@@ -3,6 +3,10 @@
 #include <cassert>
 #include <cstddef>
 
+#ifdef USE_IMGUI
+#include "Render/ImGui/Editor/EditorToolbar.h"
+#endif // USE_IMGUI
+
 namespace {
 	constexpr const char* kSceneTransitionPassName = "PixelArt";
 	constexpr const char* kPixelSizeParameterKey = "PixelSize";
@@ -21,6 +25,41 @@ Terminal::Terminal(HINSTANCE hInstance) {
 	sceneManager_->RegisterScene(SceneType::Game,   [](CommonData& commonData) { return std::make_unique<Game>(commonData); });
 	sceneManager_->RegisterScene(SceneType::Result, [](CommonData& commonData) { return std::make_unique<Result>(commonData); });
 	sceneManager_->Initialize(SceneType::Title);
+}
+
+bool Terminal::SaveAllEditorDocuments() {
+	const bool engineSucceeded = execution_->SaveEditorDocuments();
+	const bool sceneSucceeded = sceneManager_->SaveEditorDocuments();
+	const bool succeeded = engineSucceeded && sceneSucceeded;
+	execution_->NotifyEditorDocumentOperationResult("すべて保存", succeeded);
+	return succeeded;
+}
+
+bool Terminal::ProcessEditorProtectedAction() {
+#ifdef USE_IMGUI
+	MadoEngine::Editor::EditorProtectedActionResult result;
+	if (!MadoEngine::Editor::EditorToolbar::GetInstance().ConsumeProtectedActionResult(result)) {
+		return false;
+	}
+
+	// 保存失敗時は破棄操作へ進まず現在SceneとWindowを維持
+	if (result.shouldSave && !SaveAllEditorDocuments()) {
+		return false;
+	}
+
+	switch (result.action) {
+	case MadoEngine::Editor::EditorProtectedAction::SceneChange:
+		sceneManager_->RequestConfirmedEditorSceneChange(static_cast<SceneType>(result.payload));
+		return false;
+	case MadoEngine::Editor::EditorProtectedAction::ApplicationExit:
+		return true;
+	case MadoEngine::Editor::EditorProtectedAction::None:
+	default:
+		return false;
+	}
+#else
+	return false;
+#endif // USE_IMGUI
 }
 
 void Terminal::UpdateSceneTransitionPixelArt() {
@@ -217,10 +256,7 @@ void Terminal::Run() {
 		sceneManager_->DrawImGui();
 
 		if (execution_->ConsumeEditorSaveAllRequest()) {
-			const bool engineSucceeded = execution_->SaveEditorDocuments();
-			const bool sceneSucceeded = sceneManager_->SaveEditorDocuments();
-			const bool succeeded = engineSucceeded && sceneSucceeded;
-			execution_->NotifyEditorDocumentOperationResult("すべて保存", succeeded);
+			SaveAllEditorDocuments();
 		}
 		if (execution_->ConsumeEditorReloadAllRequest()) {
 			const bool engineSucceeded = execution_->ReloadEditorDocuments();
@@ -228,8 +264,15 @@ void Terminal::Run() {
 			const bool succeeded = engineSucceeded && sceneSucceeded;
 			execution_->NotifyEditorDocumentOperationResult("すべて再読込", succeeded);
 		}
+		const bool shouldExitAfterFrame = ProcessEditorProtectedAction();
 
 		execution_->PostDraw();
+		if (shouldExitAfterFrame) {
+
+			// 描画Frameを完了してからWindowを破棄してSwapChain利用中の終了を回避
+			execution_->ConfirmApplicationExit();
+			break;
+		}
 
 		// 描画中のResource破棄を避けるため予約済みScene遷移をFrame末尾で適用
 		sceneManager_->ApplyPendingSceneChange();
