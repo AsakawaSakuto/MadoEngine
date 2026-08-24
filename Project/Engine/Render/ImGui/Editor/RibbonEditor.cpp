@@ -1,4 +1,5 @@
 #include "RibbonEditor.h"
+#include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "EffectEmitterEditorCommon.h"
 #include "TextureSelector.h"
@@ -1246,6 +1247,7 @@ namespace MadoEngine::Editor {
 		}
 
 		if (reloadRequested) {
+			EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 			StopRibbonPreview(
 				system,
 				previewHandle,

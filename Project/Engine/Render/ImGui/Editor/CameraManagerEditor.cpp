@@ -1,4 +1,5 @@
 #include "CameraManagerEditor.h"
+#include "EditorToolbar.h"
 
 #ifdef USE_IMGUI
 
@@ -534,6 +535,7 @@ void DrawCameraManagerEditorUI(CameraManager& cameraManager, SceneType currentSc
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("再読込")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		fileOperationResult = cameraManager.LoadFromJson(cameraJsonPath) ? 1 : -1;
 		if (fileOperationResult > 0) {
 			selectedHandle = cameraManager.GetActiveCameraHandle();

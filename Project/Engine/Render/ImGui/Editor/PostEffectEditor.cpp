@@ -1,4 +1,5 @@
 #include "PostEffectEditor.h"
+#include "EditorToolbar.h"
 #include "Render/PostEffect/PostEffectDefinitionRegistry.h"
 #include "Utility/Json/JsonHeaders.h"
 #include "Utility/Logger/Logger.h"
@@ -319,14 +320,13 @@ void ApplyPostEffectPassOrder(
 
 /// @brief PostEffect Editorの状態をJSONから差分読み込み
 /// @param manager 読み込み先のManager
-/// @param filePath 読み込むJSONパス
+/// @param root 読み込むPostEffect設定Json
 /// @return 読み込みに成功した場合はtrue
-bool LoadPostEffectEditorJsonInternal(
+bool RestorePostEffectEditorJsonInternal(
 	Render::PostEffectManager& manager,
-	const std::filesystem::path& filePath = kPostEffectEditorJsonPath)
+	const nlohmann::json& root)
 {
-	nlohmann::json root;
-	if (!Json::JsonFile::Load(filePath, root)) {
+	if (!root.is_object()) {
 		return false;
 	}
 
@@ -354,7 +354,7 @@ bool LoadPostEffectEditorJsonInternal(
 		const Render::PostEffectPass* pass = manager.TryGet(handle);
 		if (pass && !usedKeys.contains(pass->GetKey())) {
 
-			// GPU完了待機後の読み込みによる差分削除の即時反映
+			// Snapshotに存在しないPassを遅延破棄して描画中Resourceの寿命を維持
 			manager.Destroy(handle);
 		}
 	}
@@ -364,7 +364,20 @@ bool LoadPostEffectEditorJsonInternal(
 	return true;
 }
 
-#ifdef USE_IMGUI
+/// @brief PostEffect Editorの状態をJSONファイルから差分読み込み
+/// @param manager 読み込み先のManager
+/// @param filePath 読み込むJSONパス
+/// @return 読み込みに成功した場合はtrue
+bool LoadPostEffectEditorJsonInternal(
+	Render::PostEffectManager& manager,
+	const std::filesystem::path& filePath = kPostEffectEditorJsonPath)
+{
+	nlohmann::json root;
+	if (!Json::JsonFile::Load(filePath, root)) {
+		return false;
+	}
+	return RestorePostEffectEditorJsonInternal(manager, root);
+}
 
 /// @brief PassのParameterをJSONへ変換
 /// @param pass 保存対象のPass
@@ -451,10 +464,13 @@ bool SavePostEffectEditorJsonInternal(const Render::PostEffectManager& manager) 
 	return Json::JsonFile::Save(kPostEffectEditorJsonPath, root, 4, true);
 }
 
+#ifdef USE_IMGUI
+
 enum class PostEffectEditorOperationType {
 	ChangeEffect,
 	MovePass,
 	LoadSettings,
+	RestoreSnapshot,
 	Count,
 };
 
@@ -465,6 +481,7 @@ struct PostEffectEditorOperation {
 	Render::PostEffectPassScope scope = Render::PostEffectPassScope::Layer;
 	std::size_t newIndex = 0;
 	std::filesystem::path filePath;
+	std::string snapshot;
 };
 
 /// @brief 次フレームへ予約されたEditor操作一覧を取得
@@ -748,6 +765,29 @@ std::size_t FindHandleIndex(
 
 } // namespace
 
+std::string CapturePostEffectEditorState(const Render::PostEffectManager& postEffectManager) {
+	nlohmann::json root;
+	root["version"] = 4;
+	root["layerPasses"] = SerializePostEffectPassList(
+		postEffectManager,
+		postEffectManager.GetLayerPassHandles(),
+		Render::PostEffectPassScope::Layer
+	);
+	root["screenPasses"] = SerializePostEffectPassList(
+		postEffectManager,
+		postEffectManager.GetScreenPassHandles(),
+		Render::PostEffectPassScope::Screen
+	);
+	return root.dump();
+}
+
+bool RestorePostEffectEditorState(
+	Render::PostEffectManager& postEffectManager,
+	const std::string& snapshot) {
+	const nlohmann::json root = nlohmann::json::parse(snapshot, nullptr, false);
+	return !root.is_discarded() && RestorePostEffectEditorJsonInternal(postEffectManager, root);
+}
+
 bool SavePostEffectEditorJsonToFile(const Render::PostEffectManager& postEffectManager) {
 	return SavePostEffectEditorJsonInternal(postEffectManager);
 }
@@ -762,6 +802,13 @@ bool LoadPostEffectEditorJsonFromFile(Render::PostEffectManager& postEffectManag
 
 #ifdef USE_IMGUI
 
+void ReservePostEffectEditorStateRestore(const std::string& snapshot) {
+	PostEffectEditorOperation operation{};
+	operation.type = PostEffectEditorOperationType::RestoreSnapshot;
+	operation.snapshot = snapshot;
+	GetPendingPostEffectEditorOperations().push_back(std::move(operation));
+}
+
 void ApplyPendingPostEffectEditorOperations(Render::PostEffectManager& postEffectManager) {
 	std::vector<PostEffectEditorOperation>& pending = GetPendingPostEffectEditorOperations();
 	if (pending.empty()) {
@@ -770,27 +817,50 @@ void ApplyPendingPostEffectEditorOperations(Render::PostEffectManager& postEffec
 
 	std::vector<PostEffectEditorOperation> operations = std::move(pending);
 	pending.clear();
+	bool hasHistoryChange = false;
+	bool hasSettingsLoad = false;
+	bool hasSnapshotRestore = false;
 	for (const PostEffectEditorOperation& operation : operations) {
 		switch (operation.type) {
 		case PostEffectEditorOperationType::ChangeEffect:
 			if (postEffectManager.IsValid(operation.handle)) {
 				postEffectManager.SetEffectType(operation.handle, operation.effectType);
+				hasHistoryChange = true;
 			}
 			break;
 		case PostEffectEditorOperationType::MovePass:
 			if (operation.scope == Render::PostEffectPassScope::Layer) {
 				postEffectManager.MoveLayerPass(operation.handle, operation.newIndex);
+				hasHistoryChange = true;
 			} else if (operation.scope == Render::PostEffectPassScope::Screen) {
 				postEffectManager.MoveScreenPass(operation.handle, operation.newIndex);
+				hasHistoryChange = true;
 			}
 			break;
 		case PostEffectEditorOperationType::LoadSettings:
-			LoadPostEffectEditorJsonInternal(postEffectManager, operation.filePath);
+			hasSettingsLoad =
+				LoadPostEffectEditorJsonInternal(postEffectManager, operation.filePath) || hasSettingsLoad;
+			break;
+		case PostEffectEditorOperationType::RestoreSnapshot:
+			hasSnapshotRestore =
+				RestorePostEffectEditorState(postEffectManager, operation.snapshot) || hasSnapshotRestore;
 			break;
 		case PostEffectEditorOperationType::Count:
 		default:
 			break;
 		}
+	}
+
+	EditorToolbar& toolbar = EditorToolbar::GetInstance();
+	if (hasSettingsLoad) {
+
+		// JSON読込を履歴境界として既存履歴を破棄しSnapshotだけを同期
+		toolbar.ClearHistory();
+		toolbar.SynchronizeHistorySnapshots();
+	} else if (hasSnapshotRestore) {
+		toolbar.SynchronizeHistorySnapshots();
+	} else if (hasHistoryChange) {
+		toolbar.CommitExternalDocumentChange(EditorDocument::PostEffect);
 	}
 }
 
@@ -811,11 +881,13 @@ void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager) {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		ReservePostEffectSettingsLoad(kPostEffectEditorJsonPath);
 		selectedHandle = {};
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("復元")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		ReservePostEffectSettingsLoad(CreateBackupJsonPath(kPostEffectEditorJsonPath));
 		selectedHandle = {};
 	}

@@ -417,7 +417,7 @@ std::filesystem::path CameraManager::CreateDefaultJsonPath(const std::string& sc
 	return std::filesystem::path(kDefaultCameraJsonDirectory) / (validSceneName + ".json");
 }
 
-bool CameraManager::SaveToJson(const std::filesystem::path& filePath) const {
+nlohmann::json CameraManager::ToJson() const {
 	nlohmann::json root = nlohmann::json::object();
 	root["version"] = kCameraJsonVersion;
 	root["activeCamera"] = IsValid(activeCameraHandle_)
@@ -505,7 +505,11 @@ bool CameraManager::SaveToJson(const std::filesystem::path& filePath) const {
 		}
 	}
 
-	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, root, 4, true);
+	return root;
+}
+
+bool CameraManager::SaveToJson(const std::filesystem::path& filePath) const {
+	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, ToJson(), 4, true);
 	Logger::Output(
 		isSaved
 			? "Camera設定をJsonへ保存しました : " + filePath.generic_string()
@@ -525,11 +529,18 @@ bool CameraManager::LoadFromJson(const std::filesystem::path& filePath) {
 		return false;
 	}
 
+	const bool isLoaded = FromJson(root);
+	Logger::Output(
+		isLoaded
+			? "Camera設定をJsonから読み込みました : " + filePath.generic_string()
+			: "Camera設定のJson形式が不正です : " + filePath.generic_string(),
+		isLoaded ? Logger::Level::Application : Logger::Level::Error
+	);
+	return isLoaded;
+}
+
+bool CameraManager::FromJson(const nlohmann::json& root) {
 	if (!root.is_object() || !root.contains("cameras") || !root.at("cameras").is_array()) {
-		Logger::Output(
-			"Camera設定のJson形式が不正です : " + filePath.generic_string(),
-			Logger::Level::Error
-		);
 		return false;
 	}
 
@@ -867,11 +878,6 @@ bool CameraManager::LoadFromJson(const std::filesystem::path& filePath) {
 		}
 	}
 
-	Logger::Output(
-		"Camera設定をJsonから読み込みました : " + filePath.generic_string() +
-		" 件数 : " + std::to_string(loadDescs.size()),
-		Logger::Level::Application
-	);
 	return true;
 }
 

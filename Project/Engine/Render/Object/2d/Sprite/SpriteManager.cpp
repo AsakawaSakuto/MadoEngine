@@ -5,6 +5,7 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cassert>
+#include <unordered_set>
 #include <utility>
 
 namespace MadoEngine {
@@ -420,7 +421,10 @@ nlohmann::json SpriteManager::ToJson() const {
 	nlohmann::json sprites = nlohmann::json::array();
 	for (SpriteHandle handle : drawOrder_) {
 		const Sprite* sprite = TryGet(handle);
-		if (!sprite || slots_[handle.index].managementMode != EditorManagementMode::EditorManaged) {
+		if (!sprite ||
+			slots_[handle.index].managementMode != EditorManagementMode::EditorManaged ||
+			std::find(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle) !=
+			pendingDestroyHandles_.end()) {
 			continue;
 		}
 		sprites.push_back(sprite->ToJson());
@@ -434,6 +438,41 @@ void SpriteManager::FromJson(const nlohmann::json& json) {
 
 void SpriteManager::FromJson(const nlohmann::json& json, SceneType sceneType) {
 	FromJsonInternal(json, sceneType);
+}
+
+void SpriteManager::RestoreEditorSnapshot(const nlohmann::json& json) {
+	if (!json.contains("sprites") || !json.at("sprites").is_array()) {
+		Logger::Output("Sprite履歴のSnapshotにsprites配列がありません", Logger::Level::Warning);
+		return;
+	}
+
+	std::unordered_set<std::string> snapshotNames;
+	for (const nlohmann::json& spriteJson : json.at("sprites")) {
+		if (spriteJson.is_object()) {
+			snapshotNames.insert(spriteJson.value("name", "Sprite"));
+		}
+	}
+
+	// 削除直後のUndoでは延期削除を解除して同じHandleとGPU資源を維持
+	pendingDestroyHandles_.erase(
+		std::remove_if(
+			pendingDestroyHandles_.begin(),
+			pendingDestroyHandles_.end(),
+			[this, &snapshotNames](SpriteHandle handle) {
+				return IsValid(handle) && snapshotNames.contains(slots_[handle.index].name);
+			}),
+		pendingDestroyHandles_.end());
+
+	// RuntimeOnlyを保持し、Snapshotに存在しないEditor管理Spriteだけを安全な時点で削除
+	for (const auto& [name, handle] : nameToHandle_) {
+		if (IsValid(handle) &&
+			slots_[handle.index].managementMode == EditorManagementMode::EditorManaged &&
+			!snapshotNames.contains(name)) {
+			RequestDestroy(handle);
+		}
+	}
+
+	FromJson(json);
 }
 
 void SpriteManager::FromJsonInternal(

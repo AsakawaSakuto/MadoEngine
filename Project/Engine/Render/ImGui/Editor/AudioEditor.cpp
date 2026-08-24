@@ -1,4 +1,5 @@
 #include "AudioEditor.h"
+#include "EditorToolbar.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
@@ -153,6 +154,23 @@ namespace MadoEngine::Editor {
 
     }
 
+    std::string CaptureAudioEditorState() {
+        return SerializeAudioEditorVolume().dump();
+    }
+
+    bool RestoreAudioEditorState(const std::string& snapshot) {
+        const nlohmann::json root = nlohmann::json::parse(snapshot, nullptr, false);
+        if (root.is_discarded() || !root.is_object()) {
+            return false;
+        }
+
+        AudioManager& audioManager = AudioManager::GetInstance();
+        audioManager.SetMasterVolume(ReadVolumeMember(root, "masterVolume", audioManager.GetMasterVolume()));
+        ApplyCategoryVolumes(root.value("categoryVolumes", nlohmann::json::object()));
+        ApplyIndividualVolumes(root.value("individualVolumes", nlohmann::json::object()));
+        return true;
+    }
+
     bool SaveAudioEditorJson() {
         return SaveAudioEditorVolumeJson();
     }
@@ -272,6 +290,7 @@ namespace MadoEngine::Editor {
 
                 ImGui::SameLine();
                 if (ImGui::Button("読込")) {
+                    EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
                     LoadAudioEditorVolumeJson();
                 }
 

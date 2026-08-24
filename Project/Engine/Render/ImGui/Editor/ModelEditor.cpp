@@ -1,4 +1,5 @@
 #include "ModelEditor.h"
+#include "EditorToolbar.h"
 #include "TextureSelector.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/Object/3d/Model/ModelManager.h"
@@ -570,10 +571,12 @@ namespace MadoEngine::Editor {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("読込")) {
+			EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 			LoadModelEditorJson(currentSceneType);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("復元")) {
+			EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 			std::filesystem::path backupPath = kModelEditorJsonPath;
 			backupPath += ".bak";
 			manager.LoadFromFile(backupPath, currentSceneType);

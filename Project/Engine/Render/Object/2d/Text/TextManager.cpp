@@ -5,6 +5,7 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cassert>
+#include <unordered_set>
 #include <utility>
 
 namespace MadoEngine {
@@ -415,7 +416,10 @@ nlohmann::json TextManager::ToJson() const {
 	for (const auto& [name, handle] : nameToHandle_) {
 		(void)name;
 		const Text* text = TryGet(handle);
-		if (!text || slots_[handle.index].managementMode != EditorManagementMode::EditorManaged) {
+		if (!text ||
+			slots_[handle.index].managementMode != EditorManagementMode::EditorManaged ||
+			std::find(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle) !=
+			pendingDestroyHandles_.end()) {
 			continue;
 		}
 		texts.push_back(text->ToJson());
@@ -429,6 +433,41 @@ void TextManager::FromJson(const nlohmann::json& json) {
 
 void TextManager::FromJson(const nlohmann::json& json, SceneType sceneType) {
 	FromJsonInternal(json, sceneType);
+}
+
+void TextManager::RestoreEditorSnapshot(const nlohmann::json& json) {
+	if (!json.contains("texts") || !json.at("texts").is_array()) {
+		Logger::Output("Text履歴のSnapshotにtexts配列がありません", Logger::Level::Warning);
+		return;
+	}
+
+	std::unordered_set<std::string> snapshotNames;
+	for (const nlohmann::json& textJson : json.at("texts")) {
+		if (textJson.is_object()) {
+			snapshotNames.insert(textJson.value("name", "Text"));
+		}
+	}
+
+	// 削除直後のUndoでは延期削除を解除して同じHandleとGPU資源を維持
+	pendingDestroyHandles_.erase(
+		std::remove_if(
+			pendingDestroyHandles_.begin(),
+			pendingDestroyHandles_.end(),
+			[this, &snapshotNames](TextHandle handle) {
+				return IsValid(handle) && snapshotNames.contains(slots_[handle.index].name);
+			}),
+		pendingDestroyHandles_.end());
+
+	// RuntimeOnlyを保持し、Snapshotに存在しないEditor管理Textだけを安全な時点で削除
+	for (const auto& [name, handle] : nameToHandle_) {
+		if (IsValid(handle) &&
+			slots_[handle.index].managementMode == EditorManagementMode::EditorManaged &&
+			!snapshotNames.contains(name)) {
+			RequestDestroy(handle);
+		}
+	}
+
+	FromJson(json);
 }
 
 void TextManager::FromJsonInternal(

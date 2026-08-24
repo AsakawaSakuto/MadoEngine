@@ -12,6 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <nlohmann/json_fwd.hpp>
 
 /// @brief ライトの種類を表す列挙型
 enum class LightType {
@@ -189,6 +190,15 @@ public:
 
 	/// @brief 登録済みライトをすべて削除
 	void Clear();
+
+	/// @brief Editor管理対象のライトをJsonへ変換
+	/// @return ライト設定Json
+	nlohmann::json ToJson() const;
+
+	/// @brief JsonからEditor管理対象のライトを復元
+	/// @param json 復元元のライト設定Json
+	/// @return 復元に成功した場合はtrue
+	bool FromJson(const nlohmann::json& json);
 
 	/// @brief Editor管理対象のライトをJsonファイルへ保存
 	/// @param filePath 保存先のJsonファイルパス

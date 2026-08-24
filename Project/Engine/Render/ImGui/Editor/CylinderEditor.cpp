@@ -1,4 +1,5 @@
 #include "CylinderEditor.h"
+#include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "EffectEmitterEditorCommon.h"
 #include "TextureSelector.h"
@@ -1236,6 +1237,7 @@ namespace MadoEngine::Editor {
 		}
 
 		if (reloadRequested) {
+			EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 			StopCylinderPreview(
 				system,
 				previewHandle,

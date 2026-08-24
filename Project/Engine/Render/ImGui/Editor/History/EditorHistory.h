@@ -34,11 +34,17 @@ public:
 	/// @return Redo可能な場合はtrue
 	bool CanRedo() const;
 
+	/// @brief 最後にUndoまたはRedoしたEditor領域を取得
+	/// @return Editor領域の識別値、操作前の場合はkInvalidHistoryDomain
+	std::size_t GetLastAffectedDomain() const { return lastAffectedDomain_; }
+
 private:
 	EditorHistory() = default;
+	static constexpr std::size_t kMaximumHistoryCount = 128;
 
 	std::vector<std::unique_ptr<IEditorCommand>> undoStack_;
 	std::vector<std::unique_ptr<IEditorCommand>> redoStack_;
+	std::size_t lastAffectedDomain_ = kInvalidHistoryDomain;
 };
 
 } // namespace MadoEngine::Editor

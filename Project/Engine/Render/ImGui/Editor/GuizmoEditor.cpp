@@ -1,13 +1,10 @@
 #include "GuizmoEditor.h"
 #include "EditorToolbar.h"
 #include "./History/EditorHistory.h"
-#include "./History/ModelTransformCommand.h"
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <memory>
 
 namespace MadoEngine::Editor {
 
@@ -189,48 +186,6 @@ namespace MadoEngine::Editor {
             return currentOperation;
         }
 
-        struct ModelGizmoEditState {
-            bool wasUsing = false;
-            bool isEditing = false;
-            ModelHandle target{};
-            Transform3D beforeTransform{};
-        };
-
-        /// @brief Modelギズモ操作の開始/終了状態を取得
-        /// @return Modelギズモ操作状態
-        ModelGizmoEditState& CurrentModelGizmoEditState() {
-            static ModelGizmoEditState state;
-            return state;
-        }
-
-        /// @brief 2つのfloatがほぼ同じ値か確認
-        /// @param a 比較する値
-        /// @param b 比較する値
-        /// @return ほぼ同じ場合はtrue
-        bool NearlyEqual(float a, float b) {
-            return std::fabs(a - b) <= 0.0001f;
-        }
-
-        /// @brief 2つのVector3がほぼ同じ値か確認
-        /// @param a 比較する値
-        /// @param b 比較する値
-        /// @return ほぼ同じ場合はtrue
-        bool NearlyEqual(const Vector3& a, const Vector3& b) {
-            return NearlyEqual(a.x, b.x) &&
-                NearlyEqual(a.y, b.y) &&
-                NearlyEqual(a.z, b.z);
-        }
-
-        /// @brief 2つのTransformがほぼ同じ値か確認
-        /// @param a 比較するTransform
-        /// @param b 比較するTransform
-        /// @return ほぼ同じ場合はtrue
-        bool NearlyEqual(const Transform3D& a, const Transform3D& b) {
-            return NearlyEqual(a.scale, b.scale) &&
-                NearlyEqual(a.rotate, b.rotate) &&
-                NearlyEqual(a.translate, b.translate);
-        }
-
         /// @brief Undo/Redoボタンを描画
         /// @param imageMin Game View画像領域の左上座標
         void DrawHistoryButtons(const ImVec2& imageMin) {
@@ -247,8 +202,7 @@ namespace MadoEngine::Editor {
                 ImGui::BeginDisabled();
             }
             if (DrawEditorIconButton({ "##GizmoUndo", "Undo", "Undo", "元に戻す" })) {
-                history.Undo();
-				EditorToolbar::GetInstance().MarkDocumentDirty(EditorDocument::Model);
+				EditorToolbar::GetInstance().Undo();
             }
             if (!canUndo) {
                 ImGui::EndDisabled();
@@ -260,8 +214,7 @@ namespace MadoEngine::Editor {
                 ImGui::BeginDisabled();
             }
             if (DrawEditorIconButton({ "##GizmoRedo", "Redo", "Redo", "やり直す" })) {
-                history.Redo();
-				EditorToolbar::GetInstance().MarkDocumentDirty(EditorDocument::Model);
+				EditorToolbar::GetInstance().Redo();
             }
             if (!canRedo) {
                 ImGui::EndDisabled();
@@ -392,54 +345,6 @@ namespace MadoEngine::Editor {
             return isChanged;
         }
 
-        /// @brief Modelギズモ操作をUndo履歴に記録
-        /// @param selectedModelHandle 現在選択されているModel Handle
-        /// @param beforeDrawTransform ギズモ描画前のTransform
-        /// @return 履歴が追加された場合はtrue
-        bool UpdateModelGizmoHistory(ModelHandle selectedModelHandle, const Transform3D& beforeDrawTransform) {
-            ModelGizmoEditState& state = CurrentModelGizmoEditState();
-            ModelManager& manager = ModelManager::GetInstance();
-            Model* selectedModel = manager.TryGet(selectedModelHandle);
-            const bool isUsing = ImGuizmo::IsUsing();
-            bool isChanged = false;
-
-            if (!state.wasUsing && isUsing && selectedModel) {
-
-                // Drag開始時のTransformを保持して一操作を一つのUndo Commandへ集約
-                state.isEditing = true;
-                state.target = selectedModelHandle;
-                state.beforeTransform = beforeDrawTransform;
-            }
-
-            if (state.wasUsing && !isUsing && state.isEditing) {
-
-                // Drag終了時に値が変化した場合だけ履歴へ追加
-                if (Model* target = manager.TryGet(state.target)) {
-                    const Transform3D afterTransform = target->GetTransform();
-                    if (!NearlyEqual(state.beforeTransform, afterTransform)) {
-                        EditorHistory::GetInstance().Push(std::make_unique<ModelTransformCommand>(
-                            state.target,
-                            TransformSnapshot{ state.beforeTransform },
-                            TransformSnapshot{ afterTransform }));
-                        isChanged = true;
-                    }
-                }
-
-                state.isEditing = false;
-                state.target = {};
-                state.beforeTransform = {};
-            }
-
-            if (!selectedModel && !isUsing) {
-                state.isEditing = false;
-                state.target = {};
-                state.beforeTransform = {};
-            }
-
-            state.wasUsing = isUsing;
-            return isChanged;
-        }
-
     } // namespace
 
     bool DrawTransformGizmoOnGameView(const Camera& camera, Transform3D& transform) {
@@ -459,14 +364,7 @@ namespace MadoEngine::Editor {
     /// @param selectedModel 現在選択中のModelHandle
     void ResetModelGizmoOnSceneChange(ModelHandle& selectedModel) {
         selectedModel = {};
-
-        ModelGizmoEditState& state = CurrentModelGizmoEditState();
-        state.wasUsing = false;
-        state.isEditing = false;
-        state.target = {};
-        state.beforeTransform = {};
-
-        EditorHistory::GetInstance().Clear();
+		EditorToolbar::GetInstance().ClearHistory();
     }
 
     bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, ModelHandle& selectedModelHandle) {
@@ -504,18 +402,10 @@ namespace MadoEngine::Editor {
             DrawHistoryButtons(imageMin);
 
             Transform3D transform = selectedModel->GetTransform();
-            const Transform3D beforeDrawTransform = transform;
             if (DrawTransformGizmoInRect(camera, transform, imageMin, imageSize)) {
                 selectedModel->SetTransform(transform);
-				EditorToolbar::GetInstance().MarkDocumentDirty(EditorDocument::Model);
                 isChanged = true;
             }
-            if (UpdateModelGizmoHistory(selectedModelHandle, beforeDrawTransform)) {
-                isChanged = true;
-            }
-        } else {
-            Transform3D emptyTransform{};
-            UpdateModelGizmoHistory({}, emptyTransform);
         }
 
         const bool canSelect =

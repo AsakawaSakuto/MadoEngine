@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <nlohmann/json_fwd.hpp>
 
 struct CameraHandleTag;
 using CameraHandle = MadoEngine::GenerationalHandle<CameraHandleTag>;
@@ -156,6 +157,15 @@ public:
 	/// @param sceneName 保存対象のScene名
 	/// @return Scene別Camera設定Jsonのパス
 	[[nodiscard]] static std::filesystem::path CreateDefaultJsonPath(const std::string& sceneName);
+
+	/// @brief Editor管理CameraとActive CameraをJsonへ変換
+	/// @return Camera設定Json
+	nlohmann::json ToJson() const;
+
+	/// @brief JsonからEditor管理CameraとActive Cameraを復元
+	/// @param json 復元元のCamera設定Json
+	/// @return 復元に成功した場合はtrue
+	bool FromJson(const nlohmann::json& json);
 
 	/// @brief Editor管理CameraとActive CameraをJsonへ保存
 	/// @param filePath 保存先のJsonファイルパス

@@ -1,5 +1,6 @@
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
+#include "Editor/EditorToolbar.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/View/SRVManager.h"
@@ -285,6 +286,7 @@ namespace MadoEngine {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("読み込み")) {
+			Editor::EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 			LoadStyleColors();
 		}
 		ImGui::SameLine();

@@ -469,7 +469,7 @@ void LightManager::ClearEditorManagedLights() {
 	AdvanceRevision();
 }
 
-bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
+nlohmann::json LightManager::ToJson() const {
 	nlohmann::json root = nlohmann::json::object();
 	root["version"] = 1;
 	root["lights"] = nlohmann::json::array();
@@ -508,7 +508,11 @@ bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
 		root["lights"].push_back(lightJson);
 	}
 
-	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, root, 4, true);
+	return root;
+}
+
+bool LightManager::SaveToJson(const std::filesystem::path& filePath) const {
+	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, ToJson(), 4, true);
 	if (isSaved) {
 		Logger::Output("LightManagerの設定をJsonへ保存しました : " + filePath.generic_string(), Logger::Level::Application);
 	} else {
@@ -525,15 +529,24 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		return false;
 	}
 
+	const bool isLoaded = FromJson(root);
+	Logger::Output(
+		isLoaded
+			? "LightManagerの設定をJsonから読み込みました : " + filePath.generic_string()
+			: "LightManagerのJson形式が不正です : " + filePath.generic_string(),
+		isLoaded ? Logger::Level::Application : Logger::Level::Error
+	);
+	return isLoaded;
+}
+
+bool LightManager::FromJson(const nlohmann::json& root) {
 	if (!root.is_object() || !root.contains("lights") || !root.at("lights").is_array()) {
-		Logger::Output("LightManagerのJson形式が不正です : " + filePath.generic_string(), Logger::Level::Error);
 		return false;
 	}
 
 	// Runtime Lightを保持したまま旧Editor管理Lightだけを読み込み結果と置換
 	ClearEditorManagedLights();
 
-	size_t loadCount = 0;
 	for (const nlohmann::json& lightJson : root.at("lights")) {
 		if (!lightJson.is_object()) {
 			Logger::Output("LightManagerのJson内に不正なライト情報があります", Logger::Level::Warning);
@@ -560,13 +573,12 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		const nlohmann::json dataJson = lightJson.contains("data") ? lightJson.at("data") : nlohmann::json::object();
 
 		// 共通MetaDataを検証後に種別固有Dataへ変換して対応Slotへ登録
-		LightHandle handle;
 		switch (type) {
 		case LightType::Directional:
 		{
 			DirectionalLight light = DirectionalLightFromJson(dataJson);
 			light.useLight = enabled ? 1u : 0u;
-			handle = CreateDirectionalLight(
+			CreateDirectionalLight(
 				name,
 				light,
 				sceneType,
@@ -578,7 +590,7 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		{
 			PointLight light = PointLightFromJson(dataJson);
 			light.useLight = enabled ? 1u : 0u;
-			handle = CreatePointLight(
+			CreatePointLight(
 				name,
 				light,
 				sceneType,
@@ -590,7 +602,7 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		{
 			SpotLight light = SpotLightFromJson(dataJson);
 			light.useLight = enabled ? 1u : 0u;
-			handle = CreateSpotLight(
+			CreateSpotLight(
 				name,
 				light,
 				sceneType,
@@ -601,14 +613,9 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 		default:
 			break;
 		}
-
-		if (handle.IsValid()) {
-			++loadCount;
-		}
 	}
 
 	AdvanceRevision();
-	Logger::Output("LightManagerの設定をJsonから読み込みました : " + filePath.generic_string() + " 件数 : " + std::to_string(loadCount), Logger::Level::Application);
 	return true;
 }
 

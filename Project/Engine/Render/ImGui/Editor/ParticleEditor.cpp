@@ -1,4 +1,5 @@
 #include "ParticleEditor.h"
+#include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "TextureSelector.h"
 #include "ImGuiHeaders.h"
@@ -766,6 +767,9 @@ namespace MadoEngine::Editor {
 				savedAssetSnapshots[selectedAssetName] = CreateParticleAssetSnapshot(*asset);
 				isDirty = false;
 			}
+		}
+		if (actions.isLoadRequested) {
+			EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		}
 		if (actions.isLoadRequested && particleSystem.ReloadAsset(selectedAssetName)) {
 			asset = particleSystem.FindEditableAsset(selectedAssetName);

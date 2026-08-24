@@ -1,4 +1,5 @@
 #include "SpriteEditor.h"
+#include "EditorToolbar.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
 #include "Core/TextureManager/TextureManager.h"
 #include <algorithm>
@@ -579,10 +580,12 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		LoadSpriteEditorJson(currentSceneType);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("復元")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		std::filesystem::path backupPath = kSpriteEditorJsonPath;
 		backupPath += ".bak";
 		manager.LoadFromFile(backupPath, currentSceneType);

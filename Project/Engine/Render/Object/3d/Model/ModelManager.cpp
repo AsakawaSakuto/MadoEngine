@@ -691,7 +691,10 @@ nlohmann::json ModelManager::ToJson() const {
 	nlohmann::json models = nlohmann::json::array();
 	for (const auto& [name, handle] : modelNameToHandle_) {
 		const Model* model = TryGet(handle);
-		if (!model || modelSlots_[handle.index].managementMode != EditorManagementMode::EditorManaged) {
+		if (!model ||
+			modelSlots_[handle.index].managementMode != EditorManagementMode::EditorManaged ||
+			std::find(pendingDestroyModelHandles_.begin(), pendingDestroyModelHandles_.end(), handle) !=
+			pendingDestroyModelHandles_.end()) {
 			continue;
 		}
 		nlohmann::json modelJson = model->ToJson();
@@ -707,6 +710,41 @@ void ModelManager::FromJson(const nlohmann::json& json) {
 
 void ModelManager::FromJson(const nlohmann::json& json, SceneType sceneType) {
 	FromJsonInternal(json, sceneType);
+}
+
+void ModelManager::RestoreEditorSnapshot(const nlohmann::json& json) {
+	if (!json.contains("models") || !json.at("models").is_array()) {
+		Logger::Output("Model履歴のSnapshotにmodels配列がありません", Logger::Level::Warning);
+		return;
+	}
+
+	std::unordered_set<std::string> snapshotNames;
+	for (const nlohmann::json& modelJson : json.at("models")) {
+		if (modelJson.is_object()) {
+			snapshotNames.insert(modelJson.value("name", "Model"));
+		}
+	}
+
+	// 削除直後のUndoでは延期削除を解除して同じHandleとGPU資源を維持
+	pendingDestroyModelHandles_.erase(
+		std::remove_if(
+			pendingDestroyModelHandles_.begin(),
+			pendingDestroyModelHandles_.end(),
+			[this, &snapshotNames](ModelHandle handle) {
+				return IsValid(handle) && snapshotNames.contains(modelSlots_[handle.index].name);
+			}),
+		pendingDestroyModelHandles_.end());
+
+	// RuntimeOnlyを保持し、Snapshotに存在しないEditor管理Modelだけを安全な時点で削除
+	for (const auto& [name, handle] : modelNameToHandle_) {
+		if (IsValid(handle) &&
+			modelSlots_[handle.index].managementMode == EditorManagementMode::EditorManaged &&
+			!snapshotNames.contains(name)) {
+			RequestDestroy(handle);
+		}
+	}
+
+	FromJson(json);
 }
 
 void ModelManager::FromJsonInternal(

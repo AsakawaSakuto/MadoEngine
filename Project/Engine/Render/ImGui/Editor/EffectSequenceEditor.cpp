@@ -1,4 +1,5 @@
 #include "EffectSequenceEditor.h"
+#include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "ImGuiHeaders.h"
 #include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
@@ -426,6 +427,7 @@ namespace MadoEngine::Editor {
 			}
 		}
 		if (actions.isLoadRequested) {
+			EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 			StopPreview(system, previewHandle);
 			if (system.ReloadAsset(selectedAssetName)) {
 				asset = system.FindEditableAsset(selectedAssetName);

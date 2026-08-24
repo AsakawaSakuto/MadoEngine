@@ -188,6 +188,10 @@ public:
 	/// @param sceneType 復元対象のシーン、SceneType::None所属のSpriteも復元
 	void FromJson(const nlohmann::json& json, SceneType sceneType);
 
+	/// @brief Editor履歴のSnapshotからEditor管理Sprite全体を復元
+	/// @param json Sprite一覧を含むSnapshot
+	void RestoreEditorSnapshot(const nlohmann::json& json);
+
 	/// @brief Editor管理SpriteをJSONファイルへ保存
 	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue

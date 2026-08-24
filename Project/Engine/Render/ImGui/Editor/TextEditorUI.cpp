@@ -1,4 +1,5 @@
 #include "TextEditorUI.h"
+#include "EditorToolbar.h"
 #include "Render/Object/2d/Text/TextManager.h"
 #include <algorithm>
 #include <array>
@@ -274,11 +275,13 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		LoadTextEditorJson(currentSceneType);
 		editingHandle = {};
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("復元")) {
+		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
 		manager.LoadFromFile("Assets/Json/TextObjects.json.bak", currentSceneType);
 		editingHandle = {};
 	}

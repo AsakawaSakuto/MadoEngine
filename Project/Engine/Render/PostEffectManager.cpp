@@ -194,6 +194,16 @@ void PostEffectManager::RequestDestroy(PostEffectPassHandle handle) {
 
 	if (std::find(pendingDestroyHandles_.begin(), pendingDestroyHandles_.end(), handle) == pendingDestroyHandles_.end()) {
 		pendingDestroyHandles_.push_back(handle);
+
+		// Editor履歴と次Frameの実行順へ削除を即時反映しResource本体だけGPU完了後まで保持
+		layerPassOrder_.erase(
+			std::remove(layerPassOrder_.begin(), layerPassOrder_.end(), handle),
+			layerPassOrder_.end()
+		);
+		screenPassOrder_.erase(
+			std::remove(screenPassOrder_.begin(), screenPassOrder_.end(), handle),
+			screenPassOrder_.end()
+		);
 	}
 }
 

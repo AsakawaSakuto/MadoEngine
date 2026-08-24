@@ -268,11 +268,13 @@ void SceneManager::DrawImGui() {
 	}
 	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::ModelGizmo) &&
 		toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::GameView)) {
+		toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Model);
 		MadoEngine::Editor::DrawModelGizmoOnGameView(
 			currentScene_->GetCamera(),
 			currentSceneType_,
 			selectedModel_
 		);
+		toolbar.EndDocumentCapture();
 	}
 	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::SceneDebug)) {
 		currentScene_->DrawImGui();
@@ -461,5 +463,18 @@ void SceneManager::ChangeScene(SceneType type) {
 	if (MadoEngine::Json::JsonFile::Exists(cameraJsonPath)) {
 		currentScene_->GetCameraManager().LoadFromJson(cameraJsonPath);
 	}
+#ifdef USE_IMGUI
+	CameraManager* cameraManager = &currentScene_->GetCameraManager();
+	MadoEngine::Editor::EditorToolbar::GetInstance().RegisterDocumentHistory(
+		MadoEngine::Editor::EditorDocument::Camera,
+		[cameraManager]() { return cameraManager->ToJson().dump(); },
+		[cameraManager](const std::string& snapshot) {
+			const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
+			if (!json.is_discarded()) {
+				cameraManager->FromJson(json);
+			}
+		}
+	);
+#endif // USE_IMGUI
 	Logger::Output("シーン遷移を完了しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 }

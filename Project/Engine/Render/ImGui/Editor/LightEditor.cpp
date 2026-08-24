@@ -1,4 +1,5 @@
 #include "LightEditor.h"
+#include "EditorToolbar.h"
 #include <array>
 #include <charconv>
 #include <cmath>
@@ -494,10 +495,12 @@ namespace MadoEngine::Editor {
         }
         ImGui::SameLine();
         if (ImGui::Button("読込")) {
+            EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
             LoadLightEditorJson();
         }
         ImGui::SameLine();
         if (ImGui::Button("復元")) {
+            EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
             lightManager.LoadFromJson(CreateLightManagerBackupJsonPath());
         }
 

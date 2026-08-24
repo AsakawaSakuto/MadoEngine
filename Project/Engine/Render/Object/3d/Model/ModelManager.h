@@ -241,6 +241,10 @@ public:
 	/// @param sceneType 復元対象のシーン、SceneType::None所属のModelも復元
 	void FromJson(const nlohmann::json& json, SceneType sceneType);
 
+	/// @brief Editor履歴のSnapshotからEditor管理Model全体を復元
+	/// @param json Model一覧を含むSnapshot
+	void RestoreEditorSnapshot(const nlohmann::json& json);
+
 	/// @brief Editor管理ModelをJSONファイルへ保存
 	/// @param filePath 保存先
 	/// @return 保存に成功した場合はtrue

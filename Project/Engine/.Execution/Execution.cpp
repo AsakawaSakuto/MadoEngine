@@ -54,6 +54,63 @@ namespace {
 		}
 		return succeeded;
 	}
+
+	/// @brief Effect Systemの全Assetをメモリ内Snapshotへ変換
+	/// @tparam System 取得対象のEffect System型
+	/// @param system 取得対象のEffect System
+	/// @return 全Assetを保持するSnapshot文字列
+	template <class System>
+	std::string CaptureEffectAssets(const System& system) {
+		nlohmann::json root = nlohmann::json::object();
+		for (const std::string& assetName : system.GetAssetNames()) {
+			const auto* asset = system.FindAsset(assetName);
+			if (asset) {
+				root[assetName] = asset->ToJson();
+			}
+		}
+		return root.dump();
+	}
+
+	/// @brief メモリ内SnapshotからEffect Systemの全Assetを復元
+	/// @tparam System 復元対象のEffect System型
+	/// @param system 復元対象のEffect System
+	/// @param snapshot 復元元のSnapshot文字列
+	template <class System>
+	void RestoreEffectAssets(System& system, const std::string& snapshot) {
+		const nlohmann::json root = nlohmann::json::parse(snapshot, nullptr, false);
+		if (root.is_discarded() || !root.is_object()) {
+			return;
+		}
+
+		// Snapshotから消えたAssetの登録とファイルを通常のEditor削除経路で退避
+		for (const std::string& currentName : system.GetAssetNames()) {
+			if (!root.contains(currentName)) {
+				system.DeleteAsset(currentName);
+			}
+		}
+
+		// 削除からのUndoでは既定ファイルを再生成してから完全な設定を適用
+		for (const auto& [assetName, assetJson] : root.items()) {
+			auto* asset = system.FindEditableAsset(assetName);
+			const bool isRecreated = asset == nullptr;
+			if (isRecreated) {
+				if (!system.CreateAsset(assetName)) {
+					continue;
+				}
+				asset = system.FindEditableAsset(assetName);
+			}
+			if (!asset) {
+				continue;
+			}
+
+			asset->FromJson(assetJson);
+			asset->SetName(assetName);
+			asset->Validate();
+			if (isRecreated) {
+				asset->SaveToFile({}, false);
+			}
+		}
+	}
 } // namespace
 
 namespace MadoEngine
@@ -280,7 +337,118 @@ namespace MadoEngine
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
-		MadoEngine::Editor::EditorToolbar::GetInstance().Initialize();
+		MadoEngine::Editor::EditorToolbar& toolbar =
+			MadoEngine::Editor::EditorToolbar::GetInstance();
+		toolbar.Initialize();
+
+		// Editor単位の状態全体をSnapshot化して追加、削除、直接編集を同じ履歴へ統合
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Model,
+			[]() { return MadoEngine::ModelManager::GetInstance().ToJson().dump(); },
+			[](const std::string& snapshot) {
+				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
+				if (!json.is_discarded()) {
+					MadoEngine::ModelManager::GetInstance().RestoreEditorSnapshot(json);
+				}
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Sprite,
+			[]() { return MadoEngine::SpriteManager::GetInstance().ToJson().dump(); },
+			[](const std::string& snapshot) {
+				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
+				if (!json.is_discarded()) {
+					MadoEngine::SpriteManager::GetInstance().RestoreEditorSnapshot(json);
+				}
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Text,
+			[]() { return MadoEngine::TextManager::GetInstance().ToJson().dump(); },
+			[](const std::string& snapshot) {
+				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
+				if (!json.is_discarded()) {
+					MadoEngine::TextManager::GetInstance().RestoreEditorSnapshot(json);
+				}
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Light,
+			[]() { return LightManager::GetInstance().ToJson().dump(); },
+			[](const std::string& snapshot) {
+				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
+				if (!json.is_discarded()) {
+					LightManager::GetInstance().FromJson(json);
+				}
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::PostEffect,
+			[]() {
+				return MadoEngine::Editor::CapturePostEffectEditorState(
+					MadoEngine::Render::PostEffectManager::GetInstance());
+			},
+			[](const std::string& snapshot) {
+				MadoEngine::Editor::ReservePostEffectEditorStateRestore(snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Audio,
+			[]() { return MadoEngine::Editor::CaptureAudioEditorState(); },
+			[](const std::string& snapshot) {
+				MadoEngine::Editor::RestoreAudioEditorState(snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Particle,
+			[]() { return CaptureEffectAssets(MadoEngine::Particle::ParticleSystem3d::GetInstance()); },
+			[](const std::string& snapshot) {
+				RestoreEffectAssets(MadoEngine::Particle::ParticleSystem3d::GetInstance(), snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Cylinder,
+			[]() { return CaptureEffectAssets(MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance()); },
+			[](const std::string& snapshot) {
+				RestoreEffectAssets(MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance(), snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Ribbon,
+			[]() { return CaptureEffectAssets(MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance()); },
+			[](const std::string& snapshot) {
+				RestoreEffectAssets(MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance(), snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::Beam,
+			[]() { return CaptureEffectAssets(MadoEngine::Beam::BeamEffectSystem3d::GetInstance()); },
+			[](const std::string& snapshot) {
+				RestoreEffectAssets(MadoEngine::Beam::BeamEffectSystem3d::GetInstance(), snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::EffectSequence,
+			[]() { return CaptureEffectAssets(MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance()); },
+			[](const std::string& snapshot) {
+				RestoreEffectAssets(MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance(), snapshot);
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			MadoEngine::Editor::EditorDocument::StyleColor,
+			[]() {
+				const ImVec4* colors = ImGui::GetStyle().Colors;
+				return std::string(
+					reinterpret_cast<const char*>(colors),
+					sizeof(ImVec4) * ImGuiCol_COUNT);
+			},
+			[](const std::string& snapshot) {
+				const std::size_t snapshotSize = sizeof(ImVec4) * ImGuiCol_COUNT;
+				if (snapshot.size() == snapshotSize) {
+					std::memcpy(ImGui::GetStyle().Colors, snapshot.data(), snapshotSize);
+				}
+			}
+		);
 #endif // USE_IMGUI
 		isInitialized_ = true;
 	}
@@ -981,6 +1149,9 @@ namespace MadoEngine
 	}
 
 	bool EngineExecution::ReloadEditorDocuments() {
+#ifdef USE_IMGUI
+		MadoEngine::Editor::EditorToolbar::GetInstance().ClearHistory();
+#endif // USE_IMGUI
 		bool succeeded = true;
 		succeeded = MadoEngine::Editor::LoadModelEditorJson(currentSceneType_) && succeeded;
 		succeeded = MadoEngine::Editor::LoadSpriteEditorJson(currentSceneType_) && succeeded;
@@ -1010,7 +1181,10 @@ namespace MadoEngine
 
 	void EngineExecution::NotifyEditorDocumentOperationResult(const char* actionName, bool succeeded) {
 #ifdef USE_IMGUI
-		MadoEngine::Editor::EditorToolbar::GetInstance().NotifyDocumentOperationResult(actionName, succeeded);
+		MadoEngine::Editor::EditorToolbar& toolbar =
+			MadoEngine::Editor::EditorToolbar::GetInstance();
+		toolbar.SynchronizeHistorySnapshots();
+		toolbar.NotifyDocumentOperationResult(actionName, succeeded);
 #endif // USE_IMGUI
 		const std::string operationName = actionName ? actionName : "Editor操作";
 		Logger::Output(

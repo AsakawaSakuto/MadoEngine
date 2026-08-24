@@ -12,9 +12,20 @@ void EditorHistory::Push(std::unique_ptr<IEditorCommand> command) {
 	if (!command || !command->IsValid()) {
 		return;
 	}
+	if (!undoStack_.empty() && undoStack_.back()->TryMerge(*command)) {
+
+		// 統合後も新規編集扱いとして分岐前のRedo履歴を破棄
+		redoStack_.clear();
+		return;
+	}
 
 	// Undo後に別操作を確定した場合は分岐前のRedo履歴を破棄
 	undoStack_.push_back(std::move(command));
+	if (undoStack_.size() > kMaximumHistoryCount) {
+
+		// Document SnapshotのMemory使用量を制限するため古い履歴から破棄
+		undoStack_.erase(undoStack_.begin());
+	}
 	redoStack_.clear();
 }
 
@@ -27,6 +38,7 @@ bool EditorHistory::Undo() {
 		if (!command->IsValid()) {
 			continue;
 		}
+		lastAffectedDomain_ = command->GetHistoryDomain();
 		command->Undo();
 		redoStack_.push_back(std::move(command));
 		return true;
@@ -43,6 +55,7 @@ bool EditorHistory::Redo() {
 		if (!command->IsValid()) {
 			continue;
 		}
+		lastAffectedDomain_ = command->GetHistoryDomain();
 		command->Redo();
 		undoStack_.push_back(std::move(command));
 		return true;
@@ -53,6 +66,7 @@ bool EditorHistory::Redo() {
 void EditorHistory::Clear() {
 	undoStack_.clear();
 	redoStack_.clear();
+	lastAffectedDomain_ = kInvalidHistoryDomain;
 }
 
 bool EditorHistory::CanUndo() const {

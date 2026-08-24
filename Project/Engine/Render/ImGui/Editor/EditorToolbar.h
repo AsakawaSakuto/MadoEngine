@@ -4,6 +4,8 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <string>
 
 namespace MadoEngine::Editor {
@@ -108,6 +110,37 @@ public:
 	/// @brief Document編集検出を終了
 	void EndDocumentCapture();
 
+	/// @brief Document履歴用のSnapshot取得と復元処理を登録
+	/// @param document 登録対象のDocument種別
+	/// @param captureFunction 現在状態を文字列Snapshotへ変換する関数
+	/// @param restoreFunction 文字列Snapshotから状態を復元する関数
+	void RegisterDocumentHistory(
+		EditorDocument document,
+		std::function<std::string()> captureFunction,
+		std::function<void(const std::string&)> restoreFunction
+	);
+
+	/// @brief 現在のDocument変更を履歴対象外として全履歴を破棄
+	void SuppressCurrentDocumentHistory();
+
+	/// @brief 全UndoとRedo履歴を破棄
+	void ClearHistory();
+
+	/// @brief 登録済みDocumentの履歴基準Snapshotを現在状態へ同期
+	void SynchronizeHistorySnapshots();
+
+	/// @brief UI描画後に適用されたDocument変更を履歴へ追加
+	/// @param document 変更されたDocument種別
+	void CommitExternalDocumentChange(EditorDocument document);
+
+	/// @brief 直前のEditor操作を取り消し
+	/// @return Undoできた場合はtrue
+	bool Undo();
+
+	/// @brief 取り消したEditor操作をやり直し
+	/// @return Redoできた場合はtrue
+	bool Redo();
+
 	/// @brief 指定Documentを未保存状態へ設定
 	/// @param document 未保存にするDocument種別
 	void MarkDocumentDirty(EditorDocument document);
@@ -168,15 +201,34 @@ private:
 	static constexpr std::size_t kWindowCount = static_cast<std::size_t>(EditorWindow::Count);
 	static constexpr std::size_t kDocumentCount = static_cast<std::size_t>(EditorDocument::Count);
 
+	struct DocumentHistoryBinding {
+		std::function<std::string()> captureFunction;
+		std::function<void(const std::string&)> restoreFunction;
+		std::string lastSnapshot;
+	};
+
+	struct DocumentTransactionState {
+		std::uint32_t activeItemId = 0;
+		std::uint64_t transactionId = 0;
+	};
+
 	std::array<bool, kWindowCount> windowVisibility_{};
 	std::array<bool, kDocumentCount> dirtyDocuments_{};
+	std::array<DocumentHistoryBinding, kDocumentCount> historyBindings_{};
+	std::array<DocumentTransactionState, kDocumentCount> transactionStates_{};
 	EditorDocument capturedDocument_ = EditorDocument::Count;
-	bool documentEditedAtCaptureStart_ = false;
+	std::string capturedDocumentSnapshot_;
+	std::uint32_t capturedActiveItemIdStart_ = 0;
+	bool capturedItemEditedAtStart_ = false;
+	bool capturedGuizmoUsingAtStart_ = false;
 	bool isDocumentCaptureActive_ = false;
+	bool suppressCurrentDocumentHistory_ = false;
 	bool isPaused_ = false;
 	bool stepRequested_ = false;
 	bool saveAllRequested_ = false;
 	bool reloadAllRequested_ = false;
+	bool undoRequested_ = false;
+	bool redoRequested_ = false;
 	bool saveLayoutRequested_ = false;
 	bool resetLayoutRequested_ = false;
 	bool openReloadConfirmation_ = false;
@@ -186,6 +238,7 @@ private:
 	std::string operationStatusMessage_;
 	bool operationStatusSucceeded_ = true;
 	double operationStatusExpireTime_ = 0.0;
+	std::uint64_t nextTransactionId_ = 1;
 };
 
 } // namespace MadoEngine::Editor
