@@ -130,6 +130,32 @@ namespace MadoEngine
 	/// @brief 呼び出しタイミングはシーンのDrawImGui()より前
 		void BeginImGuiLayout();
 
+		/// @brief 今回のゲーム状態更新に使用するdeltaTimeを取得
+		/// @param outDeltaTime ゲーム状態更新へ渡すdeltaTime
+		/// @return ゲーム状態を更新する場合はtrue
+		bool ConsumeApplicationDeltaTime(float& outDeltaTime);
+
+		/// @brief EditorのSave All要求を取得して解除
+		/// @return Save All要求がある場合はtrue
+		bool ConsumeEditorSaveAllRequest();
+
+		/// @brief EditorのReload All要求を取得して解除
+		/// @return Reload All要求がある場合はtrue
+		bool ConsumeEditorReloadAllRequest();
+
+		/// @brief Engine共通Editor Documentを一括保存
+		/// @return 全Documentの保存に成功した場合はtrue
+		bool SaveEditorDocuments();
+
+		/// @brief Engine共通Editor Documentを一括再読込
+		/// @return 全Documentの再読込に成功した場合はtrue
+		bool ReloadEditorDocuments();
+
+		/// @brief Editorの一括Document操作結果を通知
+		/// @param actionName 実行した操作名
+		/// @param succeeded 全Documentで成功した場合はtrue
+		void NotifyEditorDocumentOperationResult(const char* actionName, bool succeeded);
+
 		/// @brief 描画後処理（ImGui確定・Present）
 		void PostDraw();
 
@@ -138,9 +164,6 @@ namespace MadoEngine
 
 		/// @brief ゲームループを継続するかどうかを取得
 		bool IsRunning();
-
-		/// @brief アプリケーションを停止するフラグを取得
-		bool IsStopApplication() const { return isStopApplication_; }
 
 		/// @brief 1フレームの経過時間を取得
 		/// @return 経過時間（秒）
@@ -207,7 +230,6 @@ namespace MadoEngine
 		/// @return 次のLayerエフェクトチェーン出力先RenderTarget名
 		const std::string& GetNextLayerEffectOutputName() const;
 
-		bool isStopApplication_ = false;
 		bool isInitialized_ = false;
 		uint32_t renderWidth_ = 0;
 		uint32_t renderHeight_ = 0;

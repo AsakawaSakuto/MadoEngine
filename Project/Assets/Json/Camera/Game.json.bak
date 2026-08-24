@@ -34,7 +34,7 @@
     "typeSettings": [
         {
             "camera": "GameDebugCamera",
-            "distance": 10.03979778289795,
+            "distance": 10.454840660095215,
             "dollySensitivity": 10.0,
             "panSensitivity": 0.25,
             "pitch": 0.30000001192092896,
@@ -49,7 +49,7 @@
         },
         {
             "camera": "GamePlayerCamera",
-            "distance": 18.299999237060547,
+            "distance": 15.0,
             "followStrength": 0.5,
             "gamePadSensitivity": 2.5,
             "maxPitch": 1.5,

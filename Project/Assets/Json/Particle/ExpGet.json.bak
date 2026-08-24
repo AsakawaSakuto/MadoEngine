@@ -1,6 +1,7 @@
 {
     "emitters": [
         {
+            "backend": "auto",
             "colorOverLifetime": {
                 "end": {
                     "max": [
@@ -32,11 +33,16 @@
                 }
             },
             "emission": {
-                "bursts": [],
+                "bursts": [
+                    {
+                        "count": 64,
+                        "time": 0.0
+                    }
+                ],
                 "duration": 1.0,
                 "isLoop": false,
-                "maxParticles": 256,
-                "ratePerSecond": 10.0,
+                "maxParticles": 64,
+                "ratePerSecond": 0.0,
                 "startDelay": 0.0
             },
             "initial": {
@@ -46,14 +52,14 @@
                 },
                 "direction": {
                     "max": [
-                        0.0,
                         1.0,
-                        0.0
+                        1.0,
+                        1.0
                     ],
                     "min": [
-                        0.0,
+                        -1.0,
                         1.0,
-                        0.0
+                        -1.0
                     ]
                 },
                 "directionMode": "configured",
@@ -70,6 +76,7 @@
                     "min": 1.0
                 }
             },
+            "isEnabled": true,
             "motion": {
                 "acceleration": [
                     0.0,
@@ -79,7 +86,7 @@
                 "drag": 0.0,
                 "gravity": [
                     0.0,
-                    0.0,
+                    -1.0,
                     0.0
                 ]
             },
@@ -90,38 +97,66 @@
                 "texture": "white2x2"
             },
             "shape": {
-                "offset": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "type": "point"
+                "emitFromSurface": false,
+                "radius": 0.009999999776482582,
+                "type": "sphere"
             },
             "simulationSpace": "world",
             "sizeOverLifetime": {
                 "end": {
                     "max": [
-                        1.0,
-                        1.0
+                        0.10000000149011612,
+                        0.10000000149011612
                     ],
                     "min": [
-                        1.0,
-                        1.0
+                        0.10000000149011612,
+                        0.10000000149011612
                     ]
                 },
                 "start": {
                     "max": [
-                        1.0,
-                        1.0
+                        0.10000000149011612,
+                        0.10000000149011612
                     ],
                     "min": [
-                        1.0,
-                        1.0
+                        0.10000000149011612,
+                        0.10000000149011612
                     ]
                 }
-            }
+            },
+            "trail": {
+                "blendMode": "add",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": false,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.5,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "startWidth": 0.25,
+                "syncParticleColor": false,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         }
     ],
     "name": "ExpGet",
-    "version": 1
+    "version": 5
 }

@@ -22,6 +22,38 @@ namespace {
 
 	const std::filesystem::path kScreenshotOutputDirectory = "Assets/Screenshot"; // スクリーンショットの出力先ディレクトリ
 	constexpr int kGameViewCaptureKey = DIK_F11;                                  // スクリーンショットを撮るキー
+
+	/// @brief Effect Systemが保持する全Assetを保存
+	/// @tparam System 保存対象のEffect System型
+	/// @param system 保存対象のEffect System
+	/// @return 全Assetの保存に成功した場合はtrue
+	template <class System>
+	bool SaveAllEffectAssets(System& system) {
+		bool succeeded = true;
+		for (const std::string& assetName : system.GetAssetNames()) {
+			auto* asset = system.FindEditableAsset(assetName);
+			if (!asset || !asset->SaveToFile({}, true)) {
+				succeeded = false;
+			}
+		}
+		return succeeded;
+	}
+
+	/// @brief Effect Systemが保持する全Assetを再読込
+	/// @tparam System 再読込対象のEffect System型
+	/// @param system 再読込対象のEffect System
+	/// @return 全Assetの再読込に成功した場合はtrue
+	template <class System>
+	bool ReloadAllEffectAssets(System& system) {
+		bool succeeded = true;
+		const std::vector<std::string> assetNames = system.GetAssetNames();
+		for (const std::string& assetName : assetNames) {
+			if (!system.ReloadAsset(assetName)) {
+				succeeded = false;
+			}
+		}
+		return succeeded;
+	}
 } // namespace
 
 namespace MadoEngine
@@ -248,6 +280,7 @@ namespace MadoEngine
 		// ImGuiManagerの初期化
 		imguiManager_ = std::make_unique<MadoEngine::ImGuiManager>();
 		imguiManager_->Initialize(dxDevice_.get(), commandManager_.get(), srvManager_, windowsAPI_->GetHWnd(), swapChain_->GetBufferCount());
+		MadoEngine::Editor::EditorToolbar::GetInstance().Initialize();
 #endif // USE_IMGUI
 		isInitialized_ = true;
 	}
@@ -257,7 +290,6 @@ namespace MadoEngine
 		// デルタタイムを計算
 		deltaTime_->Update();
 		float dt = static_cast<float>(deltaTime_->GetDeltaTime());
-		MadoEngine::Render::PostEffectManager::GetInstance().UpdateRuntimeParameters(dt);
 
 		// ウィンドウリサイズ要求があれば描画リソースへ反映
 		HandleResize();
@@ -778,32 +810,100 @@ namespace MadoEngine
 		// バックバッファをRENDER_TARGETに遷移し、ImGui描画先に設定・クリア
 		float bbClearColor[] = { 1.0f, 0.08f, 0.08f, 1.0f };
 		swapChain_->BeginRender(commandManager_->GetCommandList(), nullptr, bbClearColor);
+		MadoEngine::Editor::EditorToolbar& toolbar =
+			MadoEngine::Editor::EditorToolbar::GetInstance();
+		const float toolbarHeight = toolbar.Draw();
+
+		if (toolbar.ConsumeSaveLayoutRequest()) {
+			const bool succeeded = imguiManager_->SaveEditorLayout();
+			toolbar.NotifyOperationResult("レイアウト保存", succeeded);
+		}
+		if (toolbar.ConsumeResetLayoutRequest()) {
+			imguiManager_->ResetEditorLayout();
+			toolbar.NotifyOperationResult("レイアウト初期化", true);
+		}
 
 		// エディタレイアウト（DockSpace + Game View）を描画
 		// ※必ずシーンの DrawImGui() より前に呼ぶこと（DockSpaceを先に生成する必要があるため）
-		imguiManager_->DrawEditorLayout(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_));
+		imguiManager_->DrawEditorLayout(
+			renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_),
+			toolbarHeight,
+			toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::GameView),
+			toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::FixedGameView)
+		);
 
 		// エンジン情報ウィンドウ（FPS表示）
-		ImGui::Begin("Engine Info");
-		ImGui::Text("FPS: %.1f", deltaTime_->GetFPS());
-		ImGui::Text("DeltaTime: %.4f ms", deltaTime_->GetDeltaTime() * 1000.0);
-		ImGui::Checkbox("FPS Limit", &isStopApplication_);
-		ImGui::End();
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::EngineInfo)) {
+			ImGui::Begin("Engine Info");
+			ImGui::Text("FPS: %.1f", deltaTime_->GetFPS());
+			ImGui::Text("DeltaTime: %.4f ms", deltaTime_->GetDeltaTime() * 1000.0);
+			ImGui::End();
+		}
 
-		MadoEngine::Editor::DrawPostEffectEditorUI(
-			MadoEngine::Render::PostEffectManager::GetInstance());
-		MadoEngine::Editor::DrawAudioManagerUI();
-		MadoEngine::Editor::DrawLightManagerEditorUI();
-		MadoEngine::Editor::DrawModelManagerEditorUI(currentSceneType_);
-		MadoEngine::Editor::DrawSpriteManagerEditorUI(currentSceneType_);
-		MadoEngine::Editor::DrawTextManagerEditorUI(currentSceneType_);
-		MadoEngine::Editor::DrawParticleSystemEditorUI();
-		MadoEngine::Editor::DrawCylinderEffectEditorUI();
-		MadoEngine::Editor::DrawRibbonEffectEditorUI();
-		MadoEngine::Editor::DrawBeamEffectEditorUI();
-		MadoEngine::Editor::DrawEffectSequenceEditorUI();
-
-		imguiManager_->DrawStyleColorEditorUI();
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::PostEffect)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::PostEffect);
+			MadoEngine::Editor::DrawPostEffectEditorUI(
+				MadoEngine::Render::PostEffectManager::GetInstance());
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Audio)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Audio);
+			MadoEngine::Editor::DrawAudioManagerUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Light)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Light);
+			MadoEngine::Editor::DrawLightManagerEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Model)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Model);
+			MadoEngine::Editor::DrawModelManagerEditorUI(currentSceneType_);
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Sprite)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Sprite);
+			MadoEngine::Editor::DrawSpriteManagerEditorUI(currentSceneType_);
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Text)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Text);
+			MadoEngine::Editor::DrawTextManagerEditorUI(currentSceneType_);
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Particle)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Particle);
+			MadoEngine::Editor::DrawParticleSystemEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Cylinder)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Cylinder);
+			MadoEngine::Editor::DrawCylinderEffectEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Ribbon)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Ribbon);
+			MadoEngine::Editor::DrawRibbonEffectEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Beam)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Beam);
+			MadoEngine::Editor::DrawBeamEffectEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::EffectSequence)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::EffectSequence);
+			MadoEngine::Editor::DrawEffectSequenceEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::StyleColor)) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::StyleColor);
+			imguiManager_->DrawStyleColorEditorUI();
+			toolbar.EndDocumentCapture();
+		}
+		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Logger)) {
+			MadoEngine::Editor::DrawLoggerEditorUI();
+		}
 
 #else
 		float bbClearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -811,6 +911,112 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 		DrawPostEffect(renderTargetManager_->GetSRVGPUHandle(resolvedPostEffectTargetName_), displayCopyDesc_);
 #endif // USE_IMGUI
+	}
+
+	bool EngineExecution::ConsumeApplicationDeltaTime(float& outDeltaTime) {
+#ifdef USE_IMGUI
+		const bool shouldUpdate = MadoEngine::Editor::EditorToolbar::GetInstance().ConsumeGameDeltaTime(
+			GetDeltaTime(),
+			outDeltaTime
+		);
+#else
+		outDeltaTime = GetDeltaTime();
+		const bool shouldUpdate = true;
+#endif // USE_IMGUI
+		if (shouldUpdate) {
+
+			// Sceneと同じ時間軸でPostEffectの時間Parameterを進行
+			MadoEngine::Render::PostEffectManager::GetInstance().UpdateRuntimeParameters(outDeltaTime);
+		}
+		return shouldUpdate;
+	}
+
+	bool EngineExecution::ConsumeEditorSaveAllRequest() {
+#ifdef USE_IMGUI
+		return MadoEngine::Editor::EditorToolbar::GetInstance().ConsumeSaveAllRequest();
+#else
+		return false;
+#endif // USE_IMGUI
+	}
+
+	bool EngineExecution::ConsumeEditorReloadAllRequest() {
+#ifdef USE_IMGUI
+		return MadoEngine::Editor::EditorToolbar::GetInstance().ConsumeReloadAllRequest();
+#else
+		return false;
+#endif // USE_IMGUI
+	}
+
+	bool EngineExecution::SaveEditorDocuments() {
+		bool succeeded = true;
+		succeeded = MadoEngine::ModelManager::GetInstance().SaveToFile(
+			"Assets/Json/ModelObjects.json",
+			currentSceneType_) && succeeded;
+		succeeded = MadoEngine::SpriteManager::GetInstance().SaveToFile(
+			"Assets/Json/SpriteObjects.json",
+			currentSceneType_) && succeeded;
+		succeeded = MadoEngine::TextManager::GetInstance().SaveToFile(
+			"Assets/Json/TextObjects.json",
+			currentSceneType_) && succeeded;
+		succeeded = LightManager::GetInstance().SaveToJson() && succeeded;
+		succeeded = MadoEngine::Editor::SavePostEffectEditorJsonToFile(
+			MadoEngine::Render::PostEffectManager::GetInstance()) && succeeded;
+		succeeded = MadoEngine::Editor::SaveAudioEditorJson() && succeeded;
+
+		succeeded = SaveAllEffectAssets(
+			MadoEngine::Particle::ParticleSystem3d::GetInstance()) && succeeded;
+		succeeded = SaveAllEffectAssets(
+			MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance()) && succeeded;
+		succeeded = SaveAllEffectAssets(
+			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance()) && succeeded;
+		succeeded = SaveAllEffectAssets(
+			MadoEngine::Beam::BeamEffectSystem3d::GetInstance()) && succeeded;
+		succeeded = SaveAllEffectAssets(
+			MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance()) && succeeded;
+
+#ifdef USE_IMGUI
+		succeeded = imguiManager_->SaveStyleColors() && succeeded;
+#endif // USE_IMGUI
+		return succeeded;
+	}
+
+	bool EngineExecution::ReloadEditorDocuments() {
+		bool succeeded = true;
+		succeeded = MadoEngine::Editor::LoadModelEditorJson(currentSceneType_) && succeeded;
+		succeeded = MadoEngine::Editor::LoadSpriteEditorJson(currentSceneType_) && succeeded;
+		succeeded = MadoEngine::Editor::LoadTextEditorJson(currentSceneType_) && succeeded;
+		succeeded = MadoEngine::Editor::LoadLightEditorJson() && succeeded;
+		succeeded = MadoEngine::Editor::LoadPostEffectEditorJson(
+			MadoEngine::Render::PostEffectManager::GetInstance()) && succeeded;
+		succeeded = MadoEngine::Editor::LoadAudioEditorJson() && succeeded;
+
+		// Sequenceが参照する個別Effectを先に再読込して参照整合性を維持
+		succeeded = ReloadAllEffectAssets(
+			MadoEngine::Particle::ParticleSystem3d::GetInstance()) && succeeded;
+		succeeded = ReloadAllEffectAssets(
+			MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance()) && succeeded;
+		succeeded = ReloadAllEffectAssets(
+			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance()) && succeeded;
+		succeeded = ReloadAllEffectAssets(
+			MadoEngine::Beam::BeamEffectSystem3d::GetInstance()) && succeeded;
+		succeeded = ReloadAllEffectAssets(
+			MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance()) && succeeded;
+
+#ifdef USE_IMGUI
+		succeeded = imguiManager_->LoadStyleColors() && succeeded;
+#endif // USE_IMGUI
+		return succeeded;
+	}
+
+	void EngineExecution::NotifyEditorDocumentOperationResult(const char* actionName, bool succeeded) {
+#ifdef USE_IMGUI
+		MadoEngine::Editor::EditorToolbar::GetInstance().NotifyDocumentOperationResult(actionName, succeeded);
+#endif // USE_IMGUI
+		const std::string operationName = actionName ? actionName : "Editor操作";
+		Logger::Output(
+			operationName + (succeeded ? "に成功" : "に失敗"),
+			succeeded ? Logger::Level::Engine : Logger::Level::Error
+		);
 	}
 
 	void EngineExecution::DrawPostEffect(
@@ -1039,6 +1245,7 @@ namespace MadoEngine
 		MadoEngine::RootSignatureManager::GetInstance().Finalize();
 
 #ifdef USE_IMGUI
+		MadoEngine::Editor::EditorToolbar::GetInstance().Finalize();
 		imguiManager_->Finalize();
 #endif // USE_IMGUI
 

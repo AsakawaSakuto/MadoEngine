@@ -4,6 +4,7 @@
 #include "Render/ImGui/Editor/CameraManagerEditor.h"
 #include "Render/ImGui/Editor/CylinderEditor.h"
 #include "Render/ImGui/Editor/EffectSequenceEditor.h"
+#include "Render/ImGui/Editor/EditorToolbar.h"
 #include "Render/ImGui/Editor/GuizmoEditor.h"
 #include "Render/ImGui/Editor/LightEditor.h"
 #include "Render/ImGui/Editor/LoggerEditor.h"

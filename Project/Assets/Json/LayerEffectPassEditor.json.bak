@@ -74,7 +74,7 @@
                 "SearchSpan": 8.0
             },
             "scope": "Layer",
-            "targetLayerMask": 16
+            "targetLayerMask": 32
         },
         {
             "effectShaderKey": "PostEffect/DepthOutline.PS",

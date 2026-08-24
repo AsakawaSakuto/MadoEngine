@@ -153,6 +153,10 @@ namespace MadoEngine::Editor {
 
     }
 
+    bool SaveAudioEditorJson() {
+        return SaveAudioEditorVolumeJson();
+    }
+
     bool LoadAudioEditorJson() {
         return LoadAudioEditorVolumeJson();
     }

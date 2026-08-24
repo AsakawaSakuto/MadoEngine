@@ -17,6 +17,7 @@
 #include "../InputRegister.h"
 #include "../ColliderPairRegister.h"
 #include <cassert>
+#include <filesystem>
 
 namespace {
 
@@ -247,19 +248,56 @@ void SceneManager::DrawCurrentScene() {
 
 void SceneManager::DrawImGui() {
 #ifdef USE_IMGUI
-	DrawSceneManagerImGui();
+	MadoEngine::Editor::EditorToolbar& toolbar =
+		MadoEngine::Editor::EditorToolbar::GetInstance();
+	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::SceneManager)) {
+		DrawSceneManagerImGui();
+	}
 
 	if (!currentScene_) {
 		return;
 	}
 
-	MadoEngine::Editor::DrawCameraManagerEditorUI(
-		currentScene_->GetCameraManager(),
-		currentSceneType_
-	);
-	MadoEngine::Editor::DrawModelGizmoOnGameView(currentScene_->GetCamera(), currentSceneType_, selectedModel_);
-	currentScene_->DrawImGui();
+	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Camera)) {
+		toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Camera);
+		MadoEngine::Editor::DrawCameraManagerEditorUI(
+			currentScene_->GetCameraManager(),
+			currentSceneType_
+		);
+		toolbar.EndDocumentCapture();
+	}
+	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::ModelGizmo) &&
+		toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::GameView)) {
+		MadoEngine::Editor::DrawModelGizmoOnGameView(
+			currentScene_->GetCamera(),
+			currentSceneType_,
+			selectedModel_
+		);
+	}
+	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::SceneDebug)) {
+		currentScene_->DrawImGui();
+	}
 #endif // USE_IMGUI
+}
+
+bool SceneManager::SaveEditorDocuments() {
+	if (!currentScene_) {
+		return false;
+	}
+
+	const std::filesystem::path cameraJsonPath =
+		CameraManager::CreateDefaultJsonPath(SceneTypeToString(currentSceneType_));
+	return currentScene_->GetCameraManager().SaveToJson(cameraJsonPath);
+}
+
+bool SceneManager::ReloadEditorDocuments() {
+	if (!currentScene_) {
+		return false;
+	}
+
+	const std::filesystem::path cameraJsonPath =
+		CameraManager::CreateDefaultJsonPath(SceneTypeToString(currentSceneType_));
+	return currentScene_->GetCameraManager().LoadFromJson(cameraJsonPath);
 }
 
 const Camera& SceneManager::GetCurrentCamera() const {

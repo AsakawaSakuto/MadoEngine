@@ -5,6 +5,10 @@
 #endif
 namespace MadoEngine::Editor {
 
+/// @brief AudioEditorのJson設定を保存
+/// @return 保存に成功した場合はtrue
+bool SaveAudioEditorJson();
+
 /// @brief AudioEditorのJson設定を読み込み
 /// @return 読み込みに成功した場合はtrue
 bool LoadAudioEditorJson();

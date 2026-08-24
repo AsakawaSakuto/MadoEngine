@@ -1,6 +1,7 @@
 {
     "emitters": [
         {
+            "backend": "auto",
             "colorOverLifetime": {
                 "end": {
                     "max": [
@@ -70,6 +71,7 @@
                     "min": 0.0
                 }
             },
+            "isEnabled": true,
             "motion": {
                 "acceleration": [
                     0.0,
@@ -119,9 +121,41 @@
                         2.0
                     ]
                 }
-            }
+            },
+            "trail": {
+                "blendMode": "add",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": false,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.5,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "startWidth": 0.25,
+                "syncParticleColor": false,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         },
         {
+            "backend": "auto",
             "colorOverLifetime": {
                 "end": {
                     "max": [
@@ -191,6 +225,7 @@
                     "min": 0.0
                 }
             },
+            "isEnabled": true,
             "motion": {
                 "acceleration": [
                     0.0,
@@ -232,17 +267,48 @@
                 },
                 "start": {
                     "max": [
-                        0.5,
-                        0.5
+                        0.3499999940395355,
+                        0.3499999940395355
                     ],
                     "min": [
-                        0.5,
-                        0.5
+                        0.3499999940395355,
+                        0.3499999940395355
                     ]
                 }
-            }
+            },
+            "trail": {
+                "blendMode": "add",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": false,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.5,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "startWidth": 0.25,
+                "syncParticleColor": false,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
         }
     ],
     "name": "FireBall",
-    "version": 1
+    "version": 5
 }

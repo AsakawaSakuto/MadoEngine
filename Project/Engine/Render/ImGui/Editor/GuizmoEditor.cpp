@@ -1,4 +1,5 @@
 #include "GuizmoEditor.h"
+#include "EditorToolbar.h"
 #include "./History/EditorHistory.h"
 #include "./History/ModelTransformCommand.h"
 #include <array>
@@ -247,6 +248,7 @@ namespace MadoEngine::Editor {
             }
             if (DrawEditorIconButton({ "##GizmoUndo", "Undo", "Undo", "元に戻す" })) {
                 history.Undo();
+				EditorToolbar::GetInstance().MarkDocumentDirty(EditorDocument::Model);
             }
             if (!canUndo) {
                 ImGui::EndDisabled();
@@ -259,33 +261,13 @@ namespace MadoEngine::Editor {
             }
             if (DrawEditorIconButton({ "##GizmoRedo", "Redo", "Redo", "やり直す" })) {
                 history.Redo();
+				EditorToolbar::GetInstance().MarkDocumentDirty(EditorDocument::Model);
             }
             if (!canRedo) {
                 ImGui::EndDisabled();
             }
 
             ImGui::PopStyleVar(3);
-        }
-
-        /// @brief Editor履歴のショートカットを処理
-        void HandleHistoryShortcuts() {
-            ImGuiIO& io = ImGui::GetIO();
-            if (!io.KeyCtrl || ImGuizmo::IsUsing()) {
-                return;
-            }
-
-            EditorHistory& history = EditorHistory::GetInstance();
-            if (ImGui::IsKeyPressed(ImGuiKey_Z) && io.KeyShift) {
-                history.Redo();
-                return;
-            }
-            if (ImGui::IsKeyPressed(ImGuiKey_Y)) {
-                history.Redo();
-                return;
-            }
-            if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
-                history.Undo();
-            }
         }
 
         /// @brief ImGuizmoの行列編集結果をTransformへ反映
@@ -495,7 +477,6 @@ namespace MadoEngine::Editor {
         }
 
         bool isChanged = false;
-        HandleHistoryShortcuts();
 		ModelManager& manager = ModelManager::GetInstance();
 		Model* selectedModel = manager.TryGet(selectedModelHandle);
 
@@ -526,6 +507,7 @@ namespace MadoEngine::Editor {
             const Transform3D beforeDrawTransform = transform;
             if (DrawTransformGizmoInRect(camera, transform, imageMin, imageSize)) {
                 selectedModel->SetTransform(transform);
+				EditorToolbar::GetInstance().MarkDocumentDirty(EditorDocument::Model);
                 isChanged = true;
             }
             if (UpdateModelGizmoHistory(selectedModelHandle, beforeDrawTransform)) {

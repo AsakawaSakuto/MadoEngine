@@ -5,7 +5,7 @@
         {
             "displayName": "Cylinder",
             "effectAssetName": "PlayerJump",
-            "isEnabled": true,
+            "isEnabled": false,
             "localTransform": {
                 "rotate": [
                     0.0,

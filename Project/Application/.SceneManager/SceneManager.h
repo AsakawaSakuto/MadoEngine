@@ -71,6 +71,14 @@ public:
 	/// @brief 現在のシーンのImGuiを描画
 	void DrawImGui();
 
+	/// @brief 現在SceneのEditor Documentを保存
+	/// @return 全Documentの保存に成功した場合はtrue
+	bool SaveEditorDocuments();
+
+	/// @brief 現在SceneのEditor Documentを再読込
+	/// @return 全Documentの再読込に成功した場合はtrue
+	bool ReloadEditorDocuments();
+
 	/// @brief 現在のシーン種別を取得
 	/// @return 現在のシーン種別
 	SceneType GetCurrentSceneType() const { return currentSceneType_; }

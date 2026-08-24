@@ -33,7 +33,18 @@
                 },
                 "height": {
                     "default": 0.5,
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": 0.5
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 0.5,
+                            "value": 0.0010000000474974513
+                        }
+                    ]
                 },
                 "heightSegments": 1,
                 "pivot": "bottom",

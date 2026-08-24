@@ -435,7 +435,7 @@ nlohmann::json SerializePostEffectPassList(
 /// @brief PostEffect Editorの状態をJSONへ保存
 /// @param manager 保存対象のManager
 /// @return 保存に成功した場合はtrue
-bool SavePostEffectEditorJson(const Render::PostEffectManager& manager) {
+bool SavePostEffectEditorJsonInternal(const Render::PostEffectManager& manager) {
 	nlohmann::json root;
 	root["version"] = 4;
 	root["layerPasses"] = SerializePostEffectPassList(
@@ -748,6 +748,10 @@ std::size_t FindHandleIndex(
 
 } // namespace
 
+bool SavePostEffectEditorJsonToFile(const Render::PostEffectManager& postEffectManager) {
+	return SavePostEffectEditorJsonInternal(postEffectManager);
+}
+
 bool LoadPostEffectEditorJson(Render::PostEffectManager& postEffectManager) {
 	return LoadPostEffectEditorJsonInternal(postEffectManager);
 }
@@ -803,7 +807,7 @@ void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager) {
 	}
 
 	if (ImGui::Button("保存")) {
-		SavePostEffectEditorJson(postEffectManager);
+		SavePostEffectEditorJsonInternal(postEffectManager);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("読込")) {

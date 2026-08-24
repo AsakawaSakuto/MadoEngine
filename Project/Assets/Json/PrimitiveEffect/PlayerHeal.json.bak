@@ -117,7 +117,7 @@
                         "position": 1.0
                     }
                 ],
-                "textureName": "Cylinder2",
+                "textureName": "Line",
                 "topFadeRange": {
                     "default": 0.0,
                     "keys": []

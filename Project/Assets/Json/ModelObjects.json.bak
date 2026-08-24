@@ -58,8 +58,8 @@
             "frustumCulling": true,
             "layer": "Default",
             "lighting": true,
-            "model": "Assets/Model/Skining/walk.gltf",
-            "name": "Model",
+            "model": "Assets/Model/Static/Projectile/Eye.obj",
+            "name": "Model1",
             "position": [
                 0.0,
                 0.0,
@@ -73,11 +73,12 @@
                 0.0
             ],
             "scale": [
-                0.5,
-                0.5,
-                0.5
+                2.0,
+                2.0,
+                2.0
             ],
-            "scene": "Title",
+            "scene": "None",
+            "texture": "EyeTexture2",
             "type": "Model3D",
             "visible": true
         }

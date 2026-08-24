@@ -147,6 +147,7 @@
                     1.0
                 ],
                 "startWidth": 0.05000000074505806,
+                "syncParticleColor": true,
                 "texture": "white2x2"
             },
             "translateOffset": [
@@ -157,5 +158,5 @@
         }
     ],
     "name": "DefaultExplosion",
-    "version": 4
+    "version": 5
 }

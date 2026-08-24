@@ -64,8 +64,8 @@
                 },
                 "directionMode": "shapeOutward",
                 "lifeTime": {
-                    "max": 0.30000001192092896,
-                    "min": 0.30000001192092896
+                    "max": 0.5,
+                    "min": 0.5
                 },
                 "rotation": {
                     "max": 0.0,

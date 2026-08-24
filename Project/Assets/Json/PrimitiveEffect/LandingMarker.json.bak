@@ -40,7 +40,7 @@
                     ]
                 },
                 "height": {
-                    "default": 0.800000011920929,
+                    "default": 0.75,
                     "keys": []
                 },
                 "heightSegments": 1,

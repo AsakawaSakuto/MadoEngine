@@ -19,6 +19,7 @@ namespace {
 	};
 
 	constexpr const char* kStyleColorJsonPath = "Assets/Json/ImGuiStyleColors.json";
+	constexpr const char* kEditorLayoutPath = "SavedData/EditorLayout.ini";
 
 	const ImGuiStyleColorItem kEditableStyleColors[] = {
 		{ ImGuiCol_Text, "Text", "基本", "通常文字" },
@@ -157,6 +158,7 @@ namespace MadoEngine {
 
 		// ドッキング機能・マルチビューポート（ウィンドウ外ドラッグ）を有効化
 		ImGuiIO& io = ImGui::GetIO();
+		io.IniFilename = kEditorLayoutPath;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
@@ -320,7 +322,11 @@ namespace MadoEngine {
 		ImGui::End();
 	}
 
-	void ImGuiManager::DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV) {
+	void ImGuiManager::DrawEditorLayout(
+		D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV,
+		float topOffset,
+		bool showGameView,
+		bool showFixedGameView) {
 
 		// 全画面 DockSpace ウィンドウの設定
 		ImGuiWindowFlags dockFlags =
@@ -334,56 +340,112 @@ namespace MadoEngine {
 			ImGuiWindowFlags_NoBackground;
 
 		ImGuiViewport* vp = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(vp->Pos);
-		ImGui::SetNextWindowSize(vp->Size);
+		const ImVec2 dockSpacePosition(vp->WorkPos.x, vp->WorkPos.y + topOffset);
+		const ImVec2 dockSpaceSize(vp->WorkSize.x, (std::max)(0.0f, vp->WorkSize.y - topOffset));
+		ImGui::SetNextWindowPos(dockSpacePosition);
+		ImGui::SetNextWindowSize(dockSpaceSize);
 		ImGui::SetNextWindowViewport(vp->ID);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpaceWindow", nullptr, dockFlags);
 		ImGui::PopStyleVar(3);
-		ImGui::DockSpace(ImGui::GetID("MainDockSpace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+		const ImGuiID dockSpaceId = ImGui::GetID("MainDockSpace");
+		if (buildDefaultLayoutRequested_ || ImGui::DockBuilderGetNode(dockSpaceId) == nullptr) {
+
+			// 初回起動と明示初期化時だけ既定配置を構築してユーザー配置を維持
+			BuildDefaultEditorLayout(dockSpaceId, dockSpaceSize);
+			buildDefaultLayoutRequested_ = false;
+		}
+		ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 		ImGui::End();
 
 		// Game View ウィンドウにオフスクリーンテクスチャを表示（16:9 固定）
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Game View");
-		ImVec2 avail = ImGui::GetContentRegionAvail();
-		constexpr float kAspect = 16.0f / 9.0f;
-		ImVec2 imageSize;
-		if (avail.x / avail.y > kAspect) {
+		if (showGameView) {
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::Begin("Game View");
+			ImVec2 avail = ImGui::GetContentRegionAvail();
+			constexpr float kAspect = 16.0f / 9.0f;
+			ImVec2 imageSize;
+			if (avail.y > 0.0f && avail.x / avail.y > kAspect) {
 
-			// 横が余る → 高さ基準
-			imageSize.y = avail.y;
-			imageSize.x = avail.y * kAspect;
-		} else {
+				// 横が余る場合は高さ基準で16:9を維持
+				imageSize.y = avail.y;
+				imageSize.x = avail.y * kAspect;
+			} else {
 
-			// 縦が余る → 幅基準
-			imageSize.x = avail.x;
-			imageSize.y = avail.x / kAspect;
+				// 縦が余る場合は幅基準で16:9を維持
+				imageSize.x = avail.x;
+				imageSize.y = avail.x / kAspect;
+			}
+
+			// Game View内の余白を均等化して描画画像を中央へ配置
+			ImVec2 offset((avail.x - imageSize.x) * 0.5f, (avail.y - imageSize.y) * 0.5f);
+			ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + offset.x, ImGui::GetCursorPosY() + offset.y));
+			ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), imageSize);
+			ImGui::End();
+			ImGui::PopStyleVar();
 		}
 
-		// 余白をセンタリング
-		ImVec2 offset((avail.x - imageSize.x) * 0.5f, (avail.y - imageSize.y) * 0.5f);
-		ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + offset.x, ImGui::GetCursorPosY() + offset.y));
-		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), imageSize);
-		ImGui::End();
-		ImGui::PopStyleVar();
-
 		// 最終描画結果を実解像度で確認する固定サイズのGame View
-		constexpr float kFixedGameViewWidth = 1280.0f;
-		constexpr float kFixedGameViewHeight = 720.0f;
-		const ImVec2 fixedGameViewSize(kFixedGameViewWidth, kFixedGameViewHeight);
-		ImGui::SetNextWindowSize(
-			ImVec2(kFixedGameViewWidth, kFixedGameViewHeight + ImGui::GetFrameHeight()),
-			ImGuiCond_FirstUseEver
-		);
-		ImGui::SetNextWindowContentSize(fixedGameViewSize);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("Game View 1280x720", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
-		ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), fixedGameViewSize);
-		ImGui::End();
-		ImGui::PopStyleVar();
+		if (showFixedGameView) {
+			constexpr float kFixedGameViewWidth = 1280.0f;
+			constexpr float kFixedGameViewHeight = 720.0f;
+			const ImVec2 fixedGameViewSize(kFixedGameViewWidth, kFixedGameViewHeight);
+			ImGui::SetNextWindowSize(
+				ImVec2(kFixedGameViewWidth, kFixedGameViewHeight + ImGui::GetFrameHeight()),
+				ImGuiCond_FirstUseEver
+			);
+			ImGui::SetNextWindowContentSize(fixedGameViewSize);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::Begin("Game View 1280x720", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+			ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), fixedGameViewSize);
+			ImGui::End();
+			ImGui::PopStyleVar();
+		}
+	}
+
+	bool ImGuiManager::SaveEditorLayout() const {
+		std::error_code errorCode;
+		std::filesystem::create_directories(std::filesystem::path(kEditorLayoutPath).parent_path(), errorCode);
+		if (errorCode) {
+			return false;
+		}
+
+		ImGui::SaveIniSettingsToDisk(kEditorLayoutPath);
+		return std::filesystem::exists(kEditorLayoutPath);
+	}
+
+	void ImGuiManager::ResetEditorLayout() {
+		ImGui::ClearIniSettings();
+		buildDefaultLayoutRequested_ = true;
+	}
+
+	void ImGuiManager::BuildDefaultEditorLayout(ImGuiID dockSpaceId, const ImVec2& dockSpaceSize) {
+		ImGui::DockBuilderRemoveNode(dockSpaceId);
+		ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace);
+		ImGui::DockBuilderSetNodeSize(dockSpaceId, dockSpaceSize);
+
+		ImGuiID centerDockId = dockSpaceId;
+		ImGuiID leftDockId = 0;
+		ImGuiID rightDockId = 0;
+		ImGuiID bottomDockId = 0;
+		ImGui::DockBuilderSplitNode(centerDockId, ImGuiDir_Left, 0.20f, &leftDockId, &centerDockId);
+		ImGui::DockBuilderSplitNode(centerDockId, ImGuiDir_Right, 0.26f, &rightDockId, &centerDockId);
+		ImGui::DockBuilderSplitNode(centerDockId, ImGuiDir_Down, 0.24f, &bottomDockId, &centerDockId);
+
+		// 使用頻度の高いGame Viewを中央、管理系Windowを左右と下部へ配置
+		ImGui::DockBuilderDockWindow("Game View", centerDockId);
+		ImGui::DockBuilderDockWindow("Game View 1280x720", centerDockId);
+		ImGui::DockBuilderDockWindow("Scene Manager", leftDockId);
+		ImGui::DockBuilderDockWindow("Camera Editor", leftDockId);
+		ImGui::DockBuilderDockWindow("Engine Info", leftDockId);
+		ImGui::DockBuilderDockWindow("Model Editor", rightDockId);
+		ImGui::DockBuilderDockWindow("Sprite Editor", rightDockId);
+		ImGui::DockBuilderDockWindow("Text Editor", rightDockId);
+		ImGui::DockBuilderDockWindow("Post Effect Editor", rightDockId);
+		ImGui::DockBuilderDockWindow("Logger", bottomDockId);
+		ImGui::DockBuilderFinish(dockSpaceId);
 	}
 
 	void ImGuiManager::End(ID3D12GraphicsCommandList* commandList) {

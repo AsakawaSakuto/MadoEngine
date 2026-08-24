@@ -7,6 +7,11 @@
 #include "../../../RenderHeaders.h"
 namespace MadoEngine::Editor {
 
+/// @brief PostEffect EditorのJson設定を保存
+/// @param postEffectManager 保存対象のPostEffectManager
+/// @return 保存に成功した場合はtrue
+bool SavePostEffectEditorJsonToFile(const Render::PostEffectManager& postEffectManager);
+
 /// @brief PostEffect EditorのJson設定を読み込み
 /// @param postEffectManager 読み込み先のPostEffectManager
 /// @return 読み込みに成功した場合はtrue

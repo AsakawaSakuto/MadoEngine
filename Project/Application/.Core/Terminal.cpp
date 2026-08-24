@@ -172,11 +172,10 @@ void Terminal::Run() {
 
 		execution_->Update();
 
-		// Application停止要求後は描画を維持しつつGame状態の更新だけを停止
-		if (execution_->IsStopApplication()) {
-
-		} else {
-			sceneManager_->Update(execution_->GetDeltaTime());
+		// 一時停止中も描画とEditor操作を維持し、Game状態の更新だけを停止
+		float applicationDeltaTime = 0.0f;
+		if (execution_->ConsumeApplicationDeltaTime(applicationDeltaTime)) {
+			sceneManager_->Update(applicationDeltaTime);
 		}
 		execution_->PreDraw(
 			sceneManager_->GetCurrentSceneType(),
@@ -216,6 +215,19 @@ void Terminal::Run() {
 		execution_->BeginImGuiLayout();
 
 		sceneManager_->DrawImGui();
+
+		if (execution_->ConsumeEditorSaveAllRequest()) {
+			const bool engineSucceeded = execution_->SaveEditorDocuments();
+			const bool sceneSucceeded = sceneManager_->SaveEditorDocuments();
+			const bool succeeded = engineSucceeded && sceneSucceeded;
+			execution_->NotifyEditorDocumentOperationResult("すべて保存", succeeded);
+		}
+		if (execution_->ConsumeEditorReloadAllRequest()) {
+			const bool engineSucceeded = execution_->ReloadEditorDocuments();
+			const bool sceneSucceeded = sceneManager_->ReloadEditorDocuments();
+			const bool succeeded = engineSucceeded && sceneSucceeded;
+			execution_->NotifyEditorDocumentOperationResult("すべて再読込", succeeded);
+		}
 
 		execution_->PostDraw();
 

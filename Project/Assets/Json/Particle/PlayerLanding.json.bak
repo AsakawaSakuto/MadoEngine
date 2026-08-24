@@ -104,7 +104,7 @@
                     1.0,
                     0.0
                 ],
-                "outerRadius": 1.0,
+                "outerRadius": 0.75,
                 "type": "ring"
             },
             "simulationSpace": "world",

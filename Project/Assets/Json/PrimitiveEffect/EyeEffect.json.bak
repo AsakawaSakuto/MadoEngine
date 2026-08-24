@@ -1,7 +1,7 @@
 {
     "emitters": [
         {
-            "duration": 1.0,
+            "duration": 8.0,
             "geometry": {
                 "arcAngleDegrees": {
                     "default": 360.0,
@@ -23,7 +23,18 @@
                 "radialSegments": 32,
                 "startAngleDegrees": {
                     "default": 0.0,
-                    "keys": []
+                    "keys": [
+                        {
+                            "easing": "Linear",
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "easing": "Linear",
+                            "time": 8.0,
+                            "value": 360.0
+                        }
+                    ]
                 },
                 "topRadii": {
                     "default": [

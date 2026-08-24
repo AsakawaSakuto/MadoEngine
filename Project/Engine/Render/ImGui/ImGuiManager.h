@@ -37,7 +37,22 @@ namespace MadoEngine {
 
 		/// @brief エディタ用レイアウト（DockSpace + Game View）を描画
 		/// @param gameViewSRV ゲーム画面オフスクリーンテクスチャのSRV GPUハンドル
-		void DrawEditorLayout(D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV);
+		/// @param topOffset Main Menu下に確保する共通ツールバーの高さ
+		/// @param showGameView 可変サイズGame Viewを表示する場合はtrue
+		/// @param showFixedGameView 固定サイズGame Viewを表示する場合はtrue
+		void DrawEditorLayout(
+			D3D12_GPU_DESCRIPTOR_HANDLE gameViewSRV,
+			float topOffset,
+			bool showGameView,
+			bool showFixedGameView
+		);
+
+		/// @brief 現在のEditorレイアウトを保存
+		/// @return 保存に成功した場合はtrue
+		bool SaveEditorLayout() const;
+
+		/// @brief Editorレイアウトを既定配置へ初期化
+		void ResetEditorLayout();
 
 		/// @brief ImGuiのスタイルカラー編集ウィンドウを描画
 		void DrawStyleColorEditorUI();
@@ -67,8 +82,14 @@ namespace MadoEngine {
 		/// @brief 既定のImGuiスタイルカラーを適用
 		void ApplyDefaultStyleColors();
 
+		/// @brief 既定のDockSpace配置を構築
+		/// @param dockSpaceId 構築対象のDockSpace ID
+		/// @param dockSpaceSize DockSpace全体のサイズ
+		void BuildDefaultEditorLayout(ImGuiID dockSpaceId, const ImVec2& dockSpaceSize);
+
 		Core::SRVManager* srvManager_ = nullptr;
 		std::vector<uint32_t> allocatedSrvIndices_; // ImGuiが確保したSRVスロットの追跡用
+		bool buildDefaultLayoutRequested_ = false;
 	};
 
 } // namespace MadoEngine

@@ -64,8 +64,8 @@
                 },
                 "directionMode": "configured",
                 "lifeTime": {
-                    "max": 0.15000000596046448,
-                    "min": 0.15000000596046448
+                    "max": 0.25,
+                    "min": 0.25
                 },
                 "rotation": {
                     "max": 3.140000104904175,
