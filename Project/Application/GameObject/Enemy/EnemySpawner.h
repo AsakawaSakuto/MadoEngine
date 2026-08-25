@@ -33,6 +33,10 @@ namespace Enemy {
 		void SetMapLimit(const MapLimit& mapLimit) { mapLimit_ = mapLimit; }
 
 	private:
+		/// @brief 通常湧きの抽選率から生成するEnemy種類を選択
+		/// @return 生成するEnemyの種類
+		Data::Type SelectSpawnType() const;
+
 		/// @brief Enemyの生成要求を1件発行
 		void SpawnEnemy();
 
@@ -42,21 +46,23 @@ namespace Enemy {
 		/// @return 生成可能な地表面が見つかった場合はtrue
 		bool TryCreateSpawnPosition(Vector3& outPosition, float& outGroundSurfaceY) const;
 
-		/// @brief 現在の経過時間に応じたEnemyステータスを計算
+		/// @brief Enemy種類と現在の経過時間に応じたステータスを計算
+		/// @param type ステータスを計算するEnemyの種類
 		/// @return 新しく生成するEnemyのステータス
-		Data::Status CalculateSpawnStatus() const;
+		Data::Status CalculateSpawnStatus(Data::Type type) const;
 
 		Player::Base* player_ = nullptr;
 		Manager* enemyManager_ = nullptr;
 		SceneType sceneType_ = SceneType::None;
 		MapLimit mapLimit_;
-		Data::Status baseStatus_;
 		std::size_t spawnLimit_ = 500;
 		float spawnInterval_ = 0.4f;
 		float spawnTimer_ = 0.0f;
 		float elapsedTime_ = 0.0f;
 		float minSpawnRadius_ = 8.0f;
 		float maxSpawnRadius_ = 14.0f;
+		float runnerSpawnRate_ = 0.25f;
+		float tankSpawnRate_ = 0.15f;
 		float healthPowerGrowthRatePerMinute_ = 0.1f;
 		float moveSpeedGrowthRatePerMinute_ = 0.02f;
 		bool isActive_ = true;

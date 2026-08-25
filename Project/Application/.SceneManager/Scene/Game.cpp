@@ -152,6 +152,8 @@ SceneType Game::Update(float dt) {
 		}
 	}
 
+	// Pause中も現在の判定形状を確認できるようEnemy Colliderを毎Frame登録
+	enemyManager_->DrawDebugLine();
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
 
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {

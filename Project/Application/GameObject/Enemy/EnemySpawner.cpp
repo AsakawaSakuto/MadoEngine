@@ -1,4 +1,5 @@
 #include "EnemySpawner.h"
+#include "EnemyFactory.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Collider/MyCollider.h"
 #include "Utility/Logger/Logger.h"
@@ -50,15 +51,28 @@ namespace Enemy {
 #ifdef USE_IMGUI
 		ImGui::Begin("EnemySpawner");
 		ImGui::Text("Enemy Count : %zu", enemyManager_ ? enemyManager_->GetEnemyCount() : 0);
+		ImGui::Text(
+			"次のEliteまで : %u体",
+			enemyManager_ ? enemyManager_->GetRemainingSpawnCountUntilElite() : 50);
 		ImGui::Text("Elapsed Time : %.1f", elapsedTime_);
 		ImGui::Checkbox("Active", &isActive_);
 		ImGui::DragScalar("Spawn Limit", ImGuiDataType_U64, &spawnLimit_, 1.0f);
 		ImGui::DragFloat("生成間隔（秒）", &spawnInterval_, 0.1f, kMinSpawnInterval, 600.0f, "%.1f");
+		float runnerSpawnPercent = runnerSpawnRate_ * 100.0f;
+		if (ImGui::SliderFloat("Runner生成率", &runnerSpawnPercent, 0.0f, 100.0f, "%.0f%%")) {
+			runnerSpawnRate_ = runnerSpawnPercent / 100.0f;
+		}
+		float tankSpawnPercent = tankSpawnRate_ * 100.0f;
+		if (ImGui::SliderFloat("Tank生成率", &tankSpawnPercent, 0.0f, 100.0f, "%.0f%%")) {
+			tankSpawnRate_ = tankSpawnPercent / 100.0f;
+		}
 		ImGui::DragFloat("体力・攻撃力強化率（毎分）", &healthPowerGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat("移動速度強化率（毎分）", &moveSpeedGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
 
 		// 直接入力されたDebug値も実行可能な範囲へ制限
 		spawnInterval_ = std::max(spawnInterval_, kMinSpawnInterval);
+		runnerSpawnRate_ = std::clamp(runnerSpawnRate_, 0.0f, 1.0f);
+		tankSpawnRate_ = std::clamp(tankSpawnRate_, 0.0f, 1.0f - runnerSpawnRate_);
 		healthPowerGrowthRatePerMinute_ = std::max(healthPowerGrowthRatePerMinute_, 0.0f);
 		moveSpeedGrowthRatePerMinute_ = std::max(moveSpeedGrowthRatePerMinute_, 0.0f);
 
@@ -75,6 +89,20 @@ namespace Enemy {
 		elapsedTime_ = 0.0f;
 	}
 
+	Data::Type Spawner::SelectSpawnType() const {
+		const float clampedRunnerSpawnRate = std::clamp(runnerSpawnRate_, 0.0f, 1.0f);
+		const float clampedTankSpawnRate = std::clamp(tankSpawnRate_, 0.0f, 1.0f - clampedRunnerSpawnRate);
+		const float randomValue = MyRand::GetFloat(0.0f, 1.0f);
+		if (randomValue < clampedRunnerSpawnRate) {
+			return Data::Type::Runner;
+		}
+		if (randomValue < clampedRunnerSpawnRate + clampedTankSpawnRate) {
+			return Data::Type::Tank;
+		}
+
+		return Data::Type::Normal;
+	}
+
 	void Spawner::SpawnEnemy() {
 		if (!player_ || !enemyManager_) {
 			return;
@@ -87,10 +115,11 @@ namespace Enemy {
 		}
 
 		// 地形Colliderを無効化した出現状態で地表面直下から上昇
+		const Data::Type spawnType = SelectSpawnType();
 		desc.emergeFromGround = true;
 		desc.groundSurfaceY = groundSurfaceY;
-		desc.status = CalculateSpawnStatus();
-		desc.type = Data::Type::Normal;
+		desc.status = CalculateSpawnStatus(spawnType);
+		desc.type = spawnType;
 		desc.bonusType = Data::BonusType::None;
 		desc.sceneType = sceneType_;
 		enemyManager_->Spawn(desc);
@@ -135,14 +164,14 @@ namespace Enemy {
 		return false;
 	}
 
-	Data::Status Spawner::CalculateSpawnStatus() const {
+	Data::Status Spawner::CalculateSpawnStatus(Data::Type type) const {
 
 		// 経過分数へ線形成長率を適用して長時間Play時の難易度を上昇
 		const float elapsedMinutes = elapsedTime_ / kSecondsPerMinute;
 		const float healthPowerMultiplier = 1.0f + elapsedMinutes * healthPowerGrowthRatePerMinute_;
 		const float moveSpeedMultiplier = 1.0f + elapsedMinutes * moveSpeedGrowthRatePerMinute_;
 
-		Data::Status status = baseStatus_;
+		Data::Status status = Factory::CreateDefaultStatus(type);
 		status.currentHealth *= healthPowerMultiplier;
 		status.power *= healthPowerMultiplier;
 		status.moveSpeed *= moveSpeedMultiplier;

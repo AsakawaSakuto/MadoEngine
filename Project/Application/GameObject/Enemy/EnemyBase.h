@@ -203,10 +203,13 @@ namespace Enemy {
 		/// @brief 移動用と被弾用のColliderを登録
 		void RegisterColliders();
 
-		/// @brief Modelへ現在のTransformを反映
+		/// @brief Enemy本体とElite Markerへ現在のTransformを反映
 		void ApplyModelTransform();
 
-		/// @brief ColliderとModelを破棄
+		/// @brief Elite属性を示す頭上PlaneModelを生成
+		void CreateEliteMarkerModel();
+
+		/// @brief Colliderと全Modelを破棄
 		void Release();
 
 		/// @brief Collider登録名を作成
@@ -229,11 +232,13 @@ namespace Enemy {
 		std::string movementColliderName_;
 		std::string hitColliderName_;
 		std::string modelName_;
+		MadoEngine::ModelHandle eliteMarkerModel_{};
 		float projectileDamageInterval_ = 0.5f; // Projectileからのダメージを受ける間隔（秒）
 		std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
 		float playerDamageCooldown_ = 0.0f;
 		float damageFlashRemainingTime_ = 0.0f;
 		float emergenceTargetY_ = 0.0f;
+		float bodyScaleMultiplier_ = 1.0f;
 		bool isActive_ = true;
 		bool isEmerging_ = false;
 		bool areCollidersRegistered_ = false;

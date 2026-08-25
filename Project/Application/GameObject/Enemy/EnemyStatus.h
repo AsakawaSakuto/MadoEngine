@@ -13,11 +13,13 @@ namespace Enemy {
 		/// @brief Enemyの種類を表す列挙型
 		enum class Type {
 			Normal, // 通常の敵
+			Runner, // 低耐久で高速な敵
+			Tank,   // 高耐久で低速な敵
 
 			Boss,	// ボス敵
 		};
 
-		/// @brief 特殊Enemy、倒された際にTypeの報酬を大量に落とす種類を表す列挙型
+		/// @brief Enemyへ付与する特殊属性の種類を表す列挙型
 		enum class BonusType {
 			None,  // 特になし
 			Elite, // エリート敵

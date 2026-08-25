@@ -25,7 +25,9 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyFactory.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyNormal.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyRunner.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyTank.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
@@ -207,7 +209,9 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemyFactory.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyNormal.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyRunner.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyTank.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>

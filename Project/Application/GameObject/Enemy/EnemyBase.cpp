@@ -10,7 +10,15 @@ namespace Enemy {
 		constexpr float kDamageFlashDuration = 6.0f / 60.0f;
 		constexpr float kEmergenceSpeed = 4.0f;
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
+		constexpr float kEliteHealthMultiplier = 3.0f;
+		constexpr float kElitePowerMultiplier = 2.0f;
+		constexpr float kEliteBodyScaleMultiplier = 1.5f;
+		constexpr float kEliteMarkerHeightOffset = 0.4f;
+		constexpr Vector3 kEliteMarkerScale = { 0.45f, 0.45f, 0.45f };
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
+		constexpr const char* kEliteMarkerModelAssetName = "Plane";
+		constexpr const char* kEliteMarkerTextureName = "Elite";
 	}
 
 	Base::~Base() { Release(); }
@@ -21,6 +29,13 @@ namespace Enemy {
 		type_ = desc.type;
 		bonusType_ = desc.bonusType;
 		sceneType_ = desc.sceneType;
+		bodyScaleMultiplier_ = bonusType_ == Data::BonusType::Elite ? kEliteBodyScaleMultiplier : 1.0f;
+		if (bonusType_ == Data::BonusType::Elite) {
+
+			// 時間経過補正後の基礎能力値へElite倍率を重ねて全非Boss種類へ同じ属性効果を適用
+			status_.currentHealth *= kEliteHealthMultiplier;
+			status_.power *= kElitePowerMultiplier;
+		}
 		projectileDamageCooldowns_.clear();
 		playerDamageCooldown_ = 0.0f;
 		damageFlashRemainingTime_ = 0.0f;
@@ -32,11 +47,15 @@ namespace Enemy {
 		isReleased_ = false;
 		transform_.translate = desc.position;
 		transform_.rotate = {};
-		transform_.scale = GetModelScale();
+		transform_.scale = GetModelScale() * bodyScaleMultiplier_;
 		movement_.Initialize();
 
-		hitAABB_ = CreateHitCollider();
-		const Sphere movementCollider = CreateMovementCollider();
+		AABB hitCollider = CreateHitCollider();
+		hitCollider.min *= bodyScaleMultiplier_;
+		hitCollider.max *= bodyScaleMultiplier_;
+		hitAABB_ = hitCollider;
+		Sphere movementCollider = CreateMovementCollider();
+		movementCollider.radius *= bodyScaleMultiplier_;
 		colliderShape_ = movementCollider;
 		emergenceTargetY_ = desc.groundSurfaceY + movementCollider.radius;
 		isEmerging_ = desc.emergeFromGround && std::isfinite(emergenceTargetY_) &&
@@ -67,6 +86,7 @@ namespace Enemy {
 			model->SetTexture("white16x16");
 			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		}
+		CreateEliteMarkerModel();
 
 		ApplyModelTransform();
 		OnInitialized();
@@ -106,7 +126,7 @@ namespace Enemy {
 	}
 
 	void Base::DrawDebugLine() const {
-		if (!isActive_) {
+		if (!isActive_ || isEmerging_) {
 			return;
 		}
 
@@ -308,19 +328,48 @@ namespace Enemy {
 	}
 
 	void Base::ApplyModelTransform() {
-		Model* model = MyModel::TryGet(model_);
-		if (!model) {
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetPosition(transform_.translate + GetModelOffset() * bodyScaleMultiplier_);
+			model->SetRotation(transform_.rotate);
+			model->SetScale(transform_.scale);
+		}
+
+		if (Model* eliteMarkerModel = MyModel::TryGet(eliteMarkerModel_)) {
+			const AABB& hitCollider = std::get<AABB>(hitAABB_);
+
+			// 種類ごとに異なる被弾Collider上端を頭上基準としてMarker位置を追従
+			eliteMarkerModel->SetPosition(
+				transform_.translate + Vector3{ 0.0f, hitCollider.max.y + kEliteMarkerHeightOffset, 0.0f });
+			eliteMarkerModel->SetScale(kEliteMarkerScale);
+			eliteMarkerModel->SetVisible(isActive_ && !isEmerging_);
+		}
+	}
+
+	void Base::CreateEliteMarkerModel() {
+		if (bonusType_ != Data::BonusType::Elite) {
 			return;
 		}
 
-		model->SetPosition(transform_.translate + GetModelOffset());
-		model->SetRotation(transform_.rotate);
-		model->SetScale(transform_.scale);
+		eliteMarkerModel_ = MyModel::Create(
+			modelName_ + "_EliteMarker",
+			kEliteMarkerModelAssetName,
+			sceneType_,
+			MadoEngine::Render::RenderLayer::Enemy);
+		if (Model* eliteMarkerModel = MyModel::TryGet(eliteMarkerModel_)) {
+
+			// UI Textureの色と透過を維持するため照明とShadowを無効化したBillboardとして構成
+			eliteMarkerModel->SetTexture(kEliteMarkerTextureName);
+			eliteMarkerModel->SetUseBillboard(true);
+			eliteMarkerModel->SetCastShadow(false);
+			eliteMarkerModel->SetReceiveShadow(false);
+			eliteMarkerModel->SetLightingEnabled(false);
+			eliteMarkerModel->SetColor(kEliteMarkerColor);
+		}
 	}
 
 	void Base::Release() {
 
-		// Destructorと明示解放の重複呼び出しからColliderとModelを保護
+		// Destructorと明示解放の重複呼び出しからColliderと複数Modelを保護
 		if (isReleased_) {
 			return;
 		}
@@ -335,6 +384,10 @@ namespace Enemy {
 		if (!modelName_.empty()) {
 			MyModel::RequestDestroy(model_);
 			model_ = {};
+		}
+		if (eliteMarkerModel_.IsValid()) {
+			MyModel::RequestDestroy(eliteMarkerModel_);
+			eliteMarkerModel_ = {};
 		}
 
 		isReleased_ = true;
