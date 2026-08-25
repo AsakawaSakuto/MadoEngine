@@ -6,16 +6,12 @@
 #include <algorithm>
 #include <cmath>
 
-#ifdef USE_IMGUI
-#include "ImGuiHeaders.h"
-#endif // USE_IMGUI
-
 namespace {
 	constexpr float kPi = 3.14159265358979323846f;
 	constexpr float kSpawnBuriedDepth = 2.0f;
-	constexpr float kMinSpawnInterval = 0.1f;
 	constexpr float kSecondsPerMinute = 60.0f;
 	constexpr std::size_t kMaxSpawnPositionAttempts = 8;
+	constexpr std::size_t kInvalidWaveIndex = static_cast<std::size_t>(-1);
 } // namespace
 
 namespace Enemy {
@@ -26,113 +22,188 @@ namespace Enemy {
 		sceneType_ = sceneType;
 		Clear();
 		isActive_ = true;
-		Logger::Output("[Engine] Enemy::Spawnerを初期化しました。", Logger::Level::Application);
+		Logger::Output("Enemy::Spawnerを初期化しました", Logger::Level::Application);
 	}
 
 	void Spawner::Update(float deltaTime) {
-		if (!isActive_ || !player_ || !enemyManager_ || deltaTime <= 0.0f) {
+		if (!isActive_ || !player_ || !enemyManager_ || !std::isfinite(deltaTime) || deltaTime <= 0.0f) {
 			return;
 		}
 
 		elapsedTime_ += deltaTime;
+		std::size_t waveIndex = kInvalidWaveIndex;
+		const WaveSettings* wave = FindActiveWave(waveIndex);
+		if (!wave) {
+
+			// Wave空白時間の周期残量を次のWaveへ持ち越さないよう生成状態を解除
+			ChangeActiveWave(kInvalidWaveIndex);
+			return;
+		}
+
+		ChangeActiveWave(waveIndex);
+
 		spawnTimer_ += deltaTime;
-		spawnInterval_ = std::max(spawnInterval_, kMinSpawnInterval);
+		const float spawnInterval = std::max(0.01f, wave->spawnInterval);
 
 		// 長いFrameでも経過した生成周期を取りこぼさないようTimer残量を順次消費
-		while (spawnTimer_ >= spawnInterval_) {
-			spawnTimer_ -= spawnInterval_;
-			if (enemyManager_->GetEnemyCount() < spawnLimit_) {
-				SpawnEnemy();
-			}
+		while (spawnTimer_ >= spawnInterval) {
+			spawnTimer_ -= spawnInterval;
+			SpawnBatch(*wave, wave->spawnCount);
 		}
-	}
-
-	void Spawner::DrawImGui() {
-#ifdef USE_IMGUI
-		ImGui::Begin("EnemySpawner");
-		ImGui::Text("Enemy Count : %zu", enemyManager_ ? enemyManager_->GetEnemyCount() : 0);
-		ImGui::Text(
-			"次のEliteまで : %u体",
-			enemyManager_ ? enemyManager_->GetRemainingSpawnCountUntilElite() : 50);
-		ImGui::Text("Elapsed Time : %.1f", elapsedTime_);
-		ImGui::Checkbox("Active", &isActive_);
-		ImGui::DragScalar("Spawn Limit", ImGuiDataType_U64, &spawnLimit_, 1.0f);
-		ImGui::DragFloat("生成間隔（秒）", &spawnInterval_, 0.1f, kMinSpawnInterval, 600.0f, "%.1f");
-		float runnerSpawnPercent = runnerSpawnRate_ * 100.0f;
-		if (ImGui::SliderFloat("Runner生成率", &runnerSpawnPercent, 0.0f, 100.0f, "%.0f%%")) {
-			runnerSpawnRate_ = runnerSpawnPercent / 100.0f;
-		}
-		float tankSpawnPercent = tankSpawnRate_ * 100.0f;
-		if (ImGui::SliderFloat("Tank生成率", &tankSpawnPercent, 0.0f, 100.0f, "%.0f%%")) {
-			tankSpawnRate_ = tankSpawnPercent / 100.0f;
-		}
-		ImGui::DragFloat("体力・攻撃力強化率（毎分）", &healthPowerGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat("移動速度強化率（毎分）", &moveSpeedGrowthRatePerMinute_, 0.01f, 0.0f, 10.0f, "%.2f");
-
-		// 直接入力されたDebug値も実行可能な範囲へ制限
-		spawnInterval_ = std::max(spawnInterval_, kMinSpawnInterval);
-		runnerSpawnRate_ = std::clamp(runnerSpawnRate_, 0.0f, 1.0f);
-		tankSpawnRate_ = std::clamp(tankSpawnRate_, 0.0f, 1.0f - runnerSpawnRate_);
-		healthPowerGrowthRatePerMinute_ = std::max(healthPowerGrowthRatePerMinute_, 0.0f);
-		moveSpeedGrowthRatePerMinute_ = std::max(moveSpeedGrowthRatePerMinute_, 0.0f);
-
-		if (ImGui::Button("敵を1体生成") && player_ && enemyManager_ && enemyManager_->GetEnemyCount() < spawnLimit_) {
-			SpawnEnemy();
-		}
-
-		ImGui::End();
-#endif // USE_IMGUI
 	}
 
 	void Spawner::Clear() {
+		activeWaveIndex_ = kInvalidWaveIndex;
+		activeWaveEnemySpawnCount_ = 0;
 		spawnTimer_ = 0.0f;
 		elapsedTime_ = 0.0f;
 	}
 
-	Data::Type Spawner::SelectSpawnType() const {
-		const float clampedRunnerSpawnRate = std::clamp(runnerSpawnRate_, 0.0f, 1.0f);
-		const float clampedTankSpawnRate = std::clamp(tankSpawnRate_, 0.0f, 1.0f - clampedRunnerSpawnRate);
-		const float randomValue = MyRand::GetFloat(0.0f, 1.0f);
-		if (randomValue < clampedRunnerSpawnRate) {
-			return Data::Type::Runner;
-		}
-		if (randomValue < clampedRunnerSpawnRate + clampedTankSpawnRate) {
-			return Data::Type::Tank;
+	std::uint32_t Spawner::GetRemainingSpawnCountUntilElite() const {
+		std::size_t waveIndex = kInvalidWaveIndex;
+		const WaveSettings* wave = FindActiveWave(waveIndex);
+		if (!wave) {
+			return 0;
 		}
 
-		return Data::Type::Normal;
+		const std::uint64_t eliteSpawnInterval = std::max<std::uint64_t>(1, wave->eliteSpawnInterval);
+		const std::uint64_t waveSpawnCount = waveIndex == activeWaveIndex_ ? activeWaveEnemySpawnCount_ : 0;
+		const std::uint64_t completedInCurrentCycle = waveSpawnCount % eliteSpawnInterval;
+		return static_cast<std::uint32_t>(eliteSpawnInterval - completedInCurrentCycle);
 	}
 
-	void Spawner::SpawnEnemy() {
-		if (!player_ || !enemyManager_) {
+	bool Spawner::TryGetActiveWaveIndex(std::size_t& outIndex) const {
+		if (activeWaveIndex_ == kInvalidWaveIndex) {
+			return false;
+		}
+
+		outIndex = activeWaveIndex_;
+		return true;
+	}
+
+	std::uint32_t Spawner::SpawnImmediately(std::uint32_t spawnCount) {
+		std::size_t waveIndex = kInvalidWaveIndex;
+		const WaveSettings* wave = FindActiveWave(waveIndex);
+		if (!wave) {
+			return 0;
+		}
+
+		ChangeActiveWave(waveIndex);
+		return SpawnBatch(*wave, spawnCount);
+	}
+
+	const WaveSettings* Spawner::FindActiveWave(std::size_t& outIndex) const {
+		const std::vector<WaveSettings>& waves = Settings::GetInstance().GetWaves();
+		const WaveSettings* selectedWave = nullptr;
+		float selectedStartTime = -1.0f;
+		outIndex = kInvalidWaveIndex;
+
+		// 時間帯が重複する場合は開始時間が遅いWaveを優先して結果を一意化
+		for (std::size_t index = 0; index < waves.size(); ++index) {
+			const WaveSettings& wave = waves[index];
+			if (elapsedTime_ < wave.startTime || elapsedTime_ >= wave.endTime) {
+				continue;
+			}
+			if (!selectedWave || wave.startTime >= selectedStartTime) {
+				selectedWave = &wave;
+				selectedStartTime = wave.startTime;
+				outIndex = index;
+			}
+		}
+
+		return selectedWave;
+	}
+
+	void Spawner::ChangeActiveWave(std::size_t waveIndex) {
+		if (activeWaveIndex_ == waveIndex) {
 			return;
+		}
+
+		// Waveをまたいで生成TimerとElite生成数が引き継がれないよう同時に初期化
+		activeWaveIndex_ = waveIndex;
+		activeWaveEnemySpawnCount_ = 0;
+		spawnTimer_ = 0.0f;
+	}
+
+	std::uint32_t Spawner::SpawnBatch(const WaveSettings& wave, std::uint32_t spawnCount) {
+		const std::size_t maxAliveEnemies = Settings::GetInstance().GetMaxAliveEnemies();
+		if (!enemyManager_ || spawnCount == 0 || enemyManager_->GetEnemyCount() >= maxAliveEnemies) {
+			return 0;
+		}
+
+		const std::size_t availableCount = maxAliveEnemies - enemyManager_->GetEnemyCount();
+		const std::uint32_t requestCount = static_cast<std::uint32_t>(std::min<std::size_t>(
+			availableCount,
+			static_cast<std::size_t>(spawnCount)));
+		std::uint32_t spawnedCount = 0;
+		for (std::uint32_t index = 0; index < requestCount; ++index) {
+			if (SpawnEnemy(wave)) {
+				++spawnedCount;
+			}
+		}
+
+		return spawnedCount;
+	}
+
+	Data::Type Spawner::SelectSpawnType(const WaveSettings& wave) const {
+		const float normalRate = std::max(0.0f, wave.normalSpawnRate);
+		const float runnerRate = std::max(0.0f, wave.runnerSpawnRate);
+		const float tankRate = std::max(0.0f, wave.tankSpawnRate);
+		const float totalRate = normalRate + runnerRate + tankRate;
+		if (totalRate <= 0.0f) {
+			return Data::Type::Normal;
+		}
+
+		const float randomValue = MyRand::GetFloat(0.0f, totalRate);
+		if (randomValue < normalRate) {
+			return Data::Type::Normal;
+		}
+		if (randomValue < normalRate + runnerRate) {
+			return Data::Type::Runner;
+		}
+
+		return Data::Type::Tank;
+	}
+
+	bool Spawner::SpawnEnemy(const WaveSettings& wave) {
+		if (!player_ || !enemyManager_) {
+			return false;
 		}
 
 		SpawnDesc desc;
 		float groundSurfaceY = 0.0f;
-		if (!TryCreateSpawnPosition(desc.position, groundSurfaceY)) {
-			return;
+		if (!TryCreateSpawnPosition(wave, desc.position, groundSurfaceY)) {
+			return false;
 		}
 
 		// 地形Colliderを無効化した出現状態で地表面直下から上昇
-		const Data::Type spawnType = SelectSpawnType();
+		const Data::Type spawnType = SelectSpawnType(wave);
 		desc.emergeFromGround = true;
 		desc.groundSurfaceY = groundSurfaceY;
-		desc.status = CalculateSpawnStatus(spawnType);
+		desc.status = CalculateSpawnStatus(spawnType, wave);
 		desc.type = spawnType;
-		desc.bonusType = Data::BonusType::None;
+		++activeWaveEnemySpawnCount_;
+		const std::uint64_t eliteSpawnInterval = std::max<std::uint64_t>(1, wave.eliteSpawnInterval);
+
+		// Wave内で指定周期に到達したEnemyだけを種類に依存せずElite化
+		desc.bonusType = activeWaveEnemySpawnCount_ % eliteSpawnInterval == 0 ?
+			Data::BonusType::Elite : Data::BonusType::None;
 		desc.sceneType = sceneType_;
 		enemyManager_->Spawn(desc);
+		return true;
 	}
 
-	bool Spawner::TryCreateSpawnPosition(Vector3& outPosition, float& outGroundSurfaceY) const {
+	bool Spawner::TryCreateSpawnPosition(
+		const WaveSettings& wave,
+		Vector3& outPosition,
+		float& outGroundSurfaceY) const {
 		const Vector3 playerPosition = player_->GetPosition();
 		const float groundSearchDistance = mapLimit_.max.y - mapLimit_.min.y;
 
 		// 穴や地形未配置地点を避けるためPlayer周辺の候補を複数回探索
 		for (std::size_t attempt = 0; attempt < kMaxSpawnPositionAttempts; ++attempt) {
 			const float angle = MyRand::GetFloat(0.0f, kPi * 2.0f);
-			const float radius = MyRand::GetFloat(minSpawnRadius_, maxSpawnRadius_);
+			const float radius = MyRand::GetFloat(wave.minSpawnRadius, wave.maxSpawnRadius);
 			Vector3 groundQueryOrigin = {
 				playerPosition.x + std::sin(angle) * radius,
 				mapLimit_.max.y,
@@ -164,12 +235,12 @@ namespace Enemy {
 		return false;
 	}
 
-	Data::Status Spawner::CalculateSpawnStatus(Data::Type type) const {
+	Data::Status Spawner::CalculateSpawnStatus(Data::Type type, const WaveSettings& wave) const {
 
-		// 経過分数へ線形成長率を適用して長時間Play時の難易度を上昇
+		// Game全体の経過分数へWave固有の強化幅を適用して難易度を算出
 		const float elapsedMinutes = elapsedTime_ / kSecondsPerMinute;
-		const float healthPowerMultiplier = 1.0f + elapsedMinutes * healthPowerGrowthRatePerMinute_;
-		const float moveSpeedMultiplier = 1.0f + elapsedMinutes * moveSpeedGrowthRatePerMinute_;
+		const float healthPowerMultiplier = 1.0f + elapsedMinutes * wave.healthPowerGrowthRatePerMinute;
+		const float moveSpeedMultiplier = 1.0f + elapsedMinutes * wave.moveSpeedGrowthRatePerMinute;
 
 		Data::Status status = Factory::CreateDefaultStatus(type);
 		status.currentHealth *= healthPowerMultiplier;

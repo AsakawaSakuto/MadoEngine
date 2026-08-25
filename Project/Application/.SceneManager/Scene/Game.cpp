@@ -22,6 +22,7 @@ void Game::Initialize() {
 	MyRand::SetSeed(gameSeed_);
 
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
+	Enemy::Settings::GetInstance().LoadOrCreate();
 
 	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("GameDebugCamera");
 	tpsCameraHandle_ = cameraManager_.CreateCamera<TPS_Camera>("GamePlayerCamera");
@@ -67,6 +68,8 @@ void Game::Initialize() {
 	enemyManager_->Initialize(player_.get());
 	enemySpawner_ = std::make_unique<Enemy::Spawner>();
 	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game);
+	enemyEditor_ = std::make_unique<Enemy::Editor>();
+	enemyEditor_->Initialize(enemySpawner_.get(), enemyManager_.get());
 	SynchronizeMapDependentState();
 
 	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
@@ -267,7 +270,7 @@ void Game::DrawImGui() {
 	weaponStatusEditor_->DrawImGui();
 	weaponUpgradeUI_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_);
 
-	enemySpawner_->DrawImGui();
+	enemyEditor_->DrawImGui();
 	projectileDamageView_.DrawImGui();
 
 	MyCollider::DrawImGui();

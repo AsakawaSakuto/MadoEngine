@@ -6,10 +6,6 @@
 #include <algorithm>
 #include <unordered_map>
 
-namespace {
-	constexpr std::uint64_t kEliteSpawnInterval = 50;
-}
-
 namespace Enemy {
 
 	void Manager::Initialize(Player::Base* player) {
@@ -30,13 +26,6 @@ namespace Enemy {
 
 			// Bossへ外部からEliteが指定されても属性制約を維持
 			effectiveDesc.bonusType = Data::BonusType::None;
-		} else {
-			++nonBossEnemySpawnCount_;
-			if (nonBossEnemySpawnCount_ % kEliteSpawnInterval == 0) {
-
-				// 生成に成功した非Boss Enemyの50体目を種類に依存せずElite化
-				effectiveDesc.bonusType = Data::BonusType::Elite;
-			}
 		}
 
 		enemy->Initialize(nextEnemyId_++, effectiveDesc);
@@ -102,13 +91,7 @@ namespace Enemy {
 	void Manager::Clear() {
 		enemies_.clear();
 		projectileDamageEvents_.clear();
-		nonBossEnemySpawnCount_ = 0;
 		nextEnemyId_ = 0;
-	}
-
-	std::uint32_t Manager::GetRemainingSpawnCountUntilElite() const {
-		const std::uint64_t completedInCurrentCycle = nonBossEnemySpawnCount_ % kEliteSpawnInterval;
-		return static_cast<std::uint32_t>(kEliteSpawnInterval - completedInCurrentCycle);
 	}
 
 	bool Manager::TryGetNearestEnemyPosition(Vector3& outPosition) const {

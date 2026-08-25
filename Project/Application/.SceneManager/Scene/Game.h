@@ -4,6 +4,7 @@
 #include "GameObject/Player/Player.h"
 #include "GameObject/Map/Map.h"
 #include "GameObject/Map/MapLimit.h"
+#include "GameObject/Enemy/EnemyEditor.h"
 #include "GameObject/Enemy/EnemyManager.h"
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
@@ -99,6 +100,7 @@ private:
 
 	std::unique_ptr<Enemy::Manager> enemyManager_;
 	std::unique_ptr<Enemy::Spawner> enemySpawner_;
+	std::unique_ptr<Enemy::Editor> enemyEditor_;
 
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
 	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;

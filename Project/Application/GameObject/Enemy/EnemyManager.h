@@ -56,10 +56,6 @@ namespace Enemy {
 		/// @return 現在管理しているEnemy数
 		std::size_t GetEnemyCount() const { return enemies_.size(); }
 
-		/// @brief 次のElite生成までに必要な非Boss Enemy生成数を取得
-		/// @return 次のElite生成までに必要な生成数
-		std::uint32_t GetRemainingSpawnCountUntilElite() const;
-
 		/// @brief Playerに最も近いEnemyの座標を取得
 		/// @param outPosition 最も近いEnemyの座標を受け取る変数
 		/// @return 取得できた場合はtrue
@@ -90,7 +86,6 @@ namespace Enemy {
 		std::vector<std::unique_ptr<Base>> enemies_;
 		std::vector<ProjectileDamageEvent> projectileDamageEvents_;
 		MapLimit mapLimit_;
-		std::uint64_t nonBossEnemySpawnCount_ = 0;
 		std::uint32_t nextEnemyId_ = 0;
 	};
 } // namespace Enemy

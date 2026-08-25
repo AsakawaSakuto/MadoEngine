@@ -1,4 +1,5 @@
 #include "EnemyBoss.h"
+#include "../EnemySettings.h"
 #include <algorithm>
 #include <cmath>
 
@@ -65,23 +66,26 @@ namespace Enemy {
 	}
 
 	Vector3 Boss::GetModelScale() const {
-		return { 1.5f, 1.5f, 1.5f };
+		const float scaleMultiplier = Settings::GetInstance().GetTypeSettings(Data::Type::Boss).scaleMultiplier;
+		return { scaleMultiplier, scaleMultiplier, scaleMultiplier };
 	}
 
 	Vector3 Boss::GetModelOffset() const {
-		return { 0.0f, -1.5f, 0.0f };
+		const float radius = Settings::GetInstance().GetTypeSettings(Data::Type::Boss).movementColliderRadius;
+		return { 0.0f, -radius, 0.0f };
 	}
 
 	Sphere Boss::CreateMovementCollider() const {
 		Sphere sphere;
-		sphere.radius = 1.5f;
+		sphere.radius = Settings::GetInstance().GetTypeSettings(Data::Type::Boss).movementColliderRadius;
 		return sphere;
 	}
 
 	AABB Boss::CreateHitCollider() const {
+		const TypeSettings& settings = Settings::GetInstance().GetTypeSettings(Data::Type::Boss);
 		AABB aabb;
-		aabb.min = { -1.5f, 0.0f, -1.5f };
-		aabb.max = { 1.5f, 4.0f, 1.5f };
+		aabb.min = settings.hitboxMin;
+		aabb.max = settings.hitboxMax;
 		return aabb;
 	}
 

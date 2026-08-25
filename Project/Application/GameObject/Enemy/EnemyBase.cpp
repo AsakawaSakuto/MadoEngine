@@ -1,4 +1,5 @@
 #include "EnemyBase.h"
+#include "EnemySettings.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Logger/Logger.h"
@@ -10,11 +11,6 @@ namespace Enemy {
 		constexpr float kDamageFlashDuration = 6.0f / 60.0f;
 		constexpr float kEmergenceSpeed = 4.0f;
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
-		constexpr float kEliteHealthMultiplier = 3.0f;
-		constexpr float kElitePowerMultiplier = 2.0f;
-		constexpr float kEliteBodyScaleMultiplier = 1.5f;
-		constexpr float kEliteMarkerHeightOffset = 0.4f;
-		constexpr Vector3 kEliteMarkerScale = { 0.45f, 0.45f, 0.45f };
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";
@@ -29,17 +25,17 @@ namespace Enemy {
 		type_ = desc.type;
 		bonusType_ = desc.bonusType;
 		sceneType_ = desc.sceneType;
-		bodyScaleMultiplier_ = bonusType_ == Data::BonusType::Elite ? kEliteBodyScaleMultiplier : 1.0f;
+		const EliteSettings& eliteSettings = Settings::GetInstance().GetEliteSettings();
+		bodyScaleMultiplier_ = bonusType_ == Data::BonusType::Elite ? eliteSettings.bodyScaleMultiplier : 1.0f;
 		if (bonusType_ == Data::BonusType::Elite) {
 
 			// 時間経過補正後の基礎能力値へElite倍率を重ねて全非Boss種類へ同じ属性効果を適用
-			status_.currentHealth *= kEliteHealthMultiplier;
-			status_.power *= kElitePowerMultiplier;
+			status_.currentHealth *= eliteSettings.healthMultiplier;
+			status_.power *= eliteSettings.powerMultiplier;
 		}
 		projectileDamageCooldowns_.clear();
 		playerDamageCooldown_ = 0.0f;
 		damageFlashRemainingTime_ = 0.0f;
-		gamingColor_.Reset();
 		isActive_ = status_.currentHealth > 0.0f;
 		isEmerging_ = false;
 		areCollidersRegistered_ = false;
@@ -84,7 +80,7 @@ namespace Enemy {
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Enemy);
 			model->SetTexture("white16x16");
-			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+			model->SetColor(Settings::GetInstance().GetTypeSettings(type_).color);
 		}
 		CreateEliteMarkerModel();
 
@@ -250,7 +246,7 @@ namespace Enemy {
 	}
 
 	void Base::UpdateAppearance(float deltaTime) {
-		const Vector4 baseColor = gamingColor_.Update(deltaTime, 1.0f);
+		const Vector4 baseColor = Settings::GetInstance().GetTypeSettings(type_).color;
 		if (damageFlashRemainingTime_ > 0.0f) {
 
 			// 通常色のAnimationより被弾Flashを優先して表示
@@ -336,11 +332,12 @@ namespace Enemy {
 
 		if (Model* eliteMarkerModel = MyModel::TryGet(eliteMarkerModel_)) {
 			const AABB& hitCollider = std::get<AABB>(hitAABB_);
+			const EliteSettings& eliteSettings = Settings::GetInstance().GetEliteSettings();
 
 			// 種類ごとに異なる被弾Collider上端を頭上基準としてMarker位置を追従
 			eliteMarkerModel->SetPosition(
-				transform_.translate + Vector3{ 0.0f, hitCollider.max.y + kEliteMarkerHeightOffset, 0.0f });
-			eliteMarkerModel->SetScale(kEliteMarkerScale);
+				transform_.translate + Vector3{ 0.0f, hitCollider.max.y + eliteSettings.markerHeightOffset, 0.0f });
+			eliteMarkerModel->SetScale(eliteSettings.markerScale);
 			eliteMarkerModel->SetVisible(isActive_ && !isEmerging_);
 		}
 	}

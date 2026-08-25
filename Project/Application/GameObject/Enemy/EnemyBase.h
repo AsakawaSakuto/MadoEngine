@@ -189,7 +189,7 @@ namespace Enemy {
 		/// @brief 被ダメージEffect Sequenceを現在座標に再生
 		void PlayDamageEffect() const;
 
-		/// @brief 経過時間に応じて敵モデルの表示色を更新
+		/// @brief 種類別表示色と被ダメージFlashを敵Modelへ反映
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateAppearance(float deltaTime);
 
@@ -244,6 +244,5 @@ namespace Enemy {
 		bool areCollidersRegistered_ = false;
 		bool isDeathRewardSpawned_ = false;
 		bool isReleased_ = false;
-		GamingColor gamingColor_;
 	};
 } // namespace Enemy

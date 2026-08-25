@@ -21,13 +21,15 @@
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyBase.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\EnemyBoss.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\Type\EnemyBoss.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyEditor.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyFactory.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyManager.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\EnemyNormal.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\EnemyRunner.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\Type\EnemyNormal.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\Type\EnemyRunner.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemySettings.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
-    <ClCompile Include="Application\GameObject\Enemy\EnemyTank.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\Type\EnemyTank.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
@@ -205,13 +207,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\GameObject\Enemy\EnemyBase.h" />
-    <ClInclude Include="Application\GameObject\Enemy\EnemyBoss.h" />
+    <ClInclude Include="Application\GameObject\Enemy\Type\EnemyBoss.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyEditor.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyFactory.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyManager.h" />
-    <ClInclude Include="Application\GameObject\Enemy\EnemyNormal.h" />
-    <ClInclude Include="Application\GameObject\Enemy\EnemyRunner.h" />
+    <ClInclude Include="Application\GameObject\Enemy\Type\EnemyNormal.h" />
+    <ClInclude Include="Application\GameObject\Enemy\Type\EnemyRunner.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemySettings.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
-    <ClInclude Include="Application\GameObject\Enemy\EnemyTank.h" />
+    <ClInclude Include="Application\GameObject\Enemy\Type\EnemyTank.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
