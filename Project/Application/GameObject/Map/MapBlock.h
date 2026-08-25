@@ -4,6 +4,9 @@
 
 class MapBlock : public IGameObject {
 public:
+	/// @brief 登録済みColliderを解除してMapBlockを破棄
+	~MapBlock() override;
+
 	struct InitializeDesc {
 		int x = 0;
 		int z = 0;

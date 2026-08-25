@@ -18,6 +18,7 @@ enum class EditorWindow {
 	SceneManager,
 	Camera,
 	SceneDebug,
+	MapGenerator,
 	ModelGizmo,
 	PostEffect,
 	Audio,
@@ -39,6 +40,7 @@ enum class EditorWindow {
 enum class EditorDocument {
 	Camera,
 	Scene,
+	Map,
 	PostEffect,
 	Audio,
 	Light,
@@ -142,6 +144,10 @@ public:
 
 	/// @brief 登録済みDocumentの履歴基準Snapshotを現在状態へ同期
 	void SynchronizeHistorySnapshots();
+
+	/// @brief 指定Documentの履歴基準Snapshotを現在状態へ同期
+	/// @param document 同期対象のDocument種別
+	void SynchronizeDocumentHistorySnapshot(EditorDocument document);
 
 	/// @brief UI描画後に適用されたDocument変更を履歴へ追加
 	/// @param document 変更されたDocument種別

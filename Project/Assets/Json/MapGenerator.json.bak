@@ -1,0 +1,37 @@
+{
+    "formatVersion": 2,
+    "settings": {
+        "blockSize": [
+            15.0,
+            7.5,
+            15.0
+        ],
+        "eventObjectCounts": {
+            "chest": 50,
+            "chestTypes": {
+                "free": 5,
+                "normal": 45
+            },
+            "jar": 100,
+            "jarTypes": {
+                "exp": 50,
+                "money": 50
+            },
+            "karma": 10
+        },
+        "height": {
+            "max": 10,
+            "min": 1,
+            "rangeMax": 1,
+            "rangeMin": -1,
+            "startMax": 2,
+            "startMin": 1
+        },
+        "mapSize": [
+            20,
+            20
+        ],
+        "seed": 1209609591,
+        "slopeSpawnRate": 1.0
+    }
+}

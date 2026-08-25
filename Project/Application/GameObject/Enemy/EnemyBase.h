@@ -56,6 +56,10 @@ namespace Enemy {
 		/// @param player 追跡対象のPlayer
 		void SetTargetPlayer(Player::Base* player) { targetPlayer_ = player; }
 
+		/// @brief Enemyの移動制限を設定
+		/// @param mapLimit Map外周と高さを表す移動制限
+		void SetMapLimit(const MapLimit& mapLimit) { movement_.SetMapLimit(mapLimit); }
+
 		/// @brief Collider更新後に地形との接触状態を解決
 		void ResolveAfterCollision();
 

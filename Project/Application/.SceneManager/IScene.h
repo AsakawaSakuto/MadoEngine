@@ -4,6 +4,7 @@
 #include "UtilityHeaders.h"
 #include "ImGuiHeaders.h"
 #include "SceneType.h"
+#include <string>
 
 class IScene {
 public:
@@ -14,6 +15,33 @@ public:
 	virtual void Draw() = 0;
 	virtual void DrawImGui() = 0;
 	virtual void Finalize() = 0;
+
+	/// @brief Map生成Editorを提供しているか確認
+	/// @return Map生成Editorを提供している場合はtrue
+	virtual bool HasMapGeneratorEditor() const { return false; }
+
+	/// @brief Map生成EditorのImGuiを描画
+	virtual void DrawMapGeneratorImGui() {}
+
+	/// @brief Map生成Editor状態を文字列Snapshotへ変換
+	/// @return UndoとRedoに使用する文字列Snapshot
+	virtual std::string CaptureMapGeneratorEditorState() const { return {}; }
+
+	/// @brief 文字列SnapshotからMap生成Editor状態を復元
+	/// @param snapshot 復元する文字列Snapshot
+	virtual void RestoreMapGeneratorEditorState(const std::string& snapshot) { (void)snapshot; }
+
+	/// @brief Scene固有のEditor Documentを保存
+	/// @return 保存に成功した場合はtrue
+	virtual bool SaveEditorDocuments() const { return true; }
+
+	/// @brief Scene固有のEditor Documentを再読込
+	/// @return 読み込みに成功した場合はtrue
+	virtual bool ReloadEditorDocuments() { return true; }
+
+	/// @brief Frame末尾に保留中のEditor操作を適用
+	/// @return Scene状態を変更した場合はtrue
+	virtual bool ApplyPendingEditorOperations() { return false; }
 
 	/// @brief 描画に使用するCameraを取得
 	/// @return Sceneの描画Camera

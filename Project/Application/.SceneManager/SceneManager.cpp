@@ -279,6 +279,19 @@ void SceneManager::DrawImGui() {
 	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::SceneDebug)) {
 		currentScene_->DrawImGui();
 	}
+	if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::MapGenerator)) {
+		if (currentScene_->HasMapGeneratorEditor()) {
+			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Map);
+			currentScene_->DrawMapGeneratorImGui();
+			toolbar.EndDocumentCapture();
+		} else {
+			ImGui::SetNextWindowSize(ImVec2(420.0f, 120.0f), ImGuiCond_FirstUseEver);
+			if (ImGui::Begin("Map Generator")) {
+				ImGui::TextDisabled("Map生成EditorはGameシーンで利用できます");
+			}
+			ImGui::End();
+		}
+	}
 #endif // USE_IMGUI
 }
 
@@ -289,7 +302,9 @@ bool SceneManager::SaveEditorDocuments() {
 
 	const std::filesystem::path cameraJsonPath =
 		CameraManager::CreateDefaultJsonPath(SceneTypeToString(currentSceneType_));
-	return currentScene_->GetCameraManager().SaveToJson(cameraJsonPath);
+	const bool cameraSucceeded = currentScene_->GetCameraManager().SaveToJson(cameraJsonPath);
+	const bool sceneSucceeded = currentScene_->SaveEditorDocuments();
+	return cameraSucceeded && sceneSucceeded;
 }
 
 bool SceneManager::ReloadEditorDocuments() {
@@ -299,7 +314,9 @@ bool SceneManager::ReloadEditorDocuments() {
 
 	const std::filesystem::path cameraJsonPath =
 		CameraManager::CreateDefaultJsonPath(SceneTypeToString(currentSceneType_));
-	return currentScene_->GetCameraManager().LoadFromJson(cameraJsonPath);
+	const bool cameraSucceeded = currentScene_->GetCameraManager().LoadFromJson(cameraJsonPath);
+	const bool sceneSucceeded = currentScene_->ReloadEditorDocuments();
+	return cameraSucceeded && sceneSucceeded;
 }
 
 const Camera& SceneManager::GetCurrentCamera() const {
@@ -382,6 +399,23 @@ void SceneManager::ApplyPendingSceneChange() {
 
 	ChangeScene(nextSceneType);
 	commonData_.GetSceneTransitionController().NotifySceneChanged(currentSceneType_);
+}
+
+void SceneManager::ApplyPendingEditorOperations() {
+	if (!currentScene_ || hasPendingSceneChange_) {
+		return;
+	}
+
+	if (!currentScene_->ApplyPendingEditorOperations()) {
+		return;
+	}
+
+#ifdef USE_IMGUI
+	// Frame末尾で確定した生成済み状態を次のMap編集操作の履歴基準へ同期
+	MadoEngine::Editor::EditorToolbar::GetInstance().SynchronizeDocumentHistorySnapshot(
+		MadoEngine::Editor::EditorDocument::Map
+	);
+#endif // USE_IMGUI
 }
 
 void SceneManager::RequestConfirmedEditorSceneChange(SceneType type) {
@@ -482,6 +516,14 @@ void SceneManager::ChangeScene(SceneType type) {
 			if (!json.is_discarded()) {
 				cameraManager->FromJson(json);
 			}
+		}
+	);
+	IScene* scene = currentScene_.get();
+	toolbar.RegisterDocumentHistory(
+		MadoEngine::Editor::EditorDocument::Map,
+		[scene]() { return scene->CaptureMapGeneratorEditorState(); },
+		[scene](const std::string& snapshot) {
+			scene->RestoreMapGeneratorEditorState(snapshot);
 		}
 	);
 

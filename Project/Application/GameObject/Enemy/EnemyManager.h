@@ -48,6 +48,10 @@ namespace Enemy {
 		/// @brief 管理中のEnemyをすべて破棄
 		void Clear();
 
+		/// @brief 新規生成と管理中Enemyの移動制限を設定
+		/// @param mapLimit Map外周と高さを表す移動制限
+		void SetMapLimit(const MapLimit& mapLimit);
+
 		/// @brief 現在管理しているEnemy数を取得
 		/// @return 現在管理しているEnemy数
 		std::size_t GetEnemyCount() const { return enemies_.size(); }
@@ -81,6 +85,7 @@ namespace Enemy {
 		Player::Base* player_ = nullptr;
 		std::vector<std::unique_ptr<Base>> enemies_;
 		std::vector<ProjectileDamageEvent> projectileDamageEvents_;
+		MapLimit mapLimit_;
 		std::uint32_t nextEnemyId_ = 0;
 	};
 } // namespace Enemy

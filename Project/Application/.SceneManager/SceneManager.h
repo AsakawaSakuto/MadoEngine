@@ -107,6 +107,9 @@ public:
 	/// @brief 保留中のシーン遷移を適用
 	void ApplyPendingSceneChange();
 
+	/// @brief Frame末尾に現在Sceneの保留中Editor操作を適用
+	void ApplyPendingEditorOperations();
+
 	/// @brief Editorの未保存確認で確定したシーン遷移を要求
 	/// @param type 遷移先のシーンのタイプ
 	void RequestConfirmedEditorSceneChange(SceneType type);

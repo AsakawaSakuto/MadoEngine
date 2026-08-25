@@ -34,7 +34,7 @@
     "typeSettings": [
         {
             "camera": "GameDebugCamera",
-            "distance": 10.454840660095215,
+            "distance": 16.66091537475586,
             "dollySensitivity": 10.0,
             "panSensitivity": 0.25,
             "pitch": 0.30000001192092896,
@@ -60,11 +60,11 @@
                 2.0,
                 -10.0
             ],
-            "pitch": 0.32807913422584534,
+            "pitch": 0.35052335262298584,
             "type": "TPS",
             "useGamePadInput": true,
             "useMouseInput": false,
-            "yaw": -7.597764492034912
+            "yaw": -40.05105209350586
         }
     ],
     "version": 3

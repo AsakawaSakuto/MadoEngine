@@ -11,6 +11,10 @@ namespace Enemy {
 		/// @brief 移動状態を初期化
 		void Initialize();
 
+		/// @brief Enemyの移動制限を設定
+		/// @param mapLimit Map外周と高さを表す移動制限
+		void SetMapLimit(const MapLimit& mapLimit) { mapLimit_ = mapLimit; }
+
 		/// @brief 目標座標へ向かう移動と重力を更新
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param targetPosition 移動目標のワールド座標

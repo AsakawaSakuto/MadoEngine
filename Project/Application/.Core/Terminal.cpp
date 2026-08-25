@@ -262,6 +262,13 @@ void Terminal::Run() {
 			const bool engineSucceeded = execution_->ReloadEditorDocuments();
 			const bool sceneSucceeded = sceneManager_->ReloadEditorDocuments();
 			const bool succeeded = engineSucceeded && sceneSucceeded;
+#ifdef USE_IMGUI
+			if (succeeded) {
+
+				// Json復元前の編集操作を再適用できないよう全Document履歴を破棄
+				MadoEngine::Editor::EditorToolbar::GetInstance().ClearHistory();
+			}
+#endif // USE_IMGUI
 			execution_->NotifyEditorDocumentOperationResult("すべて再読込", succeeded);
 		}
 		const bool shouldExitAfterFrame = ProcessEditorProtectedAction();
@@ -274,7 +281,8 @@ void Terminal::Run() {
 			break;
 		}
 
-		// 描画中のResource破棄を避けるため予約済みScene遷移をFrame末尾で適用
+		// 描画中のResource破棄を避けるためEditor再生成とScene遷移をFrame末尾で適用
+		sceneManager_->ApplyPendingEditorOperations();
 		sceneManager_->ApplyPendingSceneChange();
 	}
 

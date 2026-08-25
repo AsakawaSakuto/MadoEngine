@@ -25,6 +25,12 @@ float GetSlopeRotationY(SlopeDirection direction) {
 
 }
 
+MapBlock::~MapBlock() {
+	if (isColliderRegistered_) {
+		MyCollider::RemoveCollider(CreateColliderName());
+	}
+}
+
 void MapBlock::Initialize(const InitializeDesc& desc) {
 
 	x_ = desc.x;

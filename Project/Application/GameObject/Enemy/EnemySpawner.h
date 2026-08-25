@@ -28,6 +28,10 @@ namespace Enemy {
 		/// @brief 生成時間と強化時間を初期化
 		void Clear();
 
+		/// @brief Enemy生成位置のMap制限を設定
+		/// @param mapLimit Map外周と高さを表す移動制限
+		void SetMapLimit(const MapLimit& mapLimit) { mapLimit_ = mapLimit; }
+
 	private:
 		/// @brief Enemyの生成要求を1件発行
 		void SpawnEnemy();

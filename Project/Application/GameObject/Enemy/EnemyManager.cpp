@@ -23,6 +23,7 @@ namespace Enemy {
 
 		enemy->Initialize(nextEnemyId_++, desc);
 		enemy->SetTargetPlayer(player_);
+		enemy->SetMapLimit(mapLimit_);
 		enemies_.push_back(std::move(enemy));
 	}
 
@@ -42,6 +43,17 @@ namespace Enemy {
 		for (std::unique_ptr<Base>& enemy : enemies_) {
 			if (enemy) {
 				enemy->Update(deltaTime);
+			}
+		}
+	}
+
+	void Manager::SetMapLimit(const MapLimit& mapLimit) {
+		mapLimit_ = mapLimit;
+
+		// 再生成前から存在するEnemyにも同じ外周制限を反映
+		for (std::unique_ptr<Base>& enemy : enemies_) {
+			if (enemy) {
+				enemy->SetMapLimit(mapLimit_);
 			}
 		}
 	}

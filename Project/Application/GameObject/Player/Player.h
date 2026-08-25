@@ -31,6 +31,14 @@ namespace Player {
 		/// @brief Collider更新後に接地状態と描画状態を解決
 		void ResolveAfterCollision();
 
+		/// @brief Playerを指定した地表座標へ再配置
+		/// @param groundPosition 再配置先の地表座標
+		void TeleportToGroundPosition(const Vector3& groundPosition);
+
+		/// @brief Playerの移動制限を設定
+		/// @param mapLimit Map外周と高さを表す移動制限
+		void SetMapLimit(const MapLimit& mapLimit) { mapLimit_ = mapLimit; }
+
 		/// @brief Playerのワールド座標を取得
 		Vector3 GetPosition() const { return transform_.translate; }
 

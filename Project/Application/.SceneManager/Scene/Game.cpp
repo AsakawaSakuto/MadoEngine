@@ -67,6 +67,7 @@ void Game::Initialize() {
 	enemyManager_->Initialize(player_.get());
 	enemySpawner_ = std::make_unique<Enemy::Spawner>();
 	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game);
+	SynchronizeMapDependentState();
 
 	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
 	weaponIconUI_->Initialize(4);
@@ -264,8 +265,6 @@ void Game::DrawImGui() {
 	weaponStatusEditor_->DrawImGui();
 	weaponUpgradeUI_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_);
 
-	map_->DrawImGui();
-
 	enemySpawner_->DrawImGui();
 	projectileDamageView_.DrawImGui();
 
@@ -278,6 +277,80 @@ void Game::DrawImGui() {
 	ImGui::End();
 
 #endif // USE_IMGUI
+}
+
+void Game::DrawMapGeneratorImGui() {
+	if (map_) {
+		map_->DrawImGui(player_.get());
+	}
+}
+
+std::string Game::CaptureMapGeneratorEditorState() const {
+	return map_ ? map_->CaptureEditorState() : std::string{};
+}
+
+void Game::RestoreMapGeneratorEditorState(const std::string& snapshot) {
+	if (map_) {
+		map_->RestoreEditorState(snapshot);
+	}
+}
+
+bool Game::SaveEditorDocuments() const {
+	return map_ && map_->SaveEditorSettings();
+}
+
+bool Game::ReloadEditorDocuments() {
+	return map_ && map_->ReloadEditorSettings();
+}
+
+bool Game::ApplyPendingEditorOperations() {
+	if (!map_ || !map_->ApplyPendingEditorGeneration()) {
+		return false;
+	}
+
+	// 旧地形座標に依存する一時Objectを破棄して再開後の不正な衝突を防止
+	if (enemySpawner_) {
+		enemySpawner_->Clear();
+	}
+	if (enemyManager_) {
+		enemyManager_->Clear();
+	}
+	DropObject::Manager::GetInstance().Clear();
+	Projectile::Manager::GetInstance().Clear();
+
+	gameSeed_ = map_->GetCurrentSeed();
+	SynchronizeMapDependentState();
+	if (player_) {
+		player_->TeleportToGroundPosition(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
+	}
+	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
+	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
+		seedValueText->SetText(std::format("Seed : {}", gameSeed_));
+	}
+	return true;
+}
+
+void Game::SynchronizeMapDependentState() {
+	if (!map_) {
+		return;
+	}
+
+	const MapLimit mapLimit = map_->CreateMapLimit();
+	AABB mapLimitBox;
+	mapLimitBox.min = mapLimit.min;
+	mapLimitBox.max = mapLimit.max;
+	mapLimitBox.center = {};
+	mapLimitBox_ = mapLimitBox;
+	mapLimitBoxPos_ = mapLimitBox.center;
+	if (player_) {
+		player_->SetMapLimit(mapLimit);
+	}
+	if (enemyManager_) {
+		enemyManager_->SetMapLimit(mapLimit);
+	}
+	if (enemySpawner_) {
+		enemySpawner_->SetMapLimit(mapLimit);
+	}
 }
 
 Vector3 Game::GetShadowFocusPosition() const {

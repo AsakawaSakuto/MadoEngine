@@ -5,9 +5,12 @@
 #include "GameObject/Map/EventObject/Karma/Karma.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
+#include "Utility/Json/Core/JsonFile.h"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <numbers>
+#include <nlohmann/json.hpp>
 
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
@@ -15,8 +18,35 @@
 
 namespace {
 constexpr float kRotationEpsilon = 1e-5f;
+constexpr const char* kMapGeneratorJsonPath = "Assets/Json/MapGenerator.json";
+constexpr int kMinimumMapSize = 2;
+constexpr int kMaximumMapSize = 128;
+constexpr int kMaximumEventObjectCount = 4096;
 const Vector4 kInteractionTextDefaultColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 const Vector4 kInteractionTextUnavailableColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+
+/// @brief 総数変更後も現在比率を維持して二種類の生成数を再配分
+/// @param previousTotal 変更前の総数
+/// @param newTotal 変更後の総数
+/// @param firstCount 一種類目の生成数
+/// @param secondCount 二種類目の生成数
+void RebalanceTypeCounts(int previousTotal, int newTotal, int& firstCount, int& secondCount) {
+	if (newTotal <= 0) {
+		firstCount = 0;
+		secondCount = 0;
+		return;
+	}
+
+	const float firstRatio = previousTotal > 0
+		? static_cast<float>(firstCount) / static_cast<float>(previousTotal)
+		: 0.5f;
+	firstCount = std::clamp(
+		static_cast<int>(std::lround(firstRatio * static_cast<float>(newTotal))),
+		0,
+		newTotal
+	);
+	secondCount = newTotal - firstCount;
+}
 
 /// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返却
 /// @param value 正規化するベクトル
@@ -176,10 +206,40 @@ void DestroyMapInstancedBatches() {
 /// @brief 指定シードでMapを初期化
 /// @param seed Map生成に使用するシード値
 void Map::Initialize(uint32_t seed) {
+	editorSettings_ = CreateAppliedSettings();
+	editorSettings_.seed = seed;
+	LoadEditorSettings(editorSettings_, false);
+	editorSettings_.seed = seed;
+	ClampGenerationSettings(editorSettings_);
+	pendingGenerationSettings_.reset();
+	Generate(editorSettings_);
+}
+
+void Map::Generate(const GenerationSettings& settings) {
+	GenerationSettings safeSettings = settings;
+	ClampGenerationSettings(safeSettings);
+	currentSeed_ = safeSettings.seed;
+	mapWidth_ = safeSettings.mapWidth;
+	mapHeight_ = safeSettings.mapHeight;
+	jarSpawnCount_ = safeSettings.jarSpawnCount;
+	moneyJarSpawnCount_ = safeSettings.moneyJarSpawnCount;
+	expJarSpawnCount_ = safeSettings.expJarSpawnCount;
+	chestSpawnCount_ = safeSettings.chestSpawnCount;
+	normalChestSpawnCount_ = safeSettings.normalChestSpawnCount;
+	freeChestSpawnCount_ = safeSettings.freeChestSpawnCount;
+	karmaSpawnCount_ = safeSettings.karmaSpawnCount;
+	blockSize_ = safeSettings.blockSize;
+	minHeight_ = safeSettings.minHeight;
+	maxHeight_ = safeSettings.maxHeight;
+	minStartHeight_ = safeSettings.minStartHeight;
+	maxStartHeight_ = safeSettings.maxStartHeight;
+	minRangeHeight_ = safeSettings.minRangeHeight;
+	maxRangeHeight_ = safeSettings.maxRangeHeight;
+	slopeSpawnRate_ = safeSettings.slopeSpawnRate;
 
 	// 地形とイベント配置を独立した乱数系列に分離して生成条件の変更による相互影響を防止
-	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 100));
-	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(seed, 200));
+	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(currentSeed_, 100));
+	eventObjectRandom_.SetSeed(MyRand::MakeDerivedSeed(currentSeed_, 200));
 	ClampHeightSettings();
 	eventObjects_.clear();
 	pendingEventRequests_.clear();
@@ -195,7 +255,13 @@ void Map::Initialize(uint32_t seed) {
 		interactionText->SetVisible(false);
 	}
 
-	mapBlocks_.assign(mapHeight_, std::vector<MapBlock>(mapWidth_));
+
+	// 再生成時は登録済みColliderをDestructor経由で解除してから新しい格子を構築
+	mapBlocks_.clear();
+	mapBlocks_.resize(static_cast<std::size_t>(mapHeight_));
+	for (std::vector<MapBlock>& row : mapBlocks_) {
+		row.resize(static_cast<std::size_t>(mapWidth_));
+	}
 
 	for (int z = 0; z < mapHeight_; ++z) {
 		for (int x = 0; x < mapWidth_; ++x) {
@@ -338,43 +404,497 @@ void Map::Update(Player::Base& player, float deltaTime) {
 	UpdateEventObjects(player, deltaTime);
 }
 
-void Map::DrawImGui() {
+void Map::DrawImGui(const Player::Base* player) {
 
 #ifdef USE_IMGUI
 
-	ImGui::Begin("Map");
+	ImGui::SetNextWindowSize(ImVec2(520.0f, 720.0f), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Map Generator")) {
+		ImGui::TextDisabled("設定ファイル: %s", kMapGeneratorJsonPath);
+		ImGui::SeparatorText("生成操作");
+		ImGui::SetNextItemWidth(180.0f);
+		ImGui::InputScalar("シード", ImGuiDataType_U32, &editorSettings_.seed);
+		ImGui::SameLine();
+		if (ImGui::Button("ランダム")) {
+			editorSettings_.seed = MyRand::CreateSeed();
+		}
 
-	// Editorからの直接入力を地形生成が扱える範囲へ即時補正
-	ClampHeightSettings();
+		const bool hasDraftChanges = !AreGenerationSettingsEqual(editorSettings_, CreateAppliedSettings());
+		if (ImGui::Button("現在の設定でMapを再生成", ImVec2(-1.0f, 0.0f))) {
 
-	ImGui::Separator();
+			// 描画中のResourceを破棄しないようFrame末尾の適用要求だけを保持
+			pendingGenerationSettings_ = editorSettings_;
+		}
+		if (pendingGenerationSettings_) {
+			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "再生成を予約済み");
+		} else if (hasDraftChanges) {
+			ImGui::TextColored(ImVec4(0.25f, 0.75f, 1.0f, 1.0f), "未適用の生成設定あり");
+		} else {
+			ImGui::TextDisabled("生成済みMapと設定が一致");
+		}
+		if (ImGui::Button("生成済み設定へ戻す")) {
+			editorSettings_ = CreateAppliedSettings();
+			pendingGenerationSettings_.reset();
+		}
 
-	ImGui::Text("Block Size");
-	ImGui::DragFloat3(".", &blockSize_.x, 0.1f);
-	ImGui::Separator();
+		ImGui::SeparatorText("Mapサイズ");
+		ImGui::SetNextItemWidth(180.0f);
+		ImGui::DragInt("横幅", &editorSettings_.mapWidth, 1.0f, kMinimumMapSize, kMaximumMapSize, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SetNextItemWidth(180.0f);
+		ImGui::DragInt("奥行き", &editorSettings_.mapHeight, 1.0f, kMinimumMapSize, kMaximumMapSize, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::DragFloat3("Blockサイズ", &editorSettings_.blockSize.x, 0.1f, 0.5f, 100.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 
-	ImGui::Text("Mapの高さ");
-	ImGui::DragInt("min", &minHeight_, 1, 1, 100);
-	ImGui::DragInt("max", &maxHeight_, 1, 2, 100);
-	ImGui::Separator();
+		ImGui::SeparatorText("地形の高さ");
+		ImGui::DragInt("最小高さ", &editorSettings_.minHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::DragInt("最大高さ", &editorSettings_.maxHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::DragInt("開始高さ Min", &editorSettings_.minStartHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::DragInt("開始高さ Max", &editorSettings_.maxStartHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::DragInt("高さ変化 Min", &editorSettings_.minRangeHeight, 1.0f, -10, 0, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::DragInt("高さ変化 Max", &editorSettings_.maxRangeHeight, 1.0f, 0, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::SliderFloat("Slope出現率", &editorSettings_.slopeSpawnRate, 0.0f, 1.0f, "%.2f");
 
-	ImGui::Text("初期生成する地形の高さ");
-	ImGui::DragInt("min ", &minStartHeight_, 1, 1, 100);
-	ImGui::DragInt("max ", &maxStartHeight_, 1, 2, 100);
-	ImGui::Separator();
+		ImGui::SeparatorText("イベント配置数");
+		ImGui::TextUnformatted("Jar");
+		ImGui::Indent();
+		const int previousJarTotal = editorSettings_.jarSpawnCount;
+		if (ImGui::DragInt("総数##Jar", &editorSettings_.jarSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+			RebalanceTypeCounts(
+				previousJarTotal,
+				editorSettings_.jarSpawnCount,
+				editorSettings_.moneyJarSpawnCount,
+				editorSettings_.expJarSpawnCount
+			);
+		}
+		if (ImGui::DragInt("Money##Jar", &editorSettings_.moneyJarSpawnCount, 1.0f, 0, editorSettings_.jarSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+			editorSettings_.moneyJarSpawnCount = std::clamp(editorSettings_.moneyJarSpawnCount, 0, editorSettings_.jarSpawnCount);
+			editorSettings_.expJarSpawnCount = editorSettings_.jarSpawnCount - editorSettings_.moneyJarSpawnCount;
+		}
+		if (ImGui::DragInt("Exp##Jar", &editorSettings_.expJarSpawnCount, 1.0f, 0, editorSettings_.jarSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+			editorSettings_.expJarSpawnCount = std::clamp(editorSettings_.expJarSpawnCount, 0, editorSettings_.jarSpawnCount);
+			editorSettings_.moneyJarSpawnCount = editorSettings_.jarSpawnCount - editorSettings_.expJarSpawnCount;
+		}
+		ImGui::Unindent();
 
-	ImGui::Text("生成する地形の高さ変化幅");
-	ImGui::DragInt("min  ", &minRangeHeight_, 1, -10, -1);
-	ImGui::DragInt("max  ", &maxRangeHeight_, 1, 1, 10);
-	ImGui::Separator();
+		ImGui::TextUnformatted("Chest");
+		ImGui::Indent();
+		const int previousChestTotal = editorSettings_.chestSpawnCount;
+		if (ImGui::DragInt("総数##Chest", &editorSettings_.chestSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+			RebalanceTypeCounts(
+				previousChestTotal,
+				editorSettings_.chestSpawnCount,
+				editorSettings_.normalChestSpawnCount,
+				editorSettings_.freeChestSpawnCount
+			);
+		}
+		if (ImGui::DragInt("Normal##Chest", &editorSettings_.normalChestSpawnCount, 1.0f, 0, editorSettings_.chestSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+			editorSettings_.normalChestSpawnCount = std::clamp(editorSettings_.normalChestSpawnCount, 0, editorSettings_.chestSpawnCount);
+			editorSettings_.freeChestSpawnCount = editorSettings_.chestSpawnCount - editorSettings_.normalChestSpawnCount;
+		}
+		if (ImGui::DragInt("Free##Chest", &editorSettings_.freeChestSpawnCount, 1.0f, 0, editorSettings_.chestSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+			editorSettings_.freeChestSpawnCount = std::clamp(editorSettings_.freeChestSpawnCount, 0, editorSettings_.chestSpawnCount);
+			editorSettings_.normalChestSpawnCount = editorSettings_.chestSpawnCount - editorSettings_.freeChestSpawnCount;
+		}
+		ImGui::Unindent();
 
-	ImGui::Text("Slope出現率");
-	ImGui::SliderFloat("出現率", &slopeSpawnRate_, 0.0f, 1.0f);
+		ImGui::TextUnformatted("Karma");
+		ImGui::Indent();
+		ImGui::DragInt("総数##Karma", &editorSettings_.karmaSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+		ImGui::Unindent();
 
+		// 相互依存する高さ範囲とタイプ別生成数を各Widgetの入力後に一括補正
+		ClampGenerationSettings(editorSettings_);
+
+		ImGui::SeparatorText("生成済みMap");
+		std::size_t slopeCount = 0;
+		for (const std::vector<MapBlock>& row : mapBlocks_) {
+			slopeCount += static_cast<std::size_t>(std::count_if(row.begin(), row.end(), [](const MapBlock& block) {
+				return block.GetType() == MapBlockType::Slope;
+			}));
+		}
+		ImGui::Text("シード: %u", currentSeed_);
+		ImGui::Text("Block: %d x %d = %d", mapWidth_, mapHeight_, mapWidth_ * mapHeight_);
+		ImGui::Text("Slope: %zu / Event Object: %zu", slopeCount, eventObjects_.size());
+		ImGui::Text("Jar: %d  Money: %d  Exp: %d", jarSpawnCount_, moneyJarSpawnCount_, expJarSpawnCount_);
+		ImGui::Text("Chest: %d  Normal: %d  Free: %d", chestSpawnCount_, normalChestSpawnCount_, freeChestSpawnCount_);
+		if (player) {
+			const Vector3 playerPosition = player->GetPosition();
+			ImGui::Text("Player: X %.2f  Y %.2f  Z %.2f", playerPosition.x, playerPosition.y, playerPosition.z);
+		}
+		DrawHeightPreview(player);
+	}
 	ImGui::End();
 
 #endif // USE_IMGUI
 
+}
+
+bool Map::ApplyPendingEditorGeneration() {
+	if (!pendingGenerationSettings_) {
+		return false;
+	}
+
+	// Undo復元中も生成要求時点の設定を確実に適用するため値を退避してから予約を解除
+	const GenerationSettings settings = *pendingGenerationSettings_;
+	pendingGenerationSettings_.reset();
+	Generate(settings);
+	return true;
+}
+
+std::string Map::CaptureEditorState() const {
+	nlohmann::json root;
+	root["editing"] = GenerationSettingsToJson(editorSettings_);
+	root["applied"] = GenerationSettingsToJson(CreateAppliedSettings());
+	if (pendingGenerationSettings_) {
+		root["pending"] = GenerationSettingsToJson(*pendingGenerationSettings_);
+	}
+	return root.dump();
+}
+
+void Map::RestoreEditorState(const std::string& snapshot) {
+	const nlohmann::json root = nlohmann::json::parse(snapshot, nullptr, false);
+	if (root.is_discarded() || !root.is_object()) {
+		return;
+	}
+
+	GenerationSettings editingSettings = editorSettings_;
+	const auto editingIt = root.find("editing");
+	if (editingIt == root.end() || !GenerationSettingsFromJson(*editingIt, editingSettings)) {
+		return;
+	}
+
+	GenerationSettings appliedSettings = CreateAppliedSettings();
+	const auto appliedIt = root.find("applied");
+	if (appliedIt == root.end() || !GenerationSettingsFromJson(*appliedIt, appliedSettings)) {
+		return;
+	}
+
+	// 編集値と生成済み状態を分離して再生成操作のUndoでも直前の地形を復元
+	editorSettings_ = editingSettings;
+	const auto pendingIt = root.find("pending");
+	if (pendingIt != root.end()) {
+		GenerationSettings pendingSettings = appliedSettings;
+		if (GenerationSettingsFromJson(*pendingIt, pendingSettings)) {
+			pendingGenerationSettings_ = pendingSettings;
+		}
+	} else if (!AreGenerationSettingsEqual(appliedSettings, CreateAppliedSettings())) {
+		pendingGenerationSettings_ = appliedSettings;
+	} else {
+		pendingGenerationSettings_.reset();
+	}
+}
+
+bool Map::SaveEditorSettings() const {
+	nlohmann::json root;
+	root["formatVersion"] = 2;
+	root["settings"] = GenerationSettingsToJson(editorSettings_);
+	return MadoEngine::Json::JsonFile::Save(kMapGeneratorJsonPath, root, 4, true);
+}
+
+bool Map::ReloadEditorSettings() {
+	GenerationSettings settings = editorSettings_;
+	if (!LoadEditorSettings(settings, true)) {
+		return false;
+	}
+
+	editorSettings_ = settings;
+	pendingGenerationSettings_ = settings;
+	return true;
+}
+
+MapLimit Map::CreateMapLimit() const {
+	MapLimit mapLimit;
+	mapLimit.min = { -blockSize_.x * 0.5f, 0.0f, -blockSize_.z * 0.5f };
+	mapLimit.max = {
+		static_cast<float>(mapWidth_ - 1) * blockSize_.x + blockSize_.x * 0.5f,
+		static_cast<float>(maxHeight_ + 2) * blockSize_.y,
+		static_cast<float>(mapHeight_ - 1) * blockSize_.z + blockSize_.z * 0.5f
+	};
+	return mapLimit;
+}
+
+Map::GenerationSettings Map::CreateAppliedSettings() const {
+	GenerationSettings settings;
+	settings.seed = currentSeed_;
+	settings.mapWidth = mapWidth_;
+	settings.mapHeight = mapHeight_;
+	settings.jarSpawnCount = jarSpawnCount_;
+	settings.moneyJarSpawnCount = moneyJarSpawnCount_;
+	settings.expJarSpawnCount = expJarSpawnCount_;
+	settings.chestSpawnCount = chestSpawnCount_;
+	settings.normalChestSpawnCount = normalChestSpawnCount_;
+	settings.freeChestSpawnCount = freeChestSpawnCount_;
+	settings.karmaSpawnCount = karmaSpawnCount_;
+	settings.blockSize = blockSize_;
+	settings.minHeight = minHeight_;
+	settings.maxHeight = maxHeight_;
+	settings.minStartHeight = minStartHeight_;
+	settings.maxStartHeight = maxStartHeight_;
+	settings.minRangeHeight = minRangeHeight_;
+	settings.maxRangeHeight = maxRangeHeight_;
+	settings.slopeSpawnRate = slopeSpawnRate_;
+	return settings;
+}
+
+void Map::ClampGenerationSettings(GenerationSettings& settings) {
+	settings.mapWidth = std::clamp(settings.mapWidth, kMinimumMapSize, kMaximumMapSize);
+	settings.mapHeight = std::clamp(settings.mapHeight, kMinimumMapSize, kMaximumMapSize);
+	settings.jarSpawnCount = std::clamp(settings.jarSpawnCount, 0, kMaximumEventObjectCount);
+	settings.moneyJarSpawnCount = std::clamp(settings.moneyJarSpawnCount, 0, settings.jarSpawnCount);
+	settings.expJarSpawnCount = settings.jarSpawnCount - settings.moneyJarSpawnCount;
+	settings.chestSpawnCount = std::clamp(settings.chestSpawnCount, 0, kMaximumEventObjectCount);
+	settings.normalChestSpawnCount = std::clamp(settings.normalChestSpawnCount, 0, settings.chestSpawnCount);
+	settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
+	settings.karmaSpawnCount = std::clamp(settings.karmaSpawnCount, 0, kMaximumEventObjectCount);
+	settings.blockSize.x = std::clamp(std::isfinite(settings.blockSize.x) ? settings.blockSize.x : 15.0f, 0.5f, 100.0f);
+	settings.blockSize.y = std::clamp(std::isfinite(settings.blockSize.y) ? settings.blockSize.y : 7.5f, 0.5f, 100.0f);
+	settings.blockSize.z = std::clamp(std::isfinite(settings.blockSize.z) ? settings.blockSize.z : 15.0f, 0.5f, 100.0f);
+	settings.minHeight = std::clamp(settings.minHeight, 1, 100);
+	settings.maxHeight = std::clamp(settings.maxHeight, settings.minHeight, 100);
+	settings.minStartHeight = std::clamp(settings.minStartHeight, settings.minHeight, settings.maxHeight);
+	settings.maxStartHeight = std::clamp(settings.maxStartHeight, settings.minStartHeight, settings.maxHeight);
+	settings.minRangeHeight = std::clamp(settings.minRangeHeight, -10, 0);
+	settings.maxRangeHeight = std::clamp(settings.maxRangeHeight, 0, 10);
+	settings.slopeSpawnRate = std::clamp(
+		std::isfinite(settings.slopeSpawnRate) ? settings.slopeSpawnRate : 1.0f,
+		0.0f,
+		1.0f
+	);
+}
+
+bool Map::AreGenerationSettingsEqual(const GenerationSettings& lhs, const GenerationSettings& rhs) {
+	return lhs.seed == rhs.seed &&
+		lhs.mapWidth == rhs.mapWidth &&
+		lhs.mapHeight == rhs.mapHeight &&
+		lhs.jarSpawnCount == rhs.jarSpawnCount &&
+		lhs.moneyJarSpawnCount == rhs.moneyJarSpawnCount &&
+		lhs.expJarSpawnCount == rhs.expJarSpawnCount &&
+		lhs.chestSpawnCount == rhs.chestSpawnCount &&
+		lhs.normalChestSpawnCount == rhs.normalChestSpawnCount &&
+		lhs.freeChestSpawnCount == rhs.freeChestSpawnCount &&
+		lhs.karmaSpawnCount == rhs.karmaSpawnCount &&
+		lhs.blockSize.x == rhs.blockSize.x &&
+		lhs.blockSize.y == rhs.blockSize.y &&
+		lhs.blockSize.z == rhs.blockSize.z &&
+		lhs.minHeight == rhs.minHeight &&
+		lhs.maxHeight == rhs.maxHeight &&
+		lhs.minStartHeight == rhs.minStartHeight &&
+		lhs.maxStartHeight == rhs.maxStartHeight &&
+		lhs.minRangeHeight == rhs.minRangeHeight &&
+		lhs.maxRangeHeight == rhs.maxRangeHeight &&
+		lhs.slopeSpawnRate == rhs.slopeSpawnRate;
+}
+
+nlohmann::json Map::GenerationSettingsToJson(const GenerationSettings& settings) {
+	nlohmann::json json;
+	json["seed"] = settings.seed;
+	json["mapSize"] = { settings.mapWidth, settings.mapHeight };
+	json["eventObjectCounts"] = {
+		{ "jar", settings.jarSpawnCount },
+		{ "chest", settings.chestSpawnCount },
+		{ "karma", settings.karmaSpawnCount },
+		{ "jarTypes", {
+			{ "money", settings.moneyJarSpawnCount },
+			{ "exp", settings.expJarSpawnCount }
+		} },
+		{ "chestTypes", {
+			{ "normal", settings.normalChestSpawnCount },
+			{ "free", settings.freeChestSpawnCount }
+		} }
+	};
+	json["blockSize"] = { settings.blockSize.x, settings.blockSize.y, settings.blockSize.z };
+	json["height"] = {
+		{ "min", settings.minHeight },
+		{ "max", settings.maxHeight },
+		{ "startMin", settings.minStartHeight },
+		{ "startMax", settings.maxStartHeight },
+		{ "rangeMin", settings.minRangeHeight },
+		{ "rangeMax", settings.maxRangeHeight }
+	};
+	json["slopeSpawnRate"] = settings.slopeSpawnRate;
+	return json;
+}
+
+bool Map::GenerationSettingsFromJson(const nlohmann::json& json, GenerationSettings& outSettings) {
+	if (!json.is_object()) {
+		return false;
+	}
+
+	try {
+		GenerationSettings settings = outSettings;
+		if (const auto seedIt = json.find("seed"); seedIt != json.end() && seedIt->is_number_unsigned()) {
+			settings.seed = seedIt->get<uint32_t>();
+		}
+		if (const auto sizeIt = json.find("mapSize"); sizeIt != json.end() && sizeIt->is_array() && sizeIt->size() >= 2) {
+			settings.mapWidth = (*sizeIt)[0].get<int>();
+			settings.mapHeight = (*sizeIt)[1].get<int>();
+		}
+		if (const auto countIt = json.find("eventObjectCounts"); countIt != json.end() && countIt->is_object()) {
+			settings.jarSpawnCount = countIt->value("jar", settings.jarSpawnCount);
+			settings.chestSpawnCount = countIt->value("chest", settings.chestSpawnCount);
+			settings.karmaSpawnCount = countIt->value("karma", settings.karmaSpawnCount);
+
+			// 旧Jsonにタイプ別設定がない場合は総数を均等配分して互換性を維持
+			if (const auto jarTypesIt = countIt->find("jarTypes"); jarTypesIt != countIt->end() && jarTypesIt->is_object()) {
+				settings.moneyJarSpawnCount = jarTypesIt->value("money", settings.moneyJarSpawnCount);
+				settings.expJarSpawnCount = jarTypesIt->value("exp", settings.expJarSpawnCount);
+			} else {
+				settings.moneyJarSpawnCount = (settings.jarSpawnCount + 1) / 2;
+				settings.expJarSpawnCount = settings.jarSpawnCount - settings.moneyJarSpawnCount;
+			}
+			if (const auto chestTypesIt = countIt->find("chestTypes"); chestTypesIt != countIt->end() && chestTypesIt->is_object()) {
+				settings.normalChestSpawnCount = chestTypesIt->value("normal", settings.normalChestSpawnCount);
+				settings.freeChestSpawnCount = chestTypesIt->value("free", settings.freeChestSpawnCount);
+			} else {
+				settings.normalChestSpawnCount = (settings.chestSpawnCount + 1) / 2;
+				settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
+			}
+		}
+		if (const auto blockSizeIt = json.find("blockSize"); blockSizeIt != json.end() && blockSizeIt->is_array() && blockSizeIt->size() >= 3) {
+			settings.blockSize = {
+				(*blockSizeIt)[0].get<float>(),
+				(*blockSizeIt)[1].get<float>(),
+				(*blockSizeIt)[2].get<float>()
+			};
+		}
+		if (const auto heightIt = json.find("height"); heightIt != json.end() && heightIt->is_object()) {
+			settings.minHeight = heightIt->value("min", settings.minHeight);
+			settings.maxHeight = heightIt->value("max", settings.maxHeight);
+			settings.minStartHeight = heightIt->value("startMin", settings.minStartHeight);
+			settings.maxStartHeight = heightIt->value("startMax", settings.maxStartHeight);
+			settings.minRangeHeight = heightIt->value("rangeMin", settings.minRangeHeight);
+			settings.maxRangeHeight = heightIt->value("rangeMax", settings.maxRangeHeight);
+		}
+		settings.slopeSpawnRate = json.value("slopeSpawnRate", settings.slopeSpawnRate);
+		ClampGenerationSettings(settings);
+		outSettings = settings;
+		return true;
+	} catch (const nlohmann::json::exception&) {
+		return false;
+	}
+}
+
+bool Map::LoadEditorSettings(GenerationSettings& outSettings, bool useSavedSeed) const {
+	if (!MadoEngine::Json::JsonFile::Exists(kMapGeneratorJsonPath)) {
+		return false;
+	}
+
+	nlohmann::json root;
+	if (!MadoEngine::Json::JsonFile::Load(kMapGeneratorJsonPath, root) || !root.is_object()) {
+		return false;
+	}
+
+	const uint32_t preservedSeed = outSettings.seed;
+	const auto settingsIt = root.find("settings");
+	if (settingsIt == root.end() || !GenerationSettingsFromJson(*settingsIt, outSettings)) {
+		return false;
+	}
+	if (!useSavedSeed) {
+		outSettings.seed = preservedSeed;
+	}
+	return true;
+}
+
+void Map::DrawHeightPreview(const Player::Base* player) const {
+#ifdef USE_IMGUI
+	if (mapBlocks_.empty() || mapBlocks_.front().empty()) {
+		ImGui::TextDisabled("プレビューできるMapがありません");
+		return;
+	}
+
+	constexpr float cellSize = 14.0f;
+	int bossSpawnerX = -1;
+	int bossSpawnerZ = -1;
+	for (const std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
+		if (!object || dynamic_cast<const BossSpawner*>(object.get()) == nullptr) {
+			continue;
+		}
+
+		const Vector3 bossSpawnerPosition = object->GetPosition();
+		bossSpawnerX = std::clamp(static_cast<int>(std::lround(bossSpawnerPosition.x / blockSize_.x)), 0, mapWidth_ - 1);
+		bossSpawnerZ = std::clamp(static_cast<int>(std::lround(bossSpawnerPosition.z / blockSize_.z)), 0, mapHeight_ - 1);
+		break;
+	}
+
+	ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "■ BossSpawner");
+	ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.1f, 0.9f, 1.0f, 1.0f), "● Player");
+	ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.15f, 1.0f, 0.4f, 1.0f), "□ Slope");
+	const ImVec2 canvasSize(
+		static_cast<float>(mapWidth_) * cellSize,
+		static_cast<float>(mapHeight_) * cellSize
+	);
+	ImGui::BeginChild("MapHeightPreview", ImVec2(0.0f, 320.0f), true, ImGuiWindowFlags_HorizontalScrollbar);
+	const ImVec2 canvasPosition = ImGui::GetCursorScreenPos();
+	ImGui::InvisibleButton("MapHeightPreviewCanvas", canvasSize);
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	const float heightRange = static_cast<float>((std::max)(1, maxHeight_ - minHeight_));
+
+	// 高さを寒色から暖色へ変換し、BossSpawner配置Blockだけ赤色で上書き
+	for (int z = 0; z < mapHeight_; ++z) {
+		for (int x = 0; x < mapWidth_; ++x) {
+			const MapBlock& block = mapBlocks_[z][x];
+			const float heightRate = std::clamp(
+				(static_cast<float>(block.GetHeight()) - static_cast<float>(minHeight_)) / heightRange,
+				0.0f,
+				1.0f
+			);
+			ImVec4 color(
+				0.12f + heightRate * 0.78f,
+				0.28f + (1.0f - std::abs(heightRate - 0.5f) * 2.0f) * 0.42f,
+				0.88f - heightRate * 0.68f,
+				1.0f
+			);
+			if (x == bossSpawnerX && z == bossSpawnerZ) {
+				color = { 0.95f, 0.08f, 0.08f, 1.0f };
+			}
+			const ImVec2 cellMin(canvasPosition.x + static_cast<float>(x) * cellSize, canvasPosition.y + static_cast<float>(z) * cellSize);
+			const ImVec2 cellMax(cellMin.x + cellSize - 1.0f, cellMin.y + cellSize - 1.0f);
+			drawList->AddRectFilled(cellMin, cellMax, ImGui::GetColorU32(color));
+			drawList->AddRect(
+				cellMin,
+				cellMax,
+				block.GetType() == MapBlockType::Slope
+					? IM_COL32(40, 255, 110, 255)
+					: IM_COL32(30, 30, 30, 180)
+			);
+		}
+	}
+
+	if (player) {
+		const Vector3 playerPosition = player->GetPosition();
+		const float playerGridX = (playerPosition.x + blockSize_.x * 0.5f) / blockSize_.x;
+		const float playerGridZ = (playerPosition.z + blockSize_.z * 0.5f) / blockSize_.z;
+		if (playerGridX >= 0.0f && playerGridX <= static_cast<float>(mapWidth_) &&
+			playerGridZ >= 0.0f && playerGridZ <= static_cast<float>(mapHeight_)) {
+
+			// Block内の移動量も読み取れるようPlayerのワールド座標をセル中心へ丸めず描画座標へ変換
+			const ImVec2 playerMarkerPosition(
+				canvasPosition.x + playerGridX * cellSize,
+				canvasPosition.y + playerGridZ * cellSize
+			);
+			drawList->AddCircleFilled(playerMarkerPosition, 4.5f, IM_COL32(25, 230, 255, 255));
+			drawList->AddCircle(playerMarkerPosition, 5.0f, IM_COL32(255, 255, 255, 255), 0, 1.5f);
+		}
+	}
+
+	if (ImGui::IsItemHovered()) {
+		const ImVec2 mousePosition = ImGui::GetIO().MousePos;
+		const int x = std::clamp(static_cast<int>((mousePosition.x - canvasPosition.x) / cellSize), 0, mapWidth_ - 1);
+		const int z = std::clamp(static_cast<int>((mousePosition.y - canvasPosition.y) / cellSize), 0, mapHeight_ - 1);
+		const MapBlock& block = mapBlocks_[z][x];
+		const bool hasBossSpawner = x == bossSpawnerX && z == bossSpawnerZ;
+		ImGui::SetTooltip(
+			"X: %d  Z: %d\n高さ: %u\n種別: %s%s",
+			x,
+			z,
+			block.GetHeight(),
+			block.GetType() == MapBlockType::Slope ? "Slope" : "Ground",
+			hasBossSpawner ? "\nBossSpawner: あり" : ""
+		);
+	}
+	ImGui::EndChild();
+#endif // USE_IMGUI
 }
 
 bool Map::IsEventObjectColliderOverlapping(const AABB& collider) const {
@@ -416,6 +936,16 @@ void Map::GenerateJars() {
 	const AABB jarLocalCollider = Jar::CreatePlacementCollider({});
 	const float jarHalfSizeX = std::max(std::abs(jarLocalCollider.min.x), std::abs(jarLocalCollider.max.x));
 	const float jarHalfSizeZ = std::max(std::abs(jarLocalCollider.min.z), std::abs(jarLocalCollider.max.z));
+	std::vector<JarType> jarTypes;
+	jarTypes.reserve(static_cast<std::size_t>(maxSpawnCount));
+	jarTypes.insert(jarTypes.end(), static_cast<std::size_t>(moneyJarSpawnCount_), JarType::Money);
+	jarTypes.insert(jarTypes.end(), static_cast<std::size_t>(expJarSpawnCount_), JarType::Exp);
+
+	// タイプ別の正確な総数を保ったまま配置順だけをシード依存でランダム化
+	for (int index = maxSpawnCount - 1; index > 0; --index) {
+		const int swapIndex = eventObjectRandom_.Int(0, index);
+		std::swap(jarTypes[static_cast<std::size_t>(index)], jarTypes[static_cast<std::size_t>(swapIndex)]);
+	}
 
 	int createdCount = 0;
 	int retryCount = 0;
@@ -458,7 +988,7 @@ void Map::GenerateJars() {
 		Jar::InitializeDesc desc;
 		desc.position = spawnPosition;
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, 0.0f);
-		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? JarType::Money : JarType::Exp;
+		desc.type = jarTypes[static_cast<std::size_t>(createdCount)];
 		desc.size = eventObjectRandom_.Int(0, 1) == 0 ? JarSize::Small : JarSize::Big;
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
 		desc.colliderName = "JarAABB_" + std::to_string(createdCount);
@@ -483,6 +1013,16 @@ void Map::GenerateChests() {
 	const AABB chestLocalCollider = Chest::CreatePlacementCollider({});
 	const float chestHalfSizeX = std::max(std::abs(chestLocalCollider.min.x), std::abs(chestLocalCollider.max.x));
 	const float chestHalfSizeZ = std::max(std::abs(chestLocalCollider.min.z), std::abs(chestLocalCollider.max.z));
+	std::vector<ChestType> chestTypes;
+	chestTypes.reserve(static_cast<std::size_t>(maxSpawnCount));
+	chestTypes.insert(chestTypes.end(), static_cast<std::size_t>(normalChestSpawnCount_), ChestType::Normal);
+	chestTypes.insert(chestTypes.end(), static_cast<std::size_t>(freeChestSpawnCount_), ChestType::Free);
+
+	// タイプ別の正確な総数を保ったまま配置順だけをシード依存でランダム化
+	for (int index = maxSpawnCount - 1; index > 0; --index) {
+		const int swapIndex = eventObjectRandom_.Int(0, index);
+		std::swap(chestTypes[static_cast<std::size_t>(index)], chestTypes[static_cast<std::size_t>(swapIndex)]);
+	}
 
 	// すべての通常Chestで同じ費用段階を参照するためMap生成単位の状態を共有
 	const std::shared_ptr<Chest::OpenCostState> openCostState = std::make_shared<Chest::OpenCostState>();
@@ -529,7 +1069,7 @@ void Map::GenerateChests() {
 		desc.position = spawnPosition;
 		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, yaw);
-		desc.type = eventObjectRandom_.Int(0, 1) == 0 ? ChestType::Normal : ChestType::Free;
+		desc.type = chestTypes[static_cast<std::size_t>(createdCount)];
 		desc.openCostState = openCostState;
 		desc.modelName = "ChestModel_" + std::to_string(createdCount);
 		desc.colliderName = "ChestAABB_" + std::to_string(createdCount);

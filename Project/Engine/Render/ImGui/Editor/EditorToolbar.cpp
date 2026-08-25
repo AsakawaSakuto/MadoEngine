@@ -33,13 +33,14 @@ struct EditorWindowMenuItem {
 	const char* label;
 };
 
-constexpr std::array<EditorWindowMenuItem, 20> kWindowMenuItems = {
+constexpr std::array<EditorWindowMenuItem, 21> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::GameView, "Game View" },
 	EditorWindowMenuItem{ EditorWindow::FixedGameView, "Game View 1280x720" },
 	EditorWindowMenuItem{ EditorWindow::EngineInfo, "Engine Info" },
 	EditorWindowMenuItem{ EditorWindow::SceneManager, "Scene Manager" },
 	EditorWindowMenuItem{ EditorWindow::Camera, "Camera Editor" },
 	EditorWindowMenuItem{ EditorWindow::SceneDebug, "Scene固有デバッグ" },
+	EditorWindowMenuItem{ EditorWindow::MapGenerator, "Map Generator" },
 	EditorWindowMenuItem{ EditorWindow::ModelGizmo, "Model Gizmo" },
 	EditorWindowMenuItem{ EditorWindow::PostEffect, "Post Effect Editor" },
 	EditorWindowMenuItem{ EditorWindow::Audio, "Audio Editor" },
@@ -56,9 +57,10 @@ constexpr std::array<EditorWindowMenuItem, 20> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::Logger, "Logger" },
 };
 
-constexpr std::array<const char*, 14> kDocumentLabels = {
+constexpr std::array<const char*, 15> kDocumentLabels = {
 	"Camera",
 	"Scene",
+	"Map Generator",
 	"Post Effect",
 	"Audio",
 	"Light",
@@ -327,6 +329,18 @@ void EditorToolbar::SynchronizeHistorySnapshots() {
 		if (binding.captureFunction) {
 			binding.lastSnapshot = binding.captureFunction();
 		}
+	}
+}
+
+void EditorToolbar::SynchronizeDocumentHistorySnapshot(EditorDocument document) {
+	const std::size_t index = ToIndex(document);
+	if (index >= historyBindings_.size()) {
+		return;
+	}
+
+	DocumentHistoryBinding& binding = historyBindings_[index];
+	if (binding.captureFunction) {
+		binding.lastSnapshot = binding.captureFunction();
 	}
 }
 

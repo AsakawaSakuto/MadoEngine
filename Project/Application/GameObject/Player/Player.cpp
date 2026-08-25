@@ -83,6 +83,22 @@ namespace Player {
 		return collider;
 	}
 
+	void Base::TeleportToGroundPosition(const Vector3& groundPosition) {
+		const Sphere movementCollider = CreateSpawnMovementCollider(groundPosition);
+		transform_.translate = movementCollider.center;
+		colliderShape_ = movementCollider;
+		lastMoveInput_ = {};
+		lastDeltaTime_ = 0.0f;
+		movement_.Initialize();
+		landingMarker_.SetVisible(false);
+
+		// 次回のGame更新を待たず再生成直後の描画位置を新しい地表へ同期
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
+		}
+		UpdateShadowTransform();
+	}
+
 	void Base::AddMoney(int amount) {
 
 		// 不正な加算によって所持金が減少しないよう0以下を無視

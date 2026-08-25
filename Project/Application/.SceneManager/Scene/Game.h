@@ -45,6 +45,33 @@ public:
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
 
+	/// @brief Map生成Editorを提供しているか確認
+	/// @return Map生成Editorを提供している場合はtrue
+	bool HasMapGeneratorEditor() const override { return map_ != nullptr; }
+
+	/// @brief Map生成EditorのImGuiを描画
+	void DrawMapGeneratorImGui() override;
+
+	/// @brief Map生成Editor状態を文字列Snapshotへ変換
+	/// @return UndoとRedoに使用する文字列Snapshot
+	std::string CaptureMapGeneratorEditorState() const override;
+
+	/// @brief 文字列SnapshotからMap生成Editor状態を復元
+	/// @param snapshot 復元する文字列Snapshot
+	void RestoreMapGeneratorEditorState(const std::string& snapshot) override;
+
+	/// @brief Game Scene固有のEditor Documentを保存
+	/// @return 保存に成功した場合はtrue
+	bool SaveEditorDocuments() const override;
+
+	/// @brief Game Scene固有のEditor Documentを再読込
+	/// @return 読み込みに成功した場合はtrue
+	bool ReloadEditorDocuments() override;
+
+	/// @brief Frame末尾に保留中のMap再生成を適用
+	/// @return Mapを再生成した場合はtrue
+	bool ApplyPendingEditorOperations() override;
+
 	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得
 	/// @return Playerのワールド座標
 	Vector3 GetShadowFocusPosition() const override;
@@ -54,6 +81,9 @@ public:
 	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
+	/// @brief 現在Mapに依存する移動制限を各Game Systemへ同期
+	void SynchronizeMapDependentState();
+
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
 
