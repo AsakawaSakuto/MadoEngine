@@ -174,7 +174,11 @@ namespace Enemy {
 
 		std::size_t activeWaveIndex = 0;
 		const std::vector<WaveSettings>& constWaves = settings.GetWaves();
-		if (spawner_ && spawner_->TryGetActiveWaveIndex(activeWaveIndex) && activeWaveIndex < constWaves.size()) {
+		const bool isBonusWaveActive = spawner_ && spawner_->IsBonusWaveActive();
+		if (isBonusWaveActive) {
+			ImGui::TextColored(ImVec4(1.0f, 0.78f, 0.2f, 1.0f), "処理中Wave : Bonus Wave");
+			ImGui::Text("次のEliteまで : %u体", spawner_->GetRemainingSpawnCountUntilElite());
+		} else if (spawner_ && spawner_->TryGetActiveWaveIndex(activeWaveIndex) && activeWaveIndex < constWaves.size()) {
 			ImGui::Text("処理中Wave : %s", constWaves[activeWaveIndex].name.c_str());
 			ImGui::Text("次のEliteまで : %u体", spawner_->GetRemainingSpawnCountUntilElite());
 		} else {
@@ -222,6 +226,21 @@ namespace Enemy {
 		if (removeIndex != static_cast<std::size_t>(-1)) {
 			settingsChanged |= settings.RemoveWave(removeIndex);
 		}
+
+		ImGui::SeparatorText("Bonus Wave");
+		if (spawner_) {
+			ImGui::TextDisabled("制限時間 %.1f秒以降に継続適用", spawner_->GetTimeLimit());
+		} else {
+			ImGui::TextDisabled("制限時間以降に継続適用");
+		}
+		if (isBonusWaveActive) {
+			ImGui::TextColored(ImVec4(1.0f, 0.78f, 0.2f, 1.0f), "現在実行中");
+		}
+		ImGui::PushID("BonusWave");
+		if (ImGui::CollapsingHeader("時間切れ以降の生成設定", ImGuiTreeNodeFlags_DefaultOpen)) {
+			settingsChanged |= DrawWaveSpawnSettings(settings.EditBonusWaveSettings());
+		}
+		ImGui::PopID();
 		return settingsChanged;
 #else
 		return false;
@@ -267,65 +286,77 @@ namespace Enemy {
 				ImGui::TextColored(ImVec4(1.0f, 0.65f, 0.2f, 1.0f), "他Waveと時間帯が重複");
 			}
 
-			ImGui::SeparatorText("生成");
-			settingsChanged |= ImGui::DragFloat(
-				"生成間隔", &wave.spawnInterval, 0.01f, 0.01f, 600.0f, "%.2f秒");
-			settingsChanged |= ImGui::DragScalar(
-				"生成数", ImGuiDataType_U32, &wave.spawnCount, 1.0f);
-			settingsChanged |= ImGui::DragScalar(
-				"Elite生成周期", ImGuiDataType_U32, &wave.eliteSpawnInterval, 1.0f);
-			settingsChanged |= ImGui::DragFloat(
-				"最小生成半径", &wave.minSpawnRadius, 0.1f, 0.0f, 10000.0f, "%.1f");
-			settingsChanged |= ImGui::DragFloat(
-				"最大生成半径", &wave.maxSpawnRadius, 0.1f, 0.0f, 10000.0f, "%.1f");
-
-			ImGui::SeparatorText("種類別生成率");
-			float normalPercent = wave.normalSpawnRate * 100.0f;
-			float runnerPercent = wave.runnerSpawnRate * 100.0f;
-			float tankPercent = wave.tankSpawnRate * 100.0f;
-			if (ImGui::DragFloat("Normal", &normalPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
-				wave.normalSpawnRate = normalPercent / 100.0f;
-				settingsChanged = true;
-			}
-			if (ImGui::DragFloat("Runner", &runnerPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
-				wave.runnerSpawnRate = runnerPercent / 100.0f;
-				settingsChanged = true;
-			}
-			if (ImGui::DragFloat("Tank", &tankPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
-				wave.tankSpawnRate = tankPercent / 100.0f;
-				settingsChanged = true;
-			}
-			const float totalRate = wave.normalSpawnRate + wave.runnerSpawnRate + wave.tankSpawnRate;
-			if (totalRate > 0.0f) {
-				ImGui::TextDisabled(
-					"実効生成率  Normal %.1f%% / Runner %.1f%% / Tank %.1f%%",
-					wave.normalSpawnRate / totalRate * 100.0f,
-					wave.runnerSpawnRate / totalRate * 100.0f,
-					wave.tankSpawnRate / totalRate * 100.0f);
-			}
-			ImGui::TextDisabled("入力値は比率として自動正規化");
-
-			ImGui::SeparatorText("時間経過強化");
-			settingsChanged |= ImGui::DragFloat(
-				"HP・攻撃力強化率（毎分）",
-				&wave.healthPowerGrowthRatePerMinute,
-				0.01f,
-				0.0f,
-				100.0f,
-				"%.2f");
-			settingsChanged |= ImGui::DragFloat(
-				"移動速度強化率（毎分）",
-				&wave.moveSpeedGrowthRatePerMinute,
-				0.01f,
-				0.0f,
-				100.0f,
-				"%.2f");
+			settingsChanged |= DrawWaveSpawnSettings(wave);
 		}
 		ImGui::PopID();
 		return settingsChanged;
 #else
 		(void)index;
 		(void)wave;
+		return false;
+#endif // USE_IMGUI
+	}
+
+	bool Editor::DrawWaveSpawnSettings(WaveSpawnSettings& waveSettings) {
+#ifdef USE_IMGUI
+		bool settingsChanged = false;
+		ImGui::SeparatorText("生成");
+		settingsChanged |= ImGui::DragFloat(
+			"生成間隔", &waveSettings.spawnInterval, 0.01f, 0.01f, 600.0f, "%.2f秒");
+		settingsChanged |= ImGui::DragScalar(
+			"生成数", ImGuiDataType_U32, &waveSettings.spawnCount, 1.0f);
+		settingsChanged |= ImGui::DragScalar(
+			"Elite生成周期", ImGuiDataType_U32, &waveSettings.eliteSpawnInterval, 1.0f);
+		settingsChanged |= ImGui::DragFloat(
+			"最小生成半径", &waveSettings.minSpawnRadius, 0.1f, 0.0f, 10000.0f, "%.1f");
+		settingsChanged |= ImGui::DragFloat(
+			"最大生成半径", &waveSettings.maxSpawnRadius, 0.1f, 0.0f, 10000.0f, "%.1f");
+
+		ImGui::SeparatorText("種類別生成率");
+		float normalPercent = waveSettings.normalSpawnRate * 100.0f;
+		float runnerPercent = waveSettings.runnerSpawnRate * 100.0f;
+		float tankPercent = waveSettings.tankSpawnRate * 100.0f;
+		if (ImGui::DragFloat("Normal", &normalPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
+			waveSettings.normalSpawnRate = normalPercent / 100.0f;
+			settingsChanged = true;
+		}
+		if (ImGui::DragFloat("Runner", &runnerPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
+			waveSettings.runnerSpawnRate = runnerPercent / 100.0f;
+			settingsChanged = true;
+		}
+		if (ImGui::DragFloat("Tank", &tankPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
+			waveSettings.tankSpawnRate = tankPercent / 100.0f;
+			settingsChanged = true;
+		}
+		const float totalRate =
+			waveSettings.normalSpawnRate + waveSettings.runnerSpawnRate + waveSettings.tankSpawnRate;
+		if (totalRate > 0.0f) {
+			ImGui::TextDisabled(
+				"実効生成率  Normal %.1f%% / Runner %.1f%% / Tank %.1f%%",
+				waveSettings.normalSpawnRate / totalRate * 100.0f,
+				waveSettings.runnerSpawnRate / totalRate * 100.0f,
+				waveSettings.tankSpawnRate / totalRate * 100.0f);
+		}
+		ImGui::TextDisabled("入力値は比率として自動正規化");
+
+		ImGui::SeparatorText("時間経過強化");
+		settingsChanged |= ImGui::DragFloat(
+			"HP・攻撃力強化率（毎分）",
+			&waveSettings.healthPowerGrowthRatePerMinute,
+			0.01f,
+			0.0f,
+			100.0f,
+			"%.2f");
+		settingsChanged |= ImGui::DragFloat(
+			"移動速度強化率（毎分）",
+			&waveSettings.moveSpeedGrowthRatePerMinute,
+			0.01f,
+			0.0f,
+			100.0f,
+			"%.2f");
+		return settingsChanged;
+#else
+		(void)waveSettings;
 		return false;
 #endif // USE_IMGUI
 	}

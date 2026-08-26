@@ -29,11 +29,8 @@ namespace Enemy {
 		Vector3 markerScale = { 0.45f, 0.45f, 0.45f };
 	};
 
-	/// @brief 指定時間帯に適用するEnemy生成設定
-	struct WaveSettings {
-		std::string name = "Wave 1";
-		float startTime = 0.0f;
-		float endTime = 300.0f;
+	/// @brief 通常WaveとBonus Waveで共有するEnemy生成設定
+	struct WaveSpawnSettings {
 		float spawnInterval = 0.4f;
 		std::uint32_t spawnCount = 1;
 		std::uint32_t eliteSpawnInterval = 50;
@@ -44,6 +41,13 @@ namespace Enemy {
 		float tankSpawnRate = 0.15f;
 		float healthPowerGrowthRatePerMinute = 0.1f;
 		float moveSpeedGrowthRatePerMinute = 0.02f;
+	};
+
+	/// @brief 指定時間帯に適用する通常Wave設定
+	struct WaveSettings : public WaveSpawnSettings {
+		std::string name = "Wave 1";
+		float startTime = 0.0f;
+		float endTime = 300.0f;
 	};
 
 	/// @brief EnemyStatusとWave設定の保持とJson永続化を管理するクラス
@@ -102,6 +106,14 @@ namespace Enemy {
 		/// @return Waveの編集用設定一覧
 		std::vector<WaveSettings>& EditWaves() { return waves_; }
 
+		/// @brief 制限時間後に適用するBonus Wave設定を取得
+		/// @return Bonus Wave設定
+		const WaveSpawnSettings& GetBonusWaveSettings() const { return bonusWaveSettings_; }
+
+		/// @brief 制限時間後に適用するBonus Waveの編集用設定を取得
+		/// @return Bonus Waveの編集用設定
+		WaveSpawnSettings& EditBonusWaveSettings() { return bonusWaveSettings_; }
+
 		/// @brief 全Wave共通のEnemy最大生存数を取得
 		/// @return 全Wave共通のEnemy最大生存数
 		std::size_t GetMaxAliveEnemies() const { return maxAliveEnemies_; }
@@ -132,6 +144,7 @@ namespace Enemy {
 		EliteSettings eliteSettings_;
 		std::size_t maxAliveEnemies_ = 500;
 		std::vector<WaveSettings> waves_;
+		WaveSpawnSettings bonusWaveSettings_;
 	};
 
 	/// @brief Enemy種類を設定名へ変換

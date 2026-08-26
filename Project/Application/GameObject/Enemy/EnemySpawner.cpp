@@ -12,14 +12,16 @@ namespace {
 	constexpr float kSecondsPerMinute = 60.0f;
 	constexpr std::size_t kMaxSpawnPositionAttempts = 8;
 	constexpr std::size_t kInvalidWaveIndex = static_cast<std::size_t>(-1);
+	constexpr std::size_t kBonusWaveIndex = kInvalidWaveIndex - 1;
 } // namespace
 
 namespace Enemy {
 
-	void Spawner::Initialize(Player::Base* player, Manager* enemyManager, SceneType sceneType) {
+	void Spawner::Initialize(Player::Base* player, Manager* enemyManager, SceneType sceneType, float timeLimit) {
 		player_ = player;
 		enemyManager_ = enemyManager;
 		sceneType_ = sceneType;
+		timeLimit_ = std::isfinite(timeLimit) ? std::max(0.0f, timeLimit) : 0.0f;
 		Clear();
 		isActive_ = true;
 		Logger::Output("Enemy::Spawnerを初期化しました", Logger::Level::Application);
@@ -30,9 +32,10 @@ namespace Enemy {
 			return;
 		}
 
+		const float previousElapsedTime = elapsedTime_;
 		elapsedTime_ += deltaTime;
 		std::size_t waveIndex = kInvalidWaveIndex;
-		const WaveSettings* wave = FindActiveWave(waveIndex);
+		const WaveSpawnSettings* wave = FindActiveSpawnSettings(waveIndex);
 		if (!wave) {
 
 			// Wave空白時間の周期残量を次のWaveへ持ち越さないよう生成状態を解除
@@ -42,7 +45,11 @@ namespace Enemy {
 
 		ChangeActiveWave(waveIndex);
 
-		spawnTimer_ += deltaTime;
+		// 制限時間へ到達したFrameは超過分だけをBonus Waveの生成Timerへ反映
+		const float effectiveDeltaTime =
+			waveIndex == kBonusWaveIndex && previousElapsedTime < timeLimit_ ?
+			elapsedTime_ - timeLimit_ : deltaTime;
+		spawnTimer_ += std::max(0.0f, effectiveDeltaTime);
 		const float spawnInterval = std::max(0.01f, wave->spawnInterval);
 
 		// 長いFrameでも経過した生成周期を取りこぼさないようTimer残量を順次消費
@@ -61,7 +68,7 @@ namespace Enemy {
 
 	std::uint32_t Spawner::GetRemainingSpawnCountUntilElite() const {
 		std::size_t waveIndex = kInvalidWaveIndex;
-		const WaveSettings* wave = FindActiveWave(waveIndex);
+		const WaveSpawnSettings* wave = FindActiveSpawnSettings(waveIndex);
 		if (!wave) {
 			return 0;
 		}
@@ -73,7 +80,7 @@ namespace Enemy {
 	}
 
 	bool Spawner::TryGetActiveWaveIndex(std::size_t& outIndex) const {
-		if (activeWaveIndex_ == kInvalidWaveIndex) {
+		if (activeWaveIndex_ == kInvalidWaveIndex || activeWaveIndex_ == kBonusWaveIndex) {
 			return false;
 		}
 
@@ -81,9 +88,13 @@ namespace Enemy {
 		return true;
 	}
 
+	bool Spawner::IsBonusWaveActive() const {
+		return activeWaveIndex_ == kBonusWaveIndex;
+	}
+
 	std::uint32_t Spawner::SpawnImmediately(std::uint32_t spawnCount) {
 		std::size_t waveIndex = kInvalidWaveIndex;
-		const WaveSettings* wave = FindActiveWave(waveIndex);
+		const WaveSpawnSettings* wave = FindActiveSpawnSettings(waveIndex);
 		if (!wave) {
 			return 0;
 		}
@@ -92,7 +103,14 @@ namespace Enemy {
 		return SpawnBatch(*wave, spawnCount);
 	}
 
-	const WaveSettings* Spawner::FindActiveWave(std::size_t& outIndex) const {
+	const WaveSpawnSettings* Spawner::FindActiveSpawnSettings(std::size_t& outIndex) const {
+		if (elapsedTime_ >= timeLimit_) {
+
+			// 制限時間到達後は通常Waveの時間帯に関係なくBonus Waveを最優先
+			outIndex = kBonusWaveIndex;
+			return &Settings::GetInstance().GetBonusWaveSettings();
+		}
+
 		const std::vector<WaveSettings>& waves = Settings::GetInstance().GetWaves();
 		const WaveSettings* selectedWave = nullptr;
 		float selectedStartTime = -1.0f;
@@ -125,7 +143,7 @@ namespace Enemy {
 		spawnTimer_ = 0.0f;
 	}
 
-	std::uint32_t Spawner::SpawnBatch(const WaveSettings& wave, std::uint32_t spawnCount) {
+	std::uint32_t Spawner::SpawnBatch(const WaveSpawnSettings& wave, std::uint32_t spawnCount) {
 		const std::size_t maxAliveEnemies = Settings::GetInstance().GetMaxAliveEnemies();
 		if (!enemyManager_ || spawnCount == 0 || enemyManager_->GetEnemyCount() >= maxAliveEnemies) {
 			return 0;
@@ -145,7 +163,7 @@ namespace Enemy {
 		return spawnedCount;
 	}
 
-	Data::Type Spawner::SelectSpawnType(const WaveSettings& wave) const {
+	Data::Type Spawner::SelectSpawnType(const WaveSpawnSettings& wave) const {
 		const float normalRate = std::max(0.0f, wave.normalSpawnRate);
 		const float runnerRate = std::max(0.0f, wave.runnerSpawnRate);
 		const float tankRate = std::max(0.0f, wave.tankSpawnRate);
@@ -165,7 +183,7 @@ namespace Enemy {
 		return Data::Type::Tank;
 	}
 
-	bool Spawner::SpawnEnemy(const WaveSettings& wave) {
+	bool Spawner::SpawnEnemy(const WaveSpawnSettings& wave) {
 		if (!player_ || !enemyManager_) {
 			return false;
 		}
@@ -194,7 +212,7 @@ namespace Enemy {
 	}
 
 	bool Spawner::TryCreateSpawnPosition(
-		const WaveSettings& wave,
+		const WaveSpawnSettings& wave,
 		Vector3& outPosition,
 		float& outGroundSurfaceY) const {
 		const Vector3 playerPosition = player_->GetPosition();
@@ -235,7 +253,7 @@ namespace Enemy {
 		return false;
 	}
 
-	Data::Status Spawner::CalculateSpawnStatus(Data::Type type, const WaveSettings& wave) const {
+	Data::Status Spawner::CalculateSpawnStatus(Data::Type type, const WaveSpawnSettings& wave) const {
 
 		// Game全体の経過分数へWave固有の強化幅を適用して難易度を算出
 		const float elapsedMinutes = elapsedTime_ / kSecondsPerMinute;

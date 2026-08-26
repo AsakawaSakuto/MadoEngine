@@ -120,14 +120,11 @@ namespace {
 		}
 	}
 
-	/// @brief Wave設定をJsonへ変換
-	/// @param settings 変換するWave設定
+	/// @brief Wave共通生成設定をJsonへ変換
+	/// @param settings 変換するWave共通生成設定
 	/// @return 変換済みJson
-	nlohmann::json SerializeWaveSettings(const Enemy::WaveSettings& settings) {
+	nlohmann::json SerializeWaveSpawnSettings(const Enemy::WaveSpawnSettings& settings) {
 		return {
-			{ "name", settings.name },
-			{ "startTime", settings.startTime },
-			{ "endTime", settings.endTime },
 			{ "spawnInterval", settings.spawnInterval },
 			{ "spawnCount", settings.spawnCount },
 			{ "eliteSpawnInterval", settings.eliteSpawnInterval },
@@ -141,14 +138,22 @@ namespace {
 		};
 	}
 
-	/// @brief JsonからWave設定を部分更新
+	/// @brief Wave設定をJsonへ変換
+	/// @param settings 変換するWave設定
+	/// @return 変換済みJson
+	nlohmann::json SerializeWaveSettings(const Enemy::WaveSettings& settings) {
+		nlohmann::json json = SerializeWaveSpawnSettings(settings);
+		json["name"] = settings.name;
+		json["startTime"] = settings.startTime;
+		json["endTime"] = settings.endTime;
+		return json;
+	}
+
+	/// @brief JsonからWave共通生成設定を部分更新
 	/// @param json 読み込み元Json
-	/// @param outSettings 更新先Wave設定
-	void DeserializeWaveSettings(const nlohmann::json& json, Enemy::WaveSettings& outSettings) {
+	/// @param outSettings 更新先Wave共通生成設定
+	void DeserializeWaveSpawnSettings(const nlohmann::json& json, Enemy::WaveSpawnSettings& outSettings) {
 		using MadoEngine::Json::JsonSerializer;
-		outSettings.name = JsonSerializer::GetOrDefault<std::string>(json, "name", outSettings.name);
-		outSettings.startTime = JsonSerializer::GetOrDefault<float>(json, "startTime", outSettings.startTime);
-		outSettings.endTime = JsonSerializer::GetOrDefault<float>(json, "endTime", outSettings.endTime);
 		outSettings.spawnInterval = JsonSerializer::GetOrDefault<float>(
 			json, "spawnInterval", outSettings.spawnInterval);
 		outSettings.spawnCount = JsonSerializer::GetOrDefault<std::uint32_t>(
@@ -169,6 +174,17 @@ namespace {
 			json, "healthPowerGrowthRatePerMinute", outSettings.healthPowerGrowthRatePerMinute);
 		outSettings.moveSpeedGrowthRatePerMinute = JsonSerializer::GetOrDefault<float>(
 			json, "moveSpeedGrowthRatePerMinute", outSettings.moveSpeedGrowthRatePerMinute);
+	}
+
+	/// @brief JsonからWave設定を部分更新
+	/// @param json 読み込み元Json
+	/// @param outSettings 更新先Wave設定
+	void DeserializeWaveSettings(const nlohmann::json& json, Enemy::WaveSettings& outSettings) {
+		using MadoEngine::Json::JsonSerializer;
+		DeserializeWaveSpawnSettings(json, outSettings);
+		outSettings.name = JsonSerializer::GetOrDefault<std::string>(json, "name", outSettings.name);
+		outSettings.startTime = JsonSerializer::GetOrDefault<float>(json, "startTime", outSettings.startTime);
+		outSettings.endTime = JsonSerializer::GetOrDefault<float>(json, "endTime", outSettings.endTime);
 	}
 
 	/// @brief Enemy種類設定を実行可能な範囲へ補正
@@ -194,11 +210,9 @@ namespace {
 		}
 	}
 
-	/// @brief Wave設定を実行可能な範囲へ補正
-	/// @param settings 補正するWave設定
-	void NormalizeWaveSettings(Enemy::WaveSettings& settings) {
-		settings.startTime = std::max(0.0f, SanitizeFinite(settings.startTime, 0.0f));
-		settings.endTime = std::max(settings.startTime, SanitizeFinite(settings.endTime, settings.startTime));
+	/// @brief Wave共通生成設定を実行可能な範囲へ補正
+	/// @param settings 補正するWave共通生成設定
+	void NormalizeWaveSpawnSettings(Enemy::WaveSpawnSettings& settings) {
 		settings.spawnInterval = std::max(
 			kMinSpawnInterval, SanitizeFinite(settings.spawnInterval, kMinSpawnInterval));
 		settings.spawnCount = std::max<std::uint32_t>(1, settings.spawnCount);
@@ -216,6 +230,14 @@ namespace {
 			0.0f, SanitizeFinite(settings.healthPowerGrowthRatePerMinute, 0.0f));
 		settings.moveSpeedGrowthRatePerMinute = std::max(
 			0.0f, SanitizeFinite(settings.moveSpeedGrowthRatePerMinute, 0.0f));
+	}
+
+	/// @brief 通常Wave設定を実行可能な範囲へ補正
+	/// @param settings 補正する通常Wave設定
+	void NormalizeWaveSettings(Enemy::WaveSettings& settings) {
+		NormalizeWaveSpawnSettings(settings);
+		settings.startTime = std::max(0.0f, SanitizeFinite(settings.startTime, 0.0f));
+		settings.endTime = std::max(settings.startTime, SanitizeFinite(settings.endTime, settings.startTime));
 		if (settings.name.empty()) {
 			settings.name = "Wave";
 		}
@@ -271,6 +293,8 @@ namespace Enemy {
 		// EnemySpawner共通設定を読み込んだ後で存在するWave配列だけを置換
 		if (root.contains("enemySpawner") && root.at("enemySpawner").is_object()) {
 			const nlohmann::json& spawnerJson = root.at("enemySpawner");
+			const bool hasBonusWaveSettings =
+				spawnerJson.contains("bonusWave") && spawnerJson.at("bonusWave").is_object();
 			std::uint64_t maxAliveEnemies = MadoEngine::Json::JsonSerializer::GetOrDefault<std::uint64_t>(
 				spawnerJson, "maxAliveEnemies", static_cast<std::uint64_t>(maxAliveEnemies_));
 
@@ -282,6 +306,9 @@ namespace Enemy {
 			}
 			maxAliveEnemies_ = static_cast<std::size_t>(std::min<std::uint64_t>(
 				maxAliveEnemies, (std::numeric_limits<std::size_t>::max)()));
+			if (hasBonusWaveSettings) {
+				DeserializeWaveSpawnSettings(spawnerJson.at("bonusWave"), bonusWaveSettings_);
+			}
 			if (spawnerJson.contains("waves") && spawnerJson.at("waves").is_array()) {
 				waves_.clear();
 				for (const nlohmann::json& waveJson : spawnerJson.at("waves")) {
@@ -290,6 +317,11 @@ namespace Enemy {
 					DeserializeWaveSettings(waveJson, wave);
 					waves_.push_back(std::move(wave));
 				}
+			}
+
+			// 旧Jsonでは最終通常Waveの値を引き継いで時間切れ後の生成停止を回避
+			if (!hasBonusWaveSettings && !waves_.empty()) {
+				bonusWaveSettings_ = static_cast<const WaveSpawnSettings&>(waves_.back());
 			}
 		}
 
@@ -316,6 +348,7 @@ namespace Enemy {
 		nlohmann::json root;
 		root["enemyStatus"] = std::move(statusJson);
 		root["enemySpawner"]["maxAliveEnemies"] = maxAliveEnemies_;
+		root["enemySpawner"]["bonusWave"] = SerializeWaveSpawnSettings(bonusWaveSettings_);
 		root["enemySpawner"]["waves"] = std::move(waveJson);
 		const bool wasSaved = MadoEngine::Json::JsonFile::Save(kEnemySettingsJsonPath, root, 4, true);
 		if (wasSaved) {
@@ -346,6 +379,15 @@ namespace Enemy {
 		eliteSettings_ = {};
 		maxAliveEnemies_ = 500;
 		waves_ = { WaveSettings{} };
+		bonusWaveSettings_ = {};
+		bonusWaveSettings_.spawnInterval = 0.15f;
+		bonusWaveSettings_.spawnCount = 2;
+		bonusWaveSettings_.eliteSpawnInterval = 25;
+		bonusWaveSettings_.normalSpawnRate = 0.35f;
+		bonusWaveSettings_.runnerSpawnRate = 0.35f;
+		bonusWaveSettings_.tankSpawnRate = 0.3f;
+		bonusWaveSettings_.healthPowerGrowthRatePerMinute = 0.15f;
+		bonusWaveSettings_.moveSpeedGrowthRatePerMinute = 0.03f;
 	}
 
 	void Settings::Normalize() {
@@ -372,6 +414,7 @@ namespace Enemy {
 		for (WaveSettings& wave : waves_) {
 			NormalizeWaveSettings(wave);
 		}
+		NormalizeWaveSpawnSettings(bonusWaveSettings_);
 	}
 
 	const TypeSettings& Settings::GetTypeSettings(Data::Type type) const {

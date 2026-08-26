@@ -114,7 +114,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 11",
+            "text": "Enemy : 55",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -194,7 +194,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 51 / 100",
+            "text": "HP : 0 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -234,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.6",
+            "text": "Lv.18",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -274,7 +274,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.4",
+            "text": "Lv.6",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.7",
+            "text": "FPS : 57.5",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -394,7 +394,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 1209609591",
+            "text": "Seed : 3728544178",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -474,7 +474,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.4",
+            "text": "Lv.3",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -514,7 +514,7 @@
                 0.0,
                 0.0
             ],
-            "text": "722",
+            "text": "1973",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "719",
+            "text": "1890",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

@@ -67,7 +67,7 @@ void Game::Initialize() {
 	enemyManager_ = std::make_unique<Enemy::Manager>();
 	enemyManager_->Initialize(player_.get());
 	enemySpawner_ = std::make_unique<Enemy::Spawner>();
-	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game);
+	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game, kGameSceneTimeLimit);
 	enemyEditor_ = std::make_unique<Enemy::Editor>();
 	enemyEditor_->Initialize(enemySpawner_.get(), enemyManager_.get());
 	SynchronizeMapDependentState();

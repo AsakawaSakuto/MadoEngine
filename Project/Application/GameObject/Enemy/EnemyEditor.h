@@ -34,6 +34,11 @@ namespace Enemy {
 		/// @return 設定が変更された場合はtrue
 		bool DrawWave(std::size_t index, WaveSettings& wave, bool& outRemoveRequested);
 
+		/// @brief 通常WaveとBonus Waveで共有する生成設定を描画
+		/// @param waveSettings 編集するWave共通生成設定
+		/// @return 設定が変更された場合はtrue
+		bool DrawWaveSpawnSettings(WaveSpawnSettings& waveSettings);
+
 		Spawner* spawner_ = nullptr;
 		Manager* manager_ = nullptr;
 		Data::Type selectedType_ = Data::Type::Normal;

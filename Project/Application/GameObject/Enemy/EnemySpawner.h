@@ -18,7 +18,8 @@ namespace Enemy {
 		/// @param player 生成位置の基準になるPlayer
 		/// @param enemyManager Enemyの生成要求を登録するManager
 		/// @param sceneType Enemyを所属させるシーン種別
-		void Initialize(Player::Base* player, Manager* enemyManager, SceneType sceneType);
+		/// @param timeLimit Bonus Waveへ切り替えるゲーム制限時間
+		void Initialize(Player::Base* player, Manager* enemyManager, SceneType sceneType, float timeLimit);
 
 		/// @brief 経過時間を更新し、生成条件を満たしたEnemyをManagerへ登録
 		/// @param deltaTime 前フレームからの経過時間
@@ -43,6 +44,10 @@ namespace Enemy {
 		/// @return Spawnerの経過時間
 		float GetElapsedTime() const { return elapsedTime_; }
 
+		/// @brief Bonus Waveへ切り替えるゲーム制限時間を取得
+		/// @return Bonus Waveへ切り替えるゲーム制限時間
+		float GetTimeLimit() const { return timeLimit_; }
+
 		/// @brief 現在Wave内で次のElite生成までに必要なEnemy生成数を取得
 		/// @return 次のElite生成までに必要な生成数、処理中Waveがない場合は0
 		std::uint32_t GetRemainingSpawnCountUntilElite() const;
@@ -52,16 +57,20 @@ namespace Enemy {
 		/// @return 処理中のWaveが存在する場合はtrue
 		bool TryGetActiveWaveIndex(std::size_t& outIndex) const;
 
+		/// @brief Bonus Waveを処理中か確認
+		/// @return Bonus Waveを処理中の場合はtrue
+		bool IsBonusWaveActive() const;
+
 		/// @brief 現在のWave設定でEnemyを即時生成
 		/// @param spawnCount 同時生成するEnemy数
 		/// @return 実際に生成したEnemy数
 		std::uint32_t SpawnImmediately(std::uint32_t spawnCount);
 
 	private:
-		/// @brief 現在時刻に適用するWaveを検索
+		/// @brief 現在時刻に適用する通常WaveまたはBonus Waveを検索
 		/// @param outIndex 見つかったWave位置
-		/// @return 適用するWave、存在しない場合はnullptr
-		const WaveSettings* FindActiveWave(std::size_t& outIndex) const;
+		/// @return 適用する生成設定、存在しない場合はnullptr
+		const WaveSpawnSettings* FindActiveSpawnSettings(std::size_t& outIndex) const;
 
 		/// @brief 処理対象Waveを切り替えて生成周期とElite周期を初期化
 		/// @param waveIndex 新しく処理するWave位置
@@ -71,17 +80,17 @@ namespace Enemy {
 		/// @param wave 適用するWave設定
 		/// @param spawnCount 同時生成するEnemy数
 		/// @return 実際に生成したEnemy数
-		std::uint32_t SpawnBatch(const WaveSettings& wave, std::uint32_t spawnCount);
+		std::uint32_t SpawnBatch(const WaveSpawnSettings& wave, std::uint32_t spawnCount);
 
 		/// @brief Waveの抽選率から生成するEnemy種類を選択
 		/// @param wave 適用するWave設定
 		/// @return 生成するEnemyの種類
-		Data::Type SelectSpawnType(const WaveSettings& wave) const;
+		Data::Type SelectSpawnType(const WaveSpawnSettings& wave) const;
 
 		/// @brief Wave設定によるEnemy生成要求を1件発行
 		/// @param wave 適用するWave設定
 		/// @return Enemyを生成した場合はtrue
-		bool SpawnEnemy(const WaveSettings& wave);
+		bool SpawnEnemy(const WaveSpawnSettings& wave);
 
 		/// @brief Player周辺の地表面からEnemyの生成位置を作成
 		/// @param wave 適用するWave設定
@@ -89,7 +98,7 @@ namespace Enemy {
 		/// @param outGroundSurfaceY 生成地点の地表面Y座標
 		/// @return 生成可能な地表面が見つかった場合はtrue
 		bool TryCreateSpawnPosition(
-			const WaveSettings& wave,
+			const WaveSpawnSettings& wave,
 			Vector3& outPosition,
 			float& outGroundSurfaceY) const;
 
@@ -97,7 +106,7 @@ namespace Enemy {
 		/// @param type ステータスを計算するEnemyの種類
 		/// @param wave 適用するWave設定
 		/// @return 新しく生成するEnemyのステータス
-		Data::Status CalculateSpawnStatus(Data::Type type, const WaveSettings& wave) const;
+		Data::Status CalculateSpawnStatus(Data::Type type, const WaveSpawnSettings& wave) const;
 
 		Player::Base* player_ = nullptr;
 		Manager* enemyManager_ = nullptr;
@@ -107,6 +116,7 @@ namespace Enemy {
 		std::uint64_t activeWaveEnemySpawnCount_ = 0;
 		float spawnTimer_ = 0.0f;
 		float elapsedTime_ = 0.0f;
+		float timeLimit_ = 0.0f;
 		bool isActive_ = true;
 	};
 } // namespace Enemy

@@ -1,5 +1,17 @@
 {
     "enemySpawner": {
+        "bonusWave": {
+            "eliteSpawnInterval": 50,
+            "healthPowerGrowthRatePerMinute": 0.10000000149011612,
+            "maxSpawnRadius": 24.0,
+            "minSpawnRadius": 16.0,
+            "moveSpeedGrowthRatePerMinute": 0.019999999552965164,
+            "normalSpawnRate": 0.6000000238418579,
+            "runnerSpawnRate": 0.30000001192092896,
+            "spawnCount": 1,
+            "spawnInterval": 0.25,
+            "tankSpawnRate": 0.10000000149011612
+        },
         "maxAliveEnemies": 500,
         "waves": [
             {
@@ -30,18 +42,18 @@
             "health": 1000.0,
             "hitboxMax": [
                 1.5,
-                4.0,
+                4.5,
                 1.5
             ],
             "hitboxMin": [
                 -1.5,
-                0.0,
+                -1.5,
                 -1.5
             ],
             "moveSpeed": 1.5,
-            "movementColliderRadius": 1.5,
+            "movementColliderRadius": 1.350000023841858,
             "power": 20.0,
-            "scaleMultiplier": 1.5
+            "scaleMultiplier": 2.0
         },
         "Elite": {
             "bodyScaleMultiplier": 1.5,
