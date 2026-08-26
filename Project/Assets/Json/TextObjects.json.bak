@@ -114,7 +114,7 @@
                 0.0,
                 0.0
             ],
-            "text": "00:00",
+            "text": "03:55",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -154,7 +154,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 30",
+            "text": "Enemy : 51",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -194,7 +194,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.3",
+            "text": "Lv.2",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -234,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 0 / 100",
+            "text": "HP : 12 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -274,7 +274,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.5",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.2",
+            "text": "FPS : 60.0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -354,7 +354,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 89723762",
+            "text": "Seed : 2030749581",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -434,7 +434,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.3",
+            "text": "Lv.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -474,7 +474,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Lv.10",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -514,7 +514,7 @@
                 0.0,
                 0.0
             ],
-            "text": "1097",
+            "text": "77",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "1051",
+            "text": "69",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -634,7 +634,7 @@
                 0.0,
                 0.0
             ],
-            "text": "ボスを召喚",
+            "text": "10Gで開ける",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,

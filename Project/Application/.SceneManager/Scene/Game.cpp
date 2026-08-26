@@ -4,10 +4,14 @@
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Logger/Logger.h"
 #include "imguiHeaders.h"
+#include <algorithm>
 #include <format>
 
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
+	constexpr float kTpsCameraZoomSpeed = 15.0f;
+	constexpr float kTpsCameraMinDistance = 5.0f;
+	constexpr float kTpsCameraMaxDistance = 30.0f;
 }
 
 Game::Game(CommonData& commonData)
@@ -161,6 +165,20 @@ SceneType Game::Update(float dt) {
 
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
+
+		// 左右トリガーの差分で同時入力を相殺し、時間比例でカメラ距離を変更
+		if (tpsCamera->GetUseGamePadInput()) {
+			MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
+			if (gamePad && gamePad->IsConnected()) {
+				const float zoomInput = gamePad->GetLeftTrigger() - gamePad->GetRightTrigger();
+				const float nextDistance = tpsCamera->GetDistance() + zoomInput * kTpsCameraZoomSpeed * deltaTime;
+				tpsCamera->SetDistance(std::clamp(
+					nextDistance,
+					kTpsCameraMinDistance,
+					kTpsCameraMaxDistance
+				));
+			}
+		}
 	}
 	cameraManager_.Update(deltaTime);
 

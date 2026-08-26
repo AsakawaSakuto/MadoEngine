@@ -29,10 +29,10 @@
             "startMin": 1
         },
         "mapSize": [
-            20,
-            20
+            16,
+            16
         ],
-        "seed": 3728544178,
+        "seed": 3662274402,
         "slopeSpawnRate": 1.0
     }
 }

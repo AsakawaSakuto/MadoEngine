@@ -58,6 +58,10 @@ public:
 	/// @param distance カメラ-ターゲット間の距離
 	void SetDistance(float distance) { distance_ = distance; }
 
+	/// @brief ターゲットとの距離を取得
+	/// @return カメラ-ターゲット間の距離
+	float GetDistance() const { return distance_; }
+
 	/// @brief 旋回角（Yaw）を取得
 	/// @return Y軸周りの回転角（ラジアン）
 	float GetYaw() const { return yaw_; }
