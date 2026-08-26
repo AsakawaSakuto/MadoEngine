@@ -26,6 +26,7 @@ constexpr float kDecisionRiseDistance = 64.0f;       // 選択決定時のカー
 constexpr Vector4 kNewWeaponColor = { 0.95f, 0.97f, 1.0f, 1.0f };
 constexpr Vector4 kDefaultCardBackgroundColor = { 0.055f, 0.07f, 0.11f, 0.96f };
 constexpr Vector4 kLegendaryCardBackgroundColor = { 0.22f, 0.13f, 0.025f, 0.98f };
+constexpr Vector4 kUpgradeResultTextColor = { 0.30f, 0.95f, 0.40f, 1.0f };
 constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
 /// @brief 配列形式の色をVector4へ変換
@@ -111,6 +112,21 @@ void WeaponUpgradeCardUI::Initialize(std::size_t cardIndex) {
 		"",
 		SceneType::Game,
 		layer);
+	currentValueText_ = MyText::Create(
+		std::string(kCardObjectNamePrefix) + "CurrentValue" + suffix,
+		"",
+		SceneType::Game,
+		layer);
+	valueArrowText_ = MyText::Create(
+		std::string(kCardObjectNamePrefix) + "ValueArrow" + suffix,
+		"→",
+		SceneType::Game,
+		layer);
+	upgradedValueText_ = MyText::Create(
+		std::string(kCardObjectNamePrefix) + "UpgradedValue" + suffix,
+		"",
+		SceneType::Game,
+		layer);
 	selectionText_ = MyText::Create(
 		std::string(kCardObjectNamePrefix) + "Selection" + suffix,
 		"選択中",
@@ -133,6 +149,9 @@ void WeaponUpgradeCardUI::Finalize() {
 	weaponNameText_ = {};
 	categoryText_ = {};
 	detailText_ = {};
+	currentValueText_ = {};
+	valueArrowText_ = {};
+	upgradedValueText_ = {};
 	selectionText_ = {};
 	scaleTransitionTimer_.Reset();
 	selectedPulseTimer_.Reset();
@@ -144,6 +163,7 @@ void WeaponUpgradeCardUI::Finalize() {
 	backgroundColor_ = kDefaultCardBackgroundColor;
 	isSelected_ = false;
 	isDecisionAnimationPlaying_ = false;
+	isOwnedWeaponUpgrade_ = false;
 	isVisible_ = false;
 	isInitialized_ = false;
 }
@@ -169,15 +189,15 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 	}
 
 	// 所持武器強化と新規武器でCard配色と表示情報を切り替え
-	const bool isOwnedWeaponUpgrade = choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade;
-	accentColor_ = isOwnedWeaponUpgrade ? ToVector4(choice.rarityDisplayColor) : kNewWeaponColor;
-	const bool isLegendary = isOwnedWeaponUpgrade && choice.rarity &&
+	isOwnedWeaponUpgrade_ = choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade;
+	accentColor_ = isOwnedWeaponUpgrade_ ? ToVector4(choice.rarityDisplayColor) : kNewWeaponColor;
+	const bool isLegendary = isOwnedWeaponUpgrade_ && choice.rarity &&
 		*choice.rarity == Rarity::Legendary;
 	backgroundColor_ = isLegendary
 		? kLegendaryCardBackgroundColor
 		: kDefaultCardBackgroundColor;
 	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
-		if (isOwnedWeaponUpgrade) {
+		if (isOwnedWeaponUpgrade_) {
 			categoryText->SetText(choice.rarityDisplayName + "\n" + choice.choiceTypeDisplayName);
 			categoryText->SetColor(accentColor_);
 		} else {
@@ -186,11 +206,20 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 		}
 	}
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
-		if (isOwnedWeaponUpgrade) {
-			detailText->SetText(std::format("{}\n{:+.3f}", choice.statDisplayName, choice.calculatedAmount));
+		if (isOwnedWeaponUpgrade_) {
+			detailText->SetText(choice.statDisplayName);
 		} else {
 			detailText->SetText("新しい武器を装備");
 		}
+	}
+	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
+		currentValueText->SetText(std::format("{:.1f}", choice.currentValue));
+	}
+	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
+		upgradedValueText->SetText(std::format(
+			"{:.1f}",
+			choice.currentValue + choice.calculatedAmount
+		));
 	}
 	if (Sprite* iconBorder = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)])) {
 		iconBorder->SetColor(accentColor_);
@@ -201,6 +230,7 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
 		background->SetColor(backgroundColor_);
 	}
+	ApplySelectionScale(currentScale_);
 	SetVisible(true);
 }
 
@@ -343,11 +373,38 @@ void WeaponUpgradeCardUI::ApplyLayout() {
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
 		detailText->SetFontFamily("Yu Gothic UI");
 		detailText->SetFontSize(22.0f);
-		detailText->SetAreaSize({ 210.0f, 125.0f });
+		detailText->SetAreaSize({ 210.0f, 60.0f });
 		detailText->SetAnchorPoint({ 0.5f, 0.5f });
 		detailText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
 		detailText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
 		detailText->SetColor({ 0.92f, 0.94f, 1.0f, 1.0f });
+	}
+	const std::array<MadoEngine::TextHandle, 3> upgradeValueTextHandles = {
+		currentValueText_,
+		valueArrowText_,
+		upgradedValueText_,
+	};
+
+	// 分割した値の行へ共通書式を適用して拡縮時の見た目を統一
+	for (MadoEngine::TextHandle handle : upgradeValueTextHandles) {
+		if (MadoEngine::Text* text = ResolveText(handle)) {
+			text->SetFontFamily("Yu Gothic UI");
+			text->SetFontSize(22.0f);
+			text->SetAnchorPoint({ 0.5f, 0.5f });
+			text->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
+			text->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
+			text->SetColor({ 0.92f, 0.94f, 1.0f, 1.0f });
+		}
+	}
+	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
+		currentValueText->SetAreaSize({ 85.0f, 42.0f });
+	}
+	if (MadoEngine::Text* valueArrowText = ResolveText(valueArrowText_)) {
+		valueArrowText->SetAreaSize({ 35.0f, 42.0f });
+	}
+	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
+		upgradedValueText->SetAreaSize({ 85.0f, 42.0f });
+		upgradedValueText->SetColor(kUpgradeResultTextColor);
 	}
 	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
 		selectionText->SetFontFamily("Yu Gothic UI");
@@ -401,10 +458,26 @@ void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 			{ cardPositionX + 38.0f, 240.0f + decisionOffsetY_ }, cardPosition, scale));
 		categoryText->SetScale(textScale);
 	}
+	const float detailPositionY = isOwnedWeaponUpgrade_ ? 365.0f : 390.0f;
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
 		detailText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX, 390.0f + decisionOffsetY_ }, cardPosition, scale));
+			{ cardPositionX, detailPositionY + decisionOffsetY_ }, cardPosition, scale));
 		detailText->SetScale(textScale);
+	}
+	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
+		currentValueText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX - 48.0f, 410.0f + decisionOffsetY_ }, cardPosition, scale));
+		currentValueText->SetScale(textScale);
+	}
+	if (MadoEngine::Text* valueArrowText = ResolveText(valueArrowText_)) {
+		valueArrowText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX, 410.0f + decisionOffsetY_ }, cardPosition, scale));
+		valueArrowText->SetScale(textScale);
+	}
+	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
+		upgradedValueText->SetPosition(ScalePositionAroundCenter(
+			{ cardPositionX + 48.0f, 410.0f + decisionOffsetY_ }, cardPosition, scale));
+		upgradedValueText->SetScale(textScale);
 	}
 	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
 		selectionText->SetPosition(ScalePositionAroundCenter(
@@ -415,7 +488,7 @@ void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 
 void WeaponUpgradeCardUI::ApplyVisibility() {
 
-	// Card構成要素へ共通表示状態を反映し選択Labelだけを追加条件で制御
+	// Card構成要素へ共通表示状態を反映し候補種別と選択状態に応じて補助Textを制御
 	for (MadoEngine::SpriteHandle handle : cardSprites_) {
 		if (Sprite* sprite = ResolveSprite(handle)) {
 			sprite->SetVisible(isVisible_);
@@ -432,6 +505,16 @@ void WeaponUpgradeCardUI::ApplyVisibility() {
 	}
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
 		detailText->SetVisible(isVisible_);
+	}
+	const bool areUpgradeValuesVisible = isVisible_ && isOwnedWeaponUpgrade_;
+	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
+		currentValueText->SetVisible(areUpgradeValuesVisible);
+	}
+	if (MadoEngine::Text* valueArrowText = ResolveText(valueArrowText_)) {
+		valueArrowText->SetVisible(areUpgradeValuesVisible);
+	}
+	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
+		upgradedValueText->SetVisible(areUpgradeValuesVisible);
 	}
 	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
 		selectionText->SetVisible(isVisible_ && isSelected_);

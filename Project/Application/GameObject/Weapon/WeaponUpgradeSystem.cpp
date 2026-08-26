@@ -48,11 +48,11 @@ namespace Weapon {
 			}
 		}
 
-		/// @brief 二つの強化加算値が表示精度内で一致するか確認
-		/// @param left 比較する加算値
-		/// @param right 比較する加算値
+		/// @brief 二つの強化値が表示精度内で一致するか確認
+		/// @param left 比較する強化値
+		/// @param right 比較する強化値
 		/// @return 一致する場合はtrue
-		bool IsSameUpgradeAmount(float left, float right) {
+		bool IsSameUpgradeValue(float left, float right) {
 			if (!std::isfinite(left) || !std::isfinite(right)) {
 				return false;
 			}
@@ -203,8 +203,9 @@ namespace Weapon {
 			const int statIndex = random_.Int(0, static_cast<int>(selectableStats.size()) - 1);
 			const UpgradeStatType statType = selectableStats[static_cast<std::size_t>(statIndex)];
 			const Rarity rarity = DrawRarity();
+			const UpgradeValue* upgradeValue = FindUpgradeValue(weapon->GetUpgradeStatus(), statType);
 			float calculatedAmount = 0.0f;
-			if (!weapon->CalculateUpgradeAmount(statType, rarity, calculatedAmount)) {
+			if (!upgradeValue || !weapon->CalculateUpgradeAmount(statType, rarity, calculatedAmount)) {
 
 				// 不完全な候補群を表示しないよう生成全体を取り消し
 				choices_.clear();
@@ -219,6 +220,7 @@ namespace Weapon {
 			choice.choiceTypeDisplayName = "所持武器を強化";
 			choice.statType = statType;
 			choice.rarity = rarity;
+			choice.currentValue = upgradeValue->value;
 			choice.calculatedAmount = calculatedAmount;
 			choice.statDisplayName = UpgradeStatTypeToDisplayName(statType);
 			choice.rarityDisplayName = GetRarityDisplayName(rarity);
@@ -290,10 +292,16 @@ namespace Weapon {
 			}
 
 			float recalculatedAmount = 0.0f;
+			const UpgradeValue* currentUpgradeValue = FindUpgradeValue(
+				weapon->GetUpgradeStatus(),
+				*choice.statType
+			);
 
-			// 表示後の設定変更や不正な候補改変を適用直前の再計算で拒否
-			if (!weapon->CalculateUpgradeAmount(*choice.statType, *choice.rarity, recalculatedAmount) ||
-				!IsSameUpgradeAmount(recalculatedAmount, choice.calculatedAmount)) {
+			// 表示後の現在値・設定変更や不正な候補改変を適用直前の再計算で拒否
+			if (!currentUpgradeValue ||
+				!IsSameUpgradeValue(currentUpgradeValue->value, choice.currentValue) ||
+				!weapon->CalculateUpgradeAmount(*choice.statType, *choice.rarity, recalculatedAmount) ||
+				!IsSameUpgradeValue(recalculatedAmount, choice.calculatedAmount)) {
 				Logger::Output("[Application] 表示時と適用時の武器強化値が一致しません。", Logger::Level::Error);
 				return false;
 			}

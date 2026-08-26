@@ -80,6 +80,7 @@ private:
 		int normalChestSpawnCount = 25;
 		int freeChestSpawnCount = 25;
 		int karmaSpawnCount = 50;
+		int bossSpawnerSpawnCount = 1;
 		Vector3 blockSize = { 15.0f, 7.5f, 15.0f };
 		int minHeight = 1;
 		int maxHeight = 10;
@@ -125,6 +126,16 @@ private:
 	/// @return 読み込みに成功した場合はtrue
 	bool LoadEditorSettings(GenerationSettings& outSettings, bool useSavedSeed) const;
 
+	/// @brief MapStatusタブの生成条件と再生成操作を描画
+	void DrawMapStatusEditor();
+
+	/// @brief EventObjStatusタブのイベント配置数を描画
+	void DrawEventObjectStatusEditor();
+
+	/// @brief MapViewタブの生成結果と高さプレビューを描画
+	/// @param player プレビューへ表示するPlayer
+	void DrawMapViewEditor(const Player::Base* player) const;
+
 	/// @brief 生成済みMapの高さと主要Objectプレビューを描画
 	/// @param player プレビューへ表示するPlayer
 	void DrawHeightPreview(const Player::Base* player) const;
@@ -148,7 +159,7 @@ private:
 	/// @brief Map上にKarmaをランダム配置
 	void GenerateKarmas();
 
-	/// @brief 通常ブロック上にBossSpawnerを配置
+	/// @brief 通常ブロック上に設定数のBossSpawnerを配置
 	void GenerateBossSpawner();
 
 	/// @brief Map上のイベントオブジェクトを更新
@@ -203,6 +214,7 @@ private:
 	int normalChestSpawnCount_ = 25;
 	int freeChestSpawnCount_ = 25;
 	int karmaSpawnCount_ = 50;
+	int bossSpawnerSpawnCount_ = 1;
 
 	bool isModelDraw_ = true;
 

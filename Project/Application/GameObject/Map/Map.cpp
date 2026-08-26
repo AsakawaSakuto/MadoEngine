@@ -228,6 +228,7 @@ void Map::Generate(const GenerationSettings& settings) {
 	normalChestSpawnCount_ = safeSettings.normalChestSpawnCount;
 	freeChestSpawnCount_ = safeSettings.freeChestSpawnCount;
 	karmaSpawnCount_ = safeSettings.karmaSpawnCount;
+	bossSpawnerSpawnCount_ = safeSettings.bossSpawnerSpawnCount;
 	blockSize_ = safeSettings.blockSize;
 	minHeight_ = safeSettings.minHeight;
 	maxHeight_ = safeSettings.maxHeight;
@@ -411,121 +412,157 @@ void Map::DrawImGui(const Player::Base* player) {
 	ImGui::SetNextWindowSize(ImVec2(520.0f, 720.0f), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Map Generator")) {
 		ImGui::TextDisabled("設定ファイル: %s", kMapGeneratorJsonPath);
-		ImGui::SeparatorText("生成操作");
-		ImGui::SetNextItemWidth(180.0f);
-		ImGui::InputScalar("シード", ImGuiDataType_U32, &editorSettings_.seed);
-		ImGui::SameLine();
-		if (ImGui::Button("ランダム")) {
-			editorSettings_.seed = MyRand::CreateSeed();
+		if (ImGui::BeginTabBar("MapGeneratorTabs")) {
+			if (ImGui::BeginTabItem("MapStatus")) {
+				DrawMapStatusEditor();
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("EventObjStatus")) {
+				DrawEventObjectStatusEditor();
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("MapView")) {
+				DrawMapViewEditor(player);
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
 		}
 
-		const bool hasDraftChanges = !AreGenerationSettingsEqual(editorSettings_, CreateAppliedSettings());
-		if (ImGui::Button("現在の設定でMapを再生成", ImVec2(-1.0f, 0.0f))) {
-
-			// 描画中のResourceを破棄しないようFrame末尾の適用要求だけを保持
-			pendingGenerationSettings_ = editorSettings_;
-		}
-		if (pendingGenerationSettings_) {
-			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "再生成を予約済み");
-		} else if (hasDraftChanges) {
-			ImGui::TextColored(ImVec4(0.25f, 0.75f, 1.0f, 1.0f), "未適用の生成設定あり");
-		} else {
-			ImGui::TextDisabled("生成済みMapと設定が一致");
-		}
-		if (ImGui::Button("生成済み設定へ戻す")) {
-			editorSettings_ = CreateAppliedSettings();
-			pendingGenerationSettings_.reset();
-		}
-
-		ImGui::SeparatorText("Mapサイズ");
-		ImGui::SetNextItemWidth(180.0f);
-		ImGui::DragInt("横幅", &editorSettings_.mapWidth, 1.0f, kMinimumMapSize, kMaximumMapSize, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::SetNextItemWidth(180.0f);
-		ImGui::DragInt("奥行き", &editorSettings_.mapHeight, 1.0f, kMinimumMapSize, kMaximumMapSize, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::DragFloat3("Blockサイズ", &editorSettings_.blockSize.x, 0.1f, 0.5f, 100.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-
-		ImGui::SeparatorText("地形の高さ");
-		ImGui::DragInt("最小高さ", &editorSettings_.minHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::DragInt("最大高さ", &editorSettings_.maxHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::DragInt("開始高さ Min", &editorSettings_.minStartHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::DragInt("開始高さ Max", &editorSettings_.maxStartHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::DragInt("高さ変化 Min", &editorSettings_.minRangeHeight, 1.0f, -10, 0, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::DragInt("高さ変化 Max", &editorSettings_.maxRangeHeight, 1.0f, 0, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::SliderFloat("Slope出現率", &editorSettings_.slopeSpawnRate, 0.0f, 1.0f, "%.2f");
-
-		ImGui::SeparatorText("イベント配置数");
-		ImGui::TextUnformatted("Jar");
-		ImGui::Indent();
-		const int previousJarTotal = editorSettings_.jarSpawnCount;
-		if (ImGui::DragInt("総数##Jar", &editorSettings_.jarSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-			RebalanceTypeCounts(
-				previousJarTotal,
-				editorSettings_.jarSpawnCount,
-				editorSettings_.moneyJarSpawnCount,
-				editorSettings_.expJarSpawnCount
-			);
-		}
-		if (ImGui::DragInt("Money##Jar", &editorSettings_.moneyJarSpawnCount, 1.0f, 0, editorSettings_.jarSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-			editorSettings_.moneyJarSpawnCount = std::clamp(editorSettings_.moneyJarSpawnCount, 0, editorSettings_.jarSpawnCount);
-			editorSettings_.expJarSpawnCount = editorSettings_.jarSpawnCount - editorSettings_.moneyJarSpawnCount;
-		}
-		if (ImGui::DragInt("Exp##Jar", &editorSettings_.expJarSpawnCount, 1.0f, 0, editorSettings_.jarSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-			editorSettings_.expJarSpawnCount = std::clamp(editorSettings_.expJarSpawnCount, 0, editorSettings_.jarSpawnCount);
-			editorSettings_.moneyJarSpawnCount = editorSettings_.jarSpawnCount - editorSettings_.expJarSpawnCount;
-		}
-		ImGui::Unindent();
-
-		ImGui::TextUnformatted("Chest");
-		ImGui::Indent();
-		const int previousChestTotal = editorSettings_.chestSpawnCount;
-		if (ImGui::DragInt("総数##Chest", &editorSettings_.chestSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-			RebalanceTypeCounts(
-				previousChestTotal,
-				editorSettings_.chestSpawnCount,
-				editorSettings_.normalChestSpawnCount,
-				editorSettings_.freeChestSpawnCount
-			);
-		}
-		if (ImGui::DragInt("Normal##Chest", &editorSettings_.normalChestSpawnCount, 1.0f, 0, editorSettings_.chestSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-			editorSettings_.normalChestSpawnCount = std::clamp(editorSettings_.normalChestSpawnCount, 0, editorSettings_.chestSpawnCount);
-			editorSettings_.freeChestSpawnCount = editorSettings_.chestSpawnCount - editorSettings_.normalChestSpawnCount;
-		}
-		if (ImGui::DragInt("Free##Chest", &editorSettings_.freeChestSpawnCount, 1.0f, 0, editorSettings_.chestSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
-			editorSettings_.freeChestSpawnCount = std::clamp(editorSettings_.freeChestSpawnCount, 0, editorSettings_.chestSpawnCount);
-			editorSettings_.normalChestSpawnCount = editorSettings_.chestSpawnCount - editorSettings_.freeChestSpawnCount;
-		}
-		ImGui::Unindent();
-
-		ImGui::TextUnformatted("Karma");
-		ImGui::Indent();
-		ImGui::DragInt("総数##Karma", &editorSettings_.karmaSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
-		ImGui::Unindent();
-
-		// 相互依存する高さ範囲とタイプ別生成数を各Widgetの入力後に一括補正
+		// 非表示タブの設定も含めて相互依存する範囲と内訳を毎Frame補正
 		ClampGenerationSettings(editorSettings_);
-
-		ImGui::SeparatorText("生成済みMap");
-		std::size_t slopeCount = 0;
-		for (const std::vector<MapBlock>& row : mapBlocks_) {
-			slopeCount += static_cast<std::size_t>(std::count_if(row.begin(), row.end(), [](const MapBlock& block) {
-				return block.GetType() == MapBlockType::Slope;
-			}));
-		}
-		ImGui::Text("シード: %u", currentSeed_);
-		ImGui::Text("Block: %d x %d = %d", mapWidth_, mapHeight_, mapWidth_ * mapHeight_);
-		ImGui::Text("Slope: %zu / Event Object: %zu", slopeCount, eventObjects_.size());
-		ImGui::Text("Jar: %d  Money: %d  Exp: %d", jarSpawnCount_, moneyJarSpawnCount_, expJarSpawnCount_);
-		ImGui::Text("Chest: %d  Normal: %d  Free: %d", chestSpawnCount_, normalChestSpawnCount_, freeChestSpawnCount_);
-		if (player) {
-			const Vector3 playerPosition = player->GetPosition();
-			ImGui::Text("Player: X %.2f  Y %.2f  Z %.2f", playerPosition.x, playerPosition.y, playerPosition.z);
-		}
-		DrawHeightPreview(player);
 	}
 	ImGui::End();
 
 #endif // USE_IMGUI
 
+}
+
+void Map::DrawMapStatusEditor() {
+#ifdef USE_IMGUI
+	ImGui::SeparatorText("生成操作");
+	ImGui::SetNextItemWidth(180.0f);
+	ImGui::InputScalar("シード", ImGuiDataType_U32, &editorSettings_.seed);
+	ImGui::SameLine();
+	if (ImGui::Button("ランダム")) {
+		editorSettings_.seed = MyRand::CreateSeed();
+	}
+
+	const bool hasDraftChanges = !AreGenerationSettingsEqual(editorSettings_, CreateAppliedSettings());
+	if (ImGui::Button("現在の設定でMapを再生成", ImVec2(-1.0f, 0.0f))) {
+
+		// 描画中のResourceを破棄しないようFrame末尾の適用要求だけを保持
+		pendingGenerationSettings_ = editorSettings_;
+	}
+	if (pendingGenerationSettings_) {
+		ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "再生成を予約済み");
+	} else if (hasDraftChanges) {
+		ImGui::TextColored(ImVec4(0.25f, 0.75f, 1.0f, 1.0f), "未適用の生成設定あり");
+	} else {
+		ImGui::TextDisabled("生成済みMapと設定が一致");
+	}
+	if (ImGui::Button("生成済み設定へ戻す")) {
+		editorSettings_ = CreateAppliedSettings();
+		pendingGenerationSettings_.reset();
+	}
+
+	ImGui::SeparatorText("Mapサイズ");
+	ImGui::SetNextItemWidth(180.0f);
+	ImGui::DragInt("横幅", &editorSettings_.mapWidth, 1.0f, kMinimumMapSize, kMaximumMapSize, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::SetNextItemWidth(180.0f);
+	ImGui::DragInt("奥行き", &editorSettings_.mapHeight, 1.0f, kMinimumMapSize, kMaximumMapSize, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragFloat3("Blockサイズ", &editorSettings_.blockSize.x, 0.1f, 0.5f, 100.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+	ImGui::SeparatorText("地形の高さ");
+	ImGui::DragInt("最小高さ", &editorSettings_.minHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragInt("最大高さ", &editorSettings_.maxHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragInt("開始高さ Min", &editorSettings_.minStartHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragInt("開始高さ Max", &editorSettings_.maxStartHeight, 1.0f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragInt("高さ変化 Min", &editorSettings_.minRangeHeight, 1.0f, -10, 0, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragInt("高さ変化 Max", &editorSettings_.maxRangeHeight, 1.0f, 0, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::SliderFloat("Slope出現率", &editorSettings_.slopeSpawnRate, 0.0f, 1.0f, "%.2f");
+#endif // USE_IMGUI
+}
+
+void Map::DrawEventObjectStatusEditor() {
+#ifdef USE_IMGUI
+	ImGui::SeparatorText("イベント配置数");
+	ImGui::TextUnformatted("Jar");
+	ImGui::Indent();
+	const int previousJarTotal = editorSettings_.jarSpawnCount;
+	if (ImGui::DragInt("総数##Jar", &editorSettings_.jarSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+		RebalanceTypeCounts(
+			previousJarTotal,
+			editorSettings_.jarSpawnCount,
+			editorSettings_.moneyJarSpawnCount,
+			editorSettings_.expJarSpawnCount
+		);
+	}
+	if (ImGui::DragInt("Money##Jar", &editorSettings_.moneyJarSpawnCount, 1.0f, 0, editorSettings_.jarSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+		editorSettings_.moneyJarSpawnCount = std::clamp(editorSettings_.moneyJarSpawnCount, 0, editorSettings_.jarSpawnCount);
+		editorSettings_.expJarSpawnCount = editorSettings_.jarSpawnCount - editorSettings_.moneyJarSpawnCount;
+	}
+	if (ImGui::DragInt("Exp##Jar", &editorSettings_.expJarSpawnCount, 1.0f, 0, editorSettings_.jarSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+		editorSettings_.expJarSpawnCount = std::clamp(editorSettings_.expJarSpawnCount, 0, editorSettings_.jarSpawnCount);
+		editorSettings_.moneyJarSpawnCount = editorSettings_.jarSpawnCount - editorSettings_.expJarSpawnCount;
+	}
+	ImGui::Unindent();
+
+	ImGui::TextUnformatted("Chest");
+	ImGui::Indent();
+	const int previousChestTotal = editorSettings_.chestSpawnCount;
+	if (ImGui::DragInt("総数##Chest", &editorSettings_.chestSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+		RebalanceTypeCounts(
+			previousChestTotal,
+			editorSettings_.chestSpawnCount,
+			editorSettings_.normalChestSpawnCount,
+			editorSettings_.freeChestSpawnCount
+		);
+	}
+	if (ImGui::DragInt("Normal##Chest", &editorSettings_.normalChestSpawnCount, 1.0f, 0, editorSettings_.chestSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+		editorSettings_.normalChestSpawnCount = std::clamp(editorSettings_.normalChestSpawnCount, 0, editorSettings_.chestSpawnCount);
+		editorSettings_.freeChestSpawnCount = editorSettings_.chestSpawnCount - editorSettings_.normalChestSpawnCount;
+	}
+	if (ImGui::DragInt("Free##Chest", &editorSettings_.freeChestSpawnCount, 1.0f, 0, editorSettings_.chestSpawnCount, "%d", ImGuiSliderFlags_AlwaysClamp)) {
+		editorSettings_.freeChestSpawnCount = std::clamp(editorSettings_.freeChestSpawnCount, 0, editorSettings_.chestSpawnCount);
+		editorSettings_.normalChestSpawnCount = editorSettings_.chestSpawnCount - editorSettings_.freeChestSpawnCount;
+	}
+	ImGui::Unindent();
+
+	ImGui::TextUnformatted("Karma");
+	ImGui::Indent();
+	ImGui::DragInt("総数##Karma", &editorSettings_.karmaSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Unindent();
+
+	ImGui::TextUnformatted("BossSpawner");
+	ImGui::Indent();
+	ImGui::DragInt("総数##BossSpawner", &editorSettings_.bossSpawnerSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Unindent();
+#endif // USE_IMGUI
+}
+
+void Map::DrawMapViewEditor(const Player::Base* player) const {
+#ifdef USE_IMGUI
+	ImGui::SeparatorText("生成済みMap");
+	std::size_t slopeCount = 0;
+	for (const std::vector<MapBlock>& row : mapBlocks_) {
+		slopeCount += static_cast<std::size_t>(std::count_if(row.begin(), row.end(), [](const MapBlock& block) {
+			return block.GetType() == MapBlockType::Slope;
+		}));
+	}
+	ImGui::Text("シード: %u", currentSeed_);
+	ImGui::Text("Block: %d x %d = %d", mapWidth_, mapHeight_, mapWidth_ * mapHeight_);
+	ImGui::Text("Slope: %zu / Event Object: %zu", slopeCount, eventObjects_.size());
+	ImGui::Text("Jar: %d  Money: %d  Exp: %d", jarSpawnCount_, moneyJarSpawnCount_, expJarSpawnCount_);
+	ImGui::Text("Chest: %d  Normal: %d  Free: %d", chestSpawnCount_, normalChestSpawnCount_, freeChestSpawnCount_);
+	ImGui::Text("Karma: %d  BossSpawner: %d", karmaSpawnCount_, bossSpawnerSpawnCount_);
+	if (player) {
+		const Vector3 playerPosition = player->GetPosition();
+		ImGui::Text("Player: X %.2f  Y %.2f  Z %.2f", playerPosition.x, playerPosition.y, playerPosition.z);
+	}
+	DrawHeightPreview(player);
+#else
+	(void)player;
+#endif // USE_IMGUI
 }
 
 bool Map::ApplyPendingEditorGeneration() {
@@ -624,6 +661,7 @@ Map::GenerationSettings Map::CreateAppliedSettings() const {
 	settings.normalChestSpawnCount = normalChestSpawnCount_;
 	settings.freeChestSpawnCount = freeChestSpawnCount_;
 	settings.karmaSpawnCount = karmaSpawnCount_;
+	settings.bossSpawnerSpawnCount = bossSpawnerSpawnCount_;
 	settings.blockSize = blockSize_;
 	settings.minHeight = minHeight_;
 	settings.maxHeight = maxHeight_;
@@ -645,6 +683,7 @@ void Map::ClampGenerationSettings(GenerationSettings& settings) {
 	settings.normalChestSpawnCount = std::clamp(settings.normalChestSpawnCount, 0, settings.chestSpawnCount);
 	settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
 	settings.karmaSpawnCount = std::clamp(settings.karmaSpawnCount, 0, kMaximumEventObjectCount);
+	settings.bossSpawnerSpawnCount = std::clamp(settings.bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
 	settings.blockSize.x = std::clamp(std::isfinite(settings.blockSize.x) ? settings.blockSize.x : 15.0f, 0.5f, 100.0f);
 	settings.blockSize.y = std::clamp(std::isfinite(settings.blockSize.y) ? settings.blockSize.y : 7.5f, 0.5f, 100.0f);
 	settings.blockSize.z = std::clamp(std::isfinite(settings.blockSize.z) ? settings.blockSize.z : 15.0f, 0.5f, 100.0f);
@@ -672,6 +711,7 @@ bool Map::AreGenerationSettingsEqual(const GenerationSettings& lhs, const Genera
 		lhs.normalChestSpawnCount == rhs.normalChestSpawnCount &&
 		lhs.freeChestSpawnCount == rhs.freeChestSpawnCount &&
 		lhs.karmaSpawnCount == rhs.karmaSpawnCount &&
+		lhs.bossSpawnerSpawnCount == rhs.bossSpawnerSpawnCount &&
 		lhs.blockSize.x == rhs.blockSize.x &&
 		lhs.blockSize.y == rhs.blockSize.y &&
 		lhs.blockSize.z == rhs.blockSize.z &&
@@ -692,6 +732,7 @@ nlohmann::json Map::GenerationSettingsToJson(const GenerationSettings& settings)
 		{ "jar", settings.jarSpawnCount },
 		{ "chest", settings.chestSpawnCount },
 		{ "karma", settings.karmaSpawnCount },
+		{ "bossSpawner", settings.bossSpawnerSpawnCount },
 		{ "jarTypes", {
 			{ "money", settings.moneyJarSpawnCount },
 			{ "exp", settings.expJarSpawnCount }
@@ -732,6 +773,7 @@ bool Map::GenerationSettingsFromJson(const nlohmann::json& json, GenerationSetti
 			settings.jarSpawnCount = countIt->value("jar", settings.jarSpawnCount);
 			settings.chestSpawnCount = countIt->value("chest", settings.chestSpawnCount);
 			settings.karmaSpawnCount = countIt->value("karma", settings.karmaSpawnCount);
+			settings.bossSpawnerSpawnCount = countIt->value("bossSpawner", settings.bossSpawnerSpawnCount);
 
 			// 旧Jsonにタイプ別設定がない場合は総数を均等配分して互換性を維持
 			if (const auto jarTypesIt = countIt->find("jarTypes"); jarTypesIt != countIt->end() && jarTypesIt->is_object()) {
@@ -802,17 +844,17 @@ void Map::DrawHeightPreview(const Player::Base* player) const {
 	}
 
 	constexpr float cellSize = 14.0f;
-	int bossSpawnerX = -1;
-	int bossSpawnerZ = -1;
+	std::vector<bool> bossSpawnerCells(static_cast<std::size_t>(mapWidth_) * static_cast<std::size_t>(mapHeight_), false);
 	for (const std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
 		if (!object || dynamic_cast<const BossSpawner*>(object.get()) == nullptr) {
 			continue;
 		}
 
 		const Vector3 bossSpawnerPosition = object->GetPosition();
-		bossSpawnerX = std::clamp(static_cast<int>(std::lround(bossSpawnerPosition.x / blockSize_.x)), 0, mapWidth_ - 1);
-		bossSpawnerZ = std::clamp(static_cast<int>(std::lround(bossSpawnerPosition.z / blockSize_.z)), 0, mapHeight_ - 1);
-		break;
+		const int bossSpawnerX = std::clamp(static_cast<int>(std::lround(bossSpawnerPosition.x / blockSize_.x)), 0, mapWidth_ - 1);
+		const int bossSpawnerZ = std::clamp(static_cast<int>(std::lround(bossSpawnerPosition.z / blockSize_.z)), 0, mapHeight_ - 1);
+		const std::size_t cellIndex = static_cast<std::size_t>(bossSpawnerZ) * static_cast<std::size_t>(mapWidth_) + static_cast<std::size_t>(bossSpawnerX);
+		bossSpawnerCells[cellIndex] = true;
 	}
 
 	ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "■ BossSpawner");
@@ -834,6 +876,7 @@ void Map::DrawHeightPreview(const Player::Base* player) const {
 	for (int z = 0; z < mapHeight_; ++z) {
 		for (int x = 0; x < mapWidth_; ++x) {
 			const MapBlock& block = mapBlocks_[z][x];
+			const std::size_t cellIndex = static_cast<std::size_t>(z) * static_cast<std::size_t>(mapWidth_) + static_cast<std::size_t>(x);
 			const float heightRate = std::clamp(
 				(static_cast<float>(block.GetHeight()) - static_cast<float>(minHeight_)) / heightRange,
 				0.0f,
@@ -845,7 +888,7 @@ void Map::DrawHeightPreview(const Player::Base* player) const {
 				0.88f - heightRate * 0.68f,
 				1.0f
 			);
-			if (x == bossSpawnerX && z == bossSpawnerZ) {
+			if (bossSpawnerCells[cellIndex]) {
 				color = { 0.95f, 0.08f, 0.08f, 1.0f };
 			}
 			const ImVec2 cellMin(canvasPosition.x + static_cast<float>(x) * cellSize, canvasPosition.y + static_cast<float>(z) * cellSize);
@@ -883,7 +926,8 @@ void Map::DrawHeightPreview(const Player::Base* player) const {
 		const int x = std::clamp(static_cast<int>((mousePosition.x - canvasPosition.x) / cellSize), 0, mapWidth_ - 1);
 		const int z = std::clamp(static_cast<int>((mousePosition.y - canvasPosition.y) / cellSize), 0, mapHeight_ - 1);
 		const MapBlock& block = mapBlocks_[z][x];
-		const bool hasBossSpawner = x == bossSpawnerX && z == bossSpawnerZ;
+		const std::size_t cellIndex = static_cast<std::size_t>(z) * static_cast<std::size_t>(mapWidth_) + static_cast<std::size_t>(x);
+		const bool hasBossSpawner = bossSpawnerCells[cellIndex];
 		ImGui::SetTooltip(
 			"X: %d  Z: %d\n高さ: %u\n種別: %s%s",
 			x,
@@ -1149,6 +1193,10 @@ void Map::GenerateKarmas() {
 }
 
 void Map::GenerateBossSpawner() {
+	if (bossSpawnerSpawnCount_ <= 0) {
+		return;
+	}
+
 	std::vector<Vector3> spawnCandidates;
 	spawnCandidates.reserve(static_cast<size_t>(mapWidth_) * static_cast<size_t>(mapHeight_));
 
@@ -1173,29 +1221,32 @@ void Map::GenerateBossSpawner() {
 		return;
 	}
 
+	int createdCount = 0;
 
-	// 重複候補を除去しながら乱数選択して全候補を有限回で探索
-	while (!spawnCandidates.empty()) {
+	// 各通常ブロックを一度だけ探索し、要求数到達か候補枯渇まで配置
+	while (createdCount < bossSpawnerSpawnCount_ && !spawnCandidates.empty()) {
 		const int spawnIndex = eventObjectRandom_.Int(0, static_cast<int>(spawnCandidates.size()) - 1);
 		const Vector3 spawnPosition = spawnCandidates[static_cast<size_t>(spawnIndex)];
+		spawnCandidates[static_cast<size_t>(spawnIndex)] = spawnCandidates.back();
+		spawnCandidates.pop_back();
 		if (IsEventObjectColliderOverlapping(BossSpawner::CreatePlacementCollider(spawnPosition))) {
-			spawnCandidates[static_cast<size_t>(spawnIndex)] = spawnCandidates.back();
-			spawnCandidates.pop_back();
 			continue;
 		}
 
 		BossSpawner::InitializeDesc desc;
 		desc.position = spawnPosition;
+		desc.colliderName = "BossSpawnerAABB_" + std::to_string(createdCount);
 
 		std::unique_ptr<BossSpawner> bossSpawner = std::make_unique<BossSpawner>();
 		bossSpawner->Initialize(desc);
 		eventObjects_.push_back(std::move(bossSpawner));
-
-		Logger::Output("Map : BossSpawnerを1個配置しました", Logger::Level::Application);
-		return;
+		++createdCount;
 	}
 
-	Logger::Output("Map : 他のイベントオブジェクトと重ならないBossSpawner配置場所がありません", Logger::Level::Warning);
+	Logger::Output("Map : BossSpawnerを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+	if (createdCount < bossSpawnerSpawnCount_) {
+		Logger::Output("Map : BossSpawnerの配置可能数が設定数を下回りました", Logger::Level::Warning);
+	}
 }
 
 void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {

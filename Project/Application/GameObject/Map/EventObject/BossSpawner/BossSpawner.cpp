@@ -52,8 +52,8 @@ void BossSpawner::Initialize(const InitializeDesc& desc) {
 AABB BossSpawner::CreatePlacementCollider(const Vector3& position) {
 	AABB collider;
 	collider.center = position;
-	collider.min = { -1.0f, 0.0f, -1.0f };
-	collider.max = { 1.0f, 2.0f, 1.0f };
+	collider.min = { -3.5f, 0.0f, -3.5f };
+	collider.max = { 3.5f, 3.5f, 3.5f };
 	return collider;
 }
 

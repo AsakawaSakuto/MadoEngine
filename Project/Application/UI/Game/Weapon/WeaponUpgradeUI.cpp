@@ -132,7 +132,13 @@ namespace UI::Game {
 					choice.rarityDisplayName.c_str()
 				);
 				ImGui::Text("強化ステータス: %s", choice.statDisplayName.c_str());
-				ImGui::Text("加算値: %+.3f", choice.calculatedAmount);
+				ImGui::Text("現在値 → 強化後: %.1f →", choice.currentValue);
+				ImGui::SameLine();
+				ImGui::TextColored(
+					ImVec4(0.30f, 0.95f, 0.40f, 1.0f),
+					"%.1f",
+					choice.currentValue + choice.calculatedAmount
+				);
 			} else {
 				ImGui::TextDisabled("強化ステータス・レアリティなし");
 			}

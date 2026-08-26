@@ -74,7 +74,10 @@ namespace UI::Game {
 		MadoEngine::SpriteHandle cardIconSprite_{};
 		MadoEngine::TextHandle weaponNameText_{}; // 武器名とカテゴリを表示するテキスト
 		MadoEngine::TextHandle categoryText_{};   // カテゴリ名とレアリティを表示するテキスト
-		MadoEngine::TextHandle detailText_{};     // ステータス変化量や説明を表示するテキスト
+		MadoEngine::TextHandle detailText_{};     // 強化ステータス名や説明を表示するテキスト
+		MadoEngine::TextHandle currentValueText_{}; // 強化前の現在値を表示するテキスト
+		MadoEngine::TextHandle valueArrowText_{}; // 現在値から強化後の値への矢印を表示するテキスト
+		MadoEngine::TextHandle upgradedValueText_{}; // 強化後の値を表示するテキスト
 		MadoEngine::TextHandle selectionText_{};  // 選択中を表示するテキスト
 		GameTimer scaleTransitionTimer_;
 		GameTimer selectedPulseTimer_;
@@ -86,6 +89,7 @@ namespace UI::Game {
 		Vector4 backgroundColor_ = { 0.055f, 0.07f, 0.11f, 0.96f }; // カード本体の背景色
 		bool isSelected_ = false;
 		bool isDecisionAnimationPlaying_ = false;
+		bool isOwnedWeaponUpgrade_ = false;
 		bool isVisible_ = false;
 		bool isInitialized_ = false;
 	};

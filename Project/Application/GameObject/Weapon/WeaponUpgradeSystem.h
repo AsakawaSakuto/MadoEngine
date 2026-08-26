@@ -22,6 +22,7 @@ namespace Weapon {
 		Projectile::Type weaponType = Projectile::Type::None;
 		std::optional<UpgradeStatType> statType;
 		std::optional<Rarity> rarity;
+		float currentValue = 0.0f;
 		float calculatedAmount = 0.0f;
 		std::uint64_t generation = 0;
 		std::string weaponDisplayName;
