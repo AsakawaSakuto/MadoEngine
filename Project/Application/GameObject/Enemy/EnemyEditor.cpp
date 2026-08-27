@@ -1,7 +1,9 @@
 #include "EnemyEditor.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstring>
+#include <limits>
 #include <string>
 
 #ifdef USE_IMGUI
@@ -41,6 +43,30 @@ namespace Enemy {
 			}
 
 			return false;
+		}
+
+		/// @brief Wave設定時間内の予定Enemy出現数を計算
+		/// @param wave 算出対象のWave設定
+		/// @return 最大生存数と配置成否を考慮しない予定出現数
+		std::uint64_t CalculatePlannedEnemySpawnCount(const WaveSettings& wave) {
+			if (!std::isfinite(wave.startTime) || !std::isfinite(wave.endTime) ||
+				!std::isfinite(wave.spawnInterval) || wave.endTime <= wave.startTime ||
+				wave.spawnCount == 0) {
+				return 0;
+			}
+
+			const long double duration = static_cast<long double>(wave.endTime) - static_cast<long double>(wave.startTime);
+			const long double spawnInterval = (std::max)(0.01L, static_cast<long double>(wave.spawnInterval));
+			const long double spawnBatchCount = std::floor(duration / spawnInterval);
+			const long double enemySpawnCount = spawnBatchCount * static_cast<long double>(wave.spawnCount);
+
+			// 極端なJson設定でも表示用整数への変換で桁あふれしないよう上限へ飽和
+			const long double maximumCount = static_cast<long double>((std::numeric_limits<std::uint64_t>::max)());
+			if (enemySpawnCount >= maximumCount) {
+				return (std::numeric_limits<std::uint64_t>::max)();
+			}
+
+			return static_cast<std::uint64_t>(enemySpawnCount);
 		}
 #endif // USE_IMGUI
 	} // namespace
@@ -213,6 +239,7 @@ namespace Enemy {
 			settingsChanged = true;
 		}
 		ImGui::TextDisabled("有効時間は開始以上・終了未満、重複時は開始時間が遅いWaveを優先");
+		ImGui::TextDisabled("予定出現数は最大生存数による抑制と配置失敗を含まない生成要求数");
 		std::vector<WaveSettings>& waves = settings.EditWaves();
 		std::size_t removeIndex = static_cast<std::size_t>(-1);
 		for (std::size_t index = 0; index < waves.size(); ++index) {
@@ -252,7 +279,9 @@ namespace Enemy {
 #ifdef USE_IMGUI
 		bool settingsChanged = false;
 		ImGui::PushID(static_cast<int>(index));
-		const std::string headerLabel = wave.name + "##WaveHeader";
+		const std::uint64_t plannedEnemySpawnCount = CalculatePlannedEnemySpawnCount(wave);
+		const std::string headerLabel = wave.name + "  [予定出現数 " +
+			std::to_string(plannedEnemySpawnCount) + "体]##WaveHeader";
 		bool isExpanded = false;
 
 		// 展開状態に依存せず削除操作へアクセスできる見出し行を構築

@@ -108,14 +108,14 @@
                 "eliteSpawnInterval": 30,
                 "endTime": 150.0,
                 "healthPowerGrowthRatePerMinute": 0.10000000149011612,
-                "maxSpawnRadius": 20.0,
-                "minSpawnRadius": 12.0,
+                "maxSpawnRadius": 32.0,
+                "minSpawnRadius": 20.0,
                 "moveSpeedGrowthRatePerMinute": 0.019999999552965164,
                 "name": "Wave 7",
                 "normalSpawnRate": 1.0,
                 "runnerSpawnRate": 0.0,
-                "spawnCount": 5,
-                "spawnInterval": 0.25,
+                "spawnCount": 10,
+                "spawnInterval": 0.15000000596046448,
                 "startTime": 121.0,
                 "tankSpawnRate": 0.0
             }
