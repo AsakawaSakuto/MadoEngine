@@ -7,6 +7,7 @@
 #include "PlayerStatus.h"
 #include "../Map/MapLimit.h"
 #include "Render/Object/3d/EffectSequence/MyEffectSequence3d.h"
+#include <vector>
 
 namespace Player {
 
@@ -70,6 +71,15 @@ namespace Player {
 		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
 
+		/// @brief PlayerのHPを回復
+		/// @param amount 回復要求量
+		/// @return 実際に回復したHP量
+		float RecoverHealth(float amount);
+
+		/// @brief 未処理のリソース獲得イベントを取得してキューをクリア
+		/// @return 発生順に格納されたリソース獲得イベント
+		std::vector<ResourceGainEvent> ConsumeResourceGainEvents();
+
 		Status GetStatus() const { return status_; }
 
 		/// @brief 現在のPlayerレベルを取得
@@ -130,5 +140,6 @@ namespace Player {
 		GamingColor gamingColor_; // ゲーミングカラー
 
 		GameTimer regenerationTimer_; // HPの自動回復タイマー
+		std::vector<ResourceGainEvent> resourceGainEvents_; // 未処理のリソース獲得イベント
 	};
 }

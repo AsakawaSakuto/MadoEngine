@@ -2,6 +2,19 @@
 
 namespace Player {
 
+	/// @brief Playerが獲得したリソースの種類
+	enum class ResourceGainType {
+		Health,
+		Exp,
+		Money,
+	};
+
+	/// @brief Playerのリソース獲得情報
+	struct ResourceGainEvent {
+		ResourceGainType type = ResourceGainType::Health;
+		float amount = 0.0f;
+	};
+
 	/// @brief プレイヤーの現在ステータスを管理する構造体
 	struct Status {
 		float maxHealth = 100.0f;      // 最大体力

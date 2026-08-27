@@ -368,21 +368,62 @@ namespace Enemy {
 		}
 		ImGui::TextDisabled("入力値は比率として自動正規化");
 
-		ImGui::SeparatorText("時間経過強化");
+		ImGui::SeparatorText("時間経過強化（Wave内）");
+		ImGui::TextDisabled("Wave開始後、指定間隔を経過するたび新しく生成されるEnemyへ加算");
+
+		ImGui::TextUnformatted("HP");
+		ImGui::Indent();
 		settingsChanged |= ImGui::DragFloat(
-			"HP・攻撃力強化率（毎分）",
-			&waveSettings.healthPowerGrowthRatePerMinute,
+			"増加間隔##HP",
+			&waveSettings.healthIncrease.interval,
+			0.1f,
+			0.01f,
+			86400.0f,
+			"%.1f秒");
+		settingsChanged |= ImGui::DragFloat(
+			"1回の増加量##HP",
+			&waveSettings.healthIncrease.amount,
+			0.1f,
+			0.0f,
+			999999.0f,
+			"%.2f");
+		ImGui::Unindent();
+
+		ImGui::TextUnformatted("攻撃力");
+		ImGui::Indent();
+		settingsChanged |= ImGui::DragFloat(
+			"増加間隔##Power",
+			&waveSettings.powerIncrease.interval,
+			0.1f,
+			0.01f,
+			86400.0f,
+			"%.1f秒");
+		settingsChanged |= ImGui::DragFloat(
+			"1回の増加量##Power",
+			&waveSettings.powerIncrease.amount,
+			0.1f,
+			0.0f,
+			999999.0f,
+			"%.2f");
+		ImGui::Unindent();
+
+		ImGui::TextUnformatted("移動速度");
+		ImGui::Indent();
+		settingsChanged |= ImGui::DragFloat(
+			"増加間隔##MoveSpeed",
+			&waveSettings.moveSpeedIncrease.interval,
+			0.1f,
+			0.01f,
+			86400.0f,
+			"%.1f秒");
+		settingsChanged |= ImGui::DragFloat(
+			"1回の増加量##MoveSpeed",
+			&waveSettings.moveSpeedIncrease.amount,
 			0.01f,
 			0.0f,
-			100.0f,
+			999999.0f,
 			"%.2f");
-		settingsChanged |= ImGui::DragFloat(
-			"移動速度強化率（毎分）",
-			&waveSettings.moveSpeedGrowthRatePerMinute,
-			0.01f,
-			0.0f,
-			100.0f,
-			"%.2f");
+		ImGui::Unindent();
 		return settingsChanged;
 #else
 		(void)waveSettings;

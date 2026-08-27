@@ -102,11 +102,19 @@ namespace Enemy {
 			Vector3& outPosition,
 			float& outGroundSurfaceY) const;
 
-		/// @brief Waveと現在の経過時間に応じたEnemyステータスを計算
+		/// @brief 現在処理中Waveの開始後経過時間を取得
+		/// @return 通常Wave開始またはBonus Wave開始からの経過秒数
+		float GetActiveWaveElapsedTime() const;
+
+		/// @brief Wave内経過時間に応じたEnemyステータスを計算
 		/// @param type ステータスを計算するEnemyの種類
 		/// @param wave 適用するWave設定
+		/// @param waveElapsedTime Wave開始後の経過秒数
 		/// @return 新しく生成するEnemyのステータス
-		Data::Status CalculateSpawnStatus(Data::Type type, const WaveSpawnSettings& wave) const;
+		Data::Status CalculateSpawnStatus(
+			Data::Type type,
+			const WaveSpawnSettings& wave,
+			float waveElapsedTime) const;
 
 		Player::Base* player_ = nullptr;
 		Manager* enemyManager_ = nullptr;

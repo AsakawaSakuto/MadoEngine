@@ -118,6 +118,7 @@ private:
 	MadoEngine::TextHandle killCountText_{};
 	UI::Game::FpsMeasurementView fpsMeasurementView_;
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
+	UI::Game::PlayerResourceGainView playerResourceGainView_;
 	UI::Game::ProjectileDamageView projectileDamageView_;
 	int displayedMoney_ = -1;
 	bool useDebugCamera_ = false;

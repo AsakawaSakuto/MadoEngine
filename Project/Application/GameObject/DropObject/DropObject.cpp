@@ -13,6 +13,7 @@ namespace DropObject {
 
 		constexpr float kMoneyRiseSpeed = 8.0f;  // DropObjectのMoneyが後退中に上昇する速度
 		constexpr int kMoneyAmount = 1;          // DropObjectのMoneyがPlayerに加算する所持金量
+		constexpr float kHealAmount = 10.0f;     // DropObjectのHealがPlayerに加算するHP量
 	}
 
 	Base::~Base() {
@@ -162,6 +163,7 @@ namespace DropObject {
 			player.AddMoney(kMoneyAmount);
 			break;
 		case Type::Heal:
+			player.RecoverHealth(kHealAmount);
 			break;
 		}
 

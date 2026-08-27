@@ -13,7 +13,12 @@ namespace {
 	constexpr float kMinScaleMultiplier = 0.01f;
 	constexpr float kMinColliderRadius = 0.01f;
 	constexpr float kMinSpawnInterval = 0.01f;
+	constexpr float kMinStatIncreaseInterval = 0.01f;
 	constexpr float kDefaultWaveDuration = 60.0f;
+	constexpr float kLegacyGrowthInterval = 60.0f;
+	constexpr float kLegacyNormalHealth = 10.0f;
+	constexpr float kLegacyNormalPower = 5.0f;
+	constexpr float kLegacyNormalMoveSpeed = 3.0f;
 
 	/// @brief 非有限値を代替値へ置換
 	/// @param value 検証する値
@@ -133,8 +138,12 @@ namespace {
 			{ "normalSpawnRate", settings.normalSpawnRate },
 			{ "runnerSpawnRate", settings.runnerSpawnRate },
 			{ "tankSpawnRate", settings.tankSpawnRate },
-			{ "healthPowerGrowthRatePerMinute", settings.healthPowerGrowthRatePerMinute },
-			{ "moveSpeedGrowthRatePerMinute", settings.moveSpeedGrowthRatePerMinute },
+			{ "healthIncreaseInterval", settings.healthIncrease.interval },
+			{ "healthIncreaseAmount", settings.healthIncrease.amount },
+			{ "powerIncreaseInterval", settings.powerIncrease.interval },
+			{ "powerIncreaseAmount", settings.powerIncrease.amount },
+			{ "moveSpeedIncreaseInterval", settings.moveSpeedIncrease.interval },
+			{ "moveSpeedIncreaseAmount", settings.moveSpeedIncrease.amount },
 		};
 	}
 
@@ -170,10 +179,49 @@ namespace {
 			json, "runnerSpawnRate", outSettings.runnerSpawnRate);
 		outSettings.tankSpawnRate = JsonSerializer::GetOrDefault<float>(
 			json, "tankSpawnRate", outSettings.tankSpawnRate);
-		outSettings.healthPowerGrowthRatePerMinute = JsonSerializer::GetOrDefault<float>(
-			json, "healthPowerGrowthRatePerMinute", outSettings.healthPowerGrowthRatePerMinute);
-		outSettings.moveSpeedGrowthRatePerMinute = JsonSerializer::GetOrDefault<float>(
-			json, "moveSpeedGrowthRatePerMinute", outSettings.moveSpeedGrowthRatePerMinute);
+
+		const bool hasHealthIncreaseSettings =
+			json.contains("healthIncreaseInterval") || json.contains("healthIncreaseAmount");
+		const bool hasPowerIncreaseSettings =
+			json.contains("powerIncreaseInterval") || json.contains("powerIncreaseAmount");
+		const bool hasMoveSpeedIncreaseSettings =
+			json.contains("moveSpeedIncreaseInterval") || json.contains("moveSpeedIncreaseAmount");
+		outSettings.healthIncrease.interval = JsonSerializer::GetOrDefault<float>(
+			json, "healthIncreaseInterval", outSettings.healthIncrease.interval);
+		outSettings.healthIncrease.amount = JsonSerializer::GetOrDefault<float>(
+			json, "healthIncreaseAmount", outSettings.healthIncrease.amount);
+		outSettings.powerIncrease.interval = JsonSerializer::GetOrDefault<float>(
+			json, "powerIncreaseInterval", outSettings.powerIncrease.interval);
+		outSettings.powerIncrease.amount = JsonSerializer::GetOrDefault<float>(
+			json, "powerIncreaseAmount", outSettings.powerIncrease.amount);
+		outSettings.moveSpeedIncrease.interval = JsonSerializer::GetOrDefault<float>(
+			json, "moveSpeedIncreaseInterval", outSettings.moveSpeedIncrease.interval);
+		outSettings.moveSpeedIncrease.amount = JsonSerializer::GetOrDefault<float>(
+			json, "moveSpeedIncreaseAmount", outSettings.moveSpeedIncrease.amount);
+
+		// 旧毎分倍率をNormalの基礎能力値に対する60秒ごとの加算量へ移行
+		const float legacyHealthPowerRate = JsonSerializer::GetOrDefault<float>(
+			json, "healthPowerGrowthRatePerMinute", 0.0f);
+		if (!hasHealthIncreaseSettings && json.contains("healthPowerGrowthRatePerMinute")) {
+			outSettings.healthIncrease = {
+				kLegacyGrowthInterval,
+				legacyHealthPowerRate * kLegacyNormalHealth,
+			};
+		}
+		if (!hasPowerIncreaseSettings && json.contains("healthPowerGrowthRatePerMinute")) {
+			outSettings.powerIncrease = {
+				kLegacyGrowthInterval,
+				legacyHealthPowerRate * kLegacyNormalPower,
+			};
+		}
+		if (!hasMoveSpeedIncreaseSettings && json.contains("moveSpeedGrowthRatePerMinute")) {
+			const float legacyMoveSpeedRate = JsonSerializer::GetOrDefault<float>(
+				json, "moveSpeedGrowthRatePerMinute", 0.0f);
+			outSettings.moveSpeedIncrease = {
+				kLegacyGrowthInterval,
+				legacyMoveSpeedRate * kLegacyNormalMoveSpeed,
+			};
+		}
 	}
 
 	/// @brief JsonからWave設定を部分更新
@@ -226,10 +274,17 @@ namespace {
 		if (settings.normalSpawnRate + settings.runnerSpawnRate + settings.tankSpawnRate <= 0.0f) {
 			settings.normalSpawnRate = 1.0f;
 		}
-		settings.healthPowerGrowthRatePerMinute = std::max(
-			0.0f, SanitizeFinite(settings.healthPowerGrowthRatePerMinute, 0.0f));
-		settings.moveSpeedGrowthRatePerMinute = std::max(
-			0.0f, SanitizeFinite(settings.moveSpeedGrowthRatePerMinute, 0.0f));
+		for (Enemy::TimedStatIncreaseSettings* increaseSettings : {
+			&settings.healthIncrease,
+			&settings.powerIncrease,
+			&settings.moveSpeedIncrease,
+			}) {
+			increaseSettings->interval = std::max(
+				kMinStatIncreaseInterval,
+				SanitizeFinite(increaseSettings->interval, kMinStatIncreaseInterval));
+			increaseSettings->amount = std::max(
+				0.0f, SanitizeFinite(increaseSettings->amount, 0.0f));
+		}
 	}
 
 	/// @brief 通常Wave設定を実行可能な範囲へ補正
@@ -386,8 +441,9 @@ namespace Enemy {
 		bonusWaveSettings_.normalSpawnRate = 0.35f;
 		bonusWaveSettings_.runnerSpawnRate = 0.35f;
 		bonusWaveSettings_.tankSpawnRate = 0.3f;
-		bonusWaveSettings_.healthPowerGrowthRatePerMinute = 0.15f;
-		bonusWaveSettings_.moveSpeedGrowthRatePerMinute = 0.03f;
+		bonusWaveSettings_.healthIncrease = { 60.0f, 1.5f };
+		bonusWaveSettings_.powerIncrease = { 60.0f, 0.75f };
+		bonusWaveSettings_.moveSpeedIncrease = { 60.0f, 0.09f };
 	}
 
 	void Settings::Normalize() {

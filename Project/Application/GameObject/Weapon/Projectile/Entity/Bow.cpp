@@ -50,8 +50,6 @@ namespace Projectile {
 
 	void Bow::OnEnemyHit() {
 
-		// 連続Hitごとに威力を減衰させて貫通性能との釣り合いを維持
-		damage_ *= kHitDamageMultiplier;
 	}
 
 }

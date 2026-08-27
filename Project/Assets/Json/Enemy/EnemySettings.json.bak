@@ -114,10 +114,25 @@
                 "name": "Wave 7",
                 "normalSpawnRate": 1.0,
                 "runnerSpawnRate": 0.0,
-                "spawnCount": 10,
-                "spawnInterval": 0.15000000596046448,
+                "spawnCount": 5,
+                "spawnInterval": 0.25,
                 "startTime": 121.0,
                 "tankSpawnRate": 0.0
+            },
+            {
+                "eliteSpawnInterval": 30,
+                "endTime": 180.0,
+                "healthPowerGrowthRatePerMinute": 0.10000000149011612,
+                "maxSpawnRadius": 16.0,
+                "minSpawnRadius": 12.0,
+                "moveSpeedGrowthRatePerMinute": 0.019999999552965164,
+                "name": "Wave 8",
+                "normalSpawnRate": 0.44999998807907104,
+                "runnerSpawnRate": 0.44999998807907104,
+                "spawnCount": 3,
+                "spawnInterval": 0.3499999940395355,
+                "startTime": 151.0,
+                "tankSpawnRate": 0.10000000149011612
             }
         ]
     },

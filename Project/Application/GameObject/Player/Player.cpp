@@ -15,6 +15,7 @@ namespace Player {
 
 	void Base::Initialize(const Vector3& spawnGroundPosition, SceneType sceneType) {
 		sceneType_ = sceneType;
+		resourceGainEvents_.clear();
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
@@ -107,6 +108,10 @@ namespace Player {
 		}
 
 		status_.currentMoney += amount;
+		resourceGainEvents_.push_back({
+			ResourceGainType::Money,
+			static_cast<float>(amount),
+		});
 	}
 
 	bool Base::TrySpendMoney(int amount) {
@@ -136,6 +141,10 @@ namespace Player {
 		}
 
 		status_.currentExp += amount;
+		resourceGainEvents_.push_back({
+			ResourceGainType::Exp,
+			static_cast<float>(amount),
+		});
 		ProcessLevelUp();
 	}
 
@@ -169,6 +178,40 @@ namespace Player {
 		regenerationTimer_.Start(kHealthRegenerationInterval, true);
 	}
 
+	float Base::RecoverHealth(float amount) {
+
+		// 死亡状態からの復活や非有限値によるステータス破損を回避
+		if (!std::isfinite(amount) || amount <= 0.0f ||
+			status_.currentHealth <= 0.0f || status_.maxHealth <= 0.0f) {
+			return 0.0f;
+		}
+
+		const float previousHealth = status_.currentHealth;
+		status_.currentHealth = std::min(
+			status_.maxHealth,
+			status_.currentHealth + amount
+		);
+		const float recoveredAmount = status_.currentHealth - previousHealth;
+		if (recoveredAmount <= 0.0f) {
+			return 0.0f;
+		}
+
+		// 最大HPによる切り捨て後の実回復量だけを獲得通知へ記録
+		resourceGainEvents_.push_back({
+			ResourceGainType::Health,
+			recoveredAmount,
+		});
+		return recoveredAmount;
+	}
+
+	std::vector<ResourceGainEvent> Base::ConsumeResourceGainEvents() {
+		std::vector<ResourceGainEvent> events;
+
+		// 未処理Eventの所有権を定数時間で呼び出し側へ移動
+		events.swap(resourceGainEvents_);
+		return events;
+	}
+
 	void Base::UpdateHealthRegeneration(float deltaTime) {
 
 		// 死亡中または最大HPが不正な状態では回復周期を停止
@@ -196,10 +239,7 @@ namespace Player {
 			return;
 		}
 
-		status_.currentHealth = std::min(
-			status_.maxHealth,
-			status_.currentHealth + kHealthRegenerationAmount
-		);
+		RecoverHealth(kHealthRegenerationAmount);
 
 		if (status_.currentHealth >= status_.maxHealth) {
 			regenerationTimer_.Stop();
@@ -224,8 +264,7 @@ namespace Player {
 		}
 
 		if (MyInput::GetKeybord()->IsTrigger(DIK_F4)) {
-			status_.currentExp += status_.expToNextLevel;
-			ProcessLevelUp();
+			AddExp(static_cast<int>(status_.expToNextLevel));
 		}
 	}
 

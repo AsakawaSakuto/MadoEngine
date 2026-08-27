@@ -47,6 +47,7 @@ void Game::Initialize() {
 	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 	fpsMeasurementView_.Initialize();
 	gamePlayTimerView_.Initialize();
+	playerResourceGainView_.Initialize();
 	projectileDamageView_.Initialize();
 
 	AABB mapLimitBox;
@@ -149,6 +150,12 @@ SceneType Game::Update(float dt) {
 			}
 		}
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
+
+		// Playerの状態変更を描画処理へ依存させずSceneで獲得通知へ変換
+		for (const Player::ResourceGainEvent& event :
+			player_->ConsumeResourceGainEvents()) {
+			playerResourceGainView_.Spawn(event.type, event.amount);
+		}
 
 		// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新
 		if (MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
@@ -268,6 +275,8 @@ SceneType Game::Update(float dt) {
 	}
 	projectileDamageView_.SetVisible(inGameSession_->IsPlaying());
 	projectileDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
+	playerResourceGainView_.SetVisible(inGameSession_->IsPlaying());
+	playerResourceGainView_.Update(deltaTime);
 
 	return SceneType::Game;
 }
@@ -281,6 +290,7 @@ void Game::DrawImGui() {
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
 	player_->DrawImGui();
+	playerResourceGainView_.DrawImGui();
 	
 	weaponInventory_->DrawImGui();
 	weaponStatusEditor_->DrawImGui();
@@ -407,6 +417,7 @@ void Game::Finalize() {
 	MyCollider::RemoveColliderAll();
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();
+	playerResourceGainView_.Finalize();
 	projectileDamageView_.Finalize();
 	enemyCountText_ = {};
 	moneyText_ = {};

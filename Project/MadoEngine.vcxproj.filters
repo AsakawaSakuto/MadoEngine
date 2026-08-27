@@ -196,6 +196,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
@@ -862,6 +863,7 @@
     <ClInclude Include="Application\UI\UIHeaders.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

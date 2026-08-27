@@ -29,6 +29,12 @@ namespace Enemy {
 		Vector3 markerScale = { 0.45f, 0.45f, 0.45f };
 	};
 
+	/// @brief Wave内の一定間隔ごとに適用する能力値加算設定
+	struct TimedStatIncreaseSettings {
+		float interval = 60.0f;
+		float amount = 0.0f;
+	};
+
 	/// @brief 通常WaveとBonus Waveで共有するEnemy生成設定
 	struct WaveSpawnSettings {
 		float spawnInterval = 0.4f;
@@ -39,8 +45,9 @@ namespace Enemy {
 		float normalSpawnRate = 0.6f;
 		float runnerSpawnRate = 0.25f;
 		float tankSpawnRate = 0.15f;
-		float healthPowerGrowthRatePerMinute = 0.1f;
-		float moveSpeedGrowthRatePerMinute = 0.02f;
+		TimedStatIncreaseSettings healthIncrease = { 60.0f, 1.0f };
+		TimedStatIncreaseSettings powerIncrease = { 60.0f, 0.5f };
+		TimedStatIncreaseSettings moveSpeedIncrease = { 60.0f, 0.06f };
 	};
 
 	/// @brief 指定時間帯に適用する通常Wave設定

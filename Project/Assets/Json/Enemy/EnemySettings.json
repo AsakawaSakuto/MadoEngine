@@ -118,6 +118,21 @@
                 "spawnInterval": 0.25,
                 "startTime": 121.0,
                 "tankSpawnRate": 0.0
+            },
+            {
+                "eliteSpawnInterval": 30,
+                "endTime": 300.0,
+                "healthPowerGrowthRatePerMinute": 0.10000000149011612,
+                "maxSpawnRadius": 16.0,
+                "minSpawnRadius": 12.0,
+                "moveSpeedGrowthRatePerMinute": 0.019999999552965164,
+                "name": "Wave 8",
+                "normalSpawnRate": 0.44999998807907104,
+                "runnerSpawnRate": 0.44999998807907104,
+                "spawnCount": 3,
+                "spawnInterval": 0.3499999940395355,
+                "startTime": 151.0,
+                "tankSpawnRate": 0.10000000149011612
             }
         ]
     },
