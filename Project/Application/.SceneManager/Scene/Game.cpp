@@ -281,23 +281,14 @@ void Game::DrawImGui() {
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
 	player_->DrawImGui();
-	healthGauge_->DrawImGui();
-	staminaGauge_->DrawImGui();
-
+	
 	weaponInventory_->DrawImGui();
 	weaponStatusEditor_->DrawImGui();
 	weaponUpgradeUI_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_);
 
 	enemyEditor_->DrawImGui();
-	projectileDamageView_.DrawImGui();
-
+	
 	MyCollider::DrawImGui();
-
-	ImGui::Begin("seed");
-
-	ImGui::Text("game seed : %u", gameSeed_);
-
-	ImGui::End();
 
 #endif // USE_IMGUI
 }
