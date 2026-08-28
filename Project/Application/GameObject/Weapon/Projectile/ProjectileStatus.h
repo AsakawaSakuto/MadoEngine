@@ -35,17 +35,19 @@ namespace Projectile {
 		Pistol,
 		Bow,
 		Eye,
+		ToxicBoots,
 
 		Explosion, // 爆発で使用される、武器ではない
 	};
 
 	// ゲームロジックで使用できる武器を一か所で管理
-	inline constexpr std::array<Type, 5> kPlayableWeaponTypes = {
+	inline constexpr std::array<Type, 6> kPlayableWeaponTypes = {
 		Type::Pistol,
 		Type::Bow,
 		Type::FireBall,
 		Type::Axe,
 		Type::Eye,
+		Type::ToxicBoots,
 	};
 
 	/// @brief 武器種類をリソース名へ変換
@@ -59,6 +61,7 @@ namespace Projectile {
 		case Type::Pistol:   return "Pistol";
 		case Type::Bow:      return "Bow";
 		case Type::Eye:      return "Eye";
+		case Type::ToxicBoots: return "ToxicBoots";
 		default:             return "Unknown";
 		}
 	}
@@ -105,6 +108,7 @@ namespace Projectile {
 		case Type::Pistol:   return "Pistol";
 		case Type::Bow:      return "Bow";
 		case Type::Eye:      return "Eye";
+		case Type::ToxicBoots: return "ToxicBoots";
 		default:             return "Unknown";
 		}
 	}

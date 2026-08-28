@@ -215,6 +215,13 @@ void Map::Initialize(uint32_t seed) {
 	Generate(editorSettings_);
 }
 
+void Map::SetInteractionTextVisible(bool isVisible) {
+	isInteractionTextVisible_ = isVisible;
+	if (MadoEngine::Text* interactionText = MyText::TryGet(interactionText_)) {
+		interactionText->SetVisible(isInteractionTextVisible_ && currentHitEventObject_ != nullptr);
+	}
+}
+
 void Map::Generate(const GenerationSettings& settings) {
 	GenerationSettings safeSettings = settings;
 	ClampGenerationSettings(safeSettings);
@@ -1341,9 +1348,10 @@ void Map::UpdateInteractionText(const Player::Base& player) {
 		return;
 	}
 
-	const bool hasInteractionTarget = currentHitEventObject_ != nullptr;
-	interactionText->SetVisible(hasInteractionTarget);
-	if (!hasInteractionTarget) {
+	const bool shouldShowInteractionText =
+		isInteractionTextVisible_ && currentHitEventObject_ != nullptr;
+	interactionText->SetVisible(shouldShowInteractionText);
+	if (!shouldShowInteractionText) {
 		return;
 	}
 

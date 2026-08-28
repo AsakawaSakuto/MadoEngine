@@ -273,6 +273,7 @@ SceneType Game::Update(float dt) {
 		useDebugCamera_ = !useDebugCamera_;
 		cameraManager_.CutTo(useDebugCamera_ ? debugCameraHandle_ : tpsCameraHandle_);
 	}
+	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
 	projectileDamageView_.SetVisible(inGameSession_->IsPlaying());
 	projectileDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
 	playerResourceGainView_.SetVisible(inGameSession_->IsPlaying());

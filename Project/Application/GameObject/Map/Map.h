@@ -26,6 +26,10 @@ public:
 	/// @param deltaTime 前フレームからの経過時間
 	void Update(Player::Base& player, float deltaTime);
 
+	/// @brief 操作案内Textの表示可否を設定
+	/// @param isVisible 表示する場合はtrue
+	void SetInteractionTextVisible(bool isVisible);
+
 	/// @brief Map調整用のImGuiを描画
 	/// @param player プレビューへ表示するPlayer
 	void DrawImGui(const Player::Base* player);
@@ -198,6 +202,7 @@ private:
 	Vector3 interactionMarkerStartScale_ = { 0.35f, 0.35f, 0.35f };
 	Vector3 interactionMarkerEndScale_ = { 0.5f, 0.5f, 0.5f };
 	GameTimer interactionMarkerScaleTimer_;
+	bool isInteractionTextVisible_ = true;
 
 	Random terrainRandom_;
 	Random eventObjectRandom_;

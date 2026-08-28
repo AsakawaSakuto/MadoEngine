@@ -21,8 +21,7 @@ namespace Projectile {
 		void OnEnemyHit() override;
 
 	private:
-		static constexpr float kHitDamageMultiplier = 2.0f; // 命中時のダメージ倍率
-
+		
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
 	};

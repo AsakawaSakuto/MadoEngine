@@ -167,6 +167,12 @@ namespace Projectile {
 			projectiles.push_back(std::move(axe));
 			break;
 		}
+		case Projectile::Type::ToxicBoots: {
+			auto toxicBoots = std::make_unique<ToxicBoots>();
+			toxicBoots->Initialize(context);
+			projectiles.push_back(std::move(toxicBoots));
+			break;
+		}
 		default:
 			break;
 		}
