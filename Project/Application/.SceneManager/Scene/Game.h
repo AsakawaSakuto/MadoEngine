@@ -13,6 +13,7 @@
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "Utility/Light/LightManager.h"
+#include "Utility/Random.h"
 #include "UI/UIHeaders.h"
 #include "System/InGameSession/InGameSession.h"
 #include <cstdint>
@@ -87,7 +88,7 @@ private:
 
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
-
+	
 	CameraHandle debugCameraHandle_{};
 	CameraHandle tpsCameraHandle_{};
 

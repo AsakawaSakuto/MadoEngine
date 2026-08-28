@@ -32,4 +32,8 @@ public:
 	/// @brief Karmaの操作案内文を取得
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
+
+	/// @brief KarmaのEventObject名を取得
+	/// @return KarmaのEventObject名
+	std::string_view GetEventObjectName() const override { return "Karma"; }
 };

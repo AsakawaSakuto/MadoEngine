@@ -34,6 +34,10 @@ public:
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
 
+	/// @brief BossSpawnerのEventObject名を取得
+	/// @return BossSpawnerのEventObject名
+	std::string_view GetEventObjectName() const override { return "BossSpawner"; }
+
 	/// @brief Playerの初期配置を妨げるObjectか判定
 	/// @return Playerの初期配置を妨げるためtrue
 	bool ShouldBlockPlayerSpawn() const override { return true; }

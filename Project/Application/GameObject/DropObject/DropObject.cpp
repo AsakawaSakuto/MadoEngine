@@ -1,4 +1,5 @@
 #include "DropObject.h"
+#include "Audio/MyAudio.h"
 #include "GameObject/Player/Player.h"
 #include <algorithm>
 
@@ -30,6 +31,7 @@ namespace DropObject {
 			// 生成直後のMoneyに上昇しながら後退する予備動作を付与
 			backTimer_.Start(kBackDuration);
 		}
+
 		isAlive_ = true;
 		isReleased_ = false;
 		colliderName_ = "DropObject" + std::to_string(index);
@@ -166,6 +168,10 @@ namespace DropObject {
 			player.RecoverHealth(kHealAmount);
 			break;
 		}
+
+		// 報酬の取得成立後にDropObject名と同じSEを一度再生
+		const std::string soundKey = DropObjectTypeToString(type_);
+		MyAudio::Play(soundKey);
 
 		isAlive_ = false;
 	}

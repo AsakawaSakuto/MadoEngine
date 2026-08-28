@@ -73,6 +73,10 @@ public:
 	/// @return 操作案内に表示するUTF-8文字列
 	virtual std::string_view GetInteractionText() const = 0;
 
+	/// @brief EventObjectの名前を取得
+	/// @return 音声リソースとの対応に使用するEventObject名
+	virtual std::string_view GetEventObjectName() const = 0;
+
 	/// @brief 相互作用成立時にGameへ渡す処理要求を取得
 	/// @return 相互作用によって発生する処理要求
 	virtual MapEventRequest GetInteractionRequest() const { return {}; }

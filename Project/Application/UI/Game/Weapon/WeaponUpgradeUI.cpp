@@ -72,15 +72,22 @@ namespace UI::Game {
 			// 端から反対側へ循環する候補選択
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + visibleChoiceCount_ - 1) % visibleChoiceCount_;
+
+			MyAudio::Play("UpgradeCardSelect");
+
 		} else if (MyInput::Trigger(kUpgradeRightAction)) {
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + 1) % visibleChoiceCount_;
+
+			MyAudio::Play("UpgradeCardSelect");
 		}
 
 		UpdateCards(deltaTime);
 
 		if (!MyInput::Trigger(kUpgradeDecisionAction)) {
 			return;
+		} else {
+			MyAudio::Play("UpgradeCardDecision");
 		}
 
 		BeginDecisionAnimation(

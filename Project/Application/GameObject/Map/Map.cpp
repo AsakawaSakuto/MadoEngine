@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Audio/MyAudio.h"
 #include "GameObject/Map/EventObject/BossSpawner/BossSpawner.h"
 #include "GameObject/Map/EventObject/Chest/Chest.h"
 #include "GameObject/Map/EventObject/Jar/Jar.h"
@@ -1297,6 +1298,12 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 	MapEventObjectBase* interactedObject = currentHitEventObject_;
 	if (!interactedObject->Interact(player)) {
 		return;
+	}
+
+	// 相互作用が成立した場合だけEventObject名と同じSEを一度再生
+	const std::string eventObjectName(interactedObject->GetEventObjectName());
+	if (MyAudio::IsLoaded(eventObjectName)) {
+		MyAudio::Play(eventObjectName);
 	}
 
 	const MapEventRequest request = interactedObject->GetInteractionRequest();

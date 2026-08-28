@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Audio/MyAudio.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
 #include "Render/Object/2d/Text/MyText.h"
@@ -9,9 +10,14 @@
 
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
+
 	constexpr float kTpsCameraZoomSpeed = 15.0f;
 	constexpr float kTpsCameraMinDistance = 5.0f;
 	constexpr float kTpsCameraMaxDistance = 30.0f;
+	
+	constexpr int kEnemyDamageSoundFirstIndex = 1;
+	constexpr int kEnemyDamageSoundLastIndex = 5;
+	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
 }
 
 Game::Game(CommonData& commonData)
@@ -24,7 +30,7 @@ void Game::Initialize() {
 	// Titleの選択状態を消費し、未選択時だけ新規抽選と履歴登録を実行
 	gameSeed_ = commonData_.GetGameSeedSystem().BeginGame();
 	MyRand::SetSeed(gameSeed_);
-
+	
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 	Enemy::Settings::GetInstance().LoadOrCreate();
 
@@ -131,6 +137,16 @@ SceneType Game::Update(float dt) {
 		enemyManager_->ResolveAfterCollision();
 		for (const Enemy::ProjectileDamageEvent& event :
 			enemyManager_->ConsumeProjectileDamageEvents()) {
+
+			// Gameplay乱数へ影響しない専用乱数系列でDamage SEを選択
+			const std::string damageSoundKey =
+				std::string(kEnemyDamageSoundKeyPrefix) +
+				std::to_string(MyRand::GetInt(
+					kEnemyDamageSoundFirstIndex,
+					kEnemyDamageSoundLastIndex));
+			if (MyAudio::IsLoaded(damageSoundKey)) {
+				MyAudio::Play(damageSoundKey);
+			}
 			projectileDamageView_.Spawn(event.damage, event.worldPosition);
 			weaponInventory_->RecordProjectileDamage(event.sourceWeaponId, event.damage, event.wasKilled);
 		}

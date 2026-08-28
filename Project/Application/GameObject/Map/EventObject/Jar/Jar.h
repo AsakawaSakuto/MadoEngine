@@ -37,6 +37,10 @@ public:
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
 
+	/// @brief JarのEventObject名を取得
+	/// @return JarのEventObject名
+	std::string_view GetEventObjectName() const override { return "Jar"; }
+
 private:
 	JarType type_ = JarType::Money;
 	JarSize size_ = JarSize::Small;
