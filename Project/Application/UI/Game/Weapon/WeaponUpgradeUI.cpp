@@ -10,6 +10,9 @@ namespace UI::Game {
 		constexpr const char* kUpgradeLeftAction = "Left";
 		constexpr const char* kUpgradeRightAction = "Right";
 		constexpr const char* kUpgradeDecisionAction = "Decision";
+
+		constexpr const char* kUpgradeCardSelectSoundKey = "UpgradeCardSelect";
+		constexpr const char* kUpgradeCardDecisionSoundKey = "UpgradeCardDecision";
 	}
 
 	void UpgradeUI::Initialize() {
@@ -73,13 +76,13 @@ namespace UI::Game {
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + visibleChoiceCount_ - 1) % visibleChoiceCount_;
 
-			MyAudio::Play("UpgradeCardSelect");
+			MyAudio::Play(kUpgradeCardSelectSoundKey);
 
 		} else if (MyInput::Trigger(kUpgradeRightAction)) {
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + 1) % visibleChoiceCount_;
 
-			MyAudio::Play("UpgradeCardSelect");
+			MyAudio::Play(kUpgradeCardSelectSoundKey);
 		}
 
 		UpdateCards(deltaTime);
@@ -87,7 +90,7 @@ namespace UI::Game {
 		if (!MyInput::Trigger(kUpgradeDecisionAction)) {
 			return;
 		} else {
-			MyAudio::Play("UpgradeCardDecision");
+			MyAudio::Play(kUpgradeCardDecisionSoundKey);
 		}
 
 		BeginDecisionAnimation(

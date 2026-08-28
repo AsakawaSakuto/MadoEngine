@@ -1,4 +1,5 @@
 #include "WeaponUpgradeSystem.h"
+#include "Audio/MyAudio.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <array>
@@ -8,6 +9,7 @@
 namespace Weapon {
 	namespace {
 		constexpr std::size_t kChoiceCount = 3;
+		constexpr const char* kUpgradeTimingSoundKey = "UpgradeTiming";
 
 		struct RarityWeight {
 			Rarity rarity;
@@ -230,6 +232,9 @@ namespace Weapon {
 
 		generationFailureLogged_ = false;
 		Logger::Output("[Application] 武器アップグレード候補を三つ生成しました。", Logger::Level::Debug);
+
+		// 新しいUpgrade選択肢が公開される瞬間に通知SEを再生
+		MyAudio::Play(kUpgradeTimingSoundKey);
 		return true;
 	}
 
