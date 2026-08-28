@@ -77,9 +77,6 @@ void Game::Initialize() {
 	enemyEditor_->Initialize(enemySpawner_.get(), enemyManager_.get());
 	SynchronizeMapDependentState();
 
-	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
-	weaponIconUI_->Initialize(4);
-
 	playerIconUI_ = std::make_unique<UI::Game::PlayerIconUI>();
 	playerIconUI_->Initialize();
 
@@ -88,6 +85,10 @@ void Game::Initialize() {
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 	weaponUpgradeSystem_ = std::make_unique<Weapon::UpgradeSystem>();
 	weaponUpgradeSystem_->Initialize(player_->GetLevel(), gameSeed_);
+
+	// 武器Level表示をUpgrade Cardより先に登録してHUDをCardの背面へ配置
+	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
+	weaponIconUI_->Initialize(4);
 	weaponUpgradeUI_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始

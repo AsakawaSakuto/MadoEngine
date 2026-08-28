@@ -5,6 +5,10 @@
         "Voice": 1.0
     },
     "individualVolumes": {
+        "axe": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "bgm1": {
             "type": "BGM",
             "volume": 0.10000000149011612
@@ -25,6 +29,10 @@
             "type": "BGM",
             "volume": 0.10000000149011612
         },
+        "bow": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "chest": {
             "type": "SE",
             "volume": 1.0
@@ -41,6 +49,14 @@
             "type": "SE",
             "volume": 1.0
         },
+        "explotion": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "fireball": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "jar": {
             "type": "SE",
             "volume": 1.0
@@ -50,6 +66,10 @@
             "volume": 1.0
         },
         "lockin": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "pistol": {
             "type": "SE",
             "volume": 1.0
         },
@@ -73,10 +93,14 @@
             "type": "BGM",
             "volume": 0.10000000149011612
         },
+        "toxicboots": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "upgrade": {
             "type": "SE",
             "volume": 1.0
         }
     },
-    "masterVolume": 0.0
+    "masterVolume": 0.20000000298023224
 }

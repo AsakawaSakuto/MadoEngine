@@ -4,6 +4,13 @@
 #include <algorithm>
 #include <format>
 
+namespace {
+	constexpr float kWeaponIconSlotSpacing = 68.0f;
+	constexpr Vector2 kWeaponLevelTextBasePosition = { 133.0f, 196.0f };
+	constexpr float kWeaponLevelTextFontSize = 20.0f;
+	constexpr const char* kWeaponLevelTextNamePrefix = "LevelText";
+}
+
 namespace UI::Game {
 
 	void WeaponIconUI::Initialize(int slotCount) {
@@ -44,6 +51,26 @@ namespace UI::Game {
 				sprite->SetPosition(Vector2{ 132.0f + i * 68.0f, 232.0f - 64.0f });
 				sprite->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
 				sprite->SetVisible(false);
+			}
+
+			weaponLevelTexts_[i] = MyText::Create(
+				kWeaponLevelTextNamePrefix + std::to_string(i),
+				"",
+				SceneType::Game,
+				MadoEngine::EditorManagementMode::RuntimeOnly,
+				MadoEngine::Render::RenderLayer::Default);
+			if (MadoEngine::Text* levelText = MyText::TryGet(weaponLevelTexts_[i])) {
+
+				// 武器Iconと同じSlot間隔を使用してレベル表示を下端へ整列
+				levelText->SetPosition({
+					kWeaponLevelTextBasePosition.x + static_cast<float>(i) * kWeaponIconSlotSpacing,
+					kWeaponLevelTextBasePosition.y,
+				});
+				levelText->SetAnchorPoint({ 0.5f, 0.5f });
+				levelText->SetFontAsset("Assets/Font/YuGothB.ttc", "游ゴシック");
+				levelText->SetFontSize(kWeaponLevelTextFontSize);
+				levelText->SetWordWrap(true);
+				levelText->SetVisible(false);
 			}
 		}
 	
@@ -114,21 +141,14 @@ namespace UI::Game {
 			return;
 		}
 
-		MadoEngine::TextHandle& levelTextHandle = weaponLevelTexts_[slotIndex];
-		MadoEngine::Text* levelText = MyText::TryGet(levelTextHandle);
-		if (!levelText) {
-
-			// Editor管理Textの再生成に追従するため無効Handleだけを名前から再解決
-			levelTextHandle = MyText::Find("LevelText" + std::to_string(slotIndex));
-			levelText = MyText::TryGet(levelTextHandle);
-		}
+		MadoEngine::Text* levelText = MyText::TryGet(weaponLevelTexts_[slotIndex]);
 		if (!levelText) {
 			return;
 		}
 
-		const std::string displayText = weapon
-			? std::format("Lv.{}", weapon->GetUpgradeLevel())
-			: "";
+		levelText->SetVisible(weapon != nullptr);
+		const std::string displayText =
+			weapon ? std::format("Lv.{}", weapon->GetUpgradeLevel()) : "";
 		if (levelText->GetText() != displayText) {
 			levelText->SetText(displayText);
 		}

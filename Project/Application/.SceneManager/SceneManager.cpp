@@ -236,8 +236,20 @@ void SceneManager::DrawOverlayInOrder(MadoEngine::Render::IRenderLayerBatchConte
 		return;
 	}
 
-	MadoEngine::SpriteManager::GetInstance().DrawInOrder(currentSceneType_, batchContext);
-	MadoEngine::TextManager::GetInstance().DrawInOrder(currentSceneType_, batchContext);
+	MadoEngine::SpriteManager& spriteManager = MadoEngine::SpriteManager::GetInstance();
+	MadoEngine::TextManager& textManager = MadoEngine::TextManager::GetInstance();
+
+	// 後順位LayerのSpriteが前順位LayerのTextを覆えるようLayer単位で2D描画を完結
+	for (uint32_t layerIndex = 0;
+		layerIndex < MadoEngine::Render::kRenderLayerCount;
+		++layerIndex) {
+		const MadoEngine::Render::RenderLayer layer =
+			MadoEngine::Render::GetRenderLayerByIndex(layerIndex);
+		batchContext.BeginRenderLayerBatch(layer);
+		spriteManager.DrawLayer(currentSceneType_, layer);
+		textManager.DrawLayer(currentSceneType_, layer);
+		batchContext.EndRenderLayerBatch(layer);
+	}
 }
 
 void SceneManager::DrawCurrentScene() {

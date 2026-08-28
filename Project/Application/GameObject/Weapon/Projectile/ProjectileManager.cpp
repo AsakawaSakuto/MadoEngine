@@ -1,4 +1,5 @@
 #include "ProjectileManager.h"
+#include "Audio/MyAudio.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include <algorithm>
 #include <utility>
@@ -8,6 +9,17 @@ namespace Projectile {
 		// 跳弾先の方向を作るための最小距離の2乗
 		constexpr float kMinBounceDirectionLengthSq = 0.000001f;
 		constexpr const char* kProjectileDeleteEffectName = "ProjectileDelete";
+		constexpr const char* kExplosionSoundKey = "Explotion";
+
+		/// @brief Projectileの種類と同名の生成音を再生
+		/// @param type 生成したProjectileの種類
+		void PlayProjectileCreateSound(Projectile::Type type) {
+			const std::string soundKey = type == Projectile::Type::Explosion ?
+				kExplosionSoundKey : ProjectileTypeToString(type);
+			if (MyAudio::IsLoaded(soundKey)) {
+				MyAudio::Play(soundKey);
+			}
+		}
 
 		/// @brief 衝突したEnemy以外で最も近い跳弾先を検索
 		/// @param projectile 跳弾するProjectile
@@ -129,53 +141,24 @@ namespace Projectile {
 
 		// 衝突結果を後から照合できるよう全種類で一意なIDを採番
 		context.projectileId = nextProjectileId_++;
+		std::unique_ptr<IProjectile> projectile;
 
 		switch (type) {
-		case Projectile::Type::Explosion: {
-			auto explosion = std::make_unique<Explosion>();
-			explosion->Initialize(context);
-			projectiles.push_back(std::move(explosion));
-			break;
-		}
-		case Projectile::Type::Pistol: {
-			auto pistol = std::make_unique<Pistol>();
-			pistol->Initialize(context);
-			projectiles.push_back(std::move(pistol));
-			break;
-		}
-		case Projectile::Type::Bow: {
-			auto bow = std::make_unique<Bow>();
-			bow->Initialize(context);
-			projectiles.push_back(std::move(bow));
-			break;
-		}
-		case Projectile::Type::Eye: {
-			auto eye = std::make_unique<Eye>();
-			eye->Initialize(context);
-			projectiles.push_back(std::move(eye));
-			break;
-		}
-		case Projectile::Type::FireBall: {
-			auto fireBall = std::make_unique<FireBall>();
-			fireBall->Initialize(context);
-			projectiles.push_back(std::move(fireBall));
-			break;
-		}
-		case Projectile::Type::Axe: {
-			auto axe = std::make_unique<Axe>();
-			axe->Initialize(context);
-			projectiles.push_back(std::move(axe));
-			break;
-		}
-		case Projectile::Type::ToxicBoots: {
-			auto toxicBoots = std::make_unique<ToxicBoots>();
-			toxicBoots->Initialize(context);
-			projectiles.push_back(std::move(toxicBoots));
-			break;
-		}
+		case Projectile::Type::Explosion:  projectile = std::make_unique<Explosion>();  break;
+		case Projectile::Type::Pistol:     projectile = std::make_unique<Pistol>();     break;
+		case Projectile::Type::Bow:        projectile = std::make_unique<Bow>();        break;
+		case Projectile::Type::Eye:        projectile = std::make_unique<Eye>();        break;
+		case Projectile::Type::FireBall:   projectile = std::make_unique<FireBall>();   break;
+		case Projectile::Type::Axe:        projectile = std::make_unique<Axe>();        break;
+		case Projectile::Type::ToxicBoots: projectile = std::make_unique<ToxicBoots>(); break;
 		default:
-			break;
+			return;
 		}
+
+		// 初期化が完了したProjectileだけを管理対象と生成音の再生対象へ登録
+		projectile->Initialize(context);
+		projectiles.push_back(std::move(projectile));
+		PlayProjectileCreateSound(type);
 	}
 
 	void Manager::FlushPendingProjectiles() {
