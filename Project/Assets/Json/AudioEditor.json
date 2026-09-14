@@ -29,6 +29,10 @@
             "type": "BGM",
             "volume": 0.10000000149011612
         },
+        "bossspawner": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "bow": {
             "type": "SE",
             "volume": 1.0
@@ -45,7 +49,27 @@
             "type": "SE",
             "volume": 1.0
         },
-        "expget": {
+        "enemydamage1": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "enemydamage2": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "enemydamage3": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "enemydamage4": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "enemydamage5": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "exp": {
             "type": "SE",
             "volume": 1.0
         },
@@ -53,7 +77,15 @@
             "type": "SE",
             "volume": 1.0
         },
+        "eye": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "fireball": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "heal": {
             "type": "SE",
             "volume": 1.0
         },
@@ -65,7 +97,15 @@
             "type": "SE",
             "volume": 1.0
         },
+        "karma": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "lockin": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "money": {
             "type": "SE",
             "volume": 1.0
         },
@@ -97,7 +137,15 @@
             "type": "SE",
             "volume": 1.0
         },
-        "upgrade": {
+        "upgradecarddecision": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "upgradecardselect": {
+            "type": "SE",
+            "volume": 1.0
+        },
+        "upgradetiming": {
             "type": "SE",
             "volume": 1.0
         }

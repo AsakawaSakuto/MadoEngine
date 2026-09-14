@@ -1,47 +1,6 @@
 {
     "models": [
         {
-            "billboard": false,
-            "cameraTranslateOffset": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "castShadow": true,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "frustumCulling": true,
-            "layer": "Default",
-            "lighting": true,
-            "model": "Assets/Model/Static/Projectile/Eye.obj",
-            "name": "Model1",
-            "position": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "receiveLightMask": 1,
-            "receiveShadow": true,
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                2.0,
-                2.0,
-                2.0
-            ],
-            "scene": "None",
-            "texture": "EyeTexture2",
-            "type": "Model3D",
-            "visible": true
-        },
-        {
             "billboard": true,
             "cameraTranslateOffset": [
                 0.0,
@@ -81,6 +40,778 @@
             "texture": "xbox_button_color_x_outline",
             "type": "Model3D",
             "visible": false
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model1",
+            "position": [
+                5.0,
+                0.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model4",
+            "position": [
+                5.0,
+                0.0,
+                10.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/human.obj",
+            "name": "Model",
+            "position": [
+                0.20880308747291565,
+                -1.5735626220703125e-05,
+                -1.382659912109375
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -0.16005709767341614,
+                0.0
+            ],
+            "scale": [
+                0.9999999403953552,
+                1.0,
+                0.9999999403953552
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model19",
+            "position": [
+                0.0,
+                18.10000228881836,
+                16.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                1.0
+            ],
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model2",
+            "position": [
+                -5.0,
+                0.0,
+                0.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model18",
+            "position": [
+                -11.0,
+                18.0,
+                5.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                10.0,
+                10.0
+            ],
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model3",
+            "position": [
+                -5.0,
+                0.0,
+                10.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/enemy.obj",
+            "name": "Model5",
+            "position": [
+                0.21174092590808868,
+                1.2586824893951416,
+                2.8140668869018555
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                -0.3126620650291443,
+                -0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                0.9999999403953552,
+                0.9999999403953552
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/enemy.obj",
+            "name": "Model6",
+            "position": [
+                -2.2347025871276855,
+                0.0,
+                2.910403251647949
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -0.4856850206851959,
+                0.0
+            ],
+            "scale": [
+                0.9999998211860657,
+                1.0,
+                0.9999998211860657
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/enemy.obj",
+            "name": "Model7",
+            "position": [
+                -3.1410131454467773,
+                1.2890583276748657,
+                0.6188227534294128
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -0.9032874703407288,
+                -0.21344447135925293
+            ],
+            "scale": [
+                0.9999995827674866,
+                1.0,
+                0.9999995827674866
+            ],
+            "scene": "Test",
+            "texture": "white2x2",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model8",
+            "position": [
+                -6.318460941314697,
+                0.0,
+                3.299999952316284
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -1.2624001502990723,
+                0.0
+            ],
+            "scale": [
+                1.9999984502792358,
+                2.0,
+                1.9999984502792358
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model13",
+            "position": [
+                -1.923319697380066,
+                0.0,
+                8.310203552246094
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.5,
+                1.5,
+                1.5
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model9",
+            "position": [
+                -4.92880392074585,
+                0.0,
+                7.900000095367432
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                2.0,
+                2.0,
+                2.0
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model12",
+            "position": [
+                -7.160759449005127,
+                0.0,
+                6.183189868927002
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.5,
+                1.5,
+                1.5
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model10",
+            "position": [
+                0.3046397566795349,
+                0.0,
+                4.601360321044922
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                2.0,
+                2.0,
+                2.0
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Chest.obj",
+            "name": "Model11",
+            "position": [
+                -4.5,
+                0.0,
+                -0.40000003576278687
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -1.0084054470062256,
+                0.0
+            ],
+            "scale": [
+                0.8500000238418579,
+                0.8500000238418579,
+                0.8500000238418579
+            ],
+            "scene": "Test",
+            "texture": "Chest",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model14",
+            "position": [
+                -4.668651580810547,
+                -0.5904135704040527,
+                10.23763656616211
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model15",
+            "position": [
+                -6.720130920410156,
+                0.0,
+                7.511316299438477
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Chest.obj",
+            "name": "Model17",
+            "position": [
+                -2.7566025257110596,
+                0.0,
+                6.078753471374512
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                -0.38747745752334595,
+                0.0
+            ],
+            "scale": [
+                0.9999997019767761,
+                1.0,
+                0.9999997019767761
+            ],
+            "scene": "Test",
+            "texture": "Chest",
+            "type": "Model3D",
+            "visible": true
         }
     ]
 }
