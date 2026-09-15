@@ -247,6 +247,10 @@ namespace Player {
 	}
 
 	void Base::Update(float deltaTime) {
+
+		// SceneManagerが前フレーム末尾に解決した座標を、今回の移動情報で上書きする前に確定
+		movement_.CaptureCollisionResult(transform_.translate);
+
 		lastDeltaTime_ = std::max(0.0f, deltaTime);
 		UpdateHealthRegeneration(lastDeltaTime_);
 		controller_.Update();

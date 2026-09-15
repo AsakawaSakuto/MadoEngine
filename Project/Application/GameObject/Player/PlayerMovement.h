@@ -19,6 +19,10 @@ namespace Player {
 		/// @param input Playerの移動操作入力
 		void Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input);
 
+		/// @brief 前フレーム末尾のCollider解決結果から水平移動の阻害状態を確定
+		/// @param resolvedPosition Collider解決後のPlayer座標
+		void CaptureCollisionResult(const Vector3& resolvedPosition);
+
 		/// @brief 接地状態を移動処理へ反映
 		/// @param isGroundContact 通常地面に接地していればtrue
 		/// @param isSlopeGroundContact 坂に接地していればtrue
@@ -151,6 +155,7 @@ namespace Player {
 		bool jumpStartedThisFrame_ = false;
 		bool landedThisFrame_ = false;
 		bool hasWallClimbInput_ = false;
+		bool wasHorizontalMoveBlocked_ = false;
 		bool isWallClimbing_ = false;
 		bool hasWallClimbStartedSinceLanding_ = false;
 		bool wasGroundContact_ = true;

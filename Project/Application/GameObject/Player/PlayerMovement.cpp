@@ -98,6 +98,7 @@ namespace Player {
 		lastMoveStartPosition_ = {};
 		lastAttemptedHorizontalMove_ = {};
 		hasWallClimbInput_ = false;
+		wasHorizontalMoveBlocked_ = false;
 		isWallClimbing_ = false;
 		hasWallClimbStartedSinceLanding_ = false;
 		wasGroundContact_ = true;
@@ -126,6 +127,13 @@ namespace Player {
 			0.0f,
 			transform.translate.z - lastMoveStartPosition_.z
 		};
+	}
+
+	void Movement::CaptureCollisionResult(const Vector3& resolvedPosition) {
+
+		// SceneManagerが前フレーム末尾に押し戻した座標を、
+		// 次の移動情報で上書きする前に前フレームの希望移動量と比較
+		wasHorizontalMoveBlocked_ = IsHorizontalMoveBlocked(resolvedPosition);
 	}
 
 	void Movement::SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input) {
@@ -170,7 +178,7 @@ namespace Player {
 
 	void Movement::UpdateWallClimb(float deltaTime, const MoveInput& input, Transform3D& transform) {
 		const bool wasWallClimbing = isWallClimbing_;
-		const bool isBlocked = IsHorizontalMoveBlocked(transform.translate);
+		const bool isBlocked = wasHorizontalMoveBlocked_;
 		if (input.isCrouching || jumpStartedThisFrame_ || !hasWallClimbInput_ || !isBlocked) {
 			isWallClimbing_ = false;
 			return;

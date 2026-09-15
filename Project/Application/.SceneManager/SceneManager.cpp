@@ -123,9 +123,6 @@ void SceneManager::Update(float dt) {
 	transitionController.Update(dt);
 	sceneBgmController_.Update(transitionController.GetEffectProgress());
 
-	// Scene処理が参照するCollider状態をFrame先頭で更新
-	ColliderManager::GetInstance().Update();
-
 	if (currentScene_) {
 		SceneType next = currentScene_->Update(dt);
 		if (next != currentSceneType_) {
@@ -155,6 +152,9 @@ void SceneManager::Update(float dt) {
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Update(dt);
+
+	// Scene処理が参照するCollider状態をFrame先頭で更新
+	ColliderManager::GetInstance().Update();
 }
 
 void SceneManager::Draw() {

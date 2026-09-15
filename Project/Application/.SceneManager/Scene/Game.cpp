@@ -131,8 +131,6 @@ SceneType Game::Update(float dt) {
 		weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
 		Projectile::Manager::GetInstance().Update(deltaTime);
 
-		// 全GameObjectの移動後にColliderを一度だけ更新してから衝突を解決
-		MyCollider::Update();
 		player_->ResolveAfterCollision();
 		enemyManager_->ResolveAfterCollision();
 		for (const Enemy::ProjectileDamageEvent& event :
