@@ -1021,7 +1021,7 @@ namespace MadoEngine
 		}
 		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Light)) {
 			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Light);
-			MadoEngine::Editor::DrawLightManagerEditorUI();
+			MadoEngine::Editor::DrawLightManagerEditorUI(currentSceneType_);
 			toolbar.EndDocumentCapture();
 		}
 		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Model)) {

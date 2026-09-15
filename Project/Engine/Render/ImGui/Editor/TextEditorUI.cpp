@@ -262,7 +262,7 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 		const std::string requestedName = createName.data();
 		const TextHandle created = manager.Create(
 			requestedName,
-			SceneType::None,
+			currentSceneType,
 			EditorManagementMode::EditorManaged);
 		if (created.IsValid()) {
 			selectedHandle = created;

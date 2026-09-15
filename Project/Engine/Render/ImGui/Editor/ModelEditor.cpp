@@ -548,7 +548,7 @@ namespace MadoEngine::Editor {
 			const ModelHandle created = manager.Create(
 				requestedName,
 				createModelName,
-				SceneType::None,
+				currentSceneType,
 				EditorManagementMode::EditorManaged);
 			if (created.IsValid()) {
 				selectedHandle = created;

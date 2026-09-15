@@ -13,7 +13,8 @@ bool LoadLightEditorJson();
 #ifdef USE_IMGUI
 
 /// @brief LightManager Editorを描画
-void DrawLightManagerEditorUI();
+/// @param currentSceneType 現在のシーン
+void DrawLightManagerEditorUI(SceneType currentSceneType);
 
 #endif // USE_IMGUI
 

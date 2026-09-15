@@ -557,7 +557,7 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 		const SpriteHandle created = manager.Create(
 			requestedName,
 			createTextureName,
-			SceneType::None,
+			currentSceneType,
 			EditorManagementMode::EditorManaged);
 		if (created.IsValid()) {
 			selectedHandle = created;

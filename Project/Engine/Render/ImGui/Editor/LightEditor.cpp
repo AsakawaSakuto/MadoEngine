@@ -96,8 +96,12 @@ namespace MadoEngine::Editor {
         /// @brief Editorからライトを追加
         /// @param type 追加するライト種別
         /// @param name 追加するライト名
+        /// @param sceneType 追加するライトの対象シーン
         /// @return 追加したライトのハンドル、追加できなかった場合は無効なハンドル
-        LightHandle AddLightFromEditor(LightType type, const std::string& name) {
+        LightHandle AddLightFromEditor(
+            LightType type,
+            const std::string& name,
+            SceneType sceneType) {
             LightManager& lightManager = LightManager::GetInstance();
             const bool isNameAlreadyUsed = lightManager.Find(name).IsValid();
 
@@ -108,7 +112,7 @@ namespace MadoEngine::Editor {
                 const LightHandle createdHandle = lightManager.CreateDirectionalLight(
                     name,
                     light,
-                    SceneType::None,
+                    sceneType,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
                 return isNameAlreadyUsed ? LightHandle{} : createdHandle;
@@ -122,7 +126,7 @@ namespace MadoEngine::Editor {
                 const LightHandle createdHandle = lightManager.CreatePointLight(
                     name,
                     light,
-                    SceneType::None,
+                    sceneType,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
                 return isNameAlreadyUsed ? LightHandle{} : createdHandle;
@@ -139,7 +143,7 @@ namespace MadoEngine::Editor {
                 const LightHandle createdHandle = lightManager.CreateSpotLight(
                     name,
                     light,
-                    SceneType::None,
+                    sceneType,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
                 return isNameAlreadyUsed ? LightHandle{} : createdHandle;
@@ -447,7 +451,7 @@ namespace MadoEngine::Editor {
 
 #ifdef USE_IMGUI
 
-    void DrawLightManagerEditorUI() {
+    void DrawLightManagerEditorUI(SceneType currentSceneType) {
         LightManager& lightManager = LightManager::GetInstance();
 
         // 選択Handleと新規作成名をFrame間で維持するEditor Session状態
@@ -466,7 +470,10 @@ namespace MadoEngine::Editor {
         ImGui::SameLine();
         if (ImGui::Button("Direction追加")) {
             const std::string requestedName = createName.data();
-            const LightHandle createdHandle = AddLightFromEditor(LightType::Directional, requestedName);
+            const LightHandle createdHandle = AddLightFromEditor(
+                LightType::Directional,
+                requestedName,
+                currentSceneType);
             if (createdHandle.IsValid()) {
                 selectedHandle = createdHandle;
                 CopyToBuffer(createName, MakeNextAvailableLightName(lightManager, requestedName));
@@ -475,7 +482,10 @@ namespace MadoEngine::Editor {
         ImGui::SameLine();
         if (ImGui::Button("Point追加")) {
             const std::string requestedName = createName.data();
-            const LightHandle createdHandle = AddLightFromEditor(LightType::Point, requestedName);
+            const LightHandle createdHandle = AddLightFromEditor(
+                LightType::Point,
+                requestedName,
+                currentSceneType);
             if (createdHandle.IsValid()) {
                 selectedHandle = createdHandle;
                 CopyToBuffer(createName, MakeNextAvailableLightName(lightManager, requestedName));
@@ -484,7 +494,10 @@ namespace MadoEngine::Editor {
         ImGui::SameLine();
         if (ImGui::Button("Spot追加")) {
             const std::string requestedName = createName.data();
-            const LightHandle createdHandle = AddLightFromEditor(LightType::Spot, requestedName);
+            const LightHandle createdHandle = AddLightFromEditor(
+                LightType::Spot,
+                requestedName,
+                currentSceneType);
             if (createdHandle.IsValid()) {
                 selectedHandle = createdHandle;
                 CopyToBuffer(createName, MakeNextAvailableLightName(lightManager, requestedName));

@@ -77,7 +77,48 @@
                 1.0,
                 5.0
             ],
-            "scene": "None",
+            "scene": "Test",
+            "texture": "blockTexture",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapBlock/block.obj",
+            "name": "Model4",
+            "position": [
+                5.0,
+                0.0,
+                10.0
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "scene": "Test",
             "texture": "blockTexture",
             "type": "Model3D",
             "visible": true
@@ -118,49 +159,8 @@
                 1.0,
                 0.9999999403953552
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "white2x2",
-            "type": "Model3D",
-            "visible": true
-        },
-        {
-            "billboard": false,
-            "cameraTranslateOffset": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "castShadow": true,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "frustumCulling": true,
-            "layer": "Default",
-            "lighting": true,
-            "model": "Assets/Model/Static/MapBlock/block.obj",
-            "name": "Model4",
-            "position": [
-                5.0,
-                0.0,
-                10.0
-            ],
-            "receiveLightMask": 1,
-            "receiveShadow": true,
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                5.0,
-                1.0,
-                5.0
-            ],
-            "scene": "None",
-            "texture": "blockTexture",
             "type": "Model3D",
             "visible": true
         },
@@ -200,7 +200,7 @@
                 10.0,
                 1.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "blockTexture",
             "type": "Model3D",
             "visible": true
@@ -241,7 +241,7 @@
                 1.0,
                 5.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "blockTexture",
             "type": "Model3D",
             "visible": true
@@ -282,7 +282,7 @@
                 10.0,
                 10.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "blockTexture",
             "type": "Model3D",
             "visible": true
@@ -323,7 +323,7 @@
                 1.0,
                 5.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "blockTexture",
             "type": "Model3D",
             "visible": true
@@ -364,7 +364,7 @@
                 0.9999999403953552,
                 0.9999999403953552
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "white2x2",
             "type": "Model3D",
             "visible": true
@@ -405,7 +405,7 @@
                 1.0,
                 0.9999998211860657
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "white2x2",
             "type": "Model3D",
             "visible": true
@@ -446,48 +446,8 @@
                 1.0,
                 0.9999995827674866
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "white2x2",
-            "type": "Model3D",
-            "visible": true
-        },
-        {
-            "billboard": false,
-            "cameraTranslateOffset": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "castShadow": true,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "frustumCulling": true,
-            "layer": "Default",
-            "lighting": true,
-            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
-            "name": "Model13",
-            "position": [
-                -1.923319697380066,
-                0.0,
-                8.310203552246094
-            ],
-            "receiveLightMask": 1,
-            "receiveShadow": true,
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.5,
-                1.5,
-                1.5
-            ],
-            "scene": "None",
             "type": "Model3D",
             "visible": true
         },
@@ -527,7 +487,7 @@
                 2.0,
                 1.9999984502792358
             ],
-            "scene": "None",
+            "scene": "Test",
             "type": "Model3D",
             "visible": true
         },
@@ -549,11 +509,11 @@
             "layer": "Default",
             "lighting": true,
             "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
-            "name": "Model12",
+            "name": "Model13",
             "position": [
-                -7.160759449005127,
+                -1.923319697380066,
                 0.0,
-                6.183189868927002
+                8.310203552246094
             ],
             "receiveLightMask": 1,
             "receiveShadow": true,
@@ -567,7 +527,7 @@
                 1.5,
                 1.5
             ],
-            "scene": "None",
+            "scene": "Test",
             "type": "Model3D",
             "visible": true
         },
@@ -607,7 +567,47 @@
                 2.0,
                 2.0
             ],
-            "scene": "None",
+            "scene": "Test",
+            "type": "Model3D",
+            "visible": true
+        },
+        {
+            "billboard": false,
+            "cameraTranslateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "castShadow": true,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "frustumCulling": true,
+            "layer": "Default",
+            "lighting": true,
+            "model": "Assets/Model/Static/MapEventObject/Tree/Tree.obj",
+            "name": "Model12",
+            "position": [
+                -7.160759449005127,
+                0.0,
+                6.183189868927002
+            ],
+            "receiveLightMask": 1,
+            "receiveShadow": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.5,
+                1.5,
+                1.5
+            ],
+            "scene": "Test",
             "type": "Model3D",
             "visible": true
         },
@@ -647,7 +647,7 @@
                 2.0,
                 2.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "type": "Model3D",
             "visible": true
         },
@@ -687,7 +687,7 @@
                 0.8500000238418579,
                 0.8500000238418579
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "Chest",
             "type": "Model3D",
             "visible": true
@@ -728,7 +728,7 @@
                 1.0,
                 1.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "type": "Model3D",
             "visible": true
         },
@@ -768,7 +768,7 @@
                 1.0,
                 1.0
             ],
-            "scene": "None",
+            "scene": "Test",
             "type": "Model3D",
             "visible": true
         },
@@ -808,7 +808,7 @@
                 1.0,
                 0.9999997019767761
             ],
-            "scene": "None",
+            "scene": "Test",
             "texture": "Chest",
             "type": "Model3D",
             "visible": true
