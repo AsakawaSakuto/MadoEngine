@@ -8,6 +8,7 @@
 namespace Weapon {
 	namespace {
 		std::uint64_t nextWeaponId = 1;
+		constexpr float kProjectileSpawnHeightOffset = 0.35f;
 
 		/// @brief Weaponインスタンスの識別番号を発行
 		/// @return 新しく発行した識別番号
@@ -258,6 +259,11 @@ namespace Weapon {
 		context.projectileName = weaponName_;
 		context.projectileCount = projectileCount_;
 		context.ownerPosition = ownerPosition;
+		if (type_ != Projectile::Type::Eye && type_ != Projectile::Type::ToxicBoots) {
+
+			// 投射武器がPlayer中心より少し上から飛び始めるよう生成位置だけを補正
+			context.ownerPosition.y += kProjectileSpawnHeightOffset;
+		}
 		context.targetPosition = targetPosition;
 		context.damage = status_.damage.value;
 		context.moveSpeed = status_.speed.value;
