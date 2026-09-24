@@ -1,6 +1,7 @@
 #include "Eye.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numbers>
 
 namespace Projectile {
@@ -48,9 +49,6 @@ namespace Projectile {
 		// 常時展開中であることを視認できるよう所有者の周囲でEyeを回転
 		transform_.rotate.y += kRotationSpeed * deltaTime;
 		if (Model* model = MyModel::TryGet(model_)) {
-
-			// 所有者の座標を基準に少し上方へオフセットして表示
-			transform_.translate = ownerPosition - Vector3(0.0f, 0.45f, 0.0f);
 			model->SetTransform(transform_);
 		}
 		UpdateEffectSequenceTransform();
@@ -61,7 +59,7 @@ namespace Projectile {
 
 	void Eye::SynchronizePersistentState(const InitializeDesc& context) {
 		ownerPosition = context.ownerPosition;
-		transform_.translate = ownerPosition;
+		UpdateGroundPosition();
 		damage_ = context.damage;
 
 		// 不正な倍率による反転やゼロ半径を防ぎつつ強化値を攻撃範囲へ即時反映
@@ -73,6 +71,39 @@ namespace Projectile {
 
 		const float modelScale = kBaseModelScale * sizeRate_;
 		transform_.scale = { modelScale, modelScale, modelScale };
+	}
+
+	void Eye::UpdateGroundPosition() {
+		transform_.translate.x = ownerPosition.x;
+		transform_.translate.z = ownerPosition.z;
+
+		constexpr float kMaxGroundSearchDistance = std::numeric_limits<float>::max();
+		float groundSurfaceY = 0.0f;
+		float surfaceY = 0.0f;
+		bool foundGround = false;
+
+		if (MyCollider::TryGetGroundSurfaceY(
+			ownerPosition, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
+			groundSurfaceY = surfaceY;
+			foundGround = true;
+		}
+
+		// 通常床と坂が重なる場所では所有者に近い上側の地表を採用
+		if (MyCollider::TryGetGroundSurfaceY(
+			ownerPosition, CollisionTag::MapSlope, surfaceY, kMaxGroundSearchDistance) &&
+			(!foundGround || surfaceY > groundSurfaceY)) {
+			groundSurfaceY = surfaceY;
+			foundGround = true;
+		}
+
+		if (foundGround) {
+			transform_.translate.y = groundSurfaceY + kGroundOffset;
+			hasGroundPosition_ = true;
+		} else if (!hasGroundPosition_) {
+
+			// Map生成前など地表Colliderが未登録の初回だけ従来位置へ退避
+			transform_.translate.y = ownerPosition.y - kOwnerGroundOffset;
+		}
 	}
 
 	void Eye::StartEffectSequence() {

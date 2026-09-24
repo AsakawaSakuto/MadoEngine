@@ -1,4 +1,5 @@
 #include "ToxicBoots.h"
+#include <limits>
 
 namespace Projectile {
 
@@ -13,8 +14,30 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
-		// Playerの移動Collider中心ではなく生成時の足元へ固定
+		// Playerの移動Collider中心ではなく生成地点の地表へ固定
 		transform_.translate = ownerPosition - Vector3(0.0f, 0.45f, 0.0f);
+		constexpr float kMaxGroundSearchDistance = std::numeric_limits<float>::max();
+		float groundSurfaceY = 0.0f;
+		float surfaceY = 0.0f;
+		bool foundGround = false;
+
+		if (MyCollider::TryGetGroundSurfaceY(
+			ownerPosition, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
+			groundSurfaceY = surfaceY;
+			foundGround = true;
+		}
+
+		// 通常床と坂が重なる場所では生成地点に近い上側の地表を採用
+		if (MyCollider::TryGetGroundSurfaceY(
+			ownerPosition, CollisionTag::MapSlope, surfaceY, kMaxGroundSearchDistance) &&
+			(!foundGround || surfaceY > groundSurfaceY)) {
+			groundSurfaceY = surfaceY;
+			foundGround = true;
+		}
+
+		if (foundGround) {
+			transform_.translate.y = groundSurfaceY + kGroundOffset + MyRand::GetFloat(0.01f, 0.1f);
+		}
 		transform_.scale = Vector3{ kBaseModelScale, kBaseModelScale, kBaseModelScale } * sizeRate_;
 
 		// 専用Modelが用意されるまでEyeのModelとTextureを仮表示に使用

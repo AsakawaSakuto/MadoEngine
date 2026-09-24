@@ -24,6 +24,9 @@ namespace Projectile {
 		void SynchronizePersistentState(const InitializeDesc& context) override;
 
 	private:
+		/// @brief 所有者の直下にある地表へEyeの座標を同期
+		void UpdateGroundPosition();
+
 		/// @brief Eye Effect Sequenceのループ再生を開始
 		void StartEffectSequence();
 
@@ -41,6 +44,8 @@ namespace Projectile {
 		static constexpr float kBaseModelScale =   2.0f; // モデルの基本スケール
 		static constexpr float kMinSizeRate =      0.1f; // 攻撃範囲の最小倍率、0.0f以下は反転やゼロ半径になるため制限
 		static constexpr float kRotationSpeed =    1.0f; // Eyeを回転させる速度
+		static constexpr float kGroundOffset =     0.05f; // 地面とのZファイティングを防ぐ表示オフセット
+		static constexpr float kOwnerGroundOffset = 0.45f; // 地表を取得できない初回だけ使用する所有者基準のオフセット
 		static constexpr float kColorCycleDuration = 5.0f; // 色が開始色へ戻るまでの時間
 		static constexpr Vector4 kColorStart = { 1.0f, 0.0f, 1.0f, 1.0f };
 		static constexpr Vector4 kColorEnd = { 1.0f, 0.5f, 1.0f, 1.0f };
@@ -49,5 +54,6 @@ namespace Projectile {
 		std::string objectName_;
 		MadoEngine::EffectSequence::MyEffectSequence3d effectSequence_;
 		GameTimer colorAnimationTimer_;
+		bool hasGroundPosition_ = false;
 	};
 }
