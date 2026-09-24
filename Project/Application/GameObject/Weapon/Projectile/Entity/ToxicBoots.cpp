@@ -53,11 +53,7 @@ namespace Projectile {
 		Sphere hitbox;
 		hitbox.radius = kBaseAttackRadius * sizeRate_;
 		hitbox_ = hitbox;
-		MyCollider::RegisterCollider(
-			objectName_,
-			CollisionTag::PlayerProjectileHitBox,
-			&hitbox_,
-			&transform_.translate);
+		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 
 		// 設置範囲内の複数Enemyへ接触判定を維持
 		disappearsUponCollision_ = false;

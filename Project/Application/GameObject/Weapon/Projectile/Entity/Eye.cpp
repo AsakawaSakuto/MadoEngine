@@ -22,11 +22,7 @@ namespace Projectile {
 		Sphere hitbox;
 		hitbox_ = hitbox;
 		SynchronizePersistentState(context);
-		MyCollider::RegisterCollider(
-			objectName_,
-			CollisionTag::PlayerProjectileHitBox,
-			&hitbox_,
-			&transform_.translate);
+		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {

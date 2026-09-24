@@ -186,6 +186,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Bow.cpp" />
+	<ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Orb.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Eye.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
@@ -809,6 +810,7 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Bow.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+	<ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Orb.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Eye.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

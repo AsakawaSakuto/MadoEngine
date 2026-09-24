@@ -2,6 +2,7 @@
 #include "Entity/Explosion.h"
 #include "Entity/Pistol.h"
 #include "Entity/Bow.h"
+#include "Entity/Orb.h"
 #include "Entity/Eye.h"
 #include "Entity/Axe.h"
 #include "Entity/FireBall.h"

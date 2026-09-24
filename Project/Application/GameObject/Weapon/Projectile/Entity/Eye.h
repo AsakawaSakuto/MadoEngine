@@ -40,11 +40,11 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateColor(float deltaTime);
 
-		static constexpr float kBaseAttackRadius = 2.0f; // 攻撃範囲の基本半径
-		static constexpr float kBaseModelScale =   2.0f; // モデルの基本スケール
-		static constexpr float kMinSizeRate =      0.1f; // 攻撃範囲の最小倍率、0.0f以下は反転やゼロ半径になるため制限
-		static constexpr float kRotationSpeed =    1.0f; // Eyeを回転させる速度
-		static constexpr float kGroundOffset =     0.05f; // 地面とのZファイティングを防ぐ表示オフセット
+		static constexpr float kBaseAttackRadius = 2.0f;   // 攻撃範囲の基本半径
+		static constexpr float kBaseModelScale =   2.0f;   // モデルの基本スケール
+		static constexpr float kMinSizeRate =      0.1f;   // 攻撃範囲の最小倍率、0.0f以下は反転やゼロ半径になるため制限
+		static constexpr float kRotationSpeed =    1.0f;   // Eyeを回転させる速度
+		static constexpr float kGroundOffset =     0.05f;  // 地面とのZファイティングを防ぐ表示オフセット
 		static constexpr float kOwnerGroundOffset = 0.45f; // 地表を取得できない初回だけ使用する所有者基準のオフセット
 		static constexpr float kColorCycleDuration = 5.0f; // 色が開始色へ戻るまでの時間
 		static constexpr Vector4 kColorStart = { 1.0f, 0.0f, 1.0f, 1.0f };

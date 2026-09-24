@@ -147,6 +147,7 @@ namespace Projectile {
 		case Projectile::Type::Explosion:  projectile = std::make_unique<Explosion>();  break;
 		case Projectile::Type::Pistol:     projectile = std::make_unique<Pistol>();     break;
 		case Projectile::Type::Bow:        projectile = std::make_unique<Bow>();        break;
+		case Projectile::Type::Orb:        projectile = std::make_unique<Orb>();        break;
 		case Projectile::Type::Eye:        projectile = std::make_unique<Eye>();        break;
 		case Projectile::Type::FireBall:   projectile = std::make_unique<FireBall>();   break;
 		case Projectile::Type::Axe:        projectile = std::make_unique<Axe>();        break;
