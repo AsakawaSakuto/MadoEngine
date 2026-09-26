@@ -18,6 +18,7 @@ namespace Enemy {
 		Vector3 hitboxMin = { -0.5f, 0.0f, -0.5f };
 		Vector3 hitboxMax = { 0.5f, 2.0f, 0.5f };
 		Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float knockbackResistance = 0.0f; // 0.0で軽減なし、1.0でノックバック無効
 	};
 
 	/// @brief Elite属性へ共通適用する設定

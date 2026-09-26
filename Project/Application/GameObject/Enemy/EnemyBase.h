@@ -82,8 +82,14 @@ namespace Enemy {
 		/// @brief Projectileからのダメージを適用
 		/// @param projectileId Projectileの識別番号
 		/// @param damage 適用するダメージ量
+		/// @param knockbackDirection Enemyを押し出す方向
+		/// @param knockbackPower Enemyへ適用するノックバック力
 		/// @return 実際に適用されたダメージと死亡状態
-		ProjectileDamageResult TakeProjectileDamage(std::uint64_t projectileId, float damage);
+		ProjectileDamageResult TakeProjectileDamage(
+			std::uint64_t projectileId,
+			float damage,
+			const Vector3& knockbackDirection,
+			float knockbackPower);
 
 		/// @brief Enemyを理由に応じた死亡状態へ移行
 		/// @param reason Enemyが死亡状態へ移行した理由
@@ -239,6 +245,7 @@ namespace Enemy {
 		float damageFlashRemainingTime_ = 0.0f;
 		float emergenceTargetY_ = 0.0f;
 		float bodyScaleMultiplier_ = 1.0f;
+		float knockbackResistance_ = 0.0f;
 		bool isActive_ = true;
 		bool isEmerging_ = false;
 		bool areCollidersRegistered_ = false;

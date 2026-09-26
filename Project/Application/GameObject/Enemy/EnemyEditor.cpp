@@ -154,6 +154,11 @@ namespace Enemy {
 		settingsChanged |= ImGui::DragFloat(
 			"移動速度", &typeSettings.status.moveSpeed, 0.05f, 0.0f, 9999.0f, "%.2f");
 
+		ImGui::SeparatorText("被弾");
+		settingsChanged |= ImGui::SliderFloat(
+			"ノックバック耐性", &typeSettings.knockbackResistance, 0.0f, 1.0f, "%.2f");
+		ImGui::TextDisabled("0.0: 軽減なし / 1.0: 完全無効");
+
 		ImGui::SeparatorText("外形");
 		settingsChanged |= ImGui::DragFloat(
 			"Scale係数", &typeSettings.scaleMultiplier, 0.01f, 0.01f, 100.0f, "%.2f");

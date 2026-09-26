@@ -51,6 +51,14 @@ namespace Projectile {
 		/// @return Projectileのダメージ量
 		float GetDamage() const { return damage_; }
 
+		/// @brief Projectileのノックバック力を取得
+		/// @return Projectileのノックバック力
+		float GetKnockbackPower() const { return knockbackPower_; }
+
+		/// @brief Projectileの移動方向を取得
+		/// @return Projectileの移動方向
+		const Vector3& GetMoveDirection() const { return moveDirection_; }
+
 		/// @brief Projectileのコライダー名を取得
 		/// @return Projectileのコライダー名
 		const std::string& GetColliderName() const { return colliderName_; }
@@ -123,6 +131,7 @@ namespace Projectile {
 			targetPosition = context.targetPosition;
 
 			damage_ = context.damage;
+			knockbackPower_ = context.knockbackPower;
 			moveSpeed_ = context.moveSpeed;
 			sizeRate_ = context.sizeRate;
 			lifeTime_ = context.lifeTime;
@@ -165,6 +174,7 @@ namespace Projectile {
 		std::string colliderName_;       // Projectileのコライダー名
 
 		float damage_ = 10.0f;              // ダメージ量
+		float knockbackPower_ = 0.0f;        // ノックバック力
 		float moveSpeed_ = 25.0f;           // 移動速度
 		float sizeRate_ = 1.0f;             // サイズ倍率
 		int remainingBounceCount_ = 0;      // 跳弾可能回数

@@ -2,12 +2,14 @@
 #include "Audio/MyAudio.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include <algorithm>
+#include <cmath>
 #include <utility>
 
 namespace Projectile {
 	namespace {
 		// 跳弾先の方向を作るための最小距離の2乗
 		constexpr float kMinBounceDirectionLengthSq = 0.000001f;
+		constexpr float kMinKnockbackDirectionLengthSq = 0.000001f;
 		constexpr const char* kProjectileDeleteEffectName = "ProjectileDelete";
 		constexpr const char* kExplosionSoundKey = "Explotion";
 
@@ -51,6 +53,29 @@ namespace Projectile {
 			}
 
 			return nearestTarget;
+		}
+
+		/// @brief Projectileの位置と進行方向からEnemyを押し出す水平方向を取得
+		/// @param projectile 命中したProjectile
+		/// @param enemyPosition 命中したEnemyの座標
+		/// @return 正規化済みの水平ノックバック方向、方向を作れない場合はゼロベクトル
+		Vector3 CalculateKnockbackDirection(const IProjectile& projectile, const Vector3& enemyPosition) {
+			Vector3 direction = enemyPosition - projectile.GetPosition();
+			direction.y = 0.0f;
+			float lengthSq = direction.LengthSq();
+
+			// ProjectileとEnemyの中心が重なった場合はProjectileの進行方向を使用
+			if (lengthSq <= kMinKnockbackDirectionLengthSq) {
+				direction = projectile.GetMoveDirection();
+				direction.y = 0.0f;
+				lengthSq = direction.LengthSq();
+			}
+
+			if (lengthSq <= kMinKnockbackDirectionLengthSq) {
+				return {};
+			}
+
+			return direction * (1.0f / std::sqrt(lengthSq));
 		}
 	}
 
@@ -220,6 +245,8 @@ namespace Projectile {
 				}
 
 				const Vector3* bounceTargetPosition = bounceTarget ? &bounceTarget->position : nullptr;
+				const Vector3 knockbackDirection =
+					CalculateKnockbackDirection(*projectile, enemyTarget.position);
 				if (!projectile->HandleEnemyCollision(enemyTarget.enemyId, bounceTargetPosition)) {
 					continue;
 				}
@@ -231,7 +258,9 @@ namespace Projectile {
 					enemyTarget.enemyId,
 					projectile->GetProjectileId(),
 					projectile->GetSourceWeaponId(),
-					projectile->GetDamage()
+					projectile->GetDamage(),
+					projectile->GetKnockbackPower(),
+					knockbackDirection
 				});
 
 				if (projectile->IsDead()) {

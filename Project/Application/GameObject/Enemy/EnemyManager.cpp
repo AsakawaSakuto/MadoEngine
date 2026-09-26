@@ -163,7 +163,11 @@ namespace Enemy {
 
 			Base* enemy = enemyIterator->second;
 			const ProjectileDamageResult damageResult =
-				enemy->TakeProjectileDamage(hitInfo.projectileId, hitInfo.damage);
+				enemy->TakeProjectileDamage(
+					hitInfo.projectileId,
+					hitInfo.damage,
+					hitInfo.knockbackDirection,
+					hitInfo.knockbackPower);
 			if (!damageResult.wasApplied) {
 				continue;
 			}

@@ -23,6 +23,11 @@ namespace Enemy {
 		/// @return EnemyがMap内に存在していればtrue
 		bool Update(float deltaTime, const Vector3& targetPosition, float moveSpeed, Transform3D& transform);
 
+		/// @brief 水平方向のノックバック衝撃を追加
+		/// @param direction Enemyを押し出す方向
+		/// @param power ノックバック力
+		void ApplyKnockback(const Vector3& direction, float power);
+
 		/// @brief Collider更新後に地形との接触状態を解決
 		/// @param movementColliderName 移動用Colliderの登録名
 		/// @param transform 更新対象のTransform
@@ -69,6 +74,7 @@ namespace Enemy {
 		Vector3 lastMoveStartPosition_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 lastDesiredHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
+		Vector3 knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
 		bool isGrounded_ = false;
 		bool isSideClimbing_ = false;
 	};

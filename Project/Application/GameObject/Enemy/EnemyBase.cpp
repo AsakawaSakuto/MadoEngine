@@ -25,8 +25,10 @@ namespace Enemy {
 		type_ = desc.type;
 		bonusType_ = desc.bonusType;
 		sceneType_ = desc.sceneType;
+		const TypeSettings& typeSettings = Settings::GetInstance().GetTypeSettings(type_);
 		const EliteSettings& eliteSettings = Settings::GetInstance().GetEliteSettings();
 		bodyScaleMultiplier_ = bonusType_ == Data::BonusType::Elite ? eliteSettings.bodyScaleMultiplier : 1.0f;
+		knockbackResistance_ = std::clamp(typeSettings.knockbackResistance, 0.0f, 1.0f);
 		if (bonusType_ == Data::BonusType::Elite) {
 
 			// 時間経過補正後の基礎能力値へElite倍率を重ねて全非Boss種類へ同じ属性効果を適用
@@ -168,7 +170,11 @@ namespace Enemy {
 		return true;
 	}
 
-	ProjectileDamageResult Base::TakeProjectileDamage(std::uint64_t projectileId, float damage) {
+	ProjectileDamageResult Base::TakeProjectileDamage(
+		std::uint64_t projectileId,
+		float damage,
+		const Vector3& knockbackDirection,
+		float knockbackPower) {
 		ProjectileDamageResult result;
 
 		// 不正なProjectile識別子と非有限Damageを状態へ反映しないため入力を検証
@@ -190,6 +196,8 @@ namespace Enemy {
 		if (result.wasApplied) {
 			StartDamageFlash();
 			PlayDamageEffect();
+			const float effectiveKnockbackPower = knockbackPower * (1.0f - knockbackResistance_);
+			movement_.ApplyKnockback(knockbackDirection, effectiveKnockbackPower);
 		}
 		if (result.wasKilled) {
 			Kill();

@@ -29,7 +29,7 @@
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 0.0
+            "value": 5.0
         },
         "lifeTime": {
             "fixedAddValue": 0.0,
@@ -64,7 +64,7 @@
         "size": {
             "fixedAddValue": 0.25,
             "isSelected": true,
-            "rarityAddValue": 0.05,
+            "rarityAddValue": 0.05000000074505806,
             "value": 1.0
         },
         "speed": {

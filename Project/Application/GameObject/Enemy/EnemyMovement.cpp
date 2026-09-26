@@ -14,6 +14,8 @@ namespace Enemy {
 		constexpr float kBlockedProgressRate = 0.35f;	  // 側面で止められたと判定する前進量の割合
 		constexpr float kSideClimbCrestGraceTime = 0.25f; // 側面上昇補助の頂点での猶予時間
 		constexpr float kSideClimbCrestSpeedScale = 0.6f; // 側面上昇補助の頂点での速度倍率
+		constexpr float kKnockbackDamping = 10.0f;         // ノックバック速度の減衰率
+		constexpr float kKnockbackVelocityEpsilonSq = 0.000001f; // ノックバック停止判定の速度閾値
 
 		/// @brief 水平方向の長さの2乗を取得
 		/// @param value 対象のベクトル
@@ -103,6 +105,7 @@ namespace Enemy {
 		lastMoveStartPosition_ = {};
 		lastDesiredHorizontalMove_ = {};
 		currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
+		knockbackVelocity_ = {};
 		isGrounded_ = false;
 		isSideClimbing_ = false;
 	}
@@ -114,8 +117,23 @@ namespace Enemy {
 
 		const Vector3 direction = GetDirectionToTarget(transform.translate, targetPosition);
 
-		// Collider解決前の希望移動量を保持して側面で阻害された割合を後から判定
-		lastDesiredHorizontalMove_ = { direction.x * moveSpeed * lastDeltaTime_, 0.0f, direction.z * moveSpeed * lastDeltaTime_ };
+		// 指数減衰を積分し、Frame Rateに依存せずknockbackPower相当の距離を移動
+		Vector3 knockbackMove = {};
+		if (knockbackVelocity_.LengthSq() > kKnockbackVelocityEpsilonSq && lastDeltaTime_ > 0.0f) {
+			const float decay = std::exp(-kKnockbackDamping * lastDeltaTime_);
+			knockbackMove = knockbackVelocity_ * ((1.0f - decay) / kKnockbackDamping);
+			knockbackVelocity_ *= decay;
+			if (knockbackVelocity_.LengthSq() <= kKnockbackVelocityEpsilonSq) {
+				knockbackVelocity_ = {};
+			}
+		}
+
+		// Collider解決前の追跡移動とノックバック移動を保持して側面で阻害された割合を後から判定
+		lastDesiredHorizontalMove_ = {
+			direction.x * moveSpeed * lastDeltaTime_ + knockbackMove.x,
+			0.0f,
+			direction.z * moveSpeed * lastDeltaTime_ + knockbackMove.z
+		};
 		transform.translate.x += lastDesiredHorizontalMove_.x;
 		transform.translate.z += lastDesiredHorizontalMove_.z;
 
@@ -135,6 +153,23 @@ namespace Enemy {
 
 		// Map下限まで落下したEnemyをManager側でKillするため生存可能位置を返却
 		return transform.translate.y > mapLimit_.min.y;
+	}
+
+	void Movement::ApplyKnockback(const Vector3& direction, float power) {
+		if (!std::isfinite(power) || power <= 0.0f ||
+			!std::isfinite(direction.x) || !std::isfinite(direction.z)) {
+			return;
+		}
+
+		const Vector3 horizontalDirection = { direction.x, 0.0f, direction.z };
+		const float lengthSq = GetHorizontalLengthSq(horizontalDirection);
+		if (lengthSq <= kDirectionEpsilon) {
+			return;
+		}
+
+		// 指数減衰後の総移動距離がpowerと一致する初速を加算
+		const float velocityScale = power * kKnockbackDamping / std::sqrt(lengthSq);
+		knockbackVelocity_ += horizontalDirection * velocityScale;
 	}
 
 	void Movement::ResolveAfterCollision(const std::string& movementColliderName, Transform3D& transform) {
