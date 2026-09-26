@@ -3,7 +3,8 @@
 #include "Utility/Logger/Logger.h"
 
 namespace {
-	constexpr float kTitleGroundHalfSize = 300.0f;
+	constexpr float kTitleGroundHalfSize = 4.0f;
+	constexpr float kTitleMapHorizontalLimit = 16.0f;
 }
 
 Title::Title(CommonData& commonData)
@@ -30,8 +31,15 @@ void Title::Initialize() {
 
 	player_ = std::make_unique<Player::Base>();
 	player_->Initialize({}, SceneType::Title);
-	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
 
+	MapLimit titleMapLimit;
+	titleMapLimit.min.x = -kTitleMapHorizontalLimit;
+	titleMapLimit.min.z = -kTitleMapHorizontalLimit;
+	titleMapLimit.max.x = kTitleMapHorizontalLimit;
+	titleMapLimit.max.z = kTitleMapHorizontalLimit;
+	player_->SetMapLimit(titleMapLimit);
+
+	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
 		tpsCamera->SetDistance(15.0f);
@@ -67,6 +75,8 @@ SceneType Title::Update(float dt) {
 		nextSceneType = SceneType::Game;
 		Logger::Output("Decisionが押されました - ゲームシーンへの遷移を要求しました", Logger::Level::Application);
 	}
+
+	MyDebugLine::AddShape(groundCollider_, Vector4({ 1.0f, 0.0f, 0.0f, 1.0f }));
 
 	cameraManager_.Update(dt);
 
