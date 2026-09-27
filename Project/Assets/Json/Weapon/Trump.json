@@ -46,7 +46,7 @@
         "shotCooldown": {
             "fixedAddValue": 0.5,
             "isSelected": true,
-            "rarityAddValue": -0.05000000074505806,
+            "rarityAddValue": 0.05000000074505806,
             "value": 0.75
         },
         "shotIntervalTime": {

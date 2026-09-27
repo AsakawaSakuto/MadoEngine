@@ -67,18 +67,18 @@ namespace Weapon {
 		/// @return 有効かつ有限な強化ステータス一覧
 		std::vector<UpgradeStatType> GetSelectableUpgradeStatTypes() const;
 
-		/// @brief 指定した強化ステータスの加算値を計算
+		/// @brief 指定した強化ステータスの変化量を計算
 		/// @param statType 強化対象ステータス
 		/// @param rarity 強化レアリティ
-		/// @param outAmount 計算した加算値の出力先
+		/// @param outAmount 計算した変化量の出力先
 		/// @return 計算に成功した場合はtrue
 		bool CalculateUpgradeAmount(UpgradeStatType statType, Rarity rarity, float& outAmount) const;
 
 		/// @brief 指定した強化を武器へ適用
 		/// @param statType 強化対象ステータス
 		/// @param rarity 強化レアリティ
-		/// @param expectedAmount 選択肢へ表示した適用予定の加算値
-		/// @param outAppliedAmount 実際に適用した加算値の出力先
+		/// @param expectedAmount 選択肢へ表示した適用予定の変化量
+		/// @param outAppliedAmount 実際に適用した変化量の出力先
 		/// @return 強化の適用に成功した場合はtrue
 		bool ApplyUpgrade(UpgradeStatType statType, Rarity rarity, float expectedAmount, float& outAppliedAmount);
 

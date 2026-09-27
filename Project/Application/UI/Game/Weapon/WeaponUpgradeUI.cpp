@@ -10,6 +10,7 @@ namespace UI::Game {
 		constexpr const char* kUpgradeLeftAction = "Left";
 		constexpr const char* kUpgradeRightAction = "Right";
 		constexpr const char* kUpgradeDecisionAction = "Decision";
+		constexpr const char* kUpgradeRerollAction = "UpgradeReroll";
 
 		constexpr const char* kUpgradeCardSelectSoundKey = "UpgradeCardSelect";
 		constexpr const char* kUpgradeCardDecisionSoundKey = "UpgradeCardDecision";
@@ -24,6 +25,7 @@ namespace UI::Game {
 		MyInput::RegisterInput(kUpgradeLeftAction, { DIK_LEFT, DIK_A }, { GAMEPAD_LEFT });
 		MyInput::RegisterInput(kUpgradeRightAction, { DIK_RIGHT, DIK_D }, { GAMEPAD_RIGHT });
 		MyInput::RegisterInput(kUpgradeDecisionAction, { DIK_SPACE }, { GAMEPAD_A });
+		MyInput::RegisterInput(kUpgradeRerollAction, { DIK_F5 });
 	}
 
 	void UpgradeUI::Finalize() {
@@ -70,6 +72,14 @@ namespace UI::Game {
 			return;
 		}
 
+		if (MyInput::Trigger(kUpgradeRerollAction)) {
+			if (upgradeSystem.RerollChoices(inventory)) {
+				SynchronizeSelection(upgradeSystem);
+				UpdateCards(0.0f);
+			}
+			return;
+		}
+
 		if (MyInput::Trigger(kUpgradeLeftAction)) {
 
 			// 端から反対側へ循環する候補選択
@@ -105,7 +115,7 @@ namespace UI::Game {
 
 		ImGui::Begin("武器アップグレード");
 		ImGui::Text("未処理アップグレード: %d", upgradeSystem.GetPendingUpgradeCount());
-		ImGui::TextDisabled("← / A・→ / D: 選択　Space / A: 決定");
+		ImGui::TextDisabled("← / A・→ / D: 選択　Space / A: 決定　F5: リロール");
 		if (isDecisionAnimationPlaying_) {
 			ImGui::TextDisabled("選択決定演出中");
 		}
@@ -142,13 +152,25 @@ namespace UI::Game {
 					choice.rarityDisplayName.c_str()
 				);
 				ImGui::Text("強化ステータス: %s", choice.statDisplayName.c_str());
-				ImGui::Text("現在値 → 強化後: %.1f →", choice.currentValue);
-				ImGui::SameLine();
-				ImGui::TextColored(
-					ImVec4(0.30f, 0.95f, 0.40f, 1.0f),
-					"%.1f",
-					choice.currentValue + choice.calculatedAmount
-				);
+				if (choice.statType == Weapon::UpgradeStatType::ShotCooldown) {
+					const float reductionRate = -choice.calculatedAmount / choice.currentValue * 100.0f;
+					ImGui::Text("現在値 → 強化後: %.3f秒 →", choice.currentValue);
+					ImGui::SameLine();
+					ImGui::TextColored(
+						ImVec4(0.30f, 0.95f, 0.40f, 1.0f),
+						"%.3f秒（%.1f%%短縮）",
+						choice.currentValue + choice.calculatedAmount,
+						reductionRate
+					);
+				} else {
+					ImGui::Text("現在値 → 強化後: %.1f →", choice.currentValue);
+					ImGui::SameLine();
+					ImGui::TextColored(
+						ImVec4(0.30f, 0.95f, 0.40f, 1.0f),
+						"%.1f",
+						choice.currentValue + choice.calculatedAmount
+					);
+				}
 			} else {
 				ImGui::TextDisabled("強化ステータス・レアリティなし");
 			}

@@ -139,6 +139,14 @@ namespace Weapon {
 		Logger::Output("[Application] Chest開封による武器アップグレードを追加しました。", Logger::Level::Debug);
 	}
 
+	bool UpgradeSystem::RerollChoices(const Inventory& inventory) {
+		if (!IsUpgrading() || choices_.empty()) {
+			return false;
+		}
+
+		return GenerateChoices(inventory);
+	}
+
 	bool UpgradeSystem::GenerateChoices(const Inventory& inventory) {
 		hasGenerationAttempted_ = true;
 		lastGenerationAttemptRevision_ = inventory.GetRevision();
@@ -212,7 +220,7 @@ namespace Weapon {
 				// 不完全な候補群を表示しないよう生成全体を取り消し
 				choices_.clear();
 				if (!generationFailureLogged_) {
-					Logger::Output("[Application] 武器の強化加算値を計算できません。", Logger::Level::Error);
+					Logger::Output("[Application] 武器の強化変化量を計算できません。", Logger::Level::Error);
 					generationFailureLogged_ = true;
 				}
 				return false;

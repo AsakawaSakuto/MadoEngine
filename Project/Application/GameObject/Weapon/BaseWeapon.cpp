@@ -167,7 +167,19 @@ namespace Weapon {
 		}
 
 		const float rarityValue = static_cast<float>(static_cast<int>(rarity));
-		const float amount = value->fixedAddValue + value->rarityAddValue * rarityValue;
+		const float configuredAmount = value->fixedAddValue + value->rarityAddValue * rarityValue;
+		float amount = configuredAmount;
+
+		// Cooldownの設定値だけは秒数ではなく現在時間に対する短縮率として扱う
+		if (statType == UpgradeStatType::ShotCooldown) {
+			constexpr float kPercentageScale = 0.01f;
+			if (value->value <= 0.0f || configuredAmount <= 0.0f || configuredAmount >= 100.0f) {
+				return false;
+			}
+
+			amount = -value->value * configuredAmount * kPercentageScale;
+		}
+
 		if (!std::isfinite(amount) || !std::isfinite(value->value + amount)) {
 			return false;
 		}

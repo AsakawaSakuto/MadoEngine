@@ -61,6 +61,11 @@ namespace Weapon {
 		/// @return 現在の選択肢へのconst参照
 		const std::vector<UpgradeChoice>& GetChoices() const { return choices_; }
 
+		/// @brief 現在の武器アップグレード選択肢を再抽選
+		/// @param inventory 候補生成に使用する武器インベントリ
+		/// @return 再抽選に成功した場合はtrue
+		bool RerollChoices(const Inventory& inventory);
+
 		/// @brief 指定した武器アップグレード選択肢を適用
 		/// @param choiceIndex 適用する選択肢の番号
 		/// @param generation UIが取得した選択肢の世代番号

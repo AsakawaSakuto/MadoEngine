@@ -54,7 +54,7 @@ namespace Weapon {
 		UpgradeValue damage           = { 1.0f, 1.0f, 0.1f, true }; // 武器のダメージ量
 		UpgradeValue shotMaxCount     = { 1.0f, 1.0f, 0.1f, true }; // 武器の最大射撃数
 		UpgradeValue shotIntervalTime = { 0.25f, 0.0f, 0.0f, false }; // 武器の射撃間隔
-		UpgradeValue shotCooldown     = { 1.0f, 1.0f,-0.1f, true }; // 武器の射撃クールダウン
+		UpgradeValue shotCooldown     = { 1.0f, 1.0f, 0.1f, true }; // 武器の射撃クールダウンと強化時の短縮率
 		UpgradeValue criticalChance   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカル率
 		UpgradeValue criticalDamage   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカルダメージ倍率
 		UpgradeValue size             = { 1.0f, 1.0f, 0.1f, true }; // 武器のサイズ
@@ -73,7 +73,7 @@ namespace Weapon {
 		case UpgradeStatType::Damage:           return "ダメージ量";
 		case UpgradeStatType::ShotMaxCount:     return "最大射撃数";
 		case UpgradeStatType::ShotIntervalTime: return "射撃間隔";
-		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン";
+		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン短縮";
 		case UpgradeStatType::CriticalChance:   return "クリティカル率";
 		case UpgradeStatType::CriticalDamage:   return "クリティカル倍率";
 		case UpgradeStatType::Size:             return "サイズ";

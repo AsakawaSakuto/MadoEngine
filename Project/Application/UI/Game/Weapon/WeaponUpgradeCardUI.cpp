@@ -50,6 +50,30 @@ MadoEngine::Text* ResolveText(MadoEngine::TextHandle handle) {
 	return MyText::TryGet(handle);
 }
 
+/// @brief 強化値をステータスに適した精度で文字列化
+/// @param choice 表示する強化候補
+/// @param value 表示する値
+/// @return 表示用の強化値文字列
+std::string FormatUpgradeValue(const Weapon::UpgradeChoice& choice, float value) {
+	if (choice.statType == Weapon::UpgradeStatType::ShotCooldown) {
+		return std::format("{:.3f}秒", value);
+	}
+
+	return std::format("{:.1f}", value);
+}
+
+/// @brief 強化内容をカード用の文字列へ変換
+/// @param choice 表示する強化候補
+/// @return ステータス名と強化内容を含む文字列
+std::string FormatUpgradeDetail(const Weapon::UpgradeChoice& choice) {
+	if (choice.statType == Weapon::UpgradeStatType::ShotCooldown && choice.currentValue > 0.0f) {
+		const float reductionRate = -choice.calculatedAmount / choice.currentValue * 100.0f;
+		return std::format("{}\n{:.1f}%短縮", choice.statDisplayName, reductionRate);
+	}
+
+	return choice.statDisplayName;
+}
+
 /// @brief 基準位置を中心として座標を拡大
 /// @param position 拡大する座標
 /// @param center 拡大の中心座標
@@ -207,17 +231,17 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 	}
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
 		if (isOwnedWeaponUpgrade_) {
-			detailText->SetText(choice.statDisplayName);
+			detailText->SetText(FormatUpgradeDetail(choice));
 		} else {
 			detailText->SetText("新しい武器を装備");
 		}
 	}
 	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
-		currentValueText->SetText(std::format("{:.1f}", choice.currentValue));
+		currentValueText->SetText(FormatUpgradeValue(choice, choice.currentValue));
 	}
 	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
-		upgradedValueText->SetText(std::format(
-			"{:.1f}",
+		upgradedValueText->SetText(FormatUpgradeValue(
+			choice,
 			choice.currentValue + choice.calculatedAmount
 		));
 	}
