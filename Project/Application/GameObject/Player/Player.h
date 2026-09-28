@@ -71,6 +71,11 @@ namespace Player {
 		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
 
+		/// @brief Playerへ水平方向のノックバック衝撃を追加
+		/// @param direction Playerを押し出す方向
+		/// @param power ノックバック距離
+		void ApplyKnockback(const Vector3& direction, float power);
+
 		/// @brief PlayerのHPを回復
 		/// @param amount 回復要求量
 		/// @return 実際に回復したHP量

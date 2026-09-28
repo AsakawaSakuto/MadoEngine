@@ -178,6 +178,10 @@ namespace Player {
 		regenerationTimer_.Start(kHealthRegenerationInterval, true);
 	}
 
+	void Base::ApplyKnockback(const Vector3& direction, float power) {
+		movement_.ApplyKnockback(direction, power);
+	}
+
 	float Base::RecoverHealth(float amount) {
 
 		// 死亡状態からの復活や非有限値によるステータス破損を回避
@@ -382,11 +386,13 @@ namespace Player {
 		ImGui::Begin("プレイヤー");
 		const Vector3 slideVelocity = movement_.GetSlideVelocity();
 		const Vector3 jumpMoveVelocity = movement_.GetJumpMoveVelocity();
+		const Vector3 knockbackVelocity = movement_.GetKnockbackVelocity();
 		const float velocityY = movement_.GetVelocityY();
-		const float horizontalVelocityX = slideVelocity.x + jumpMoveVelocity.x;
-		const float horizontalVelocityZ = slideVelocity.z + jumpMoveVelocity.z;
+		const float horizontalVelocityX = slideVelocity.x + jumpMoveVelocity.x + knockbackVelocity.x;
+		const float horizontalVelocityZ = slideVelocity.z + jumpMoveVelocity.z + knockbackVelocity.z;
 		const float horizontalSpeed = std::sqrt(horizontalVelocityX * horizontalVelocityX + horizontalVelocityZ * horizontalVelocityZ);
 		const float jumpMoveBoostSpeed = std::sqrt(jumpMoveVelocity.x * jumpMoveVelocity.x + jumpMoveVelocity.z * jumpMoveVelocity.z);
+		const float knockbackSpeed = std::sqrt(knockbackVelocity.x * knockbackVelocity.x + knockbackVelocity.z * knockbackVelocity.z);
 		const float currentSpeed = std::sqrt(horizontalSpeed * horizontalSpeed + velocityY * velocityY);
 		MovementParams& movementParams = movement_.GetParams();
 		ImGui::Text("現在の動作: %s", ToMotionText(movement_.GetCurrentMotion()));
@@ -394,6 +400,7 @@ namespace Player {
 		ImGui::Text("水平速度: %.2f", horizontalSpeed);
 		ImGui::Text("Y速度: %.2f", velocityY);
 		ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
+		ImGui::Text("ノックバック速度: %.2f", knockbackSpeed);
 		ImGui::Text("壁上り: %s", movement_.IsWallClimbing() ? "有効" : "無効");
 		ImGui::Text(
 			"壁上り時間: %.2f / %.2f",

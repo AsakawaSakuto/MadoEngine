@@ -5,6 +5,9 @@
 namespace {
 	constexpr float kRotationEpsilon = 1e-5f;
 	constexpr float kBlockedProgressRate = 0.35f;
+	constexpr float kKnockbackDamping = 10.0f;
+	constexpr float kKnockbackVelocityEpsilonSq = 0.000001f;
+	constexpr float kMaxKnockbackSpeed = 30.0f;
 
 	/// @brief 長さがある場合は正規化し、短すぎる場合は代替ベクトルを返却
 	/// @param value 正規化するベクトル
@@ -97,6 +100,7 @@ namespace Player {
 		remainingJumpCount_ = movementParams_.jumpCount_;
 		lastMoveStartPosition_ = {};
 		lastAttemptedHorizontalMove_ = {};
+		knockbackVelocity_ = {};
 		hasWallClimbInput_ = false;
 		wasHorizontalMoveBlocked_ = false;
 		isWallClimbing_ = false;
@@ -112,13 +116,14 @@ namespace Player {
 		lastAttemptedHorizontalMove_ = {};
 		hasWallClimbInput_ = false;
 
-		// 入力移動と重力落下を反映してから接地中の斜面追従で位置を補正
+		// 入力移動と重力落下へ外力を重ねてから接地中の斜面追従で位置を補正
 		Move(deltaTime, transform, camera, input);
 		hasWallClimbInput_ = hasMoveInput_ && !input.isCrouching;
 		if (!hasWallClimbInput_) {
 			isWallClimbing_ = false;
 		}
 		Jump(deltaTime, transform, input);
+		UpdateKnockback(deltaTime, transform);
 		ApplySlopeGroundSnap(deltaTime, transform);
 
 		// Collider解決後の実移動量と比較するため解決前の水平移動量を保持
@@ -127,6 +132,32 @@ namespace Player {
 			0.0f,
 			transform.translate.z - lastMoveStartPosition_.z
 		};
+	}
+
+	void Movement::ApplyKnockback(const Vector3& direction, float power) {
+		if (!std::isfinite(power) || power <= 0.0f ||
+			!std::isfinite(direction.x) || !std::isfinite(direction.z)) {
+			return;
+		}
+
+		const Vector3 horizontalDirection = { direction.x, 0.0f, direction.z };
+		const float lengthSq = horizontalDirection.x * horizontalDirection.x + horizontalDirection.z * horizontalDirection.z;
+		if (lengthSq <= kRotationEpsilon) {
+			return;
+		}
+
+		// 指数減衰後の総移動距離がpowerと一致する初速へ変換
+		const float velocityScale = power * kKnockbackDamping / std::sqrt(lengthSq);
+		knockbackVelocity_ += horizontalDirection * velocityScale;
+
+		const float speedSq = knockbackVelocity_.x * knockbackVelocity_.x + knockbackVelocity_.z * knockbackVelocity_.z;
+		if (speedSq <= kMaxKnockbackSpeed * kMaxKnockbackSpeed) {
+			return;
+		}
+
+		// 多数のEnemyから同時に受けても極端な移動量にならないよう合成速度を制限
+		const float speedScale = kMaxKnockbackSpeed / std::sqrt(speedSq);
+		knockbackVelocity_ *= speedScale;
 	}
 
 	void Movement::CaptureCollisionResult(const Vector3& resolvedPosition) {
@@ -449,6 +480,22 @@ namespace Player {
 		const float speedScale = maxBoostSpeed / boostSpeed;
 		jumpMoveVelocity_.x *= speedScale;
 		jumpMoveVelocity_.z *= speedScale;
+	}
+
+	void Movement::UpdateKnockback(float deltaTime, Transform3D& transform) {
+		if (knockbackVelocity_.LengthSq() <= kKnockbackVelocityEpsilonSq || deltaTime <= 0.0f) {
+			return;
+		}
+
+		// 指数減衰を積分してフレームレートに依存しない移動距離を算出
+		const float decay = std::exp(-kKnockbackDamping * deltaTime);
+		const Vector3 knockbackMove = knockbackVelocity_ * ((1.0f - decay) / kKnockbackDamping);
+		transform.translate.x += knockbackMove.x;
+		transform.translate.z += knockbackMove.z;
+		knockbackVelocity_ *= decay;
+		if (knockbackVelocity_.LengthSq() <= kKnockbackVelocityEpsilonSq) {
+			knockbackVelocity_ = {};
+		}
 	}
 
 	void Movement::ApplySlopeGroundSnap(float deltaTime, Transform3D& transform) {

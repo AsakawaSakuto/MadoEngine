@@ -11,9 +11,11 @@ namespace Enemy {
 		constexpr float kDamageFlashDuration = 6.0f / 60.0f;
 		constexpr float kEmergenceSpeed = 4.0f;
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
+		constexpr float kPlayerKnockbackPower = 1.5f;
+		constexpr float kPlayerKnockbackDirectionEpsilonSq = 0.000001f;
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
-		constexpr const char* kEliteMarkerModelAssetName = "Plane";
+		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
 		constexpr const char* kEliteMarkerTextureName = "Elite";
 	}
 
@@ -163,6 +165,19 @@ namespace Enemy {
 		// Bossの継続接触を考慮して種類別の待機時間をDamage適用前に確定
 		playerDamageCooldown_ = std::max(0.0f, GetPlayerDamageInterval());
 		player.TakeDamage(status_.power);
+
+		Vector3 knockbackDirection = player.GetPosition() - transform_.translate;
+		knockbackDirection.y = 0.0f;
+		if (knockbackDirection.LengthSq() <= kPlayerKnockbackDirectionEpsilonSq) {
+
+			// 中心が一致した場合も押し出せるようEnemyの正面方向へ代替
+			knockbackDirection = {
+				std::sin(transform_.rotate.y),
+				0.0f,
+				std::cos(transform_.rotate.y),
+			};
+		}
+		player.ApplyKnockback(knockbackDirection, kPlayerKnockbackPower);
 
 		return true;
 	}

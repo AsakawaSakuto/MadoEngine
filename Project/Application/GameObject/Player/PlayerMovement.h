@@ -19,6 +19,11 @@ namespace Player {
 		/// @param input Playerの移動操作入力
 		void Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input);
 
+		/// @brief 水平方向のノックバック衝撃を追加
+		/// @param direction Playerを押し出す方向
+		/// @param power ノックバック距離
+		void ApplyKnockback(const Vector3& direction, float power);
+
 		/// @brief 前フレーム末尾のCollider解決結果から水平移動の阻害状態を確定
 		/// @param resolvedPosition Collider解決後のPlayer座標
 		void CaptureCollisionResult(const Vector3& resolvedPosition);
@@ -91,6 +96,10 @@ namespace Player {
 		/// @return ジャンプ時の水平初速
 		Vector3 GetJumpMoveVelocity() const { return jumpMoveVelocity_; }
 
+		/// @brief ノックバック速度を取得
+		/// @return 現在の水平ノックバック速度
+		Vector3 GetKnockbackVelocity() const { return knockbackVelocity_; }
+
 		/// @brief 移動パラメータを取得
 		/// @return 移動パラメータ
 		Player::MovementParams& GetParams() { return movementParams_; }
@@ -114,6 +123,11 @@ namespace Player {
 		/// @brief 移動入力中のジャンプに水平初速を加算
 		/// @param input Playerの移動操作入力
 		void AddJumpMoveBoost(const MoveInput& input);
+
+		/// @brief 水平ノックバック速度を移動へ反映
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
+		void UpdateKnockback(float deltaTime, Transform3D& transform);
 
 		/// @brief Crouching中のスライディング速度を更新
 		/// @param deltaTime 1フレームの経過時間
@@ -146,6 +160,7 @@ namespace Player {
 
 		Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
+		Vector3 knockbackVelocity_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 lastMoveDirection_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 lastMoveStartPosition_ = { 0.0f, 0.0f, 0.0f };
 		Vector3 lastAttemptedHorizontalMove_ = { 0.0f, 0.0f, 0.0f };
