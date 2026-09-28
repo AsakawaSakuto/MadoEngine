@@ -33,10 +33,6 @@ namespace Enemy {
 		/// @return 被弾判定用AABB
 		AABB CreateHitCollider() const override;
 
-		/// @brief Player接触時にBossを消滅させるか判定
-		/// @return 常にfalse
-		bool ShouldDisappearOnPlayerCollision() const override;
-
 		/// @brief Bossの接触ダメージ待機時間を取得
 		/// @return 接触ダメージの待機時間
 		float GetPlayerDamageInterval() const override;

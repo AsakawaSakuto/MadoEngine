@@ -163,9 +163,6 @@ namespace Enemy {
 		// Bossの継続接触を考慮して種類別の待機時間をDamage適用前に確定
 		playerDamageCooldown_ = std::max(0.0f, GetPlayerDamageInterval());
 		player.TakeDamage(status_.power);
-		if (ShouldDisappearOnPlayerCollision()) {
-			Kill();
-		}
 
 		return true;
 	}

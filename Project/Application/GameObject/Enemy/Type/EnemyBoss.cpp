@@ -89,10 +89,6 @@ namespace Enemy {
 		return aabb;
 	}
 
-	bool Boss::ShouldDisappearOnPlayerCollision() const {
-		return false;
-	}
-
 	float Boss::GetPlayerDamageInterval() const {
 		return 1.0f;
 	}

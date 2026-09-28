@@ -34,9 +34,4 @@ namespace Enemy {
 		aabb.max = settings.hitboxMax;
 		return aabb;
 	}
-
-	bool Tank::ShouldDisappearOnPlayerCollision() const {
-		return true;
-	}
-
 } // namespace Enemy

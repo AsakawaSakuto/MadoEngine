@@ -29,10 +29,6 @@ namespace Enemy {
 		/// @brief 通常Enemyの被弾判定用AABBを作成
 		/// @return 被弾判定用AABB
 		AABB CreateHitCollider() const override;
-
-		/// @brief Player接触時に通常Enemyを消滅させるか判定
-		/// @return 常にtrue
-		bool ShouldDisappearOnPlayerCollision() const override;
 	};
 
 } // namespace Enemy

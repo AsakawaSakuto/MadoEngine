@@ -159,10 +159,6 @@ namespace Enemy {
 		/// @return 被弾判定用AABB
 		virtual AABB CreateHitCollider() const = 0;
 
-		/// @brief Player接触時にEnemyを消滅させるか判定
-		/// @return Player接触時に消滅させる場合はtrue
-		virtual bool ShouldDisappearOnPlayerCollision() const = 0;
-
 		/// @brief Playerへ接触ダメージを再適用できるまでの時間を取得
 		/// @return 接触ダメージの待機時間
 		virtual float GetPlayerDamageInterval() const { return 0.5f; }
