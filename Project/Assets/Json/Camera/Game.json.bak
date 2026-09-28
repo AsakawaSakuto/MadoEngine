@@ -63,7 +63,7 @@
             "pitch": 0.09533950686454773,
             "type": "TPS",
             "useGamePadInput": true,
-            "useMouseInput": false,
+            "useMouseInput": true,
             "yaw": -0.3913523554801941
         }
     ],

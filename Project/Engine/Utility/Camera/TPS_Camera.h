@@ -23,7 +23,7 @@ struct TPSCameraSettings {
 	float gamePadSensitivity = 2.5f;
 	float followStrength = 0.5f;
 	Vector3 offset = { 0.0f, 2.0f, -10.0f };
-	bool useMouseInput = false;
+	bool useMouseInput = true;
 	bool useGamePadInput = true;
 };
 
@@ -105,16 +105,16 @@ public:
 	/// @param maxPitch 最大仰俯角（例: 1.2f）
 	void SetPitchLimit(float minPitch, float maxPitch) { minPitch_ = (std::min)(minPitch, maxPitch); maxPitch_ = (std::max)(minPitch, maxPitch); ClampPitch();}
 
-	/// @brief マウス入力の有効/無効を設定
-	/// @param enable trueで有効
+	/// @brief GamePad未接続時のマウス入力許可を設定
+	/// @param enable マウス入力を許可する場合はtrue
 	void SetUseMouseInput(bool enable) { useMouseInput_ = enable; }
 
 	/// @brief ゲームパッド入力の有効/無効を設定
 	/// @param enable trueで有効
 	void SetUseGamePadInput(bool enable) { useGamePadInput_ = enable; }
 
-	/// @brief マウス入力が有効かどうかを取得
-	/// @return 有効ならtrue
+	/// @brief GamePad未接続時のマウス入力許可を取得
+	/// @return マウス入力を許可する場合はtrue
 	bool GetUseMouseInput() const { return useMouseInput_; }
 
 	/// @brief ゲームパッド入力が有効かどうかを取得
@@ -139,7 +139,7 @@ private:
 	// 補間後の現在注視点
 	Vector3 currentTarget_ = { 0.0f, 0.0f, 0.0f };
 
-	bool useMouseInput_ = false;  // マウス入力を使用するか
+	bool useMouseInput_ = true;   // GamePad未接続時にマウス入力を許可するか
 	bool useGamePadInput_ = true; // ゲームパッド入力を使用するか
 
 	// 球面座標パラメータ

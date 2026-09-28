@@ -16,6 +16,8 @@ namespace Player {
 	void Base::Initialize(const Vector3& spawnGroundPosition, SceneType sceneType) {
 		sceneType_ = sceneType;
 		resourceGainEvents_.clear();
+		isDead_ = false;
+		isDeathAnimationPlaying_ = false;
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
@@ -164,13 +166,14 @@ namespace Player {
 	}
 
 	void Base::TakeDamage(float damage) {
-		if (damage <= 0 || status_.currentHealth <= 0) {
+		if (damage <= 0 || isDead_) {
 			return;
 		}
 
 		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
 		if (status_.currentHealth <= 0.0f) {
 			regenerationTimer_.Stop();
+			BeginDeath();
 			return;
 		}
 
@@ -178,7 +181,39 @@ namespace Player {
 		regenerationTimer_.Start(kHealthRegenerationInterval, true);
 	}
 
+	void Base::BeginDeath() {
+		if (isDead_) {
+			return;
+		}
+
+		isDead_ = true;
+		lastMoveInput_ = {};
+		landingMarker_.SetVisible(false);
+
+		// 通常移動Animationによる上書きを止めて非Loopの死亡Animationを先頭から再生
+		Model* model = MyModel::TryGet(model_);
+		isDeathAnimationPlaying_ = model && model->PlayAnimation("Die", 0.1f, true);
+		if (!isDeathAnimationPlaying_) {
+			Logger::Output("[Application] Player用AnimationClipが見つかりません: Die", Logger::Level::Warning);
+		}
+	}
+
+	bool Base::IsDeathAnimationFinished() const {
+		if (!isDead_) {
+			return false;
+		}
+
+		const Model* model = MyModel::TryGet(model_);
+
+		// Clip欠損やModel破棄時にGameOver進行が永久停止しないよう終了扱いへ退避
+		return !isDeathAnimationPlaying_ || !model || model->IsAnimationFinished();
+	}
+
 	void Base::ApplyKnockback(const Vector3& direction, float power) {
+		if (isDead_) {
+			return;
+		}
+
 		movement_.ApplyKnockback(direction, power);
 	}
 
@@ -257,8 +292,14 @@ namespace Player {
 
 		lastDeltaTime_ = std::max(0.0f, deltaTime);
 		UpdateHealthRegeneration(lastDeltaTime_);
-		controller_.Update();
-		lastMoveInput_ = controller_.GetMoveInput();
+		if (isDead_) {
+
+			// 死亡後は入力を読まず空入力で重力と接地だけを継続
+			lastMoveInput_ = {};
+		} else {
+			controller_.Update();
+			lastMoveInput_ = controller_.GetMoveInput();
+		}
 
 		// Colliderへ最新座標を渡すため全Colliderの更新前に入力移動と重力落下を反映
 		movement_.Update(lastDeltaTime_, transform_, camera_, lastMoveInput_);
@@ -267,11 +308,11 @@ namespace Player {
 		transform_.translate.y = std::clamp(transform_.translate.y, mapLimit_.min.y, mapLimit_.max.y);
 		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
+		if (!isDead_ && MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
 			transform_.translate = { 0.0f, 100.0f, 0.0f };
 		}
 
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F4)) {
+		if (!isDead_ && MyInput::GetKeybord()->IsTrigger(DIK_F4)) {
 			AddExp(static_cast<int>(status_.expToNextLevel));
 		}
 	}
@@ -285,9 +326,9 @@ namespace Player {
 		movement_.UpdateWallClimb(lastDeltaTime_, lastMoveInput_, transform_);
 
 		// 瞬間的な移動状態の成立時だけ足元のEffect Sequenceを一度再生
-		if (movement_.WasJumpStartedThisFrame()) {
+		if (!isDead_ && movement_.WasJumpStartedThisFrame()) {
 			PlayMovementEffect("PlayerJump");
-		} else if (movement_.WasLandedThisFrame()) {
+		} else if (!isDead_ && movement_.WasLandedThisFrame()) {
 			PlayMovementEffect("PlayerLanding");
 		}
 
@@ -297,21 +338,23 @@ namespace Player {
 		if (model) {
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);
-			const Vector3 slideVelocity = movement_.GetSlideVelocity();
-			const bool isCrouchingMoving =
-				slideVelocity.x * slideVelocity.x + slideVelocity.z * slideVelocity.z > 1e-6f;
-			animationController_.Update(
-				movement_.GetCurrentMotion(),
-				isCrouchingMoving,
-				movement_.IsGrounded(),
-				movement_.WasJumpStartedThisFrame(),
-				*model
-			);
+			if (!isDead_) {
+				const Vector3 slideVelocity = movement_.GetSlideVelocity();
+				const bool isCrouchingMoving =
+					slideVelocity.x * slideVelocity.x + slideVelocity.z * slideVelocity.z > 1e-6f;
+				animationController_.Update(
+					movement_.GetCurrentMotion(),
+					isCrouchingMoving,
+					movement_.IsGrounded(),
+					movement_.WasJumpStartedThisFrame(),
+					*model
+				);
+			}
 		}
 
 		UpdateShadowTransform();
 
-		if (model && movement_.GetCurrentMotion() == Player::Motion::Crouching) {
+		if (!isDead_ && model && movement_.GetCurrentMotion() == Player::Motion::Crouching) {
 			model->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 		} else if (model) {
 			model->SetColor(gamingColor_.Update(lastDeltaTime_, 1.0f));

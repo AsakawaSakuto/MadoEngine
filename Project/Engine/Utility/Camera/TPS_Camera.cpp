@@ -80,29 +80,27 @@ void TPS_Camera::Update(float deltaTime) {
 }
 
 void TPS_Camera::HandleInput(float deltaTime) {
+	auto* pad = MyInput::GetGamePad();
+	const bool isGamePadConnected = pad && pad->IsConnected();
+	const bool shouldUseMouseInput = useMouseInput_ && !isGamePadConnected;
 
-	// --- マウス入力 ---
+	// GamePad接続中は二重入力を避け、未接続時だけマウス相対入力へ切り替え
 	auto* mouse = MyInput::GetMouse();
 	if (mouse) {
-		mouse->SetRelativeMode(useMouseInput_);
+		mouse->SetRelativeMode(shouldUseMouseInput);
 	}
 
-	if (useMouseInput_) {
-		if (mouse) {
-			Vector2 delta = mouse->GetDelta();
-			yaw_   += delta.x * mouseSensitivity_;
-			pitch_ += delta.y * mouseSensitivity_;
-		}
+	if (shouldUseMouseInput && mouse) {
+		Vector2 delta = mouse->GetDelta();
+		yaw_   += delta.x * mouseSensitivity_;
+		pitch_ += delta.y * mouseSensitivity_;
 	}
 
-	// --- ゲームパッド右スティック入力 ---
-	if (useGamePadInput_) {
-		auto* pad = MyInput::GetGamePad();
-		if (pad && pad->IsConnected()) {
-			Vector2 stick = pad->GetRightStick();
-			yaw_   += stick.x * gamePadSensitivity_ * deltaTime;
-			pitch_ -= stick.y * gamePadSensitivity_ * deltaTime; // スティック上でカメラ上方向
-		}
+	// 接続済みGamePadだけ右スティック入力を反映
+	if (useGamePadInput_ && isGamePadConnected) {
+		Vector2 stick = pad->GetRightStick();
+		yaw_   += stick.x * gamePadSensitivity_ * deltaTime;
+		pitch_ -= stick.y * gamePadSensitivity_ * deltaTime; // スティック上でカメラ上方向
 	}
 
 	ClampPitch();

@@ -181,6 +181,11 @@ SceneType Game::Update(float dt) {
 		}
 	}
 
+	// HPが0になったFrameでGame進行を固定し、死亡Animationだけを描画System側で継続
+	if (player_->IsDead()) {
+		inGameSession_->SetGameOver();
+	}
+
 	// Pause中も現在の判定形状を確認できるようEnemy Colliderを毎Frame登録
 	enemyManager_->DrawDebugLine();
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
@@ -293,6 +298,10 @@ SceneType Game::Update(float dt) {
 	projectileDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
 	playerResourceGainView_.SetVisible(inGameSession_->IsPlaying());
 	playerResourceGainView_.Update(deltaTime);
+
+	if (player_->IsDeathAnimationFinished()) {
+		return SceneType::Result;
+	}
 
 	return SceneType::Game;
 }

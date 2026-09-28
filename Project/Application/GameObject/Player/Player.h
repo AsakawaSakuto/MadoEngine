@@ -71,6 +71,14 @@ namespace Player {
 		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
 
+		/// @brief Playerが死亡状態か判定
+		/// @return 死亡状態の場合はtrue
+		bool IsDead() const { return isDead_; }
+
+		/// @brief 死亡Animationが終了したか判定
+		/// @return 死亡Animationが終了した場合はtrue
+		bool IsDeathAnimationFinished() const;
+
 		/// @brief Playerへ水平方向のノックバック衝撃を追加
 		/// @param direction Playerを押し出す方向
 		/// @param power ノックバック距離
@@ -121,6 +129,9 @@ namespace Player {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateHealthRegeneration(float deltaTime);
 
+		/// @brief Playerの死亡状態と死亡Animationを開始
+		void BeginDeath();
+
 		ColliderShape hitAABB_;
 		ColliderShape expGetSphere_;
 		ColliderShape attackRangeSphere_;
@@ -146,5 +157,7 @@ namespace Player {
 
 		GameTimer regenerationTimer_; // HPの自動回復タイマー
 		std::vector<ResourceGainEvent> resourceGainEvents_; // 未処理のリソース獲得イベント
+		bool isDead_ = false; // 死亡状態の場合はtrue
+		bool isDeathAnimationPlaying_ = false; // 死亡Animationの再生開始に成功した場合はtrue
 	};
 }

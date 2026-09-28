@@ -17,6 +17,9 @@ namespace System {
 		/// @param isActive 武器アップグレード選択中の場合はtrue
 		void SetUpgradeSelectionActive(bool isActive);
 
+		/// @brief ゲーム進行をGameOver状態へ変更
+		void SetGameOver();
+
 		/// @brief ゲームプレイ中であるか確認
 		/// @return ゲームプレイ中の場合はtrue
 		bool IsPlaying() const { return currentPhase_ == InGamePhase::Playing; }

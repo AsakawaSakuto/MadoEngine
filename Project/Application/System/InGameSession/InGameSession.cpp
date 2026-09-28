@@ -66,4 +66,8 @@ namespace System {
 		}
 	}
 
+	void InGameSession::SetGameOver() {
+		currentPhase_ = InGamePhase::GameOver;
+	}
+
 } // namespace System

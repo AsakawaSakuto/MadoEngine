@@ -50,6 +50,13 @@
       "loop": false,
       "playbackSpeed": 1.0,
       "blendDuration": 0.08
+    },
+    "Die": {
+      "file": "Die.gltf",
+      "index": 0,
+      "loop": false,
+      "playbackSpeed": 1.0,
+      "blendDuration": 0.1
     }
   }
 }
