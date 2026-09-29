@@ -52,7 +52,7 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "TitleSprite2",
+            "name": "InputUI1_Pad",
             "position": [
                 435.0,
                 410.0
@@ -64,6 +64,240 @@
             ],
             "scene": "Title",
             "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Key",
+            "position": [
+                435.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Title",
+            "texture": "Decision_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "Sprite",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Result",
+            "texture": "wallPaper",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Pad",
+            "position": [
+                400.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Result",
+            "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Key",
+            "position": [
+                400.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Result",
+            "texture": "Decision_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI2_Pad",
+            "position": [
+                400.0,
+                510.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Result",
+            "texture": "Interact_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI2_Key",
+            "position": [
+                400.0,
+                510.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Result",
+            "texture": "keyboard_q_outline",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -169,7 +403,7 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "Sprite",
+            "name": "InputUI1_Pad",
             "position": [
                 1000.0,
                 500.0
@@ -208,7 +442,7 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "Sprite1",
+            "name": "InputUI2_Pad",
             "position": [
                 1000.0,
                 564.0
@@ -247,7 +481,7 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "Sprite2",
+            "name": "InputUI3_Pad",
             "position": [
                 1000.0,
                 628.0
@@ -259,6 +493,201 @@
             ],
             "scene": "Game",
             "texture": "xbox_stick_l_up",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Key",
+            "position": [
+                1000.0,
+                500.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.5,
+                0.5
+            ],
+            "scene": "Game",
+            "texture": "Decision_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI2_Key",
+            "position": [
+                1000.0,
+                564.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.5,
+                0.5
+            ],
+            "scene": "Game",
+            "texture": "Crouching_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI3_Key",
+            "position": [
+                1000.0,
+                628.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.5,
+                0.5
+            ],
+            "scene": "Game",
+            "texture": "Up_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI4_Pad",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "texture": "Pause_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI4_Key",
+            "position": [
+                0.0,
+                146.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "texture": "Pause_Key",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

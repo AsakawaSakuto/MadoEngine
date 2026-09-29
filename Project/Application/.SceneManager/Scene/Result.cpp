@@ -12,13 +12,30 @@ void Result::Initialize() {
 }
 
 SceneType Result::Update(float dt) {
+	if (commonData_.GetSceneTransitionController().IsTransitioning()) {
+		return SceneType::Result;
+	}
 
-	// Result表示を維持しつつ決定入力だけをTitle遷移として受付
-	if (!commonData_.GetSceneTransitionController().IsTransitioning() &&
-		MyInput::GetKeybord()->IsTrigger(DIK_SPACE)) {
-		Logger::Output("スペースキーが押されました - Titleシーンへ遷移", Logger::Level::Application);
+	MadoEngine::InputDevice::Keybord* keyboard = MyInput::GetKeybord();
+	MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
+	const bool isTitleTriggered =
+		(keyboard && keyboard->IsTrigger(DIK_SPACE)) ||
+		(gamePad && gamePad->IsTrigger(GAMEPAD_A));
+	const bool isGameTriggered =
+		(keyboard && keyboard->IsTrigger(DIK_Q)) ||
+		(gamePad && gamePad->IsTrigger(GAMEPAD_X));
+
+	// 同時入力時はGame再開よりTitleへ戻る操作を優先
+	if (isTitleTriggered) {
+		Logger::Output("Titleシーンへの遷移入力を受け付けました", Logger::Level::Application);
 		return SceneType::Title;
 	}
+
+	if (isGameTriggered) {
+		Logger::Output("Gameシーンへの遷移入力を受け付けました", Logger::Level::Application);
+		return SceneType::Game;
+	}
+
 	return SceneType::Result;
 }
 

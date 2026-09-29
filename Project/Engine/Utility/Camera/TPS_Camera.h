@@ -113,6 +113,10 @@ public:
 	/// @param enable trueで有効
 	void SetUseGamePadInput(bool enable) { useGamePadInput_ = enable; }
 
+	/// @brief カメラ操作入力の有効状態を設定
+	/// @param enable 操作入力を有効にする場合はtrue
+	void SetInputEnabled(bool enable) { isInputEnabled_ = enable; }
+
 	/// @brief GamePad未接続時のマウス入力許可を取得
 	/// @return マウス入力を許可する場合はtrue
 	bool GetUseMouseInput() const { return useMouseInput_; }
@@ -141,6 +145,7 @@ private:
 
 	bool useMouseInput_ = true;   // GamePad未接続時にマウス入力を許可するか
 	bool useGamePadInput_ = true; // ゲームパッド入力を使用するか
+	bool isInputEnabled_ = true;  // 現在のゲーム進行状態でカメラ操作を受け付ける場合はtrue
 
 	// 球面座標パラメータ
 	float yaw_      = 0.0f;  // Y軸周りの回転（ラジアン）

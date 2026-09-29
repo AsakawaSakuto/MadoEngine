@@ -3,7 +3,7 @@
 #include ".SceneManager/IScene.h"
 
 /// @brief リザルトシーン
-/// @details ゲームの結果を表示し、スペースキーでタイトルシーンに遷移
+/// @details ゲームの結果を表示し、SpaceまたはGamePad AでTitle、QまたはGamePad XでGameへ遷移
 class Result : public IScene
 {
 public:

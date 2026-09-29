@@ -792,9 +792,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                49.22990036010742,
-                16.5,
-                48.57177734375
+                18.888172149658203,
+                25.8059139251709,
+                208.85025024414063
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -804,14 +804,14 @@
                 0.0
             ],
             "scale": [
-                0.3781217336654663,
-                0.3781217336654663,
-                0.3781217336654663
+                0.3499999940395355,
+                0.3499999940395355,
+                0.3499999940395355
             ],
             "scene": "Game",
             "texture": "Interact_Pad",
             "type": "Model3D",
-            "visible": true
+            "visible": false
         }
     ]
 }

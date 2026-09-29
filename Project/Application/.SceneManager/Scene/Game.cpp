@@ -192,6 +192,7 @@ SceneType Game::Update(float dt) {
 
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
+		tpsCamera->SetInputEnabled(inGameSession_->GetCurrentPhase() != InGamePhase::Paused);
 
 		// 左右トリガーの差分で同時入力を相殺し、時間比例でカメラ距離を変更
 		if (tpsCamera->GetUseGamePadInput()) {

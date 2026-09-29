@@ -80,12 +80,21 @@ void TPS_Camera::Update(float deltaTime) {
 }
 
 void TPS_Camera::HandleInput(float deltaTime) {
+	auto* mouse = MyInput::GetMouse();
+	if (!isInputEnabled_) {
+
+		// Pause中にCursor拘束と視点操作が残らないよう相対入力を明示的に解除
+		if (mouse) {
+			mouse->SetRelativeMode(false);
+		}
+		return;
+	}
+
 	auto* pad = MyInput::GetGamePad();
 	const bool isGamePadConnected = pad && pad->IsConnected();
 	const bool shouldUseMouseInput = useMouseInput_ && !isGamePadConnected;
 
 	// GamePad接続中は二重入力を避け、未接続時だけマウス相対入力へ切り替え
-	auto* mouse = MyInput::GetMouse();
 	if (mouse) {
 		mouse->SetRelativeMode(shouldUseMouseInput);
 	}
