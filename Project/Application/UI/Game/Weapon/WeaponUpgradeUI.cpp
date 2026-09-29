@@ -7,9 +7,6 @@
 
 namespace UI::Game {
 	namespace {
-		constexpr const char* kUpgradeLeftAction = "Left";
-		constexpr const char* kUpgradeRightAction = "Right";
-		constexpr const char* kUpgradeDecisionAction = "Decision";
 		constexpr const char* kUpgradeRerollAction = "UpgradeReroll";
 
 		constexpr const char* kUpgradeCardSelectSoundKey = "UpgradeCardSelect";
@@ -22,9 +19,6 @@ namespace UI::Game {
 		}
 		ResetSelection();
 
-		MyInput::RegisterInput(kUpgradeLeftAction, { DIK_LEFT, DIK_A }, { GAMEPAD_LEFT });
-		MyInput::RegisterInput(kUpgradeRightAction, { DIK_RIGHT, DIK_D }, { GAMEPAD_RIGHT });
-		MyInput::RegisterInput(kUpgradeDecisionAction, { DIK_SPACE }, { GAMEPAD_A });
 		MyInput::RegisterInput(kUpgradeRerollAction, { DIK_F5 });
 	}
 
@@ -80,7 +74,7 @@ namespace UI::Game {
 			return;
 		}
 
-		if (MyInput::Trigger(kUpgradeLeftAction)) {
+		if (MyInput::Trigger("Left")) {
 
 			// 端から反対側へ循環する候補選択
 			selectedChoiceIndex_ =
@@ -88,7 +82,7 @@ namespace UI::Game {
 
 			MyAudio::Play(kUpgradeCardSelectSoundKey);
 
-		} else if (MyInput::Trigger(kUpgradeRightAction)) {
+		} else if (MyInput::Trigger("Right")) {
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + 1) % visibleChoiceCount_;
 
@@ -97,7 +91,7 @@ namespace UI::Game {
 
 		UpdateCards(deltaTime);
 
-		if (!MyInput::Trigger(kUpgradeDecisionAction)) {
+		if (!MyInput::Trigger("Decision")) {
 			return;
 		} else {
 			MyAudio::Play(kUpgradeCardDecisionSoundKey);

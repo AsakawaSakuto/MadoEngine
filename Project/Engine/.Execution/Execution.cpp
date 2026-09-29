@@ -251,7 +251,7 @@ namespace MadoEngine
 		sceneColorDesc.width = renderWidth_;
 		sceneColorDesc.height = renderHeight_;
 		sceneColorDesc.format = MadoEngine::Render::kHdrRenderTargetFormat;
-		sceneColorDesc.clearColor = { 0.1f, 0.25f, 0.5f, 1.0f };
+		sceneColorDesc.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		renderTargetManager_->Create(kSceneColorTarget, sceneColorDesc);
 
 		MadoEngine::Render::RenderTargetManager::Desc postEffectDesc{};

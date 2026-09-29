@@ -792,9 +792,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                -0.5377383232116699,
-                31.0,
-                39.73927307128906
+                139.2606658935547,
+                14.880332946777344,
+                59.192020416259766
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -809,7 +809,7 @@
                 0.3499999940395355
             ],
             "scene": "Game",
-            "texture": "xbox_button_color_x_outline",
+            "texture": "Interact_Pad",
             "type": "Model3D",
             "visible": false
         }

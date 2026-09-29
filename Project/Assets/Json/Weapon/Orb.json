@@ -47,13 +47,13 @@
             "fixedAddValue": 0.5,
             "isSelected": true,
             "rarityAddValue": 0.05000000074505806,
-            "value": 0.23999999463558197
+            "value": 0.10000000149011612
         },
         "shotIntervalTime": {
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 0.20000000298023224
+            "value": 0.5
         },
         "shotMaxCount": {
             "fixedAddValue": 1.0,

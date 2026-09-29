@@ -37,7 +37,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -63,7 +63,7 @@
                 0.75
             ],
             "scene": "Title",
-            "texture": "xbox_button_color_a",
+            "texture": "Decision_Pad",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -76,46 +76,7 @@
                     0.0
                 ]
             },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "interact_x",
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "None",
-            "texture": "xbox_button_color_x",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -219,7 +180,7 @@
                 0.5
             ],
             "scene": "Game",
-            "texture": "xbox_button_color_a_outline",
+            "texture": "Decision_Pad",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -258,7 +219,7 @@
                 0.5
             ],
             "scene": "Game",
-            "texture": "xbox_rb_outline",
+            "texture": "Crouching_Pad",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

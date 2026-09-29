@@ -212,10 +212,10 @@ void Terminal::Run() {
 		execution_->Update();
 
 		// ESC入力をアプリケーション全体の終了として最優先で処理
-		if (MyInput::GetKeybord()->IsTrigger(DIK_ESCAPE)) {
+		/*if (MyInput::GetKeybord()->IsTrigger(DIK_ESCAPE)) {
 			execution_->ConfirmApplicationExit();
 			break;
-		}
+		}*/
 
 		// 一時停止中も描画とEditor操作を維持し、Game状態の更新だけを停止
 		float applicationDeltaTime = 0.0f;
