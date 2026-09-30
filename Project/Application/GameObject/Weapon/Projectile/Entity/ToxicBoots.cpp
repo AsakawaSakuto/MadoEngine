@@ -13,6 +13,8 @@ namespace Projectile {
 	void ToxicBoots::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
+		rotationYaw_ = 0.0f;
+		groundNormal_ = { 0.0f, 1.0f, 0.0f };
 
 		// Playerの移動Collider中心ではなく生成地点の地表へ固定
 		transform_.translate = ownerPosition - Vector3(0.0f, 0.45f, 0.0f);
@@ -28,16 +30,19 @@ namespace Projectile {
 		}
 
 		// 通常床と坂が重なる場所では生成地点に近い上側の地表を採用
-		if (MyCollider::TryGetGroundSurfaceY(
-			ownerPosition, CollisionTag::MapSlope, surfaceY, kMaxGroundSearchDistance) &&
+		Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
+		if (MyCollider::TryGetGroundSurface(
+			ownerPosition, CollisionTag::MapSlope, surfaceY, slopeNormal, kMaxGroundSearchDistance) &&
 			(!foundGround || surfaceY > groundSurfaceY)) {
 			groundSurfaceY = surfaceY;
+			groundNormal_ = slopeNormal;
 			foundGround = true;
 		}
 
 		if (foundGround) {
 			transform_.translate.y = groundSurfaceY + kGroundOffset + MyRand::GetFloat(0.01f, 0.1f);
 		}
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		transform_.scale = Vector3{ kBaseModelScale, kBaseModelScale, kBaseModelScale } * sizeRate_;
 
 		// 専用Modelが用意されるまでEyeのModelとTextureを仮表示に使用
@@ -77,8 +82,9 @@ namespace Projectile {
 			reductionTimer_.Start(lifeTime_ * (1.0f - kReductionStartRatio), false);
 		}
 
-		// 生成位置を維持したままY軸回転だけを更新
-		transform_.rotate.y += kRotationSpeed * deltaTime;
+		// 生成位置を維持したまま接地面の法線を軸に回転
+		rotationYaw_ += kRotationSpeed * deltaTime;
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		if (Model* model = MyModel::TryGet(model_)) {
 			const float reductionProgress = isReductionStarted_ ? reductionTimer_.GetProgress() : 0.0f;
 			const Vector3 baseScale = Vector3{ kBaseModelScale, kBaseModelScale, kBaseModelScale } * sizeRate_;

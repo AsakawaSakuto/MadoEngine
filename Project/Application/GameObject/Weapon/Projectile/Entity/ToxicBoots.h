@@ -27,6 +27,8 @@ namespace Projectile {
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
 		GameTimer reductionTimer_;
+		Vector3 groundNormal_ = { 0.0f, 1.0f, 0.0f };
+		float rotationYaw_ = 0.0f;
 		bool isReductionStarted_ = false;
 	};
 }

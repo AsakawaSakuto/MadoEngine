@@ -3,6 +3,7 @@
 #include "RenderHeaders.h"
 #include "ProjectileStatus.h"
 #include "../WeaponStatus.h"
+#include <algorithm>
 #include <cmath>
 #include <string>
 #include <unordered_set>
@@ -167,6 +168,53 @@ namespace Projectile {
 			transform_.rotate.y = std::atan2(moveDirection_.x, moveDirection_.z);
 			transform_.rotate.z = 0.0f;
 			return true;
+		}
+
+		/// @brief 地表法線と水平向きに沿った回転を作成
+		/// @param yaw 水平Yaw角度
+		/// @param groundNormal 地表面の法線
+		/// @return 地表面に沿ったEuler角
+		Vector3 CreateGroundAlignedRotation(float yaw, const Vector3& groundNormal) const {
+			constexpr float kRotationEpsilon = 0.00001f;
+			const auto normalizeOrFallback = [](const Vector3& value, const Vector3& fallback) {
+				const float lengthSq = value.LengthSq();
+				if (lengthSq < kRotationEpsilon) {
+					return fallback;
+				}
+
+				return value * (1.0f / std::sqrt(lengthSq));
+			};
+
+			const Vector3 up = normalizeOrFallback(groundNormal, { 0.0f, 1.0f, 0.0f });
+			const Vector3 horizontalForward = { std::sin(yaw), 0.0f, std::cos(yaw) };
+			const Vector3 horizontalRight = { std::cos(yaw), 0.0f, -std::sin(yaw) };
+
+			// 水平向きを地表面へ射影して回転中もModelの上方向を法線へ拘束
+			Vector3 forward = horizontalForward - up * Math::Dot(horizontalForward, up);
+			if (forward.LengthSq() < kRotationEpsilon) {
+
+				// 前方向と法線が平行に近い場合は右方向から安定した前方向を再構築
+				forward = Math::Cross(horizontalRight, up);
+			}
+			forward = normalizeOrFallback(forward, { 0.0f, 0.0f, 1.0f });
+
+			Vector3 right = normalizeOrFallback(Math::Cross(up, forward), horizontalRight);
+			forward = normalizeOrFallback(Math::Cross(right, up), forward);
+
+			Vector3 euler = {};
+			const float sinY = std::clamp(-right.z, -1.0f, 1.0f);
+			euler.y = std::asin(sinY);
+			const float cosY = std::cos(euler.y);
+			if (std::abs(cosY) > kRotationEpsilon) {
+				euler.x = std::atan2(up.z, forward.z);
+				euler.z = std::atan2(right.y, right.x);
+				return euler;
+			}
+
+			// ジンバルロック付近ではZ回転を固定して不定な解を回避
+			euler.x = std::atan2(up.x * sinY, up.y);
+			euler.z = 0.0f;
+			return euler;
 		}
 
 		std::uint64_t projectileId_ = 0; // Projectileの識別番号

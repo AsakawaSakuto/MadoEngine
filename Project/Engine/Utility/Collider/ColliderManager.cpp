@@ -1354,6 +1354,11 @@ bool ColliderManager::IsSlopeGroundContact(CollisionTag selfTag, CollisionTag ta
 }
 
 bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, float maxDistance) {
+    Vector3 surfaceNormal = { 0.0f, 1.0f, 0.0f };
+    return TryGetGroundSurface(origin, targetTag, outSurfaceY, surfaceNormal, maxDistance);
+}
+
+bool ColliderManager::TryGetGroundSurface(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, Vector3& outSurfaceNormal, float maxDistance) {
     if (maxDistance < 0.0f) {
         return false;
     }
@@ -1365,6 +1370,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
 
     bool foundSurface = false;
     float bestSurfaceY = -FLT_MAX;
+    Vector3 bestSurfaceNormal = { 0.0f, 1.0f, 0.0f };
 
     // 複数の地面候補から基準座標の直下にある最も高い表面を選択
     const auto evaluateCollider = [&](const ColliderInfo& colliderInfo) {
@@ -1373,6 +1379,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
         }
 
         float surfaceY = 0.0f;
+        Vector3 surfaceNormal = { 0.0f, 1.0f, 0.0f };
         if (std::holds_alternative<AABB>(*(colliderInfo.pShape))) {
             AABB ground = std::get<AABB>(*(colliderInfo.pShape));
             ground.center = *(colliderInfo.pPosition);
@@ -1392,6 +1399,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
             }
 
             surfaceY = Collision::Detail::GetSlopeSurfaceY(slope, origin);
+            surfaceNormal = Collision::Detail::GetSlopeTopNormal(slope);
         } else {
             return;
         }
@@ -1404,6 +1412,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
         if (!foundSurface || surfaceY > bestSurfaceY) {
             foundSurface = true;
             bestSurfaceY = surfaceY;
+            bestSurfaceNormal = surfaceNormal;
         }
     };
 
@@ -1445,6 +1454,7 @@ bool ColliderManager::TryGetGroundSurfaceY(const Vector3& origin, CollisionTag t
     }
 
     outSurfaceY = bestSurfaceY;
+    outSurfaceNormal = bestSurfaceNormal;
     return true;
 }
 

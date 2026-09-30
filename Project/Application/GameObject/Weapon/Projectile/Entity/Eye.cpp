@@ -18,6 +18,8 @@ namespace Projectile {
 	void Eye::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
+		rotationYaw_ = 0.0f;
+		groundNormal_ = { 0.0f, 1.0f, 0.0f };
 
 		Sphere hitbox;
 		hitbox_ = hitbox;
@@ -43,7 +45,8 @@ namespace Projectile {
 	void Eye::Update(float deltaTime) {
 
 		// 常時展開中であることを視認できるよう所有者の周囲でEyeを回転
-		transform_.rotate.y += kRotationSpeed * deltaTime;
+		rotationYaw_ += kRotationSpeed * deltaTime;
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTransform(transform_);
 		}
@@ -78,6 +81,7 @@ namespace Projectile {
 		float groundSurfaceY = 0.0f;
 		float surfaceY = 0.0f;
 		bool foundGround = false;
+		groundNormal_ = { 0.0f, 1.0f, 0.0f };
 
 		if (MyCollider::TryGetGroundSurfaceY(
 			ownerPosition, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
@@ -86,10 +90,12 @@ namespace Projectile {
 		}
 
 		// 通常床と坂が重なる場所では所有者に近い上側の地表を採用
-		if (MyCollider::TryGetGroundSurfaceY(
-			ownerPosition, CollisionTag::MapSlope, surfaceY, kMaxGroundSearchDistance) &&
+		Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
+		if (MyCollider::TryGetGroundSurface(
+			ownerPosition, CollisionTag::MapSlope, surfaceY, slopeNormal, kMaxGroundSearchDistance) &&
 			(!foundGround || surfaceY > groundSurfaceY)) {
 			groundSurfaceY = surfaceY;
+			groundNormal_ = slopeNormal;
 			foundGround = true;
 		}
 
@@ -101,11 +107,14 @@ namespace Projectile {
 			// Map生成前など地表Colliderが未登録の初回だけ従来位置へ退避
 			transform_.translate.y = ownerPosition.y - kOwnerGroundOffset;
 		}
+
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 	}
 
 	void Eye::StartEffectSequence() {
 		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
 		desc.rootTransform.translate = transform_.translate;
+		desc.rootTransform.rotate = transform_.rotate;
 		desc.rootTransform.scale = { sizeRate_, 1.0f, sizeRate_ };
 		desc.sceneType = SceneType::Game;
 		desc.loopOverride = true;
@@ -115,6 +124,7 @@ namespace Projectile {
 	void Eye::UpdateEffectSequenceTransform() {
 		Transform3D effectTransform;
 		effectTransform.translate = transform_.translate;
+		effectTransform.rotate = transform_.rotate;
 		effectTransform.scale = { sizeRate_, 1.0f, sizeRate_ };
 
 		if (!effectSequence_.SetTransform(effectTransform)) {

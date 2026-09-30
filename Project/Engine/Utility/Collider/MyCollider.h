@@ -115,6 +115,17 @@ namespace MyCollider {
 		return ColliderManager::GetInstance().TryGetGroundSurfaceY(origin, targetTag, outSurfaceY, maxDistance);
 	}
 
+	/// @brief 指定座標の直下にある地表面のY座標と法線を取得
+	/// @param origin 地表面を探す基準座標
+	/// @param targetTag 地面として扱う対象タグ
+	/// @param outSurfaceY 見つかった地表面のY座標
+	/// @param outSurfaceNormal 見つかった地表面の法線
+	/// @param maxDistance 下方向に探索する最大距離
+	/// @return 地表面が見つかった場合はtrue
+	inline bool TryGetGroundSurface(const Vector3& origin, CollisionTag targetTag, float& outSurfaceY, Vector3& outSurfaceNormal, float maxDistance) {
+		return ColliderManager::GetInstance().TryGetGroundSurface(origin, targetTag, outSurfaceY, outSurfaceNormal, maxDistance);
+	}
+
 	/// @brief Sphereコライダーが追従できるSlope上面の中心Y座標を取得
 	/// @param name Sphereコライダーの識別名
 	/// @param targetTag Slopeとして扱うタグ

@@ -54,6 +54,8 @@ namespace Projectile {
 		std::string objectName_;
 		MadoEngine::EffectSequence::MyEffectSequence3d effectSequence_;
 		GameTimer colorAnimationTimer_;
+		Vector3 groundNormal_ = { 0.0f, 1.0f, 0.0f };
+		float rotationYaw_ = 0.0f;
 		bool hasGroundPosition_ = false;
 	};
 }
