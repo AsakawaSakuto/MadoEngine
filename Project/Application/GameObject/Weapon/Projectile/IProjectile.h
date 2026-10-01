@@ -52,6 +52,14 @@ namespace Projectile {
 		/// @return Projectileのダメージ量
 		float GetDamage() const { return damage_; }
 
+		/// @brief Projectileのクリティカル率を取得
+		/// @return Projectileのクリティカル率
+		float GetCriticalChance() const { return criticalChance_; }
+
+		/// @brief Projectileのクリティカルダメージ倍率を取得
+		/// @return Projectileのクリティカルダメージ倍率
+		float GetCriticalDamage() const { return criticalDamage_; }
+
 		/// @brief Projectileのノックバック力を取得
 		/// @return Projectileのノックバック力
 		float GetKnockbackPower() const { return knockbackPower_; }
@@ -132,6 +140,8 @@ namespace Projectile {
 			targetPosition = context.targetPosition;
 
 			damage_ = context.damage;
+			criticalChance_ = context.criticalChance;
+			criticalDamage_ = context.criticalDamage;
 			knockbackPower_ = context.knockbackPower;
 			moveSpeed_ = context.moveSpeed;
 			sizeRate_ = context.sizeRate;
@@ -222,6 +232,8 @@ namespace Projectile {
 		std::string colliderName_;       // Projectileのコライダー名
 
 		float damage_ = 10.0f;              // ダメージ量
+		float criticalChance_ = 0.0f;       // クリティカル率
+		float criticalDamage_ = 1.0f;       // クリティカルダメージ倍率
 		float knockbackPower_ = 0.0f;        // ノックバック力
 		float moveSpeed_ = 25.0f;           // 移動速度
 		float sizeRate_ = 1.0f;             // サイズ倍率

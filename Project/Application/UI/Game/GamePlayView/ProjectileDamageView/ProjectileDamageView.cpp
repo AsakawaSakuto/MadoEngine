@@ -63,7 +63,7 @@ namespace UI::Game {
 		spawnSequence_ = 0;
 	}
 
-	void ProjectileDamageView::Spawn(float damage, const Vector3& worldPosition) {
+	void ProjectileDamageView::Spawn(float damage, const Vector3& worldPosition, bool isCritical) {
 		if (!std::isfinite(damage) || std::floor(damage) <= 0.0f) {
 			return;
 		}
@@ -92,6 +92,7 @@ namespace UI::Game {
 			enemyHeadOffsetMax_,
 			kOffsetRates[verticalOffsetIndex]);
 		slot->elapsedTime = 0.0f;
+		slot->isCritical = isCritical;
 		slot->isActive = true;
 		++spawnSequence_;
 
@@ -100,7 +101,7 @@ namespace UI::Game {
 			1.0f + initialScaleAddition_,
 			1.0f + initialScaleAddition_,
 		});
-		text->SetColor(damageTextColor_);
+		text->SetColor(isCritical ? criticalDamageTextColor_ : damageTextColor_);
 		text->SetVisible(isVisible_);
 	}
 
@@ -144,7 +145,8 @@ namespace UI::Game {
 				(progress - fadeStartProgress_) / (1.0f - fadeStartProgress_),
 				0.0f,
 				1.0f);
-			const float alpha = damageTextColor_.w * (1.0f - fadeProgress);
+			const Vector4& textColor = slot.isCritical ? criticalDamageTextColor_ : damageTextColor_;
+			const float alpha = textColor.w * (1.0f - fadeProgress);
 			const float scaleSettleProgress =
 				std::clamp(progress / scaleSettleProgress_, 0.0f, 1.0f);
 			const float scale = 1.0f +
@@ -156,9 +158,9 @@ namespace UI::Game {
 			text->SetPosition(screenPosition);
 			text->SetScale({ scale, scale });
 			text->SetColor({
-				damageTextColor_.x,
-				damageTextColor_.y,
-				damageTextColor_.z,
+				textColor.x,
+				textColor.y,
+				textColor.z,
 				alpha,
 			});
 			text->SetVisible(true);
@@ -222,7 +224,8 @@ namespace UI::Game {
 			"最大: %.0f px");
 		const bool fontSizeChanged =
 			ImGui::DragFloat("フォントサイズ", &fontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
-		ImGui::ColorEdit4("文字色", &damageTextColor_.x);
+		ImGui::ColorEdit4("通常ダメージ文字色", &damageTextColor_.x);
+		ImGui::ColorEdit4("クリティカルダメージ文字色", &criticalDamageTextColor_.x);
 
 		// 手入力を含む調整値をUpdate内の除算と補間が安全な範囲へ制限
 		displayLifeTime_ = std::clamp(displayLifeTime_, 0.05f, 5.0f);

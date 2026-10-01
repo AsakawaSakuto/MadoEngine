@@ -166,6 +166,8 @@ namespace Enemy {
 				enemy->TakeProjectileDamage(
 					hitInfo.projectileId,
 					hitInfo.damage,
+					hitInfo.criticalChance,
+					hitInfo.criticalDamage,
 					hitInfo.knockbackDirection,
 					hitInfo.knockbackPower);
 			if (!damageResult.wasApplied) {
@@ -176,6 +178,8 @@ namespace Enemy {
 				enemy->GetPosition(),
 				hitInfo.sourceWeaponId,
 				damageResult.appliedDamage,
+				damageResult.resolvedDamage,
+				damageResult.isCritical,
 				damageResult.wasKilled,
 			});
 		}

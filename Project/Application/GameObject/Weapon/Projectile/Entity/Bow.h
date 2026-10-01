@@ -17,7 +17,6 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
-		/// @brief Enemy命中時のダメージを2倍化
 		void OnEnemyHit() override;
 
 	private:

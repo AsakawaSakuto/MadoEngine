@@ -15,7 +15,9 @@ namespace Enemy {
 	struct ProjectileDamageEvent {
 		Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
 		std::uint64_t sourceWeaponId = 0;
-		float damage = 0.0f;
+		float appliedDamage = 0.0f;
+		float displayDamage = 0.0f;
+		bool isCritical = false;
 		bool wasKilled = false;
 	};
 

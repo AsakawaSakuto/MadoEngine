@@ -16,6 +16,8 @@ namespace Projectile {
 		Vector3 targetPosition;         // 投射物の目標座標
 
 		float damage = 10.0f;           // 投射物のダメージ量
+		float criticalChance = 0.0f;    // 投射物のクリティカル率
+		float criticalDamage = 1.0f;    // 投射物のクリティカルダメージ倍率
 		float knockbackPower = 0.0f;    // 投射物のノックバック力
 		float moveSpeed = 10.0f;        // 投射物の移動速度
 		float sizeRate = 1.0f;          // 投射物のサイズ倍率

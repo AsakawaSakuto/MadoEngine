@@ -33,7 +33,9 @@ namespace Enemy {
 	/// @brief Enemyへ適用したProjectileダメージの結果
 	struct ProjectileDamageResult {
 		float appliedDamage = 0.0f;
+		float resolvedDamage = 0.0f;
 		bool wasApplied = false;
+		bool isCritical = false;
 		bool wasKilled = false;
 	};
 
@@ -82,12 +84,16 @@ namespace Enemy {
 		/// @brief Projectileからのダメージを適用
 		/// @param projectileId Projectileの識別番号
 		/// @param damage 適用するダメージ量
+		/// @param criticalChance クリティカル率
+		/// @param criticalDamage クリティカル発生時のダメージ倍率
 		/// @param knockbackDirection Enemyを押し出す方向
 		/// @param knockbackPower Enemyへ適用するノックバック力
 		/// @return 実際に適用されたダメージと死亡状態
 		ProjectileDamageResult TakeProjectileDamage(
 			std::uint64_t projectileId,
 			float damage,
+			float criticalChance,
+			float criticalDamage,
 			const Vector3& knockbackDirection,
 			float knockbackPower);
 

@@ -91,6 +91,8 @@ namespace Projectile {
 		context.projectileName = objectName_;
 		context.ownerPosition = transform_.translate;
 		context.damage = damage_;
+		context.criticalChance = criticalChance_;
+		context.criticalDamage = criticalDamage_;
 		context.knockbackPower = knockbackPower_;
 		context.explotionDamageDecreaseRate = 0.75f;
 		context.explosionRadius = sizeRate_;

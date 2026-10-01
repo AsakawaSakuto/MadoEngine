@@ -47,8 +47,8 @@ namespace Projectile {
 		static constexpr float kGroundOffset =     0.05f;  // 地面とのZファイティングを防ぐ表示オフセット
 		static constexpr float kOwnerGroundOffset = 0.45f; // 地表を取得できない初回だけ使用する所有者基準のオフセット
 		static constexpr float kColorCycleDuration = 5.0f; // 色が開始色へ戻るまでの時間
-		static constexpr Vector4 kColorStart = { 1.0f, 0.0f, 1.0f, 1.0f };
-		static constexpr Vector4 kColorEnd = { 1.0f, 0.5f, 1.0f, 1.0f };
+		static constexpr Vector4 kColorStart = { 1.0f, 0.0f, 1.0f, 0.95f };
+		static constexpr Vector4 kColorEnd   = { 1.0f, 0.5f, 1.0f, 0.95f };
 
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;

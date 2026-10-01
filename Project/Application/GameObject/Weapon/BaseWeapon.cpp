@@ -278,6 +278,8 @@ namespace Weapon {
 		}
 		context.targetPosition = targetPosition;
 		context.damage = status_.damage.value;
+		context.criticalChance = status_.criticalChance.value;
+		context.criticalDamage = status_.criticalDamage.value;
 		context.knockbackPower = status_.knockbackPower.value;
 		context.moveSpeed = status_.speed.value;
 		context.sizeRate = status_.size.value;

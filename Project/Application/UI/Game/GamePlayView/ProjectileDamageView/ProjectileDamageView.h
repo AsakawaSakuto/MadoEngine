@@ -24,7 +24,8 @@ namespace UI::Game {
 		/// @brief ダメージ数値の表示を開始
 		/// @param damage 実際に適用されたダメージ量
 		/// @param worldPosition ダメージを受けた対象のワールド座標
-		void Spawn(float damage, const Vector3& worldPosition);
+		/// @param isCritical クリティカルダメージの場合はtrue
+		void Spawn(float damage, const Vector3& worldPosition, bool isCritical);
 
 		/// @brief 表示中のダメージ数値を更新
 		/// @param deltaTime 前フレームからの経過時間
@@ -48,6 +49,7 @@ namespace UI::Game {
 			float horizontalOffset = 0.0f;
 			float verticalOffset = 0.0f;
 			float elapsedTime = 0.0f;
+			bool isCritical = false;
 			bool isActive = false;
 		};
 
@@ -82,6 +84,7 @@ namespace UI::Game {
 		float horizontalOffsetMax_ = 24.0f;    // ダメージ表示の最大左右オフセット
 		float fontSize_ = 32.0f;               // ダメージ表示のフォントサイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
+		Vector4 criticalDamageTextColor_ = { 1.0f, 0.5f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
 	};
 
 } // namespace UI::Game

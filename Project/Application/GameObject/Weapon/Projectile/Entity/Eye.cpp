@@ -60,6 +60,8 @@ namespace Projectile {
 		ownerPosition = context.ownerPosition;
 		UpdateGroundPosition();
 		damage_ = context.damage;
+		criticalChance_ = context.criticalChance;
+		criticalDamage_ = context.criticalDamage;
 		knockbackPower_ = context.knockbackPower;
 
 		// 不正な倍率による反転やゼロ半径を防ぎつつ強化値を攻撃範囲へ即時反映

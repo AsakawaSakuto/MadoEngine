@@ -3,6 +3,7 @@
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
 
@@ -13,6 +14,9 @@ namespace Enemy {
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
 		constexpr float kPlayerKnockbackPower = 1.5f;
 		constexpr float kPlayerKnockbackDirectionEpsilonSq = 0.000001f;
+		constexpr int kCriticalRollMin = 1;
+		constexpr int kCriticalRollMax = 100;
+		constexpr float kGuaranteedCriticalChance = static_cast<float>(kCriticalRollMax);
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
@@ -185,6 +189,8 @@ namespace Enemy {
 	ProjectileDamageResult Base::TakeProjectileDamage(
 		std::uint64_t projectileId,
 		float damage,
+		float criticalChance,
+		float criticalDamage,
 		const Vector3& knockbackDirection,
 		float knockbackPower) {
 		ProjectileDamageResult result;
@@ -198,12 +204,22 @@ namespace Enemy {
 			return result;
 		}
 
+		// 確定率以上では乱数消費を避け、それ未満では1から100の整数値で命中ごとに抽選
+		const bool isCritical = criticalChance >= kGuaranteedCriticalChance ||
+			static_cast<float>(MyRand::GetInt(kCriticalRollMin, kCriticalRollMax)) <= criticalChance;
+		const float resolvedDamage = isCritical ? damage * criticalDamage : damage;
+		if (!std::isfinite(resolvedDamage) || resolvedDamage <= 0.0f) {
+			return result;
+		}
+
 		// 同じProjectileが接触中に毎フレームDamageを与えないよう識別子単位で待機時間を登録
 		const float healthBeforeDamage = status_.currentHealth;
-		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
+		status_.currentHealth = std::max(0.0f, status_.currentHealth - resolvedDamage);
 		projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
 		result.appliedDamage = healthBeforeDamage - status_.currentHealth;
+		result.resolvedDamage = resolvedDamage;
 		result.wasApplied = result.appliedDamage > 0.0f;
+		result.isCritical = result.wasApplied && isCritical;
 		result.wasKilled = status_.currentHealth <= 0.0f;
 		if (result.wasApplied) {
 			StartDamageFlash();

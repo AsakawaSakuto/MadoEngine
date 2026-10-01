@@ -27,6 +27,8 @@ namespace Projectile {
 		std::uint64_t projectileId = 0;
 		std::uint64_t sourceWeaponId = 0;
 		float damage = 0.0f;
+		float criticalChance = 0.0f;
+		float criticalDamage = 1.0f;
 		float knockbackPower = 0.0f;
 		Vector3 knockbackDirection = { 0.0f, 0.0f, 0.0f };
 	};

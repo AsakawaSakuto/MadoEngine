@@ -73,7 +73,7 @@ namespace Weapon {
 		case UpgradeStatType::Damage:           return "ダメージ量";
 		case UpgradeStatType::ShotMaxCount:     return "最大射撃数";
 		case UpgradeStatType::ShotIntervalTime: return "射撃間隔";
-		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン短縮";
+		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン";
 		case UpgradeStatType::CriticalChance:   return "クリティカル率";
 		case UpgradeStatType::CriticalDamage:   return "クリティカル倍率";
 		case UpgradeStatType::Size:             return "サイズ";

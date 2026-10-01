@@ -259,6 +259,8 @@ namespace Projectile {
 					projectile->GetProjectileId(),
 					projectile->GetSourceWeaponId(),
 					projectile->GetDamage(),
+					projectile->GetCriticalChance(),
+					projectile->GetCriticalDamage(),
 					projectile->GetKnockbackPower(),
 					knockbackDirection
 				});

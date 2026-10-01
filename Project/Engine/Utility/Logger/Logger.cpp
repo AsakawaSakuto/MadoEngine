@@ -168,7 +168,6 @@ namespace {
         }
 
         g_logFile << message;
-        g_logFile.flush();
     }
 
 	/// @brief ログファイルを閉じるスレッドセーフな関数
@@ -198,6 +197,14 @@ namespace Logger {
     }
 
     void Output(const std::string& message, Level level, const std::source_location& location) {
+
+#ifdef NDEBUG
+
+        // DevelopmentとReleaseでは実行時の大量出力を避け、問題調査に必要な警告とエラーだけを保持
+        if (level != Level::Warning && level != Level::Error) {
+            return;
+        }
+#endif
 
         // 1. 文字列を組み立てる (UTF-8のまま)
         std::string ts = GetTimestamp();
