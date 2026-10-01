@@ -121,7 +121,8 @@ namespace UI::Game {
 				slot.elapsedTime += deltaTime;
 			}
 
-			if (slot.elapsedTime >= displayLifeTime_) {
+			// 縮小演出の完了後にSlotを解放して次の表示へ再利用
+			if (slot.elapsedTime >= displayLifeTime_ + shrinkDuration_) {
 				slot.isActive = false;
 				text->SetVisible(false);
 				continue;
@@ -137,23 +138,24 @@ namespace UI::Game {
 				continue;
 			}
 
-			const float progress =
+			const float displayProgress =
 				std::clamp(slot.elapsedTime / displayLifeTime_, 0.0f, 1.0f);
 
-			// 寿命後半のFadeと初期拡大の収束を独立した進捗で計算
-			const float fadeProgress = std::clamp(
-				(progress - fadeStartProgress_) / (1.0f - fadeStartProgress_),
+			// 表示時間中に初期拡大を収束させ、寿命経過時のScaleからゼロへ縮小
+			const Vector4& textColor = slot.isCritical ? criticalDamageTextColor_ : damageTextColor_;
+			const float alpha = 1.0f;
+			const float scaleSettleProgress =
+				std::clamp(displayProgress / scaleSettleProgress_, 0.0f, 1.0f);
+			const float displayScale = 1.0f +
+				initialScaleAddition_ * (1.0f - scaleSettleProgress);
+			const float shrinkProgress = std::clamp(
+				(slot.elapsedTime - displayLifeTime_) / shrinkDuration_,
 				0.0f,
 				1.0f);
-			const Vector4& textColor = slot.isCritical ? criticalDamageTextColor_ : damageTextColor_;
-			const float alpha = textColor.w * (1.0f - fadeProgress);
-			const float scaleSettleProgress =
-				std::clamp(progress / scaleSettleProgress_, 0.0f, 1.0f);
-			const float scale = 1.0f +
-				initialScaleAddition_ * (1.0f - scaleSettleProgress);
+			const float scale = displayScale * (1.0f - shrinkProgress);
 
 			screenPosition.x += slot.horizontalOffset;
-			screenPosition.y -= riseDistance_ * progress;
+			screenPosition.y -= riseDistance_ * displayProgress;
 
 			text->SetPosition(screenPosition);
 			text->SetScale({ scale, scale });
@@ -200,7 +202,7 @@ namespace UI::Game {
 		ImGui::Begin("Projectile Damage View");
 
 		ImGui::DragFloat("表示時間", &displayLifeTime_, 0.01f, 0.05f, 5.0f, "%.2f 秒");
-		ImGui::DragFloat("フェード開始位置", &fadeStartProgress_, 0.01f, 0.0f, 0.99f, "%.2f");
+		ImGui::DragFloat("縮小時間", &shrinkDuration_, 0.01f, 0.01f, 1.0f, "%.2f 秒");
 		ImGui::DragFloat("スケール整定位置", &scaleSettleProgress_, 0.01f, 0.01f, 1.0f, "%.2f");
 		ImGui::DragFloat("初期スケール加算", &initialScaleAddition_, 0.01f, 0.0f, 3.0f, "%.2f");
 		ImGui::DragFloat("上昇距離", &riseDistance_, 1.0f, -500.0f, 500.0f, "%.0f px");
@@ -229,7 +231,7 @@ namespace UI::Game {
 
 		// 手入力を含む調整値をUpdate内の除算と補間が安全な範囲へ制限
 		displayLifeTime_ = std::clamp(displayLifeTime_, 0.05f, 5.0f);
-		fadeStartProgress_ = std::clamp(fadeStartProgress_, 0.0f, 0.99f);
+		shrinkDuration_ = std::clamp(shrinkDuration_, 0.01f, 1.0f);
 		scaleSettleProgress_ = std::clamp(scaleSettleProgress_, 0.01f, 1.0f);
 		initialScaleAddition_ = std::clamp(initialScaleAddition_, 0.0f, 3.0f);
 		riseDistance_ = std::clamp(riseDistance_, -500.0f, 500.0f);

@@ -10,7 +10,8 @@
 
 namespace Weapon {
 	
-	void Inventory::Initialize(Projectile::Type type) {
+	void Inventory::Initialize(Projectile::Type type, int slotCount) {
+		slotCount_ = slotCount;
 		weapons_.clear();
 		weapons_.resize(slotCount_);
 		weaponAttackEvents_.clear();

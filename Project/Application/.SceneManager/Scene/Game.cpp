@@ -18,6 +18,8 @@ namespace {
 	constexpr int kEnemyDamageSoundFirstIndex = 1;
 	constexpr int kEnemyDamageSoundLastIndex = 5;
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
+	
+	constexpr int slotCount = 4;
 }
 
 Game::Game(CommonData& commonData)
@@ -87,14 +89,16 @@ void Game::Initialize() {
 	playerIconUI_->Initialize();
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
-	weaponInventory_->Initialize(Projectile::Type::FireBall);
+	weaponInventory_->Initialize(Projectile::Type::FireBall, slotCount);
+
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
+
 	weaponUpgradeSystem_ = std::make_unique<Weapon::UpgradeSystem>();
 	weaponUpgradeSystem_->Initialize(player_->GetLevel(), gameSeed_);
 
 	// 武器Level表示をUpgrade Cardより先に登録してHUDをCardの背面へ配置
 	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
-	weaponIconUI_->Initialize(4);
+	weaponIconUI_->Initialize(slotCount);
 	weaponUpgradeUI_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始

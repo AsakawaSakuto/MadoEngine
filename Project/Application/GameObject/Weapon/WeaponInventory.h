@@ -16,7 +16,7 @@ namespace Weapon {
 	/// @brief 武器のインベントリを管理するクラス
 	class Inventory {
 	public:
-		void Initialize(Projectile::Type type);
+		void Initialize(Projectile::Type type, int slotCount);
 
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 

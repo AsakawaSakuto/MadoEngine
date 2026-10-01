@@ -74,7 +74,7 @@ namespace UI::Game {
 		std::uint64_t spawnSequence_ = 0;
 		bool isVisible_ = true;
 		float displayLifeTime_ = 0.5f;         // ダメージ表示の寿命（秒）
-		float fadeStartProgress_ = 0.5f;       // ダメージ表示のフェード開始タイミング
+		float shrinkDuration_ = 0.1f;          // 表示寿命後の縮小時間（秒）
 		float scaleSettleProgress_ = 1.0f;     // ダメージ表示のスケールが落ち着くタイミング
 		float initialScaleAddition_ = 1.0f;    // ダメージ表示の初期スケール増加量
 		float riseDistance_ = 64.0f;           // ダメージ表示の上昇距離（ピクセル）
