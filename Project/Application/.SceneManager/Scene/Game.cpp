@@ -131,6 +131,8 @@ SceneType Game::Update(float dt) {
 		weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
 		Projectile::Manager::GetInstance().Update(deltaTime);
 
+		// 全GameObjectの移動結果へ衝突解決を適用してから接地と壁登り状態を確定
+		MyCollider::Update();
 		player_->ResolveAfterCollision();
 		enemyManager_->ResolveAfterCollision();
 		for (const Enemy::ProjectileDamageEvent& event :

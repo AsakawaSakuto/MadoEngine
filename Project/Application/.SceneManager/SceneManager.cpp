@@ -152,9 +152,6 @@ void SceneManager::Update(float dt) {
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Update(dt);
-
-	// Scene処理が参照するCollider状態をFrame先頭で更新
-	ColliderManager::GetInstance().Update();
 }
 
 void SceneManager::Draw() {

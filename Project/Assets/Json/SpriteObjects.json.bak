@@ -639,13 +639,13 @@
             "layer": "Default",
             "name": "InputUI4_Pad",
             "position": [
-                0.0,
-                0.0
+                1000.0,
+                434.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                0.5,
+                0.5
             ],
             "scene": "Game",
             "texture": "Pause_Pad",
@@ -678,13 +678,13 @@
             "layer": "Default",
             "name": "InputUI4_Key",
             "position": [
-                0.0,
-                146.0
+                1000.0,
+                434.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                0.5,
+                0.5
             ],
             "scene": "Game",
             "texture": "Pause_Key",
