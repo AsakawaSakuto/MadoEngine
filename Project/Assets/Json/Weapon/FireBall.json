@@ -1,5 +1,27 @@
 {
     "name": "Fireball",
+    "statusEffects": {
+        "burn": {
+            "applyChance": {
+                "fixedAddValue": 5.0,
+                "isSelected": true,
+                "rarityAddValue": 2.0,
+                "value": 25.0
+            },
+            "damagePerTick": {
+                "fixedAddValue": 1.0,
+                "isSelected": true,
+                "rarityAddValue": 0.5,
+                "value": 3.0
+            },
+            "duration": {
+                "fixedAddValue": 1.0,
+                "isSelected": true,
+                "rarityAddValue": 0.5,
+                "value": 5.0
+            }
+        }
+    },
     "upgradeStatus": {
         "bounceCount": {
             "fixedAddValue": 1.0,

@@ -1,5 +1,6 @@
 #include "ProjectileDamageView.h"
 #include ".SceneManager/SceneType.h"
+#include "GameObject/Enemy/EnemyManager.h"
 #include "Math/Function/MatrixFunction.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Camera/Camera.h"
@@ -63,8 +64,8 @@ namespace UI::Game {
 		spawnSequence_ = 0;
 	}
 
-	void ProjectileDamageView::Spawn(float damage, const Vector3& worldPosition, bool isCritical) {
-		if (!std::isfinite(damage) || std::floor(damage) <= 0.0f) {
+	void ProjectileDamageView::Spawn(const Enemy::ProjectileDamageEvent& event) {
+		if (!std::isfinite(event.displayDamage) || std::floor(event.displayDamage) <= 0.0f) {
 			return;
 		}
 
@@ -78,7 +79,7 @@ namespace UI::Game {
 		}
 
 		// 連続表示が重ならないよう固定Sequenceから左右と高さのOffsetを分散
-		slot->worldPosition = worldPosition;
+		slot->worldPosition = event.worldPosition;
 		const std::size_t offsetIndex =
 			static_cast<std::size_t>(spawnSequence_ % kOffsetRates.size());
 		const std::size_t verticalOffsetIndex =
@@ -92,16 +93,16 @@ namespace UI::Game {
 			enemyHeadOffsetMax_,
 			kOffsetRates[verticalOffsetIndex]);
 		slot->elapsedTime = 0.0f;
-		slot->isCritical = isCritical;
+		slot->type = ResolveDamageTextType(event);
 		slot->isActive = true;
 		++spawnSequence_;
 
-		text->SetText(FormatDamage(damage));
+		text->SetText(FormatDamage(event.displayDamage));
 		text->SetScale({
 			1.0f + initialScaleAddition_,
 			1.0f + initialScaleAddition_,
 		});
-		text->SetColor(isCritical ? criticalDamageTextColor_ : damageTextColor_);
+		text->SetColor(GetDamageTextColor(slot->type));
 		text->SetVisible(isVisible_);
 	}
 
@@ -142,7 +143,7 @@ namespace UI::Game {
 				std::clamp(slot.elapsedTime / displayLifeTime_, 0.0f, 1.0f);
 
 			// 表示時間中に初期拡大を収束させ、寿命経過時のScaleからゼロへ縮小
-			const Vector4& textColor = slot.isCritical ? criticalDamageTextColor_ : damageTextColor_;
+			const Vector4& textColor = GetDamageTextColor(slot.type);
 			const float alpha = 1.0f;
 			const float scaleSettleProgress =
 				std::clamp(displayProgress / scaleSettleProgress_, 0.0f, 1.0f);
@@ -228,6 +229,8 @@ namespace UI::Game {
 			ImGui::DragFloat("フォントサイズ", &fontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::ColorEdit4("通常ダメージ文字色", &damageTextColor_.x);
 		ImGui::ColorEdit4("クリティカルダメージ文字色", &criticalDamageTextColor_.x);
+		ImGui::ColorEdit4("火傷ダメージ文字色", &burnDamageTextColor_.x);
+		ImGui::ColorEdit4("毒ダメージ文字色", &poisonDamageTextColor_.x);
 
 		// 手入力を含む調整値をUpdate内の除算と補間が安全な範囲へ制限
 		displayLifeTime_ = std::clamp(displayLifeTime_, 0.05f, 5.0f);
@@ -286,6 +289,38 @@ namespace UI::Game {
 		}
 
 		return nullptr;
+	}
+
+	ProjectileDamageView::DamageTextType ProjectileDamageView::ResolveDamageTextType(
+		const Enemy::ProjectileDamageEvent& event) const {
+		if (event.statusEffectType) {
+
+			// 継続ダメージはクリティカル表示より発生元の状態異常色を優先
+			switch (*event.statusEffectType) {
+			case Enemy::StatusEffect::Type::Burn:
+				return DamageTextType::Burn;
+			case Enemy::StatusEffect::Type::Poison:
+				return DamageTextType::Poison;
+			default:
+				break;
+			}
+		}
+
+		return event.isCritical ? DamageTextType::Critical : DamageTextType::Normal;
+	}
+
+	const Vector4& ProjectileDamageView::GetDamageTextColor(DamageTextType type) const {
+		switch (type) {
+		case DamageTextType::Critical:
+			return criticalDamageTextColor_;
+		case DamageTextType::Burn:
+			return burnDamageTextColor_;
+		case DamageTextType::Poison:
+			return poisonDamageTextColor_;
+		case DamageTextType::Normal:
+		default:
+			return damageTextColor_;
+		}
 	}
 
 	bool ProjectileDamageView::WorldToScreen(

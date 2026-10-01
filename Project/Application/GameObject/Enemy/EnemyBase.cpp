@@ -5,6 +5,7 @@
 #include "Utility/Logger/Logger.h"
 #include "Utility/Random.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 namespace Enemy {
@@ -18,9 +19,42 @@ namespace Enemy {
 		constexpr int kCriticalRollMax = 100;
 		constexpr float kGuaranteedCriticalChance = static_cast<float>(kCriticalRollMax);
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		constexpr Vector4 kBurnColorMultiplier = { 2.5f, 0.45f, 0.25f, 1.0f };
+		constexpr Vector4 kPoisonColorMultiplier = { 0.4f, 3.0f, 0.45f, 1.0f };
+		constexpr Vector4 kFrozenColorMultiplier = { 0.45f, 1.1f, 6.0f, 1.0f };
+		constexpr std::array<Vector4, StatusEffect::kTypeCount> kStatusEffectColorMultipliers = {
+			kBurnColorMultiplier,
+			kPoisonColorMultiplier,
+			kFrozenColorMultiplier,
+		};
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
 		constexpr const char* kEliteMarkerTextureName = "Elite";
+
+		/// @brief Enemy基礎色へ有効な状態異常の色係数を合成
+		/// @param baseColor Enemy種類ごとの基礎色
+		/// @param controller 状態異常の管理Controller
+		/// @return 状態異常色を乗算した表示色
+		Vector4 ApplyStatusEffectColorMultipliers(
+			const Vector4& baseColor,
+			const StatusEffect::Controller& controller) {
+			Vector4 result = baseColor;
+			for (std::size_t index = 0; index < kStatusEffectColorMultipliers.size(); ++index) {
+				if (!controller.IsActive(static_cast<StatusEffect::Type>(index))) {
+					continue;
+				}
+
+				// 複数状態を同時に識別できるよう単一色への置換ではなく係数を順番に合成
+				result *= kStatusEffectColorMultipliers[index];
+			}
+
+			// 高い色係数による表示範囲超過を防ぎAlphaはEnemy基礎色を維持
+			result.x = std::clamp(result.x, 0.0f, 1.0f);
+			result.y = std::clamp(result.y, 0.0f, 1.0f);
+			result.z = std::clamp(result.z, 0.0f, 1.0f);
+			result.w = std::clamp(baseColor.w, 0.0f, 1.0f);
+			return result;
+		}
 	}
 
 	Base::~Base() { Release(); }
@@ -42,6 +76,7 @@ namespace Enemy {
 			status_.power *= eliteSettings.powerMultiplier;
 		}
 		projectileDamageCooldowns_.clear();
+		statusEffectDamageEvents_.clear();
 		playerDamageCooldown_ = 0.0f;
 		damageFlashRemainingTime_ = 0.0f;
 		isActive_ = status_.currentHealth > 0.0f;
@@ -53,6 +88,7 @@ namespace Enemy {
 		transform_.rotate = {};
 		transform_.scale = GetModelScale() * bodyScaleMultiplier_;
 		movement_.Initialize();
+		statusEffectController_.Clear();
 
 		AABB hitCollider = CreateHitCollider();
 		hitCollider.min *= bodyScaleMultiplier_;
@@ -98,12 +134,22 @@ namespace Enemy {
 
 	void Base::Update(float deltaTime) {
 
-		// 死亡後も残る被弾間隔とDamage演出を破棄まで進行
+		// 死亡後も残る被弾間隔を破棄まで進行
 		UpdateProjectileDamageCooldowns(deltaTime);
-		UpdateAppearance(deltaTime);
 		playerDamageCooldown_ = std::max(0.0f, playerDamageCooldown_ - std::max(0.0f, deltaTime));
 
-		if (!isActive_ || !targetPlayer_) {
+		// 出現中は攻撃対象外のため状態異常を進行させず、通常状態へ移行後から更新
+		if (isActive_ && !isEmerging_) {
+			UpdateStatusEffects(deltaTime);
+		}
+
+		// 状態異常の発症と解除を同FrameのModel色へ反映して被弾Flashの時間も更新
+		UpdateAppearance(deltaTime);
+		if (!isActive_) {
+			return;
+		}
+
+		if (!targetPlayer_) {
 			return;
 		}
 
@@ -186,14 +232,14 @@ namespace Enemy {
 		return true;
 	}
 
-	ProjectileDamageResult Base::TakeProjectileDamage(
+	DamageResult Base::TakeProjectileDamage(
 		std::uint64_t projectileId,
 		float damage,
 		float criticalChance,
 		float criticalDamage,
 		const Vector3& knockbackDirection,
 		float knockbackPower) {
-		ProjectileDamageResult result;
+		DamageResult result;
 
 		// 不正なProjectile識別子と非有限Damageを状態へ反映しないため入力を検証
 		if (!isActive_ || isEmerging_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
@@ -212,26 +258,40 @@ namespace Enemy {
 			return result;
 		}
 
-		// 同じProjectileが接触中に毎フレームDamageを与えないよう識別子単位で待機時間を登録
-		const float healthBeforeDamage = status_.currentHealth;
-		status_.currentHealth = std::max(0.0f, status_.currentHealth - resolvedDamage);
-		projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
-		result.appliedDamage = healthBeforeDamage - status_.currentHealth;
-		result.resolvedDamage = resolvedDamage;
-		result.wasApplied = result.appliedDamage > 0.0f;
-		result.isCritical = result.wasApplied && isCritical;
-		result.wasKilled = status_.currentHealth <= 0.0f;
+		result = ApplyDamage(resolvedDamage, isCritical, true);
 		if (result.wasApplied) {
-			StartDamageFlash();
-			PlayDamageEffect();
+
+			// 同じProjectileが接触中に毎フレームDamageを与えないよう適用成功後に待機時間を登録
+			projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
 			const float effectiveKnockbackPower = knockbackPower * (1.0f - knockbackResistance_);
 			movement_.ApplyKnockback(knockbackDirection, effectiveKnockbackPower);
 		}
-		if (result.wasKilled) {
-			Kill();
-		}
 
 		return result;
+	}
+
+	bool Base::ApplyStatusEffect(const StatusEffect::ApplyRequest& request) {
+		if (!isActive_ || isEmerging_) {
+			return false;
+		}
+
+		return statusEffectController_.Apply(request);
+	}
+
+	bool Base::HasStatusEffect(StatusEffect::Type type) const {
+		return statusEffectController_.IsActive(type);
+	}
+
+	float Base::GetStatusEffectRemainingTime(StatusEffect::Type type) const {
+		return statusEffectController_.GetRemainingTime(type);
+	}
+
+	std::vector<StatusEffectDamageEvent> Base::ConsumeStatusEffectDamageEvents() {
+		std::vector<StatusEffectDamageEvent> events;
+
+		// 未処理Eventの所有権を定数時間で呼び出し側へ移動
+		events.swap(statusEffectDamageEvents_);
+		return events;
 	}
 
 	void Base::Kill(DeathReason reason) {
@@ -241,10 +301,60 @@ namespace Enemy {
 
 		isActive_ = false;
 		status_.currentHealth = 0.0f;
+		statusEffectController_.Clear();
 
 		// Map外への落下とPlayer周辺の管理範囲外は撃破として扱わず報酬生成を抑制
 		if (reason == DeathReason::Defeated) {
 			SpawnDeathReward();
+		}
+	}
+
+	DamageResult Base::ApplyDamage(float resolvedDamage, bool isCritical, bool playsDamageEffect) {
+		DamageResult result;
+		if (!isActive_ || !std::isfinite(resolvedDamage) || resolvedDamage <= 0.0f) {
+			return result;
+		}
+
+		// ダメージの発生源にかかわらずHP減少と死亡判定を一つの経路へ集約
+		const float healthBeforeDamage = status_.currentHealth;
+		status_.currentHealth = std::max(0.0f, status_.currentHealth - resolvedDamage);
+		result.appliedDamage = healthBeforeDamage - status_.currentHealth;
+		result.resolvedDamage = resolvedDamage;
+		result.wasApplied = result.appliedDamage > 0.0f;
+		result.isCritical = result.wasApplied && isCritical;
+		result.wasKilled = status_.currentHealth <= 0.0f;
+		if (result.wasApplied) {
+			StartDamageFlash();
+			if (playsDamageEffect) {
+				PlayDamageEffect();
+			}
+		}
+		if (result.wasKilled) {
+			Kill();
+		}
+
+		return result;
+	}
+
+	void Base::UpdateStatusEffects(float deltaTime) {
+		const StatusEffect::UpdateResult updateResult = statusEffectController_.Update(deltaTime);
+		for (std::size_t index = 0; index < updateResult.damageEventCount; ++index) {
+			const StatusEffect::DamageEvent& damageEvent = updateResult.damageEvents[index];
+
+			// 複数の継続Damageが同Frameに発生しても死亡後の追加適用を停止
+			const DamageResult damageResult = ApplyDamage(damageEvent.damage, false, false);
+			if (damageResult.wasApplied) {
+				statusEffectDamageEvents_.push_back({
+					damageEvent.type,
+					damageEvent.sourceWeaponId,
+					damageResult.appliedDamage,
+					damageResult.resolvedDamage,
+					damageResult.wasKilled,
+				});
+			}
+			if (damageResult.wasKilled) {
+				break;
+			}
 		}
 	}
 
@@ -297,7 +407,9 @@ namespace Enemy {
 		}
 
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetColor(baseColor);
+
+			// 基礎色へ現在有効な全状態異常の色係数を重ねて解除時は自動的に元色へ復元
+			model->SetColor(ApplyStatusEffectColorMultipliers(baseColor, statusEffectController_));
 		}
 	}
 
@@ -342,7 +454,8 @@ namespace Enemy {
 	}
 
 	bool Base::MoveTowardPosition(float deltaTime, const Vector3& targetPosition, float speedMultiplier) {
-		const float moveSpeed = status_.moveSpeed * std::max(0.0f, speedMultiplier);
+		const float moveSpeed = status_.moveSpeed * std::max(0.0f, speedMultiplier) *
+			statusEffectController_.GetMoveSpeedMultiplier();
 		if (movement_.Update(deltaTime, targetPosition, moveSpeed, transform_)) {
 			return true;
 		}

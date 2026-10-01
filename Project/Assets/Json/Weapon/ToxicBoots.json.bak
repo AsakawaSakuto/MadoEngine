@@ -2,24 +2,9 @@
     "name": "ToxicBoots",
     "statusEffects": {
         "poison": {
-            "applyChance": {
-                "fixedAddValue": 5.0,
-                "isSelected": true,
-                "rarityAddValue": 2.0,
-                "value": 30.0
-            },
-            "damagePerTick": {
-                "fixedAddValue": 1.0,
-                "isSelected": true,
-                "rarityAddValue": 0.5,
-                "value": 2.0
-            },
-            "duration": {
-                "fixedAddValue": 1.0,
-                "isSelected": true,
-                "rarityAddValue": 0.5,
-                "value": 8.0
-            }
+            "applyChance": 30.0,
+            "damagePerTick": 2.0,
+            "duration": 8.0
         }
     },
     "upgradeStatus": {
@@ -45,7 +30,7 @@
             "fixedAddValue": 2.0,
             "isSelected": true,
             "rarityAddValue": 0.5,
-            "value": 1.0
+            "value": 5.0
         },
         "knockbackPower": {
             "fixedAddValue": 0.0,
@@ -66,9 +51,9 @@
             "value": 0.0
         },
         "shotCooldown": {
-            "fixedAddValue": 0.10000000149011612,
+            "fixedAddValue": 0.1,
             "isSelected": true,
-            "rarityAddValue": 0.05000000074505806,
+            "rarityAddValue": 0.05,
             "value": 2.0
         },
         "shotIntervalTime": {
@@ -86,7 +71,7 @@
         "size": {
             "fixedAddValue": 0.25,
             "isSelected": true,
-            "rarityAddValue": 0.05000000074505806,
+            "rarityAddValue": 0.05,
             "value": 1.0
         },
         "speed": {

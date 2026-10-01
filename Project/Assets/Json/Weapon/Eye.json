@@ -1,5 +1,27 @@
 {
     "name": "Eye",
+    "statusEffects": {
+        "frozen": {
+            "applyChance": {
+                "fixedAddValue": 5.0,
+                "isSelected": true,
+                "rarityAddValue": 1.0,
+                "value": 50.0
+            },
+            "duration": {
+                "fixedAddValue": 1.0,
+                "isSelected": true,
+                "rarityAddValue": 0.25,
+                "value": 5.0
+            },
+            "slowRate": {
+                "fixedAddValue": 5.0,
+                "isSelected": true,
+                "rarityAddValue": 1.0,
+                "value": 50.0
+            }
+        }
+    },
     "upgradeStatus": {
         "bounceCount": {
             "fixedAddValue": 0.0,

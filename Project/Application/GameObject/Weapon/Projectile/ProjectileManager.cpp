@@ -262,6 +262,7 @@ namespace Projectile {
 					projectile->GetCriticalChance(),
 					projectile->GetCriticalDamage(),
 					projectile->GetKnockbackPower(),
+					projectile->GetStatusEffects(),
 					knockbackDirection
 				});
 

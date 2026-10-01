@@ -94,6 +94,7 @@ namespace Projectile {
 		context.criticalChance = criticalChance_;
 		context.criticalDamage = criticalDamage_;
 		context.knockbackPower = knockbackPower_;
+		context.statusEffects = statusEffects_;
 		context.explotionDamageDecreaseRate = 0.75f;
 		context.explosionRadius = sizeRate_;
 		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);

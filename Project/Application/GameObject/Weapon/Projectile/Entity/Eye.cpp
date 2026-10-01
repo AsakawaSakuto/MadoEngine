@@ -63,6 +63,7 @@ namespace Projectile {
 		criticalChance_ = context.criticalChance;
 		criticalDamage_ = context.criticalDamage;
 		knockbackPower_ = context.knockbackPower;
+		statusEffects_ = context.statusEffects;
 
 		// 不正な倍率による反転やゼロ半径を防ぎつつ強化値を攻撃範囲へ即時反映
 		sizeRate_ = std::isfinite(context.sizeRate)

@@ -1,5 +1,27 @@
 {
     "name": "Orb",
+    "statusEffects": {
+        "frozen": {
+            "applyChance": {
+                "fixedAddValue": 5.0,
+                "isSelected": true,
+                "rarityAddValue": 2.0,
+                "value": 15.0
+            },
+            "duration": {
+                "fixedAddValue": 1.0,
+                "isSelected": true,
+                "rarityAddValue": 0.5,
+                "value": 4.0
+            },
+            "slowRate": {
+                "fixedAddValue": 5.0,
+                "isSelected": true,
+                "rarityAddValue": 2.0,
+                "value": 40.0
+            }
+        }
+    },
     "upgradeStatus": {
         "bounceCount": {
             "fixedAddValue": 0.0,

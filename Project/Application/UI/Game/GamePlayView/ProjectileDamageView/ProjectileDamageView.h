@@ -9,12 +9,15 @@
 
 class Camera;
 
+namespace Enemy {
+	struct ProjectileDamageEvent;
+}
+
 namespace MadoEngine {
 	class Text;
 }
 
 namespace UI::Game {
-
 	/// @brief Projectileによるダメージ数値をワールド座標へ追従表示するビュー
 	class ProjectileDamageView {
 	public:
@@ -22,10 +25,8 @@ namespace UI::Game {
 		void Initialize();
 
 		/// @brief ダメージ数値の表示を開始
-		/// @param damage 実際に適用されたダメージ量
-		/// @param worldPosition ダメージを受けた対象のワールド座標
-		/// @param isCritical クリティカルダメージの場合はtrue
-		void Spawn(float damage, const Vector3& worldPosition, bool isCritical);
+		/// @param event 表示するEnemyダメージイベント
+		void Spawn(const Enemy::ProjectileDamageEvent& event);
 
 		/// @brief 表示中のダメージ数値を更新
 		/// @param deltaTime 前フレームからの経過時間
@@ -43,13 +44,21 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
+		/// @brief ダメージ文字の表示種別
+		enum class DamageTextType {
+			Normal,
+			Critical,
+			Burn,
+			Poison,
+		};
+
 		struct DamageTextSlot {
 			MadoEngine::TextHandle text{};
 			Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
 			float horizontalOffset = 0.0f;
 			float verticalOffset = 0.0f;
 			float elapsedTime = 0.0f;
-			bool isCritical = false;
+			DamageTextType type = DamageTextType::Normal;
 			bool isActive = false;
 		};
 
@@ -58,6 +67,16 @@ namespace UI::Game {
 		/// @brief 表示に使用できるTextスロットを取得
 		/// @return 使用可能なTextスロット、生成済みTextがない場合はnullptr
 		DamageTextSlot* AcquireSlot();
+
+		/// @brief Enemyダメージイベントを文字表示種別へ変換
+		/// @param event 変換するEnemyダメージイベント
+		/// @return ダメージ文字の表示種別
+		DamageTextType ResolveDamageTextType(const Enemy::ProjectileDamageEvent& event) const;
+
+		/// @brief 表示種別に対応するダメージ文字色を取得
+		/// @param type ダメージ文字の表示種別
+		/// @return 表示に使用する文字色
+		const Vector4& GetDamageTextColor(DamageTextType type) const;
 
 		/// @brief ワールド座標を基準画面上の座標へ変換
 		/// @param worldPosition 変換するワールド座標
@@ -84,7 +103,9 @@ namespace UI::Game {
 		float horizontalOffsetMax_ = 24.0f;    // ダメージ表示の最大左右オフセット
 		float fontSize_ = 32.0f;               // ダメージ表示のフォントサイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
-		Vector4 criticalDamageTextColor_ = { 1.0f, 0.5f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
+		Vector4 criticalDamageTextColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
+		Vector4 burnDamageTextColor_ = { 1.0f, 0.45f, 0.25f, 1.0f }; // 火傷ダメージ表示の文字色
+		Vector4 poisonDamageTextColor_ = { 0.4f, 1.0f, 0.45f, 1.0f }; // 毒ダメージ表示の文字色
 	};
 
 } // namespace UI::Game

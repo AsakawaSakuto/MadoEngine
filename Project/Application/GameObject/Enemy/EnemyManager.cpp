@@ -3,10 +3,92 @@
 #include "GameObject/Player/Player.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Random.h"
 #include <algorithm>
+#include <cmath>
 #include <unordered_map>
 
 namespace Enemy {
+	namespace {
+		constexpr float kGuaranteedStatusEffectChance = 100.0f;
+
+		/// @brief 状態異常の付与率から発症可否を抽選
+		/// @param applyChance 状態異常の付与率
+		/// @return 状態異常を付与する場合はtrue
+		bool RollStatusEffectApplication(float applyChance) {
+			if (!std::isfinite(applyChance) || applyChance <= 0.0f) {
+				return false;
+			}
+
+			return applyChance >= kGuaranteedStatusEffectChance ||
+				MyRand::GetFloat(0.0f, kGuaranteedStatusEffectChance) < applyChance;
+		}
+
+		/// @brief 継続ダメージ型状態異常を抽選してEnemyへ適用
+		/// @param enemy 適用対象のEnemy
+		/// @param type 適用する状態異常の種類
+		/// @param status 武器に設定された状態異常性能
+		/// @param sourceWeaponId 適用元の武器識別番号
+		void TryApplyDamageStatusEffect(
+			Base& enemy,
+			StatusEffect::Type type,
+			const Weapon::DamageStatusEffectStatus& status,
+			std::uint64_t sourceWeaponId) {
+			if (!RollStatusEffectApplication(status.applyChance)) {
+				return;
+			}
+
+			StatusEffect::ApplyRequest request;
+			request.type = type;
+			request.definition.duration = status.duration;
+			request.definition.damagePerTick = status.damagePerTick;
+			request.sourceWeaponId = sourceWeaponId;
+			enemy.ApplyStatusEffect(request);
+		}
+
+		/// @brief 凍結状態異常を抽選してEnemyへ適用
+		/// @param enemy 適用対象のEnemy
+		/// @param status 武器に設定された状態異常性能
+		/// @param sourceWeaponId 適用元の武器識別番号
+		void TryApplyFrozenStatusEffect(
+			Base& enemy,
+			const Weapon::FrozenStatusEffectStatus& status,
+			std::uint64_t sourceWeaponId) {
+			if (!RollStatusEffectApplication(status.applyChance)) {
+				return;
+			}
+
+			StatusEffect::ApplyRequest request;
+			request.type = StatusEffect::Type::Frozen;
+			request.definition.duration = status.duration;
+			request.definition.moveSpeedMultiplier = status.moveSpeedMultiplier;
+			request.sourceWeaponId = sourceWeaponId;
+			enemy.ApplyStatusEffect(request);
+		}
+
+		/// @brief 武器に設定された状態異常を個別に抽選してEnemyへ適用
+		/// @param enemy 適用対象のEnemy
+		/// @param statusEffects 武器に設定された状態異常群
+		/// @param sourceWeaponId 適用元の武器識別番号
+		void TryApplyStatusEffects(
+			Base& enemy,
+			const Weapon::StatusEffectStatus& statusEffects,
+			std::uint64_t sourceWeaponId) {
+
+			// 複数種類を設定した武器では各状態異常を独立抽選して同時発症を許可
+			if (statusEffects.burn) {
+				TryApplyDamageStatusEffect(
+					enemy, StatusEffect::Type::Burn, *statusEffects.burn, sourceWeaponId);
+			}
+			if (statusEffects.poison) {
+				TryApplyDamageStatusEffect(
+					enemy, StatusEffect::Type::Poison, *statusEffects.poison, sourceWeaponId);
+			}
+			if (statusEffects.frozen) {
+				TryApplyFrozenStatusEffect(enemy, *statusEffects.frozen, sourceWeaponId);
+			}
+		}
+	}
 
 	void Manager::Initialize(Player::Base* player) {
 		Clear();
@@ -50,6 +132,19 @@ namespace Enemy {
 		for (std::unique_ptr<Base>& enemy : enemies_) {
 			if (enemy) {
 				enemy->Update(deltaTime);
+				for (const StatusEffectDamageEvent& event : enemy->ConsumeStatusEffectDamageEvents()) {
+
+					// 継続Damageも表示と武器戦績へ通知できる共通Event形式へ変換
+					projectileDamageEvents_.push_back({
+						enemy->GetPosition(),
+						event.sourceWeaponId,
+						event.appliedDamage,
+						event.resolvedDamage,
+						false,
+						event.wasKilled,
+						event.type,
+					});
+				}
 			}
 		}
 	}
@@ -162,7 +257,7 @@ namespace Enemy {
 			}
 
 			Base* enemy = enemyIterator->second;
-			const ProjectileDamageResult damageResult =
+			const DamageResult damageResult =
 				enemy->TakeProjectileDamage(
 					hitInfo.projectileId,
 					hitInfo.damage,
@@ -181,7 +276,13 @@ namespace Enemy {
 				damageResult.resolvedDamage,
 				damageResult.isCritical,
 				damageResult.wasKilled,
+				std::nullopt,
 			});
+
+			// 撃破済みEnemyへの不要な状態登録を避け、実ダメージ成立後だけ付与抽選
+			if (!damageResult.wasKilled) {
+				TryApplyStatusEffects(*enemy, hitInfo.statusEffects, hitInfo.sourceWeaponId);
+			}
 		}
 	}
 

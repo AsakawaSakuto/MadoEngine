@@ -24,6 +24,7 @@ namespace Weapon {
 		std::string GetJsonFilePath() const;
 
 		UpgradeStatus editingStatus_;
+		StatusEffectUpgradeStatus editingStatusEffects_;
 		char statusName_[64] = "Pistol";
 	};
 }

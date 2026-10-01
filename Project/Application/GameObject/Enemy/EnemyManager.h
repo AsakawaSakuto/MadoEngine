@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace Player {
@@ -19,6 +20,7 @@ namespace Enemy {
 		float displayDamage = 0.0f;
 		bool isCritical = false;
 		bool wasKilled = false;
+		std::optional<StatusEffect::Type> statusEffectType;
 	};
 
 	/// @brief 生成されたEnemyの所有と一括処理を管理するクラス

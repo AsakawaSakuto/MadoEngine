@@ -33,6 +33,29 @@ namespace Weapon {
 		}
 
 #ifdef USE_IMGUI
+		constexpr ImGuiTableFlags kUpgradeTableFlags =
+			ImGuiTableFlags_Borders |
+			ImGuiTableFlags_RowBg |
+			ImGuiTableFlags_Resizable |
+			ImGuiTableFlags_SizingStretchProp;
+
+		/// @brief アップグレード値編集用のImGuiテーブルを開始
+		/// @param id テーブルの識別名
+		/// @return テーブルを描画できる場合はtrue
+		bool BeginUpgradeValueTable(const char* id) {
+			if (!ImGui::BeginTable(id, 5, kUpgradeTableFlags, ImVec2(-1.0f, 0.0f))) {
+				return false;
+			}
+
+			ImGui::TableSetupColumn("ステータス", ImGuiTableColumnFlags_WidthFixed, 160.0f);
+			ImGui::TableSetupColumn("初期値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("固定加算値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("上昇幅", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("選択肢に表示", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+			ImGui::TableHeadersRow();
+			return true;
+		}
+
 		/// @brief アップグレード値のImGuiテーブル行を描画
 		/// @param label 表示名
 		/// @param value 編集するアップグレード値
@@ -62,16 +85,87 @@ namespace Weapon {
 			ImGui::Checkbox("##IsSelected", &value.isSelected);
 			ImGui::PopID();
 		}
+
+		/// @brief 継続ダメージ型状態異常の編集項目を描画
+		/// @param label 状態異常の表示名
+		/// @param status 編集対象の状態異常設定
+		void DrawDamageStatusEffectEditor(
+			const char* label,
+			std::optional<DamageStatusEffectUpgradeStatus>& status) {
+			ImGui::PushID(label);
+			bool isEnabled = status.has_value();
+			if (ImGui::Checkbox("##Enabled", &isEnabled)) {
+
+				// 有効化時だけ既定値を生成し、無効化時はJson出力対象から除外
+				if (isEnabled) {
+					status.emplace();
+				} else {
+					status.reset();
+				}
+			}
+			ImGui::SameLine();
+			ImGui::TextUnformatted(label);
+
+			if (status) {
+				ImGui::Indent();
+				if (BeginUpgradeValueTable("StatusEffectUpgradeTable")) {
+					DrawUpgradeValueTableRow("付与率(%)", status->applyChance);
+					DrawUpgradeValueTableRow("1Tickダメージ", status->damagePerTick);
+					DrawUpgradeValueTableRow("持続時間(秒)", status->duration);
+					ImGui::EndTable();
+				}
+				ImGui::Unindent();
+			}
+			ImGui::PopID();
+		}
+
+		/// @brief 凍結状態異常の編集項目を描画
+		/// @param status 編集対象の状態異常設定
+		void DrawFrozenStatusEffectEditor(std::optional<FrozenStatusEffectUpgradeStatus>& status) {
+			ImGui::PushID("Frozen");
+			bool isEnabled = status.has_value();
+			if (ImGui::Checkbox("##Enabled", &isEnabled)) {
+
+				// 有効化時だけ既定値を生成し、無効化時はJson出力対象から除外
+				if (isEnabled) {
+					status.emplace();
+				} else {
+					status.reset();
+				}
+			}
+			ImGui::SameLine();
+			ImGui::TextUnformatted("凍結");
+
+			if (status) {
+				ImGui::Indent();
+				if (BeginUpgradeValueTable("StatusEffectUpgradeTable")) {
+					DrawUpgradeValueTableRow("付与率(%)", status->applyChance);
+					DrawUpgradeValueTableRow("減速率(%)", status->slowRate);
+					DrawUpgradeValueTableRow("持続時間(秒)", status->duration);
+					ImGui::EndTable();
+				}
+				ImGui::Unindent();
+			}
+			ImGui::PopID();
+		}
 #endif // USE_IMGUI
 	}
 
 	bool StatusEditor::SaveToJson() const {
 		const std::string filePath = GetJsonFilePath();
+		if (!IsValidStatusEffectUpgradeStatus(editingStatusEffects_)) {
+			Logger::Output("[Assets] 状態異常ステータスに不正な値があります: " + filePath, Logger::Level::Error);
+			return false;
+		}
+
 		nlohmann::json json;
 
 		// Editor用の名前と実行時ステータスを一つのDocumentへ保存
 		json["name"] = SanitizeJsonName(statusName_);
 		json["upgradeStatus"] = UpgradeStatusToJson(editingStatus_);
+		if (HasStatusEffect(editingStatusEffects_)) {
+			json["statusEffects"] = StatusEffectUpgradeStatusToJson(editingStatusEffects_);
+		}
 
 		const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, json, 4, true);
 		if (isSaved) {
@@ -102,10 +196,21 @@ namespace Weapon {
 			statusJson = &json.at("upgradeStatus");
 		}
 
-		if (!UpgradeStatusFromJson(*statusJson, editingStatus_)) {
+		UpgradeStatus loadedStatus = editingStatus_;
+		if (!UpgradeStatusFromJson(*statusJson, loadedStatus)) {
 			Logger::Output("[Assets] 武器初期ステータスJsonに不正な値があります: " + filePath, Logger::Level::Error);
 			return false;
 		}
+
+		StatusEffectUpgradeStatus loadedStatusEffects;
+		if (json.is_object() && json.contains("statusEffects") &&
+			!StatusEffectUpgradeStatusFromJson(json.at("statusEffects"), loadedStatusEffects)) {
+			Logger::Output("[Assets] 状態異常ステータスJsonに不正な値があります: " + filePath, Logger::Level::Error);
+			return false;
+		}
+
+		editingStatus_ = loadedStatus;
+		editingStatusEffects_ = loadedStatusEffects;
 
 		Logger::Output("[Assets] 武器初期ステータスをJsonから読み込みました: " + filePath, Logger::Level::Assets);
 		return true;
@@ -157,21 +262,8 @@ namespace Weapon {
 
 		ImGui::Separator();
 
-		constexpr ImGuiTableFlags tableFlags =
-			ImGuiTableFlags_Borders |
-			ImGuiTableFlags_RowBg |
-			ImGuiTableFlags_Resizable |
-			ImGuiTableFlags_SizingStretchProp;
-
 		// 全武器で共通する初期値とレアリティ加算設定を一覧編集
-		if (ImGui::BeginTable("WeaponInitialStatusTable", 5, tableFlags, ImVec2(-1.0f, 0.0f))) {
-			ImGui::TableSetupColumn("ステータス", ImGuiTableColumnFlags_WidthFixed, 160.0f);
-			ImGui::TableSetupColumn("初期値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-			ImGui::TableSetupColumn("固定加算値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-			ImGui::TableSetupColumn("上昇幅", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-			ImGui::TableSetupColumn("選択肢に表示", ImGuiTableColumnFlags_WidthFixed, 110.0f);
-			ImGui::TableHeadersRow();
-
+		if (BeginUpgradeValueTable("WeaponInitialStatusTable")) {
 			DrawUpgradeValueTableRow("ダメージ量", editingStatus_.damage);
 			DrawUpgradeValueTableRow("最大射撃数", editingStatus_.shotMaxCount);
 			DrawUpgradeValueTableRow("射撃間隔", editingStatus_.shotIntervalTime);
@@ -187,6 +279,13 @@ namespace Weapon {
 
 			ImGui::EndTable();
 		}
+
+		ImGui::SeparatorText("状態異常");
+
+		// 使用する状態異常だけを有効化して武器Jsonへ個別保存
+		DrawDamageStatusEffectEditor("火傷", editingStatusEffects_.burn);
+		DrawDamageStatusEffectEditor("毒", editingStatusEffects_.poison);
+		DrawFrozenStatusEffectEditor(editingStatusEffects_.frozen);
 
 		ImGui::End();
 

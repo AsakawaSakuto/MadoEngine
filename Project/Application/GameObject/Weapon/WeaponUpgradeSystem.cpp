@@ -213,7 +213,7 @@ namespace Weapon {
 			const int statIndex = random_.Int(0, static_cast<int>(selectableStats.size()) - 1);
 			const UpgradeStatType statType = selectableStats[static_cast<std::size_t>(statIndex)];
 			const Rarity rarity = DrawRarity();
-			const UpgradeValue* upgradeValue = FindUpgradeValue(weapon->GetUpgradeStatus(), statType);
+			const UpgradeValue* upgradeValue = weapon->GetUpgradeValue(statType);
 			float calculatedAmount = 0.0f;
 			if (!upgradeValue || !weapon->CalculateUpgradeAmount(statType, rarity, calculatedAmount)) {
 
@@ -305,10 +305,7 @@ namespace Weapon {
 			}
 
 			float recalculatedAmount = 0.0f;
-			const UpgradeValue* currentUpgradeValue = FindUpgradeValue(
-				weapon->GetUpgradeStatus(),
-				*choice.statType
-			);
+			const UpgradeValue* currentUpgradeValue = weapon->GetUpgradeValue(*choice.statType);
 
 			// 表示後の現在値・設定変更や不正な候補改変を適用直前の再計算で拒否
 			if (!currentUpgradeValue ||

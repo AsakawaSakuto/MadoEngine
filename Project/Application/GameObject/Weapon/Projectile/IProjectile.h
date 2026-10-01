@@ -64,6 +64,10 @@ namespace Projectile {
 		/// @return Projectileのノックバック力
 		float GetKnockbackPower() const { return knockbackPower_; }
 
+		/// @brief Projectileが付与できる状態異常設定を取得
+		/// @return 状態異常設定へのconst参照
+		const Weapon::StatusEffectStatus& GetStatusEffects() const { return statusEffects_; }
+
 		/// @brief Projectileの移動方向を取得
 		/// @return Projectileの移動方向
 		const Vector3& GetMoveDirection() const { return moveDirection_; }
@@ -148,6 +152,7 @@ namespace Projectile {
 			lifeTime_ = context.lifeTime;
 			remainingBounceCount_ = context.bounceCount;
 			remainingPenetrationCount_ = context.penetrationCount;
+			statusEffects_ = context.statusEffects;
 			previousContactEnemyIds_.clear();
 			currentContactEnemyIds_.clear();
 		}
@@ -239,6 +244,7 @@ namespace Projectile {
 		float sizeRate_ = 1.0f;             // サイズ倍率
 		int remainingBounceCount_ = 0;      // 跳弾可能回数
 		int remainingPenetrationCount_ = 0; // 貫通可能回数
+		Weapon::StatusEffectStatus statusEffects_; // 付与可能な状態異常設定
 		float lifeTime_ = 0.0f;             // 生存時間（秒）
 		GameTimer lifeTimer_;               // 生存時間計測用タイマー
 

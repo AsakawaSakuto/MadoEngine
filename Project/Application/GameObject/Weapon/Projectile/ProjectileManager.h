@@ -30,6 +30,7 @@ namespace Projectile {
 		float criticalChance = 0.0f;
 		float criticalDamage = 1.0f;
 		float knockbackPower = 0.0f;
+		Weapon::StatusEffectStatus statusEffects;
 		Vector3 knockbackDirection = { 0.0f, 0.0f, 0.0f };
 	};
 

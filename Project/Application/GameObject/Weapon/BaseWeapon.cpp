@@ -53,6 +53,58 @@ namespace Weapon {
 			default:                                return nullptr;
 			}
 		}
+
+		/// @brief 指定した状態異常強化ステータスの変更可能な設定を取得
+		/// @param status 参照する状態異常強化設定
+		/// @param type 取得する強化ステータス
+		/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
+		UpgradeValue* FindMutableUpgradeValue(StatusEffectUpgradeStatus& status, UpgradeStatType type) {
+
+			// 状態異常Typeを有効化済みOptional内の唯一の更新先へ対応付け
+			switch (type) {
+			case UpgradeStatType::BurnApplyChance:
+				return status.burn ? &status.burn->applyChance : nullptr;
+			case UpgradeStatType::BurnDamage:
+				return status.burn ? &status.burn->damagePerTick : nullptr;
+			case UpgradeStatType::BurnDuration:
+				return status.burn ? &status.burn->duration : nullptr;
+			case UpgradeStatType::PoisonApplyChance:
+				return status.poison ? &status.poison->applyChance : nullptr;
+			case UpgradeStatType::PoisonDamage:
+				return status.poison ? &status.poison->damagePerTick : nullptr;
+			case UpgradeStatType::PoisonDuration:
+				return status.poison ? &status.poison->duration : nullptr;
+			case UpgradeStatType::FrozenApplyChance:
+				return status.frozen ? &status.frozen->applyChance : nullptr;
+			case UpgradeStatType::FrozenSlowRate:
+				return status.frozen ? &status.frozen->slowRate : nullptr;
+			case UpgradeStatType::FrozenDuration:
+				return status.frozen ? &status.frozen->duration : nullptr;
+			default:
+				return nullptr;
+			}
+		}
+
+		/// @brief 上限付き割合として扱う状態異常ステータスか確認
+		/// @param type 確認する強化ステータス
+		/// @return 0から100の割合として扱う場合はtrue
+		bool IsStatusEffectPercentage(UpgradeStatType type) {
+			return type == UpgradeStatType::BurnApplyChance ||
+				type == UpgradeStatType::PoisonApplyChance ||
+				type == UpgradeStatType::FrozenApplyChance ||
+				type == UpgradeStatType::FrozenSlowRate;
+		}
+
+		/// @brief 正の値だけを許可する状態異常ステータスか確認
+		/// @param type 確認する強化ステータス
+		/// @return ダメージまたは持続時間の場合はtrue
+		bool IsPositiveStatusEffectValue(UpgradeStatType type) {
+			return type == UpgradeStatType::BurnDamage ||
+				type == UpgradeStatType::BurnDuration ||
+				type == UpgradeStatType::PoisonDamage ||
+				type == UpgradeStatType::PoisonDuration ||
+				type == UpgradeStatType::FrozenDuration;
+		}
 	}
 
 	BaseWeapon::~BaseWeapon() {
@@ -68,6 +120,7 @@ namespace Weapon {
 		}
 
 		UpgradeStatus loadedStatus{};
+		StatusEffectUpgradeStatus loadedStatusEffects;
 		const std::string weaponName = ProjectileTypeToString(type);
 		const std::string jsonPath = "Assets/Json/Weapon/" + Projectile::ProjectileTypeToJsonFileName(type) + ".json";
 
@@ -89,11 +142,17 @@ namespace Weapon {
 			Logger::Output("[Assets] 武器ステータスに不正な値があります: " + jsonPath, Logger::Level::Error);
 			return false;
 		}
+		if (json.is_object() && json.contains("statusEffects") &&
+			!StatusEffectUpgradeStatusFromJson(json.at("statusEffects"), loadedStatusEffects)) {
+			Logger::Output("[Assets] 状態異常ステータスに不正な値があります: " + jsonPath, Logger::Level::Error);
+			return false;
+		}
 
 		slotIndex_ = slotIndex;
 		type_ = type;
 		weaponId_ = IssueWeaponId();
 		status_ = loadedStatus;
+		statusEffectUpgrades_ = loadedStatusEffects;
 		weaponName_ = weaponName;
 
 		upgradeLevel_ = 1;
@@ -122,12 +181,20 @@ namespace Weapon {
 		}
 	}
 
+	const UpgradeValue* BaseWeapon::GetUpgradeValue(UpgradeStatType statType) const {
+		if (const UpgradeValue* value = FindUpgradeValue(status_, statType)) {
+			return value;
+		}
+
+		return FindUpgradeValue(statusEffectUpgrades_, statType);
+	}
+
 	std::vector<UpgradeStatType> BaseWeapon::GetSelectableUpgradeStatTypes() const {
 		std::vector<UpgradeStatType> selectableTypes;
 		selectableTypes.reserve(kUpgradeStatTypes.size());
 
 		for (const UpgradeStatType statType : kUpgradeStatTypes) {
-			const UpgradeValue* value = FindUpgradeValue(status_, statType);
+			const UpgradeValue* value = GetUpgradeValue(statType);
 			if (!value || !value->isSelected || !std::isfinite(value->value) ||
 				!std::isfinite(value->fixedAddValue) || !std::isfinite(value->rarityAddValue)) {
 				continue;
@@ -160,7 +227,7 @@ namespace Weapon {
 			return false;
 		}
 
-		const UpgradeValue* value = FindUpgradeValue(status_, statType);
+		const UpgradeValue* value = GetUpgradeValue(statType);
 		if (!value || !value->isSelected || !std::isfinite(value->value) ||
 			!std::isfinite(value->fixedAddValue) || !std::isfinite(value->rarityAddValue)) {
 			return false;
@@ -178,6 +245,19 @@ namespace Weapon {
 			}
 
 			amount = -value->value * configuredAmount * kPercentageScale;
+		} else if (IsStatusEffectPercentage(statType)) {
+
+			// 付与率と減速率は100%を上限として上限直前の強化量だけを切り詰め
+			if (value->value < 0.0f || value->value >= 100.0f || configuredAmount <= 0.0f) {
+				return false;
+			}
+			amount = std::min(configuredAmount, 100.0f - value->value);
+		} else if (IsPositiveStatusEffectValue(statType)) {
+
+			// ダメージと持続時間が強化によって無効値へ遷移しないよう正の加算だけを受付
+			if (value->value <= 0.0f || configuredAmount <= 0.0f) {
+				return false;
+			}
 		}
 
 		if (!std::isfinite(amount) || !std::isfinite(value->value + amount)) {
@@ -198,6 +278,9 @@ namespace Weapon {
 
 		// 候補生成時と適用時の値が一致する場合だけステータスを更新
 		UpgradeValue* value = FindMutableUpgradeValue(status_, statType);
+		if (!value) {
+			value = FindMutableUpgradeValue(statusEffectUpgrades_, statType);
+		}
 		if (!value) {
 			return false;
 		}
@@ -286,6 +369,7 @@ namespace Weapon {
 		context.lifeTime = status_.lifeTime.value;
 		context.bounceCount = ConvertToProjectileCount(status_.bounceCount.value);
 		context.penetrationCount = ConvertToProjectileCount(status_.penetrationCount.value);
+		context.statusEffects = ResolveStatusEffectStatus(statusEffectUpgrades_);
 		return context;
 	}
 }

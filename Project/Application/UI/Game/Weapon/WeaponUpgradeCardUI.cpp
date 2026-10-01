@@ -59,6 +59,19 @@ std::string FormatUpgradeValue(const Weapon::UpgradeChoice& choice, float value)
 		return std::format("{:.3f}秒", value);
 	}
 
+	// 状態異常値の意味をカード上で判別できるよう割合と時間へ単位を付与
+	if (choice.statType == Weapon::UpgradeStatType::BurnApplyChance ||
+		choice.statType == Weapon::UpgradeStatType::PoisonApplyChance ||
+		choice.statType == Weapon::UpgradeStatType::FrozenApplyChance ||
+		choice.statType == Weapon::UpgradeStatType::FrozenSlowRate) {
+		return std::format("{:.1f}%", value);
+	}
+	if (choice.statType == Weapon::UpgradeStatType::BurnDuration ||
+		choice.statType == Weapon::UpgradeStatType::PoisonDuration ||
+		choice.statType == Weapon::UpgradeStatType::FrozenDuration) {
+		return std::format("{:.1f}秒", value);
+	}
+
 	return std::format("{:.1f}", value);
 }
 

@@ -152,7 +152,7 @@ SceneType Game::Update(float dt) {
 			if (MyAudio::IsLoaded(damageSoundKey)) {
 				MyAudio::Play(damageSoundKey);
 			}
-			projectileDamageView_.Spawn(event.displayDamage, event.worldPosition, event.isCritical);
+			projectileDamageView_.Spawn(event);
 			weaponInventory_->RecordProjectileDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
 		}
 

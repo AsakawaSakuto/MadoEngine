@@ -1,10 +1,12 @@
 #pragma once
 #include "../IGameObject.h"
+#include "EnemyStatusEffect.h"
 #include "EnemyMovement.h"
 #include "EnemyStatus.h"
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace Player {
 	class Base;
@@ -30,12 +32,21 @@ namespace Enemy {
 		bool emergeFromGround = false;
 	};
 
-	/// @brief Enemyへ適用したProjectileダメージの結果
-	struct ProjectileDamageResult {
+	/// @brief Enemyへ適用したダメージの結果
+	struct DamageResult {
 		float appliedDamage = 0.0f;
 		float resolvedDamage = 0.0f;
 		bool wasApplied = false;
 		bool isCritical = false;
+		bool wasKilled = false;
+	};
+
+	/// @brief 状態異常によるダメージ結果
+	struct StatusEffectDamageEvent {
+		StatusEffect::Type type = StatusEffect::Type::Burn;
+		std::uint64_t sourceWeaponId = 0;
+		float appliedDamage = 0.0f;
+		float resolvedDamage = 0.0f;
 		bool wasKilled = false;
 	};
 
@@ -89,13 +100,32 @@ namespace Enemy {
 		/// @param knockbackDirection Enemyを押し出す方向
 		/// @param knockbackPower Enemyへ適用するノックバック力
 		/// @return 実際に適用されたダメージと死亡状態
-		ProjectileDamageResult TakeProjectileDamage(
+		DamageResult TakeProjectileDamage(
 			std::uint64_t projectileId,
 			float damage,
 			float criticalChance,
 			float criticalDamage,
 			const Vector3& knockbackDirection,
 			float knockbackPower);
+
+		/// @brief Enemyへ状態異常を適用
+		/// @param request 状態異常の適用内容
+		/// @return 状態異常を適用できた場合はtrue
+		bool ApplyStatusEffect(const StatusEffect::ApplyRequest& request);
+
+		/// @brief 指定した状態異常の有効状態を取得
+		/// @param type 確認対象の状態異常
+		/// @return 状態異常が有効な場合はtrue
+		bool HasStatusEffect(StatusEffect::Type type) const;
+
+		/// @brief 指定した状態異常の残り時間を取得
+		/// @param type 確認対象の状態異常
+		/// @return 状態異常の残り時間、無効な種類の場合は0
+		float GetStatusEffectRemainingTime(StatusEffect::Type type) const;
+
+		/// @brief 未処理の状態異常ダメージ結果を取得してキューをクリア
+		/// @return 発生順に格納された状態異常ダメージ結果
+		std::vector<StatusEffectDamageEvent> ConsumeStatusEffectDamageEvents();
 
 		/// @brief Enemyを理由に応じた死亡状態へ移行
 		/// @param reason Enemyが死亡状態へ移行した理由
@@ -187,6 +217,17 @@ namespace Enemy {
 		Vector3 GetTargetPlayerPosition() const;
 
 	private:
+		/// @brief 検証済みのダメージをEnemyのHPへ適用
+		/// @param resolvedDamage 補正計算後のダメージ量
+		/// @param isCritical クリティカルダメージの場合はtrue
+		/// @param playsDamageEffect 被弾Effectを再生する場合はtrue
+		/// @return 実際に適用されたダメージと死亡状態
+		DamageResult ApplyDamage(float resolvedDamage, bool isCritical, bool playsDamageEffect);
+
+		/// @brief 状態異常の時間経過と継続ダメージを更新
+		/// @param deltaTime 前フレームからの経過時間
+		void UpdateStatusEffects(float deltaTime);
+
 		/// @brief Projectileごとの再ダメージ待機時間を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateProjectileDamageCooldowns(float deltaTime);
@@ -197,7 +238,7 @@ namespace Enemy {
 		/// @brief 被ダメージEffect Sequenceを現在座標に再生
 		void PlayDamageEffect() const;
 
-		/// @brief 種類別表示色と被ダメージFlashを敵Modelへ反映
+		/// @brief 種類別表示色、状態異常色、被ダメージFlashを敵Modelへ反映
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateAppearance(float deltaTime);
 
@@ -235,6 +276,7 @@ namespace Enemy {
 		Data::BonusType bonusType_ = Data::BonusType::None;
 		SceneType sceneType_ = SceneType::None;
 		Movement movement_;
+		StatusEffect::Controller statusEffectController_;
 		ColliderShape hitAABB_;
 		Player::Base* targetPlayer_ = nullptr;
 		std::string movementColliderName_;
@@ -243,6 +285,7 @@ namespace Enemy {
 		MadoEngine::ModelHandle eliteMarkerModel_{};
 		float projectileDamageInterval_ = 0.5f; // Projectileからのダメージを受ける間隔（秒）
 		std::unordered_map<std::uint64_t, float> projectileDamageCooldowns_;
+		std::vector<StatusEffectDamageEvent> statusEffectDamageEvents_;
 		float playerDamageCooldown_ = 0.0f;
 		float damageFlashRemainingTime_ = 0.0f;
 		float emergenceTargetY_ = 0.0f;

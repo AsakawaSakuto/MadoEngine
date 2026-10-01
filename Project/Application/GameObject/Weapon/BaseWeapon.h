@@ -63,6 +63,15 @@ namespace Weapon {
 		/// @return 現在の武器ステータスへのconst参照
 		const UpgradeStatus& GetUpgradeStatus() const { return status_; }
 
+		/// @brief 現在の状態異常強化設定を取得
+		/// @return 現在の状態異常強化設定へのconst参照
+		const StatusEffectUpgradeStatus& GetStatusEffectUpgradeStatus() const { return statusEffectUpgrades_; }
+
+		/// @brief 指定した強化ステータスの設定を取得
+		/// @param statType 取得する強化ステータス
+		/// @return 設定が存在する場合はconstポインターを、存在しない場合はnullptr
+		const UpgradeValue* GetUpgradeValue(UpgradeStatType statType) const;
+
 		/// @brief 抽選可能な強化ステータス一覧を取得
 		/// @return 有効かつ有限な強化ステータス一覧
 		std::vector<UpgradeStatType> GetSelectableUpgradeStatTypes() const;
@@ -99,6 +108,7 @@ namespace Weapon {
 		
 		// 武器のステータス
 		UpgradeStatus status_;
+		StatusEffectUpgradeStatus statusEffectUpgrades_;
 		
 		// 武器の種類
 		Projectile::Type type_ = Projectile::Type::None;
