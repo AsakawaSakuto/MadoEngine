@@ -69,11 +69,11 @@ namespace Weapon {
 		/// @return 発生順に格納された武器攻撃イベント
 		std::vector<WeaponAttackEvent> ConsumeWeaponAttackEvents();
 
-		/// @brief Projectileによるダメージと撃破結果を発射元Weaponへ記録
-		/// @param sourceWeaponId 発射元Weaponインスタンスの識別番号
+		/// @brief ダメージと撃破結果を発生元Weaponへ記録
+		/// @param sourceWeaponId 発生元Weaponインスタンスの識別番号
 		/// @param appliedDamage Enemyへ実際に適用されたダメージ量
 		/// @param wasKilled このダメージでEnemyを倒した場合はtrue
-		void RecordProjectileDamage(std::uint64_t sourceWeaponId, float appliedDamage, bool wasKilled);
+		void RecordWeaponDamage(std::uint64_t sourceWeaponId, float appliedDamage, bool wasKilled);
 
 		/// @brief 指定したスロットの武器を削除
 		/// @param slotIndex 削除する武器スロットの番号

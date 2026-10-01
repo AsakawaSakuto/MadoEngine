@@ -180,6 +180,7 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\WeaponStatusJson.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeUI.cpp" />
@@ -202,9 +203,10 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
-    <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffect.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
     <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
@@ -782,6 +784,7 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Weapon\WeaponStatusJson.h" />
     <ClInclude Include="Application\GameObject\Weapon\BaseWeapon.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
@@ -827,6 +830,8 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatusEffect.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Combat\DamageEvent.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.h" />
     <ClInclude Include="Application\GameObject\Item\BaseItem.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
@@ -871,7 +876,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
-    <ClInclude Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.h">
+    <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h">

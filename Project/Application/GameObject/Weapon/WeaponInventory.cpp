@@ -165,7 +165,7 @@ namespace Weapon {
 		return events;
 	}
 
-	void Inventory::RecordProjectileDamage(
+	void Inventory::RecordWeaponDamage(
 		std::uint64_t sourceWeaponId,
 		float appliedDamage,
 		bool wasKilled) {

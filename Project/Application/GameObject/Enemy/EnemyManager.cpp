@@ -12,6 +12,22 @@ namespace Enemy {
 	namespace {
 		constexpr float kGuaranteedStatusEffectChance = 100.0f;
 
+		/// @brief 状態異常種別をダメージ発生源種別へ変換
+		/// @param type 変換する状態異常種別
+		/// @return 対応するダメージ発生源種別
+		Combat::DamageSourceType ToDamageSourceType(StatusEffect::Type type) {
+			switch (type) {
+			case StatusEffect::Type::Burn:
+				return Combat::DamageSourceType::Burn;
+			case StatusEffect::Type::Poison:
+				return Combat::DamageSourceType::Poison;
+			case StatusEffect::Type::Frozen:
+			case StatusEffect::Type::Count:
+			default:
+				return Combat::DamageSourceType::Weapon;
+			}
+		}
+
 		/// @brief 状態異常の付与率から発症可否を抽選
 		/// @param applyChance 状態異常の付与率
 		/// @return 状態異常を付与する場合はtrue
@@ -135,14 +151,14 @@ namespace Enemy {
 				for (const StatusEffectDamageEvent& event : enemy->ConsumeStatusEffectDamageEvents()) {
 
 					// 継続Damageも表示と武器戦績へ通知できる共通Event形式へ変換
-					projectileDamageEvents_.push_back({
+					damageEvents_.push_back({
 						enemy->GetPosition(),
 						event.sourceWeaponId,
 						event.appliedDamage,
 						event.resolvedDamage,
+						ToDamageSourceType(event.type),
 						false,
 						event.wasKilled,
-						event.type,
 					});
 				}
 			}
@@ -185,7 +201,7 @@ namespace Enemy {
 
 	void Manager::Clear() {
 		enemies_.clear();
-		projectileDamageEvents_.clear();
+		damageEvents_.clear();
 		nextEnemyId_ = 0;
 	}
 
@@ -222,11 +238,11 @@ namespace Enemy {
 		return nearestEnemyPosition;
 	}
 
-	std::vector<ProjectileDamageEvent> Manager::ConsumeProjectileDamageEvents() {
-		std::vector<ProjectileDamageEvent> events;
+	std::vector<Combat::DamageEvent> Manager::ConsumeDamageEvents() {
+		std::vector<Combat::DamageEvent> events;
 
 		// 未処理Eventの所有権を定数時間で呼び出し側へ移動
-		events.swap(projectileDamageEvents_);
+		events.swap(damageEvents_);
 		return events;
 	}
 
@@ -249,7 +265,7 @@ namespace Enemy {
 
 		std::vector<Projectile::HitInfo> projectileHitInfos;
 		Projectile::Manager::GetInstance().CollectHitsAgainst(enemyTargets, projectileHitInfos);
-		projectileDamageEvents_.reserve(projectileDamageEvents_.size() + projectileHitInfos.size());
+		damageEvents_.reserve(damageEvents_.size() + projectileHitInfos.size());
 		for (const Projectile::HitInfo& hitInfo : projectileHitInfos) {
 			const auto enemyIterator = enemiesById.find(hitInfo.enemyId);
 			if (enemyIterator == enemiesById.end()) {
@@ -269,14 +285,14 @@ namespace Enemy {
 				continue;
 			}
 
-			projectileDamageEvents_.push_back({
+			damageEvents_.push_back({
 				enemy->GetPosition(),
 				hitInfo.sourceWeaponId,
 				damageResult.appliedDamage,
 				damageResult.resolvedDamage,
+				Combat::DamageSourceType::Weapon,
 				damageResult.isCritical,
 				damageResult.wasKilled,
-				std::nullopt,
 			});
 
 			// 撃破済みEnemyへの不要な状態登録を避け、実ダメージ成立後だけ付与抽選

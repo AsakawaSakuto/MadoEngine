@@ -3,7 +3,7 @@
 #include "Game/GamePlayView/FpsMeasurementView/FpsMeasurementView.h"
 #include "Game/GamePlayView/GamePlayTimerView/GamePlayTimerView.h"
 #include "Game/GamePlayView/PlayerResourceGainView/PlayerResourceGainView.h"
-#include "Game/GamePlayView/ProjectileDamageView/ProjectileDamageView.h"
+#include "Game/GamePlayView/EnemyDamageView/EnemyDamageView.h"
 #include "Game/Player/PlayerExpGauge.h"
 #include "Game/Player/PlayerHealthGauge.h"
 #include "Game/Player/PlayerIconUI.h"

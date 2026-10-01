@@ -1,6 +1,7 @@
-#include "ProjectileDamageView.h"
+#include "EnemyDamageView.h"
 #include ".SceneManager/SceneType.h"
-#include "GameObject/Enemy/EnemyManager.h"
+#include "GameObject/Combat/DamageEvent.h"
+#include "GameObject/Enemy/EnemyStatusEffectVisualSettings.h"
 #include "Math/Function/MatrixFunction.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Camera/Camera.h"
@@ -23,7 +24,7 @@ namespace {
 		0.25f,
 		0.75f,
 	};
-	constexpr const char* kTextObjectNamePrefix = "ProjectileDamageText_";
+	constexpr const char* kTextObjectNamePrefix = "EnemyDamageText_";
 
 	/// @brief ダメージ量を表示用文字列へ変換
 	/// @param damage 表示するダメージ量
@@ -35,7 +36,7 @@ namespace {
 
 namespace UI::Game {
 
-	void ProjectileDamageView::Initialize() {
+	void EnemyDamageView::Initialize() {
 		Finalize();
 
 		// 実行中の生成破棄を避ける固定数Text Poolを事前構築
@@ -64,7 +65,7 @@ namespace UI::Game {
 		spawnSequence_ = 0;
 	}
 
-	void ProjectileDamageView::Spawn(const Enemy::ProjectileDamageEvent& event) {
+	void EnemyDamageView::Spawn(const Combat::DamageEvent& event) {
 		if (!std::isfinite(event.displayDamage) || std::floor(event.displayDamage) <= 0.0f) {
 			return;
 		}
@@ -106,7 +107,7 @@ namespace UI::Game {
 		text->SetVisible(isVisible_);
 	}
 
-	void ProjectileDamageView::Update(float deltaTime, const Camera& camera) {
+	void EnemyDamageView::Update(float deltaTime, const Camera& camera) {
 		if (!isVisible_) {
 			return;
 		}
@@ -170,7 +171,7 @@ namespace UI::Game {
 		}
 	}
 
-	void ProjectileDamageView::SetVisible(bool isVisible) {
+	void EnemyDamageView::SetVisible(bool isVisible) {
 		if (isVisible_ == isVisible) {
 			return;
 		}
@@ -188,7 +189,7 @@ namespace UI::Game {
 		}
 	}
 
-	void ProjectileDamageView::Finalize() {
+	void EnemyDamageView::Finalize() {
 		for (std::size_t index = 0; index < slots_.size(); ++index) {
 			DamageTextSlot& slot = slots_[index];
 			slot = {};
@@ -198,9 +199,9 @@ namespace UI::Game {
 		spawnSequence_ = 0;
 	}
 
-	void ProjectileDamageView::DrawImGui() {
+	void EnemyDamageView::DrawImGui() {
 #ifdef USE_IMGUI
-		ImGui::Begin("Projectile Damage View");
+		ImGui::Begin("Enemy Damage View");
 
 		ImGui::DragFloat("表示時間", &displayLifeTime_, 0.01f, 0.05f, 5.0f, "%.2f 秒");
 		ImGui::DragFloat("縮小時間", &shrinkDuration_, 0.01f, 0.01f, 1.0f, "%.2f 秒");
@@ -229,8 +230,14 @@ namespace UI::Game {
 			ImGui::DragFloat("フォントサイズ", &fontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::ColorEdit4("通常ダメージ文字色", &damageTextColor_.x);
 		ImGui::ColorEdit4("クリティカルダメージ文字色", &criticalDamageTextColor_.x);
-		ImGui::ColorEdit4("火傷ダメージ文字色", &burnDamageTextColor_.x);
-		ImGui::ColorEdit4("毒ダメージ文字色", &poisonDamageTextColor_.x);
+		Enemy::StatusEffect::VisualSettings& visualSettings =
+			Enemy::StatusEffect::VisualSettings::GetInstance();
+		ImGui::ColorEdit4(
+			"火傷ダメージ文字色",
+			&visualSettings.Edit(Enemy::StatusEffect::Type::Burn).damageTextColor.x);
+		ImGui::ColorEdit4(
+			"毒ダメージ文字色",
+			&visualSettings.Edit(Enemy::StatusEffect::Type::Poison).damageTextColor.x);
 
 		// 手入力を含む調整値をUpdate内の除算と補間が安全な範囲へ制限
 		displayLifeTime_ = std::clamp(displayLifeTime_, 0.05f, 5.0f);
@@ -262,7 +269,7 @@ namespace UI::Game {
 #endif
 	}
 
-	ProjectileDamageView::DamageTextSlot* ProjectileDamageView::AcquireSlot() {
+	EnemyDamageView::DamageTextSlot* EnemyDamageView::AcquireSlot() {
 
 		// 次回位置から未使用Slotを循環探索して表示順の偏りを防止
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
@@ -291,39 +298,40 @@ namespace UI::Game {
 		return nullptr;
 	}
 
-	ProjectileDamageView::DamageTextType ProjectileDamageView::ResolveDamageTextType(
-		const Enemy::ProjectileDamageEvent& event) const {
-		if (event.statusEffectType) {
+	EnemyDamageView::DamageTextType EnemyDamageView::ResolveDamageTextType(
+		const Combat::DamageEvent& event) const {
 
-			// 継続ダメージはクリティカル表示より発生元の状態異常色を優先
-			switch (*event.statusEffectType) {
-			case Enemy::StatusEffect::Type::Burn:
-				return DamageTextType::Burn;
-			case Enemy::StatusEffect::Type::Poison:
-				return DamageTextType::Poison;
-			default:
-				break;
-			}
+		// 継続ダメージはクリティカル表示より発生元の状態異常色を優先
+		switch (event.sourceType) {
+		case Combat::DamageSourceType::Burn:
+			return DamageTextType::Burn;
+		case Combat::DamageSourceType::Poison:
+			return DamageTextType::Poison;
+		case Combat::DamageSourceType::Weapon:
+		default:
+			break;
 		}
 
 		return event.isCritical ? DamageTextType::Critical : DamageTextType::Normal;
 	}
 
-	const Vector4& ProjectileDamageView::GetDamageTextColor(DamageTextType type) const {
+	const Vector4& EnemyDamageView::GetDamageTextColor(DamageTextType type) const {
 		switch (type) {
 		case DamageTextType::Critical:
 			return criticalDamageTextColor_;
 		case DamageTextType::Burn:
-			return burnDamageTextColor_;
+			return Enemy::StatusEffect::VisualSettings::GetInstance()
+				.Get(Enemy::StatusEffect::Type::Burn).damageTextColor;
 		case DamageTextType::Poison:
-			return poisonDamageTextColor_;
+			return Enemy::StatusEffect::VisualSettings::GetInstance()
+				.Get(Enemy::StatusEffect::Type::Poison).damageTextColor;
 		case DamageTextType::Normal:
 		default:
 			return damageTextColor_;
 		}
 	}
 
-	bool ProjectileDamageView::WorldToScreen(
+	bool EnemyDamageView::WorldToScreen(
 		const Vector3& worldPosition,
 		const Camera& camera,
 		Vector2& outScreenPosition) const {

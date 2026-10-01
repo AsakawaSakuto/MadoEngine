@@ -148,6 +148,7 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffect.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyNormal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyRunner.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySettings.cpp" />
@@ -185,6 +186,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\WeaponStatusJson.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
@@ -192,7 +194,7 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
-    <ClCompile Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.cpp" />
     <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
@@ -394,7 +396,9 @@
     <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerStatus.h" />
     <ClInclude Include="Application\GameObject\Rarity.h" />
+    <ClInclude Include="Application\GameObject\Combat\DamageEvent.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatusEffect.h" />
+    <ClInclude Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.h" />
     <ClInclude Include="Application\GameObject\Weapon\BaseWeapon.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Axe.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.h" />
@@ -410,6 +414,7 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileStatus.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponInventory.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h" />
+    <ClInclude Include="Application\GameObject\Weapon\WeaponStatusJson.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusEditor.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
     <ClInclude Include="Application\InputRegister.h" />
@@ -419,7 +424,7 @@
     <ClInclude Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerIconUI.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
-    <ClInclude Include="Application\UI\Game\GamePlayView\ProjectileDamageView\ProjectileDamageView.h" />
+    <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.h" />
     <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h" />
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h" />

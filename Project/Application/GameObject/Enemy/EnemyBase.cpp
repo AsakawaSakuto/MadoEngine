@@ -1,11 +1,11 @@
 #include "EnemyBase.h"
 #include "EnemySettings.h"
+#include "EnemyStatusEffectVisualSettings.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Logger/Logger.h"
 #include "Utility/Random.h"
 #include <algorithm>
-#include <array>
 #include <cmath>
 
 namespace Enemy {
@@ -19,14 +19,6 @@ namespace Enemy {
 		constexpr int kCriticalRollMax = 100;
 		constexpr float kGuaranteedCriticalChance = static_cast<float>(kCriticalRollMax);
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-		constexpr Vector4 kBurnColorMultiplier = { 2.5f, 0.45f, 0.25f, 1.0f };
-		constexpr Vector4 kPoisonColorMultiplier = { 0.4f, 3.0f, 0.45f, 1.0f };
-		constexpr Vector4 kFrozenColorMultiplier = { 0.45f, 1.1f, 6.0f, 1.0f };
-		constexpr std::array<Vector4, StatusEffect::kTypeCount> kStatusEffectColorMultipliers = {
-			kBurnColorMultiplier,
-			kPoisonColorMultiplier,
-			kFrozenColorMultiplier,
-		};
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
 		constexpr const char* kEliteMarkerTextureName = "Elite";
@@ -39,13 +31,14 @@ namespace Enemy {
 			const Vector4& baseColor,
 			const StatusEffect::Controller& controller) {
 			Vector4 result = baseColor;
-			for (std::size_t index = 0; index < kStatusEffectColorMultipliers.size(); ++index) {
-				if (!controller.IsActive(static_cast<StatusEffect::Type>(index))) {
+			for (std::size_t index = 0; index < StatusEffect::kTypeCount; ++index) {
+				const StatusEffect::Type type = static_cast<StatusEffect::Type>(index);
+				if (!controller.IsActive(type)) {
 					continue;
 				}
 
 				// 複数状態を同時に識別できるよう単一色への置換ではなく係数を順番に合成
-				result *= kStatusEffectColorMultipliers[index];
+				result *= StatusEffect::VisualSettings::GetInstance().Get(type).enemyColorMultiplier;
 			}
 
 			// 高い色係数による表示範囲超過を防ぎAlphaはEnemy基礎色を維持

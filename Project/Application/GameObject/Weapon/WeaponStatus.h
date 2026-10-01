@@ -2,7 +2,6 @@
 #include "../Rarity.h"
 #include <array>
 #include <cmath>
-#include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
 
@@ -177,6 +176,15 @@ namespace Weapon {
 		}
 	}
 
+	/// @brief 指定した強化ステータスの変更可能な設定を取得
+	/// @param status 参照する武器ステータス
+	/// @param type 取得する強化ステータス
+	/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
+	inline UpgradeValue* FindUpgradeValue(UpgradeStatus& status, UpgradeStatType type) {
+		return const_cast<UpgradeValue*>(
+			FindUpgradeValue(static_cast<const UpgradeStatus&>(status), type));
+	}
+
 	/// @brief 指定した状態異常強化ステータスの設定を取得
 	/// @param status 参照する状態異常強化設定
 	/// @param type 取得する強化ステータス
@@ -208,6 +216,17 @@ namespace Weapon {
 		}
 	}
 
+	/// @brief 指定した状態異常強化ステータスの変更可能な設定を取得
+	/// @param status 参照する状態異常強化設定
+	/// @param type 取得する強化ステータス
+	/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
+	inline UpgradeValue* FindUpgradeValue(
+		StatusEffectUpgradeStatus& status,
+		UpgradeStatType type) {
+		return const_cast<UpgradeValue*>(
+			FindUpgradeValue(static_cast<const StatusEffectUpgradeStatus&>(status), type));
+	}
+
 	/// @brief レアリティが武器強化の抽選対象か確認
 	/// @param rarity 確認するレアリティ
 	/// @return UncommonからLegendaryの場合はtrue
@@ -215,64 +234,6 @@ namespace Weapon {
 		const int rarityValue = static_cast<int>(rarity);
 		return rarityValue >= static_cast<int>(Rarity::Uncommon) &&
 			rarityValue <= static_cast<int>(Rarity::Legendary);
-	}
-
-	/// @brief アップグレード値をJsonへ変換
-	/// @param value 変換するアップグレード値
-	/// @return 変換後のJson
-	inline nlohmann::json UpgradeValueToJson(const UpgradeValue& value) {
-		return {
-			{ "value", value.value },
-			{ "fixedAddValue", value.fixedAddValue },
-			{ "rarityAddValue", value.rarityAddValue },
-			{ "isSelected", value.isSelected },
-		};
-	}
-
-	/// @brief Jsonからアップグレード値を読み込み
-	/// @param json 読み込み元のJson
-	/// @param value 読み込み先のアップグレード値
-	/// @return 有効な値を読み込めた場合はtrue
-	inline bool UpgradeValueFromJson(const nlohmann::json& json, UpgradeValue& value) {
-		if (!json.is_object()) {
-			return false;
-		}
-
-		UpgradeValue parsedValue = value;
-		auto readFiniteFloat = [&json](const char* key, float& destination) {
-			if (!json.contains(key)) {
-				return true;
-			}
-
-			const nlohmann::json& source = json.at(key);
-			if (!source.is_number()) {
-				return false;
-			}
-
-			const float parsed = source.get<float>();
-			if (!std::isfinite(parsed)) {
-				return false;
-			}
-
-			destination = parsed;
-			return true;
-		};
-
-		if (!readFiniteFloat("value", parsedValue.value) ||
-			!readFiniteFloat("fixedAddValue", parsedValue.fixedAddValue) ||
-			!readFiniteFloat("rarityAddValue", parsedValue.rarityAddValue)) {
-			return false;
-		}
-
-		if (json.contains("isSelected")) {
-			if (!json.at("isSelected").is_boolean()) {
-				return false;
-			}
-			parsedValue.isSelected = json.at("isSelected").get<bool>();
-		}
-
-		value = parsedValue;
-		return true;
 	}
 
 	/// @brief アップグレード値の有限性を検証
@@ -354,190 +315,4 @@ namespace Weapon {
 		return resolvedStatus;
 	}
 
-	/// @brief 継続ダメージ型状態異常の強化設定をJsonへ変換
-	/// @param status 変換する状態異常強化設定
-	/// @return 変換後のJson
-	inline nlohmann::json DamageStatusEffectUpgradeStatusToJson(
-		const DamageStatusEffectUpgradeStatus& status) {
-		return {
-			{ "applyChance", UpgradeValueToJson(status.applyChance) },
-			{ "damagePerTick", UpgradeValueToJson(status.damagePerTick) },
-			{ "duration", UpgradeValueToJson(status.duration) },
-		};
-	}
-
-	/// @brief 凍結状態異常の強化設定をJsonへ変換
-	/// @param status 変換する状態異常強化設定
-	/// @return 変換後のJson
-	inline nlohmann::json FrozenStatusEffectUpgradeStatusToJson(
-		const FrozenStatusEffectUpgradeStatus& status) {
-		return {
-			{ "applyChance", UpgradeValueToJson(status.applyChance) },
-			{ "slowRate", UpgradeValueToJson(status.slowRate) },
-			{ "duration", UpgradeValueToJson(status.duration) },
-		};
-	}
-
-	/// @brief 武器の状態異常強化設定をJsonへ変換
-	/// @param status 変換する状態異常強化設定
-	/// @return 使用する状態異常だけを格納したJson
-	inline nlohmann::json StatusEffectUpgradeStatusToJson(const StatusEffectUpgradeStatus& status) {
-		nlohmann::json json = nlohmann::json::object();
-		if (status.burn) {
-			json["burn"] = DamageStatusEffectUpgradeStatusToJson(*status.burn);
-		}
-		if (status.poison) {
-			json["poison"] = DamageStatusEffectUpgradeStatusToJson(*status.poison);
-		}
-		if (status.frozen) {
-			json["frozen"] = FrozenStatusEffectUpgradeStatusToJson(*status.frozen);
-		}
-		return json;
-	}
-
-	/// @brief Jsonから継続ダメージ型状態異常の強化設定を読み込み
-	/// @param json 読み込み元のJson
-	/// @param status 読み込み先の状態異常強化設定
-	/// @return 有効な設定を読み込めた場合はtrue
-	inline bool DamageStatusEffectUpgradeStatusFromJson(
-		const nlohmann::json& json,
-		DamageStatusEffectUpgradeStatus& status) {
-		if (!json.is_object() ||
-			!json.contains("applyChance") ||
-			!json.contains("damagePerTick") ||
-			!json.contains("duration")) {
-			return false;
-		}
-
-		DamageStatusEffectUpgradeStatus parsedStatus;
-		if (!UpgradeValueFromJson(json.at("applyChance"), parsedStatus.applyChance) ||
-			!UpgradeValueFromJson(json.at("damagePerTick"), parsedStatus.damagePerTick) ||
-			!UpgradeValueFromJson(json.at("duration"), parsedStatus.duration) ||
-			!IsValidDamageStatusEffectUpgradeStatus(parsedStatus)) {
-			return false;
-		}
-
-		status = parsedStatus;
-		return true;
-	}
-
-	/// @brief Jsonから凍結状態異常の強化設定を読み込み
-	/// @param json 読み込み元のJson
-	/// @param status 読み込み先の状態異常強化設定
-	/// @return 有効な設定を読み込めた場合はtrue
-	inline bool FrozenStatusEffectUpgradeStatusFromJson(
-		const nlohmann::json& json,
-		FrozenStatusEffectUpgradeStatus& status) {
-		if (!json.is_object() ||
-			!json.contains("applyChance") ||
-			!json.contains("slowRate") ||
-			!json.contains("duration")) {
-			return false;
-		}
-
-		FrozenStatusEffectUpgradeStatus parsedStatus;
-		if (!UpgradeValueFromJson(json.at("applyChance"), parsedStatus.applyChance) ||
-			!UpgradeValueFromJson(json.at("slowRate"), parsedStatus.slowRate) ||
-			!UpgradeValueFromJson(json.at("duration"), parsedStatus.duration) ||
-			!IsValidFrozenStatusEffectUpgradeStatus(parsedStatus)) {
-			return false;
-		}
-
-		status = parsedStatus;
-		return true;
-	}
-
-	/// @brief Jsonから武器の状態異常強化設定を読み込み
-	/// @param json 読み込み元のJson
-	/// @param status 読み込み先の状態異常強化設定
-	/// @return 有効な設定を読み込めた場合はtrue
-	inline bool StatusEffectUpgradeStatusFromJson(
-		const nlohmann::json& json,
-		StatusEffectUpgradeStatus& status) {
-		if (!json.is_object()) {
-			return false;
-		}
-
-		StatusEffectUpgradeStatus parsedStatus;
-		if (json.contains("burn")) {
-			DamageStatusEffectUpgradeStatus burn;
-			if (!DamageStatusEffectUpgradeStatusFromJson(json.at("burn"), burn)) {
-				return false;
-			}
-			parsedStatus.burn = burn;
-		}
-		if (json.contains("poison")) {
-			DamageStatusEffectUpgradeStatus poison;
-			if (!DamageStatusEffectUpgradeStatusFromJson(json.at("poison"), poison)) {
-				return false;
-			}
-			parsedStatus.poison = poison;
-		}
-		if (json.contains("frozen")) {
-			FrozenStatusEffectUpgradeStatus frozen;
-			if (!FrozenStatusEffectUpgradeStatusFromJson(json.at("frozen"), frozen)) {
-				return false;
-			}
-			parsedStatus.frozen = frozen;
-		}
-
-		status = parsedStatus;
-		return true;
-	}
-
-	/// @brief 武器の初期ステータスをJsonへ変換
-	/// @param status 変換する初期ステータス
-	/// @return 変換後のJson
-	inline nlohmann::json UpgradeStatusToJson(const UpgradeStatus& status) {
-		return {
-			{ "damage", UpgradeValueToJson(status.damage) },
-			{ "shotMaxCount", UpgradeValueToJson(status.shotMaxCount) },
-			{ "shotIntervalTime", UpgradeValueToJson(status.shotIntervalTime) },
-			{ "shotCooldown", UpgradeValueToJson(status.shotCooldown) },
-			{ "criticalChance", UpgradeValueToJson(status.criticalChance) },
-			{ "criticalDamage", UpgradeValueToJson(status.criticalDamage) },
-			{ "size", UpgradeValueToJson(status.size) },
-			{ "bounceCount", UpgradeValueToJson(status.bounceCount) },
-			{ "penetrationCount", UpgradeValueToJson(status.penetrationCount) },
-			{ "knockbackPower", UpgradeValueToJson(status.knockbackPower) },
-			{ "lifeTime", UpgradeValueToJson(status.lifeTime) },
-			{ "speed", UpgradeValueToJson(status.speed) },
-		};
-	}
-
-	/// @brief Jsonから武器の初期ステータスを読み込み
-	/// @param json 読み込み元のJson
-	/// @param status 読み込み先の初期ステータス
-	/// @return 有効なステータスを読み込めた場合はtrue
-	inline bool UpgradeStatusFromJson(const nlohmann::json& json, UpgradeStatus& status) {
-		if (!json.is_object()) {
-			return false;
-		}
-
-		UpgradeStatus parsedStatus = status;
-		auto readValue = [&json](const char* key, UpgradeValue& destination) {
-			if (!json.contains(key)) {
-				return true;
-			}
-			return UpgradeValueFromJson(json.at(key), destination);
-		};
-
-		if (!readValue("damage", parsedStatus.damage) ||
-			!readValue("shotMaxCount", parsedStatus.shotMaxCount) ||
-			!readValue("shotIntervalTime", parsedStatus.shotIntervalTime) ||
-			!readValue("shotCooldown", parsedStatus.shotCooldown) ||
-			!readValue("criticalChance", parsedStatus.criticalChance) ||
-			!readValue("criticalDamage", parsedStatus.criticalDamage) ||
-			!readValue("size", parsedStatus.size) ||
-			!readValue("bounceCount", parsedStatus.bounceCount) ||
-			!readValue("penetrationCount", parsedStatus.penetrationCount) ||
-			!readValue("knockbackPower", parsedStatus.knockbackPower) ||
-			!readValue("lifeTime", parsedStatus.lifeTime) ||
-			!readValue("speed", parsedStatus.speed)) {
-			return false;
-		}
-
-		status = parsedStatus;
-		return true;
-	}
-}
+} // namespace Weapon

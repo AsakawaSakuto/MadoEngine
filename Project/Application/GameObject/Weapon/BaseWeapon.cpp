@@ -1,4 +1,5 @@
 #include "BaseWeapon.h"
+#include "WeaponStatusJson.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
@@ -28,61 +29,6 @@ namespace Weapon {
 				static_cast<double>(value),
 				static_cast<double>(std::numeric_limits<int>::max()));
 			return static_cast<int>(clampedValue);
-		}
-
-		/// @brief 指定した強化ステータスの変更可能な設定を取得
-		/// @param status 参照する武器ステータス
-		/// @param type 取得する強化ステータス
-		/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
-		UpgradeValue* FindMutableUpgradeValue(UpgradeStatus& status, UpgradeStatType type) {
-
-			// 選択TypeをUpgradeStatus内の唯一の更新先へ対応付け
-			switch (type) {
-			case UpgradeStatType::Damage:           return &status.damage;
-			case UpgradeStatType::ShotMaxCount:     return &status.shotMaxCount;
-			case UpgradeStatType::ShotIntervalTime: return &status.shotIntervalTime;
-			case UpgradeStatType::ShotCooldown:     return &status.shotCooldown;
-			case UpgradeStatType::CriticalChance:   return &status.criticalChance;
-			case UpgradeStatType::CriticalDamage:   return &status.criticalDamage;
-			case UpgradeStatType::Size:             return &status.size;
-			case UpgradeStatType::BounceCount:      return &status.bounceCount;
-			case UpgradeStatType::PenetrationCount: return &status.penetrationCount;
-			case UpgradeStatType::KnockbackPower:   return &status.knockbackPower;
-			case UpgradeStatType::LifeTime:         return &status.lifeTime;
-			case UpgradeStatType::Speed:            return &status.speed;
-			default:                                return nullptr;
-			}
-		}
-
-		/// @brief 指定した状態異常強化ステータスの変更可能な設定を取得
-		/// @param status 参照する状態異常強化設定
-		/// @param type 取得する強化ステータス
-		/// @return 設定が存在する場合はポインターを、存在しない場合はnullptr
-		UpgradeValue* FindMutableUpgradeValue(StatusEffectUpgradeStatus& status, UpgradeStatType type) {
-
-			// 状態異常Typeを有効化済みOptional内の唯一の更新先へ対応付け
-			switch (type) {
-			case UpgradeStatType::BurnApplyChance:
-				return status.burn ? &status.burn->applyChance : nullptr;
-			case UpgradeStatType::BurnDamage:
-				return status.burn ? &status.burn->damagePerTick : nullptr;
-			case UpgradeStatType::BurnDuration:
-				return status.burn ? &status.burn->duration : nullptr;
-			case UpgradeStatType::PoisonApplyChance:
-				return status.poison ? &status.poison->applyChance : nullptr;
-			case UpgradeStatType::PoisonDamage:
-				return status.poison ? &status.poison->damagePerTick : nullptr;
-			case UpgradeStatType::PoisonDuration:
-				return status.poison ? &status.poison->duration : nullptr;
-			case UpgradeStatType::FrozenApplyChance:
-				return status.frozen ? &status.frozen->applyChance : nullptr;
-			case UpgradeStatType::FrozenSlowRate:
-				return status.frozen ? &status.frozen->slowRate : nullptr;
-			case UpgradeStatType::FrozenDuration:
-				return status.frozen ? &status.frozen->duration : nullptr;
-			default:
-				return nullptr;
-			}
 		}
 
 		/// @brief 上限付き割合として扱う状態異常ステータスか確認
@@ -277,9 +223,9 @@ namespace Weapon {
 		}
 
 		// 候補生成時と適用時の値が一致する場合だけステータスを更新
-		UpgradeValue* value = FindMutableUpgradeValue(status_, statType);
+		UpgradeValue* value = FindUpgradeValue(status_, statType);
 		if (!value) {
-			value = FindMutableUpgradeValue(statusEffectUpgrades_, statType);
+			value = FindUpgradeValue(statusEffectUpgrades_, statType);
 		}
 		if (!value) {
 			return false;

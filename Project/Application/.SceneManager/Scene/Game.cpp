@@ -57,7 +57,7 @@ void Game::Initialize() {
 	fpsMeasurementView_.Initialize();
 	gamePlayTimerView_.Initialize();
 	playerResourceGainView_.Initialize();
-	projectileDamageView_.Initialize();
+	enemyDamageView_.Initialize();
 
 	AABB mapLimitBox;
 	MapLimit mapLimit;
@@ -140,8 +140,8 @@ SceneType Game::Update(float dt) {
 		MyCollider::Update();
 		player_->ResolveAfterCollision();
 		enemyManager_->ResolveAfterCollision();
-		for (const Enemy::ProjectileDamageEvent& event :
-			enemyManager_->ConsumeProjectileDamageEvents()) {
+		for (const Combat::DamageEvent& event :
+			enemyManager_->ConsumeDamageEvents()) {
 
 			// Gameplay乱数へ影響しない専用乱数系列でDamage SEを選択
 			const std::string damageSoundKey =
@@ -152,8 +152,8 @@ SceneType Game::Update(float dt) {
 			if (MyAudio::IsLoaded(damageSoundKey)) {
 				MyAudio::Play(damageSoundKey);
 			}
-			projectileDamageView_.Spawn(event);
-			weaponInventory_->RecordProjectileDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
+			enemyDamageView_.Spawn(event);
+			weaponInventory_->RecordWeaponDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
 		}
 
 		map_->Update(*player_, deltaTime);
@@ -316,8 +316,8 @@ SceneType Game::Update(float dt) {
 		cameraManager_.CutTo(useDebugCamera_ ? debugCameraHandle_ : tpsCameraHandle_);
 	}
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
-	projectileDamageView_.SetVisible(inGameSession_->IsPlaying());
-	projectileDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
+	enemyDamageView_.SetVisible(inGameSession_->IsPlaying());
+	enemyDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
 	playerResourceGainView_.SetVisible(inGameSession_->IsPlaying());
 	playerResourceGainView_.Update(deltaTime);
 
@@ -465,7 +465,7 @@ void Game::Finalize() {
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();
 	playerResourceGainView_.Finalize();
-	projectileDamageView_.Finalize();
+	enemyDamageView_.Finalize();
 	enemyCountText_ = {};
 	moneyText_ = {};
 	killCountText_ = {};

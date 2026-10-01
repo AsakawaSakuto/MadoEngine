@@ -1,9 +1,9 @@
 #pragma once
 #include "EnemyBase.h"
+#include "GameObject/Combat/DamageEvent.h"
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <vector>
 
 namespace Player {
@@ -11,17 +11,6 @@ namespace Player {
 }
 
 namespace Enemy {
-
-	/// @brief Projectileによるダメージ表示へ渡すイベント情報
-	struct ProjectileDamageEvent {
-		Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
-		std::uint64_t sourceWeaponId = 0;
-		float appliedDamage = 0.0f;
-		float displayDamage = 0.0f;
-		bool isCritical = false;
-		bool wasKilled = false;
-		std::optional<StatusEffect::Type> statusEffectType;
-	};
 
 	/// @brief 生成されたEnemyの所有と一括処理を管理するクラス
 	class Manager {
@@ -69,9 +58,9 @@ namespace Enemy {
 		/// @return 最も近いEnemyの座標、Enemyが存在しない場合はゼロ座標
 		Vector3 GetNearestEnemyPosition() const;
 
-		/// @brief 未処理のProjectileダメージイベントを取得してキューをクリア
-		/// @return 発生順に格納されたProjectileダメージイベント
-		std::vector<ProjectileDamageEvent> ConsumeProjectileDamageEvents();
+		/// @brief 未処理のEnemyダメージイベントを取得してキューをクリア
+		/// @return 発生順に格納されたEnemyダメージイベント
+		std::vector<Combat::DamageEvent> ConsumeDamageEvents();
 
 	private:
 		/// @brief ProjectileとEnemyの衝突結果を処理
@@ -88,7 +77,7 @@ namespace Enemy {
 
 		Player::Base* player_ = nullptr;
 		std::vector<std::unique_ptr<Base>> enemies_;
-		std::vector<ProjectileDamageEvent> projectileDamageEvents_;
+		std::vector<Combat::DamageEvent> damageEvents_;
 		MapLimit mapLimit_;
 		std::uint32_t nextEnemyId_ = 0;
 	};

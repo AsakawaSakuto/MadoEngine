@@ -9,8 +9,8 @@
 
 class Camera;
 
-namespace Enemy {
-	struct ProjectileDamageEvent;
+namespace Combat {
+	struct DamageEvent;
 }
 
 namespace MadoEngine {
@@ -18,15 +18,15 @@ namespace MadoEngine {
 }
 
 namespace UI::Game {
-	/// @brief Projectileによるダメージ数値をワールド座標へ追従表示するビュー
-	class ProjectileDamageView {
+	/// @brief Enemyへのダメージ数値をワールド座標へ追従表示するビュー
+	class EnemyDamageView {
 	public:
 		/// @brief ダメージ表示用Textプールを初期化
 		void Initialize();
 
 		/// @brief ダメージ数値の表示を開始
 		/// @param event 表示するEnemyダメージイベント
-		void Spawn(const Enemy::ProjectileDamageEvent& event);
+		void Spawn(const Combat::DamageEvent& event);
 
 		/// @brief 表示中のダメージ数値を更新
 		/// @param deltaTime 前フレームからの経過時間
@@ -71,7 +71,7 @@ namespace UI::Game {
 		/// @brief Enemyダメージイベントを文字表示種別へ変換
 		/// @param event 変換するEnemyダメージイベント
 		/// @return ダメージ文字の表示種別
-		DamageTextType ResolveDamageTextType(const Enemy::ProjectileDamageEvent& event) const;
+		DamageTextType ResolveDamageTextType(const Combat::DamageEvent& event) const;
 
 		/// @brief 表示種別に対応するダメージ文字色を取得
 		/// @param type ダメージ文字の表示種別
@@ -104,8 +104,6 @@ namespace UI::Game {
 		float fontSize_ = 32.0f;               // ダメージ表示のフォントサイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
 		Vector4 criticalDamageTextColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
-		Vector4 burnDamageTextColor_ = { 1.0f, 0.45f, 0.25f, 1.0f }; // 火傷ダメージ表示の文字色
-		Vector4 poisonDamageTextColor_ = { 0.4f, 1.0f, 0.45f, 1.0f }; // 毒ダメージ表示の文字色
 	};
 
 } // namespace UI::Game

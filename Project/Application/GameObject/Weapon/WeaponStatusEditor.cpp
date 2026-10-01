@@ -1,4 +1,5 @@
 #include "WeaponStatusEditor.h"
+#include "WeaponStatusJson.h"
 #include "Projectile/ProjectileStatus.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
