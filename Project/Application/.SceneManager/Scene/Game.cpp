@@ -11,7 +11,8 @@
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
 
-	constexpr float kTpsCameraZoomSpeed = 15.0f;
+	constexpr float kTpsCameraGamePadZoomSpeed = 15.0f;
+	constexpr float kTpsCameraMouseWheelZoomStep = 2.0f;
 	constexpr float kTpsCameraMinDistance = 5.0f;
 	constexpr float kTpsCameraMaxDistance = 30.0f;
 	
@@ -198,14 +199,28 @@ SceneType Game::Update(float dt) {
 
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
-		tpsCamera->SetInputEnabled(inGameSession_->GetCurrentPhase() != InGamePhase::Paused);
+		const bool isCameraInputEnabled = inGameSession_->GetCurrentPhase() != InGamePhase::Paused;
+		tpsCamera->SetInputEnabled(isCameraInputEnabled);
 
-		// 左右トリガーの差分で同時入力を相殺し、時間比例でカメラ距離を変更
-		if (tpsCamera->GetUseGamePadInput()) {
-			MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
-			if (gamePad && gamePad->IsConnected()) {
-				const float zoomInput = gamePad->GetLeftTrigger() - gamePad->GetRightTrigger();
-				const float nextDistance = tpsCamera->GetDistance() + zoomInput * kTpsCameraZoomSpeed * deltaTime;
+		if (isCameraInputEnabled) {
+			float distanceDelta = 0.0f;
+
+			// 左右トリガーの差分で同時入力を相殺し、時間比例の距離変化へ変換
+			if (tpsCamera->GetUseGamePadInput()) {
+				MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
+				if (gamePad && gamePad->IsConnected()) {
+					const float zoomInput = gamePad->GetLeftTrigger() - gamePad->GetRightTrigger();
+					distanceDelta += zoomInput * kTpsCameraGamePadZoomSpeed * deltaTime;
+				}
+			}
+
+			// 前方ホイールで接近、後方ホイールで後退となる距離変化へ変換
+			if (MadoEngine::InputDevice::Mouse* mouse = MyInput::GetMouse()) {
+				distanceDelta -= mouse->GetWheelDelta() * kTpsCameraMouseWheelZoomStep;
+			}
+
+			if (distanceDelta != 0.0f) {
+				const float nextDistance = tpsCamera->GetDistance() + distanceDelta;
 				tpsCamera->SetDistance(std::clamp(
 					nextDistance,
 					kTpsCameraMinDistance,

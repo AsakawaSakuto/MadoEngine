@@ -136,7 +136,7 @@
                 "FarClip": 1000.0,
                 "HeightStrength": 0.0,
                 "NearClip": 0.10000000149011612,
-                "StartDistance": 65.0
+                "StartDistance": 85.0
             },
             "scope": "Screen",
             "screenEffectStage": "Scene"
