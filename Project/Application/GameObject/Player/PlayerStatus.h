@@ -63,7 +63,7 @@ namespace Player {
 		float jumpMoveBoostSpeed_ = 3.0f;      // ジャンプ時の水平初速
 		float wallClimbSpeed_ = 2.0f;          // Block側面を上る速度
 		float wallClimbMaxDuration_ = 3.0f;    // 着地までに壁登りできる最大時間
-		float jumpCount_ = 1000.0f;			   // ジャンプ可能回数
+		float jumpCount_ = 1.0f;			   // ジャンプ可能回数
 	};
 
 	/// @brief プレイヤーの動作状態を表す列挙型

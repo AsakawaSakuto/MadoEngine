@@ -363,6 +363,7 @@ void Game::DrawImGui() {
 	weaponStatusEditor_->DrawImGui();
 	weaponUpgradeUI_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_);
 	relicEditor_.DrawImGui(*relicSystem_);
+	relicAcquisitionUI_.DrawImGui(*relicSystem_);
 
 	enemyEditor_->DrawImGui();
 	

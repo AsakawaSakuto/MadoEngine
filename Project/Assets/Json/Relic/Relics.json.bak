@@ -92,7 +92,7 @@
         }
       ],
       "id": "health_regeneration_speed_boost",
-      "maxStack": 10,
+      "maxStack": 100,
       "rarity": "Uncommon",
       "textureName": "Candy"
     },

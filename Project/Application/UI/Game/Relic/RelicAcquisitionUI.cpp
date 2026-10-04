@@ -1,12 +1,13 @@
 #include "RelicAcquisitionUI.h"
 #include "GameObject/Relic/RelicSystem.h"
 #include "Input/MyInput.h"
+#ifdef USE_IMGUI
+#include "ImGuiHeaders.h"
+#endif // USE_IMGUI
+#include <algorithm>
 #include <array>
-#include <format>
 
 namespace {
-
-constexpr Vector2 kScreenCenter = { 640.0f, 360.0f };
 
 /// @brief SpriteHandleを一時参照へ解決
 /// @param handle SpriteHandle
@@ -22,24 +23,6 @@ MadoEngine::Text* ResolveText(MadoEngine::TextHandle handle) {
 	return MyText::TryGet(handle);
 }
 
-/// @brief レアリティに対応する表示色を取得
-/// @param rarity 色を取得するレアリティ
-/// @return レアリティ表示色
-Vector4 GetRarityColor(Rarity rarity) {
-	switch (rarity) {
-	case Rarity::Uncommon:
-		return { 0.32f, 0.88f, 0.40f, 1.0f };
-	case Rarity::Rare:
-		return { 0.30f, 0.58f, 1.0f, 1.0f };
-	case Rarity::Epic:
-		return { 0.72f, 0.36f, 1.0f, 1.0f };
-	case Rarity::Legendary:
-		return { 1.0f, 0.75f, 0.18f, 1.0f };
-	default:
-		return { 1.0f, 0.30f, 0.30f, 1.0f };
-	}
-}
-
 }
 
 namespace UI::Game {
@@ -51,69 +34,16 @@ namespace UI::Game {
 		panelSprites_[2] = MySprite::Create("RelicAcquisitionPanel", "white16x16", SceneType::Game, layer);
 		iconSprite_ = MySprite::Create("RelicAcquisitionIcon", "None", SceneType::Game, layer);
 
-		const std::array<const char*, 5> objectNames = {
-			"RelicAcquisitionTitle",
+		const std::array<const char*, 3> objectNames = {
 			"RelicAcquisitionName",
 			"RelicAcquisitionRarity",
 			"RelicAcquisitionDescription",
-			"RelicAcquisitionGuide",
 		};
 		for (std::size_t index = 0; index < textHandles_.size(); ++index) {
 			textHandles_[index] = MyText::Create(objectNames[index], "", SceneType::Game, layer);
 		}
 
-		// 全要素の基準を画面中央へ統一して解像度内の一枚表示を構成
-		if (Sprite* overlay = ResolveSprite(panelSprites_[0])) {
-			overlay->SetAnchorPoint({ 0.5f, 0.5f });
-			overlay->SetPosition(kScreenCenter);
-			overlay->SetScale({ 80.0f, 45.0f });
-			overlay->SetColor({ 0.0f, 0.0f, 0.0f, 0.72f });
-		}
-		if (Sprite* border = ResolveSprite(panelSprites_[1])) {
-			border->SetAnchorPoint({ 0.5f, 0.5f });
-			border->SetPosition(kScreenCenter);
-			border->SetScale({ 27.0f, 20.5f });
-		}
-		if (Sprite* panel = ResolveSprite(panelSprites_[2])) {
-			panel->SetAnchorPoint({ 0.5f, 0.5f });
-			panel->SetPosition(kScreenCenter);
-			panel->SetScale({ 26.0f, 19.5f });
-			panel->SetColor({ 0.045f, 0.06f, 0.10f, 0.98f });
-		}
-		if (Sprite* icon = ResolveSprite(iconSprite_)) {
-			icon->SetAnchorPoint({ 0.5f, 0.5f });
-			icon->SetPosition({ kScreenCenter.x, 315.0f });
-			icon->SetScale({ 2.0f, 2.0f });
-		}
-
-		const std::array<Vector2, 5> textPositions = {
-			Vector2{ kScreenCenter.x, 205.0f },
-			Vector2{ kScreenCenter.x, 415.0f },
-			Vector2{ kScreenCenter.x, 452.0f },
-			Vector2{ kScreenCenter.x, 495.0f },
-			Vector2{ kScreenCenter.x, 550.0f },
-		};
-		const std::array<float, 5> fontSizes = { 30.0f, 26.0f, 20.0f, 22.0f, 18.0f };
-		for (std::size_t index = 0; index < textHandles_.size(); ++index) {
-			if (MadoEngine::Text* text = ResolveText(textHandles_[index])) {
-				text->SetFontFamily("Yu Gothic UI");
-				text->SetFontSize(fontSizes[index]);
-				text->SetAreaSize({ 480.0f, 48.0f });
-				text->SetAnchorPoint({ 0.5f, 0.5f });
-				text->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
-				text->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
-				text->SetPosition(textPositions[index]);
-				text->SetColor({ 0.95f, 0.97f, 1.0f, 1.0f });
-			}
-		}
-
-		if (MadoEngine::Text* title = ResolveText(textHandles_[0])) {
-			title->SetText("レリック獲得");
-		}
-		if (MadoEngine::Text* guide = ResolveText(textHandles_[4])) {
-			guide->SetText("決定で取得");
-			guide->SetColor({ 1.0f, 0.82f, 0.18f, 1.0f });
-		}
+		ApplyAppearanceSettings();
 
 		isInitialized_ = true;
 		SetVisible(false);
@@ -138,7 +68,7 @@ namespace UI::Game {
 
 		if (!isVisible_ || displayedRelicId_ != definition->id ||
 			displayedRevision_ != relicSystem.GetRevision()) {
-			SetDefinition(*definition, relicSystem.GetInventory().GetCount(definition->id));
+			SetDefinition(*definition);
 			displayedRevision_ = relicSystem.GetRevision();
 			SetVisible(true);
 		}
@@ -150,9 +80,173 @@ namespace UI::Game {
 		}
 	}
 
-	void RelicAcquisitionUI::SetDefinition(const Relic::Definition& definition, int ownedCount) {
+	void RelicAcquisitionUI::DrawImGui(Relic::System& relicSystem) {
+
+#ifdef USE_IMGUI
+
+		if (!isInitialized_) {
+			return;
+		}
+
+		bool settingsChanged = false;
+		bool previewContentChanged = false;
+		ImGui::Begin("レリック獲得UI");
+		previewContentChanged |= ImGui::Checkbox("プレビュー表示", &isPreviewEnabled_);
+		ImGui::SameLine();
+		if (ImGui::Button("初期値へ戻す")) {
+			appearanceSettings_ = {};
+			settingsChanged = true;
+		}
+
+		const std::vector<Relic::Definition>& definitions = relicSystem.GetDefinitions();
+		if (!definitions.empty()) {
+			previewRelicIndex_ = (std::min)(previewRelicIndex_, definitions.size() - 1);
+			ImGui::SetNextItemWidth(260.0f);
+			if (ImGui::BeginCombo("プレビューするレリック", definitions[previewRelicIndex_].displayName.c_str())) {
+				for (std::size_t index = 0; index < definitions.size(); ++index) {
+					const bool isSelected = index == previewRelicIndex_;
+					const std::string label = definitions[index].displayName + "##RelicAcquisitionPreview" + definitions[index].id;
+					if (ImGui::Selectable(label.c_str(), isSelected)) {
+						previewRelicIndex_ = index;
+						previewContentChanged = true;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		}
+
+		if (ImGui::CollapsingHeader("背景とパネル", ImGuiTreeNodeFlags_DefaultOpen)) {
+			constexpr std::array<const char*, 3> panelNames = { "オーバーレイ", "枠", "パネル" };
+			for (std::size_t index = 0; index < panelNames.size(); ++index) {
+				ImGui::PushID(static_cast<int>(index));
+				ImGui::SeparatorText(panelNames[index]);
+				settingsChanged |= ImGui::DragFloat2("位置", &appearanceSettings_.panelPositions[index].x, 1.0f, -4096.0f, 4096.0f, "%.0f px");
+				settingsChanged |= ImGui::DragFloat2("スケール", &appearanceSettings_.panelScales[index].x, 0.1f, 0.01f, 200.0f, "%.2f");
+				ImGui::PopID();
+			}
+			settingsChanged |= ImGui::ColorEdit4("オーバーレイ色", &appearanceSettings_.overlayColor.x, ImGuiColorEditFlags_AlphaBar);
+			settingsChanged |= ImGui::ColorEdit4("パネル色", &appearanceSettings_.panelColor.x, ImGuiColorEditFlags_AlphaBar);
+		}
+
+		if (ImGui::CollapsingHeader("アイコン", ImGuiTreeNodeFlags_DefaultOpen)) {
+			settingsChanged |= ImGui::DragFloat2("位置##RelicIcon", &appearanceSettings_.iconPosition.x, 1.0f, -4096.0f, 4096.0f, "%.0f px");
+			settingsChanged |= ImGui::DragFloat2("スケール##RelicIcon", &appearanceSettings_.iconScale.x, 0.05f, 0.01f, 100.0f, "%.2f");
+		}
+
+		if (ImGui::CollapsingHeader("文字", ImGuiTreeNodeFlags_DefaultOpen)) {
+			constexpr std::array<const char*, 3> textNames = { "名前", "レアリティ", "説明" };
+			for (std::size_t index = 0; index < textNames.size(); ++index) {
+				ImGui::PushID(static_cast<int>(index));
+				if (ImGui::TreeNode(textNames[index])) {
+					settingsChanged |= ImGui::DragFloat2("位置", &appearanceSettings_.textPositions[index].x, 1.0f, -4096.0f, 4096.0f, "%.0f px");
+					settingsChanged |= ImGui::DragFloat2("表示領域", &appearanceSettings_.textAreaSizes[index].x, 1.0f, 1.0f, 4096.0f, "%.0f px");
+					settingsChanged |= ImGui::DragFloat("フォントサイズ", &appearanceSettings_.fontSizes[index], 1.0f, 1.0f, 200.0f, "%.0f px");
+					if (index != 1) {
+						settingsChanged |= ImGui::ColorEdit4("文字色", &appearanceSettings_.textColors[index].x, ImGuiColorEditFlags_AlphaBar);
+					} else {
+						ImGui::TextDisabled("文字色はレアリティ色を使用");
+					}
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+		}
+
+		if (ImGui::CollapsingHeader("レアリティ色", ImGuiTreeNodeFlags_DefaultOpen)) {
+			constexpr std::array<const char*, 5> rarityNames = { "アンコモン", "レア", "エピック", "レジェンダリー", "ユニーク" };
+			for (std::size_t index = 0; index < rarityNames.size(); ++index) {
+				ImGui::PushID(static_cast<int>(index));
+				settingsChanged |= ImGui::ColorEdit4(rarityNames[index], &appearanceSettings_.rarityColors[index].x, ImGuiColorEditFlags_AlphaBar);
+				ImGui::PopID();
+			}
+		}
+		ImGui::End();
+
+		// 手入力された値も描画Objectが扱える範囲へ制限して不正なテクスチャ寸法を防止
+		for (Vector2& scale : appearanceSettings_.panelScales) {
+			scale.x = std::clamp(scale.x, 0.01f, 200.0f);
+			scale.y = std::clamp(scale.y, 0.01f, 200.0f);
+		}
+		appearanceSettings_.iconScale.x = std::clamp(appearanceSettings_.iconScale.x, 0.01f, 100.0f);
+		appearanceSettings_.iconScale.y = std::clamp(appearanceSettings_.iconScale.y, 0.01f, 100.0f);
+		for (std::size_t index = 0; index < appearanceSettings_.fontSizes.size(); ++index) {
+			appearanceSettings_.textAreaSizes[index].x = std::clamp(appearanceSettings_.textAreaSizes[index].x, 1.0f, 4096.0f);
+			appearanceSettings_.textAreaSizes[index].y = std::clamp(appearanceSettings_.textAreaSizes[index].y, 1.0f, 4096.0f);
+			appearanceSettings_.fontSizes[index] = std::clamp(appearanceSettings_.fontSizes[index], 1.0f, 200.0f);
+		}
+
+		if (settingsChanged) {
+			ApplyAppearanceSettings();
+		}
+
+		const Relic::Definition* displayDefinition = relicSystem.GetPendingReward();
+		if (!displayDefinition && isPreviewEnabled_ && !definitions.empty()) {
+			displayDefinition = &definitions[previewRelicIndex_];
+		}
+
+		// 実報酬を優先し、待機中でない場合だけEditor用レリックへ表示内容を差し替え
+		if (displayDefinition &&
+			(settingsChanged || previewContentChanged || displayedRelicId_ != displayDefinition->id)) {
+			SetDefinition(*displayDefinition);
+			displayedRevision_ = relicSystem.GetRevision();
+		}
+		SetVisible(displayDefinition != nullptr);
+
+#else
+
+		(void)relicSystem;
+
+#endif // USE_IMGUI
+	}
+
+	void RelicAcquisitionUI::ApplyAppearanceSettings() {
+		for (std::size_t index = 0; index < panelSprites_.size(); ++index) {
+			if (Sprite* sprite = ResolveSprite(panelSprites_[index])) {
+				sprite->SetAnchorPoint({ 0.5f, 0.5f });
+				sprite->SetPosition(appearanceSettings_.panelPositions[index]);
+				sprite->SetScale(appearanceSettings_.panelScales[index]);
+			}
+		}
+		if (Sprite* overlay = ResolveSprite(panelSprites_[0])) {
+			overlay->SetColor(appearanceSettings_.overlayColor);
+		}
+		if (Sprite* panel = ResolveSprite(panelSprites_[2])) {
+			panel->SetColor(appearanceSettings_.panelColor);
+		}
+		if (Sprite* icon = ResolveSprite(iconSprite_)) {
+			icon->SetAnchorPoint({ 0.5f, 0.5f });
+			icon->SetPosition(appearanceSettings_.iconPosition);
+			icon->SetScale(appearanceSettings_.iconScale);
+		}
+
+		for (std::size_t index = 0; index < textHandles_.size(); ++index) {
+			if (MadoEngine::Text* text = ResolveText(textHandles_[index])) {
+				text->SetFontFamily("Yu Gothic UI");
+				text->SetFontSize(appearanceSettings_.fontSizes[index]);
+				text->SetAreaSize(appearanceSettings_.textAreaSizes[index]);
+				text->SetAnchorPoint({ 0.5f, 0.5f });
+				text->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
+				text->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
+				text->SetPosition(appearanceSettings_.textPositions[index]);
+				text->SetColor(appearanceSettings_.textColors[index]);
+			}
+		}
+	}
+
+	const Vector4& RelicAcquisitionUI::GetRarityColor(Rarity rarity) const {
+		const std::size_t index = static_cast<std::size_t>(rarity);
+		if (index >= appearanceSettings_.rarityColors.size()) {
+			return appearanceSettings_.rarityColors.back();
+		}
+		return appearanceSettings_.rarityColors[index];
+	}
+
+	void RelicAcquisitionUI::SetDefinition(const Relic::Definition& definition) {
 		displayedRelicId_ = definition.id;
-		const Vector4 rarityColor = GetRarityColor(definition.rarity);
+		const Vector4& rarityColor = GetRarityColor(definition.rarity);
 		if (Sprite* border = ResolveSprite(panelSprites_[1])) {
 			border->SetColor(rarityColor);
 		}
@@ -161,18 +255,14 @@ namespace UI::Game {
 				(void)icon->SetTexture("None");
 			}
 		}
-		if (MadoEngine::Text* name = ResolveText(textHandles_[1])) {
+		if (MadoEngine::Text* name = ResolveText(textHandles_[0])) {
 			name->SetText(definition.displayName);
 		}
-		if (MadoEngine::Text* rarity = ResolveText(textHandles_[2])) {
-			rarity->SetText(std::format(
-				"{}  所持数: {} / {}",
-				Relic::ToDisplayName(definition.rarity),
-				ownedCount + 1,
-				definition.maxStack));
+		if (MadoEngine::Text* rarity = ResolveText(textHandles_[1])) {
+			rarity->SetText(Relic::ToDisplayName(definition.rarity));
 			rarity->SetColor(rarityColor);
 		}
-		if (MadoEngine::Text* description = ResolveText(textHandles_[3])) {
+		if (MadoEngine::Text* description = ResolveText(textHandles_[2])) {
 			description->SetText(definition.description);
 		}
 	}
