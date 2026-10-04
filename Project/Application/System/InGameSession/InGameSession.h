@@ -17,6 +17,10 @@ namespace System {
 		/// @param isActive 武器アップグレード選択中の場合はtrue
 		void SetUpgradeSelectionActive(bool isActive);
 
+		/// @brief レリック獲得の待機状態を同期
+		/// @param isActive レリック獲得待ちの場合はtrue
+		void SetItemAcquisitionActive(bool isActive);
+
 		/// @brief ゲーム進行をGameOver状態へ変更
 		void SetGameOver();
 
@@ -27,6 +31,10 @@ namespace System {
 		/// @brief 武器アップグレード選択の待機状態であるか確認
 		/// @return 武器アップグレード選択の待機状態の場合はtrue
 		bool IsWaitingUpgradeSelection() const { return currentPhase_ == InGamePhase::WaitingUpgrade; }
+
+		/// @brief レリック獲得の待機状態であるか確認
+		/// @return レリック獲得の待機状態の場合はtrue
+		bool IsWaitingItemAcquisition() const { return currentPhase_ == InGamePhase::WaitingGetItem; }
 
 		/// @brief 現在のゲーム進行状態を取得
 		/// @return 現在のゲーム進行状態

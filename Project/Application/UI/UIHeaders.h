@@ -10,5 +10,6 @@
 #include "Game/Player/PlayerStaminaGauge.h"
 #include "Game/Weapon/WeaponIconUI.h"
 #include "Game/Weapon/WeaponUpgradeUI.h"
+#include "Game/Relic/RelicAcquisitionUI.h"
 #include "Title/PlayerSelectIcon/PLayerSclectIcon.h"
 #include "Title/WeaponSelectIcon/WeaponSelectIcon.h"

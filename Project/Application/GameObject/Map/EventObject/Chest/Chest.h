@@ -70,8 +70,8 @@ public:
 	/// @return ChestのEventObject名
 	std::string_view GetEventObjectName() const override { return "Chest"; }
 
-	/// @brief 武器アップグレード用のMapイベント要求を取得
-	/// @return 武器アップグレード開始要求
+	/// @brief レリック報酬用のMapイベント要求を取得
+	/// @return レリック報酬開始要求
 	MapEventRequest GetInteractionRequest() const override;
 
 private:

@@ -100,6 +100,10 @@ namespace Player {
 		/// @return 現在の水平ノックバック速度
 		Vector3 GetKnockbackVelocity() const { return knockbackVelocity_; }
 
+		/// @brief 歩行速度へ適用する倍率を設定
+		/// @param multiplier 1.0を基準とする速度倍率
+		void SetMoveSpeedMultiplier(float multiplier);
+
 		/// @brief 移動パラメータを取得
 		/// @return 移動パラメータ
 		Player::MovementParams& GetParams() { return movementParams_; }
@@ -181,6 +185,7 @@ namespace Player {
 		float slideReleaseFriction_ = 10.0f; // スライディング解除時の摩擦
 		float remainingJumpCount_ = 0.0f;    // 残りジャンプ回数
 		float wallClimbElapsedTime_ = 0.0f;  // 着地後から累積した壁登り時間
+		float moveSpeedMultiplier_ = 1.0f;   // 外部効果による歩行速度倍率
 
 		Player::MovementParams movementParams_; // 移動に関するパラメータ
 

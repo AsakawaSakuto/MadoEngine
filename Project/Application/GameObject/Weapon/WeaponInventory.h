@@ -20,6 +20,10 @@ namespace Weapon {
 
 		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
 
+		/// @brief 全武器へ適用する実行時補正を設定
+		/// @param modifiers 全武器共通の補正値
+		void SetRuntimeModifiers(const RuntimeModifiers& modifiers) { runtimeModifiers_ = modifiers; }
+
 		/// @brief 装備中の常時展開型Projectileを武器所有者へ同期
 		/// @param ownerPosition 武器所有者の座標
 		void SynchronizePersistentProjectiles(const Vector3& ownerPosition);
@@ -87,6 +91,7 @@ namespace Weapon {
 		Projectile::Type selectedAddWeaponType_ = Projectile::Type::Pistol;
 		std::vector<std::unique_ptr<BaseWeapon>> weapons_;
 		std::vector<WeaponAttackEvent> weaponAttackEvents_;
+		RuntimeModifiers runtimeModifiers_;
 		std::uint64_t revision_ = 0;
 	};
 }

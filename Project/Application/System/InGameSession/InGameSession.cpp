@@ -66,6 +66,20 @@ namespace System {
 		}
 	}
 
+	void InGameSession::SetItemAcquisitionActive(bool isActive) {
+
+		// 宝箱報酬を武器強化より優先して通常プレイから獲得待ちへ遷移
+		if (isActive && currentPhase_ == InGamePhase::Playing) {
+			currentPhase_ = InGamePhase::WaitingGetItem;
+			return;
+		}
+
+		// 他の停止理由を解除しないようレリック獲得待ちだけを再開
+		if (!isActive && currentPhase_ == InGamePhase::WaitingGetItem) {
+			currentPhase_ = InGamePhase::Playing;
+		}
+	}
+
 	void InGameSession::SetGameOver() {
 		currentPhase_ = InGamePhase::GameOver;
 	}

@@ -136,5 +136,5 @@ std::string_view Chest::GetInteractionText() const {
 }
 
 MapEventRequest Chest::GetInteractionRequest() const {
-	return { MapEventAction::RequestWeaponUpgrade, GetPosition() };
+	return { MapEventAction::RequestRelicReward, GetPosition() };
 }

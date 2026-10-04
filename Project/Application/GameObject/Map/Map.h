@@ -4,6 +4,7 @@
 #include "MapBlock.h"
 #include "MapLimit.h"
 #include "EventObject/MapEventObjectBase.h"
+#include <array>
 #include <memory>
 #include <optional>
 #include <string>
@@ -29,6 +30,11 @@ public:
 	/// @brief 操作案内Textの表示可否を設定
 	/// @param isVisible 表示する場合はtrue
 	void SetInteractionTextVisible(bool isVisible);
+
+	/// @brief 指定したMapイベント要求の受付可否を設定
+	/// @param action 設定対象のイベント要求
+	/// @param isEnabled 受付可能にする場合はtrue
+	void SetEventActionEnabled(MapEventAction action, bool isEnabled);
 
 	/// @brief Map調整用のImGuiを描画
 	/// @param player プレビューへ表示するPlayer
@@ -183,6 +189,11 @@ private:
 	/// @param player 相互作用するPlayer
 	void UpdateInteractionText(const Player::Base& player);
 
+	/// @brief 指定したMapイベント要求を現在受け付けられるか確認
+	/// @param action 確認対象のイベント要求
+	/// @return 受付可能な場合はtrue
+	bool IsEventActionEnabled(MapEventAction action) const;
+
 	/// @brief 地形生成用の高さ設定を有効範囲に補正
 	void ClampHeightSettings();
 
@@ -195,6 +206,7 @@ private:
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
 	std::vector<MapEventRequest> pendingEventRequests_;
+	std::array<bool, static_cast<std::size_t>(MapEventAction::Count)> eventActionEnabled_{};
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
 
 	MadoEngine::ModelHandle interactionMarkerModel_{};

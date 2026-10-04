@@ -1,0 +1,148 @@
+{
+  "relics": [
+    {
+      "description": "与ダメージ 10% Up",
+      "displayName": "ただのハンドグリップ",
+      "effects": [
+        {
+          "operation": "AddPercent",
+          "stat": "OutgoingDamage",
+          "type": "StatModifier",
+          "valuePerStack": 0.10000000149011612
+        }
+      ],
+      "id": "damage_boost",
+      "maxStack": 5,
+      "rarity": "Uncommon",
+      "textureName": "HandGrip"
+    },
+    {
+      "description": "最大 HP 15 増加",
+      "displayName": "生命のミルク",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "MaxHealth",
+          "type": "StatModifier",
+          "valuePerStack": 15.0
+        }
+      ],
+      "id": "max_health_boost",
+      "maxStack": 5,
+      "rarity": "Uncommon",
+      "textureName": "Milk"
+    },
+    {
+      "description": "プレイヤー移動速度 5% Up",
+      "displayName": "俊敏なローブ",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "MovementSpeed",
+          "type": "StatModifier",
+          "valuePerStack": 0.05000000074505806
+        }
+      ],
+      "id": "movement_speed_boost",
+      "maxStack": 30,
+      "rarity": "Uncommon",
+      "textureName": "SpeedRobe"
+    },
+    {
+      "description": "効果説明",
+      "displayName": "増幅器",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "WeaponShotMaxCount",
+          "type": "StatModifier",
+          "valuePerStack": 1.0
+        }
+      ],
+      "id": "relic_1",
+      "maxStack": 10,
+      "rarity": "Rare",
+      "textureName": "Amplifier"
+    },
+    {
+      "description": "獲得Money 10% Up",
+      "displayName": "金の王冠",
+      "effects": [
+        {
+          "operation": "AddPercent",
+          "stat": "MoneyGain",
+          "type": "StatModifier",
+          "valuePerStack": 0.10000000149011612
+        }
+      ],
+      "id": "money_gain_boost",
+      "maxStack": 10,
+      "rarity": "Uncommon",
+      "textureName": "Crown"
+    },
+    {
+      "description": "HPリジェネ速度 10% Up",
+      "displayName": "再生のキャンディ",
+      "effects": [
+        {
+          "operation": "AddPercent",
+          "stat": "HealthRegenerationSpeed",
+          "type": "StatModifier",
+          "valuePerStack": 0.10000000149011612
+        }
+      ],
+      "id": "health_regeneration_speed_boost",
+      "maxStack": 100,
+      "rarity": "Uncommon",
+      "textureName": "Candy"
+    },
+    {
+      "description": "獲得EXP 10% Up",
+      "displayName": "知恵のフラスコ",
+      "effects": [
+        {
+          "operation": "AddPercent",
+          "stat": "ExpGain",
+          "type": "StatModifier",
+          "valuePerStack": 0.10000000149011612
+        }
+      ],
+      "id": "exp_gain_boost",
+      "maxStack": 49,
+      "rarity": "Uncommon",
+      "textureName": "Flask"
+    },
+    {
+      "description": "クリティカル発生確率 5% Up",
+      "displayName": "幸運魚",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "ProjectileCriticalChance",
+          "type": "StatModifier",
+          "valuePerStack": 5.0
+        }
+      ],
+      "id": "projectile_critical_chance_boost",
+      "maxStack": 10,
+      "rarity": "Uncommon",
+      "textureName": "CriticalFish"
+    },
+    {
+      "description": "発射クールタイム 5% 短縮",
+      "displayName": "加速器",
+      "effects": [
+        {
+          "operation": "AddPercent",
+          "stat": "WeaponShotCooldown",
+          "type": "StatModifier",
+          "valuePerStack": -0.05000000074505806
+        }
+      ],
+      "id": "weapon_shot_cooldown_reduction",
+      "maxStack": 10,
+      "rarity": "Uncommon",
+      "textureName": "Accelerator"
+    }
+  ]
+}

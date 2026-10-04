@@ -6,7 +6,9 @@
 #include "Utility/Logger/Logger.h"
 #include "imguiHeaders.h"
 #include <algorithm>
+#include <cmath>
 #include <format>
+#include <limits>
 
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f;
@@ -19,8 +21,6 @@ namespace {
 	constexpr int kEnemyDamageSoundFirstIndex = 1;
 	constexpr int kEnemyDamageSoundLastIndex = 5;
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
-	
-	constexpr int slotCount = 4;
 }
 
 Game::Game(CommonData& commonData)
@@ -90,17 +90,24 @@ void Game::Initialize() {
 	playerIconUI_->Initialize();
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
-	weaponInventory_->Initialize(Projectile::Type::FireBall, slotCount);
+	weaponInventory_->Initialize(Projectile::Type::FireBall, weaponSlotCount_);
 
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 
 	weaponUpgradeSystem_ = std::make_unique<Weapon::UpgradeSystem>();
 	weaponUpgradeSystem_->Initialize(player_->GetLevel(), gameSeed_);
+	relicSystem_ = std::make_unique<Relic::System>();
+	if (!relicSystem_->Initialize(gameSeed_)) {
+		Logger::Output("[Relic] レリックシステムの初期化に失敗", Logger::Level::Error);
+	}
+	relicEditor_.Initialize(*relicSystem_);
+	appliedRelicRevision_ = relicSystem_->GetRevision();
 
 	// 武器Level表示をUpgrade Cardより先に登録してHUDをCardの背面へ配置
 	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
-	weaponIconUI_->Initialize(slotCount);
+	weaponIconUI_->Initialize(weaponSlotCount_);
 	weaponUpgradeUI_.Initialize();
+	relicAcquisitionUI_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始
 	inGameSession_ = std::make_unique<System::InGameSession>();
@@ -156,6 +163,10 @@ SceneType Game::Update(float dt) {
 			weaponInventory_->RecordWeaponDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
 		}
 
+		// 全レリック上限時は支払い前に宝箱操作を拒否して一個獲得の契約を維持
+		map_->SetEventActionEnabled(
+			MapEventAction::RequestRelicReward,
+			relicSystem_->CanRequestReward());
 		map_->Update(*player_, deltaTime);
 		for (const MapEventRequest& request : map_->ConsumeEventRequests()) {
 
@@ -164,8 +175,8 @@ SceneType Game::Update(float dt) {
 			case MapEventAction::SpawnBoss:
 				enemyManager_->SpawnBoss(request.position, SceneType::Game);
 				break;
-			case MapEventAction::RequestWeaponUpgrade:
-				weaponUpgradeSystem_->RequestUpgrade(*weaponInventory_);
+			case MapEventAction::RequestRelicReward:
+				relicSystem_->RequestReward();
 				break;
 			case MapEventAction::None:
 				break;
@@ -233,10 +244,19 @@ SceneType Game::Update(float dt) {
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
-	if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
+	if (inGameSession_->IsWaitingItemAcquisition()) {
+		relicAcquisitionUI_.Update(*relicSystem_);
+	} else if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
 		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_);
 	}
-	inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
+	ApplyRelicModifiersIfChanged();
+
+	// レリック獲得を先に解決し、終了後に保留中のLevel Up選択へ遷移
+	const bool isRelicRewardPending = relicSystem_->HasPendingReward();
+	inGameSession_->SetItemAcquisitionActive(isRelicRewardPending);
+	if (!isRelicRewardPending) {
+		inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
+	}
 
 	// 当Frameの攻撃Eventを一度だけ消費して対応SlotのUI演出へ変換
 	for (const Weapon::WeaponAttackEvent& event :
@@ -342,6 +362,7 @@ void Game::DrawImGui() {
 	weaponInventory_->DrawImGui();
 	weaponStatusEditor_->DrawImGui();
 	weaponUpgradeUI_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_);
+	relicEditor_.DrawImGui(*relicSystem_);
 
 	enemyEditor_->DrawImGui();
 	
@@ -367,11 +388,15 @@ void Game::RestoreMapGeneratorEditorState(const std::string& snapshot) {
 }
 
 bool Game::SaveEditorDocuments() const {
-	return map_ && map_->SaveEditorSettings();
+	const bool mapSucceeded = map_ && map_->SaveEditorSettings();
+	const bool relicSucceeded = relicSystem_ && relicEditor_.Save(*relicSystem_);
+	return mapSucceeded && relicSucceeded;
 }
 
 bool Game::ReloadEditorDocuments() {
-	return map_ && map_->ReloadEditorSettings();
+	const bool mapSucceeded = map_ && map_->ReloadEditorSettings();
+	const bool relicSucceeded = relicSystem_ && relicEditor_.Reload(*relicSystem_);
+	return mapSucceeded && relicSucceeded;
 }
 
 bool Game::ApplyPendingEditorOperations() {
@@ -424,6 +449,39 @@ void Game::SynchronizeMapDependentState() {
 	}
 }
 
+void Game::ApplyRelicModifiersIfChanged() {
+	if (!relicSystem_ || relicSystem_->GetRevision() == appliedRelicRevision_) {
+		return;
+	}
+
+	const Relic::ModifierSnapshot& modifiers = relicSystem_->GetModifiers();
+	Player::RuntimeModifiers playerModifiers;
+
+	playerModifiers.maxHealthFlat                     = modifiers.GetFlat(Relic::Stat::MaxHealth);
+	playerModifiers.movementSpeedMultiplier           = modifiers.Resolve(Relic::Stat::MovementSpeed, 1.0f);
+	playerModifiers.moneyGainMultiplier               = modifiers.Resolve(Relic::Stat::MoneyGain, 1.0f);
+	playerModifiers.expGainMultiplier                 = modifiers.Resolve(Relic::Stat::ExpGain, 1.0f);
+	playerModifiers.healthRegenerationSpeedMultiplier = modifiers.Resolve(Relic::Stat::HealthRegenerationSpeed, 1.0f);
+
+	player_->SetRuntimeModifiers(playerModifiers);
+
+	Weapon::RuntimeModifiers weaponModifiers;
+	weaponModifiers.damageMultiplier   = modifiers.Resolve(Relic::Stat::OutgoingDamage, 1.0f);
+	weaponModifiers.criticalChanceFlat = modifiers.GetFlat(Relic::Stat::ProjectileCriticalChance);
+	weaponModifiers.criticalChanceRate = modifiers.GetAdditiveRate(Relic::Stat::ProjectileCriticalChance);
+	weaponModifiers.shotCooldownFlat   = modifiers.GetFlat(Relic::Stat::WeaponShotCooldown);
+	weaponModifiers.shotCooldownRate   = modifiers.GetAdditiveRate(Relic::Stat::WeaponShotCooldown);
+
+	const float additionalShotMaxCount = modifiers.Resolve(Relic::Stat::WeaponShotMaxCount, 0.0f);
+	if (std::isfinite(additionalShotMaxCount)) {
+		const float clampedCount = std::clamp(additionalShotMaxCount, 0.0f, static_cast<float>((std::numeric_limits<int>::max)()));
+		weaponModifiers.additionalShotMaxCount = static_cast<int>(std::lround(clampedCount));
+	}
+
+	weaponInventory_->SetRuntimeModifiers(weaponModifiers);
+	appliedRelicRevision_ = relicSystem_->GetRevision();
+}
+
 Vector3 Game::GetShadowFocusPosition() const {
 	if (!player_) {
 		return GetCamera().GetPosition();
@@ -443,6 +501,7 @@ bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 }
 
 void Game::Finalize() {
+	relicAcquisitionUI_.Finalize();
 	weaponUpgradeUI_.Finalize();
 	if (healthGauge_) {
 		healthGauge_->Finalize();

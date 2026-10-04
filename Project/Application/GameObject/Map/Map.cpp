@@ -207,6 +207,7 @@ void DestroyMapInstancedBatches() {
 /// @brief 指定シードでMapを初期化
 /// @param seed Map生成に使用するシード値
 void Map::Initialize(uint32_t seed) {
+	eventActionEnabled_.fill(true);
 	editorSettings_ = CreateAppliedSettings();
 	editorSettings_.seed = seed;
 	LoadEditorSettings(editorSettings_, false);
@@ -220,6 +221,13 @@ void Map::SetInteractionTextVisible(bool isVisible) {
 	isInteractionTextVisible_ = isVisible;
 	if (MadoEngine::Text* interactionText = MyText::TryGet(interactionText_)) {
 		interactionText->SetVisible(isInteractionTextVisible_ && currentHitEventObject_ != nullptr);
+	}
+}
+
+void Map::SetEventActionEnabled(MapEventAction action, bool isEnabled) {
+	const std::size_t actionIndex = static_cast<std::size_t>(action);
+	if (actionIndex < eventActionEnabled_.size()) {
+		eventActionEnabled_[actionIndex] = isEnabled;
 	}
 }
 
@@ -1294,8 +1302,13 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 		return;
 	}
 
-	// 相互作用が成立したObjectの要求を保存してから配置一覧から除去
 	MapEventObjectBase* interactedObject = currentHitEventObject_;
+	const MapEventRequest request = interactedObject->GetInteractionRequest();
+	if (!IsEventActionEnabled(request.action)) {
+		return;
+	}
+
+	// 外部Systemが要求を受け付けられる状態を確認してから支払いとObject削除を確定
 	if (!interactedObject->Interact(player)) {
 		return;
 	}
@@ -1306,7 +1319,6 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 		MyAudio::Play(eventObjectName);
 	}
 
-	const MapEventRequest request = interactedObject->GetInteractionRequest();
 	if (request.action != MapEventAction::None) {
 		pendingEventRequests_.push_back(request);
 	}
@@ -1363,12 +1375,20 @@ void Map::UpdateInteractionText(const Player::Base& player) {
 	}
 
 	// 相互作用できない状態を赤色で通知し、対象変更時は通常色へ復帰
-	interactionText->SetColor(currentHitEventObject_->CanInteract(player)
+	const MapEventRequest request = currentHitEventObject_->GetInteractionRequest();
+	const bool canInteract = currentHitEventObject_->CanInteract(player) &&
+		IsEventActionEnabled(request.action);
+	interactionText->SetColor(canInteract
 		? kInteractionTextDefaultColor
 		: kInteractionTextUnavailableColor);
 
 	// 文言の決定を各MapEventObjectへ委譲してObject固有の操作内容を表示
 	interactionText->SetText(std::string(currentHitEventObject_->GetInteractionText()));
+}
+
+bool Map::IsEventActionEnabled(MapEventAction action) const {
+	const std::size_t actionIndex = static_cast<std::size_t>(action);
+	return actionIndex < eventActionEnabled_.size() && eventActionEnabled_[actionIndex];
 }
 
 void Map::ClampHeightSettings() {

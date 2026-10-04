@@ -99,6 +99,10 @@ namespace Player {
 		/// @return 現在のPlayerレベル
 		int GetLevel() const { return status_.level; }
 
+		/// @brief 外部システム由来の実行時補正を反映
+		/// @param modifiers Playerへ適用する補正値
+		void SetRuntimeModifiers(const RuntimeModifiers& modifiers);
+
 		/// @brief 壁登り可能な残り時間を取得
 		/// @return 壁登り可能な残り時間
 		float GetWallClimbRemainingTime() const { return movement_.GetWallClimbRemainingTime(); }
@@ -129,6 +133,10 @@ namespace Player {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateHealthRegeneration(float deltaTime);
 
+		/// @brief 現在の補正を適用したHPリジェネ間隔を取得
+		/// @return HPを一回復するまでの秒数
+		float GetHealthRegenerationInterval() const;
+
 		/// @brief Playerの死亡状態と死亡Animationを開始
 		void BeginDeath();
 
@@ -145,6 +153,8 @@ namespace Player {
 
 		Status status_;                     // ステータス
 		StatusMultiplier statusMultiplier_; // ステータスの倍率
+
+		float baseMaxHealth_ = 100.0f;       // 外部補正を含まない最大HP
 		Controller controller_;             // 入力制御
 		AnimationController animationController_; // 描画Animation制御
 		Movement movement_;                 // 移動処理

@@ -38,6 +38,16 @@ namespace Player {
 		float exp = 1.0f;           // 経験値の倍率
 		float damage = 1.0f;        // ダメージの倍率
 		float movementSpeed = 1.0f; // 移動速度の倍率
+		float healthRegenerationSpeed = 1.0f; // HPリジェネ速度の倍率
+	};
+
+	/// @brief 外部システムからPlayerへ適用する実行時補正
+	struct RuntimeModifiers {
+		float maxHealthFlat = 0.0f;
+		float movementSpeedMultiplier = 1.0f;
+		float moneyGainMultiplier = 1.0f;
+		float expGainMultiplier = 1.0f;
+		float healthRegenerationSpeedMultiplier = 1.0f;
 	};
 
 	/// @brief プレイヤーの移動に関するパラメータを管理する構造体

@@ -15,6 +15,7 @@ namespace Weapon {
 		weapons_.clear();
 		weapons_.resize(slotCount_);
 		weaponAttackEvents_.clear();
+		runtimeModifiers_ = {};
 		revision_ = 0;
 
 		if (!AddWeapon(type)) {
@@ -31,7 +32,7 @@ namespace Weapon {
 				continue;
 			}
 
-			weapon->Update(deltaTime, ownerPosition, targetPosition);
+			weapon->Update(deltaTime, ownerPosition, targetPosition, runtimeModifiers_);
 			if (weapon->WasFiredThisFrame()) {
 				weaponAttackEvents_.push_back({
 					slotIndex,
@@ -46,7 +47,7 @@ namespace Weapon {
 		// 通常射撃のTarget有無と分離して常時展開型をPlayerへ追従
 		for (const std::unique_ptr<BaseWeapon>& weapon : weapons_) {
 			if (weapon) {
-				weapon->SynchronizePersistentProjectile(ownerPosition);
+				weapon->SynchronizePersistentProjectile(ownerPosition, runtimeModifiers_);
 			}
 		}
 	}

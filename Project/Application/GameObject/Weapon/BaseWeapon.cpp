@@ -51,6 +51,18 @@ namespace Weapon {
 				type == UpgradeStatType::PoisonDuration ||
 				type == UpgradeStatType::FrozenDuration;
 		}
+
+		/// @brief 状態異常の継続ダメージへ外部ダメージ倍率を適用
+		/// @param statusEffects 倍率を適用する状態異常設定
+		/// @param damageMultiplier 適用するダメージ倍率
+		void ApplyDamageMultiplier(StatusEffectStatus& statusEffects, float damageMultiplier) {
+			if (statusEffects.burn) {
+				statusEffects.burn->damagePerTick *= damageMultiplier;
+			}
+			if (statusEffects.poison) {
+				statusEffects.poison->damagePerTick *= damageMultiplier;
+			}
+		}
 	}
 
 	BaseWeapon::~BaseWeapon() {
@@ -237,21 +249,27 @@ namespace Weapon {
 		return true;
 	}
 
-	void BaseWeapon::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
+	void BaseWeapon::Update(
+		float deltaTime,
+		const Vector3& ownerPosition,
+		const Vector3& targetPosition,
+		const RuntimeModifiers& modifiers) {
 		wasFiredThisFrame_ = false;
 		if (Projectile::IsPersistentWeaponType(type_)) {
 			return;
 		}
 
-		CreateProjectile(deltaTime, ownerPosition, targetPosition);
+		CreateProjectile(deltaTime, ownerPosition, targetPosition, modifiers);
 	}
 
-	bool BaseWeapon::SynchronizePersistentProjectile(const Vector3& ownerPosition) {
+	bool BaseWeapon::SynchronizePersistentProjectile(
+		const Vector3& ownerPosition,
+		const RuntimeModifiers& modifiers) {
 		if (!Projectile::IsPersistentWeaponType(type_)) {
 			return false;
 		}
 
-		Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, ownerPosition);
+		Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, ownerPosition, modifiers);
 		const bool wasCreated = Projectile::Manager::GetInstance().SynchronizePersistentProjectile(type_, context);
 		if (wasCreated) {
 			++projectileCount_;
@@ -259,7 +277,11 @@ namespace Weapon {
 		return wasCreated;
 	}
 
-	void BaseWeapon::CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
+	void BaseWeapon::CreateProjectile(
+		float deltaTime,
+		const Vector3& ownerPosition,
+		const Vector3& targetPosition,
+		const RuntimeModifiers& modifiers) {
 
 		// Burst間のCooldown終了後に次の射撃間隔Timerを再開
 		if (cooldownTimer_.IsFinished()) {
@@ -274,16 +296,25 @@ namespace Weapon {
 			shotNowCount_++;
 			projectileCount_++;
 
-			Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, targetPosition);
+			Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, targetPosition, modifiers);
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 			wasFiredThisFrame_ = true;
 
 			// 最大射撃数へ到達したBurstを閉じてCooldownへ遷移
-			if (shotNowCount_ >= static_cast<int>(status_.shotMaxCount.value)) {
+			const int shotMaxCount = std::max(
+				1,
+				static_cast<int>(status_.shotMaxCount.value) + modifiers.additionalShotMaxCount);
+			if (shotNowCount_ >= shotMaxCount) {
 				shotNowCount_ = 0;
 				intervalTimer_.Reset();
-				cooldownTimer_.Start(status_.shotCooldown.value, false);
+				const float modifiedCooldown =
+					(status_.shotCooldown.value + modifiers.shotCooldownFlat) *
+					(1.0f + modifiers.shotCooldownRate);
+				const float cooldown = std::isfinite(modifiedCooldown)
+					? std::max(modifiedCooldown, 0.0f)
+					: std::max(status_.shotCooldown.value, 0.0f);
+				cooldownTimer_.Start(cooldown, false);
 			}
 		}
 
@@ -294,7 +325,8 @@ namespace Weapon {
 
 	Projectile::InitializeDesc BaseWeapon::CreateProjectileInitializeDesc(
 		const Vector3& ownerPosition,
-		const Vector3& targetPosition) const {
+		const Vector3& targetPosition,
+		const RuntimeModifiers& modifiers) const {
 		Projectile::InitializeDesc context;
 		context.sourceWeaponId = weaponId_;
 		context.projectileName = weaponName_;
@@ -306,8 +338,16 @@ namespace Weapon {
 			context.ownerPosition.y += kProjectileSpawnHeightOffset;
 		}
 		context.targetPosition = targetPosition;
-		context.damage = status_.damage.value;
-		context.criticalChance = status_.criticalChance.value;
+		const float damageMultiplier = std::isfinite(modifiers.damageMultiplier)
+			? std::max(modifiers.damageMultiplier, 0.0f)
+			: 1.0f;
+		context.damage = status_.damage.value * damageMultiplier;
+		const float modifiedCriticalChance =
+			(status_.criticalChance.value + modifiers.criticalChanceFlat) *
+			(1.0f + modifiers.criticalChanceRate);
+		context.criticalChance = std::isfinite(modifiedCriticalChance)
+			? std::clamp(modifiedCriticalChance, 0.0f, 100.0f)
+			: std::clamp(status_.criticalChance.value, 0.0f, 100.0f);
 		context.criticalDamage = status_.criticalDamage.value;
 		context.knockbackPower = status_.knockbackPower.value;
 		context.moveSpeed = status_.speed.value;
@@ -316,6 +356,7 @@ namespace Weapon {
 		context.bounceCount = ConvertToProjectileCount(status_.bounceCount.value);
 		context.penetrationCount = ConvertToProjectileCount(status_.penetrationCount.value);
 		context.statusEffects = ResolveStatusEffectStatus(statusEffectUpgrades_);
+		ApplyDamageMultiplier(context.statusEffects, damageMultiplier);
 		return context;
 	}
 }

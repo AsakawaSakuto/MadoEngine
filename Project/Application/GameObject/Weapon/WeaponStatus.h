@@ -6,6 +6,16 @@
 #include <string>
 
 namespace Weapon {
+
+	/// @brief 外部システムから全武器へ適用する実行時補正
+	struct RuntimeModifiers {
+		float damageMultiplier = 1.0f;
+		int additionalShotMaxCount = 0;
+		float criticalChanceFlat = 0.0f;
+		float criticalChanceRate = 0.0f;
+		float shotCooldownFlat = 0.0f;
+		float shotCooldownRate = 0.0f;
+	};
 	/// @brief 武器の強化対象ステータスを表す列挙型
 	enum class UpgradeStatType {
 		None,

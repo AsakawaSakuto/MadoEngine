@@ -23,12 +23,18 @@ namespace Weapon {
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param ownerPosition 武器所有者の座標
 		/// @param targetPosition 射撃対象の座標
-		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
+		void Update(
+			float deltaTime,
+			const Vector3& ownerPosition,
+			const Vector3& targetPosition,
+			const RuntimeModifiers& modifiers);
 
 		/// @brief 常時展開型Projectileを武器所有者の最新状態へ同期
 		/// @param ownerPosition 武器所有者の座標
 		/// @return 新しくProjectileを生成した場合はtrue
-		bool SynchronizePersistentProjectile(const Vector3& ownerPosition);
+		bool SynchronizePersistentProjectile(
+			const Vector3& ownerPosition,
+			const RuntimeModifiers& modifiers);
 
 		/// @brief 直前の更新でProjectileを射出したか確認
 		/// @return Projectileを射出した場合はtrue
@@ -96,7 +102,11 @@ namespace Weapon {
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param ownerPosition 武器所有者の座標
 		/// @param targetPosition 射撃対象の座標
-		void CreateProjectile(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
+		void CreateProjectile(
+			float deltaTime,
+			const Vector3& ownerPosition,
+			const Vector3& targetPosition,
+			const RuntimeModifiers& modifiers);
 
 		/// @brief 現在の武器状態からProjectile初期化情報を生成
 		/// @param ownerPosition 武器所有者の座標
@@ -104,7 +114,8 @@ namespace Weapon {
 		/// @return Projectileの初期化情報
 		Projectile::InitializeDesc CreateProjectileInitializeDesc(
 			const Vector3& ownerPosition,
-			const Vector3& targetPosition) const;
+			const Vector3& targetPosition,
+			const RuntimeModifiers& modifiers) const;
 		
 		// 武器のステータス
 		UpgradeStatus status_;

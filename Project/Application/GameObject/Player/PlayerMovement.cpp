@@ -107,6 +107,11 @@ namespace Player {
 		hasWallClimbStartedSinceLanding_ = false;
 		wasGroundContact_ = true;
 		wallClimbElapsedTime_ = 0.0f;
+		moveSpeedMultiplier_ = 1.0f;
+	}
+
+	void Movement::SetMoveSpeedMultiplier(float multiplier) {
+		moveSpeedMultiplier_ = std::isfinite(multiplier) ? std::max(multiplier, 0.0f) : 1.0f;
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
@@ -282,8 +287,9 @@ namespace Player {
 		}
 
 		if (!isCrouching && hasMoveInput) {
-			transform.translate.x += moveDir.x * movementParams_.moveSpeed_ * deltaTime;
-			transform.translate.z += moveDir.z * movementParams_.moveSpeed_ * deltaTime;
+			const float moveSpeed = movementParams_.moveSpeed_ * moveSpeedMultiplier_;
+			transform.translate.x += moveDir.x * moveSpeed * deltaTime;
+			transform.translate.z += moveDir.z * moveSpeed * deltaTime;
 			currentMotion_ = Player::Motion::Walk;
 		} else if (!isCrouching && !isGrounded_) {
 			currentMotion_ = Player::Motion::Jump;

@@ -6,7 +6,7 @@
 
 namespace Player {
 	namespace {
-		constexpr float kMovementSphereRadius = 0.5f;
+		constexpr float kMovementSphereRadius = 0.5f;                       // 移動解決用のSphereCollider半径
 		constexpr float kShadowGroundOffset = 0.01f;                        // 影の描画座標を地面より少し上にずらすことでZファイティングを回避
 		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>; // Modelの前方がZ軸負方向を向くため、Y軸回転を180度補正
 		constexpr float kHealthRegenerationInterval = 6.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
@@ -16,8 +16,10 @@ namespace Player {
 	void Base::Initialize(const Vector3& spawnGroundPosition, SceneType sceneType) {
 		sceneType_ = sceneType;
 		resourceGainEvents_.clear();
+		statusMultiplier_ = {};
 		isDead_ = false;
 		isDeathAnimationPlaying_ = false;
+		baseMaxHealth_ = status_.maxHealth;
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
@@ -76,6 +78,30 @@ namespace Player {
 		desc.loopOverride = true;
 	}
 
+	void Base::SetRuntimeModifiers(const RuntimeModifiers& modifiers) {
+		const float nextMaxHealth = baseMaxHealth_ + modifiers.maxHealthFlat;
+
+		// 最大HP増加分は現在HPにも加え、同じ補正の再適用では重複回復を防止
+		status_.maxHealth = nextMaxHealth;
+		status_.currentHealth = std::clamp(status_.currentHealth + nextMaxHealth - status_.maxHealth,0.0f, nextMaxHealth);
+
+		// 外部補正の倍率を反映
+		statusMultiplier_.money                   = modifiers.moneyGainMultiplier;
+		statusMultiplier_.exp                     = modifiers.expGainMultiplier;
+		statusMultiplier_.movementSpeed           = modifiers.movementSpeedMultiplier;
+		statusMultiplier_.healthRegenerationSpeed = modifiers.healthRegenerationSpeedMultiplier;
+
+		// 移動速度倍率を反映
+		movement_.SetMoveSpeedMultiplier(statusMultiplier_.movementSpeed);
+
+		// 効果変更前の進捗率を保ちつつ実行中のリジェネ周期を新しい速度へ同期
+		if (regenerationTimer_.IsActive()) {
+			const float interval = GetHealthRegenerationInterval();
+			regenerationTimer_.Start(interval, true);
+			regenerationTimer_.Update(interval * regenerationTimer_.GetProgress());
+		}
+	}
+
 	Sphere Base::CreateSpawnMovementCollider(const Vector3& spawnGroundPosition) {
 		Sphere collider;
 		collider.center = spawnGroundPosition;
@@ -109,10 +135,15 @@ namespace Player {
 			return;
 		}
 
-		status_.currentMoney += amount;
+		const float appliedAmount = static_cast<float>(amount) * statusMultiplier_.money;
+		if (!std::isfinite(appliedAmount) || appliedAmount <= 0.0f) {
+			return;
+		}
+
+		status_.currentMoney += appliedAmount;
 		resourceGainEvents_.push_back({
 			ResourceGainType::Money,
-			static_cast<float>(amount),
+			appliedAmount,
 		});
 	}
 
@@ -142,10 +173,15 @@ namespace Player {
 			return;
 		}
 
-		status_.currentExp += amount;
+		const float appliedAmount = static_cast<float>(amount) * statusMultiplier_.exp;
+		if (!std::isfinite(appliedAmount) || appliedAmount <= 0.0f) {
+			return;
+		}
+
+		status_.currentExp += appliedAmount;
 		resourceGainEvents_.push_back({
 			ResourceGainType::Exp,
-			static_cast<float>(amount),
+			appliedAmount,
 		});
 		ProcessLevelUp();
 	}
@@ -178,7 +214,7 @@ namespace Player {
 		}
 
 		// 被弾時点を起点に回復待機時間を再計測
-		regenerationTimer_.Start(kHealthRegenerationInterval, true);
+		regenerationTimer_.Start(GetHealthRegenerationInterval(), true);
 	}
 
 	void Base::BeginDeath() {
@@ -268,7 +304,7 @@ namespace Player {
 
 		// Timer停止中にHPが減った場合も自動で回復周期を再開
 		if (!regenerationTimer_.IsActive()) {
-			regenerationTimer_.Start(kHealthRegenerationInterval, true);
+			regenerationTimer_.Start(GetHealthRegenerationInterval(), true);
 		}
 
 		regenerationTimer_.Update(deltaTime);
@@ -283,6 +319,11 @@ namespace Player {
 		if (status_.currentHealth >= status_.maxHealth) {
 			regenerationTimer_.Stop();
 		}
+	}
+
+	float Base::GetHealthRegenerationInterval() const {
+		return kHealthRegenerationInterval /
+			std::max(statusMultiplier_.healthRegenerationSpeed, 0.01f);
 	}
 
 	void Base::Update(float deltaTime) {

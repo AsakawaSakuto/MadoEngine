@@ -179,6 +179,12 @@
     <ClCompile Include="Application\UI\Game\Player\PlayerStaminaGauge.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\GamePlayTimerView\GamePlayTimerView.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
+    <ClCompile Include="Application\GameObject\Relic\RelicCatalog.cpp" />
+    <ClCompile Include="Application\GameObject\Relic\RelicDefinition.cpp" />
+    <ClCompile Include="Application\GameObject\Relic\RelicEditor.cpp" />
+    <ClCompile Include="Application\GameObject\Relic\RelicInventory.cpp" />
+    <ClCompile Include="Application\GameObject\Relic\RelicSystem.cpp" />
+    <ClCompile Include="Application\UI\Game\Relic\RelicAcquisitionUI.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusJson.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
@@ -784,6 +790,12 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Relic\RelicCatalog.h" />
+    <ClInclude Include="Application\GameObject\Relic\RelicDefinition.h" />
+    <ClInclude Include="Application\GameObject\Relic\RelicEditor.h" />
+    <ClInclude Include="Application\GameObject\Relic\RelicInventory.h" />
+    <ClInclude Include="Application\GameObject\Relic\RelicSystem.h" />
+    <ClInclude Include="Application\UI\Game\Relic\RelicAcquisitionUI.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponStatusJson.h" />
     <ClInclude Include="Application\GameObject\Weapon\BaseWeapon.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>

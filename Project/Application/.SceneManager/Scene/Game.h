@@ -12,6 +12,8 @@
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
+#include "GameObject/Relic/RelicSystem.h"
+#include "GameObject/Relic/RelicEditor.h"
 #include "Utility/Light/LightManager.h"
 #include "Utility/Random.h"
 #include "UI/UIHeaders.h"
@@ -86,6 +88,9 @@ private:
 	/// @brief 現在Mapに依存する移動制限を各Game Systemへ同期
 	void SynchronizeMapDependentState();
 
+	/// @brief 所持レリックの変更をPlayerとWeaponへ反映
+	void ApplyRelicModifiersIfChanged();
+
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
 	
@@ -106,6 +111,8 @@ private:
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
 	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
 	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
+	std::unique_ptr<Relic::System> relicSystem_;
+	Relic::Editor relicEditor_;
 	
 	std::unique_ptr<UI::Game::PlayerIconUI> playerIconUI_;
 	std::unique_ptr<UI::Game::PlayerExpGauge> expGauge_;
@@ -113,6 +120,7 @@ private:
 	std::unique_ptr<UI::Game::PlayerStaminaGauge> staminaGauge_;
 	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
 	UI::Game::UpgradeUI weaponUpgradeUI_;
+	UI::Game::RelicAcquisitionUI relicAcquisitionUI_;
 
 	MadoEngine::TextHandle enemyCountText_{};
 	MadoEngine::TextHandle moneyText_{};
@@ -123,6 +131,9 @@ private:
 	UI::Game::EnemyDamageView enemyDamageView_;
 	int displayedMoney_ = -1;
 	bool useDebugCamera_ = false;
+	std::uint64_t appliedRelicRevision_ = 0;
+
+	const int weaponSlotCount_ = 4;
 
 	// System
 	std::unique_ptr<System::InGameSession> inGameSession_;
