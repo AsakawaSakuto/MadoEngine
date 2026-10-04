@@ -53,7 +53,7 @@ namespace UI::Game {
 				continue;
 			}
 
-			text->SetFontFamily("Segoe UI");
+			text->SetFontAsset("Assets/Font/dot.ttf", "dot");
 			text->SetFontSize(fontSize_);
 			text->SetAnchorPoint({ 0.5f, 0.5f });
 			text->SetWordWrap(false);

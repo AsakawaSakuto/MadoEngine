@@ -143,6 +143,22 @@
       "maxStack": 10,
       "rarity": "Uncommon",
       "textureName": "Accelerator"
+    },
+    {
+      "description": "ジャンプ可能回数 +1",
+      "displayName": "うちわ",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "JumpCount",
+          "type": "StatModifier",
+          "valuePerStack": 1.0
+        }
+      ],
+      "id": "jump_count_boost",
+      "maxStack": 10,
+      "rarity": "Uncommon",
+      "textureName": "Uchiwa"
     }
   ]
 }

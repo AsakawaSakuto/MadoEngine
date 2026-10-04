@@ -20,6 +20,7 @@ namespace Relic {
 		ExpGain,
 		ProjectileCriticalChance,
 		WeaponShotCooldown,
+		JumpCount,
 		Count,
 	};
 

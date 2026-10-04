@@ -201,6 +201,7 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
     <ClCompile Include="Application\UI\Game\Relic\RelicAcquisitionUI.cpp" />
+    <ClCompile Include="Application\UI\Game\Relic\RelicInventoryUI.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.cpp" />
     <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
@@ -437,6 +438,7 @@
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h" />
     <ClInclude Include="Application\UI\Game\Relic\RelicAcquisitionUI.h" />
+    <ClInclude Include="Application\UI\Game\Relic\RelicInventoryUI.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.h" />
     <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h" />
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h" />

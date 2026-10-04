@@ -48,6 +48,7 @@ namespace Player {
 		float moneyGainMultiplier = 1.0f;
 		float expGainMultiplier = 1.0f;
 		float healthRegenerationSpeedMultiplier = 1.0f;
+		int additionalJumpCount = 0;
 	};
 
 	/// @brief プレイヤーの移動に関するパラメータを管理する構造体

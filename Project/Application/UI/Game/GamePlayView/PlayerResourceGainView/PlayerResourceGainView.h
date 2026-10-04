@@ -83,7 +83,7 @@ namespace UI::Game {
 		float riseDistance_ = 48.0f;                             // 表示中に上昇するピクセル距離
 		float horizontalOffsetMin_ = -2.0f;                      // 通知を分散する最小Xオフセット
 		float horizontalOffsetMax_ = 2.0f;                       // 通知を分散する最大Xオフセット
-		float fontSize_ = 24.0f;                                 // 獲得通知のフォントサイズ
+		float fontSize_ = 16.0f;                                 // 獲得通知のフォントサイズ
 		Vector2 healthBasePosition_ = { 600.0f, 440.0f };        // HP獲得通知の基準座標
 		Vector2 expBasePosition_ = { 600.0f, 440.0f };           // Exp獲得通知の基準座標
 		Vector2 moneyBasePosition_ = { 600.0f, 440.0f };         // Money獲得通知の基準座標

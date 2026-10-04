@@ -97,7 +97,7 @@ namespace Player {
 		// 生成直後の重力落下で地形内部へ入らないよう初期状態を接地へ固定
 		velocityY_ = 0.0f;
 		isGrounded_ = true;
-		remainingJumpCount_ = movementParams_.jumpCount_;
+		remainingJumpCount_ = GetMaxJumpCount();
 		lastMoveStartPosition_ = {};
 		lastAttemptedHorizontalMove_ = {};
 		knockbackVelocity_ = {};
@@ -107,11 +107,23 @@ namespace Player {
 		hasWallClimbStartedSinceLanding_ = false;
 		wasGroundContact_ = true;
 		wallClimbElapsedTime_ = 0.0f;
-		moveSpeedMultiplier_ = 1.0f;
 	}
 
 	void Movement::SetMoveSpeedMultiplier(float multiplier) {
 		moveSpeedMultiplier_ = std::isfinite(multiplier) ? std::max(multiplier, 0.0f) : 1.0f;
+	}
+
+	void Movement::SetAdditionalJumpCount(int additionalJumpCount) {
+		const float previousMaxJumpCount = GetMaxJumpCount();
+		additionalJumpCount_ = std::max(additionalJumpCount, 0);
+		const float nextMaxJumpCount = GetMaxJumpCount();
+
+		// 空中で補正が変わっても使用済み回数を維持し、増減した上限分だけ残り回数へ反映
+		remainingJumpCount_ = std::clamp(
+			remainingJumpCount_ + nextMaxJumpCount - previousMaxJumpCount,
+			0.0f,
+			nextMaxJumpCount
+		);
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
@@ -551,7 +563,7 @@ namespace Player {
 
 		// 壁登りを接地回復に含めず実際の地面へ接地している場合だけ使用回数を回復
 		if (isGrounded_ && !isWallClimbing_) {
-			remainingJumpCount_ = movementParams_.jumpCount_;
+			remainingJumpCount_ = GetMaxJumpCount();
 		}
 
 		// 壁登り中のJump入力は回数を消費せず、壁登り解除後まで無視
@@ -576,8 +588,12 @@ namespace Player {
 			velocityY_ = 0.0f;
 			if (!isGrounded_) {
 				isGrounded_ = true;
-				remainingJumpCount_ = movementParams_.jumpCount_;
+				remainingJumpCount_ = GetMaxJumpCount();
 			}
 		}
+	}
+
+	float Movement::GetMaxJumpCount() const {
+		return std::max(0.0f, movementParams_.jumpCount_ + static_cast<float>(additionalJumpCount_));
 	}
 }

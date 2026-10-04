@@ -17,7 +17,7 @@ constexpr std::array<const char*, 4> kRarityNames = {
 	"エピック",
 	"レジェンダリー",
 };
-constexpr std::array<const char*, 9> kStatNames = {
+constexpr std::array<const char*, 10> kStatNames = {
 	"与ダメージ",
 	"最大HP",
 	"移動速度",
@@ -27,6 +27,7 @@ constexpr std::array<const char*, 9> kStatNames = {
 	"獲得EXP",
 	"Projectileクリティカル率",
 	"発射クールタイム",
+	"ジャンプ可能回数",
 };
 constexpr std::array<const char*, 2> kOperationNames = {
 	"固定加算",

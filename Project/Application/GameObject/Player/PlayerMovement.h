@@ -104,6 +104,10 @@ namespace Player {
 		/// @param multiplier 1.0を基準とする速度倍率
 		void SetMoveSpeedMultiplier(float multiplier);
 
+		/// @brief レリック由来の追加ジャンプ回数を設定
+		/// @param additionalJumpCount 追加するジャンプ回数
+		void SetAdditionalJumpCount(int additionalJumpCount);
+
 		/// @brief 移動パラメータを取得
 		/// @return 移動パラメータ
 		Player::MovementParams& GetParams() { return movementParams_; }
@@ -160,6 +164,10 @@ namespace Player {
 		/// @brief 壁登り時間切れによる強制Jumpを開始
 		void StartWallClimbTimeoutJump();
 
+		/// @brief 基礎値と外部補正から最大ジャンプ回数を取得
+		/// @return 0以上の最大ジャンプ回数
+		float GetMaxJumpCount() const;
+
 	private:
 
 		Vector3 slideVelocity_ = { 0.0f, 0.0f, 0.0f };
@@ -186,6 +194,7 @@ namespace Player {
 		float remainingJumpCount_ = 0.0f;    // 残りジャンプ回数
 		float wallClimbElapsedTime_ = 0.0f;  // 着地後から累積した壁登り時間
 		float moveSpeedMultiplier_ = 1.0f;   // 外部効果による歩行速度倍率
+		int additionalJumpCount_ = 0;        // 外部効果による追加ジャンプ回数
 
 		Player::MovementParams movementParams_; // 移動に関するパラメータ
 

@@ -121,6 +121,7 @@ private:
 	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
 	UI::Game::UpgradeUI weaponUpgradeUI_;
 	UI::Game::RelicAcquisitionUI relicAcquisitionUI_;
+	UI::Game::RelicInventoryUI relicInventoryUI_;
 
 	MadoEngine::TextHandle enemyCountText_{};
 	MadoEngine::TextHandle moneyText_{};

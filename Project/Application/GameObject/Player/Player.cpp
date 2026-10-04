@@ -91,8 +91,9 @@ namespace Player {
 		statusMultiplier_.movementSpeed           = modifiers.movementSpeedMultiplier;
 		statusMultiplier_.healthRegenerationSpeed = modifiers.healthRegenerationSpeedMultiplier;
 
-		// 移動速度倍率を反映
+		// Movementへ移動速度とジャンプ上限の外部補正を集約して反映
 		movement_.SetMoveSpeedMultiplier(statusMultiplier_.movementSpeed);
+		movement_.SetAdditionalJumpCount(modifiers.additionalJumpCount);
 
 		// 効果変更前の進捗率を保ちつつ実行中のリジェネ周期を新しい速度へ同期
 		if (regenerationTimer_.IsActive()) {

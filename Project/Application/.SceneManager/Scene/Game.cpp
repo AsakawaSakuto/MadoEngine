@@ -107,6 +107,7 @@ void Game::Initialize() {
 	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
 	weaponIconUI_->Initialize(weaponSlotCount_);
 	weaponUpgradeUI_.Initialize();
+	relicInventoryUI_.Initialize(*relicSystem_);
 	relicAcquisitionUI_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始
@@ -250,6 +251,7 @@ SceneType Game::Update(float dt) {
 		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_);
 	}
 	ApplyRelicModifiersIfChanged();
+	relicInventoryUI_.Update(*relicSystem_);
 
 	// レリック獲得を先に解決し、終了後に保留中のLevel Up選択へ遷移
 	const bool isRelicRewardPending = relicSystem_->HasPendingReward();
@@ -464,6 +466,12 @@ void Game::ApplyRelicModifiersIfChanged() {
 	playerModifiers.expGainMultiplier                 = modifiers.Resolve(Relic::Stat::ExpGain, 1.0f);
 	playerModifiers.healthRegenerationSpeedMultiplier = modifiers.Resolve(Relic::Stat::HealthRegenerationSpeed, 1.0f);
 
+	const float additionalJumpCount = modifiers.Resolve(Relic::Stat::JumpCount, 0.0f);
+	if (std::isfinite(additionalJumpCount)) {
+		const float clampedCount = std::clamp(additionalJumpCount, 0.0f, static_cast<float>((std::numeric_limits<int>::max)()));
+		playerModifiers.additionalJumpCount = static_cast<int>(std::lround(clampedCount));
+	}
+
 	player_->SetRuntimeModifiers(playerModifiers);
 
 	Weapon::RuntimeModifiers weaponModifiers;
@@ -503,6 +511,7 @@ bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 
 void Game::Finalize() {
 	relicAcquisitionUI_.Finalize();
+	relicInventoryUI_.Finalize();
 	weaponUpgradeUI_.Finalize();
 	if (healthGauge_) {
 		healthGauge_->Finalize();
