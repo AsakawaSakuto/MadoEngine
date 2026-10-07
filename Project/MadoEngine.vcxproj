@@ -175,10 +175,10 @@
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\GameScene.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\ResultScene.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Axe.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.cpp" />
@@ -200,6 +200,7 @@
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.cpp" />
     <ClCompile Include="Application\UI\Game\Relic\RelicAcquisitionUI.cpp" />
     <ClCompile Include="Application\UI\Game\Relic\RelicInventoryUI.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.cpp" />
@@ -397,10 +398,10 @@
     <ClInclude Include="Application\.SceneManager\SceneManager.h" />
     <ClInclude Include="Application\.SceneManager\SceneBgmController.h" />
     <ClInclude Include="Application\.SceneManager\SceneTransitionController.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\Game.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\Result.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\Test.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\Title.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\GameScene.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\TestScene.h" />
+    <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerStatus.h" />
     <ClInclude Include="Application\GameObject\Relic\RelicCatalog.h" />
     <ClInclude Include="Application\GameObject\Relic\RelicDefinition.h" />
@@ -437,6 +438,7 @@
     <ClInclude Include="Application\UI\Game\Player\PlayerIconUI.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h" />
+    <ClInclude Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.h" />
     <ClInclude Include="Application\UI\Game\Relic\RelicAcquisitionUI.h" />
     <ClInclude Include="Application\UI\Game\Relic\RelicInventoryUI.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.h" />

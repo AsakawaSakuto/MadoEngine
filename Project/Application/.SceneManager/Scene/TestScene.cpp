@@ -1,4 +1,4 @@
-#include "Test.h"
+#include "TestScene.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
 #include "Render/Object/2d/Text/MyText.h"
@@ -7,13 +7,13 @@
 #include <cmath>
 #include <format>
 
-Test::Test()
+TestScene::TestScene()
 	
 {}
 
-Test::~Test() {}
+TestScene::~TestScene() {}
 
-void Test::Initialize() {
+void TestScene::Initialize() {
 	Logger::Output("テストシーンを初期化しました", Logger::Level::Application);
 
 	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("TestDebugCamera");
@@ -24,16 +24,16 @@ void Test::Initialize() {
 	cameraManager_.CutTo(debugCameraHandle_);
 }
 
-SceneType Test::Update(float dt) {
+SceneType TestScene::Update(float dt) {
 	cameraManager_.Update(dt);
 	return SceneType::Test;
 }
 
-void Test::Draw() {
+void TestScene::Draw() {
 	
 }
 
-void Test::DrawImGui() {
+void TestScene::DrawImGui() {
 #ifdef USE_IMGUI
 
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
@@ -43,16 +43,16 @@ void Test::DrawImGui() {
 #endif // USE_IMGUI
 }
 
-Vector3 Test::GetShadowFocusPosition() const {
+Vector3 TestScene::GetShadowFocusPosition() const {
 	return Vector3{ 0.0f, 0.0f, 0.0f };
 }
 
-bool Test::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
+bool TestScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 	
 	return true;
 }
 
-void Test::Finalize() {
+void TestScene::Finalize() {
 	cameraManager_.Clear();
 	debugCameraHandle_ = {};
 	tpsCameraHandle_ = {};

@@ -155,6 +155,10 @@ namespace Enemy {
 		/// @return Enemyの現在座標
 		Vector3 GetPosition() const { return transform_.translate; }
 
+		/// @brief 状態異常アイコンを配置する頭上座標を取得
+		/// @return 被弾判定上端を基準とした頭上座標
+		Vector3 GetStatusEffectAnchorPosition() const;
+
 		/// @brief Enemyの当たり判定用Collider名を取得
 		/// @return Enemyの当たり判定用Collider名
 		const std::string& GetHitColliderName() const { return hitColliderName_; }

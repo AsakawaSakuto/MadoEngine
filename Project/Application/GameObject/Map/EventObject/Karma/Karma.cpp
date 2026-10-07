@@ -1,4 +1,5 @@
 #include "Karma.h"
+#include "GameObject/Player/Player.h"
 
 Karma::~Karma() {
 	MyCollider::RemoveCollider(colliderName_);
@@ -66,7 +67,7 @@ void Karma::Update(float deltaTime) {
 }
 
 bool Karma::Interact(Player::Base& player) {
-	(void)player;
+	player.AddKarma(1);
 
 	return true;
 }

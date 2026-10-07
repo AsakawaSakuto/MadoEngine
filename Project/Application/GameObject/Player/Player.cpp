@@ -187,6 +187,16 @@ namespace Player {
 		ProcessLevelUp();
 	}
 
+	void Base::AddKarma(int amount) {
+
+		// 不正な加算によって取得数が減少しないよう0以下を無視
+		if (amount <= 0) {
+			return;
+		}
+
+		status_.karmaCount += amount;
+	}
+
 	void Base::ProcessLevelUp() {
 		if (status_.expToNextLevel <= 0.0f) {
 			Logger::Output("[Engine] Playerの必要経験値が不正なため、レベルアップ処理をスキップしました。", Logger::Level::Warning);
@@ -517,6 +527,7 @@ namespace Player {
 		ImGui::Text("NextLvExp  : %d", status_.expToNextLevel);
 		ImGui::Separator();
 		ImGui::Text("Money : %d", status_.currentMoney);
+		ImGui::Text("Karma : %d", status_.karmaCount);
 
 		ImGui::End();
 

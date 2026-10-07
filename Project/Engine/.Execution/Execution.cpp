@@ -8,14 +8,14 @@
 namespace {
 
 	// レンダーターゲットの識別用キー
-	const std::string kSceneColorTarget = "SceneColor";               // 通常のシーン全体を最初に描く
-	const std::string kPostEffectResultTarget = "PostEffectResult";   // ポストエフェクト後の結果を置く場所
-	const std::string kPostEffectWorkTarget = "PostEffectWork";       // 複数回ポストエフェクトするための作業用バッファ
-	const std::string kDisplayResultTarget = "DisplayResult";         // Tone Mapping後の表示用結果
-	const std::string kDisplayWorkTarget = "DisplayWork";             // 表示用ポストエフェクトの作業用バッファ
-	const std::string kLayerColorTarget = "LayerColor";               // 特定レイヤーだけを描く
-	const std::string kLayerEffectResultTarget = "LayerEffectResult"; // レイヤー用ポストエフェクト結果
-	const std::string kLayerEffectWorkTarget = "LayerEffectWork";     // レイヤー用ポストエフェクトの作業用バッファ
+	const std::string kSceneColorTarget = "SceneColor";                             // 通常のシーン全体を最初に描く
+	const std::string kPostEffectResultTarget = "PostEffectResult";                 // ポストエフェクト後の結果を置く場所
+	const std::string kPostEffectWorkTarget = "PostEffectWork";                     // 複数回ポストエフェクトするための作業用バッファ
+	const std::string kDisplayResultTarget = "DisplayResult";                       // Tone Mapping後の表示用結果
+	const std::string kDisplayWorkTarget = "DisplayWork";                           // 表示用ポストエフェクトの作業用バッファ
+	const std::string kLayerColorTarget = "LayerColor";                             // 特定レイヤーだけを描く
+	const std::string kLayerEffectResultTarget = "LayerEffectResult";               // レイヤー用ポストエフェクト結果
+	const std::string kLayerEffectWorkTarget = "LayerEffectWork";                   // レイヤー用ポストエフェクトの作業用バッファ
 	const std::string kOverlayLayerColorTarget = "OverlayLayerColor";               // 表示色空間の特定レイヤーだけを描く
 	const std::string kOverlayLayerEffectResultTarget = "OverlayLayerEffectResult"; // 表示色空間のレイヤー用ポストエフェクト結果
 	const std::string kOverlayLayerEffectWorkTarget = "OverlayLayerEffectWork";     // 表示色空間のレイヤー用作業バッファ
@@ -126,11 +126,11 @@ namespace MadoEngine
 		Logger::Initialize();
 
 		// ウィンドウの設定
-		winDesc_.title = "MadoEngine";
+		winDesc_.title = "GigaSurvivor - with MadoEngine";
 		winDesc_.width = 1280;
 		winDesc_.height = 720;
 		winDesc_.iconPath = "Assets/Texture/.Engine/icon.png";
-		winDesc_.isResizable = false;
+		winDesc_.isResizable = true;
 		winDesc_.isShowMouseCursor = true;
 
 		// ウィンドウの初期化

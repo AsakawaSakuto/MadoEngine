@@ -1,29 +1,22 @@
 #pragma once
+#include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
-#include "GameObject/Map/Map.h"
-#include "GameObject/Map/MapLimit.h"
-#include "GameObject/Enemy/EnemyManager.h"
-#include "GameObject/Enemy/EnemySpawner.h"
-#include "GameObject/Weapon/WeaponInventory.h"
-#include "GameObject/Weapon/WeaponStatusEditor.h"
-#include "GameObject/Weapon/WeaponUpgradeSystem.h"
-#include "GameObject/Weapon/Projectile/ProjectileManager.h"
-#include "GameObject/Weapon/Projectile/ProjectileStatus.h"
-#include "Utility/Light/LightManager.h"
-#include "UI/UIHeaders.h"
-#include "System/InGameSession/InGameSession.h"
+#include <cstddef>
+#include <memory>
+#include <optional>
 
-/// @brief テストシーン
-/// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
-class Test : public IScene
+/// @brief タイトルシーン
+/// @details ゲームのタイトル画面を表示し、スペースキーでゲームシーンに遷移
+class TitleScene : public IScene
 {
 public:
 	/// @brief コンストラクタ
-	Test();
+	/// @param commonData Sceneをまたいで保持するApplication共通データ
+	explicit TitleScene(CommonData& commonData);
 
 	/// @brief デストラクタ
-	~Test() override;
+	~TitleScene() override;
 
 	/// @brief 初期化処理
 	void Initialize() override;
@@ -50,7 +43,17 @@ public:
 	/// @param outPosition PlayerのModelワールド座標を受け取る変数
 	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
+
 private:
+	CommonData& commonData_;
+	std::optional<std::size_t> selectedSeedIndex_;
+
+	MadoEngine::SpriteHandle wallPaperSprite_{};
+
 	CameraHandle debugCameraHandle_{};
 	CameraHandle tpsCameraHandle_{};
+
+	std::unique_ptr<Player::Base> player_;
+	ColliderShape groundCollider_;
+	Vector3 groundPosition_{};
 };

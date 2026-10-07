@@ -1,6 +1,7 @@
 #pragma once
 #include "EnemyBase.h"
 #include "GameObject/Combat/DamageEvent.h"
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -11,6 +12,12 @@ namespace Player {
 }
 
 namespace Enemy {
+	/// @brief Enemy頭上の状態異常表示に使用する読み取り専用データ
+	struct StatusEffectDisplayData {
+		std::uint32_t enemyId = 0;
+		Vector3 anchorPosition = { 0.0f, 0.0f, 0.0f };
+		std::array<bool, StatusEffect::kTypeCount> activeEffects{};
+	};
 
 	/// @brief 生成されたEnemyの所有と一括処理を管理するクラス
 	class Manager {
@@ -61,6 +68,11 @@ namespace Enemy {
 		/// @brief 未処理のEnemyダメージイベントを取得してキューをクリア
 		/// @return 発生順に格納されたEnemyダメージイベント
 		std::vector<Combat::DamageEvent> ConsumeDamageEvents();
+
+		/// @brief 生存中Enemyの状態異常表示データを収集
+		/// @param outDisplayData 状態異常表示データの格納先
+		void CollectStatusEffectDisplayData(
+			std::vector<StatusEffectDisplayData>& outDisplayData) const;
 
 	private:
 		/// @brief ProjectileとEnemyの衝突結果を処理

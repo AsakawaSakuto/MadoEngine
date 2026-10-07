@@ -4,15 +4,15 @@
 
 /// @brief リザルトシーン
 /// @details ゲームの結果を表示し、SpaceまたはGamePad AでTitle、QまたはGamePad XでGameへ遷移
-class Result : public IScene
+class ResultScene : public IScene
 {
 public:
 	/// @brief コンストラクタ
 	/// @param commonData Sceneをまたいで保持するApplication共通データ
-	explicit Result(CommonData& commonData);
+	explicit ResultScene(CommonData& commonData);
 
 	/// @brief デストラクタ
-	~Result() override;
+	~ResultScene() override;
 
 	/// @brief 初期化処理
 	void Initialize() override;

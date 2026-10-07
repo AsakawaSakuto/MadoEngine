@@ -48,7 +48,7 @@ namespace Projectile {
 		// 専用Modelが用意されるまでEyeのModelとTextureを仮表示に使用
 		model_ = MyModel::Create(objectName_, "Eye", SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("EyeTexture2");
+			model->SetTexture("ToxicBootsTexture");
 			model->SetTransform(transform_);
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);

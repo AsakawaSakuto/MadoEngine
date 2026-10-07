@@ -246,6 +246,28 @@ namespace Enemy {
 		return events;
 	}
 
+	void Manager::CollectStatusEffectDisplayData(
+		std::vector<StatusEffectDisplayData>& outDisplayData) const {
+		outDisplayData.clear();
+		outDisplayData.reserve(enemies_.size());
+
+		// 描画側へEnemy本体の参照を渡さず、表示に必要な現在値だけを複製
+		for (const std::unique_ptr<Base>& enemy : enemies_) {
+			if (!enemy || !enemy->IsActive() || enemy->IsEmerging()) {
+				continue;
+			}
+
+			StatusEffectDisplayData displayData;
+			displayData.enemyId = enemy->GetEnemyId();
+			displayData.anchorPosition = enemy->GetStatusEffectAnchorPosition();
+			for (std::size_t index = 0; index < StatusEffect::kTypeCount; ++index) {
+				displayData.activeEffects[index] =
+					enemy->HasStatusEffect(static_cast<StatusEffect::Type>(index));
+			}
+			outDisplayData.push_back(displayData);
+		}
+	}
+
 	void Manager::ProcessProjectileHits() {
 		std::vector<Projectile::EnemyTargetInfo> enemyTargets;
 		enemyTargets.reserve(enemies_.size());

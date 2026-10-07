@@ -20,17 +20,17 @@
 #include "System/InGameSession/InGameSession.h"
 #include <cstdint>
 
-/// @brief テストシーン
-/// @details 動作確認用のシーン。スペースキーでゲームシーンに遷移
-class Game : public IScene
+/// @brief ゲームシーン
+/// @details ゲーム本編の進行、ゲームオブジェクト、HUDの管理
+class GameScene : public IScene
 {
 public:
 	/// @brief コンストラクタ
 	/// @param commonData Sceneをまたいで保持するApplication共通データ
-	explicit Game(CommonData& commonData);
+	explicit GameScene(CommonData& commonData);
 
 	/// @brief デストラクタ
-	~Game() override;
+	~GameScene() override;
 
 	/// @brief 初期化処理
 	void Initialize() override;
@@ -130,6 +130,7 @@ private:
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
 	UI::Game::PlayerResourceGainView playerResourceGainView_;
 	UI::Game::EnemyDamageView enemyDamageView_;
+	UI::Game::EnemyStatusEffectIconView enemyStatusEffectIconView_;
 	int displayedMoney_ = -1;
 	bool useDebugCamera_ = false;
 	std::uint64_t appliedRelicRevision_ = 0;

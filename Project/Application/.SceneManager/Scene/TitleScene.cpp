@@ -1,4 +1,4 @@
-#include "Title.h"
+#include "TitleScene.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
@@ -7,12 +7,12 @@ namespace {
 	constexpr float kTitleMapHorizontalLimit = 16.0f;
 }
 
-Title::Title(CommonData& commonData)
+TitleScene::TitleScene(CommonData& commonData)
 	: commonData_(commonData) {}
 
-Title::~Title() {}
+TitleScene::~TitleScene() {}
 
-void Title::Initialize() {
+void TitleScene::Initialize() {
 	Logger::Output("タイトルシーンを初期化しました", Logger::Level::Application);
 
 	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("TitleDebugCamera");
@@ -48,7 +48,7 @@ void Title::Initialize() {
 	cameraManager_.CutTo(tpsCameraHandle_);
 }
 
-SceneType Title::Update(float dt) {
+SceneType TitleScene::Update(float dt) {
 	SceneType nextSceneType = SceneType::Title;
 	const SceneTransitionController& transitionController =
 		commonData_.GetSceneTransitionController();
@@ -83,10 +83,10 @@ SceneType Title::Update(float dt) {
 	return nextSceneType;
 }
 
-void Title::Draw() {
+void TitleScene::Draw() {
 }
 
-void Title::DrawImGui() {
+void TitleScene::DrawImGui() {
 #ifdef USE_IMGUI
 	
 	System::GameSeedSystem& gameSeedSystem = commonData_.GetGameSeedSystem();
@@ -146,7 +146,7 @@ void Title::DrawImGui() {
 #endif // USE_IMGUI
 }
 
-Vector3 Title::GetShadowFocusPosition() const {
+Vector3 TitleScene::GetShadowFocusPosition() const {
 	if (!player_) {
 		return GetCamera().GetPosition();
 	}
@@ -154,7 +154,7 @@ Vector3 Title::GetShadowFocusPosition() const {
 	return player_->GetPosition();
 }
 
-bool Title::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
+bool TitleScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 	if (!player_) {
 		outPosition = {};
 		return false;
@@ -164,7 +164,7 @@ bool Title::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 	return true;
 }
 
-void Title::Finalize() {
+void TitleScene::Finalize() {
 	if (player_) {
 		player_->SetCamera(nullptr);
 	}

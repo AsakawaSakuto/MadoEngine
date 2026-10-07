@@ -74,11 +74,16 @@ namespace Enemy {
 			elapsedTime_ - timeLimit_ : deltaTime;
 		spawnTimer_ += std::max(0.0f, effectiveDeltaTime);
 		const float spawnInterval = std::max(0.01f, wave->spawnInterval);
+		const std::uint64_t karmaBonusSpawnCount = static_cast<std::uint64_t>(
+			std::max(0, player_->GetKarmaCount()));
+		const std::uint32_t adjustedSpawnCount = static_cast<std::uint32_t>((std::min)(
+			static_cast<std::uint64_t>(wave->spawnCount) + karmaBonusSpawnCount,
+			static_cast<std::uint64_t>((std::numeric_limits<std::uint32_t>::max)())));
 
-		// 長いFrameでも経過した生成周期を取りこぼさないようTimer残量を順次消費
+		// 長いFrameでも経過した生成周期を取りこぼさず、各周期へ現在のKarma取得数を加算
 		while (spawnTimer_ >= spawnInterval) {
 			spawnTimer_ -= spawnInterval;
-			SpawnBatch(*wave, wave->spawnCount);
+			SpawnBatch(*wave, adjustedSpawnCount);
 		}
 	}
 

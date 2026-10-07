@@ -11,9 +11,23 @@ namespace UI::Game {
 
 		constexpr const char* kUpgradeCardSelectSoundKey = "UpgradeCardSelect";
 		constexpr const char* kUpgradeCardDecisionSoundKey = "UpgradeCardDecision";
+		constexpr Vector2 kOverlayPosition = { 640.0f, 388.0f };
+		constexpr Vector2 kOverlayScale = { 80.0f, 44.5f };
+		constexpr Vector4 kOverlayColor = { 0.0f, 0.0f, 0.0f, 184.0f / 255.0f };
 	}
 
 	void UpgradeUI::Initialize() {
+		const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
+		overlaySprite_ = MySprite::Create("WeaponUpgradeOverlay","white16x16",SceneType::Game,layer);
+		if (Sprite* overlay = MySprite::TryGet(overlaySprite_)) {
+			overlay->SetAnchorPoint({ 0.5f, 0.5f });
+			overlay->SetPosition(kOverlayPosition);
+			overlay->SetScale(kOverlayScale);
+			overlay->SetColor(kOverlayColor);
+			overlay->SetVisible(false);
+		}
+
+		// 暗幕の後にCardを生成して既存HUDと選択肢の間へ描画順を固定
 		for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
 			upgradeCards_[cardIndex].Initialize(cardIndex);
 		}
@@ -27,6 +41,7 @@ namespace UI::Game {
 		for (WeaponUpgradeCardUI& card : upgradeCards_) {
 			card.Finalize();
 		}
+		overlaySprite_ = {};
 	}
 
 	void UpgradeUI::Update(
@@ -197,6 +212,7 @@ namespace UI::Game {
 			ResetSelection();
 			return;
 		}
+		SetOverlayVisible(true);
 
 		const std::uint64_t currentGeneration = choices.front().generation;
 		if (selectedGeneration_ != currentGeneration) {
@@ -256,12 +272,19 @@ namespace UI::Game {
 
 	void UpgradeUI::ResetSelection() {
 		ResetDecisionAnimationState();
+		SetOverlayVisible(false);
 		selectedChoiceIndex_ = 0;
 		visibleChoiceCount_ = 0;
 		selectedGeneration_ = 0;
 		for (WeaponUpgradeCardUI& card : upgradeCards_) {
 			card.SetSelected(false);
 			card.SetVisible(false);
+		}
+	}
+
+	void UpgradeUI::SetOverlayVisible(bool isVisible) {
+		if (Sprite* overlay = MySprite::TryGet(overlaySprite_)) {
+			overlay->SetVisible(isVisible);
 		}
 	}
 }

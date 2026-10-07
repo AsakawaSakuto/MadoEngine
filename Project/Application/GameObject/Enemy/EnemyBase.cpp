@@ -279,6 +279,11 @@ namespace Enemy {
 		return statusEffectController_.GetRemainingTime(type);
 	}
 
+	Vector3 Base::GetStatusEffectAnchorPosition() const {
+		const AABB& hitCollider = std::get<AABB>(hitAABB_);
+		return transform_.translate + Vector3{ 0.0f, hitCollider.max.y, 0.0f };
+	}
+
 	std::vector<StatusEffectDamageEvent> Base::ConsumeStatusEffectDamageEvents() {
 		std::vector<StatusEffectDamageEvent> events;
 

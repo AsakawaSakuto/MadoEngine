@@ -4,6 +4,7 @@
 #include "Game/GamePlayView/GamePlayTimerView/GamePlayTimerView.h"
 #include "Game/GamePlayView/PlayerResourceGainView/PlayerResourceGainView.h"
 #include "Game/GamePlayView/EnemyDamageView/EnemyDamageView.h"
+#include "Game/GamePlayView/EnemyStatusEffectIconView/EnemyStatusEffectIconView.h"
 #include "Game/Player/PlayerExpGauge.h"
 #include "Game/Player/PlayerHealthGauge.h"
 #include "Game/Player/PlayerIconUI.h"

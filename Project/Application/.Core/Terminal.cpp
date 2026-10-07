@@ -20,10 +20,10 @@ Terminal::Terminal(HINSTANCE hInstance) {
 	sceneManager_ = std::make_unique<SceneManager>();
 
 	// 初期Scene生成前に利用可能なSceneTypeとFactoryを登録
-	sceneManager_->RegisterScene(SceneType::Test,   [](CommonData&) { return std::make_unique<Test>(); });
-	sceneManager_->RegisterScene(SceneType::Title,  [](CommonData& commonData) { return std::make_unique<Title>(commonData); });
-	sceneManager_->RegisterScene(SceneType::Game,   [](CommonData& commonData) { return std::make_unique<Game>(commonData); });
-	sceneManager_->RegisterScene(SceneType::Result, [](CommonData& commonData) { return std::make_unique<Result>(commonData); });
+	sceneManager_->RegisterScene(SceneType::Test,   [](CommonData&) { return std::make_unique<TestScene>(); });
+	sceneManager_->RegisterScene(SceneType::Title,  [](CommonData& commonData) { return std::make_unique<TitleScene>(commonData); });
+	sceneManager_->RegisterScene(SceneType::Game,   [](CommonData& commonData) { return std::make_unique<GameScene>(commonData); });
+	sceneManager_->RegisterScene(SceneType::Result, [](CommonData& commonData) { return std::make_unique<ResultScene>(commonData); });
 	sceneManager_->Initialize(SceneType::Title);
 }
 

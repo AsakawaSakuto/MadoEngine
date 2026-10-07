@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "GameScene.h"
 #include "Audio/MyAudio.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
@@ -23,12 +23,12 @@ namespace {
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
 }
 
-Game::Game(CommonData& commonData)
+GameScene::GameScene(CommonData& commonData)
 	: commonData_(commonData) {}
 
-Game::~Game() {}
+GameScene::~GameScene() {}
 
-void Game::Initialize() {
+void GameScene::Initialize() {
 
 	// Titleの選択状態を消費し、未選択時だけ新規抽選と履歴登録を実行
 	gameSeed_ = commonData_.GetGameSeedSystem().BeginGame();
@@ -58,6 +58,7 @@ void Game::Initialize() {
 	gamePlayTimerView_.Initialize();
 	playerResourceGainView_.Initialize();
 	enemyDamageView_.Initialize();
+	enemyStatusEffectIconView_.Initialize();
 
 	AABB mapLimitBox;
 	MapLimit mapLimit;
@@ -129,7 +130,7 @@ void Game::Initialize() {
 	}
 }
 
-SceneType Game::Update(float dt) {
+SceneType GameScene::Update(float dt) {
 	inGameSession_->Update(dt);
 
 	// Pauseと強化選択中はGameObjectへ渡す時間だけを停止
@@ -340,6 +341,8 @@ SceneType Game::Update(float dt) {
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
 	enemyDamageView_.SetVisible(inGameSession_->IsPlaying());
 	enemyDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
+	enemyStatusEffectIconView_.SetVisible(inGameSession_->IsPlaying());
+	enemyStatusEffectIconView_.Update(*enemyManager_, cameraManager_.GetRenderCamera());
 	playerResourceGainView_.SetVisible(inGameSession_->IsPlaying());
 	playerResourceGainView_.Update(deltaTime);
 
@@ -350,11 +353,11 @@ SceneType Game::Update(float dt) {
 	return SceneType::Game;
 }
 
-void Game::Draw() {
+void GameScene::Draw() {
 
 }
 
-void Game::DrawImGui() {
+void GameScene::DrawImGui() {
 #ifdef USE_IMGUI
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
@@ -374,35 +377,35 @@ void Game::DrawImGui() {
 #endif // USE_IMGUI
 }
 
-void Game::DrawMapGeneratorImGui() {
+void GameScene::DrawMapGeneratorImGui() {
 	if (map_) {
 		map_->DrawImGui(player_.get());
 	}
 }
 
-std::string Game::CaptureMapGeneratorEditorState() const {
+std::string GameScene::CaptureMapGeneratorEditorState() const {
 	return map_ ? map_->CaptureEditorState() : std::string{};
 }
 
-void Game::RestoreMapGeneratorEditorState(const std::string& snapshot) {
+void GameScene::RestoreMapGeneratorEditorState(const std::string& snapshot) {
 	if (map_) {
 		map_->RestoreEditorState(snapshot);
 	}
 }
 
-bool Game::SaveEditorDocuments() const {
+bool GameScene::SaveEditorDocuments() const {
 	const bool mapSucceeded = map_ && map_->SaveEditorSettings();
 	const bool relicSucceeded = relicSystem_ && relicEditor_.Save(*relicSystem_);
 	return mapSucceeded && relicSucceeded;
 }
 
-bool Game::ReloadEditorDocuments() {
+bool GameScene::ReloadEditorDocuments() {
 	const bool mapSucceeded = map_ && map_->ReloadEditorSettings();
 	const bool relicSucceeded = relicSystem_ && relicEditor_.Reload(*relicSystem_);
 	return mapSucceeded && relicSucceeded;
 }
 
-bool Game::ApplyPendingEditorOperations() {
+bool GameScene::ApplyPendingEditorOperations() {
 	if (!map_ || !map_->ApplyPendingEditorGeneration()) {
 		return false;
 	}
@@ -429,7 +432,7 @@ bool Game::ApplyPendingEditorOperations() {
 	return true;
 }
 
-void Game::SynchronizeMapDependentState() {
+void GameScene::SynchronizeMapDependentState() {
 	if (!map_) {
 		return;
 	}
@@ -452,7 +455,7 @@ void Game::SynchronizeMapDependentState() {
 	}
 }
 
-void Game::ApplyRelicModifiersIfChanged() {
+void GameScene::ApplyRelicModifiersIfChanged() {
 	if (!relicSystem_ || relicSystem_->GetRevision() == appliedRelicRevision_) {
 		return;
 	}
@@ -491,7 +494,7 @@ void Game::ApplyRelicModifiersIfChanged() {
 	appliedRelicRevision_ = relicSystem_->GetRevision();
 }
 
-Vector3 Game::GetShadowFocusPosition() const {
+Vector3 GameScene::GetShadowFocusPosition() const {
 	if (!player_) {
 		return GetCamera().GetPosition();
 	}
@@ -499,7 +502,7 @@ Vector3 Game::GetShadowFocusPosition() const {
 	return player_->GetPosition();
 }
 
-bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
+bool GameScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 	if (!player_) {
 		outPosition = {};
 		return false;
@@ -509,7 +512,7 @@ bool Game::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 	return true;
 }
 
-void Game::Finalize() {
+void GameScene::Finalize() {
 	relicAcquisitionUI_.Finalize();
 	relicInventoryUI_.Finalize();
 	weaponUpgradeUI_.Finalize();
@@ -535,6 +538,7 @@ void Game::Finalize() {
 	gamePlayTimerView_.Finalize();
 	playerResourceGainView_.Finalize();
 	enemyDamageView_.Finalize();
+	enemyStatusEffectIconView_.Finalize();
 	enemyCountText_ = {};
 	moneyText_ = {};
 	killCountText_ = {};

@@ -1,10 +1,10 @@
 #pragma once
 #include ".Execution/Execution.h"
 #include ".SceneManager/SceneManager.h"
-#include ".SceneManager/Scene/Test.h"
-#include ".SceneManager/Scene/Title.h"
-#include ".SceneManager/Scene/Game.h"
-#include ".SceneManager/Scene/Result.h"
+#include ".SceneManager/Scene/TestScene.h"
+#include ".SceneManager/Scene/TitleScene.h"
+#include ".SceneManager/Scene/GameScene.h"
+#include ".SceneManager/Scene/ResultScene.h"
 #include <vector>
 
 class Terminal final : private MadoEngine::Render::IRenderLayerBatchContext {

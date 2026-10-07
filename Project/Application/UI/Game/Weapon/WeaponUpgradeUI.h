@@ -56,8 +56,13 @@ namespace UI::Game {
 		/// @brief 選択状態を初期値へ戻してカードを非表示化
 		void ResetSelection();
 
+		/// @brief 背景を暗くするオーバーレイの表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetOverlayVisible(bool isVisible);
+
 		static constexpr std::size_t kUpgradeCardCount = 3;
 
+		MadoEngine::SpriteHandle overlaySprite_{};
 		std::array<WeaponUpgradeCardUI, kUpgradeCardCount> upgradeCards_;
 		std::size_t selectedChoiceIndex_ = 0;
 		std::size_t visibleChoiceCount_ = 0;

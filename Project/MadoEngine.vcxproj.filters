@@ -33,9 +33,9 @@
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Game.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Result.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Title.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\GameScene.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\ResultScene.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\TitleScene.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -78,7 +78,7 @@
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\Test.cpp" />
+    <ClCompile Include="Application\.SceneManager\Scene\TestScene.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Externals\imgui\imgui.cpp" />
     <ClCompile Include="Externals\imgui\imgui_demo.cpp" />
@@ -211,6 +211,7 @@
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffect.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.cpp" />
@@ -418,13 +419,13 @@
     <ClInclude Include="Application\.SceneManager\SceneManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\Title.h">
+    <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\Game.h">
+    <ClInclude Include="Application\.SceneManager\Scene\GameScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\Result.h">
+    <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\.SceneManager\IScene.h">
@@ -489,7 +490,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\Test.h">
+    <ClInclude Include="Application\.SceneManager\Scene\TestScene.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h">
@@ -893,6 +894,7 @@
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

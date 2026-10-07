@@ -1,17 +1,17 @@
-#include "Result.h"
+#include "ResultScene.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
-Result::Result(CommonData& commonData)
+ResultScene::ResultScene(CommonData& commonData)
 	: commonData_(commonData) {}
 
-Result::~Result() {}
+ResultScene::~ResultScene() {}
 
-void Result::Initialize() {
+void ResultScene::Initialize() {
 	Logger::Output("リザルトシーンを初期化しました", Logger::Level::Application);
 }
 
-SceneType Result::Update(float dt) {
+SceneType ResultScene::Update(float dt) {
 	if (commonData_.GetSceneTransitionController().IsTransitioning()) {
 		return SceneType::Result;
 	}
@@ -39,12 +39,12 @@ SceneType Result::Update(float dt) {
 	return SceneType::Result;
 }
 
-void Result::Draw() {
+void ResultScene::Draw() {
 }
 
-void Result::DrawImGui() {
+void ResultScene::DrawImGui() {
 }
 
-void Result::Finalize() {
+void ResultScene::Finalize() {
 	Logger::Output("リザルトシーンの終了処理を実行しました", Logger::Level::Application);
 }

@@ -67,6 +67,14 @@ namespace Player {
 		/// @param amount 加算する経験値
 		void AddExp(int amount);
 
+		/// @brief Karma取得数を加算
+		/// @param amount 加算するKarma取得数
+		void AddKarma(int amount);
+
+		/// @brief 現在のKarma取得数を取得
+		/// @return 現在のKarma取得数
+		int GetKarmaCount() const { return status_.karmaCount; }
+
 		/// @brief PlayerのHPを減少
 		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
