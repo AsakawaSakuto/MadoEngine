@@ -1,5 +1,6 @@
 #include "WeaponUpgradeSystem.h"
 #include "Audio/MyAudio.h"
+#include "GameObject/Player/Player.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <array>
@@ -10,45 +11,6 @@ namespace Weapon {
 	namespace {
 		constexpr std::size_t kChoiceCount = 3;
 		constexpr const char* kUpgradeTimingSoundKey = "UpgradeTiming";
-
-		struct RarityWeight {
-			Rarity rarity;
-			int weight;
-		};
-
-		// 新武器取得専用のUniqueを除外した武器強化用抽選テーブル
-		constexpr std::array<RarityWeight, 4> kRarityWeights = {
-			RarityWeight{ Rarity::Uncommon,  60 },
-			RarityWeight{ Rarity::Rare,      25 },
-			RarityWeight{ Rarity::Epic,      10 },
-			RarityWeight{ Rarity::Legendary, 5 },
-		};
-
-		/// @brief レアリティの日本語表示名を取得
-		/// @param rarity 表示名を取得するレアリティ
-		/// @return レアリティの日本語表示名
-		const char* GetRarityDisplayName(Rarity rarity) {
-			switch (rarity) {
-			case Rarity::Uncommon:  return "アンコモン";
-			case Rarity::Rare:      return "レア";
-			case Rarity::Epic:      return "エピック";
-			case Rarity::Legendary: return "レジェンダリー";
-			default:                return "不明";
-			}
-		}
-
-		/// @brief レアリティの表示色を取得
-		/// @param rarity 表示色を取得するレアリティ
-		/// @return RGBA形式の表示色
-		std::array<float, 4> GetRarityDisplayColor(Rarity rarity) {
-			switch (rarity) {
-			case Rarity::Uncommon:  return { 0.20f, 0.85f, 0.30f, 1.0f };
-			case Rarity::Rare:      return { 0.20f, 0.55f, 1.00f, 1.0f };
-			case Rarity::Epic:      return { 0.70f, 0.30f, 1.00f, 1.0f };
-			case Rarity::Legendary: return { 1.00f, 0.85f, 0.15f, 1.0f };
-			default:                return { 1.00f, 1.00f, 1.00f, 1.0f };
-			}
-		}
 
 		/// @brief 二つの強化値が表示精度内で一致するか確認
 		/// @param left 比較する強化値
@@ -67,6 +29,7 @@ namespace Weapon {
 	void UpgradeSystem::Initialize(int currentPlayerLevel, std::uint32_t randomSeed) {
 		previousPlayerLevel_ = currentPlayerLevel;
 		pendingUpgradeCount_ = 0;
+		rerollCost_ = kInitialRerollCost;
 		choices_.clear();
 		random_.SetSeed(randomSeed);
 		nextGeneration_ = 1;
@@ -139,18 +102,60 @@ namespace Weapon {
 		Logger::Output("[Application] Chest開封による武器アップグレードを追加しました。", Logger::Level::Debug);
 	}
 
-	bool UpgradeSystem::RerollChoices(const Inventory& inventory) {
+	bool UpgradeSystem::RerollChoices(const Inventory& inventory, Player::Base& player) {
 		if (!IsUpgrading() || choices_.empty()) {
 			return false;
 		}
 
+		const int paidCost = rerollCost_;
+		if (!player.CanAfford(paidCost)) {
+			Logger::Output(
+				"[Application] 所持金が不足しているため武器アップグレード候補をリロールできません。",
+				Logger::Level::Debug
+			);
+			return false;
+		}
+
+		// 候補生成の失敗時に料金だけを失わないよう再抽選の成立後に支払いを確定
+		if (!GenerateChoices(inventory)) {
+			return false;
+		}
+
+		if (!player.TrySpendMoney(paidCost)) {
+			Logger::Output(
+				"[Application] リロール成立後の所持金消費に失敗しました。",
+				Logger::Level::Error
+			);
+			return false;
+		}
+
+		// 長時間のプレイでも整数Overflowを起こさない範囲で次回料金を増加
+		if (rerollCost_ <= (std::numeric_limits<int>::max)() - kRerollCostIncrement) {
+			rerollCost_ += kRerollCostIncrement;
+		} else {
+			rerollCost_ = (std::numeric_limits<int>::max)();
+		}
+
+		Logger::Output(
+			"[Application] 所持金" + std::to_string(paidCost) +
+			"を消費して武器アップグレード候補をリロールしました。",
+			Logger::Level::Application
+		);
+		return true;
+	}
+
+	bool UpgradeSystem::RerollChoicesForDebug(const Inventory& inventory) {
+		if (!IsUpgrading() || choices_.empty()) {
+			return false;
+		}
+
+		// デバッグ操作ではPlayerの所持金と通常リロール料金を変更せず候補だけを更新
 		return GenerateChoices(inventory);
 	}
 
 	bool UpgradeSystem::GenerateChoices(const Inventory& inventory) {
 		hasGenerationAttempted_ = true;
 		lastGenerationAttemptRevision_ = inventory.GetRevision();
-		choices_.clear();
 
 		std::vector<Projectile::Type> candidateWeapons;
 		candidateWeapons.reserve(Projectile::kPlayableWeaponTypes.size());
@@ -175,9 +180,9 @@ namespace Weapon {
 			return false;
 		}
 
-		const std::uint64_t generation = nextGeneration_++;
-		choiceInventoryRevision_ = inventory.GetRevision();
-		choices_.reserve(kChoiceCount);
+		const std::uint64_t generation = nextGeneration_;
+		std::vector<UpgradeChoice> generatedChoices;
+		generatedChoices.reserve(kChoiceCount);
 
 		// 候補ごとに抽選済み武器を除外して三種類の武器を保証
 		for (std::size_t choiceIndex = 0; choiceIndex < kChoiceCount; ++choiceIndex) {
@@ -196,13 +201,12 @@ namespace Weapon {
 				// 未所持武器はステータス強化ではなく新規装備候補として構築
 				choice.choiceType = UpgradeChoiceType::NewWeapon;
 				choice.choiceTypeDisplayName = "新しい武器を装備";
-				choices_.push_back(std::move(choice));
+				generatedChoices.push_back(std::move(choice));
 				continue;
 			}
 
 			const std::vector<UpgradeStatType> selectableStats = weapon->GetSelectableUpgradeStatTypes();
 			if (selectableStats.empty()) {
-				choices_.clear();
 				if (!generationFailureLogged_) {
 					Logger::Output("[Application] 所持武器に強化対象ステータスがありません。", Logger::Level::Error);
 					generationFailureLogged_ = true;
@@ -218,7 +222,6 @@ namespace Weapon {
 			if (!upgradeValue || !weapon->CalculateUpgradeAmount(statType, rarity, calculatedAmount)) {
 
 				// 不完全な候補群を表示しないよう生成全体を取り消し
-				choices_.clear();
 				if (!generationFailureLogged_) {
 					Logger::Output("[Application] 武器の強化変化量を計算できません。", Logger::Level::Error);
 					generationFailureLogged_ = true;
@@ -234,10 +237,14 @@ namespace Weapon {
 			choice.calculatedAmount = calculatedAmount;
 			choice.statDisplayName = UpgradeStatTypeToDisplayName(statType);
 			choice.rarityDisplayName = GetRarityDisplayName(rarity);
-			choice.rarityDisplayColor = GetRarityDisplayColor(rarity);
-			choices_.push_back(std::move(choice));
+			choice.rarityDisplayColor = GetRarityDefaultColor(rarity);
+			generatedChoices.push_back(std::move(choice));
 		}
 
+		// 全候補の構築後にまとめて公開して失敗時は現在の選択肢を維持
+		choices_ = std::move(generatedChoices);
+		choiceInventoryRevision_ = inventory.GetRevision();
+		++nextGeneration_;
 		generationFailureLogged_ = false;
 		Logger::Output("[Application] 武器アップグレード候補を三つ生成しました。", Logger::Level::Debug);
 
@@ -248,22 +255,27 @@ namespace Weapon {
 
 	Rarity UpgradeSystem::DrawRarity() {
 		int totalWeight = 0;
-		for (const RarityWeight& entry : kRarityWeights) {
-			totalWeight += entry.weight;
+		for (const RarityDefinition& definition : kRarityDefinitions) {
+			totalWeight += definition.selectionWeight;
 		}
 
 		const int draw = random_.Int(1, totalWeight);
 		int cumulativeWeight = 0;
+		Rarity fallbackRarity = Rarity::Uncommon;
 
 		// 累積区間へ抽選値を対応付けて重み付きレアリティを決定
-		for (const RarityWeight& entry : kRarityWeights) {
-			cumulativeWeight += entry.weight;
+		for (const RarityDefinition& definition : kRarityDefinitions) {
+			if (definition.selectionWeight <= 0) {
+				continue;
+			}
+			fallbackRarity = definition.rarity;
+			cumulativeWeight += definition.selectionWeight;
 			if (draw <= cumulativeWeight) {
-				return entry.rarity;
+				return definition.rarity;
 			}
 		}
 
-		return Rarity::Legendary;
+		return fallbackRarity;
 	}
 
 	bool UpgradeSystem::SelectChoice(std::size_t choiceIndex, std::uint64_t generation, Inventory& inventory) {

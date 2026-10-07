@@ -11,12 +11,6 @@
 namespace {
 
 #ifdef USE_IMGUI
-constexpr std::array<const char*, 4> kRarityNames = {
-	"アンコモン",
-	"レア",
-	"エピック",
-	"レジェンダリー",
-};
 constexpr std::array<const char*, 10> kStatNames = {
 	"与ダメージ",
 	"最大HP",
@@ -81,6 +75,7 @@ namespace Relic {
 
 #ifdef USE_IMGUI
 
+		// 定義が存在しない場合も再読み込み操作だけを提供
 		ImGui::Begin("レリック定義");
 		if (editingDefinitions_.empty()) {
 			ImGui::TextUnformatted("編集可能なレリック定義がありません");
@@ -91,6 +86,7 @@ namespace Relic {
 			return;
 		}
 
+		// 編集対象の切り替え時に固定長テキストバッファも同期
 		selectedIndex_ = (std::min)(selectedIndex_, editingDefinitions_.size() - 1);
 		const char* selectedName = editingDefinitions_[selectedIndex_].displayName.c_str();
 		ImGui::SetNextItemWidth(260.0f);
@@ -165,10 +161,20 @@ namespace Relic {
 		}
 
 		Definition& definition = editingDefinitions_[selectedIndex_];
-		int rarityIndex = static_cast<int>(definition.rarity);
+
+		// 共通レアリティ定義を列挙して表示名と設定可能範囲を同期
 		ImGui::SetNextItemWidth(220.0f);
-		if (ImGui::Combo("固定レアリティ", &rarityIndex, kRarityNames.data(), static_cast<int>(kRarityNames.size()))) {
-			definition.rarity = static_cast<Rarity>(rarityIndex);
+		if (ImGui::BeginCombo("固定レアリティ", GetRarityDisplayName(definition.rarity))) {
+			for (const RarityDefinition& rarityDefinition : kRarityDefinitions) {
+				const bool isSelected = definition.rarity == rarityDefinition.rarity;
+				if (ImGui::Selectable(rarityDefinition.displayName, isSelected)) {
+					definition.rarity = rarityDefinition.rarity;
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
 		}
 		ImGui::SetNextItemWidth(220.0f);
 		if (ImGui::DragInt("所持上限", &definition.maxStack, 1.0f, 1, 999)) {

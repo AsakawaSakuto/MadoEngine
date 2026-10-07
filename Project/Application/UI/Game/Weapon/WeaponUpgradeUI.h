@@ -4,6 +4,11 @@
 #include <cstddef>
 #include <cstdint>
 
+namespace Player {
+
+	class Base;
+}
+
 namespace Weapon {
 
 	class Inventory;
@@ -25,10 +30,12 @@ namespace UI::Game {
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param upgradeSystem 武器アップグレード進行を管理するシステム
 		/// @param inventory 選択結果を適用する武器インベントリ
+		/// @param player リロール料金を支払うPlayer
 		void Update(
 			float deltaTime,
 			Weapon::UpgradeSystem& upgradeSystem,
-			Weapon::Inventory& inventory
+			Weapon::Inventory& inventory,
+			Player::Base& player
 		);
 
 		/// @brief 武器アップグレード確認用のImGuiを描画

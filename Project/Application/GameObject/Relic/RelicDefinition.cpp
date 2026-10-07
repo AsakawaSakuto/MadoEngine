@@ -53,21 +53,4 @@ namespace Relic {
 		return index < kStatCount ? additiveRate_[index] : 0.0f;
 	}
 
-	const char* ToDisplayName(Rarity rarity) {
-		switch (rarity) {
-		case Rarity::Uncommon:
-			return "アンコモン";
-		case Rarity::Rare:
-			return "レア";
-		case Rarity::Epic:
-			return "エピック";
-		case Rarity::Legendary:
-			return "レジェンダリー";
-		case Rarity::Unique:
-			return "ユニーク";
-		default:
-			return "不明";
-		}
-	}
-
 }

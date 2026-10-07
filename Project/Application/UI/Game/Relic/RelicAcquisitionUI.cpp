@@ -27,6 +27,16 @@ MadoEngine::Text* ResolveText(MadoEngine::TextHandle handle) {
 
 namespace UI::Game {
 
+	RelicAcquisitionUI::AppearanceSettings::AppearanceSettings() {
+
+		// 描画型に依存しない共通色からUI用Vector4への変換
+		for (const RarityDefinition& definition : kRarityDefinitions) {
+			const std::size_t index = static_cast<std::size_t>(definition.rarity);
+			const RarityColor& color = definition.displayColor;
+			rarityColors[index] = Vector4{ color[0], color[1], color[2], color[3] };
+		}
+	}
+
 	void RelicAcquisitionUI::Initialize() {
 		const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
 		panelSprites_[0] = MySprite::Create("RelicAcquisitionOverlay", "white16x16", SceneType::Game, layer);
@@ -156,10 +166,13 @@ namespace UI::Game {
 		}
 
 		if (ImGui::CollapsingHeader("レアリティ色", ImGuiTreeNodeFlags_DefaultOpen)) {
-			constexpr std::array<const char*, 5> rarityNames = { "アンコモン", "レア", "エピック", "レジェンダリー", "ユニーク" };
-			for (std::size_t index = 0; index < rarityNames.size(); ++index) {
+			for (const RarityDefinition& definition : kRarityDefinitions) {
+				const std::size_t index = static_cast<std::size_t>(definition.rarity);
 				ImGui::PushID(static_cast<int>(index));
-				settingsChanged |= ImGui::ColorEdit4(rarityNames[index], &appearanceSettings_.rarityColors[index].x, ImGuiColorEditFlags_AlphaBar);
+				settingsChanged |= ImGui::ColorEdit4(
+					definition.displayName,
+					&appearanceSettings_.rarityColors[index].x,
+					ImGuiColorEditFlags_AlphaBar);
 				ImGui::PopID();
 			}
 		}
@@ -259,7 +272,7 @@ namespace UI::Game {
 			name->SetText(definition.displayName);
 		}
 		if (MadoEngine::Text* rarity = ResolveText(textHandles_[1])) {
-			rarity->SetText(Relic::ToDisplayName(definition.rarity));
+			rarity->SetText(GetRarityDisplayName(definition.rarity));
 			rarity->SetColor(rarityColor);
 		}
 		if (MadoEngine::Text* description = ResolveText(textHandles_[2])) {

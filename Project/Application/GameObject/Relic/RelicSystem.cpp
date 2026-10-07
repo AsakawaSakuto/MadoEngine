@@ -7,13 +7,6 @@
 namespace {
 
 constexpr std::uint32_t kRelicRandomStreamId = 400;
-constexpr std::array<Rarity, 4> kRewardRarities = {
-	Rarity::Uncommon,
-	Rarity::Rare,
-	Rarity::Epic,
-	Rarity::Legendary,
-};
-constexpr std::array<float, 4> kRarityWeights = { 60.0f, 25.0f, 10.0f, 5.0f };
 
 }
 
@@ -69,14 +62,16 @@ namespace Relic {
 			return false;
 		}
 
-		std::array<std::vector<const Definition*>, kRewardRarities.size()> candidatesByRarity;
+		std::array<std::vector<const Definition*>, kRarityDefinitions.size()> candidatesByRarity;
 		for (const Definition& definition : catalog_.GetAll()) {
 			if (!inventory_.CanAdd(definition)) {
 				continue;
 			}
 
-			for (std::size_t index = 0; index < kRewardRarities.size(); ++index) {
-				if (definition.rarity == kRewardRarities[index]) {
+			for (std::size_t index = 0; index < kRarityDefinitions.size(); ++index) {
+				const RarityDefinition& rarityDefinition = kRarityDefinitions[index];
+				if (rarityDefinition.selectionWeight > 0 &&
+					definition.rarity == rarityDefinition.rarity) {
 					candidatesByRarity[index].push_back(&definition);
 					break;
 				}
@@ -87,7 +82,7 @@ namespace Relic {
 		float totalRarityWeight = 0.0f;
 		for (std::size_t index = 0; index < candidatesByRarity.size(); ++index) {
 			if (!candidatesByRarity[index].empty()) {
-				totalRarityWeight += kRarityWeights[index];
+				totalRarityWeight += static_cast<float>(kRarityDefinitions[index].selectionWeight);
 			}
 		}
 		if (totalRarityWeight <= 0.0f) {
@@ -101,7 +96,7 @@ namespace Relic {
 				continue;
 			}
 
-			rarityRoll -= kRarityWeights[index];
+			rarityRoll -= static_cast<float>(kRarityDefinitions[index].selectionWeight);
 			if (rarityRoll <= 0.0f) {
 
 				// 同じレアリティ内の全候補を均等な確率で選択
@@ -121,7 +116,7 @@ namespace Relic {
 		}
 
 		for (const Definition& definition : catalog_.GetAll()) {
-			if (inventory_.CanAdd(definition) && definition.rarity != Rarity::Unique) {
+			if (inventory_.CanAdd(definition) && IsStandardRarity(definition.rarity)) {
 				return true;
 			}
 		}

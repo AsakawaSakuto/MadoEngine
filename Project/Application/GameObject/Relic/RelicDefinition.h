@@ -84,9 +84,4 @@ namespace Relic {
 		std::array<float, kStatCount> additiveRate_{};
 	};
 
-	/// @brief レアリティを表示用文字列へ変換
-	/// @param rarity 変換対象のレアリティ
-	/// @return 表示用文字列
-	const char* ToDisplayName(Rarity rarity);
-
 }

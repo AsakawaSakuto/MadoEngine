@@ -8,30 +8,6 @@
 
 namespace {
 
-/// @brief 文字列からレアリティを取得
-/// @param text 変換対象文字列
-/// @param outRarity 変換結果の出力先
-/// @return 変換に成功した場合はtrue
-bool TryParseRarity(const std::string& text, Rarity& outRarity) {
-	if (text == "Uncommon") {
-		outRarity = Rarity::Uncommon;
-		return true;
-	}
-	if (text == "Rare") {
-		outRarity = Rarity::Rare;
-		return true;
-	}
-	if (text == "Epic") {
-		outRarity = Rarity::Epic;
-		return true;
-	}
-	if (text == "Legendary") {
-		outRarity = Rarity::Legendary;
-		return true;
-	}
-	return false;
-}
-
 /// @brief 文字列から補正対象ステータスを取得
 /// @param text 変換対象文字列
 /// @param outStat 変換結果の出力先
@@ -96,24 +72,6 @@ bool TryParseOperation(const std::string& text, Relic::ModifierOperation& outOpe
 	return false;
 }
 
-/// @brief レアリティをJSON用文字列へ変換
-/// @param rarity 変換対象のレアリティ
-/// @return JSONへ保存する文字列、無効値の場合は空文字列
-const char* RarityToJsonName(Rarity rarity) {
-	switch (rarity) {
-	case Rarity::Uncommon:
-		return "Uncommon";
-	case Rarity::Rare:
-		return "Rare";
-	case Rarity::Epic:
-		return "Epic";
-	case Rarity::Legendary:
-		return "Legendary";
-	default:
-		return "";
-	}
-}
-
 /// @brief 補正対象ステータスをJSON用文字列へ変換
 /// @param stat 変換対象のステータス
 /// @return JSONへ保存する文字列、無効値の場合は空文字列
@@ -164,7 +122,7 @@ const char* OperationToJsonName(Relic::ModifierOperation operation) {
 bool IsValidDefinition(const Relic::Definition& definition) {
 	if (definition.id.empty() || definition.displayName.empty() || definition.textureName.empty() ||
 		definition.maxStack <= 0 ||
-		RarityToJsonName(definition.rarity)[0] == '\0' || definition.effects.empty()) {
+		GetRaritySerializedName(definition.rarity)[0] == '\0' || definition.effects.empty()) {
 		return false;
 	}
 
@@ -270,7 +228,7 @@ namespace Relic {
 			definitionJson["displayName"] = definition.displayName;
 			definitionJson["description"] = definition.description;
 			definitionJson["textureName"] = definition.textureName;
-			definitionJson["rarity"] = RarityToJsonName(definition.rarity);
+			definitionJson["rarity"] = GetRaritySerializedName(definition.rarity);
 			definitionJson["maxStack"] = definition.maxStack;
 			definitionJson["effects"] = nlohmann::json::array();
 			for (const StatModifierEffect& effect : definition.effects) {

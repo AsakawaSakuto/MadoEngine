@@ -1,4 +1,5 @@
 #include "WeaponUpgradeUI.h"
+#include "GameObject/Player/Player.h"
 #include "GameObject/Weapon/WeaponInventory.h"
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
 #include "Input/MyInput.h"
@@ -7,8 +8,6 @@
 
 namespace UI::Game {
 	namespace {
-		constexpr const char* kUpgradeRerollAction = "UpgradeReroll";
-
 		constexpr const char* kUpgradeCardSelectSoundKey = "UpgradeCardSelect";
 		constexpr const char* kUpgradeCardDecisionSoundKey = "UpgradeCardDecision";
 		constexpr Vector2 kOverlayPosition = { 640.0f, 388.0f };
@@ -32,8 +31,6 @@ namespace UI::Game {
 			upgradeCards_[cardIndex].Initialize(cardIndex);
 		}
 		ResetSelection();
-
-		MyInput::RegisterInput(kUpgradeRerollAction, { DIK_F5 });
 	}
 
 	void UpgradeUI::Finalize() {
@@ -47,7 +44,8 @@ namespace UI::Game {
 	void UpgradeUI::Update(
 		float deltaTime,
 		Weapon::UpgradeSystem& upgradeSystem,
-		Weapon::Inventory& inventory) {
+		Weapon::Inventory& inventory,
+		Player::Base& player) {
 		SynchronizeSelection(upgradeSystem);
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
@@ -81,8 +79,16 @@ namespace UI::Game {
 			return;
 		}
 
-		if (MyInput::Trigger(kUpgradeRerollAction)) {
-			if (upgradeSystem.RerollChoices(inventory)) {
+		if (MyInput::GetKeybord()->IsTrigger(DIK_F5)) {
+			if (upgradeSystem.RerollChoicesForDebug(inventory)) {
+				SynchronizeSelection(upgradeSystem);
+				UpdateCards(0.0f);
+			}
+			return;
+		}
+
+		if (MyInput::Trigger("Reroll")) {
+			if (upgradeSystem.RerollChoices(inventory, player)) {
 				SynchronizeSelection(upgradeSystem);
 				UpdateCards(0.0f);
 			}
@@ -124,7 +130,8 @@ namespace UI::Game {
 
 		ImGui::Begin("武器アップグレード");
 		ImGui::Text("未処理アップグレード: %d", upgradeSystem.GetPendingUpgradeCount());
-		ImGui::TextDisabled("← / A・→ / D: 選択　Space / A: 決定　F5: リロール");
+		ImGui::Text("次回リロール料金: %d", upgradeSystem.GetRerollCost());
+		ImGui::TextDisabled("← / A・→ / D: 選択　Space / A: 決定　R / X: リロール　F5: 無料リロール(Debug)");
 		if (isDecisionAnimationPlaying_) {
 			ImGui::TextDisabled("選択決定演出中");
 		}

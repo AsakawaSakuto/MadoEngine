@@ -8,6 +8,11 @@
 #include <string>
 #include <vector>
 
+namespace Player {
+
+	class Base;
+}
+
 namespace Weapon {
 
 	/// @brief 武器アップグレード選択肢の種類
@@ -29,7 +34,7 @@ namespace Weapon {
 		std::string choiceTypeDisplayName;
 		std::string statDisplayName;
 		std::string rarityDisplayName;
-		std::array<float, 4> rarityDisplayColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		RarityColor rarityDisplayColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	};
 
 	/// @brief Playerレベルに応じた武器アップグレード進行を管理
@@ -61,10 +66,20 @@ namespace Weapon {
 		/// @return 現在の選択肢へのconst参照
 		const std::vector<UpgradeChoice>& GetChoices() const { return choices_; }
 
+		/// @brief 次回のリロールに必要な所持金を取得
+		/// @return 次回のリロール料金
+		int GetRerollCost() const { return rerollCost_; }
+
 		/// @brief 現在の武器アップグレード選択肢を再抽選
 		/// @param inventory 候補生成に使用する武器インベントリ
+		/// @param player リロール料金を支払うPlayer
+		/// @return 再抽選と支払いに成功した場合はtrue
+		bool RerollChoices(const Inventory& inventory, Player::Base& player);
+
+		/// @brief デバッグ用に料金なしで現在の武器アップグレード選択肢を再抽選
+		/// @param inventory 候補生成に使用する武器インベントリ
 		/// @return 再抽選に成功した場合はtrue
-		bool RerollChoices(const Inventory& inventory);
+		bool RerollChoicesForDebug(const Inventory& inventory);
 
 		/// @brief 指定した武器アップグレード選択肢を適用
 		/// @param choiceIndex 適用する選択肢の番号
@@ -83,8 +98,12 @@ namespace Weapon {
 		/// @return 抽選した武器強化レアリティ
 		Rarity DrawRarity();
 
+		static constexpr int kInitialRerollCost = 10;
+		static constexpr int kRerollCostIncrement = 10;
+
 		int previousPlayerLevel_ = 0;
 		int pendingUpgradeCount_ = 0;
+		int rerollCost_ = kInitialRerollCost;
 		std::vector<UpgradeChoice> choices_;
 		Random random_;
 		std::uint64_t nextGeneration_ = 1;

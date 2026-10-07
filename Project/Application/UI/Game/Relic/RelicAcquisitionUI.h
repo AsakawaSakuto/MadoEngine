@@ -32,6 +32,9 @@ namespace UI::Game {
 
 	private:
 		struct AppearanceSettings {
+			/// @brief 共通レアリティ色を使用して見た目設定を初期化
+			AppearanceSettings();
+
 			std::array<Vector2, 3> panelPositions = {
 				Vector2{ 640.0f, 360.0f },
 				Vector2{ 640.0f, 360.0f },
@@ -62,13 +65,7 @@ namespace UI::Game {
 				Vector4{ 242.0f / 255.0f, 247.0f / 255.0f, 1.0f, 1.0f },
 				Vector4{ 242.0f / 255.0f, 247.0f / 255.0f, 1.0f, 1.0f },
 			};
-			std::array<Vector4, 5> rarityColors = {
-				Vector4{ 0.32f, 0.88f, 0.40f, 1.0f },
-				Vector4{ 0.30f, 0.58f, 1.0f, 1.0f },
-				Vector4{ 0.72f, 0.36f, 1.0f, 1.0f },
-				Vector4{ 1.0f, 0.75f, 0.18f, 1.0f },
-				Vector4{ 1.0f, 0.30f, 0.30f, 1.0f },
-			};
+			std::array<Vector4, kRarityCount> rarityColors{};
 		};
 
 		/// @brief 現在の見た目設定を全描画要素へ反映

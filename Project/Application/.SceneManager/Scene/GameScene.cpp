@@ -249,7 +249,7 @@ SceneType GameScene::Update(float dt) {
 	if (inGameSession_->IsWaitingItemAcquisition()) {
 		relicAcquisitionUI_.Update(*relicSystem_);
 	} else if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
-		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_);
+		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_, *player_);
 	}
 	ApplyRelicModifiersIfChanged();
 	relicInventoryUI_.Update(*relicSystem_);
