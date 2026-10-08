@@ -180,7 +180,11 @@ const Sprite* SpriteManager::TryGet(SpriteHandle handle) const {
 
 SpriteHandle SpriteManager::Find(const std::string& name) const {
 	const auto it = nameToHandle_.find(name);
-	return it == nameToHandle_.end() ? SpriteHandle{} : it->second;
+	if (it == nameToHandle_.end()) {
+		return SpriteHandle{};
+	} else {
+		return it->second;
+	}
 }
 
 bool SpriteManager::IsValid(SpriteHandle handle) const {

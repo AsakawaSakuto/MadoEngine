@@ -66,9 +66,11 @@ namespace Projectile {
 		statusEffects_ = context.statusEffects;
 
 		// 不正な倍率による反転やゼロ半径を防ぎつつ強化値を攻撃範囲へ即時反映
-		sizeRate_ = std::isfinite(context.sizeRate)
-			? std::max(context.sizeRate, kMinSizeRate)
-			: kMinSizeRate;
+		if (std::isfinite(context.sizeRate)) {
+			sizeRate_ = std::max(context.sizeRate, kMinSizeRate);
+		} else {
+			sizeRate_ = kMinSizeRate;
+		}
 		Sphere& hitbox = std::get<Sphere>(hitbox_);
 		hitbox.radius = kBaseAttackRadius * sizeRate_;
 
@@ -142,9 +144,13 @@ namespace Projectile {
 	}
 
 	void Eye::UpdateColor(float deltaTime) {
-		const float safeDeltaTime = std::isfinite(deltaTime)
-			? std::max(deltaTime, 0.0f)
-			: 0.0f;
+		const float safeDeltaTime = [&]() {
+			if (std::isfinite(deltaTime)) {
+				return (std::max(deltaTime, 0.0f));
+			} else {
+				return (0.0f);
+			}
+		}();
 		colorAnimationTimer_.Update(safeDeltaTime);
 
 		// GameTimerのループ進捗をCos波へ変換して往復端の色変化を平滑化

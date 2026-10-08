@@ -43,7 +43,11 @@ namespace Weapon {
 		/// @brief 連射終了後のクールダウン進捗を取得
 		/// @return クールダウン開始を0.0f、終了を1.0fとした進捗、連射中は1.0f
 		float GetShotCooldownProgress() const {
-			return cooldownTimer_.IsActive() ? cooldownTimer_.GetProgress() : 1.0f;
+			if (cooldownTimer_.IsActive()) {
+				return cooldownTimer_.GetProgress();
+			} else {
+				return 1.0f;
+			}
 		}
 
 		Projectile::Type GetProjectileType() const { return type_; }

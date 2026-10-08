@@ -202,7 +202,13 @@ bool Model::TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition
 		localPosition = skinnedPosition;
 	}
 
-	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	const Camera* billboardCamera = [&]() -> const Camera* {
+		if (usebillbord_) {
+			return (&camera_);
+		} else {
+			return (nullptr);
+		}
+	}();
 	Matrix4x4 worldMatrix = MakeWorldMatrix(billboardCamera);
 	if (type_ == ModelType::Animated) {
 
@@ -297,7 +303,11 @@ bool Model::ResetTexture() {
 void Model::SetLightingEnabled(bool enabled) {
 	enableLighting_ = enabled;
 	if (materialData_) {
-		materialData_->enableLighting = enabled ? 1 : 0;
+		if (enabled) {
+			materialData_->enableLighting = 1;
+		} else {
+			materialData_->enableLighting = 0;
+		}
 	}
 }
 
@@ -307,7 +317,11 @@ void Model::SetDirectionalLight(const DirectionalLight& light) {
 }
 
 void Model::SetDirectionalLightEnabled(bool enabled) {
-	directionalLight_.useLight = enabled ? 1u : 0u;
+	if (enabled) {
+		directionalLight_.useLight = 1u;
+	} else {
+		directionalLight_.useLight = 0u;
+	}
 }
 
 void Model::SetDirectionalLightDirection(const Vector3& direction) {
@@ -323,7 +337,11 @@ void Model::SetDirectionalLightIntensity(float intensity) {
 }
 
 void Model::SetUseHalfLambert(bool enabled) {
-	directionalLight_.useHalfLambert = enabled ? 1u : 0u;
+	if (enabled) {
+		directionalLight_.useHalfLambert = 1u;
+	} else {
+		directionalLight_.useHalfLambert = 0u;
+	}
 }
 
 void Model::SetSceneType(SceneType sceneType) {
@@ -373,9 +391,17 @@ void Model::InitializeInstanceResources() {
 
 	materialData_ = CreateMappedBuffer<ModelMaterial>(device_.Get(), materialResource_);
 	materialData_->color = color_;
-	materialData_->enableLighting = enableLighting_ ? 1 : 0;
+	if (enableLighting_) {
+		materialData_->enableLighting = 1;
+	} else {
+		materialData_->enableLighting = 0;
+	}
 	materialData_->uvTransformMatrix = Matrix::MakeIdentity();
-	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+	if (useEnvironmentMap_) {
+		materialData_->useEnvironmentMap = 1;
+	} else {
+		materialData_->useEnvironmentMap = 0;
+	}
 
 	transformationData_ = CreateMappedBuffer<ModelTransformationMatrix>(device_.Get(), transformationResource_);
 	transformationData_->WVP = Matrix::MakeIdentity();
@@ -477,9 +503,17 @@ void Model::Update(float deltaTime) {
 
 	// UV変換をScale、Rotation、Translation順で合成してMaterial Bufferへ反映
 	materialData_->color = color_;
-	materialData_->enableLighting = enableLighting_ ? 1 : 0;
+	if (enableLighting_) {
+		materialData_->enableLighting = 1;
+	} else {
+		materialData_->enableLighting = 0;
+	}
 	materialData_->uvTransformMatrix = scale * rot * trans;
-	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+	if (useEnvironmentMap_) {
+		materialData_->useEnvironmentMap = 1;
+	} else {
+		materialData_->useEnvironmentMap = 0;
+	}
 }
 
 bool Model::PlayAnimation(std::string_view clipName, float blendDuration, bool restart) {
@@ -552,7 +586,11 @@ void Model::UpdateReceiveShadowGpuData() {
 		kShadowCompareBias,
 		0.0f
 	};
-	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
+	if ((receiveShadow_ && shadowMapSrvHandle_.ptr != 0)) {
+		shadowGpuData_->useShadow = 1u;
+	} else {
+		shadowGpuData_->useShadow = 0u;
+	}
 }
 
 bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* billboardCamera) const {
@@ -617,7 +655,13 @@ bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float
 
 	Vector3 worldMin;
 	Vector3 worldMax;
-	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	const Camera* billboardCamera = [&]() -> const Camera* {
+		if (usebillbord_) {
+			return (&camera_);
+		} else {
+			return (nullptr);
+		}
+	}();
 	if (!CalculateWorldAABB(worldMin, worldMax, billboardCamera)) {
 		return false;
 	}
@@ -674,8 +718,20 @@ void Model::Draw(Camera& useCamera) {
 	commandList_->SetGraphicsRootDescriptorTable(kModelRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
 	commandList_->SetGraphicsRootConstantBufferView(kModelRootCamera, cameraResource_->GetGPUVirtualAddress());
 
-	const UINT environmentRootIndex = (type_ == ModelType::Skinning) ? kSkinningRootEnvironment : kModelRootEnvironment;
-	const UINT lightGpuDataRootIndex = (type_ == ModelType::Skinning) ? kSkinningRootLight : kModelRootLight;
+	const UINT environmentRootIndex = [&]() {
+		if ((type_ == ModelType::Skinning)) {
+			return (kSkinningRootEnvironment);
+		} else {
+			return (kModelRootEnvironment);
+		}
+	}();
+	const UINT lightGpuDataRootIndex = [&]() {
+		if ((type_ == ModelType::Skinning)) {
+			return (kSkinningRootLight);
+		} else {
+			return (kModelRootLight);
+		}
+	}();
 	UpdateLightGpuData();
 	commandList_->SetGraphicsRootConstantBufferView(lightGpuDataRootIndex, lightGpuDataResource_->GetGPUVirtualAddress());
 
@@ -693,7 +749,13 @@ void Model::Draw(Camera& useCamera) {
 	const D3D12_GPU_DESCRIPTOR_HANDLE fallbackSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_);
 
 	// Shadow未設定時もRoot Descriptorを有効に保つためModel TextureをFallbackに使用
-	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = shadowMapSrvHandle_.ptr != 0 ? shadowMapSrvHandle_ : fallbackSrv;
+	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = [&]() {
+		if (shadowMapSrvHandle_.ptr != 0) {
+			return (shadowMapSrvHandle_);
+		} else {
+			return (fallbackSrv);
+		}
+	}();
 	if (type_ == ModelType::Skinning) {
 		commandList_->SetGraphicsRootConstantBufferView(kSkinningRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
 		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootShadowMap, shadowSrv);
@@ -720,7 +782,13 @@ void Model::Draw(Camera& useCamera) {
 }
 
 void Model::DrawShadow(const Matrix4x4& lightViewProjection) {
-	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	const Camera* billboardCamera = [&]() -> const Camera* {
+		if (usebillbord_) {
+			return (&camera_);
+		} else {
+			return (nullptr);
+		}
+	}();
 	DrawShadowInternal(lightViewProjection, billboardCamera);
 }
 
@@ -738,9 +806,13 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 	UpdateShadowTransformGpuData(lightViewProjection, billboardCamera);
 
 	// SkinningのPalette Bind有無に合わせてDepth専用Pipelineを選択
-	const MadoEngine::Render::PSODesc shadowPsoDesc = type_ == ModelType::Skinning
-		? CreateSkinningShadowPSODesc()
-		: MadoEngine::Render::ShadowMap::CreatePSODesc();
+	const MadoEngine::Render::PSODesc shadowPsoDesc = [&]() {
+		if (type_ == ModelType::Skinning) {
+			return (CreateSkinningShadowPSODesc());
+		} else {
+			return (MadoEngine::Render::ShadowMap::CreatePSODesc());
+		}
+	}();
 	commandList_->SetGraphicsRootSignature(
 		MadoEngine::RootSignatureManager::GetInstance().Get(shadowPsoDesc.rootSigKey));
 	commandList_->SetPipelineState(psoRegistry_->Get(shadowPsoDesc));

@@ -25,7 +25,11 @@ namespace {
 	/// @param fallback 非有限値の場合に使用する値
 	/// @return 有限値または代替値
 	float SanitizeFinite(float value, float fallback) {
-		return std::isfinite(value) ? value : fallback;
+		if (std::isfinite(value)) {
+			return value;
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Vector3の各成分を有限値へ補正

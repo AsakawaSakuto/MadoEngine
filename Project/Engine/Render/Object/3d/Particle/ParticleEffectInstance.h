@@ -82,7 +82,11 @@ namespace MadoEngine::Particle {
 		/// @brief 生存Particle数を取得
 		/// @return 生存Particle数
 		uint32_t GetAliveCount() const {
-			return runtime_ ? runtime_->GetAliveCount() : 0;
+			if (runtime_) {
+				return runtime_->GetAliveCount();
+			} else {
+				return 0;
+			}
 		}
 
 		/// @brief Runtime情報を取得

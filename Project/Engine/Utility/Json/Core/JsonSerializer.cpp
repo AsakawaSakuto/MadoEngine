@@ -176,9 +176,17 @@ namespace MadoEngine::Json {
 		}
 
 		Transform2D result = defaultValue;
-		result.scale = json.contains("scale") ? ToVector2(json.at("scale"), defaultValue.scale) : defaultValue.scale;
+		if (json.contains("scale")) {
+			result.scale = ToVector2(json.at("scale"), defaultValue.scale);
+		} else {
+			result.scale = defaultValue.scale;
+		}
 		result.rotate = GetOrDefault<float>(json, "rotate", defaultValue.rotate);
-		result.translate = json.contains("translate") ? ToVector2(json.at("translate"), defaultValue.translate) : defaultValue.translate;
+		if (json.contains("translate")) {
+			result.translate = ToVector2(json.at("translate"), defaultValue.translate);
+		} else {
+			result.translate = defaultValue.translate;
+		}
 		return result;
 	}
 
@@ -188,9 +196,21 @@ namespace MadoEngine::Json {
 		}
 
 		Transform3D result = defaultValue;
-		result.scale = json.contains("scale") ? ToVector3(json.at("scale"), defaultValue.scale) : defaultValue.scale;
-		result.rotate = json.contains("rotate") ? ToVector3(json.at("rotate"), defaultValue.rotate) : defaultValue.rotate;
-		result.translate = json.contains("translate") ? ToVector3(json.at("translate"), defaultValue.translate) : defaultValue.translate;
+		if (json.contains("scale")) {
+			result.scale = ToVector3(json.at("scale"), defaultValue.scale);
+		} else {
+			result.scale = defaultValue.scale;
+		}
+		if (json.contains("rotate")) {
+			result.rotate = ToVector3(json.at("rotate"), defaultValue.rotate);
+		} else {
+			result.rotate = defaultValue.rotate;
+		}
+		if (json.contains("translate")) {
+			result.translate = ToVector3(json.at("translate"), defaultValue.translate);
+		} else {
+			result.translate = defaultValue.translate;
+		}
 		return result;
 	}
 
@@ -200,9 +220,21 @@ namespace MadoEngine::Json {
 		}
 
 		EulerTransform result = defaultValue;
-		result.scale = json.contains("scale") ? ToVector3(json.at("scale"), defaultValue.scale) : defaultValue.scale;
-		result.rotate = json.contains("rotate") ? ToVector3(json.at("rotate"), defaultValue.rotate) : defaultValue.rotate;
-		result.translate = json.contains("translate") ? ToVector3(json.at("translate"), defaultValue.translate) : defaultValue.translate;
+		if (json.contains("scale")) {
+			result.scale = ToVector3(json.at("scale"), defaultValue.scale);
+		} else {
+			result.scale = defaultValue.scale;
+		}
+		if (json.contains("rotate")) {
+			result.rotate = ToVector3(json.at("rotate"), defaultValue.rotate);
+		} else {
+			result.rotate = defaultValue.rotate;
+		}
+		if (json.contains("translate")) {
+			result.translate = ToVector3(json.at("translate"), defaultValue.translate);
+		} else {
+			result.translate = defaultValue.translate;
+		}
 		return result;
 	}
 
@@ -212,9 +244,21 @@ namespace MadoEngine::Json {
 		}
 
 		QuaternionTransform result = defaultValue;
-		result.scale = json.contains("scale") ? ToVector3(json.at("scale"), defaultValue.scale) : defaultValue.scale;
-		result.rotate = json.contains("rotate") ? ToQuaternion(json.at("rotate"), defaultValue.rotate) : defaultValue.rotate;
-		result.translate = json.contains("translate") ? ToVector3(json.at("translate"), defaultValue.translate) : defaultValue.translate;
+		if (json.contains("scale")) {
+			result.scale = ToVector3(json.at("scale"), defaultValue.scale);
+		} else {
+			result.scale = defaultValue.scale;
+		}
+		if (json.contains("rotate")) {
+			result.rotate = ToQuaternion(json.at("rotate"), defaultValue.rotate);
+		} else {
+			result.rotate = defaultValue.rotate;
+		}
+		if (json.contains("translate")) {
+			result.translate = ToVector3(json.at("translate"), defaultValue.translate);
+		} else {
+			result.translate = defaultValue.translate;
+		}
 		return result;
 	}
 

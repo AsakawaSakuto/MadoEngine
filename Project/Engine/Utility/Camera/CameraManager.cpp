@@ -57,7 +57,11 @@ namespace {
 			key,
 			defaultValue
 		);
-		return std::isfinite(value) ? std::clamp(value, minValue, maxValue) : defaultValue;
+		if (std::isfinite(value)) {
+			return std::clamp(value, minValue, maxValue);
+		} else {
+			return defaultValue;
+		}
 	}
 
 	/// @brief Vector3の全成分が有限値か確認
@@ -71,14 +75,22 @@ namespace {
 	/// @param mode 変換対象の遷移方式
 	/// @return Jsonへ保存する遷移方式名
 	const char* CameraTransitionModeToString(CameraTransitionMode mode) {
-		return mode == CameraTransitionMode::Blend ? "Blend" : "Cut";
+		if (mode == CameraTransitionMode::Blend) {
+			return "Blend";
+		} else {
+			return "Cut";
+		}
 	}
 
 	/// @brief Json表示名からCamera遷移方式を取得
 	/// @param value 読み込んだ遷移方式名
 	/// @return 名前に対応する遷移方式
 	CameraTransitionMode CameraTransitionModeFromString(const std::string& value) {
-		return value == "Blend" ? CameraTransitionMode::Blend : CameraTransitionMode::Cut;
+		if (value == "Blend") {
+			return CameraTransitionMode::Blend;
+		} else {
+			return CameraTransitionMode::Cut;
+		}
 	}
 
 	/// @brief Shake軸をJson表示名へ変換
@@ -161,17 +173,29 @@ CameraHandle CameraManager::RegisterCamera(
 
 Camera* CameraManager::TryGetCamera(CameraHandle handle) {
 	CameraEntry* entry = TryGetEntry(handle);
-	return entry ? entry->camera.get() : nullptr;
+	if (entry) {
+		return entry->camera.get();
+	} else {
+		return nullptr;
+	}
 }
 
 const Camera* CameraManager::TryGetCamera(CameraHandle handle) const {
 	const CameraEntry* entry = TryGetEntry(handle);
-	return entry ? entry->camera.get() : nullptr;
+	if (entry) {
+		return entry->camera.get();
+	} else {
+		return nullptr;
+	}
 }
 
 CameraHandle CameraManager::Find(const std::string& name) const {
 	const auto cameraIt = cameraHandlesByName_.find(name);
-	return cameraIt != cameraHandlesByName_.end() ? cameraIt->second : CameraHandle{};
+	if (cameraIt != cameraHandlesByName_.end()) {
+		return cameraIt->second;
+	} else {
+		return CameraHandle{};
+	}
 }
 
 std::vector<CameraHandle> CameraManager::GetCameraHandles() const {
@@ -188,7 +212,11 @@ std::vector<CameraHandle> CameraManager::GetCameraHandles() const {
 
 std::string CameraManager::GetCameraName(CameraHandle handle) const {
 	const CameraEntry* entry = TryGetEntry(handle);
-	return entry ? entry->name : std::string{};
+	if (entry) {
+		return entry->name;
+	} else {
+		return std::string{};
+	}
 }
 
 bool CameraManager::RenameCamera(CameraHandle handle, const std::string& newName) {
@@ -222,7 +250,11 @@ bool CameraManager::IsEditorManaged(CameraHandle handle) const {
 
 CameraTransitionSettings CameraManager::GetTransitionSettings(CameraHandle handle) const {
 	const CameraEntry* entry = TryGetEntry(handle);
-	return entry ? entry->transitionSettings : CameraTransitionSettings{};
+	if (entry) {
+		return entry->transitionSettings;
+	} else {
+		return CameraTransitionSettings{};
+	}
 }
 
 bool CameraManager::SetTransitionSettings(
@@ -239,8 +271,11 @@ bool CameraManager::SetTransitionSettings(
 	}
 
 	entry->transitionSettings = settings;
-	entry->transitionSettings.blendDuration =
-		std::isfinite(settings.blendDuration) ? (std::max)(settings.blendDuration, 0.0f) : 0.5f;
+	if (std::isfinite(settings.blendDuration)) {
+		entry->transitionSettings.blendDuration = (std::max)(settings.blendDuration, 0.0f);
+	} else {
+		entry->transitionSettings.blendDuration = 0.5f;
+	}
 	return true;
 }
 
@@ -263,7 +298,11 @@ bool CameraManager::ExecuteTransition(CameraHandle handle) {
 
 CameraShakeSettings CameraManager::GetShakeSettings(CameraHandle handle) const {
 	const CameraEntry* entry = TryGetEntry(handle);
-	return entry ? entry->shakeSettings : CameraShakeSettings{};
+	if (entry) {
+		return entry->shakeSettings;
+	} else {
+		return CameraShakeSettings{};
+	}
 }
 
 bool CameraManager::SetShakeSettings(
@@ -275,14 +314,16 @@ bool CameraManager::SetShakeSettings(
 	}
 
 	entry->shakeSettings = settings;
-	entry->shakeSettings.power =
-		std::isfinite(settings.power)
-		? std::clamp(settings.power, 0.0f, kMaxShakePower)
-		: 0.25f;
-	entry->shakeSettings.duration =
-		std::isfinite(settings.duration)
-		? std::clamp(settings.duration, 0.0f, kMaxShakeDuration)
-		: 0.5f;
+	if (std::isfinite(settings.power)) {
+		entry->shakeSettings.power = std::clamp(settings.power, 0.0f, kMaxShakePower);
+	} else {
+		entry->shakeSettings.power = 0.25f;
+	}
+	if (std::isfinite(settings.duration)) {
+		entry->shakeSettings.duration = std::clamp(settings.duration, 0.0f, kMaxShakeDuration);
+	} else {
+		entry->shakeSettings.duration = 0.5f;
+	}
 	return true;
 }
 
@@ -413,16 +454,24 @@ void CameraManager::Clear() {
 }
 
 std::filesystem::path CameraManager::CreateDefaultJsonPath(const std::string& sceneName) {
-	const std::string validSceneName = sceneName.empty() ? "Unknown" : sceneName;
+	const std::string validSceneName = [&]() -> std::string {
+		if (sceneName.empty()) {
+			return ("Unknown");
+		} else {
+			return (sceneName);
+		}
+	}();
 	return std::filesystem::path(kDefaultCameraJsonDirectory) / (validSceneName + ".json");
 }
 
 nlohmann::json CameraManager::ToJson() const {
 	nlohmann::json root = nlohmann::json::object();
 	root["version"] = kCameraJsonVersion;
-	root["activeCamera"] = IsValid(activeCameraHandle_)
-		? GetCameraName(activeCameraHandle_)
-		: std::string{};
+	if (IsValid(activeCameraHandle_)) {
+		root["activeCamera"] = GetCameraName(activeCameraHandle_);
+	} else {
+		root["activeCamera"] = std::string{};
+	}
 	root["cameras"] = nlohmann::json::array();
 	root["transitions"] = nlohmann::json::array();
 	root["shakes"] = nlohmann::json::array();
@@ -457,9 +506,13 @@ nlohmann::json CameraManager::ToJson() const {
 		root["transitions"].push_back({
 			{ "camera", entry.name },
 			{ "mode", CameraTransitionModeToString(transition.mode) },
-			{ "destination", IsValid(transition.destinationHandle)
-				? GetCameraName(transition.destinationHandle)
-				: std::string{} },
+			{ "destination", [&]() {
+				if (IsValid(transition.destinationHandle)) {
+					return (GetCameraName(transition.destinationHandle));
+				} else {
+					return (std::string{});
+				}
+			}() },
 			{ "blendDuration", transition.blendDuration },
 			{ "blendEaseType", static_cast<int>(transition.blendEaseType) },
 		});
@@ -511,10 +564,20 @@ nlohmann::json CameraManager::ToJson() const {
 bool CameraManager::SaveToJson(const std::filesystem::path& filePath) const {
 	const bool isSaved = MadoEngine::Json::JsonFile::Save(filePath, ToJson(), 4, true);
 	Logger::Output(
-		isSaved
-			? "Camera設定をJsonへ保存しました : " + filePath.generic_string()
-			: "Camera設定のJson保存に失敗しました : " + filePath.generic_string(),
-		isSaved ? Logger::Level::Application : Logger::Level::Error
+		[&]() {
+			if (isSaved) {
+				return ("Camera設定をJsonへ保存しました : " + filePath.generic_string());
+			} else {
+				return ("Camera設定のJson保存に失敗しました : " + filePath.generic_string());
+			}
+		}(),
+		[&]() {
+			if (isSaved) {
+				return (Logger::Level::Application);
+			} else {
+				return (Logger::Level::Error);
+			}
+		}()
 	);
 	return isSaved;
 }
@@ -531,10 +594,20 @@ bool CameraManager::LoadFromJson(const std::filesystem::path& filePath) {
 
 	const bool isLoaded = FromJson(root);
 	Logger::Output(
-		isLoaded
-			? "Camera設定をJsonから読み込みました : " + filePath.generic_string()
-			: "Camera設定のJson形式が不正です : " + filePath.generic_string(),
-		isLoaded ? Logger::Level::Application : Logger::Level::Error
+		[&]() {
+			if (isLoaded) {
+				return ("Camera設定をJsonから読み込みました : " + filePath.generic_string());
+			} else {
+				return ("Camera設定のJson形式が不正です : " + filePath.generic_string());
+			}
+		}(),
+		[&]() {
+			if (isLoaded) {
+				return (Logger::Level::Application);
+			} else {
+				return (Logger::Level::Error);
+			}
+		}()
 	);
 	return isLoaded;
 }
@@ -584,12 +657,16 @@ bool CameraManager::FromJson(const nlohmann::json& root) {
 		}
 
 		const Camera defaultCamera;
-		desc.position = cameraJson.contains("position")
-			? MadoEngine::Json::JsonSerializer::ToVector3(cameraJson.at("position"), defaultCamera.GetPosition())
-			: defaultCamera.GetPosition();
-		desc.rotation = cameraJson.contains("rotation")
-			? MadoEngine::Json::JsonSerializer::ToVector3(cameraJson.at("rotation"), defaultCamera.GetRotation())
-			: defaultCamera.GetRotation();
+		if (cameraJson.contains("position")) {
+			desc.position = MadoEngine::Json::JsonSerializer::ToVector3(cameraJson.at("position"), defaultCamera.GetPosition());
+		} else {
+			desc.position = defaultCamera.GetPosition();
+		}
+		if (cameraJson.contains("rotation")) {
+			desc.rotation = MadoEngine::Json::JsonSerializer::ToVector3(cameraJson.at("rotation"), defaultCamera.GetRotation());
+		} else {
+			desc.rotation = defaultCamera.GetRotation();
+		}
 		if (!IsFiniteVector3(desc.position)) {
 			desc.position = defaultCamera.GetPosition();
 		}

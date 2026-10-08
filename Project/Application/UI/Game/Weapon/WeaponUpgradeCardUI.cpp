@@ -227,12 +227,18 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 
 	// 所持武器強化と新規武器でCard配色と表示情報を切り替え
 	isOwnedWeaponUpgrade_ = choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade;
-	accentColor_ = isOwnedWeaponUpgrade_ ? ToVector4(choice.rarityDisplayColor) : kNewWeaponColor;
+	if (isOwnedWeaponUpgrade_) {
+		accentColor_ = ToVector4(choice.rarityDisplayColor);
+	} else {
+		accentColor_ = kNewWeaponColor;
+	}
 	const bool isLegendary = isOwnedWeaponUpgrade_ && choice.rarity &&
 		*choice.rarity == Rarity::Legendary;
-	backgroundColor_ = isLegendary
-		? kLegendaryCardBackgroundColor
-		: kDefaultCardBackgroundColor;
+	if (isLegendary) {
+		backgroundColor_ = kLegendaryCardBackgroundColor;
+	} else {
+		backgroundColor_ = kDefaultCardBackgroundColor;
+	}
 	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
 		if (isOwnedWeaponUpgrade_) {
 			categoryText->SetText(choice.rarityDisplayName + "\n" + choice.choiceTypeDisplayName);
@@ -313,8 +319,20 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 
 	// 選択状態の変化を現在Scaleから目標Scaleへ補間
 	const float transitionProgress = scaleTransitionTimer_.GetProgress();
-	const float targetScale = isSelected_ ? kSelectedCardScale : 1.0f;
-	const EaseType easeType = isSelected_ ? EaseType::EaseOutBack : EaseType::EaseOutCubic;
+	const float targetScale = [&]() {
+		if (isSelected_) {
+			return (kSelectedCardScale);
+		} else {
+			return (1.0f);
+		}
+	}();
+	const EaseType easeType = [&]() {
+		if (isSelected_) {
+			return (EaseType::EaseOutBack);
+		} else {
+			return (EaseType::EaseOutCubic);
+		}
+	}();
 	currentScale_ = Easing::Lerp(
 		scaleTransitionStart_,
 		targetScale,
@@ -495,7 +513,13 @@ void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 			{ cardPositionX + 38.0f, 240.0f + decisionOffsetY_ }, cardPosition, scale));
 		categoryText->SetScale(textScale);
 	}
-	const float detailPositionY = isOwnedWeaponUpgrade_ ? 365.0f : 390.0f;
+	const float detailPositionY = [&]() {
+		if (isOwnedWeaponUpgrade_) {
+			return (365.0f);
+		} else {
+			return (390.0f);
+		}
+	}();
 	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
 		detailText->SetPosition(ScalePositionAroundCenter(
 			{ cardPositionX, detailPositionY + decisionOffsetY_ }, cardPosition, scale));

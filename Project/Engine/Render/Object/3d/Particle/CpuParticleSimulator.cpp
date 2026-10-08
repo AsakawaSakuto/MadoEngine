@@ -75,9 +75,13 @@ namespace {
 	/// @param outBitangent 従法線の出力先
 	void BuildPlaneBasis(const Vector3& normal, Vector3& outTangent, Vector3& outBitangent) {
 		const Vector3 normalized = Math::Normalize(normal);
-		const Vector3 reference = std::abs(normalized.y) < 0.999f
-			? Vector3{ 0.0f, 1.0f, 0.0f }
-			: Vector3{ 1.0f, 0.0f, 0.0f };
+		const Vector3 reference = [&]() {
+			if (std::abs(normalized.y) < 0.999f) {
+				return (Vector3{ 0.0f, 1.0f, 0.0f });
+			} else {
+				return (Vector3{ 1.0f, 0.0f, 0.0f });
+			}
+		}();
 		outTangent = Math::Normalize(Math::Cross(reference, normalized));
 		outBitangent = Math::Normalize(Math::Cross(normalized, outTangent));
 	}
@@ -96,7 +100,13 @@ namespace {
 				return { value.start + (value.end - value.start) * t, {} };
 			} else if constexpr (std::is_same_v<ShapeType, SphereShape>) {
 				const Vector3 direction = SampleUnitSphere(random);
-				const float radiusScale = value.emitFromSurface ? 1.0f : std::cbrt(random.Float(0.0f, 1.0f));
+				const float radiusScale = [&]() {
+					if (value.emitFromSurface) {
+						return (1.0f);
+					} else {
+						return (std::cbrt(random.Float(0.0f, 1.0f)));
+					}
+				}();
 				return { direction * (value.radius * radiusScale), direction };
 			} else if constexpr (std::is_same_v<ShapeType, BoxShape>) {
 				ShapeSample sample;
@@ -107,7 +117,13 @@ namespace {
 				};
 				if (value.emitFromSurface) {
 					const int axis = random.Int(0, 2);
-					const float sign = random.Int(0, 1) == 0 ? -1.0f : 1.0f;
+					const float sign = [&]() {
+						if (random.Int(0, 1) == 0) {
+							return (-1.0f);
+						} else {
+							return (1.0f);
+						}
+					}();
 					sample.position[static_cast<std::size_t>(axis)] = value.halfExtents[static_cast<std::size_t>(axis)] * sign;
 					sample.outward[static_cast<std::size_t>(axis)] = sign;
 				} else {
@@ -126,9 +142,13 @@ namespace {
 				Vector3 bitangent;
 				BuildPlaneBasis(value.normal, tangent, bitangent);
 				const float angle = random.Float(0.0f, 2.0f * std::numbers::pi_v<float>);
-				const float radius = value.emitFromEdge
-					? value.outerRadius
-					: std::sqrt(random.Float(value.innerRadius * value.innerRadius, value.outerRadius * value.outerRadius));
+				const float radius = [&]() {
+					if (value.emitFromEdge) {
+						return (value.outerRadius);
+					} else {
+						return (std::sqrt(random.Float(value.innerRadius * value.innerRadius, value.outerRadius * value.outerRadius)));
+					}
+				}();
 				const Vector3 radial = tangent * std::cos(angle) + bitangent * std::sin(angle);
 				return { radial * radius, radial };
 			}
@@ -187,9 +207,13 @@ namespace MadoEngine::Particle {
 		for (uint32_t index = 0; index < spawnCount; ++index) {
 			const ShapeSample shapeSample = SampleShape(config.shape, random);
 			const Vector3 configuredDirection = NormalizeDirection(SampleRange(config.initial.direction, random));
-			Vector3 direction = config.initial.directionMode == DirectionMode::ShapeOutward && shapeSample.outward.LengthSq() > 0.000001f
-				? NormalizeDirection(shapeSample.outward)
-				: configuredDirection;
+			Vector3 direction = [&]() {
+				if (config.initial.directionMode == DirectionMode::ShapeOutward && shapeSample.outward.LengthSq() > 0.000001f) {
+					return (NormalizeDirection(shapeSample.outward));
+				} else {
+					return (configuredDirection);
+				}
+			}();
 
 			ParticleState& particle = particles_[aliveCount_++];
 			particle = {};

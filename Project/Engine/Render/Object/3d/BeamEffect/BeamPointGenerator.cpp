@@ -67,15 +67,25 @@ namespace MadoEngine::Beam {
 		);
 		const Vector3 beamVector = endPosition - startPosition;
 		const Vector3 direction = SafeNormalize(beamVector, { 0.0f, 1.0f, 0.0f });
-		const Vector3 referenceAxis = std::abs(direction.y) < 0.9f
-			? Vector3{ 0.0f, 1.0f, 0.0f }
-			: Vector3{ 1.0f, 0.0f, 0.0f };
+		const Vector3 referenceAxis = [&]() {
+			if (std::abs(direction.y) < 0.9f) {
+				return (Vector3{ 0.0f, 1.0f, 0.0f });
+			} else {
+				return (Vector3{ 1.0f, 0.0f, 0.0f });
+			}
+		}();
 
 		// Beam方向との平行を避けた参照軸から安定したNoise平面を構築
 		const Vector3 noiseAxisX = SafeNormalize(Cross(direction, referenceAxis), { 1.0f, 0.0f, 0.0f });
 		const Vector3 noiseAxisY = SafeNormalize(Cross(direction, noiseAxisX), { 0.0f, 0.0f, 1.0f });
 
-		const float safeTime = std::isfinite(elapsedTime) ? elapsedTime : 0.0f;
+		const float safeTime = [&]() {
+			if (std::isfinite(elapsedTime)) {
+				return (elapsedTime);
+			} else {
+				return (0.0f);
+			}
+		}();
 		const float noiseCoordinateOffset = safeTime * noise.scrollSpeed;
 		std::vector<MadoEngine::Ribbon::RibbonPoint> points;
 		points.reserve(static_cast<std::size_t>(segmentCount) + 1);

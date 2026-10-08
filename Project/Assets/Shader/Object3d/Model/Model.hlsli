@@ -175,7 +175,12 @@ LightContribution CalculateDirectionalLightContribution(
         diffuseFactor = pow(normalDotLight * 0.5f + 0.5f, 2.0f);
     }
 
-    float specularFactor = normalDotLight > 0.0f ? pow(saturate(dot(normal, halfVector)), shininess) : 0.0f;
+    float specularFactor;
+    if (normalDotLight > 0.0f) {
+        specularFactor = pow(saturate(dot(normal, halfVector)), shininess);
+    } else {
+        specularFactor = 0.0f;
+    }
     contribution.diffuse = albedo * light.color.rgb * diffuseFactor * light.intensity;
     contribution.specular = light.color.rgb * light.intensity * specularFactor * specularIntensity;
     return contribution;
@@ -214,7 +219,12 @@ LightContribution CalculatePointLightContribution(
     float3 halfVector = normalize(lightDirection + toEye);
     float normalDotLight = saturate(dot(normal, lightDirection));
     float diffuseFactor = pow(normalDotLight * 0.5f + 0.5f, 2.0f);
-    float specularFactor = normalDotLight > 0.0f ? pow(saturate(dot(normal, halfVector)), shininess) : 0.0f;
+    float specularFactor;
+    if (normalDotLight > 0.0f) {
+        specularFactor = pow(saturate(dot(normal, halfVector)), shininess);
+    } else {
+        specularFactor = 0.0f;
+    }
 
     contribution.diffuse = albedo * light.color.rgb * diffuseFactor * light.intensity * attenuation;
     contribution.specular = light.color.rgb * light.intensity * specularFactor * attenuation * specularIntensity;
@@ -258,7 +268,12 @@ LightContribution CalculateSpotLightContribution(
     float3 halfVector = normalize(lightDirection + toEye);
     float normalDotLight = saturate(dot(normal, lightDirection));
     float diffuseFactor = pow(normalDotLight * 0.5f + 0.5f, 2.0f);
-    float specularFactor = normalDotLight > 0.0f ? pow(saturate(dot(normal, halfVector)), shininess) : 0.0f;
+    float specularFactor;
+    if (normalDotLight > 0.0f) {
+        specularFactor = pow(saturate(dot(normal, halfVector)), shininess);
+    } else {
+        specularFactor = 0.0f;
+    }
     float3 spotColor = light.color.rgb * light.intensity * attenuation * falloffFactor;
 
     contribution.diffuse = albedo * spotColor * diffuseFactor;

@@ -142,33 +142,49 @@ namespace MadoEngine::EffectSequence {
 			[mode](MadoEngine::Particle::EffectHandle child) {
 				MadoEngine::Particle::ParticleSystem3d::GetInstance().Stop(
 					child,
-					mode == EffectSequenceStopMode::Immediate
-						? MadoEngine::Particle::StopMode::Immediate
-						: MadoEngine::Particle::StopMode::Finish
+					[&]() {
+						if (mode == EffectSequenceStopMode::Immediate) {
+							return (MadoEngine::Particle::StopMode::Immediate);
+						} else {
+							return (MadoEngine::Particle::StopMode::Finish);
+						}
+					}()
 				);
 			},
 			[mode](MadoEngine::Effect::PrimitiveEffectHandle child) {
 				MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Stop(
 					child,
-					mode == EffectSequenceStopMode::Immediate
-						? MadoEngine::Effect::PrimitiveEffectStopMode::Immediate
-						: MadoEngine::Effect::PrimitiveEffectStopMode::Finish
+					[&]() {
+						if (mode == EffectSequenceStopMode::Immediate) {
+							return (MadoEngine::Effect::PrimitiveEffectStopMode::Immediate);
+						} else {
+							return (MadoEngine::Effect::PrimitiveEffectStopMode::Finish);
+						}
+					}()
 				);
 			},
 			[mode](MadoEngine::Ribbon::RibbonEffectHandle child) {
 				MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Stop(
 					child,
-					mode == EffectSequenceStopMode::Immediate
-						? MadoEngine::Ribbon::RibbonStopMode::Immediate
-						: MadoEngine::Ribbon::RibbonStopMode::Finish
+					[&]() {
+						if (mode == EffectSequenceStopMode::Immediate) {
+							return (MadoEngine::Ribbon::RibbonStopMode::Immediate);
+						} else {
+							return (MadoEngine::Ribbon::RibbonStopMode::Finish);
+						}
+					}()
 				);
 			},
 			[mode](MadoEngine::Beam::BeamEffectHandle child) {
 				MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Stop(
 					child,
-					mode == EffectSequenceStopMode::Immediate
-						? MadoEngine::Beam::BeamStopMode::Immediate
-						: MadoEngine::Beam::BeamStopMode::Finish
+					[&]() {
+						if (mode == EffectSequenceStopMode::Immediate) {
+							return (MadoEngine::Beam::BeamStopMode::Immediate);
+						} else {
+							return (MadoEngine::Beam::BeamStopMode::Finish);
+						}
+					}()
 				);
 			},
 		}, handle);

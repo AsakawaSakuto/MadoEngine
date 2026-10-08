@@ -123,8 +123,20 @@ namespace MadoEngine::Editor {
         bool SaveAudioEditorVolumeJson() {
             const bool succeeded = Json::JsonFile::Save(kAudioEditorJsonPath, SerializeAudioEditorVolume(), 4, true);
             Logger::Output(
-                succeeded ? "AudioEditor : 音量設定Jsonを保存しました" : "AudioEditor : 音量設定Jsonの保存に失敗しました",
-                succeeded ? Logger::Level::Assets : Logger::Level::Error
+                [&]() {
+                    if (succeeded) {
+                        return ("AudioEditor : 音量設定Jsonを保存しました");
+                    } else {
+                        return ("AudioEditor : 音量設定Jsonの保存に失敗しました");
+                    }
+                }(),
+                [&]() {
+                    if (succeeded) {
+                        return (Logger::Level::Assets);
+                    } else {
+                        return (Logger::Level::Error);
+                    }
+                }()
             );
             return succeeded;
         }

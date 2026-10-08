@@ -41,7 +41,11 @@ namespace {
 	/// @return 読み込んだ文字列
 	std::string ReadString(const Json& json, const char* key, const std::string& fallback) {
 		const Json* value = FindValue(json, key);
-		return value && value->is_string() ? value->get<std::string>() : fallback;
+		if (value && value->is_string()) {
+			return value->get<std::string>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからfloatを安全に取得
@@ -51,7 +55,11 @@ namespace {
 	/// @return 読み込んだ値
 	float ReadFloat(const Json& json, const char* key, float fallback) {
 		const Json* value = FindValue(json, key);
-		return value && value->is_number() ? value->get<float>() : fallback;
+		if (value && value->is_number()) {
+			return value->get<float>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからuint32_tを安全に取得
@@ -75,7 +83,11 @@ namespace {
 	/// @return 読み込んだ値
 	bool ReadBool(const Json& json, const char* key, bool fallback) {
 		const Json* value = FindValue(json, key);
-		return value && value->is_boolean() ? value->get<bool>() : fallback;
+		if (value && value->is_boolean()) {
+			return value->get<bool>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief JsonからVector2を安全に取得
@@ -85,7 +97,11 @@ namespace {
 	/// @return 読み込んだVector2
 	Vector2 ReadVector2(const Json& json, const char* key, const Vector2& fallback) {
 		const Json* value = FindValue(json, key);
-		return value ? MadoEngine::Json::JsonSerializer::ToVector2(*value, fallback) : fallback;
+		if (value) {
+			return MadoEngine::Json::JsonSerializer::ToVector2(*value, fallback);
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief JsonからVector3を安全に取得
@@ -95,7 +111,11 @@ namespace {
 	/// @return 読み込んだVector3
 	Vector3 ReadVector3(const Json& json, const char* key, const Vector3& fallback) {
 		const Json* value = FindValue(json, key);
-		return value ? MadoEngine::Json::JsonSerializer::ToVector3(*value, fallback) : fallback;
+		if (value) {
+			return MadoEngine::Json::JsonSerializer::ToVector3(*value, fallback);
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief JsonからVector4を安全に取得
@@ -105,7 +125,11 @@ namespace {
 	/// @return 読み込んだVector4
 	Vector4 ReadVector4(const Json& json, const char* key, const Vector4& fallback) {
 		const Json* value = FindValue(json, key);
-		return value ? MadoEngine::Json::JsonSerializer::ToVector4(*value, fallback) : fallback;
+		if (value) {
+			return MadoEngine::Json::JsonSerializer::ToVector4(*value, fallback);
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからfloat範囲を読み込み
@@ -217,14 +241,22 @@ namespace {
 	/// @param value 変換元文字列
 	/// @return 変換したSimulationSpace
 	SimulationSpace ParseSimulationSpace(const std::string& value) {
-		return value == "local" ? SimulationSpace::Local : SimulationSpace::World;
+		if (value == "local") {
+			return SimulationSpace::Local;
+		} else {
+			return SimulationSpace::World;
+		}
 	}
 
 	/// @brief SimulationSpaceを文字列へ変換
 	/// @param value 変換するSimulationSpace
 	/// @return 変換した文字列
 	const char* ToString(SimulationSpace value) {
-		return value == SimulationSpace::Local ? "local" : "world";
+		if (value == SimulationSpace::Local) {
+			return "local";
+		} else {
+			return "world";
+		}
 	}
 
 	/// @brief 文字列からParticle Backendを取得
@@ -260,44 +292,66 @@ namespace {
 	/// @param value 変換元文字列
 	/// @return 変換したDirectionMode
 	DirectionMode ParseDirectionMode(const std::string& value) {
-		return value == "shapeOutward" ? DirectionMode::ShapeOutward : DirectionMode::Configured;
+		if (value == "shapeOutward") {
+			return DirectionMode::ShapeOutward;
+		} else {
+			return DirectionMode::Configured;
+		}
 	}
 
 	/// @brief DirectionModeを文字列へ変換
 	/// @param value 変換するDirectionMode
 	/// @return 変換した文字列
 	const char* ToString(DirectionMode value) {
-		return value == DirectionMode::ShapeOutward ? "shapeOutward" : "configured";
+		if (value == DirectionMode::ShapeOutward) {
+			return "shapeOutward";
+		} else {
+			return "configured";
+		}
 	}
 
 	/// @brief 文字列からSortModeを取得
 	/// @param value 変換元文字列
 	/// @return 変換したSortMode
 	SortMode ParseSortMode(const std::string& value) {
-		return value == "backToFront" ? SortMode::BackToFront : SortMode::None;
+		if (value == "backToFront") {
+			return SortMode::BackToFront;
+		} else {
+			return SortMode::None;
+		}
 	}
 
 	/// @brief SortModeを文字列へ変換
 	/// @param value 変換するSortMode
 	/// @return 変換した文字列
 	const char* ToString(SortMode value) {
-		return value == SortMode::BackToFront ? "backToFront" : "none";
+		if (value == SortMode::BackToFront) {
+			return "backToFront";
+		} else {
+			return "none";
+		}
 	}
 
 	/// @brief 文字列からParticle Trail補間方式を取得
 	/// @param value 変換元文字列
 	/// @return 変換したParticle Trail補間方式
 	ParticleTrailInterpolation ParseParticleTrailInterpolation(const std::string& value) {
-		return value == "catmullRom"
-			? ParticleTrailInterpolation::CatmullRom
-			: ParticleTrailInterpolation::Linear;
+		if (value == "catmullRom") {
+			return ParticleTrailInterpolation::CatmullRom;
+		} else {
+			return ParticleTrailInterpolation::Linear;
+		}
 	}
 
 	/// @brief Particle Trail補間方式を文字列へ変換
 	/// @param value 変換するParticle Trail補間方式
 	/// @return 変換した文字列
 	const char* ToString(ParticleTrailInterpolation value) {
-		return value == ParticleTrailInterpolation::CatmullRom ? "catmullRom" : "linear";
+		if (value == ParticleTrailInterpolation::CatmullRom) {
+			return "catmullRom";
+		} else {
+			return "linear";
+		}
 	}
 
 	/// @brief 文字列からBlendModeを取得
@@ -455,7 +509,13 @@ namespace MadoEngine::Particle {
 	}
 
 	bool ParticleEffectAsset::SaveToFile(const std::filesystem::path& filePath, bool createBackup) const {
-		const std::filesystem::path outputPath = filePath.empty() ? filePath_ : filePath;
+		const std::filesystem::path outputPath = [&]() {
+			if (filePath.empty()) {
+				return (filePath_);
+			} else {
+				return (filePath);
+			}
+		}();
 		if (outputPath.empty()) {
 			Logger::Output("Particle Assetの保存先が指定されていません。", Logger::Level::Error);
 			return false;
@@ -704,12 +764,24 @@ namespace MadoEngine::Particle {
 			emitter.initial.lifeTime.max = (std::max)(emitter.initial.lifeTime.min, emitter.initial.lifeTime.max);
 			emitter.motion.drag = (std::max)(0.0f, emitter.motion.drag);
 			emitter.trail.pointLifetime = std::clamp(
-				std::isfinite(emitter.trail.pointLifetime) ? emitter.trail.pointLifetime : 0.5f,
+				[&]() {
+					if (std::isfinite(emitter.trail.pointLifetime)) {
+						return (emitter.trail.pointLifetime);
+					} else {
+						return (0.5f);
+					}
+				}(),
 				0.001f,
 				3600.0f
 			);
 			emitter.trail.minPointDistance = std::clamp(
-				std::isfinite(emitter.trail.minPointDistance) ? emitter.trail.minPointDistance : 0.05f,
+				[&]() {
+					if (std::isfinite(emitter.trail.minPointDistance)) {
+						return (emitter.trail.minPointDistance);
+					} else {
+						return (0.05f);
+					}
+				}(),
 				0.0f,
 				100000.0f
 			);
@@ -720,11 +792,23 @@ namespace MadoEngine::Particle {
 			);
 			emitter.trail.startWidth = (std::max)(
 				0.0f,
-				std::isfinite(emitter.trail.startWidth) ? emitter.trail.startWidth : 0.25f
+				[&]() {
+					if (std::isfinite(emitter.trail.startWidth)) {
+						return (emitter.trail.startWidth);
+					} else {
+						return (0.25f);
+					}
+				}()
 			);
 			emitter.trail.endWidth = (std::max)(
 				0.0f,
-				std::isfinite(emitter.trail.endWidth) ? emitter.trail.endWidth : 0.0f
+				[&]() {
+					if (std::isfinite(emitter.trail.endWidth)) {
+						return (emitter.trail.endWidth);
+					} else {
+						return (0.0f);
+					}
+				}()
 			);
 			if (emitter.trail.interpolation != ParticleTrailInterpolation::Linear &&
 				emitter.trail.interpolation != ParticleTrailInterpolation::CatmullRom) {
@@ -741,10 +825,26 @@ namespace MadoEngine::Particle {
 			const Vector4 defaultStartTrailColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 			const Vector4 defaultEndTrailColor = { 1.0f, 1.0f, 1.0f, 0.0f };
 			const auto normalizeTrailColor = [](Vector4& color, const Vector4& fallback) {
-				color.x = std::isfinite(color.x) ? (std::max)(0.0f, color.x) : fallback.x;
-				color.y = std::isfinite(color.y) ? (std::max)(0.0f, color.y) : fallback.y;
-				color.z = std::isfinite(color.z) ? (std::max)(0.0f, color.z) : fallback.z;
-				color.w = std::isfinite(color.w) ? std::clamp(color.w, 0.0f, 1.0f) : fallback.w;
+				if (std::isfinite(color.x)) {
+					color.x = (std::max)(0.0f, color.x);
+				} else {
+					color.x = fallback.x;
+				}
+				if (std::isfinite(color.y)) {
+					color.y = (std::max)(0.0f, color.y);
+				} else {
+					color.y = fallback.y;
+				}
+				if (std::isfinite(color.z)) {
+					color.z = (std::max)(0.0f, color.z);
+				} else {
+					color.z = fallback.z;
+				}
+				if (std::isfinite(color.w)) {
+					color.w = std::clamp(color.w, 0.0f, 1.0f);
+				} else {
+					color.w = fallback.w;
+				}
 			};
 			normalizeTrailColor(emitter.trail.startColor, defaultStartTrailColor);
 			normalizeTrailColor(emitter.trail.endColor, defaultEndTrailColor);

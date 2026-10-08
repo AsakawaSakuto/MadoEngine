@@ -115,7 +115,11 @@ namespace MadoEngine::Editor {
                     sceneType,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
-                return isNameAlreadyUsed ? LightHandle{} : createdHandle;
+                if (isNameAlreadyUsed) {
+                    return LightHandle{};
+                } else {
+                    return createdHandle;
+                }
             }
 
             if (type == LightType::Point) {
@@ -129,7 +133,11 @@ namespace MadoEngine::Editor {
                     sceneType,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
-                return isNameAlreadyUsed ? LightHandle{} : createdHandle;
+                if (isNameAlreadyUsed) {
+                    return LightHandle{};
+                } else {
+                    return createdHandle;
+                }
             }
 
             if (type == LightType::Spot) {
@@ -146,7 +154,11 @@ namespace MadoEngine::Editor {
                     sceneType,
                     ToLightLayerMask(LightLayer::World),
                     EditorManagementMode::EditorManaged);
-                return isNameAlreadyUsed ? LightHandle{} : createdHandle;
+                if (isNameAlreadyUsed) {
+                    return LightHandle{};
+                } else {
+                    return createdHandle;
+                }
             }
 
             return {};
@@ -291,7 +303,11 @@ namespace MadoEngine::Editor {
             BeginLightParameterRow("HalfLambert");
             bool useHalfLambert = light.useHalfLambert != 0;
             if (ImGui::Checkbox("##HalfLambert", &useHalfLambert)) {
-                light.useHalfLambert = useHalfLambert ? 1u : 0u;
+                if (useHalfLambert) {
+                    light.useHalfLambert = 1u;
+                } else {
+                    light.useHalfLambert = 0u;
+                }
                 isChanged = true;
             }
 

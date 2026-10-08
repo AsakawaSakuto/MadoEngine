@@ -30,9 +30,13 @@ namespace UI::Game {
 			return;
 		}
 
-		const float fps = sampleTime_ > 0.0f
-			? static_cast<float>(sampleFrameCount_) / sampleTime_
-			: 0.0f;
+		const float fps = [&]() {
+			if (sampleTime_ > 0.0f) {
+				return (static_cast<float>(sampleFrameCount_) / sampleTime_);
+			} else {
+				return (0.0f);
+			}
+		}();
 		fpsText->SetText(std::format("FPS : {:.1f}", fps));
 		sampleTime_ = 0.0f;
 		sampleFrameCount_ = 0;

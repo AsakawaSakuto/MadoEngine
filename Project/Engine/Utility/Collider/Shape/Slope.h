@@ -20,7 +20,11 @@ struct Slope {
 	/// @return 底面延長後の最小ワールド座標
 	Vector3 GetMinWorld() const {
 		Vector3 worldMin = center + min;
-		worldMin.y -= bottomExtendY > 0.0f ? bottomExtendY : 0.0f;
+		if (bottomExtendY > 0.0f) {
+			worldMin.y -= bottomExtendY;
+		} else {
+			worldMin.y -= 0.0f;
+		}
 		return worldMin;
 	}
 

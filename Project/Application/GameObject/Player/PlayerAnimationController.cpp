@@ -47,7 +47,13 @@ namespace Player {
 			if (!isGrounded) {
 
 				// 非LoopのJump Clipは終端到達後も着地まで最終Poseを維持
-				model.SetAnimationPlaybackSpeed(model.IsAnimationFinished() ? 0.0f : 1.0f);
+				model.SetAnimationPlaybackSpeed([&]() {
+					if (model.IsAnimationFinished()) {
+						return (0.0f);
+					} else {
+						return (1.0f);
+					}
+				}());
 				currentMotion_ = Motion::Jump;
 				return;
 			}
@@ -77,7 +83,13 @@ namespace Player {
 		}
 
 		// Crouching Poseを維持したまま水平移動が止まった時点でClipの時刻だけ停止
-		model.SetAnimationPlaybackSpeed(motion == Motion::Crouching && !isMoving ? 0.0f : 1.0f);
+		model.SetAnimationPlaybackSpeed([&]() {
+			if (motion == Motion::Crouching && !isMoving) {
+				return (0.0f);
+			} else {
+				return (1.0f);
+			}
+		}());
 
 		if (currentMotion_ && *currentMotion_ == motion) {
 			return;

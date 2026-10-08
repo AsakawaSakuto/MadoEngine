@@ -267,7 +267,13 @@ namespace MadoEngine {
 				continue;
 			}
 
-			const nlohmann::json& colorJson = it != colorsJson->end() ? *it : *oldTabActiveIt;
+			const nlohmann::json& colorJson = [&]() {
+				if (it != colorsJson->end()) {
+					return (*it);
+				} else {
+					return (*oldTabActiveIt);
+				}
+			}();
 			ImVec4 color;
 			if (TryReadJsonColor(colorJson, color)) {
 				colors[item.index] = color;

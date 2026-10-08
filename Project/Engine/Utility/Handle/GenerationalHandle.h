@@ -28,7 +28,11 @@ struct GenerationalHandle {
 /// @return 0を除外した次の世代番号
 [[nodiscard]] constexpr uint32_t NextGeneration(uint32_t generation) {
 	++generation;
-	return generation == 0 ? 1 : generation;
+	if (generation == 0) {
+		return 1;
+	} else {
+		return generation;
+	}
 }
 
 static_assert(NextGeneration((std::numeric_limits<uint32_t>::max)()) == 1);

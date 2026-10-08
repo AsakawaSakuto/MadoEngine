@@ -600,12 +600,20 @@ namespace MadoEngine::Effect {
 
 	const CylinderEffectAsset* PrimitiveEffectSystem3d::FindAsset(const std::string& assetName) const {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	CylinderEffectAsset* PrimitiveEffectSystem3d::FindEditableAsset(const std::string& assetName) {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	std::size_t PrimitiveEffectSystem3d::GetActiveEffectCount() const {
@@ -623,7 +631,11 @@ namespace MadoEngine::Effect {
 			return nullptr;
 		}
 		EffectSlot& slot = effectSlots_[handle.index];
-		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
+		if (slot.generation == handle.generation) {
+			return slot.instance.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	const CylinderEffectInstance* PrimitiveEffectSystem3d::Resolve(PrimitiveEffectHandle handle) const {
@@ -631,7 +643,11 @@ namespace MadoEngine::Effect {
 			return nullptr;
 		}
 		const EffectSlot& slot = effectSlots_[handle.index];
-		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
+		if (slot.generation == handle.generation) {
+			return slot.instance.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	void PrimitiveEffectSystem3d::ReleaseSlot(uint32_t index) {

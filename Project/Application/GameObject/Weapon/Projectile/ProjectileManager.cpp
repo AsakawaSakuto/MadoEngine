@@ -16,8 +16,13 @@ namespace Projectile {
 		/// @brief Projectileの種類と同名の生成音を再生
 		/// @param type 生成したProjectileの種類
 		void PlayProjectileCreateSound(Projectile::Type type) {
-			const std::string soundKey = type == Projectile::Type::Explosion ?
-				kExplosionSoundKey : ProjectileTypeToString(type);
+			const std::string soundKey = [&]() -> std::string {
+				if (type == Projectile::Type::Explosion) {
+					return (kExplosionSoundKey);
+				} else {
+					return (ProjectileTypeToString(type));
+				}
+			}();
 			if (MyAudio::IsLoaded(soundKey)) {
 				MyAudio::Play(soundKey);
 			}
@@ -244,7 +249,13 @@ namespace Projectile {
 					bounceTarget = FindNearestBounceTarget(*projectile, enemyTarget.enemyId, enemyTargets);
 				}
 
-				const Vector3* bounceTargetPosition = bounceTarget ? &bounceTarget->position : nullptr;
+				const Vector3* bounceTargetPosition = [&]() -> const Vector3* {
+					if (bounceTarget) {
+						return (&bounceTarget->position);
+					} else {
+						return (nullptr);
+					}
+				}();
 				const Vector3 knockbackDirection =
 					CalculateKnockbackDirection(*projectile, enemyTarget.position);
 				if (!projectile->HandleEnemyCollision(enemyTarget.enemyId, bounceTargetPosition)) {

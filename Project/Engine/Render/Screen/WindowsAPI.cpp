@@ -174,7 +174,11 @@ namespace MadoEngine::Screen {
 				Logger::Output("ビットマップからHICONの取得に失敗しました。デフォルトアイコンを使用します", Logger::Level::Warning);
 			}
 
-			return hIcon ? hIcon : LoadIcon(nullptr, IDI_APPLICATION);
+			if (hIcon) {
+				return hIcon;
+			} else {
+				return LoadIcon(nullptr, IDI_APPLICATION);
+			}
 		}
 
 		// Client領域の作成と表示に必要なWindow初期化

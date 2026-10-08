@@ -126,7 +126,11 @@ namespace {
 			break;
 		}
 		const std::vector<std::string> assetNames = GetEffectAssetNames(node.nodeType);
-		node.effectAssetName = assetNames.empty() ? std::string{} : assetNames.front();
+		if (assetNames.empty()) {
+			node.effectAssetName = std::string{};
+		} else {
+			node.effectAssetName = assetNames.front();
+		}
 	}
 
 	/// @brief Node IDからNodeを検索
@@ -137,7 +141,11 @@ namespace {
 		const auto found = std::find_if(nodes.begin(), nodes.end(), [nodeId](const EffectSequenceNode& node) {
 			return node.nodeId == nodeId;
 		});
-		return found != nodes.end() ? &*found : nullptr;
+		if (found != nodes.end()) {
+			return &*found;
+		} else {
+			return nullptr;
+		}
 	}
 
 	/// @brief Parent候補が循環参照を作るか確認
@@ -221,7 +229,13 @@ namespace {
 			const float x = start.x + size.x * static_cast<float>(tick) / 10.0f;
 			drawList->AddLine({ x, start.y + 18.0f }, { x, start.y + size.y }, IM_COL32(90, 95, 105, 255));
 		}
-		const float normalizedTime = duration > 0.0f ? std::clamp(playbackTime / duration, 0.0f, 1.0f) : 0.0f;
+		const float normalizedTime = [&]() {
+			if (duration > 0.0f) {
+				return (std::clamp(playbackTime / duration, 0.0f, 1.0f));
+			} else {
+				return (0.0f);
+			}
+		}();
 		const float headX = start.x + size.x * normalizedTime;
 		drawList->AddLine({ headX, start.y }, { headX, start.y + size.y }, IM_COL32(255, 185, 40, 255), 2.0f);
 		const std::string label = std::to_string(playbackTime) + " / " + std::to_string(duration) + " 秒";
@@ -324,9 +338,13 @@ namespace MadoEngine::Editor {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			renameOriginalName = selectedAssetName;
 		}
-		EffectSequenceAsset* asset = selectedAssetName.empty()
-			? nullptr
-			: system.FindEditableAsset(selectedAssetName);
+		EffectSequenceAsset* asset = [&]() -> EffectSequenceAsset* {
+			if (selectedAssetName.empty()) {
+				return (nullptr);
+			} else {
+				return (system.FindEditableAsset(selectedAssetName));
+			}
+		}();
 		if (asset) {
 			savedSnapshots.try_emplace(selectedAssetName, asset->ToJson().dump());
 		}
@@ -399,9 +417,11 @@ namespace MadoEngine::Editor {
 			savedSnapshots.erase(selectedAssetName);
 			system.DeleteAsset(selectedAssetName);
 			assetNames = system.GetAssetNames();
-			selectedAssetIndex = assetNames.empty()
-				? 0
-				: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+			if (assetNames.empty()) {
+				selectedAssetIndex = 0;
+			} else {
+				selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+			}
 			selectedNodeId = 0;
 			renameOriginalName.clear();
 		}
@@ -502,7 +522,11 @@ namespace MadoEngine::Editor {
 			if (previewLoopChanged) {
 				StopPreview(system, previewHandle);
 				previewHandle = PlayPreview(system, selectedAssetName, previewRootTransform, previewLoop, previewSpeed);
-				previewAssetName = system.IsAlive(previewHandle) ? selectedAssetName : std::string{};
+				if (system.IsAlive(previewHandle)) {
+					previewAssetName = selectedAssetName;
+				} else {
+					previewAssetName = std::string{};
+				}
 			} else if (previewSpeedChanged) {
 				system.SetPlaybackSpeed(previewHandle, previewSpeed);
 			}
@@ -513,9 +537,15 @@ namespace MadoEngine::Editor {
 		DrawPlaybackHead(previewTime, config.duration);
 		ImGui::TextDisabled(
 			"プレビュー：%s / シーケンス再生数：%zu",
-			system.IsAlive(previewHandle)
-				? (system.IsPaused(previewHandle) ? "一時停止中" : "再生中")
-				: "停止中",
+			[&]() {
+				if (!system.IsAlive(previewHandle)) {
+					return "停止中";
+				} else if (system.IsPaused(previewHandle)) {
+					return "一時停止中";
+				} else {
+					return "再生中";
+				}
+			}(),
 			system.GetActiveSequenceCount()
 		);
 
@@ -631,9 +661,13 @@ namespace MadoEngine::Editor {
 				const std::vector<std::string>& effectAssetNames = effectAssetNamesByType[
 					static_cast<std::size_t>(node.nodeType)
 				];
-				const char* selectedEffectAsset = node.effectAssetName.empty()
-					? "未選択"
-					: node.effectAssetName.c_str();
+				const char* selectedEffectAsset = [&]() {
+					if (node.effectAssetName.empty()) {
+						return ("未選択");
+					} else {
+						return (node.effectAssetName.c_str());
+					}
+				}();
 				ImGui::SetNextItemWidth(-FLT_MIN);
 				if (ImGui::BeginCombo("##EffectAsset", selectedEffectAsset)) {
 					for (const std::string& assetName : effectAssetNames) {
@@ -697,12 +731,20 @@ namespace MadoEngine::Editor {
 					ImGui::EndCombo();
 				}
 				ImGui::TableSetColumnIndex(6);
-				const int renderLayerIndex = node.renderLayer.has_value()
-					? static_cast<int>(node.renderLayer.value()) + 1
-					: 0;
-				const char* renderLayerLabel = renderLayerIndex == 0
-					? "Sequence Default"
-					: MadoEngine::Render::GetRenderLayerName(node.renderLayer.value());
+				const int renderLayerIndex = [&]() {
+					if (node.renderLayer.has_value()) {
+						return (static_cast<int>(node.renderLayer.value()) + 1);
+					} else {
+						return (0);
+					}
+				}();
+				const char* renderLayerLabel = [&]() {
+					if (renderLayerIndex == 0) {
+						return ("Sequence Default");
+					} else {
+						return (MadoEngine::Render::GetRenderLayerName(node.renderLayer.value()));
+					}
+				}();
 				ImGui::SetNextItemWidth(-FLT_MIN);
 				if (ImGui::BeginCombo("##RenderLayer", renderLayerLabel)) {
 					selectedNodeId = node.nodeId;
@@ -757,7 +799,11 @@ namespace MadoEngine::Editor {
 			if (system.IsAlive(previewHandle) && previewAssetName == selectedAssetName) {
 				StopPreview(system, previewHandle);
 				previewHandle = PlayPreview(system, selectedAssetName, previewRootTransform, previewLoop, previewSpeed);
-				previewAssetName = system.IsAlive(previewHandle) ? selectedAssetName : std::string{};
+				if (system.IsAlive(previewHandle)) {
+					previewAssetName = selectedAssetName;
+				} else {
+					previewAssetName = std::string{};
+				}
 			}
 		}
 		ImGui::End();

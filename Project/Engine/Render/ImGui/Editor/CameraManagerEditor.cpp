@@ -80,7 +80,11 @@ namespace {
 		if (dynamic_cast<const DebugCamera*>(&camera)) {
 			return "Debug";
 		}
-		return typeid(camera) == typeid(Camera) ? "Fixed" : "Camera";
+		if (typeid(camera) == typeid(Camera)) {
+			return "Fixed";
+		} else {
+			return "Camera";
+		}
 	}
 
 	/// @brief Cameraの位置と回転をEditorから直接編集できるか確認
@@ -134,9 +138,13 @@ namespace {
 			kShakeTypeItems.end(),
 			[shakeType](const ShakeTypeItem& item) { return item.type == shakeType; }
 		);
-		const char* preview = selectedItem != kShakeTypeItems.end()
-			? selectedItem->label
-			: "XYZ";
+		const char* preview = [&]() {
+			if (selectedItem != kShakeTypeItems.end()) {
+				return (selectedItem->label);
+			} else {
+				return ("XYZ");
+			}
+		}();
 		if (!ImGui::BeginCombo("振動軸", preview)) {
 			return false;
 		}
@@ -166,7 +174,13 @@ namespace {
 		CameraHandle ownerHandle,
 		CameraHandle& destinationHandle) {
 		const std::string destinationName = cameraManager.GetCameraName(destinationHandle);
-		const char* preview = destinationName.empty() ? "移動先を選択" : destinationName.c_str();
+		const char* preview = [&]() {
+			if (destinationName.empty()) {
+				return ("移動先を選択");
+			} else {
+				return (destinationName.c_str());
+			}
+		}();
 		if (!ImGui::BeginCombo("移動先", preview)) {
 			return false;
 		}
@@ -531,12 +545,20 @@ void DrawCameraManagerEditorUI(CameraManager& cameraManager, SceneType currentSc
 	}
 
 	if (ImGui::Button("保存")) {
-		fileOperationResult = cameraManager.SaveToJson(cameraJsonPath) ? 1 : -1;
+		if (cameraManager.SaveToJson(cameraJsonPath)) {
+			fileOperationResult = 1;
+		} else {
+			fileOperationResult = -1;
+		}
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("再読込")) {
 		EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
-		fileOperationResult = cameraManager.LoadFromJson(cameraJsonPath) ? 1 : -1;
+		if (cameraManager.LoadFromJson(cameraJsonPath)) {
+			fileOperationResult = 1;
+		} else {
+			fileOperationResult = -1;
+		}
 		if (fileOperationResult > 0) {
 			selectedHandle = cameraManager.GetActiveCameraHandle();
 		}

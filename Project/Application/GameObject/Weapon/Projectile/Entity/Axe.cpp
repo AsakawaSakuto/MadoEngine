@@ -70,7 +70,13 @@ namespace Projectile {
 		if (Model* model = MyModel::TryGet(model_)) {
 
 			// 消滅直前だけScaleを連続的に縮小して突然の非表示を回避
-			const float reductionProgress = isReductionStarted_ ? reductionTimer_.GetProgress() : 0.0f;
+			const float reductionProgress = [&]() {
+				if (isReductionStarted_) {
+					return (reductionTimer_.GetProgress());
+				} else {
+					return (0.0f);
+				}
+			}();
 			const float scaleValue = 0.5f * sizeRate_ * (1.0f - reductionProgress);
 			transform_.scale = Easing::Lerp(Vector3{ scaleValue,scaleValue,scaleValue }, Vector3{ 0.0f,0.0f,0.0f }, reductionProgress, EaseType::Linear);
 			model->SetTransform(transform_);

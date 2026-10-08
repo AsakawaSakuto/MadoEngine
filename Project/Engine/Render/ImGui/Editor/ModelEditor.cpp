@@ -154,9 +154,13 @@ namespace MadoEngine::Editor {
 				const std::filesystem::path modelPath(modelName);
 				const std::filesystem::path relativePath =
 					modelPath.lexically_relative(kModelDirectoryPath);
-				const std::filesystem::path displayPath = relativePath.empty()
-					? modelPath.filename()
-					: relativePath;
+				const std::filesystem::path displayPath = [&]() {
+					if (relativePath.empty()) {
+						return (modelPath.filename());
+					} else {
+						return (relativePath);
+					}
+				}();
 
 				ModelAssetDirectory* directory = &root;
 				for (const std::filesystem::path& component : displayPath.parent_path()) {
@@ -244,7 +248,13 @@ namespace MadoEngine::Editor {
 			std::string& selectedName,
 			const std::vector<std::string>& modelNames) {
 			const std::string displayName = GetModelDisplayName(selectedName);
-			const char* preview = selectedName.empty() ? "Modelを選択" : displayName.c_str();
+			const char* preview = [&]() {
+				if (selectedName.empty()) {
+					return ("Modelを選択");
+				} else {
+					return (displayName.c_str());
+				}
+			}();
 			bool isChanged = false;
 			if (ImGui::BeginCombo(label, preview)) {
 				const ModelAssetDirectory tree = CreateModelAssetTree(modelNames);
@@ -336,9 +346,13 @@ namespace MadoEngine::Editor {
 
 			const size_t vertexCount = model.GetVertexCount();
 			ImGui::Text("頂点数: %zu", vertexCount);
-			const int maxVertexIndex = vertexCount > 0
-				? static_cast<int>(vertexCount - 1)
-				: 0;
+			const int maxVertexIndex = [&]() {
+				if (vertexCount > 0) {
+					return (static_cast<int>(vertexCount - 1));
+				} else {
+					return (0);
+				}
+			}();
 			ImGui::AlignTextToFramePadding();
 			ImGui::TextUnformatted("頂点Index");
 			ImGui::SameLine();

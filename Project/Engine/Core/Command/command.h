@@ -33,7 +33,11 @@ namespace MadoEngine::Core {
         /// @brief GPUが完了済みのFence値を取得
         /// @return 完了済みFence値
         uint64_t GetCompletedFenceValue() const {
-            return fence_ ? fence_->GetCompletedValue() : 0;
+            if (fence_) {
+                return fence_->GetCompletedValue();
+            } else {
+                return 0;
+            }
         }
 
     private:

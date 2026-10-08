@@ -162,7 +162,11 @@ const Text* TextManager::TryGet(TextHandle handle) const {
 
 TextHandle TextManager::Find(const std::string& name) const {
 	const auto it = nameToHandle_.find(name);
-	return it == nameToHandle_.end() ? TextHandle{} : it->second;
+	if (it == nameToHandle_.end()) {
+		return TextHandle{};
+	} else {
+		return it->second;
+	}
 }
 
 bool TextManager::IsValid(TextHandle handle) const {

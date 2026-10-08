@@ -88,10 +88,34 @@ namespace {
 	/// @return 補正後色
 	Vector4 NormalizeColor(const Vector4& color, float globalAlpha) {
 		return {
-			(std::max)(0.0f, std::isfinite(color.x) ? color.x : 1.0f),
-			(std::max)(0.0f, std::isfinite(color.y) ? color.y : 1.0f),
-			(std::max)(0.0f, std::isfinite(color.z) ? color.z : 1.0f),
-			std::clamp(std::isfinite(color.w) ? color.w * globalAlpha : globalAlpha, 0.0f, 1.0f),
+			(std::max)(0.0f, [&]() {
+				if (std::isfinite(color.x)) {
+					return (color.x);
+				} else {
+					return (1.0f);
+				}
+			}()),
+			(std::max)(0.0f, [&]() {
+				if (std::isfinite(color.y)) {
+					return (color.y);
+				} else {
+					return (1.0f);
+				}
+			}()),
+			(std::max)(0.0f, [&]() {
+				if (std::isfinite(color.z)) {
+					return (color.z);
+				} else {
+					return (1.0f);
+				}
+			}()),
+			std::clamp([&]() {
+				if (std::isfinite(color.w)) {
+					return (color.w * globalAlpha);
+				} else {
+					return (globalAlpha);
+				}
+			}(), 0.0f, 1.0f),
 		};
 	}
 
@@ -215,7 +239,13 @@ namespace MadoEngine::Ribbon {
 		for (std::size_t index = 1; index < points.size(); ++index) {
 			const float segmentLength = (points[index].position - points[index - 1].position).Length();
 			cumulativeDistances[index] = cumulativeDistances[index - 1] +
-				(std::isfinite(segmentLength) ? segmentLength : 0.0f);
+				([&]() {
+					if (std::isfinite(segmentLength)) {
+						return (segmentLength);
+					} else {
+						return (0.0f);
+					}
+				}());
 		}
 		const float totalLength = cumulativeDistances.back();
 		if (!std::isfinite(totalLength) || totalLength <= kRibbonGeometryEpsilon) {
@@ -252,15 +282,31 @@ namespace MadoEngine::Ribbon {
 
 			const float normalizedLifetime = std::clamp(points[index].normalizedLifetime, 0.0f, 1.0f);
 			float width = data.widthOverLifetime.Evaluate(normalizedLifetime);
-			width = std::isfinite(width) ? (std::max)(0.0f, width) : 0.0f;
+			if (std::isfinite(width)) {
+				width = (std::max)(0.0f, width);
+			} else {
+				width = 0.0f;
+			}
 			const Vector3 halfWidth = side * (width * 0.5f);
 			const float startAlphaFade = std::clamp(
-				std::isfinite(data.startAlphaFade) ? data.startAlphaFade : 0.0f,
+				[&]() {
+					if (std::isfinite(data.startAlphaFade)) {
+						return (data.startAlphaFade);
+					} else {
+						return (0.0f);
+					}
+				}(),
 				0.0f,
 				1.0f
 			);
 			const float endAlphaFade = std::clamp(
-				std::isfinite(data.endAlphaFade) ? data.endAlphaFade : 0.0f,
+				[&]() {
+					if (std::isfinite(data.endAlphaFade)) {
+						return (data.endAlphaFade);
+					} else {
+						return (0.0f);
+					}
+				}(),
 				0.0f,
 				1.0f
 			);
@@ -279,10 +325,18 @@ namespace MadoEngine::Ribbon {
 			sourceColor.w *= std::clamp(lengthAlpha, 0.0f, 1.0f);
 			const Vector4 color = NormalizeColor(sourceColor, data.globalAlpha);
 
-			float ribbonU = data.uvMode == RibbonUvMode::Tile
-				? cumulativeDistances[index] / (std::max)(data.tileLength, 0.001f)
-				: cumulativeDistances[index] / totalLength;
-			ribbonU = std::isfinite(ribbonU) ? ribbonU : 0.0f;
+			float ribbonU = [&]() {
+				if (data.uvMode == RibbonUvMode::Tile) {
+					return (cumulativeDistances[index] / (std::max)(data.tileLength, 0.001f));
+				} else {
+					return (cumulativeDistances[index] / totalLength);
+				}
+			}();
+			if (std::isfinite(ribbonU)) {
+				ribbonU = ribbonU;
+			} else {
+				ribbonU = 0.0f;
+			}
 			const float leftU = ribbonU * data.uvScale.x + data.uvOffset.x;
 			const float leftV = data.uvOffset.y;
 			const float rightV = data.uvScale.y + data.uvOffset.y;
@@ -431,10 +485,20 @@ namespace MadoEngine::Ribbon {
 				const float rate = static_cast<float>(step) / static_cast<float>(steps);
 				Vector3 position = left.position * (1.0f - rate) + right.position * rate;
 				if (data.interpolation == RibbonInterpolationMode::CatmullRom) {
-					const Vector3& p0 = segment > 0 ? source[segment - 1].position : left.position;
-					const Vector3& p3 = segment + 2 < source.size()
-						? source[segment + 2].position
-						: right.position;
+					const Vector3& p0 = [&]() {
+						if (segment > 0) {
+							return (source[segment - 1].position);
+						} else {
+							return (left.position);
+						}
+					}();
+					const Vector3& p3 = [&]() {
+						if (segment + 2 < source.size()) {
+							return (source[segment + 2].position);
+						} else {
+							return (right.position);
+						}
+					}();
 					const Vector3 candidate = CatmullRom(p0, left.position, right.position, p3, rate);
 					if (IsFiniteVector3(candidate)) {
 						position = candidate;
@@ -459,7 +523,13 @@ namespace MadoEngine::Ribbon {
 		}
 
 		const float progress = std::clamp(
-			std::isfinite(data.playbackProgress) ? data.playbackProgress : 0.0f,
+			[&]() {
+				if (std::isfinite(data.playbackProgress)) {
+					return (data.playbackProgress);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			1.0f
 		);
@@ -486,9 +556,13 @@ namespace MadoEngine::Ribbon {
 
 		// Sweep Modeでは先端から指定距離だけを可視区間として保持
 		if (data.playbackMode == RibbonPlaybackMode::Sweep) {
-			const float sweepLength = std::isfinite(data.sweepLength)
-				? (std::max)(0.0f, data.sweepLength)
-				: 0.0f;
+			const float sweepLength = [&]() {
+				if (std::isfinite(data.sweepLength)) {
+					return ((std::max)(0.0f, data.sweepLength));
+				} else {
+					return (0.0f);
+				}
+			}();
 			startDistance = (std::max)(0.0f, endDistance - sweepLength);
 		}
 		if (endDistance - startDistance <= kRibbonGeometryEpsilon) {
@@ -514,9 +588,13 @@ namespace MadoEngine::Ribbon {
 			);
 			const std::size_t leftIndex = rightIndex - 1;
 			const float segmentLength = cumulativeDistances[rightIndex] - cumulativeDistances[leftIndex];
-			const float rate = segmentLength > kRibbonGeometryEpsilon
-				? std::clamp((distance - cumulativeDistances[leftIndex]) / segmentLength, 0.0f, 1.0f)
-				: 0.0f;
+			const float rate = [&]() {
+				if (segmentLength > kRibbonGeometryEpsilon) {
+					return (std::clamp((distance - cumulativeDistances[leftIndex]) / segmentLength, 0.0f, 1.0f));
+				} else {
+					return (0.0f);
+				}
+			}();
 			return SmoothedPoint{
 				points[leftIndex].position * (1.0f - rate) + points[rightIndex].position * rate,
 				points[leftIndex].normalizedLifetime * (1.0f - rate) +
@@ -562,9 +640,13 @@ namespace MadoEngine::Ribbon {
 			side = cameraRight_ - tangent * Dot(cameraRight_, tangent);
 		}
 		if (side.LengthSq() <= kRibbonGeometryEpsilon) {
-			const Vector3 fallbackAxis = std::abs(tangent.y) < 0.9f
-				? Vector3{ 0.0f, 1.0f, 0.0f }
-				: Vector3{ 1.0f, 0.0f, 0.0f };
+			const Vector3 fallbackAxis = [&]() {
+				if (std::abs(tangent.y) < 0.9f) {
+					return (Vector3{ 0.0f, 1.0f, 0.0f });
+				} else {
+					return (Vector3{ 1.0f, 0.0f, 0.0f });
+				}
+			}();
 			side = Cross(tangent, fallbackAxis);
 		}
 		return NormalizeSafe(side, Vector3{ 1.0f, 0.0f, 0.0f });
@@ -649,9 +731,11 @@ namespace MadoEngine::Ribbon {
 		MadoEngine::Render::CullMode cullMode) const {
 		MadoEngine::Render::PSODesc desc;
 		desc.blendMode = blendMode;
-		desc.depthMode = blendMode == MadoEngine::Render::BlendMode::None
-			? MadoEngine::Render::DepthMode::ReadWrite
-			: MadoEngine::Render::DepthMode::ReadOnly;
+		if (blendMode == MadoEngine::Render::BlendMode::None) {
+			desc.depthMode = MadoEngine::Render::DepthMode::ReadWrite;
+		} else {
+			desc.depthMode = MadoEngine::Render::DepthMode::ReadOnly;
+		}
 		desc.cullMode = cullMode;
 		desc.fillMode = MadoEngine::Render::FillMode::Solid;
 		desc.topology = MadoEngine::Render::TopologyType::Triangle;

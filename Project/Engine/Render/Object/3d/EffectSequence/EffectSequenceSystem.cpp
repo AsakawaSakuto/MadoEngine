@@ -191,7 +191,11 @@ namespace MadoEngine::EffectSequence {
 		std::sort(paths.begin(), paths.end());
 		std::size_t loadedCount = 0;
 		for (const std::filesystem::path& path : paths) {
-			loadedCount += LoadAsset(path) ? 1 : 0;
+			if (LoadAsset(path)) {
+				loadedCount += 1;
+			} else {
+				loadedCount += 0;
+			}
 		}
 		return loadedCount;
 	}
@@ -446,7 +450,11 @@ namespace MadoEngine::EffectSequence {
 
 	std::optional<float> EffectSequenceSystem::GetPlaybackTime(EffectSequenceHandle handle) const {
 		const EffectSequenceInstance* instance = Resolve(handle);
-		return instance ? std::optional<float>{ instance->GetPlaybackTime() } : std::nullopt;
+		if (instance) {
+			return std::optional<float>{ instance->GetPlaybackTime() };
+		} else {
+			return std::nullopt;
+		}
 	}
 
 	void EffectSequenceSystem::Update(float deltaTime) {
@@ -507,12 +515,20 @@ namespace MadoEngine::EffectSequence {
 
 	const EffectSequenceAsset* EffectSequenceSystem::FindAsset(const std::string& assetName) const {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	EffectSequenceAsset* EffectSequenceSystem::FindEditableAsset(const std::string& assetName) {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	std::size_t EffectSequenceSystem::GetActiveSequenceCount() const {
@@ -536,7 +552,11 @@ namespace MadoEngine::EffectSequence {
 			return nullptr;
 		}
 		SequenceSlot& slot = sequenceSlots_[handle.index];
-		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
+		if (slot.generation == handle.generation) {
+			return slot.instance.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	const EffectSequenceInstance* EffectSequenceSystem::Resolve(EffectSequenceHandle handle) const {
@@ -544,7 +564,11 @@ namespace MadoEngine::EffectSequence {
 			return nullptr;
 		}
 		const SequenceSlot& slot = sequenceSlots_[handle.index];
-		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
+		if (slot.generation == handle.generation) {
+			return slot.instance.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	void EffectSequenceSystem::CompleteAndReleaseSlot(uint32_t index, bool emitEvent) {

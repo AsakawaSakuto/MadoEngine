@@ -36,28 +36,52 @@ TPSCameraSettings TPS_Camera::GetSettings() const {
 void TPS_Camera::ApplySettings(const TPSCameraSettings& settings) {
 
 	// Camera行列と入力計算へ非有限値を渡さないよう現在値をFallbackとして設定値を検証
-	yaw_ = std::isfinite(settings.yaw) ? settings.yaw : yaw_;
-	distance_ = std::isfinite(settings.distance)
-		? std::clamp(settings.distance, kMinDistance, kMaxDistance)
-		: distance_;
-	const float requestedMinPitch = std::isfinite(settings.minPitch)
-		? std::clamp(settings.minPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit)
-		: minPitch_;
-	const float requestedMaxPitch = std::isfinite(settings.maxPitch)
-		? std::clamp(settings.maxPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit)
-		: maxPitch_;
+	if (std::isfinite(settings.yaw)) {
+		yaw_ = settings.yaw;
+	} else {
+		yaw_ = yaw_;
+	}
+	if (std::isfinite(settings.distance)) {
+		distance_ = std::clamp(settings.distance, kMinDistance, kMaxDistance);
+	} else {
+		distance_ = distance_;
+	}
+	const float requestedMinPitch = [&]() {
+		if (std::isfinite(settings.minPitch)) {
+			return (std::clamp(settings.minPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit));
+		} else {
+			return (minPitch_);
+		}
+	}();
+	const float requestedMaxPitch = [&]() {
+		if (std::isfinite(settings.maxPitch)) {
+			return (std::clamp(settings.maxPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit));
+		} else {
+			return (maxPitch_);
+		}
+	}();
 	minPitch_ = (std::min)(requestedMinPitch, requestedMaxPitch);
 	maxPitch_ = (std::max)(requestedMinPitch, requestedMaxPitch);
-	pitch_ = std::isfinite(settings.pitch) ? settings.pitch : pitch_;
-	mouseSensitivity_ = std::isfinite(settings.mouseSensitivity)
-		? std::clamp(settings.mouseSensitivity, 0.0f, kMaxSensitivity)
-		: mouseSensitivity_;
-	gamePadSensitivity_ = std::isfinite(settings.gamePadSensitivity)
-		? std::clamp(settings.gamePadSensitivity, 0.0f, kMaxSensitivity)
-		: gamePadSensitivity_;
-	followStrength_ = std::isfinite(settings.followStrength)
-		? std::clamp(settings.followStrength, kMinFollowStrength, kMaxFollowStrength)
-		: followStrength_;
+	if (std::isfinite(settings.pitch)) {
+		pitch_ = settings.pitch;
+	} else {
+		pitch_ = pitch_;
+	}
+	if (std::isfinite(settings.mouseSensitivity)) {
+		mouseSensitivity_ = std::clamp(settings.mouseSensitivity, 0.0f, kMaxSensitivity);
+	} else {
+		mouseSensitivity_ = mouseSensitivity_;
+	}
+	if (std::isfinite(settings.gamePadSensitivity)) {
+		gamePadSensitivity_ = std::clamp(settings.gamePadSensitivity, 0.0f, kMaxSensitivity);
+	} else {
+		gamePadSensitivity_ = gamePadSensitivity_;
+	}
+	if (std::isfinite(settings.followStrength)) {
+		followStrength_ = std::clamp(settings.followStrength, kMinFollowStrength, kMaxFollowStrength);
+	} else {
+		followStrength_ = followStrength_;
+	}
 	if (std::isfinite(settings.offset.x) &&
 		std::isfinite(settings.offset.y) &&
 		std::isfinite(settings.offset.z)) {

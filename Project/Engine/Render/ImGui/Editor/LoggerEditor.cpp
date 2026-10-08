@@ -158,7 +158,13 @@ namespace MadoEngine::Editor {
 		static std::uint64_t lastTailSequence = 0;
 
 		std::vector<Logger::LogEntry> entries = Logger::GetEntries();
-		std::uint64_t tailSequence = entries.empty() ? 0 : entries.back().sequence;
+		std::uint64_t tailSequence = [&]() -> std::uint64_t {
+			if (entries.empty()) {
+				return (0);
+			} else {
+				return (entries.back().sequence);
+			}
+		}();
 		bool hasNewLog = tailSequence != lastTailSequence;
 
 		if (ImGui::Begin("Logger")) {

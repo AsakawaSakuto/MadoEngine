@@ -137,8 +137,20 @@ namespace MadoEngine
 		windowsAPI_ = std::make_unique<MadoEngine::Screen::WindowsAPI>();
 		windowsAPI_->Initialize(winDesc_, hInstance);
 		auto [clientWidth, clientHeight] = windowsAPI_->GetClientSize();
-		renderWidth_ = static_cast<uint32_t>(clientWidth > 0 ? clientWidth : winDesc_.width);
-		renderHeight_ = static_cast<uint32_t>(clientHeight > 0 ? clientHeight : winDesc_.height);
+		renderWidth_ = static_cast<uint32_t>([&]() {
+			if (clientWidth > 0) {
+				return (clientWidth);
+			} else {
+				return (winDesc_.width);
+			}
+		}());
+		renderHeight_ = static_cast<uint32_t>([&]() {
+			if (clientHeight > 0) {
+				return (clientHeight);
+			} else {
+				return (winDesc_.height);
+			}
+		}());
 
 		// DxDeviceの初期化
 		dxDevice_ = std::make_unique<MadoEngine::Core::DxDevice>();
@@ -686,9 +698,11 @@ namespace MadoEngine
 		const MadoEngine::Render::LayerEffectStage stage = pass.GetLayerEffectStage();
 		isLayerEffectChainResolved_ = false;
 		isCurrentLayerEffectDisplay_ = stage == MadoEngine::Render::LayerEffectStage::Overlay;
-		currentLayerColorTargetName_ = isCurrentLayerEffectDisplay_
-			? kOverlayLayerColorTarget
-			: kLayerColorTarget;
+		if (isCurrentLayerEffectDisplay_) {
+			currentLayerColorTargetName_ = kOverlayLayerColorTarget;
+		} else {
+			currentLayerColorTargetName_ = kLayerColorTarget;
+		}
 		currentLayerEffectSourceName_ = currentLayerColorTargetName_;
 		assert((!isCurrentLayerEffectDisplay_ || isToneMapped_) &&
 			"OverlayのLayer EffectはTone Mapping後に実行してください");
@@ -696,7 +710,11 @@ namespace MadoEngine
 		// OverlayまたはDepth無視LayerではScene Depthと分離したMask用Depthを選択
 		const bool ignoreDepthForMask = stage == MadoEngine::Render::LayerEffectStage::Overlay ||
 			NeedsIgnoreDepthMask(pass.GetTargetLayerMask(), stage);
-		currentLayerMaskDepthStencilBuffer_ = ignoreDepthForMask ? layerDepthStencilBuffer_.get() : depthStencilBuffer_.get();
+		if (ignoreDepthForMask) {
+			currentLayerMaskDepthStencilBuffer_ = layerDepthStencilBuffer_.get();
+		} else {
+			currentLayerMaskDepthStencilBuffer_ = depthStencilBuffer_.get();
+		}
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = currentLayerMaskDepthStencilBuffer_->GetDSVCPUHandle();
 		currentLayerMaskDepthStencilBuffer_->Transition(commandManager_->GetCommandList(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		renderTargetManager_->Begin(currentLayerColorTargetName_, commandManager_->GetCommandList(), dsvHandle);
@@ -723,9 +741,11 @@ namespace MadoEngine
 		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 		MadoEngine::Render::PSODesc effectDesc = pass.GetEffectPSODesc();
-		effectDesc.rtvFormat = isCurrentLayerEffectDisplay_
-			? MadoEngine::Render::kDisplayRenderTargetFormat
-			: MadoEngine::Render::kHdrRenderTargetFormat;
+		if (isCurrentLayerEffectDisplay_) {
+			effectDesc.rtvFormat = MadoEngine::Render::kDisplayRenderTargetFormat;
+		} else {
+			effectDesc.rtvFormat = MadoEngine::Render::kHdrRenderTargetFormat;
+		}
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentLayerEffectSourceName_),
 			effectDesc,
@@ -771,9 +791,11 @@ namespace MadoEngine
 		renderTargetManager_->Begin(outputTargetName, commandManager_->GetCommandList());
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 		MadoEngine::Render::PSODesc effectDesc = pass.GetEffectPSODesc();
-		effectDesc.rtvFormat = isToneMapped_
-			? MadoEngine::Render::kDisplayRenderTargetFormat
-			: MadoEngine::Render::kHdrRenderTargetFormat;
+		if (isToneMapped_) {
+			effectDesc.rtvFormat = MadoEngine::Render::kDisplayRenderTargetFormat;
+		} else {
+			effectDesc.rtvFormat = MadoEngine::Render::kHdrRenderTargetFormat;
+		}
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
 			effectDesc,
@@ -934,7 +956,13 @@ namespace MadoEngine
 		viewportScissor_->Apply(commandManager_->GetCommandList());
 		DrawPostEffect(
 			renderTargetManager_->GetSRVGPUHandle(currentCompositeSourceName_),
-			isToneMapped_ ? displayCopyDesc_ : postEffectCopyDesc_
+			[&]() {
+				if (isToneMapped_) {
+					return (displayCopyDesc_);
+				} else {
+					return (postEffectCopyDesc_);
+				}
+			}()
 		);
 		renderTargetManager_->End(outputTargetName, commandManager_->GetCommandList());
 		currentCompositeSourceName_ = outputTargetName;
@@ -1186,10 +1214,28 @@ namespace MadoEngine
 		toolbar.SynchronizeHistorySnapshots();
 		toolbar.NotifyDocumentOperationResult(actionName, succeeded);
 #endif // USE_IMGUI
-		const std::string operationName = actionName ? actionName : "Editor操作";
+		const std::string operationName = [&]() {
+			if (actionName) {
+				return (actionName);
+			} else {
+				return ("Editor操作");
+			}
+		}();
 		Logger::Output(
-			operationName + (succeeded ? "に成功" : "に失敗"),
-			succeeded ? Logger::Level::Engine : Logger::Level::Error
+			operationName + ([&]() {
+				if (succeeded) {
+					return ("に成功");
+				} else {
+					return ("に失敗");
+				}
+			}()),
+			[&]() {
+				if (succeeded) {
+					return (Logger::Level::Engine);
+				} else {
+					return (Logger::Level::Error);
+				}
+			}()
 		);
 	}
 
@@ -1213,7 +1259,13 @@ namespace MadoEngine
 			depthStencilBuffer_->Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->SetGraphicsRootDescriptorTable(1, depthStencilBuffer_->GetSRVGPUHandle());
 			MadoEngine::Core::DepthStencilBuffer* maskDepth =
-				maskDepthStencilBuffer != nullptr ? maskDepthStencilBuffer : depthStencilBuffer_.get();
+				[&]() {
+					if (maskDepthStencilBuffer != nullptr) {
+						return (maskDepthStencilBuffer);
+					} else {
+						return (depthStencilBuffer_.get());
+					}
+				}();
 			maskDepth->Transition(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->SetGraphicsRootDescriptorTable(2, maskDepth->GetSRVGPUHandle());
 			if (parameterBufferAddress == 0) {
@@ -1296,9 +1348,11 @@ namespace MadoEngine
 	void EngineExecution::DrawComposite(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, D3D12_GPU_DESCRIPTOR_HANDLE effectSrv) {
 		auto* commandList = commandManager_->GetCommandList();
 		MadoEngine::Render::PSODesc compositeDesc = compositeDesc_;
-		compositeDesc.rtvFormat = isToneMapped_
-			? MadoEngine::Render::kDisplayRenderTargetFormat
-			: MadoEngine::Render::kHdrRenderTargetFormat;
+		if (isToneMapped_) {
+			compositeDesc.rtvFormat = MadoEngine::Render::kDisplayRenderTargetFormat;
+		} else {
+			compositeDesc.rtvFormat = MadoEngine::Render::kHdrRenderTargetFormat;
+		}
 		commandList->SetGraphicsRootSignature(
 			MadoEngine::RootSignatureManager::GetInstance().Get(compositeDesc.rootSigKey));
 		commandList->SetPipelineState(psoRegistry_->Get(compositeDesc));

@@ -196,7 +196,13 @@ namespace UI::Game {
 				// 画像解像度と縦横比を維持しつつDamage表示と同じScale演出を適用
 				const Vector2 textureSize = jokerSprite->GetTextureSize();
 				const float textureMaxSize = std::max(textureSize.x, textureSize.y);
-				const float baseScale = textureMaxSize > 0.0f ? jokerPixelSize_ / textureMaxSize : 1.0f;
+				const float baseScale = [&]() {
+					if (textureMaxSize > 0.0f) {
+						return (jokerPixelSize_ / textureMaxSize);
+					} else {
+						return (1.0f);
+					}
+				}();
 				jokerSprite->SetPosition(screenPosition);
 				jokerSprite->SetScale({ baseScale * scale, baseScale * scale });
 				jokerSprite->SetVisible(true);
@@ -368,7 +374,11 @@ namespace UI::Game {
 			break;
 		}
 
-		return event.isCritical ? DamageTextType::Critical : DamageTextType::Normal;
+		if (event.isCritical) {
+			return DamageTextType::Critical;
+		} else {
+			return DamageTextType::Normal;
+		}
 	}
 
 	const Vector4& EnemyDamageView::GetDamageTextColor(DamageTextType type) const {

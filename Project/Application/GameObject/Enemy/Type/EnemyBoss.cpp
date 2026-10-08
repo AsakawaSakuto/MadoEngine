@@ -20,7 +20,13 @@ namespace Enemy {
 	}
 
 	void Boss::UpdateBehavior(float deltaTime) {
-		const float safeDeltaTime = std::isfinite(deltaTime) ? std::max(0.0f, deltaTime) : 0.0f;
+		const float safeDeltaTime = [&]() {
+			if (std::isfinite(deltaTime)) {
+				return (std::max(0.0f, deltaTime));
+			} else {
+				return (0.0f);
+			}
+		}();
 		stateTimer_ += safeDeltaTime;
 
 		// 追跡後に予備動作を挟み、固定したPlayer座標へ突進してから硬直

@@ -31,9 +31,13 @@ AnimationClip LoadAnimationFile(const std::string& filename, int index) {
 
 	// 時間の単位を秒に変換
 	const double ticksPerSecond =
-		(animationAssimp->mTicksPerSecond != 0.0)
-		? animationAssimp->mTicksPerSecond
-		: 1.0; // 0防止
+		[&]() {
+			if ((animationAssimp->mTicksPerSecond != 0.0)) {
+				return (animationAssimp->mTicksPerSecond);
+			} else {
+				return (1.0);
+			}
+		}(); // 0防止
 
 	animation.duration = static_cast<float>(
 		animationAssimp->mDuration / ticksPerSecond);

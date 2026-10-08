@@ -199,7 +199,11 @@ namespace MadoEngine::Ribbon {
 		std::sort(paths.begin(), paths.end());
 		std::size_t loadedCount = 0;
 		for (const std::filesystem::path& path : paths) {
-			loadedCount += LoadAsset(path) ? 1 : 0;
+			if (LoadAsset(path)) {
+				loadedCount += 1;
+			} else {
+				loadedCount += 0;
+			}
 		}
 		return loadedCount;
 	}
@@ -562,12 +566,20 @@ namespace MadoEngine::Ribbon {
 
 	const RibbonEffectAsset* RibbonEffectSystem3d::FindAsset(const std::string& assetName) const {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	RibbonEffectAsset* RibbonEffectSystem3d::FindEditableAsset(const std::string& assetName) {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	std::size_t RibbonEffectSystem3d::GetActiveEffectCount() const {
@@ -585,7 +597,11 @@ namespace MadoEngine::Ribbon {
 			return nullptr;
 		}
 		EffectSlot& slot = effectSlots_[handle.index];
-		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
+		if (slot.generation == handle.generation) {
+			return slot.instance.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	const RibbonEffectInstance* RibbonEffectSystem3d::Resolve(RibbonEffectHandle handle) const {
@@ -593,7 +609,11 @@ namespace MadoEngine::Ribbon {
 			return nullptr;
 		}
 		const EffectSlot& slot = effectSlots_[handle.index];
-		return slot.generation == handle.generation ? slot.instance.get() : nullptr;
+		if (slot.generation == handle.generation) {
+			return slot.instance.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	void RibbonEffectSystem3d::ReleaseSlot(uint32_t index) {

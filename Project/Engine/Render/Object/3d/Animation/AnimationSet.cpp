@@ -17,7 +17,11 @@ bool AnimationSet::AddClip(std::string name, AnimationClip clip) {
 
 const AnimationClip* AnimationSet::FindClip(std::string_view name) const {
 	const auto iterator = clips_.find(std::string(name));
-	return iterator == clips_.end() ? nullptr : &iterator->second;
+	if (iterator == clips_.end()) {
+		return nullptr;
+	} else {
+		return &iterator->second;
+	}
 }
 
 bool AnimationSet::SetDefaultClip(std::string_view name) {

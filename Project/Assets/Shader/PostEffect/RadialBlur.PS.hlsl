@@ -79,7 +79,12 @@ PixelShaderOutput main(VertexShaderOutput input) {
             break;
         }
 
-        float sampleRate = sampleCount <= 1 ? 0.0f : (float)sampleIndex / (float)(sampleCount - 1);
+        float sampleRate;
+        if (sampleCount <= 1) {
+            sampleRate = 0.0f;
+        } else {
+            sampleRate = (float)sampleIndex / (float)(sampleCount - 1);
+        }
         float weight = 1.0f - sampleRate * 0.35f;
         float2 sampleTexcoord = CreateRadialBlurSampleTexcoord(input.texcoord, center, sampleRate, blurLength);
         blurColor += gTexture.Sample(gSampler, sampleTexcoord) * weight;

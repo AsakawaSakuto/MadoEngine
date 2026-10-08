@@ -45,12 +45,20 @@ namespace Relic {
 
 	float ModifierSnapshot::GetFlat(Stat stat) const {
 		const std::size_t index = static_cast<std::size_t>(stat);
-		return index < kStatCount ? flat_[index] : 0.0f;
+		if (index < kStatCount) {
+			return flat_[index];
+		} else {
+			return 0.0f;
+		}
 	}
 
 	float ModifierSnapshot::GetAdditiveRate(Stat stat) const {
 		const std::size_t index = static_cast<std::size_t>(stat);
-		return index < kStatCount ? additiveRate_[index] : 0.0f;
+		if (index < kStatCount) {
+			return additiveRate_[index];
+		} else {
+			return 0.0f;
+		}
 	}
 
 }

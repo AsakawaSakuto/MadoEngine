@@ -49,9 +49,11 @@ namespace {
 		}
 
 		// Favorite値が欠損または不正な場合は未登録として安全に復元
-		outEntry.isFavorite = entryJson.contains("favorite") && entryJson.at("favorite").is_boolean()
-			? entryJson.at("favorite").get<bool>()
-			: false;
+		if (entryJson.contains("favorite") && entryJson.at("favorite").is_boolean()) {
+			outEntry.isFavorite = entryJson.at("favorite").get<bool>();
+		} else {
+			outEntry.isFavorite = false;
+		}
 		return true;
 	}
 }

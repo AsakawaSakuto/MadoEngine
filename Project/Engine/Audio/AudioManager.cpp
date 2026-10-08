@@ -106,7 +106,13 @@ namespace MadoEngine {
 			}
 		}
 		float volume = volumeMap_[lowerKey] * masterVolume_ * typeVolume;
-		Logger::Output("AudioManager : 音声を再生します - キー: " + lowerKey + ", ループ: " + (loop ? "有効" : "無効") + ", 音量: " + std::to_string(volume), Logger::Level::Application);
+		Logger::Output("AudioManager : 音声を再生します - キー: " + lowerKey + ", ループ: " + ([&]() {
+			if (loop) {
+				return ("有効");
+			} else {
+				return ("無効");
+			}
+		}()) + ", 音量: " + std::to_string(volume), Logger::Level::Application);
 		it->second->PlayAudio(volume, loop);
 	}
 
@@ -176,7 +182,13 @@ namespace MadoEngine {
 			}
 
 			const auto volumeIt = volumeMap_.find(key);
-			const float individualVolume = volumeIt != volumeMap_.end() ? volumeIt->second : 1.0f;
+			const float individualVolume = [&]() {
+				if (volumeIt != volumeMap_.end()) {
+					return (volumeIt->second);
+				} else {
+					return (1.0f);
+				}
+			}();
 			audio->SetVolume(individualVolume * masterVolume_ * bgmVolume_ * bgmTransitionGain_);
 		}
 	}
@@ -230,8 +242,19 @@ namespace MadoEngine {
 
 				// MasterとCategoryとInstanceの倍率から最終音量を計算して適用
 				AudioType type = GetAudioType(lowerKey);
-				float categoryVol = (type == AudioType::SE) ? seVolume_ :
-					(type == AudioType::BGM) ? bgmVolume_ * bgmTransitionGain_ : voiceVolume_;
+				float categoryVol = [&]() {
+					if ((type == AudioType::SE)) {
+						return (seVolume_);
+					} else {
+						return ([&]() {
+							if ((type == AudioType::BGM)) {
+								return (bgmVolume_ * bgmTransitionGain_);
+							} else {
+								return (voiceVolume_);
+							}
+						}());
+					}
+				}();
 
 				audioIt->second->SetVolume(volume * categoryVol * masterVolume_);
 			}

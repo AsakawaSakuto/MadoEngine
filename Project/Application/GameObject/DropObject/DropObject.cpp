@@ -94,7 +94,13 @@ namespace DropObject {
 			return;
 		}
 
-		const Vector3 targetPosition = player ? player->GetPosition() : targetPosition_;
+		const Vector3 targetPosition = [&]() {
+			if (player) {
+				return (player->GetPosition());
+			} else {
+				return (targetPosition_);
+			}
+		}();
 
 		if (isMoving_) {
 

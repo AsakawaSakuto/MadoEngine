@@ -88,9 +88,17 @@ void InstancedModel::InitializeInstanceResources() {
 
 	materialData_ = CreateMappedBuffer<ModelMaterial>(device_.Get(), materialResource_);
 	materialData_->color = color_;
-	materialData_->enableLighting = enableLighting_ ? 1 : 0;
+	if (enableLighting_) {
+		materialData_->enableLighting = 1;
+	} else {
+		materialData_->enableLighting = 0;
+	}
 	materialData_->uvTransformMatrix = Matrix::MakeIdentity();
-	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+	if (useEnvironmentMap_) {
+		materialData_->useEnvironmentMap = 1;
+	} else {
+		materialData_->useEnvironmentMap = 0;
+	}
 
 	cameraData_ = CreateMappedBuffer<CameraForGPU>(device_.Get(), cameraResource_);
 	lightGpuData_ = CreateMappedBuffer<LightGpuData>(device_.Get(), lightGpuDataResource_);
@@ -157,9 +165,17 @@ void InstancedModel::Update(float deltaTime) {
 	trans.m[3][1] = uvTransform_.translate.y;
 
 	materialData_->color = color_;
-	materialData_->enableLighting = enableLighting_ ? 1 : 0;
+	if (enableLighting_) {
+		materialData_->enableLighting = 1;
+	} else {
+		materialData_->enableLighting = 0;
+	}
 	materialData_->uvTransformMatrix = scale * rot * trans;
-	materialData_->useEnvironmentMap = useEnvironmentMap_ ? 1 : 0;
+	if (useEnvironmentMap_) {
+		materialData_->useEnvironmentMap = 1;
+	} else {
+		materialData_->useEnvironmentMap = 0;
+	}
 }
 
 void InstancedModel::Draw(Camera& useCamera) {
@@ -205,7 +221,13 @@ void InstancedModel::Draw(Camera& useCamera) {
 	const D3D12_GPU_DESCRIPTOR_HANDLE fallbackSrv = MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_);
 
 	// Shadow未設定時もDescriptor Tableを有効なSRVで埋めてRoot設定を安定化
-	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = shadowMapSrvHandle_.ptr != 0 ? shadowMapSrvHandle_ : fallbackSrv;
+	const D3D12_GPU_DESCRIPTOR_HANDLE shadowSrv = [&]() {
+		if (shadowMapSrvHandle_.ptr != 0) {
+			return (shadowMapSrvHandle_);
+		} else {
+			return (fallbackSrv);
+		}
+	}();
 	commandList_->SetGraphicsRootConstantBufferView(kInstancedRootShadow, shadowGpuDataResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(kInstancedRootShadowMap, shadowSrv);
 
@@ -225,7 +247,13 @@ void InstancedModel::Draw(Camera& useCamera) {
 }
 
 void InstancedModel::DrawShadow(const Matrix4x4& lightViewProjection) {
-	const Camera* billboardCamera = usebillbord_ ? &camera_ : nullptr;
+	const Camera* billboardCamera = [&]() -> const Camera* {
+		if (usebillbord_) {
+			return (&camera_);
+		} else {
+			return (nullptr);
+		}
+	}();
 	DrawShadowInternal(lightViewProjection, billboardCamera);
 }
 
@@ -406,7 +434,11 @@ void InstancedModel::UpdateReceiveShadowGpuData() {
 		kInstancedShadowCompareBias,
 		0.0f
 	};
-	shadowGpuData_->useShadow = (receiveShadow_ && shadowMapSrvHandle_.ptr != 0) ? 1u : 0u;
+	if ((receiveShadow_ && shadowMapSrvHandle_.ptr != 0)) {
+		shadowGpuData_->useShadow = 1u;
+	} else {
+		shadowGpuData_->useShadow = 0u;
+	}
 }
 
 bool InstancedModel::IsValidHandle(uint32_t handle) const {

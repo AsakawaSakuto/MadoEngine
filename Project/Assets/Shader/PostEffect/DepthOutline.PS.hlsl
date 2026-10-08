@@ -175,7 +175,12 @@ float CalculateOutlineWeight(float2 texcoord, float2 texelSize)
     float centerDepth = gMaskDepthTexture.Sample(gSamplerPoint, texcoord);
 
     // 背景Clear値ではAlpha輪郭を優先して不要な深度Edgeの広がりを抑制
-    float depthGate = IsClearDepth(centerDepth) ? alphaWeight : saturate(alphaWeight * 2.0f + depthWeight * 0.25f);
+    float depthGate;
+    if (IsClearDepth(centerDepth)) {
+        depthGate = alphaWeight;
+    } else {
+        depthGate = saturate(alphaWeight * 2.0f + depthWeight * 0.25f);
+    }
     float outlineWeight = max(alphaWeight, depthWeight * depthGate);
     return saturate(outlineWeight * GetOutlineIntensity());
 }
@@ -199,7 +204,12 @@ PixelShaderOutput main(VertexShaderOutput input)
     float sceneDepth = gSceneDepthTexture.Sample(gSamplerPoint, input.texcoord);
 
     // Sceneより奥のMask本体を消しつつ手前に見える輪郭だけを合成
-    float visibleBody = IsMaskVisible(maskDepth, sceneDepth) ? srcColor.a : 0.0f;
+    float visibleBody;
+    if (IsMaskVisible(maskDepth, sceneDepth)) {
+        visibleBody = srcColor.a;
+    } else {
+        visibleBody = 0.0f;
+    }
     float outputAlpha = max(visibleBody, outlineWeight);
 
     output.color.rgb = lerp(srcColor.rgb, gOutlineColor.rgb, outlineWeight);

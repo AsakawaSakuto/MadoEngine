@@ -35,7 +35,11 @@ namespace {
 	/// @return 読み込んだ値
 	float ReadFloat(const JsonValue& json, const char* key, float fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_number() ? value->get<float>() : fallback;
+		if (value && value->is_number()) {
+			return value->get<float>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonから符号なし整数を安全に読み込み
@@ -50,17 +54,21 @@ namespace {
 		}
 		if (value->is_number_unsigned()) {
 			const uint64_t number = value->get<uint64_t>();
-			return number <= (std::numeric_limits<uint32_t>::max)()
-				? static_cast<uint32_t>(number)
-				: fallback;
+			if (number <= (std::numeric_limits<uint32_t>::max)()) {
+				return static_cast<uint32_t>(number);
+			} else {
+				return fallback;
+			}
 		}
 		if (!value->is_number_integer()) {
 			return fallback;
 		}
 		const int64_t number = value->get<int64_t>();
-		return number >= 0 && number <= (std::numeric_limits<uint32_t>::max)()
-			? static_cast<uint32_t>(number)
-			: fallback;
+		if (number >= 0 && number <= (std::numeric_limits<uint32_t>::max)()) {
+			return static_cast<uint32_t>(number);
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからboolを安全に読み込み
@@ -70,7 +78,11 @@ namespace {
 	/// @return 読み込んだ値
 	bool ReadBool(const JsonValue& json, const char* key, bool fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_boolean() ? value->get<bool>() : fallback;
+		if (value && value->is_boolean()) {
+			return value->get<bool>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonから文字列を安全に読み込み
@@ -80,7 +92,11 @@ namespace {
 	/// @return 読み込んだ値
 	std::string ReadString(const JsonValue& json, const char* key, const std::string& fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_string() ? value->get<std::string>() : fallback;
+		if (value && value->is_string()) {
+			return value->get<std::string>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Json配列からVector2を読み込み
@@ -230,7 +246,13 @@ namespace {
 		track.SetDefaultValue(normalizer(track.GetDefaultValue()));
 		std::vector<MadoEngine::Effect::EffectKeyframe<T>> keys = track.GetKeyframes();
 		for (MadoEngine::Effect::EffectKeyframe<T>& key : keys) {
-			key.time = std::clamp(std::isfinite(key.time) ? key.time : 0.0f, 0.0f, 1.0f);
+			key.time = std::clamp([&]() {
+				if (std::isfinite(key.time)) {
+					return (key.time);
+				} else {
+					return (0.0f);
+				}
+			}(), 0.0f, 1.0f);
 			key.value = normalizer(key.value);
 		}
 		track.SetKeyframes(std::move(keys));
@@ -286,16 +308,22 @@ namespace {
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	MadoEngine::Ribbon::RibbonUvMode ParseUvMode(const std::string& value) {
-		return value == "tile"
-			? MadoEngine::Ribbon::RibbonUvMode::Tile
-			: MadoEngine::Ribbon::RibbonUvMode::Stretch;
+		if (value == "tile") {
+			return MadoEngine::Ribbon::RibbonUvMode::Tile;
+		} else {
+			return MadoEngine::Ribbon::RibbonUvMode::Stretch;
+		}
 	}
 
 	/// @brief UV Modeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(MadoEngine::Ribbon::RibbonUvMode value) {
-		return value == MadoEngine::Ribbon::RibbonUvMode::Tile ? "tile" : "stretch";
+		if (value == MadoEngine::Ribbon::RibbonUvMode::Tile) {
+			return "tile";
+		} else {
+			return "stretch";
+		}
 	}
 
 	/// @brief JsonからBeam Emitter設定を読み込み
@@ -320,7 +348,11 @@ namespace {
 					*extension,
 					config.playback.extensionOverTime.GetDefaultValue(),
 					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
+						if (value.is_number()) {
+							return value.get<float>();
+						} else {
+							return fallback;
+						}
 					}
 				);
 				hasExtensionTrack = true;
@@ -339,7 +371,11 @@ namespace {
 					*width,
 					config.geometry.widthOverTime.GetDefaultValue(),
 					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
+						if (value.is_number()) {
+							return value.get<float>();
+						} else {
+							return fallback;
+						}
 					}
 				);
 			}
@@ -384,7 +420,11 @@ namespace {
 					*alpha,
 					config.material.globalAlphaOverTime.GetDefaultValue(),
 					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
+						if (value.is_number()) {
+							return value.get<float>();
+						} else {
+							return fallback;
+						}
 					}
 				);
 			}
@@ -437,11 +477,29 @@ namespace {
 	/// @brief Beam Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateBeamEmitter(BeamEmitterConfig& config) {
-		config.translateOffset.x = std::isfinite(config.translateOffset.x) ? config.translateOffset.x : 0.0f;
-		config.translateOffset.y = std::isfinite(config.translateOffset.y) ? config.translateOffset.y : 0.0f;
-		config.translateOffset.z = std::isfinite(config.translateOffset.z) ? config.translateOffset.z : 0.0f;
+		if (std::isfinite(config.translateOffset.x)) {
+			config.translateOffset.x = config.translateOffset.x;
+		} else {
+			config.translateOffset.x = 0.0f;
+		}
+		if (std::isfinite(config.translateOffset.y)) {
+			config.translateOffset.y = config.translateOffset.y;
+		} else {
+			config.translateOffset.y = 0.0f;
+		}
+		if (std::isfinite(config.translateOffset.z)) {
+			config.translateOffset.z = config.translateOffset.z;
+		} else {
+			config.translateOffset.z = 0.0f;
+		}
 		config.playback.duration = std::clamp(
-			std::isfinite(config.playback.duration) ? config.playback.duration : 1.0f,
+			[&]() {
+				if (std::isfinite(config.playback.duration)) {
+					return (config.playback.duration);
+				} else {
+					return (1.0f);
+				}
+			}(),
 			0.001f,
 			3600.0f
 		);
@@ -451,12 +509,24 @@ namespace {
 			kMaximumBeamSegmentCount
 		);
 		config.geometry.startFade = std::clamp(
-			std::isfinite(config.geometry.startFade) ? config.geometry.startFade : 0.0f,
+			[&]() {
+				if (std::isfinite(config.geometry.startFade)) {
+					return (config.geometry.startFade);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			1.0f
 		);
 		config.geometry.endFade = std::clamp(
-			std::isfinite(config.geometry.endFade) ? config.geometry.endFade : 0.0f,
+			[&]() {
+				if (std::isfinite(config.geometry.endFade)) {
+					return (config.geometry.endFade);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			1.0f
 		);
@@ -466,17 +536,35 @@ namespace {
 			config.geometry.endFade /= fadeSum;
 		}
 		config.noise.amplitude = std::clamp(
-			std::isfinite(config.noise.amplitude) ? config.noise.amplitude : 0.0f,
+			[&]() {
+				if (std::isfinite(config.noise.amplitude)) {
+					return (config.noise.amplitude);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			100000.0f
 		);
 		config.noise.frequency = std::clamp(
-			std::isfinite(config.noise.frequency) ? config.noise.frequency : 0.0f,
+			[&]() {
+				if (std::isfinite(config.noise.frequency)) {
+					return (config.noise.frequency);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			10000.0f
 		);
 		config.noise.scrollSpeed = std::clamp(
-			std::isfinite(config.noise.scrollSpeed) ? config.noise.scrollSpeed : 0.0f,
+			[&]() {
+				if (std::isfinite(config.noise.scrollSpeed)) {
+					return (config.noise.scrollSpeed);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			-10000.0f,
 			10000.0f
 		);
@@ -484,7 +572,13 @@ namespace {
 			config.material.textureName = "white2x2";
 		}
 		const auto normalizeFloat = [](float value, float minimum, float maximum, float fallback) {
-			return std::clamp(std::isfinite(value) ? value : fallback, minimum, maximum);
+			return std::clamp([&]() {
+				if (std::isfinite(value)) {
+					return (value);
+				} else {
+					return (fallback);
+				}
+			}(), minimum, maximum);
 		};
 		NormalizeTrack(config.geometry.widthOverTime, [&](float value) {
 			return normalizeFloat(value, 0.0f, 100000.0f, 0.25f);
@@ -532,7 +626,13 @@ namespace MadoEngine::Beam {
 	bool BeamEffectAsset::SaveToFile(
 		const std::filesystem::path& filePath,
 		bool createBackup) const {
-		const std::filesystem::path outputPath = filePath.empty() ? filePath_ : filePath;
+		const std::filesystem::path outputPath = [&]() {
+			if (filePath.empty()) {
+				return (filePath_);
+			} else {
+				return (filePath);
+			}
+		}();
 		if (outputPath.empty()) {
 			Logger::Output("Beam Effect Assetの保存先が指定されていません。", Logger::Level::Error);
 			return false;
@@ -592,7 +692,13 @@ namespace MadoEngine::Beam {
 		usedNames.reserve(emitters_.size());
 		for (size_t index = 0; index < emitters_.size(); ++index) {
 			BeamEmitterConfig& emitter = emitters_[index];
-			std::string baseName = emitter.name.empty() ? "Emitter" : emitter.name;
+			std::string baseName = [&]() -> std::string {
+				if (emitter.name.empty()) {
+					return ("Emitter");
+				} else {
+					return (emitter.name);
+				}
+			}();
 			std::string uniqueName = baseName;
 			uint32_t suffix = 1;
 			while (std::find(usedNames.begin(), usedNames.end(), uniqueName) != usedNames.end()) {

@@ -17,11 +17,27 @@ struct Vector4 {
 
     // --- index access (インデックスアクセス) ---
     constexpr float& operator[](std::size_t i) noexcept {
-        return (i == 0) ? x : (i == 1 ? y : (i == 2 ? z : w));
+        if (i == 0) {
+            return x;
+        } else if (i == 1) {
+            return y;
+        } else if (i == 2) {
+            return z;
+        } else {
+            return w;
+        }
     }
 
     constexpr const float& operator[](std::size_t i) const noexcept {
-        return (i == 0) ? x : (i == 1 ? y : (i == 2 ? z : w));
+        if (i == 0) {
+            return x;
+        } else if (i == 1) {
+            return y;
+        } else if (i == 2) {
+            return z;
+        } else {
+            return w;
+        }
     }
 
     // --- unary (単項演算子) ---

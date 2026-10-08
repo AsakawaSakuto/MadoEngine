@@ -254,7 +254,13 @@ namespace Weapon {
 		if (!canAddWeapon) {
 			ImGui::EndDisabled();
 			ImGui::SameLine();
-			ImGui::TextDisabled(HasWeapon(selectedAddWeaponType_) ? "装備済みです" : "空きスロットがありません");
+			ImGui::TextDisabled([&]() {
+				if (HasWeapon(selectedAddWeaponType_)) {
+					return ("装備済みです");
+				} else {
+					return ("空きスロットがありません");
+				}
+			}());
 		}
 
 		ImGui::Separator();

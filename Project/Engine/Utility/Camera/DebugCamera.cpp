@@ -39,22 +39,36 @@ void DebugCamera::ApplySettings(const DebugCameraSettings& settings) {
 		std::isfinite(settings.target.z)) {
 		target_ = settings.target;
 	}
-	distance_ = std::isfinite(settings.distance)
-		? std::clamp(settings.distance, kMinDistance, kMaxDistance)
-		: distance_;
-	yaw_ = std::isfinite(settings.yaw) ? settings.yaw : yaw_;
-	pitch_ = std::isfinite(settings.pitch)
-		? std::clamp(settings.pitch, -kPitchLimit, kPitchLimit)
-		: pitch_;
-	rotateSensitivity_ = std::isfinite(settings.rotateSensitivity)
-		? std::clamp(settings.rotateSensitivity, 0.0f, kMaxSensitivity)
-		: rotateSensitivity_;
-	panSensitivity_ = std::isfinite(settings.panSensitivity)
-		? std::clamp(settings.panSensitivity, 0.0f, kMaxSensitivity)
-		: panSensitivity_;
-	dollySensitivity_ = std::isfinite(settings.dollySensitivity)
-		? std::clamp(settings.dollySensitivity, 0.0f, kMaxSensitivity)
-		: dollySensitivity_;
+	if (std::isfinite(settings.distance)) {
+		distance_ = std::clamp(settings.distance, kMinDistance, kMaxDistance);
+	} else {
+		distance_ = distance_;
+	}
+	if (std::isfinite(settings.yaw)) {
+		yaw_ = settings.yaw;
+	} else {
+		yaw_ = yaw_;
+	}
+	if (std::isfinite(settings.pitch)) {
+		pitch_ = std::clamp(settings.pitch, -kPitchLimit, kPitchLimit);
+	} else {
+		pitch_ = pitch_;
+	}
+	if (std::isfinite(settings.rotateSensitivity)) {
+		rotateSensitivity_ = std::clamp(settings.rotateSensitivity, 0.0f, kMaxSensitivity);
+	} else {
+		rotateSensitivity_ = rotateSensitivity_;
+	}
+	if (std::isfinite(settings.panSensitivity)) {
+		panSensitivity_ = std::clamp(settings.panSensitivity, 0.0f, kMaxSensitivity);
+	} else {
+		panSensitivity_ = panSensitivity_;
+	}
+	if (std::isfinite(settings.dollySensitivity)) {
+		dollySensitivity_ = std::clamp(settings.dollySensitivity, 0.0f, kMaxSensitivity);
+	} else {
+		dollySensitivity_ = dollySensitivity_;
+	}
 
 	// 設定変更Frameから描画状態へ反映するため球面座標とCamera行列を即時更新
 	ApplySphericalCoord();

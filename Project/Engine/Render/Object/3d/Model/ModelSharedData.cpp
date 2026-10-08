@@ -81,9 +81,17 @@ bool ValidateAnimationClip(
 void ApplyAnimationClipSettings(const nlohmann::json& json, AnimationClip& clip) {
 	clip.loop = json.value("loop", true);
 	const float playbackSpeed = json.value("playbackSpeed", 1.0f);
-	clip.playbackSpeed = std::isfinite(playbackSpeed) ? (std::max)(0.0f, playbackSpeed) : 1.0f;
+	if (std::isfinite(playbackSpeed)) {
+		clip.playbackSpeed = (std::max)(0.0f, playbackSpeed);
+	} else {
+		clip.playbackSpeed = 1.0f;
+	}
 	const float blendDuration = json.value("blendDuration", 0.15f);
-	clip.blendDuration = std::isfinite(blendDuration) ? (std::max)(0.0f, blendDuration) : 0.15f;
+	if (std::isfinite(blendDuration)) {
+		clip.blendDuration = (std::max)(0.0f, blendDuration);
+	} else {
+		clip.blendDuration = 0.15f;
+	}
 }
 
 /// @brief Modelに対応するAnimationSetを読み込み
@@ -218,7 +226,11 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 	}
 
 	const ModelType inferredType = InferModelType(outData.modelData, outData.animationSet);
-	outData.type = (requestedType == ModelType::Auto) ? inferredType : requestedType;
+	if ((requestedType == ModelType::Auto)) {
+		outData.type = inferredType;
+	} else {
+		outData.type = requestedType;
+	}
 
 	if (outData.type == ModelType::Skinning && outData.modelData.skinClusterData.empty()) {
 

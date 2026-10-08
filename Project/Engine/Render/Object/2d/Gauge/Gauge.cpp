@@ -49,7 +49,11 @@ Gauge2d::~Gauge2d() {
 void Gauge2d::Initialize(const std::string& gaugeName, SceneType sceneType, MadoEngine::Render::RenderLayer renderLayer) {
 	Finalize();
 
-	objectName_ = gaugeName.empty() ? objectName_ : gaugeName;
+	if (gaugeName.empty()) {
+		objectName_ = objectName_;
+	} else {
+		objectName_ = gaugeName;
+	}
 	backgroundSpriteName_ = objectName_ + "1";
 	gaugeSpriteName_ = objectName_ + "2";
 	sceneType_ = sceneType;

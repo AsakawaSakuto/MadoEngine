@@ -17,7 +17,13 @@ namespace Projectile {
 		baseDamage_ = damage_;
 
 		transform_.translate = ownerPosition;
-		const float safeSizeRate = std::isfinite(sizeRate_) ? std::max(sizeRate_, kMinSizeRate) : kMinSizeRate;
+		const float safeSizeRate = [&]() {
+			if (std::isfinite(sizeRate_)) {
+				return (std::max(sizeRate_, kMinSizeRate));
+			} else {
+				return (kMinSizeRate);
+			}
+		}();
 		const float size = kBaseSize * safeSizeRate;
 		transform_.scale = { size, size, size };
 		SetMoveDirectionTowards(targetPosition);
@@ -36,7 +42,13 @@ namespace Projectile {
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 
-		const float safeLifeTime = std::isfinite(lifeTime_) ? std::max(lifeTime_, kMinLifeTime) : kMinLifeTime;
+		const float safeLifeTime = [&]() {
+			if (std::isfinite(lifeTime_)) {
+				return (std::max(lifeTime_, kMinLifeTime));
+			} else {
+				return (kMinLifeTime);
+			}
+		}();
 
 		lifeTimer_.Start(safeLifeTime, false);
 	}

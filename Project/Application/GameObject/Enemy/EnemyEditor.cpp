@@ -200,8 +200,20 @@ namespace Enemy {
 		bool settingsChanged = false;
 
 		ImGui::SeparatorText("実行状態");
-		ImGui::Text("Enemy数 : %zu", manager_ ? manager_->GetEnemyCount() : 0);
-		ImGui::Text("経過時間 : %.1f秒", spawner_ ? spawner_->GetElapsedTime() : 0.0f);
+		ImGui::Text("Enemy数 : %zu", [&]() -> std::size_t {
+			if (manager_) {
+				return (manager_->GetEnemyCount());
+			} else {
+				return (0);
+			}
+		}());
+		ImGui::Text("経過時間 : %.1f秒", [&]() {
+			if (spawner_) {
+				return (spawner_->GetElapsedTime());
+			} else {
+				return (0.0f);
+			}
+		}());
 
 		std::size_t activeWaveIndex = 0;
 		const std::vector<WaveSettings>& constWaves = settings.GetWaves();

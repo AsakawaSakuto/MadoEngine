@@ -9,10 +9,26 @@ namespace Player {
 
 		// GamePadとKeyboardの入力を同じ移動ベクトルへ合成
 		Vector2 input = MyInput::GetGamePad()->GetLeftStick();
-		input.x += MyInput::Press("Right") ? 1.0f : 0.0f;
-		input.x -= MyInput::Press("Left") ? 1.0f : 0.0f;
-		input.y += MyInput::Press("Up") ? 1.0f : 0.0f;
-		input.y -= MyInput::Press("Down") ? 1.0f : 0.0f;
+		if (MyInput::Press("Right")) {
+			input.x += 1.0f;
+		} else {
+			input.x += 0.0f;
+		}
+		if (MyInput::Press("Left")) {
+			input.x -= 1.0f;
+		} else {
+			input.x -= 0.0f;
+		}
+		if (MyInput::Press("Up")) {
+			input.y += 1.0f;
+		} else {
+			input.y += 0.0f;
+		}
+		if (MyInput::Press("Down")) {
+			input.y -= 1.0f;
+		} else {
+			input.y -= 0.0f;
+		}
 
 		const float inputLengthSq = input.x * input.x + input.y * input.y;
 

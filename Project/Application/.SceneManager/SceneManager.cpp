@@ -48,7 +48,13 @@ namespace {
 			Sphere sphere;
 			sphere.center = light->position;
 			sphere.radius = kLightDebugSphereRadius;
-			MyDebugLine::AddShape(sphere, lightManager.IsEnabled(handle) ? enabledPointColor : disabledPointColor);
+			MyDebugLine::AddShape(sphere, [&]() {
+				if (lightManager.IsEnabled(handle)) {
+					return (enabledPointColor);
+				} else {
+					return (disabledPointColor);
+				}
+			}());
 		}
 
 		for (LightHandle handle : lightManager.GetSpotLightHandles()) {
@@ -60,7 +66,13 @@ namespace {
 			Sphere sphere;
 			sphere.center = light->position;
 			sphere.radius = kLightDebugSphereRadius;
-			MyDebugLine::AddShape(sphere, lightManager.IsEnabled(handle) ? enabledSpotColor : disabledSpotColor);
+			MyDebugLine::AddShape(sphere, [&]() {
+				if (lightManager.IsEnabled(handle)) {
+					return (enabledSpotColor);
+				} else {
+					return (disabledSpotColor);
+				}
+			}());
 		}
 	}
 

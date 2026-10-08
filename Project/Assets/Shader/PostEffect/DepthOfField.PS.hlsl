@@ -84,7 +84,12 @@ float CalculateCircleOfConfusion(float viewDistance, float4 focusParams, float4 
     float focusDistance = max(focusParams.x, 0.0f);
     float focusRange = max(focusParams.y, 0.0001f);
     float distanceDelta = viewDistance - focusDistance;
-    float sideStrength = distanceDelta < 0.0f ? cameraParams.z : cameraParams.w;
+    float sideStrength;
+    if (distanceDelta < 0.0f) {
+        sideStrength = cameraParams.z;
+    } else {
+        sideStrength = cameraParams.w;
+    }
     float blurRate = smoothstep(0.0f, focusRange, abs(distanceDelta));
     return saturate(blurRate * max(sideStrength, 0.0f));
 }
@@ -131,9 +136,12 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float sceneDepth = gSceneDepthTexture.Sample(gSamplerPoint, input.texcoord);
 
     // Geometryを持たないClear DepthはFar Clip上の背景としてぼけ量を計算
-    float viewDistance = IsClearDepth(sceneDepth)
-        ? max(cameraParams.y, cameraParams.x + 0.0001f)
-        : ConvertDepthToViewDistance(sceneDepth, cameraParams.x, cameraParams.y);
+    float viewDistance;
+    if (IsClearDepth(sceneDepth)) {
+        viewDistance = max(cameraParams.y, cameraParams.x + 0.0001f);
+    } else {
+        viewDistance = ConvertDepthToViewDistance(sceneDepth, cameraParams.x, cameraParams.y);
+    }
     float coc = CalculateCircleOfConfusion(viewDistance, focusParams, cameraParams);
     float4 blurColor = SampleDepthOfFieldBlur(input.texcoord, texelSize, focusParams.z, coc);
 

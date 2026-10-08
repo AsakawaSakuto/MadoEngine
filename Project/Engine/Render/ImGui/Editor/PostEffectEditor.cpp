@@ -67,14 +67,22 @@ const char* GetScreenEffectStageName(Render::ScreenEffectStage stage) {
 /// @param value 変換する適用段階名
 /// @return 変換した適用段階、未定義名の場合はFinal
 Render::ScreenEffectStage ScreenEffectStageFromString(const std::string& value) {
-	return value == "Scene" ? Render::ScreenEffectStage::Scene : Render::ScreenEffectStage::Final;
+	if (value == "Scene") {
+		return Render::ScreenEffectStage::Scene;
+	} else {
+		return Render::ScreenEffectStage::Final;
+	}
 }
 
 /// @brief Passの適用先名を取得
 /// @param scope 名前を取得する適用先
 /// @return JSONへ保存する適用先名
 const char* GetPostEffectPassScopeName(Render::PostEffectPassScope scope) {
-	return scope == Render::PostEffectPassScope::Screen ? "Screen" : "Layer";
+	if (scope == Render::PostEffectPassScope::Screen) {
+		return "Screen";
+	} else {
+		return "Layer";
+	}
 }
 
 /// @brief Passに設定された登録済みポストエフェクト定義を取得
@@ -82,7 +90,11 @@ const char* GetPostEffectPassScopeName(Render::PostEffectPassScope scope) {
 /// @return 登録済み定義、未登録Shaderの場合はnullptr
 const Render::PostEffectDefinition* FindPostEffectDefinition(const Render::PostEffectPass& pass) {
 	const auto effectType = pass.GetPostEffectType();
-	return effectType ? Render::PostEffectDefinitionRegistry::Find(*effectType) : nullptr;
+	if (effectType) {
+		return Render::PostEffectDefinitionRegistry::Find(*effectType);
+	} else {
+		return nullptr;
+	}
 }
 
 /// @brief 指定したJSONパスのバックアップパスを作成
@@ -168,9 +180,21 @@ Render::PostEffectPassHandle UpsertPostEffectPassFromJson(
 
 	const bool isScreen = scope == Render::PostEffectPassScope::Screen;
 	const std::string defaultKey =
-		(isScreen ? "ScreenEffectPass_Loaded_" : "LayerEffectPass_Loaded_") + std::to_string(index + 1);
+		([&]() {
+			if (isScreen) {
+				return ("ScreenEffectPass_Loaded_");
+			} else {
+				return ("LayerEffectPass_Loaded_");
+			}
+		}()) + std::to_string(index + 1);
 	const std::string defaultName =
-		(isScreen ? "Screen Effect Loaded " : "Layer Effect Loaded ") + std::to_string(index + 1);
+		([&]() {
+			if (isScreen) {
+				return ("Screen Effect Loaded ");
+			} else {
+				return ("Layer Effect Loaded ");
+			}
+		}()) + std::to_string(index + 1);
 	std::string key = passJson.value("key", defaultKey);
 	std::string name = passJson.value("name", defaultName);
 	if (key.empty()) {
@@ -281,7 +305,13 @@ std::vector<Render::PostEffectPassHandle> LoadPostEffectPassListFromJson(
 
 		const bool isScreen = scope == Render::PostEffectPassScope::Screen;
 		const std::string defaultKey =
-			(isScreen ? "ScreenEffectPass_Loaded_" : "LayerEffectPass_Loaded_") + std::to_string(index + 1);
+			([&]() {
+				if (isScreen) {
+					return ("ScreenEffectPass_Loaded_");
+				} else {
+					return ("LayerEffectPass_Loaded_");
+				}
+			}()) + std::to_string(index + 1);
 		std::string key = passJson.value("key", defaultKey);
 		if (key.empty()) {
 			key = defaultKey;
@@ -600,7 +630,13 @@ void DrawPostEffectSelectionCombo(
 	const Render::PostEffectPass& pass)
 {
 	const Render::PostEffectDefinition* currentDefinition = FindPostEffectDefinition(pass);
-	const char* preview = currentDefinition ? currentDefinition->displayName.data() : "Unknown";
+	const char* preview = [&]() {
+		if (currentDefinition) {
+			return (currentDefinition->displayName.data());
+		} else {
+			return ("Unknown");
+		}
+	}();
 	ImGui::SetNextItemWidth(-1.0f);
 	if (!ImGui::BeginCombo("##PostEffect", preview)) {
 		return;
@@ -651,7 +687,13 @@ int GetColorComponentCount(
 	const std::string base = GetColorBase(parameters[startIndex].key);
 	const std::size_t offset = parameters[startIndex].offset;
 	for (std::size_t component = 1; component < 3; ++component) {
-		const char suffix = component == 1 ? 'G' : 'B';
+		const char suffix = [&]() {
+			if (component == 1) {
+				return ('G');
+			} else {
+				return ('B');
+			}
+		}();
 		if (parameters[startIndex + component].key != base + suffix ||
 			parameters[startIndex + component].offset != offset + sizeof(float) * component) {
 			return 0;
@@ -698,8 +740,13 @@ void DrawPostEffectParameterRows(Render::PostEffectPass& pass) {
 				ImGui::TableSetColumnIndex(2);
 				ImGui::SetNextItemWidth(-1.0f);
 				const std::string id = "##" + GetColorBase(parameter.key);
-				const bool changed = colorComponentCount == 4 ?
-					ImGui::ColorEdit4(id.c_str(), color) : ImGui::ColorEdit3(id.c_str(), color);
+				const bool changed = [&]() {
+					if (colorComponentCount == 4) {
+						return (ImGui::ColorEdit4(id.c_str(), color));
+					} else {
+						return (ImGui::ColorEdit3(id.c_str(), color));
+					}
+				}();
 				if (changed) {
 					for (int component = 0; component < colorComponentCount; ++component) {
 						pass.SetFloatParameter(parameters[index + component].offset, color[component]);
@@ -758,7 +805,11 @@ std::size_t FindHandleIndex(
 	Render::PostEffectPassHandle handle)
 {
 	const auto it = std::find(handles.begin(), handles.end(), handle);
-	return it == handles.end() ? handles.size() : static_cast<std::size_t>(std::distance(handles.begin(), it));
+	if (it == handles.end()) {
+		return handles.size();
+	} else {
+		return static_cast<std::size_t>(std::distance(handles.begin(), it));
+	}
 }
 
 #endif // USE_IMGUI
@@ -975,8 +1026,13 @@ void DrawPostEffectEditorUI(Render::PostEffectManager& postEffectManager) {
 		}
 
 		const std::vector<Render::PostEffectPassHandle>& order =
-			scope == Render::PostEffectPassScope::Layer ?
-			postEffectManager.GetLayerPassHandles() : postEffectManager.GetScreenPassHandles();
+			[&]() {
+				if (scope == Render::PostEffectPassScope::Layer) {
+					return (postEffectManager.GetLayerPassHandles());
+				} else {
+					return (postEffectManager.GetScreenPassHandles());
+				}
+			}();
 		const std::size_t currentIndex = FindHandleIndex(order, selectedHandle);
 		ImGui::BeginDisabled(currentIndex == 0 || currentIndex >= order.size());
 		if (ImGui::Button("上へ")) {

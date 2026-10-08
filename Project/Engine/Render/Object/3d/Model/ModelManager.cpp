@@ -376,7 +376,11 @@ const Model* ModelManager::TryGet(ModelHandle handle) const {
 
 ModelHandle ModelManager::Find(const std::string& name) const {
 	const auto it = modelNameToHandle_.find(name);
-	return it == modelNameToHandle_.end() ? ModelHandle{} : it->second;
+	if (it == modelNameToHandle_.end()) {
+		return ModelHandle{};
+	} else {
+		return it->second;
+	}
 }
 
 bool ModelManager::IsValid(ModelHandle handle) const {
@@ -561,7 +565,11 @@ const InstancedModel* ModelManager::TryGet(InstancedModelHandle handle) const {
 
 InstancedModelHandle ModelManager::FindInstanced(const std::string& name) const {
 	const auto it = instancedModelNameToHandle_.find(name);
-	return it == instancedModelNameToHandle_.end() ? InstancedModelHandle{} : it->second;
+	if (it == instancedModelNameToHandle_.end()) {
+		return InstancedModelHandle{};
+	} else {
+		return it->second;
+	}
 }
 
 bool ModelManager::IsValid(InstancedModelHandle handle) const {
@@ -897,7 +905,11 @@ std::vector<std::string> ModelManager::GetAvailableModelNames() const {
 }
 
 std::string ModelManager::GetModelAssetName(ModelHandle handle) const {
-	return IsValid(handle) ? modelSlots_[handle.index].assetName : std::string{};
+	if (IsValid(handle)) {
+		return modelSlots_[handle.index].assetName;
+	} else {
+		return std::string{};
+	}
 }
 
 std::string ModelManager::GetModelAssetName(const std::string& name) const {
@@ -950,12 +962,20 @@ const ModelSharedData* ModelManager::FindSharedData(const std::string& modelName
 
 	const std::string normalized = NormalizePath(modelName);
 	const auto dataIt = sharedData_.find(normalized);
-	return dataIt == sharedData_.end() ? nullptr : dataIt->second.get();
+	if (dataIt == sharedData_.end()) {
+		return nullptr;
+	} else {
+		return dataIt->second.get();
+	}
 }
 
 std::string ModelManager::ResolveModelPath(const std::string& modelName) const {
 	const auto aliasIt = aliases_.find(modelName);
-	return aliasIt == aliases_.end() ? NormalizePath(modelName) : aliasIt->second;
+	if (aliasIt == aliases_.end()) {
+		return NormalizePath(modelName);
+	} else {
+		return aliasIt->second;
+	}
 }
 
 void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime) {

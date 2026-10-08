@@ -39,7 +39,13 @@ bool Animator::Play(std::string_view clipName, float blendDuration, bool restart
 	currentClip_ = nextClip;
 	animationTime_ = 0.0f;
 	blendElapsedTime_ = 0.0f;
-	blendDuration_ = (std::max)(0.0f, blendDuration < 0.0f ? nextClip->blendDuration : blendDuration);
+	blendDuration_ = (std::max)(0.0f, [&]() {
+		if (blendDuration < 0.0f) {
+			return (nextClip->blendDuration);
+		} else {
+			return (blendDuration);
+		}
+	}());
 	isFinished_ = false;
 	return true;
 }
@@ -50,7 +56,13 @@ void Animator::Update(float deltaTime, Skeleton& skeleton) {
 		return;
 	}
 
-	const float safeDeltaTime = std::isfinite(deltaTime) ? (std::max)(0.0f, deltaTime) : 0.0f;
+	const float safeDeltaTime = [&]() {
+		if (std::isfinite(deltaTime)) {
+			return ((std::max)(0.0f, deltaTime));
+		} else {
+			return (0.0f);
+		}
+	}();
 	const float clipPlaybackSpeed = (std::max)(0.0f, currentClip_->playbackSpeed);
 	animationTime_ += safeDeltaTime * playbackSpeed_ * clipPlaybackSpeed;
 
@@ -87,9 +99,17 @@ void Animator::Update(float deltaTime, Skeleton& skeleton) {
 }
 
 void Animator::SetPlaybackSpeed(float playbackSpeed) {
-	playbackSpeed_ = std::isfinite(playbackSpeed) ? (std::max)(0.0f, playbackSpeed) : 0.0f;
+	if (std::isfinite(playbackSpeed)) {
+		playbackSpeed_ = (std::max)(0.0f, playbackSpeed);
+	} else {
+		playbackSpeed_ = 0.0f;
+	}
 }
 
 std::string_view Animator::GetCurrentClipName() const {
-	return currentClip_ ? std::string_view(currentClip_->name) : std::string_view{};
+	if (currentClip_) {
+		return std::string_view(currentClip_->name);
+	} else {
+		return std::string_view{};
+	}
 }

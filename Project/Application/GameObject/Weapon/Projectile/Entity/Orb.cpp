@@ -17,13 +17,25 @@ namespace Projectile {
 
 		startPosition_ = ownerPosition;
 		transform_.translate = startPosition_;
-		const float safeSizeRate = std::isfinite(sizeRate_) ? std::max(sizeRate_, kMinSizeRate) : kMinSizeRate;
+		const float safeSizeRate = [&]() {
+			if (std::isfinite(sizeRate_)) {
+				return (std::max(sizeRate_, kMinSizeRate));
+			} else {
+				return (kMinSizeRate);
+			}
+		}();
 		const float modelScale = kBaseModelScale * safeSizeRate;
 		transform_.scale = { modelScale, modelScale, modelScale };
 
 		const Vector3 toTarget = targetPosition - startPosition_;
 		const float distance = toTarget.Length();
-		const float safeMoveSpeed = std::isfinite(moveSpeed_) ? std::max(std::fabs(moveSpeed_), kMinMoveSpeed) : kMinMoveSpeed;
+		const float safeMoveSpeed = [&]() {
+			if (std::isfinite(moveSpeed_)) {
+				return (std::max(std::fabs(moveSpeed_), kMinMoveSpeed));
+			} else {
+				return (kMinMoveSpeed);
+			}
+		}();
 
 		flightDuration_ = std::max(distance / safeMoveSpeed, kMinFlightDuration);
 
@@ -51,9 +63,13 @@ namespace Projectile {
 	}
 
 	void Orb::Update(float deltaTime) {
-		const float safeDeltaTime = std::isfinite(deltaTime)
-			? std::max(deltaTime, 0.0f)
-			: 0.0f;
+		const float safeDeltaTime = [&]() {
+			if (std::isfinite(deltaTime)) {
+				return (std::max(deltaTime, 0.0f));
+			} else {
+				return (0.0f);
+			}
+		}();
 
 		if (!hasArrived_) {
 			flightElapsedTime_ += safeDeltaTime;

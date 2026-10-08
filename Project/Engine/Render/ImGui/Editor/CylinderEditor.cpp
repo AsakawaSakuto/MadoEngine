@@ -174,15 +174,23 @@ namespace {
 
 		if (preferredIndex >= 0 && preferredIndex < static_cast<int>(keyframes.size())) {
 			const float preferredTime = keyframes[preferredIndex].time;
-			const float nextTime = preferredIndex + 1 < static_cast<int>(keyframes.size())
-				? keyframes[preferredIndex + 1].time
-				: safeMaximumTime;
+			const float nextTime = [&]() {
+				if (preferredIndex + 1 < static_cast<int>(keyframes.size())) {
+					return (keyframes[preferredIndex + 1].time);
+				} else {
+					return (safeMaximumTime);
+				}
+			}();
 			if (nextTime - preferredTime > minimumGap) {
 				return (preferredTime + nextTime) * 0.5f;
 			}
-			const float previousTime = preferredIndex > 0
-				? keyframes[preferredIndex - 1].time
-				: 0.0f;
+			const float previousTime = [&]() {
+				if (preferredIndex > 0) {
+					return (keyframes[preferredIndex - 1].time);
+				} else {
+					return (0.0f);
+				}
+			}();
 			if (preferredTime - previousTime > minimumGap) {
 				return (previousTime + preferredTime) * 0.5f;
 			}
@@ -342,12 +350,20 @@ namespace {
 
 				for (int index = 0; index < static_cast<int>(keyframes.size()); ++index) {
 					EffectKeyframe<T>& keyframe = keyframes[index];
-					const float minimumKeyframeTime = index > 0
-						? keyframes[index - 1].time
-						: 0.0f;
-					const float requestedMaximumKeyframeTime = index + 1 < static_cast<int>(keyframes.size())
-						? keyframes[index + 1].time
-						: (std::max)(duration, 0.001f);
+					const float minimumKeyframeTime = [&]() {
+						if (index > 0) {
+							return (keyframes[index - 1].time);
+						} else {
+							return (0.0f);
+						}
+					}();
+					const float requestedMaximumKeyframeTime = [&]() {
+						if (index + 1 < static_cast<int>(keyframes.size())) {
+							return (keyframes[index + 1].time);
+						} else {
+							return ((std::max)(duration, 0.001f));
+						}
+					}();
 					const float maximumKeyframeTime = (std::max)(
 						minimumKeyframeTime,
 						requestedMaximumKeyframeTime
@@ -370,7 +386,13 @@ namespace {
 						"%.3f秒"
 					)) {
 						keyframe.time = std::clamp(
-							std::isfinite(keyframe.time) ? keyframe.time : minimumKeyframeTime,
+							[&]() {
+								if (std::isfinite(keyframe.time)) {
+									return (keyframe.time);
+								} else {
+									return (minimumKeyframeTime);
+								}
+							}(),
 							minimumKeyframeTime,
 							maximumKeyframeTime
 						);
@@ -521,7 +543,13 @@ namespace {
 					ImGuiColorEditFlags_HDR
 				);
 			},
-			defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None
+			[&]() {
+				if (defaultOpen) {
+					return (ImGuiTreeNodeFlags_DefaultOpen);
+				} else {
+					return (ImGuiTreeNodeFlags_None);
+				}
+			}()
 		);
 	}
 
@@ -669,16 +697,24 @@ namespace {
 
 		if (preferredIndex >= 0 && preferredIndex < static_cast<int>(gradient.size())) {
 			const float selectedPosition = std::clamp(gradient[preferredIndex].position, 0.0f, 1.0f);
-			const float nextPosition = preferredIndex + 1 < static_cast<int>(gradient.size())
-				? std::clamp(gradient[preferredIndex + 1].position, 0.0f, 1.0f)
-				: 1.0f;
+			const float nextPosition = [&]() {
+				if (preferredIndex + 1 < static_cast<int>(gradient.size())) {
+					return (std::clamp(gradient[preferredIndex + 1].position, 0.0f, 1.0f));
+				} else {
+					return (1.0f);
+				}
+			}();
 			if (const std::optional<float> position = midpointIfAvailable(selectedPosition, nextPosition)) {
 				return position;
 			}
 
-			const float previousPosition = preferredIndex > 0
-				? std::clamp(gradient[preferredIndex - 1].position, 0.0f, 1.0f)
-				: 0.0f;
+			const float previousPosition = [&]() {
+				if (preferredIndex > 0) {
+					return (std::clamp(gradient[preferredIndex - 1].position, 0.0f, 1.0f));
+				} else {
+					return (0.0f);
+				}
+			}();
 			if (const std::optional<float> position = midpointIfAvailable(previousPosition, selectedPosition)) {
 				return position;
 			}
@@ -710,7 +746,13 @@ namespace {
 	/// @return 0から1へ制限したImGui描画色
 	ImU32 ToGradientPreviewColor(const Vector4& color) {
 		const auto normalize = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
+			return std::clamp([&]() {
+				if (std::isfinite(value)) {
+					return (value);
+				} else {
+					return (0.0f);
+				}
+			}(), 0.0f, 1.0f);
 		};
 		return ImGui::ColorConvertFloat4ToU32(ImVec4{
 			normalize(color.x),
@@ -816,7 +858,13 @@ namespace {
 		);
 		const float maximumPreviewTime = (std::max)(config.duration, 0.001f);
 		previewTime = std::clamp(
-			std::isfinite(previewTime) ? previewTime : 0.0f,
+			[&]() {
+				if (std::isfinite(previewTime)) {
+					return (previewTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			maximumPreviewTime
 		);
@@ -889,10 +937,20 @@ namespace {
 
 			for (int index = 0; index < static_cast<int>(gradient.size()); ++index) {
 				CylinderColorStop& stop = gradient[index];
-				const float minimumPosition = index > 0 ? gradient[index - 1].position : 0.0f;
-				const float maximumPosition = index + 1 < static_cast<int>(gradient.size())
-					? gradient[index + 1].position
-					: 1.0f;
+				const float minimumPosition = [&]() {
+					if (index > 0) {
+						return (gradient[index - 1].position);
+					} else {
+						return (0.0f);
+					}
+				}();
+				const float maximumPosition = [&]() {
+					if (index + 1 < static_cast<int>(gradient.size())) {
+						return (gradient[index + 1].position);
+					} else {
+						return (1.0f);
+					}
+				}();
 				ImGui::PushID(index);
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
@@ -911,7 +969,13 @@ namespace {
 					"%.3f"
 				)) {
 					stop.position = std::clamp(
-						std::isfinite(stop.position) ? stop.position : minimumPosition,
+						[&]() {
+							if (std::isfinite(stop.position)) {
+								return (stop.position);
+							} else {
+								return (minimumPosition);
+							}
+						}(),
 						minimumPosition,
 						maximumPosition
 					);
@@ -1059,17 +1123,25 @@ namespace MadoEngine::Editor {
 				static_cast<int>(assetNames.size()) - 1
 			);
 		}
-		std::string selectedAssetName = assetNames.empty()
-			? std::string{}
-			: assetNames[selectedAssetIndex];
+		std::string selectedAssetName = [&]() {
+			if (assetNames.empty()) {
+				return (std::string{});
+			} else {
+				return (assetNames[selectedAssetIndex]);
+			}
+		}();
 
 		if (!selectedAssetName.empty() && assetRenameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			assetRenameOriginalName = selectedAssetName;
 		}
-		CylinderEffectAsset* asset = selectedAssetName.empty()
-			? nullptr
-			: system.FindEditableAsset(selectedAssetName);
+		CylinderEffectAsset* asset = [&]() -> CylinderEffectAsset* {
+			if (selectedAssetName.empty()) {
+				return (nullptr);
+			} else {
+				return (system.FindEditableAsset(selectedAssetName));
+			}
+		}();
 		if (asset) {
 			savedAssetSnapshots.try_emplace(
 				selectedAssetName,
@@ -1180,9 +1252,11 @@ namespace MadoEngine::Editor {
 			if (system.DeleteAsset(selectedAssetName)) {
 				savedAssetSnapshots.erase(selectedAssetName);
 				assetNames = system.GetAssetNames();
-				selectedAssetIndex = assetNames.empty()
-					? 0
-					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				if (assetNames.empty()) {
+					selectedAssetIndex = 0;
+				} else {
+					selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				}
 				assetRenameOriginalName.clear();
 			}
 		}

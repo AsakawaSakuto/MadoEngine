@@ -38,9 +38,13 @@ void RebalanceTypeCounts(int previousTotal, int newTotal, int& firstCount, int& 
 		return;
 	}
 
-	const float firstRatio = previousTotal > 0
-		? static_cast<float>(firstCount) / static_cast<float>(previousTotal)
-		: 0.5f;
+	const float firstRatio = [&]() {
+		if (previousTotal > 0) {
+			return (static_cast<float>(firstCount) / static_cast<float>(previousTotal));
+		} else {
+			return (0.5f);
+		}
+	}();
 	firstCount = std::clamp(
 		static_cast<int>(std::lround(firstRatio * static_cast<float>(newTotal))),
 		0,
@@ -337,7 +341,11 @@ void Map::Generate(const GenerationSettings& settings) {
 			desc.z = z;
 			desc.mapWidth = mapWidth_;
 			desc.height = currentHeight;
-			desc.type = useSlope ? MapBlockType::Slope : MapBlockType::Ground;
+			if (useSlope) {
+				desc.type = MapBlockType::Slope;
+			} else {
+				desc.type = MapBlockType::Ground;
+			}
 			desc.slopeDirection = slopeDirection;
 			desc.blockSize = blockSize_;
 			desc.isModelDraw = isModelDraw_;
@@ -700,9 +708,27 @@ void Map::ClampGenerationSettings(GenerationSettings& settings) {
 	settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
 	settings.karmaSpawnCount = std::clamp(settings.karmaSpawnCount, 0, kMaximumEventObjectCount);
 	settings.bossSpawnerSpawnCount = std::clamp(settings.bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
-	settings.blockSize.x = std::clamp(std::isfinite(settings.blockSize.x) ? settings.blockSize.x : 15.0f, 0.5f, 100.0f);
-	settings.blockSize.y = std::clamp(std::isfinite(settings.blockSize.y) ? settings.blockSize.y : 7.5f, 0.5f, 100.0f);
-	settings.blockSize.z = std::clamp(std::isfinite(settings.blockSize.z) ? settings.blockSize.z : 15.0f, 0.5f, 100.0f);
+	settings.blockSize.x = std::clamp([&]() {
+		if (std::isfinite(settings.blockSize.x)) {
+			return (settings.blockSize.x);
+		} else {
+			return (15.0f);
+		}
+	}(), 0.5f, 100.0f);
+	settings.blockSize.y = std::clamp([&]() {
+		if (std::isfinite(settings.blockSize.y)) {
+			return (settings.blockSize.y);
+		} else {
+			return (7.5f);
+		}
+	}(), 0.5f, 100.0f);
+	settings.blockSize.z = std::clamp([&]() {
+		if (std::isfinite(settings.blockSize.z)) {
+			return (settings.blockSize.z);
+		} else {
+			return (15.0f);
+		}
+	}(), 0.5f, 100.0f);
 	settings.minHeight = std::clamp(settings.minHeight, 1, 100);
 	settings.maxHeight = std::clamp(settings.maxHeight, settings.minHeight, 100);
 	settings.minStartHeight = std::clamp(settings.minStartHeight, settings.minHeight, settings.maxHeight);
@@ -710,7 +736,13 @@ void Map::ClampGenerationSettings(GenerationSettings& settings) {
 	settings.minRangeHeight = std::clamp(settings.minRangeHeight, -10, 0);
 	settings.maxRangeHeight = std::clamp(settings.maxRangeHeight, 0, 10);
 	settings.slopeSpawnRate = std::clamp(
-		std::isfinite(settings.slopeSpawnRate) ? settings.slopeSpawnRate : 1.0f,
+		[&]() {
+			if (std::isfinite(settings.slopeSpawnRate)) {
+				return (settings.slopeSpawnRate);
+			} else {
+				return (1.0f);
+			}
+		}(),
 		0.0f,
 		1.0f
 	);
@@ -913,9 +945,13 @@ void Map::DrawHeightPreview(const Player::Base* player) const {
 			drawList->AddRect(
 				cellMin,
 				cellMax,
-				block.GetType() == MapBlockType::Slope
-					? IM_COL32(40, 255, 110, 255)
-					: IM_COL32(30, 30, 30, 180)
+				[&]() {
+					if (block.GetType() == MapBlockType::Slope) {
+						return (IM_COL32(40, 255, 110, 255));
+					} else {
+						return (IM_COL32(30, 30, 30, 180));
+					}
+				}()
 			);
 		}
 	}
@@ -949,8 +985,20 @@ void Map::DrawHeightPreview(const Player::Base* player) const {
 			x,
 			z,
 			block.GetHeight(),
-			block.GetType() == MapBlockType::Slope ? "Slope" : "Ground",
-			hasBossSpawner ? "\nBossSpawner: あり" : ""
+			[&]() {
+				if (block.GetType() == MapBlockType::Slope) {
+					return ("Slope");
+				} else {
+					return ("Ground");
+				}
+			}(),
+			[&]() {
+				if (hasBossSpawner) {
+					return ("\nBossSpawner: あり");
+				} else {
+					return ("");
+				}
+			}()
 		);
 	}
 	ImGui::EndChild();
@@ -1049,7 +1097,11 @@ void Map::GenerateJars() {
 		desc.position = spawnPosition;
 		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, 0.0f);
 		desc.type = jarTypes[static_cast<std::size_t>(createdCount)];
-		desc.size = eventObjectRandom_.Int(0, 1) == 0 ? JarSize::Small : JarSize::Big;
+		if (eventObjectRandom_.Int(0, 1) == 0) {
+			desc.size = JarSize::Small;
+		} else {
+			desc.size = JarSize::Big;
+		}
 		desc.modelName = "JarModel_" + std::to_string(createdCount);
 		desc.colliderName = "JarAABB_" + std::to_string(createdCount);
 
@@ -1378,9 +1430,13 @@ void Map::UpdateInteractionText(const Player::Base& player) {
 	const MapEventRequest request = currentHitEventObject_->GetInteractionRequest();
 	const bool canInteract = currentHitEventObject_->CanInteract(player) &&
 		IsEventActionEnabled(request.action);
-	interactionText->SetColor(canInteract
-		? kInteractionTextDefaultColor
-		: kInteractionTextUnavailableColor);
+	interactionText->SetColor([&]() {
+		if (canInteract) {
+			return (kInteractionTextDefaultColor);
+		} else {
+			return (kInteractionTextUnavailableColor);
+		}
+	}());
 
 	// 文言の決定を各MapEventObjectへ委譲してObject固有の操作内容を表示
 	interactionText->SetText(std::string(currentHitEventObject_->GetInteractionText()));

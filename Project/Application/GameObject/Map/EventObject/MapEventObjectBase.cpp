@@ -58,9 +58,13 @@ void MapEventObjectBase::SetHighlighted(bool isHighlighted) {
 
 	// Instance描画を利用できないObjectは単体ModelのRenderLayerで代替
 	if (Model* model = MyModel::TryGet(model_)) {
-		model->SetRenderLayer(isHighlighted
-			? MadoEngine::Render::RenderLayer::MapEventObjectOutline
-			: MadoEngine::Render::RenderLayer::MapEventObject);
+		model->SetRenderLayer([&]() {
+			if (isHighlighted) {
+				return (MadoEngine::Render::RenderLayer::MapEventObjectOutline);
+			} else {
+				return (MadoEngine::Render::RenderLayer::MapEventObject);
+			}
+		}());
 	}
 }
 

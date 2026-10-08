@@ -499,7 +499,13 @@ namespace Player {
 		ImGui::Text("Y速度: %.2f", velocityY);
 		ImGui::Text("ジャンプ横初速: %.2f", jumpMoveBoostSpeed);
 		ImGui::Text("ノックバック速度: %.2f", knockbackSpeed);
-		ImGui::Text("壁上り: %s", movement_.IsWallClimbing() ? "有効" : "無効");
+		ImGui::Text("壁上り: %s", [&]() {
+			if (movement_.IsWallClimbing()) {
+				return ("有効");
+			} else {
+				return ("無効");
+			}
+		}());
 		ImGui::Text(
 			"壁上り時間: %.2f / %.2f",
 			movement_.GetWallClimbElapsedTime(),

@@ -269,9 +269,13 @@ namespace MadoEngine::Particle {
 			return false;
 		}
 
-		const std::string assetName = asset->GetName().empty()
-			? PathToUtf8String(filePath.stem())
-			: asset->GetName();
+		const std::string assetName = [&]() {
+			if (asset->GetName().empty()) {
+				return (PathToUtf8String(filePath.stem()));
+			} else {
+				return (asset->GetName());
+			}
+		}();
 		assets_[assetName] = std::move(asset);
 		assetPaths_[assetName] = filePath;
 		Logger::Output("Particle Assetを登録しました: " + assetName, Logger::Level::Assets);
@@ -680,12 +684,20 @@ namespace MadoEngine::Particle {
 
 	const ParticleEffectAsset* ParticleSystem3d::FindAsset(const std::string& assetName) const {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	ParticleEffectAsset* ParticleSystem3d::FindEditableAsset(const std::string& assetName) {
 		const auto found = assets_.find(assetName);
-		return found != assets_.end() ? found->second.get() : nullptr;
+		if (found != assets_.end()) {
+			return found->second.get();
+		} else {
+			return nullptr;
+		}
 	}
 
 	std::size_t ParticleSystem3d::GetActiveEffectCount() const {
@@ -707,7 +719,11 @@ namespace MadoEngine::Particle {
 	std::vector<ParticleEmitterRuntimeInfo> ParticleSystem3d::GetRuntimeInfo(
 		EffectHandle handle) const {
 		const ParticleEffectInstance* instance = Resolve(handle);
-		return instance ? instance->GetRuntimeInfo() : std::vector<ParticleEmitterRuntimeInfo>{};
+		if (instance) {
+			return instance->GetRuntimeInfo();
+		} else {
+			return std::vector<ParticleEmitterRuntimeInfo>{};
+		}
 	}
 
 	ParticleEffectInstance* ParticleSystem3d::Resolve(EffectHandle handle) {

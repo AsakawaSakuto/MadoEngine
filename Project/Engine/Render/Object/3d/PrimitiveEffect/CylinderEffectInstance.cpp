@@ -82,7 +82,13 @@ namespace MadoEngine::Effect {
 
 		// 大きなFrame間隔によるTrack補間の飛び越しを抑える時間上限
 		const float scaledDeltaTime = std::clamp(
-			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			[&]() {
+				if (std::isfinite(deltaTime)) {
+					return (deltaTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			0.1f
 		) * playbackSpeed_;

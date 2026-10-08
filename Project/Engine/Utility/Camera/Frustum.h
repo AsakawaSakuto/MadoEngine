@@ -18,9 +18,27 @@ struct Frustum {
 	bool IntersectsAABB(const Vector3& min, const Vector3& max) const {
 		for (const FrustumPlane& plane : planes) {
 			const Vector3 positiveVertex = {
-				plane.normal.x >= 0.0f ? max.x : min.x,
-				plane.normal.y >= 0.0f ? max.y : min.y,
-				plane.normal.z >= 0.0f ? max.z : min.z
+				[&]() {
+					if (plane.normal.x >= 0.0f) {
+						return (max.x);
+					} else {
+						return (min.x);
+					}
+				}(),
+				[&]() {
+					if (plane.normal.y >= 0.0f) {
+						return (max.y);
+					} else {
+						return (min.y);
+					}
+				}(),
+				[&]() {
+					if (plane.normal.z >= 0.0f) {
+						return (max.z);
+					} else {
+						return (min.z);
+					}
+				}()
 			};
 
 			const float distance =

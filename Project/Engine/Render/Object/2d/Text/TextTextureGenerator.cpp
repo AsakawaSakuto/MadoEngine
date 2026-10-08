@@ -199,9 +199,27 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 		return false;
 	}
 
-	const std::wstring text = desc.text.empty() ? L" " : desc.text;
-	const float layoutWidth = desc.areaSize.x > 0.0f ? desc.areaSize.x : 4096.0f;
-	const float layoutHeight = desc.areaSize.y > 0.0f ? desc.areaSize.y : 4096.0f;
+	const std::wstring text = [&]() -> std::wstring {
+		if (desc.text.empty()) {
+			return (L" ");
+		} else {
+			return (desc.text);
+		}
+	}();
+	const float layoutWidth = [&]() {
+		if (desc.areaSize.x > 0.0f) {
+			return (desc.areaSize.x);
+		} else {
+			return (4096.0f);
+		}
+	}();
+	const float layoutHeight = [&]() {
+		if (desc.areaSize.y > 0.0f) {
+			return (desc.areaSize.y);
+		} else {
+			return (4096.0f);
+		}
+	}();
 	IDWriteFontCollection* fontCollection = nullptr;
 	const wchar_t* fontFamily = desc.fontFamily.c_str();
 
@@ -233,7 +251,13 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 
 	textFormat->SetTextAlignment(ToDWriteTextAlignment(desc.horizontalAlign));
 	textFormat->SetParagraphAlignment(ToDWriteParagraphAlignment(desc.verticalAlign));
-	textFormat->SetWordWrapping(desc.wordWrap ? DWRITE_WORD_WRAPPING_WRAP : DWRITE_WORD_WRAPPING_NO_WRAP);
+	textFormat->SetWordWrapping([&]() {
+		if (desc.wordWrap) {
+			return (DWRITE_WORD_WRAPPING_WRAP);
+		} else {
+			return (DWRITE_WORD_WRAPPING_NO_WRAP);
+		}
+	}());
 	if (desc.lineSpacing > 0.0f && desc.lineSpacing != 1.0f) {
 		const float lineSpacing = desc.fontSize * desc.lineSpacing;
 		const float baseline = lineSpacing * 0.8f;
@@ -447,7 +471,13 @@ bool TextTextureGenerator::CreateFontAssetCollection(
 
 	hr = writeFactory5->CreateFontCollectionFromFontSet(fontSet.Get(), outCollection.ReleaseAndGetAddressOf());
 	if (FAILED(hr) || outCollection->GetFontFamilyCount() == 0) {
-		LogIfFailed("[Engine] フォントコレクションの作成に失敗しました。", FAILED(hr) ? hr : E_FAIL);
+		LogIfFailed("[Engine] フォントコレクションの作成に失敗しました。", [&]() {
+			if (FAILED(hr)) {
+				return (hr);
+			} else {
+				return (E_FAIL);
+			}
+		}());
 		return false;
 	}
 
@@ -480,8 +510,20 @@ void TextTextureGenerator::ResolveTextureSize(
 	const float measuredWidth = (std::max)(metrics.widthIncludingTrailingWhitespace, metrics.width);
 	const float measuredHeight = metrics.height;
 
-	const float resolvedWidth = requestedSize.x > 0.0f ? requestedSize.x : measuredWidth;
-	const float resolvedHeight = requestedSize.y > 0.0f ? requestedSize.y : measuredHeight;
+	const float resolvedWidth = [&]() {
+		if (requestedSize.x > 0.0f) {
+			return (requestedSize.x);
+		} else {
+			return (measuredWidth);
+		}
+	}();
+	const float resolvedHeight = [&]() {
+		if (requestedSize.y > 0.0f) {
+			return (requestedSize.y);
+		} else {
+			return (measuredHeight);
+		}
+	}();
 
 	outWidth = std::max<uint32_t>(1, static_cast<uint32_t>(std::ceil(resolvedWidth)));
 	outHeight = std::max<uint32_t>(1, static_cast<uint32_t>(std::ceil(resolvedHeight)));

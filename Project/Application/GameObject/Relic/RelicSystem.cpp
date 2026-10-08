@@ -167,7 +167,11 @@ namespace Relic {
 	}
 
 	const Definition* System::GetPendingReward() const {
-		return pendingRelicId_ ? catalog_.Find(*pendingRelicId_) : nullptr;
+		if (pendingRelicId_) {
+			return catalog_.Find(*pendingRelicId_);
+		} else {
+			return nullptr;
+		}
 	}
 
 	void System::RebuildModifiers() {

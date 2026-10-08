@@ -134,7 +134,13 @@ SceneType GameScene::Update(float dt) {
 	inGameSession_->Update(dt);
 
 	// Pauseと強化選択中はGameObjectへ渡す時間だけを停止
-	const float deltaTime = inGameSession_->IsPlaying() ? dt : 0.0f;
+	const float deltaTime = [&]() {
+		if (inGameSession_->IsPlaying()) {
+			return (dt);
+		} else {
+			return (0.0f);
+		}
+	}();
 
 	if (inGameSession_->IsPlaying()) {
 		player_->Update(deltaTime);
@@ -336,7 +342,13 @@ SceneType GameScene::Update(float dt) {
 
 		// EditorやJson復元で変更されたActive Cameraと同期した上で二つの操作Cameraを交互に選択
 		useDebugCamera_ = !useDebugCamera_;
-		cameraManager_.CutTo(useDebugCamera_ ? debugCameraHandle_ : tpsCameraHandle_);
+		cameraManager_.CutTo([&]() {
+			if (useDebugCamera_) {
+				return (debugCameraHandle_);
+			} else {
+				return (tpsCameraHandle_);
+			}
+		}());
 	}
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
 	enemyDamageView_.SetVisible(inGameSession_->IsPlaying());
@@ -384,7 +396,11 @@ void GameScene::DrawMapGeneratorImGui() {
 }
 
 std::string GameScene::CaptureMapGeneratorEditorState() const {
-	return map_ ? map_->CaptureEditorState() : std::string{};
+	if (map_) {
+		return map_->CaptureEditorState();
+	} else {
+		return std::string{};
+	}
 }
 
 void GameScene::RestoreMapGeneratorEditorState(const std::string& snapshot) {

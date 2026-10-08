@@ -22,24 +22,40 @@ const char* GetJarModelAssetName(JarSize size) {
 /// @return インスタンス描画バッチ名
 const char* GetJarBatchName(JarSize size, bool isOutline) {
 	if (size == JarSize::Big) {
-		return isOutline ? "Jar.Big.Outline" : "Jar.Big.Normal";
+		if (isOutline) {
+			return "Jar.Big.Outline";
+		} else {
+			return "Jar.Big.Normal";
+		}
 	}
 
-	return isOutline ? "Jar.Small.Outline" : "Jar.Small.Normal";
+	if (isOutline) {
+		return "Jar.Small.Outline";
+	} else {
+		return "Jar.Small.Normal";
+	}
 }
 
 /// @brief Jarの取得報酬量を計算
 /// @param size Jarのサイズ
 /// @return プレイヤーに加算する報酬量
 int CalculateRewardAmount(JarSize size) {
-	return size == JarSize::Big ? 20 : 10;
+	if (size == JarSize::Big) {
+		return 20;
+	} else {
+		return 10;
+	}
 }
 
 /// @brief Jarの種別に対応するEffect Sequenceアセット名を取得
 /// @param type Jarの種別
 /// @return 再生するEffect Sequenceアセット名
 const char* GetJarEffectSequenceAssetName(JarType type) {
-	return type == JarType::Exp ? "ExpJar" : "MoneyJar";
+	if (type == JarType::Exp) {
+		return "ExpJar";
+	} else {
+		return "MoneyJar";
+	}
 }
 
 }
@@ -141,5 +157,9 @@ bool Jar::Interact(Player::Base& player) {
 }
 
 std::string_view Jar::GetInteractionText() const {
-	return type_ == JarType::Exp ? "壺を壊す" : "壺を壊す";
+	if (type_ == JarType::Exp) {
+		return "壺を壊す";
+	} else {
+		return "壺を壊す";
+	}
 }

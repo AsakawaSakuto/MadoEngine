@@ -170,7 +170,13 @@ namespace MadoEngine::Render {
 		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, depthStencilHandle);
 
 		const float* actualClearColor =
-			clearColor != nullptr ? clearColor : clearColor_.data();
+			[&]() -> const float* {
+				if (clearColor != nullptr) {
+					return (clearColor);
+				} else {
+					return (clearColor_.data());
+				}
+			}();
 		commandList->ClearRenderTargetView(rtvHandle, actualClearColor, 0, nullptr);
 	}
 

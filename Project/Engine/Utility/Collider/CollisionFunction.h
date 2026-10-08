@@ -353,8 +353,32 @@ namespace Collision
         // AABBの各軸での投影テスト
         for (int i = 0; i < 3; ++i) {
             // AABBの投影範囲
-            float aabbProjMin = (i == 0) ? aabbMin.x : (i == 1) ? aabbMin.y : aabbMin.z;
-            float aabbProjMax = (i == 0) ? aabbMax.x : (i == 1) ? aabbMax.y : aabbMax.z;
+            float aabbProjMin = [&]() {
+                if ((i == 0)) {
+                    return (aabbMin.x);
+                } else {
+                    return ([&]() {
+                        if ((i == 1)) {
+                            return (aabbMin.y);
+                        } else {
+                            return (aabbMin.z);
+                        }
+                    }());
+                }
+            }();
+            float aabbProjMax = [&]() {
+                if ((i == 0)) {
+                    return (aabbMax.x);
+                } else {
+                    return ([&]() {
+                        if ((i == 1)) {
+                            return (aabbMax.y);
+                        } else {
+                            return (aabbMax.z);
+                        }
+                    }());
+                }
+            }();
 
             // OBBの投影範囲
             float obbProjMin, obbProjMax;
@@ -1011,10 +1035,58 @@ namespace Collision
 
         // 各軸でスラブテスト
         for (int i = 0; i < 3; ++i) {
-            float origin = (i == 0) ? segment.origin.x : (i == 1) ? segment.origin.y : segment.origin.z;
-            float dir = (i == 0) ? segment.diff.x : (i == 1) ? segment.diff.y : segment.diff.z;
-            float boxMin = (i == 0) ? aabbMin.x : (i == 1) ? aabbMin.y : aabbMin.z;
-            float boxMax = (i == 0) ? aabbMax.x : (i == 1) ? aabbMax.y : aabbMax.z;
+            float origin = [&]() {
+                if ((i == 0)) {
+                    return (segment.origin.x);
+                } else {
+                    return ([&]() {
+                        if ((i == 1)) {
+                            return (segment.origin.y);
+                        } else {
+                            return (segment.origin.z);
+                        }
+                    }());
+                }
+            }();
+            float dir = [&]() {
+                if ((i == 0)) {
+                    return (segment.diff.x);
+                } else {
+                    return ([&]() {
+                        if ((i == 1)) {
+                            return (segment.diff.y);
+                        } else {
+                            return (segment.diff.z);
+                        }
+                    }());
+                }
+            }();
+            float boxMin = [&]() {
+                if ((i == 0)) {
+                    return (aabbMin.x);
+                } else {
+                    return ([&]() {
+                        if ((i == 1)) {
+                            return (aabbMin.y);
+                        } else {
+                            return (aabbMin.z);
+                        }
+                    }());
+                }
+            }();
+            float boxMax = [&]() {
+                if ((i == 0)) {
+                    return (aabbMax.x);
+                } else {
+                    return ([&]() {
+                        if ((i == 1)) {
+                            return (aabbMax.y);
+                        } else {
+                            return (aabbMax.z);
+                        }
+                    }());
+                }
+            }();
 
             if (std::abs(dir) < 0.0001f) {
                 // 線分がこの軸に平行

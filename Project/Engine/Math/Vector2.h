@@ -14,8 +14,20 @@ struct Vector2 {
     constexpr Vector2(float x_, float y_) : x(x_), y(y_) {}
 
     // --- index access (インデックスアクセス) ---
-    constexpr float& operator[](std::size_t i) noexcept { return (i == 0) ? x : y; }
-    constexpr const float& operator[](std::size_t i) const noexcept { return (i == 0) ? x : y; }
+    constexpr float& operator[](std::size_t i) noexcept {
+        if (i == 0) {
+            return x;
+        } else {
+            return y;
+        }
+    }
+    constexpr const float& operator[](std::size_t i) const noexcept {
+        if (i == 0) {
+            return x;
+        } else {
+            return y;
+        }
+    }
 
     // --- unary (単項演算子) ---
     constexpr Vector2 operator+() const noexcept { return *this; }

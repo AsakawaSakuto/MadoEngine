@@ -44,7 +44,11 @@ namespace Enemy {
 		player_ = player;
 		enemyManager_ = enemyManager;
 		sceneType_ = sceneType;
-		timeLimit_ = std::isfinite(timeLimit) ? std::max(0.0f, timeLimit) : 0.0f;
+		if (std::isfinite(timeLimit)) {
+			timeLimit_ = std::max(0.0f, timeLimit);
+		} else {
+			timeLimit_ = 0.0f;
+		}
 		Clear();
 		isActive_ = true;
 		Logger::Output("Enemy::Spawnerを初期化しました", Logger::Level::Application);
@@ -70,8 +74,13 @@ namespace Enemy {
 
 		// 制限時間へ到達したFrameは超過分だけをBonus Waveの生成Timerへ反映
 		const float effectiveDeltaTime =
-			waveIndex == kBonusWaveIndex && previousElapsedTime < timeLimit_ ?
-			elapsedTime_ - timeLimit_ : deltaTime;
+			[&]() {
+				if (waveIndex == kBonusWaveIndex && previousElapsedTime < timeLimit_) {
+					return (elapsedTime_ - timeLimit_);
+				} else {
+					return (deltaTime);
+				}
+			}();
 		spawnTimer_ += std::max(0.0f, effectiveDeltaTime);
 		const float spawnInterval = std::max(0.01f, wave->spawnInterval);
 		const std::uint64_t karmaBonusSpawnCount = static_cast<std::uint64_t>(
@@ -102,7 +111,13 @@ namespace Enemy {
 		}
 
 		const std::uint64_t eliteSpawnInterval = std::max<std::uint64_t>(1, wave->eliteSpawnInterval);
-		const std::uint64_t waveSpawnCount = waveIndex == activeWaveIndex_ ? activeWaveEnemySpawnCount_ : 0;
+		const std::uint64_t waveSpawnCount = [&]() -> std::uint64_t {
+			if (waveIndex == activeWaveIndex_) {
+				return (activeWaveEnemySpawnCount_);
+			} else {
+				return (0);
+			}
+		}();
 		const std::uint64_t completedInCurrentCycle = waveSpawnCount % eliteSpawnInterval;
 		return static_cast<std::uint32_t>(eliteSpawnInterval - completedInCurrentCycle);
 	}
@@ -232,8 +247,11 @@ namespace Enemy {
 		const std::uint64_t eliteSpawnInterval = std::max<std::uint64_t>(1, wave.eliteSpawnInterval);
 
 		// Wave内で指定周期に到達したEnemyだけを種類に依存せずElite化
-		desc.bonusType = activeWaveEnemySpawnCount_ % eliteSpawnInterval == 0 ?
-			Data::BonusType::Elite : Data::BonusType::None;
+		if (activeWaveEnemySpawnCount_ % eliteSpawnInterval == 0) {
+			desc.bonusType = Data::BonusType::Elite;
+		} else {
+			desc.bonusType = Data::BonusType::None;
+		}
 		desc.sceneType = sceneType_;
 		enemyManager_->Spawn(desc);
 		return true;
@@ -271,8 +289,17 @@ namespace Enemy {
 			}
 
 			// 境界上で複数の地形が見つかった場合は埋まりを避けるため高い表面を採用
-			outGroundSurfaceY = foundBlock && foundSlope ? std::max(blockSurfaceY, slopeSurfaceY) :
-				foundBlock ? blockSurfaceY : slopeSurfaceY;
+			if (foundBlock && foundSlope) {
+				outGroundSurfaceY = std::max(blockSurfaceY, slopeSurfaceY);
+			} else {
+				outGroundSurfaceY = [&]() {
+					if (foundBlock) {
+						return (blockSurfaceY);
+					} else {
+						return (slopeSurfaceY);
+					}
+				}();
+			}
 			outPosition = groundQueryOrigin;
 			outPosition.y = outGroundSurfaceY - kSpawnBuriedDepth;
 			return true;

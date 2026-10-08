@@ -112,7 +112,11 @@ namespace Enemy::StatusEffect {
 		}
 
 		const ActiveState& state = states_[ToIndex(type)];
-		return state.isActive ? state.remainingTime : 0.0f;
+		if (state.isActive) {
+			return state.remainingTime;
+		} else {
+			return 0.0f;
+		}
 	}
 
 	std::size_t Controller::ToIndex(Type type) {

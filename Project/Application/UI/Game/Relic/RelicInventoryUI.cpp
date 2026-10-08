@@ -46,7 +46,13 @@ namespace UI::Game {
 		EnsureSlotCount(ownedDefinitions.size());
 		activeSlotCount_ = ownedDefinitions.size();
 		const float firstSlotX = kScreenCenterX -
-			static_cast<float>(activeSlotCount_ > 0 ? activeSlotCount_ - 1 : 0) *
+			static_cast<float>([&]() -> std::size_t {
+				if (activeSlotCount_ > 0) {
+					return (activeSlotCount_ - 1);
+				} else {
+					return (0);
+				}
+			}()) *
 			kSlotSpacing * 0.5f;
 
 		// カタログ順を維持して獲得順による表示位置の揺れを防止

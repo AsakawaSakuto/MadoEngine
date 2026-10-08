@@ -179,9 +179,13 @@ bool PostEffectManager::Destroy(PostEffectPassHandle handle) {
 	freeSlots_.push_back(handle.index);
 
 	Logger::Output(
-		(scope == PostEffectPassScope::Layer ?
-			"レイヤーポストエフェクトPassを削除しました: " :
-			"フルスクリーンポストエフェクトPassを削除しました: ") + name,
+		([&]() {
+			if (scope == PostEffectPassScope::Layer) {
+				return ("レイヤーポストエフェクトPassを削除しました: ");
+			} else {
+				return ("フルスクリーンポストエフェクトPassを削除しました: ");
+			}
+		}()) + name,
 		Logger::Level::Engine
 	);
 	return true;

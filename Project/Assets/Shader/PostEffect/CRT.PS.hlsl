@@ -26,33 +26,41 @@ bool UsesDefaultCRTParams() {
 /// @brief CRTの表示調整パラメータを取得
 /// @return x: 全体適用率, y: 画面湾曲, z: 輝度補正, w: 周辺減光
 float4 GetCRTDisplayParams() {
-    return UsesDefaultCRTParams()
-        ? float4(1.0f, 0.08f, 1.03f, 0.25f)
-        : gCRTDisplayParams;
+    if (UsesDefaultCRTParams()) {
+        return float4(1.0f, 0.08f, 1.03f, 0.25f);
+    } else {
+        return gCRTDisplayParams;
+    }
 }
 
 /// @brief CRTの走査線パラメータを取得
 /// @return x: 強度, y: 間隔, z: 太さ, w: 硬さ
 float4 GetCRTScanlineParams() {
-    return UsesDefaultCRTParams()
-        ? float4(0.18f, 3.0f, 0.35f, 4.0f)
-        : gCRTScanlineParams;
+    if (UsesDefaultCRTParams()) {
+        return float4(0.18f, 3.0f, 0.35f, 4.0f);
+    } else {
+        return gCRTScanlineParams;
+    }
 }
 
 /// @brief CRTの表面模様パラメータを取得
 /// @return x: RGBマスク強度, y: RGBマスク幅, z: ノイズ強度, w: ちらつき強度
 float4 GetCRTSurfaceParams() {
-    return UsesDefaultCRTParams()
-        ? float4(0.08f, 1.0f, 0.015f, 0.015f)
-        : gCRTSurfaceParams;
+    if (UsesDefaultCRTParams()) {
+        return float4(0.08f, 1.0f, 0.015f, 0.015f);
+    } else {
+        return gCRTSurfaceParams;
+    }
 }
 
 /// @brief CRTのアニメーションパラメータを取得
 /// @return x: 走査速度, y: ちらつき周波数, z: 画面端ぼかし, w: 経過時間
 float4 GetCRTAnimationParams() {
-    return UsesDefaultCRTParams()
-        ? float4(0.0f, 17.0f, 0.015f, 0.0f)
-        : gCRTAnimationParams;
+    if (UsesDefaultCRTParams()) {
+        return float4(0.0f, 17.0f, 0.015f, 0.0f);
+    } else {
+        return gCRTAnimationParams;
+    }
 }
 
 /// @brief CRT湾曲を適用したサンプリングUVを計算

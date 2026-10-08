@@ -329,7 +329,13 @@ namespace {
 		const char* label,
 		std::string& selectedName,
 		const std::vector<std::string>& textureNames) {
-		const char* preview = selectedName.empty() ? "テクスチャを選択" : selectedName.c_str();
+		const char* preview = [&]() {
+			if (selectedName.empty()) {
+				return ("テクスチャを選択");
+			} else {
+				return (selectedName.c_str());
+			}
+		}();
 		bool isChanged = false;
 		const bool isComboOpen = ImGui::BeginCombo(label, preview);
 		if (!isComboOpen) {

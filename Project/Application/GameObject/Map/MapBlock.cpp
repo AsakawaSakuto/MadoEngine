@@ -89,9 +89,13 @@ void MapBlock::DrawDebugLine() const {
 	}
 
 	// 坂と平地のColliderを識別できる色で可視化
-	Vector4 lineColor = type_ == MapBlockType::Slope ?
-		Vector4(0.0f, 1.0f, 0.35f, 1.0f) :
-		Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	Vector4 lineColor = [&]() {
+		if (type_ == MapBlockType::Slope) {
+			return (Vector4(0.0f, 1.0f, 0.35f, 1.0f));
+		} else {
+			return (Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+	}();
 
 	MyDebugLine::AddShape(colliderShape_, lineColor);
 }

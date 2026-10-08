@@ -30,7 +30,11 @@ Chest::~Chest() {
 
 void Chest::Initialize(const InitializeDesc& desc) {
 	type_ = desc.type;
-	openCostState_ = desc.openCostState ? desc.openCostState : std::make_shared<OpenCostState>();
+	if (desc.openCostState) {
+		openCostState_ = desc.openCostState;
+	} else {
+		openCostState_ = std::make_shared<OpenCostState>();
+	}
 	modelName_ = desc.modelName;
 	SetColliderName(desc.colliderName);
 	transform_.translate = desc.position;
@@ -64,9 +68,11 @@ void Chest::Initialize(const InitializeDesc& desc) {
 		normalInstance.transform.scale = { 0.75f, 0.75f, 0.75f };
 
 		// 無料Chestを外見だけで識別できるよう黄色で着色
-		normalInstance.color = type_ == ChestType::Free
-			? Vector4{ 1.0f, 0.0f, 0.0f, 1.0f }
-			: Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
+		if (type_ == ChestType::Free) {
+			normalInstance.color = Vector4{ 1.0f, 0.0f, 0.0f, 1.0f };
+		} else {
+			normalInstance.color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
+		}
 		normalInstance.isVisible = true;
 
 		InstancedModel::InstanceDesc outlineInstance = normalInstance;

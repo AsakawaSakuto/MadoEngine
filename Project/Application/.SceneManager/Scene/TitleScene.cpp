@@ -125,9 +125,11 @@ void TitleScene::DrawImGui() {
 				if (ImGui::Checkbox("Use", &isSelected)) {
 
 					// Checkboxの表示を使いながら選択状態を一件だけに限定
-					selectedSeedIndex_ = isSelected
-						? std::optional<std::size_t>{ historyIndex }
-						: std::nullopt;
+					if (isSelected) {
+						selectedSeedIndex_ = std::optional<std::size_t>{ historyIndex };
+					} else {
+						selectedSeedIndex_ = std::nullopt;
+					}
 				}
 				ImGui::TableSetColumnIndex(2);
 				if (ImGui::Checkbox("Favorite", &isFavorite)) {

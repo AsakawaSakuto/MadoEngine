@@ -301,9 +301,27 @@ namespace Enemy {
 				enemy->GetType() != Data::Type::Boss;
 
 			// 即死抽選成功時は適用直前の残りHPを使い、Critical倍率による過剰Damageを抑制
-			const float damage = dealsRemainingHealthDamage ? enemy->GetCurrentHealth() : hitInfo.damage;
-			const float criticalChance = dealsRemainingHealthDamage ? 0.0f : hitInfo.criticalChance;
-			const float criticalDamage = dealsRemainingHealthDamage ? 1.0f : hitInfo.criticalDamage;
+			const float damage = [&]() {
+				if (dealsRemainingHealthDamage) {
+					return (enemy->GetCurrentHealth());
+				} else {
+					return (hitInfo.damage);
+				}
+			}();
+			const float criticalChance = [&]() {
+				if (dealsRemainingHealthDamage) {
+					return (0.0f);
+				} else {
+					return (hitInfo.criticalChance);
+				}
+			}();
+			const float criticalDamage = [&]() {
+				if (dealsRemainingHealthDamage) {
+					return (1.0f);
+				} else {
+					return (hitInfo.criticalDamage);
+				}
+			}();
 			const DamageResult damageResult =
 				enemy->TakeProjectileDamage(
 					hitInfo.projectileId,
@@ -330,8 +348,13 @@ namespace Enemy {
 				Combat::DamageSourceType::Weapon,
 				damageResult.isCritical,
 				damageResult.wasKilled,
-				wasInstantKilled ?
-					Combat::DamageDisplayType::InstantKill : Combat::DamageDisplayType::Number,
+				[&]() {
+					if (wasInstantKilled) {
+						return (Combat::DamageDisplayType::InstantKill);
+					} else {
+						return (Combat::DamageDisplayType::Number);
+					}
+				}(),
 			});
 
 			// 撃破済みEnemyへの不要な状態登録を避け、実ダメージ成立後だけ付与抽選

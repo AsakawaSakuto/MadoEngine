@@ -75,7 +75,13 @@ void Line3d::AddGrid(float size, int divisions, const Vector4& color) {
         float z = -halfSize + step * i;
 
         // 原点を通る線（X軸、Z=0）は赤色
-        Vector4 lineColor = (std::abs(z) < 0.001f) ? Vector4{ 1.0f, 0.0f, 0.0f, 1.0f } : color;
+        Vector4 lineColor = [&]() {
+            if ((std::abs(z) < 0.001f)) {
+                return (Vector4{ 1.0f, 0.0f, 0.0f, 1.0f });
+            } else {
+                return (color);
+            }
+        }();
 
         AddLine(
             { -halfSize, 0.0f, z },
@@ -89,7 +95,13 @@ void Line3d::AddGrid(float size, int divisions, const Vector4& color) {
         float x = -halfSize + step * i;
 
         // 原点を通る線（Z軸、X=0）は緑色
-        Vector4 lineColor = (std::abs(x) < 0.001f) ? Vector4{ 0.0f, 1.0f, 0.0f, 1.0f } : color;
+        Vector4 lineColor = [&]() {
+            if ((std::abs(x) < 0.001f)) {
+                return (Vector4{ 0.0f, 1.0f, 0.0f, 1.0f });
+            } else {
+                return (color);
+            }
+        }();
 
         AddLine(
             { x, 0.0f, -halfSize },

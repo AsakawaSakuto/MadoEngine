@@ -57,9 +57,11 @@ namespace MadoEngine::Render {
 		const bool requiresDisplayColor = effectType_ == PostEffectType::ToneMapping ||
 			effectType_ == PostEffectType::FXAA ||
 			effectType_ == PostEffectType::CRT;
-		desc_.screenEffectStage = requiresDisplayColor
-			? ScreenEffectStage::Final
-			: stage;
+		if (requiresDisplayColor) {
+			desc_.screenEffectStage = ScreenEffectStage::Final;
+		} else {
+			desc_.screenEffectStage = stage;
+		}
 	}
 
 	ScreenEffectStage PostEffectPass::GetScreenEffectStage() const {

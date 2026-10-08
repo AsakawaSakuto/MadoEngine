@@ -157,8 +157,20 @@ void Sprite::Update() {
 	materialData_->uvTransformMatrix = uvScaleMatrix * uvRotateMatrix * uvTranslateMatrix;
 
 	// Unit QuadをPixel Sizeへ拡大し、Anchor補正後に回転とWorld移動を適用
-	float sx = isFitToScreen_ ? screenWidth_ : size_.x * transform_.scale.x;
-	float sy = isFitToScreen_ ? screenHeight_ : size_.y * transform_.scale.y;
+	float sx = [&]() {
+		if (isFitToScreen_) {
+			return (screenWidth_);
+		} else {
+			return (size_.x * transform_.scale.x);
+		}
+	}();
+	float sy = [&]() {
+		if (isFitToScreen_) {
+			return (screenHeight_);
+		} else {
+			return (size_.y * transform_.scale.y);
+		}
+	}();
 
 	Matrix4x4 scaleMatrix = Matrix::MakeScale({ sx, sy, 1.0f });
 	Matrix4x4 anchorMatrix = Matrix::MakeTranslate({ -anchorPoint_.x * sx, -anchorPoint_.y * sy, 0.0f });

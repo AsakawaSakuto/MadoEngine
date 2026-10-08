@@ -204,23 +204,59 @@ namespace Weapon {
 		UpgradeStatType type) {
 		switch (type) {
 		case UpgradeStatType::BurnApplyChance:
-			return status.burn ? &status.burn->applyChance : nullptr;
+			if (status.burn) {
+				return &status.burn->applyChance;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::BurnDamage:
-			return status.burn ? &status.burn->damagePerTick : nullptr;
+			if (status.burn) {
+				return &status.burn->damagePerTick;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::BurnDuration:
-			return status.burn ? &status.burn->duration : nullptr;
+			if (status.burn) {
+				return &status.burn->duration;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::PoisonApplyChance:
-			return status.poison ? &status.poison->applyChance : nullptr;
+			if (status.poison) {
+				return &status.poison->applyChance;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::PoisonDamage:
-			return status.poison ? &status.poison->damagePerTick : nullptr;
+			if (status.poison) {
+				return &status.poison->damagePerTick;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::PoisonDuration:
-			return status.poison ? &status.poison->duration : nullptr;
+			if (status.poison) {
+				return &status.poison->duration;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::FrozenApplyChance:
-			return status.frozen ? &status.frozen->applyChance : nullptr;
+			if (status.frozen) {
+				return &status.frozen->applyChance;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::FrozenSlowRate:
-			return status.frozen ? &status.frozen->slowRate : nullptr;
+			if (status.frozen) {
+				return &status.frozen->slowRate;
+			} else {
+				return nullptr;
+			}
 		case UpgradeStatType::FrozenDuration:
-			return status.frozen ? &status.frozen->duration : nullptr;
+			if (status.frozen) {
+				return &status.frozen->duration;
+			} else {
+				return nullptr;
+			}
 		default:
 			return nullptr;
 		}

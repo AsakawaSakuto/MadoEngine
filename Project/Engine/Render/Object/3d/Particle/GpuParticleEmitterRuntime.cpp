@@ -148,9 +148,11 @@ namespace MadoEngine::Particle {
 			aliveIndexReadbackOffset_ + sizeof(uint32_t) * particleCount,
 			alignof(GpuParticleTrailSample)
 		);
-		readbackBufferSize_ = config_.trail.isEnabled
-			? trailSampleReadbackOffset_ + sizeof(GpuParticleTrailSample) * particleCount
-			: sizeof(uint32_t);
+		if (config_.trail.isEnabled) {
+			readbackBufferSize_ = trailSampleReadbackOffset_ + sizeof(GpuParticleTrailSample) * particleCount;
+		} else {
+			readbackBufferSize_ = sizeof(uint32_t);
+		}
 
 		// GPU実行中のFrame DataをCPUが上書きしないようUploadとReadbackを多重化
 		for (uint32_t index = 0; index < kFrameResourceCount; ++index) {
@@ -804,9 +806,13 @@ namespace MadoEngine::Particle {
 		D3D12_RESOURCE_STATES initialState,
 		BufferResource& outBuffer) {
 		const D3D12_RESOURCE_STATES resourceInitialState =
-			initialState == D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-			? D3D12_RESOURCE_STATE_COMMON
-			: initialState;
+			[&]() {
+				if (initialState == D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+					return (D3D12_RESOURCE_STATE_COMMON);
+				} else {
+					return (initialState);
+				}
+			}();
 		D3D12_HEAP_PROPERTIES heapProperties{};
 		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 

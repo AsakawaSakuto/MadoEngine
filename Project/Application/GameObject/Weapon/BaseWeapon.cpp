@@ -311,9 +311,13 @@ namespace Weapon {
 				const float modifiedCooldown =
 					(status_.shotCooldown.value + modifiers.shotCooldownFlat) *
 					(1.0f + modifiers.shotCooldownRate);
-				const float cooldown = std::isfinite(modifiedCooldown)
-					? std::max(modifiedCooldown, 0.0f)
-					: std::max(status_.shotCooldown.value, 0.0f);
+				const float cooldown = [&]() {
+					if (std::isfinite(modifiedCooldown)) {
+						return (std::max(modifiedCooldown, 0.0f));
+					} else {
+						return (std::max(status_.shotCooldown.value, 0.0f));
+					}
+				}();
 				cooldownTimer_.Start(cooldown, false);
 			}
 		}
@@ -338,16 +342,22 @@ namespace Weapon {
 			context.ownerPosition.y += kProjectileSpawnHeightOffset;
 		}
 		context.targetPosition = targetPosition;
-		const float damageMultiplier = std::isfinite(modifiers.damageMultiplier)
-			? std::max(modifiers.damageMultiplier, 0.0f)
-			: 1.0f;
+		const float damageMultiplier = [&]() {
+			if (std::isfinite(modifiers.damageMultiplier)) {
+				return (std::max(modifiers.damageMultiplier, 0.0f));
+			} else {
+				return (1.0f);
+			}
+		}();
 		context.damage = status_.damage.value * damageMultiplier;
 		const float modifiedCriticalChance =
 			(status_.criticalChance.value + modifiers.criticalChanceFlat) *
 			(1.0f + modifiers.criticalChanceRate);
-		context.criticalChance = std::isfinite(modifiedCriticalChance)
-			? std::clamp(modifiedCriticalChance, 0.0f, 100.0f)
-			: std::clamp(status_.criticalChance.value, 0.0f, 100.0f);
+		if (std::isfinite(modifiedCriticalChance)) {
+			context.criticalChance = std::clamp(modifiedCriticalChance, 0.0f, 100.0f);
+		} else {
+			context.criticalChance = std::clamp(status_.criticalChance.value, 0.0f, 100.0f);
+		}
 		context.criticalDamage = status_.criticalDamage.value;
 		context.knockbackPower = status_.knockbackPower.value;
 		context.moveSpeed = status_.speed.value;

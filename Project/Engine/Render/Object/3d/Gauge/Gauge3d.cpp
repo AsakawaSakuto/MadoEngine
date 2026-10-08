@@ -79,7 +79,11 @@ bool Gauge3d::Initialize(
 	MadoEngine::Render::RenderLayer renderLayer) {
 	Finalize();
 
-	objectName_ = gaugeName.empty() ? objectName_ : gaugeName;
+	if (gaugeName.empty()) {
+		objectName_ = objectName_;
+	} else {
+		objectName_ = gaugeName;
+	}
 	sceneType_ = sceneType;
 	renderLayer_ = renderLayer;
 	isTransformReady_ = false;

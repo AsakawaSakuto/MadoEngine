@@ -247,7 +247,13 @@ namespace Enemy {
 			return;
 		}
 
-		const float climbSpeed = isSideBlocked ? kSideClimbSpeed : kSideClimbSpeed * kSideClimbCrestSpeedScale;
+		const float climbSpeed = [&]() {
+			if (isSideBlocked) {
+				return (kSideClimbSpeed);
+			} else {
+				return (kSideClimbSpeed * kSideClimbCrestSpeedScale);
+			}
+		}();
 
 		// 頂点付近では速度を落として短時間だけ上昇を継続し段差を越える余裕を確保
 		const float climbStep = std::min(climbSpeed * deltaTime, remainClimbHeight);

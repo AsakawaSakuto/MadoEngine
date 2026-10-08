@@ -36,7 +36,13 @@ namespace MadoEngine::Ribbon {
 
 		// Finish停止後は既存形状だけを寿命に従って自然消滅
 		const float safeDeltaTime = std::clamp(
-			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			[&]() {
+				if (std::isfinite(deltaTime)) {
+					return (deltaTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			0.1f
 		);

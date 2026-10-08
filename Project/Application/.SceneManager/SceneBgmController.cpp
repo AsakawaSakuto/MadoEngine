@@ -51,7 +51,11 @@ std::string SceneBgmController::SelectBgmKey(SceneType sceneType) {
 	}
 
 	const auto bgmIt = bgmKeys_.find(sceneType);
-	return bgmIt != bgmKeys_.end() ? bgmIt->second : std::string{};
+	if (bgmIt != bgmKeys_.end()) {
+		return bgmIt->second;
+	} else {
+		return std::string{};
+	}
 }
 
 void SceneBgmController::StopCurrentBgm() {

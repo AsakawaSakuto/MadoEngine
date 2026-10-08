@@ -96,7 +96,11 @@ float ReadFiniteFloat(const nlohmann::json& json, const char* key, float fallbac
 	}
 
 	const float value = it->get<float>();
-	return std::isfinite(value) ? value : fallback;
+	if (std::isfinite(value)) {
+		return value;
+	} else {
+		return fallback;
+	}
 }
 
 } // namespace
@@ -149,9 +153,13 @@ float EditorToolbar::Draw() {
 }
 
 bool EditorToolbar::ConsumeGameDeltaTime(float realDeltaTime, float& outGameDeltaTime) {
-	const float safeRealDeltaTime = std::isfinite(realDeltaTime)
-		? (std::max)(0.0f, realDeltaTime)
-		: 0.0f;
+	const float safeRealDeltaTime = [&]() {
+		if (std::isfinite(realDeltaTime)) {
+			return ((std::max)(0.0f, realDeltaTime));
+		} else {
+			return (0.0f);
+		}
+	}();
 
 	if (!isPaused_) {
 		outGameDeltaTime = safeRealDeltaTime * timeScale_;
@@ -217,7 +225,11 @@ void EditorToolbar::BeginDocumentCapture(EditorDocument document) {
 		capturedDocumentSnapshot_ = binding.lastSnapshot;
 	}
 	ImGuiContext* context = ImGui::GetCurrentContext();
-	capturedActiveItemIdStart_ = context ? static_cast<std::uint32_t>(context->ActiveId) : 0;
+	if (context) {
+		capturedActiveItemIdStart_ = static_cast<std::uint32_t>(context->ActiveId);
+	} else {
+		capturedActiveItemIdStart_ = 0;
+	}
 	capturedItemEditedAtStart_ = context && context->ActiveIdHasBeenEditedThisFrame;
 	capturedGuizmoUsingAtStart_ = ImGuizmo::IsUsing();
 	suppressCurrentDocumentHistory_ = false;
@@ -234,9 +246,13 @@ void EditorToolbar::EndDocumentCapture() {
 		DocumentHistoryBinding& binding = historyBindings_[documentIndex];
 		if (binding.captureFunction && binding.restoreFunction) {
 			ImGuiContext* context = ImGui::GetCurrentContext();
-			const std::uint32_t currentActiveItemId = context
-				? static_cast<std::uint32_t>(context->ActiveId)
-				: 0;
+			const std::uint32_t currentActiveItemId = [&]() -> std::uint32_t {
+				if (context) {
+					return (static_cast<std::uint32_t>(context->ActiveId));
+				} else {
+					return (0);
+				}
+			}();
 			const bool isGuizmoTransaction =
 				capturedDocument_ == EditorDocument::Model &&
 				(capturedGuizmoUsingAtStart_ || ImGuizmo::IsUsing());
@@ -245,14 +261,22 @@ void EditorToolbar::EndDocumentCapture() {
 				isGuizmoTransaction ||
 				currentActiveItemId != capturedActiveItemIdStart_ ||
 				(context && !capturedItemEditedAtStart_ && context->ActiveIdHasBeenEditedThisFrame);
-			const std::string afterSnapshot = hasPotentialEdit
-				? binding.captureFunction()
-				: capturedDocumentSnapshot_;
+			const std::string afterSnapshot = [&]() {
+				if (hasPotentialEdit) {
+					return (binding.captureFunction());
+				} else {
+					return (capturedDocumentSnapshot_);
+				}
+			}();
 			if (afterSnapshot != capturedDocumentSnapshot_) {
 				if (!suppressCurrentDocumentHistory_) {
-					const std::uint32_t activeItemId = isGuizmoTransaction
-						? kGuizmoTransactionItemId
-						: currentActiveItemId;
+					const std::uint32_t activeItemId = [&]() {
+						if (isGuizmoTransaction) {
+							return (kGuizmoTransactionItemId);
+						} else {
+							return (currentActiveItemId);
+						}
+					}();
 					DocumentTransactionState& transaction = transactionStates_[documentIndex];
 					if (activeItemId == 0 ||
 						activeItemId != transaction.activeItemId ||
@@ -302,9 +326,11 @@ void EditorToolbar::RegisterDocumentHistory(
 
 	historyBindings_[index].captureFunction = std::move(captureFunction);
 	historyBindings_[index].restoreFunction = std::move(restoreFunction);
-	historyBindings_[index].lastSnapshot = historyBindings_[index].captureFunction
-		? historyBindings_[index].captureFunction()
-		: std::string{};
+	if (historyBindings_[index].captureFunction) {
+		historyBindings_[index].lastSnapshot = historyBindings_[index].captureFunction();
+	} else {
+		historyBindings_[index].lastSnapshot = std::string{};
+	}
 }
 
 void EditorToolbar::SuppressCurrentDocumentHistory() {
@@ -440,9 +466,13 @@ void EditorToolbar::RequestProtectedAction(EditorProtectedAction action, std::ui
 		return;
 	}
 
-	const EditorProtectedAction currentAction = pendingProtectedAction_ != EditorProtectedAction::None
-		? pendingProtectedAction_
-		: protectedActionResult_.action;
+	const EditorProtectedAction currentAction = [&]() {
+		if (pendingProtectedAction_ != EditorProtectedAction::None) {
+			return (pendingProtectedAction_);
+		} else {
+			return (protectedActionResult_.action);
+		}
+	}();
 	if (currentAction != EditorProtectedAction::None) {
 		if (currentAction == action &&
 			(pendingProtectedAction_ == EditorProtectedAction::None ||
@@ -490,8 +520,16 @@ void EditorToolbar::NotifyDocumentOperationResult(const char* actionName, bool s
 }
 
 void EditorToolbar::NotifyOperationResult(const char* actionName, bool succeeded) {
-	operationStatusMessage_ = actionName ? actionName : "Editor操作";
-	operationStatusMessage_ += succeeded ? "に成功" : "に失敗";
+	if (actionName) {
+		operationStatusMessage_ = actionName;
+	} else {
+		operationStatusMessage_ = "Editor操作";
+	}
+	if (succeeded) {
+		operationStatusMessage_ += "に成功";
+	} else {
+		operationStatusMessage_ += "に失敗";
+	}
 	operationStatusSucceeded_ = succeeded;
 	operationStatusExpireTime_ = ImGui::GetTime() + kOperationStatusDuration;
 }
@@ -652,7 +690,13 @@ float EditorToolbar::DrawPlaybackToolbar() {
 	ImGui::Begin("##EditorToolbar", nullptr, toolbarFlags);
 	ImGui::PopStyleVar();
 
-	if (ImGui::Button(isPaused_ ? "再生" : "一時停止")) {
+	if (ImGui::Button([&]() {
+		if (isPaused_) {
+			return ("再生");
+		} else {
+			return ("一時停止");
+		}
+	}())) {
 		isPaused_ = !isPaused_;
 		if (!isPaused_) {
 			stepRequested_ = false;
@@ -714,8 +758,20 @@ float EditorToolbar::DrawPlaybackToolbar() {
 	}
 	ImGui::SameLine();
 	ImGui::TextColored(
-		isPaused_ ? ImVec4(1.0f, 0.75f, 0.2f, 1.0f) : ImVec4(0.2f, 1.0f, 0.35f, 1.0f),
-		isPaused_ ? "一時停止中" : "実行中"
+		[&]() {
+			if (isPaused_) {
+				return (ImVec4(1.0f, 0.75f, 0.2f, 1.0f));
+			} else {
+				return (ImVec4(0.2f, 1.0f, 0.35f, 1.0f));
+			}
+		}(),
+		[&]() {
+			if (isPaused_) {
+				return ("一時停止中");
+			} else {
+				return ("実行中");
+			}
+		}()
 	);
 
 	ImGui::SameLine();
@@ -736,7 +792,13 @@ float EditorToolbar::DrawPlaybackToolbar() {
 	if (!operationStatusMessage_.empty() && ImGui::GetTime() <= operationStatusExpireTime_) {
 		ImGui::SameLine();
 		ImGui::TextColored(
-			operationStatusSucceeded_ ? ImVec4(0.2f, 1.0f, 0.35f, 1.0f) : ImVec4(1.0f, 0.3f, 0.3f, 1.0f),
+			[&]() {
+				if (operationStatusSucceeded_) {
+					return (ImVec4(0.2f, 1.0f, 0.35f, 1.0f));
+				} else {
+					return (ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+				}
+			}(),
 			"%s",
 			operationStatusMessage_.c_str()
 		);
@@ -784,9 +846,13 @@ void EditorToolbar::DrawUnsavedConfirmationPopup() {
 		return;
 	}
 
-	const char* actionLabel = pendingProtectedAction_ == EditorProtectedAction::ApplicationExit
-		? "アプリケーションを終了"
-		: "シーンを遷移";
+	const char* actionLabel = [&]() {
+		if (pendingProtectedAction_ == EditorProtectedAction::ApplicationExit) {
+			return ("アプリケーションを終了");
+		} else {
+			return ("シーンを遷移");
+		}
+	}();
 	ImGui::Text("未保存の変更があります。%sしますか？", actionLabel);
 	ImGui::Spacing();
 	ImGui::TextDisabled("未保存のDocument");

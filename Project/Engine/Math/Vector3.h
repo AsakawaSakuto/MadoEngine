@@ -16,11 +16,23 @@ struct Vector3 {
 
     // --- index access (インデックスアクセス) ---
     constexpr float& operator[](std::size_t i) noexcept {
-        return (i == 0) ? x : (i == 1 ? y : z);
+        if (i == 0) {
+            return x;
+        } else if (i == 1) {
+            return y;
+        } else {
+            return z;
+        }
     }
 
     constexpr const float& operator[](std::size_t i) const noexcept {
-        return (i == 0) ? x : (i == 1 ? y : z);
+        if (i == 0) {
+            return x;
+        } else if (i == 1) {
+            return y;
+        } else {
+            return z;
+        }
     }
 
     // --- unary (単項演算子) ---

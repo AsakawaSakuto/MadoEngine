@@ -69,7 +69,13 @@ namespace MadoEngine::Ribbon {
 		}
 
 		const float safeDeltaTime = std::clamp(
-			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			[&]() {
+				if (std::isfinite(deltaTime)) {
+					return (deltaTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			0.1f
 		);

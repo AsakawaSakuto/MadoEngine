@@ -64,7 +64,13 @@ namespace MadoEngine::Particle {
 		}
 
 		const float safeDeltaTime = std::clamp(
-			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			[&]() {
+				if (std::isfinite(deltaTime)) {
+					return (deltaTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			0.1f
 		);
@@ -158,35 +164,65 @@ namespace MadoEngine::Particle {
 				state.hasLatestPosition &&
 				(state.latestPosition - lastPoint.position).LengthSq() > kParticleTrailPositionEpsilon;
 			const std::size_t firstPointIndex =
-				appendLatestPosition && state.points.size() >= config_.maxPointCount
-				? 1
-				: 0;
+				[&]() {
+					if (appendLatestPosition && state.points.size() >= config_.maxPointCount) {
+						return (1);
+					} else {
+						return (0);
+					}
+				}();
 
 			MadoEngine::Ribbon::RibbonRenderData renderData;
 			renderData.points.reserve(
-				state.points.size() - firstPointIndex + (appendLatestPosition ? 1u : 0u)
+				state.points.size() - firstPointIndex + ([&]() {
+					if (appendLatestPosition) {
+						return (1u);
+					} else {
+						return (0u);
+					}
+				}())
 			);
 			for (std::size_t pointIndex = firstPointIndex; pointIndex < state.points.size(); ++pointIndex) {
 				const TrailPoint& point = state.points[pointIndex];
 				renderData.points.push_back({
-					simulationSpace_ == SimulationSpace::Local
-						? Matrix::Transform(point.position, emitterMatrix)
-						: point.position,
+					[&]() {
+						if (simulationSpace_ == SimulationSpace::Local) {
+							return (Matrix::Transform(point.position, emitterMatrix));
+						} else {
+							return (point.position);
+						}
+					}(),
 					point.age,
 					config_.pointLifetime,
-					config_.syncParticleColor ? point.color : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f },
+					[&]() {
+						if (config_.syncParticleColor) {
+							return (point.color);
+						} else {
+							return (Vector4{ 1.0f, 1.0f, 1.0f, 1.0f });
+						}
+					}(),
 				});
 			}
 			if (appendLatestPosition) {
 
 				// 最小間隔未満でも描画時の先端だけは現在位置へ追従させて軌跡の遅延を抑制
 				renderData.points.push_back({
-					simulationSpace_ == SimulationSpace::Local
-						? Matrix::Transform(state.latestPosition, emitterMatrix)
-						: state.latestPosition,
+					[&]() {
+						if (simulationSpace_ == SimulationSpace::Local) {
+							return (Matrix::Transform(state.latestPosition, emitterMatrix));
+						} else {
+							return (state.latestPosition);
+						}
+					}(),
 					0.0f,
 					config_.pointLifetime,
-					config_.syncParticleColor ? state.latestColor : Vector4{ 1.0f, 1.0f, 1.0f, 1.0f },
+					[&]() {
+						if (config_.syncParticleColor) {
+							return (state.latestColor);
+						} else {
+							return (Vector4{ 1.0f, 1.0f, 1.0f, 1.0f });
+						}
+					}(),
 				});
 			}
 			if (renderData.points.size() < kMinimumParticleTrailPointCount) {
@@ -195,9 +231,11 @@ namespace MadoEngine::Particle {
 
 			renderData.widthOverLifetime = widthTrack;
 			renderData.colorOverLifetime = colorTrack;
-			renderData.interpolation = config_.interpolation == ParticleTrailInterpolation::CatmullRom
-				? MadoEngine::Ribbon::RibbonInterpolationMode::CatmullRom
-				: MadoEngine::Ribbon::RibbonInterpolationMode::Linear;
+			if (config_.interpolation == ParticleTrailInterpolation::CatmullRom) {
+				renderData.interpolation = MadoEngine::Ribbon::RibbonInterpolationMode::CatmullRom;
+			} else {
+				renderData.interpolation = MadoEngine::Ribbon::RibbonInterpolationMode::Linear;
+			}
 			renderData.smoothingSubdivision = config_.smoothingSubdivision;
 			renderData.cameraFacing = config_.cameraFacing;
 			renderData.textureName = config_.textureName;

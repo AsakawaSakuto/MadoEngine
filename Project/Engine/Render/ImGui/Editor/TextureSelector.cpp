@@ -328,9 +328,13 @@ bool TextureSelector::Draw(const char* label, std::string& selectedTextureName) 
 	const std::vector<std::string> textureNames = TextureManager::GetInstance().GetTextureNames();
 	const bool isSelectedTextureAvailable =
 		std::find(textureNames.begin(), textureNames.end(), selectedTextureName) != textureNames.end();
-	const char* comboPreview = selectedTextureName.empty()
-		? "テクスチャを選択"
-		: selectedTextureName.c_str();
+	const char* comboPreview = [&]() {
+		if (selectedTextureName.empty()) {
+			return ("テクスチャを選択");
+		} else {
+			return (selectedTextureName.c_str());
+		}
+	}();
 	bool isChanged = false;
 
 	const bool isComboOpen = ImGui::BeginCombo(label, comboPreview);

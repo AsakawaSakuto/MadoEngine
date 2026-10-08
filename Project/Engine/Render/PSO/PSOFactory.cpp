@@ -104,9 +104,11 @@ namespace MadoEngine::Render {
 
 		// Compile済みShaderをShaderManagerのCacheから取得
 		psoDesc.VS             = MadoEngine::ShaderManager::GetInstance().Get(desc.vsKey);
-		psoDesc.PS             = desc.psKey.empty()
-			? D3D12_SHADER_BYTECODE{ nullptr, 0 }
-			: MadoEngine::ShaderManager::GetInstance().Get(desc.psKey);
+		if (desc.psKey.empty()) {
+			psoDesc.PS = D3D12_SHADER_BYTECODE{ nullptr, 0 };
+		} else {
+			psoDesc.PS = MadoEngine::ShaderManager::GetInstance().Get(desc.psKey);
+		}
 		psoDesc.pRootSignature = MadoEngine::RootSignatureManager::GetInstance().Get(desc.rootSigKey);
 
 		return psoDesc;
@@ -163,13 +165,15 @@ namespace MadoEngine::Render {
 		auto& rt = desc.RenderTarget[0];
 		rt.BlendEnable           = TRUE;
 		rt.LogicOpEnable         = FALSE;
-		rt.RenderTargetWriteMask = preserveRenderTargetAlpha
-			? static_cast<UINT8>(
+		if (preserveRenderTargetAlpha) {
+			rt.RenderTargetWriteMask = static_cast<UINT8>(
 				D3D12_COLOR_WRITE_ENABLE_RED |
 				D3D12_COLOR_WRITE_ENABLE_GREEN |
 				D3D12_COLOR_WRITE_ENABLE_BLUE
-			)
-			: D3D12_COLOR_WRITE_ENABLE_ALL;
+			);
+		} else {
+			rt.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		}
 		rt.SrcBlendAlpha         = D3D12_BLEND_ONE;
 		rt.DestBlendAlpha        = D3D12_BLEND_ZERO;
 		rt.BlendOpAlpha          = D3D12_BLEND_OP_ADD;

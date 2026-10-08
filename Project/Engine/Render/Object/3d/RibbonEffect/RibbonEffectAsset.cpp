@@ -35,7 +35,11 @@ namespace {
 	/// @return 読み込んだ値
 	float ReadFloat(const JsonValue& json, const char* key, float fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_number() ? value->get<float>() : fallback;
+		if (value && value->is_number()) {
+			return value->get<float>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonから符号なし整数を安全に読み込み
@@ -45,7 +49,11 @@ namespace {
 	/// @return 読み込んだ値
 	uint32_t ReadUInt(const JsonValue& json, const char* key, uint32_t fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_number_unsigned() ? value->get<uint32_t>() : fallback;
+		if (value && value->is_number_unsigned()) {
+			return value->get<uint32_t>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからboolを安全に読み込み
@@ -55,7 +63,11 @@ namespace {
 	/// @return 読み込んだ値
 	bool ReadBool(const JsonValue& json, const char* key, bool fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_boolean() ? value->get<bool>() : fallback;
+		if (value && value->is_boolean()) {
+			return value->get<bool>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonから文字列を安全に読み込み
@@ -65,7 +77,11 @@ namespace {
 	/// @return 読み込んだ値
 	std::string ReadString(const JsonValue& json, const char* key, const std::string& fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_string() ? value->get<std::string>() : fallback;
+		if (value && value->is_string()) {
+			return value->get<std::string>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Json配列からVector2を読み込み
@@ -229,8 +245,12 @@ namespace {
 		track.SetDefaultValue(normalizer(track.GetDefaultValue()));
 		std::vector<MadoEngine::Effect::EffectKeyframe<T>> keyframes = track.GetKeyframes();
 		for (MadoEngine::Effect::EffectKeyframe<T>& keyframe : keyframes) {
+			float keyframeTime = 0.0f;
+			if (std::isfinite(keyframe.time)) {
+				keyframeTime = keyframe.time;
+			}
 			keyframe.time = std::clamp(
-				std::isfinite(keyframe.time) ? keyframe.time : 0.0f,
+				keyframeTime,
 				0.0f,
 				maximumTime
 			);
@@ -243,16 +263,22 @@ namespace {
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonPointGenerationMode ParseGenerationMode(const std::string& value) {
-		return value == "manual"
-			? RibbonPointGenerationMode::Manual
-			: RibbonPointGenerationMode::TransformHistory;
+		if (value == "manual") {
+			return RibbonPointGenerationMode::Manual;
+		} else {
+			return RibbonPointGenerationMode::TransformHistory;
+		}
 	}
 
 	/// @brief generationModeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonPointGenerationMode value) {
-		return value == RibbonPointGenerationMode::Manual ? "manual" : "transformHistory";
+		if (value == RibbonPointGenerationMode::Manual) {
+			return "manual";
+		} else {
+			return "transformHistory";
+		}
 	}
 
 	/// @brief playbackMode文字列をEnumへ変換
@@ -280,42 +306,66 @@ namespace {
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonSimulationSpace ParseSimulationSpace(const std::string& value) {
-		return value == "local" ? RibbonSimulationSpace::Local : RibbonSimulationSpace::World;
+		if (value == "local") {
+			return RibbonSimulationSpace::Local;
+		} else {
+			return RibbonSimulationSpace::World;
+		}
 	}
 
 	/// @brief simulationSpaceを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonSimulationSpace value) {
-		return value == RibbonSimulationSpace::Local ? "local" : "world";
+		if (value == RibbonSimulationSpace::Local) {
+			return "local";
+		} else {
+			return "world";
+		}
 	}
 
 	/// @brief interpolation文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonInterpolationMode ParseInterpolation(const std::string& value) {
-		return value == "catmullRom" ? RibbonInterpolationMode::CatmullRom : RibbonInterpolationMode::Linear;
+		if (value == "catmullRom") {
+			return RibbonInterpolationMode::CatmullRom;
+		} else {
+			return RibbonInterpolationMode::Linear;
+		}
 	}
 
 	/// @brief interpolationを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonInterpolationMode value) {
-		return value == RibbonInterpolationMode::CatmullRom ? "catmullRom" : "linear";
+		if (value == RibbonInterpolationMode::CatmullRom) {
+			return "catmullRom";
+		} else {
+			return "linear";
+		}
 	}
 
 	/// @brief UV Mode文字列をEnumへ変換
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonUvMode ParseUvMode(const std::string& value) {
-		return value == "tile" ? RibbonUvMode::Tile : RibbonUvMode::Stretch;
+		if (value == "tile") {
+			return RibbonUvMode::Tile;
+		} else {
+			return RibbonUvMode::Stretch;
+		}
 	}
 
 	/// @brief UV Modeを文字列へ変換
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonUvMode value) {
-		return value == RibbonUvMode::Tile ? "tile" : "stretch";
+		if (value == RibbonUvMode::Tile) {
+			return "tile";
+		} else {
+			return "stretch";
+		}
 	}
 
 	/// @brief Blend Mode文字列をEnumへ変換
@@ -384,7 +434,11 @@ namespace {
 					*progress,
 					config.playback.progress.GetDefaultValue(),
 					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
+						if (value.is_number()) {
+							return value.get<float>();
+						} else {
+							return fallback;
+						}
 					}
 				);
 			}
@@ -418,7 +472,11 @@ namespace {
 					*width,
 					config.geometry.widthOverLifetime.GetDefaultValue(),
 					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
+						if (value.is_number()) {
+							return value.get<float>();
+						} else {
+							return fallback;
+						}
 					}
 				);
 			}
@@ -450,7 +508,11 @@ namespace {
 					*alpha,
 					config.material.globalAlpha.GetDefaultValue(),
 					[](const JsonValue& value, float fallback) {
-						return value.is_number() ? value.get<float>() : fallback;
+						if (value.is_number()) {
+							return value.get<float>();
+						} else {
+							return fallback;
+						}
 					}
 				);
 			}
@@ -505,9 +567,15 @@ namespace {
 	/// @brief Ribbon Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateRibbonEmitter(RibbonEmitterConfig& config) {
-		config.translateOffset.x = std::isfinite(config.translateOffset.x) ? config.translateOffset.x : 0.0f;
-		config.translateOffset.y = std::isfinite(config.translateOffset.y) ? config.translateOffset.y : 0.0f;
-		config.translateOffset.z = std::isfinite(config.translateOffset.z) ? config.translateOffset.z : 0.0f;
+		if (!std::isfinite(config.translateOffset.x)) {
+			config.translateOffset.x = 0.0f;
+		}
+		if (!std::isfinite(config.translateOffset.y)) {
+			config.translateOffset.y = 0.0f;
+		}
+		if (!std::isfinite(config.translateOffset.z)) {
+			config.translateOffset.z = 0.0f;
+		}
 		switch (config.playback.mode) {
 		case RibbonPlaybackMode::Full:
 		case RibbonPlaybackMode::Reveal:
@@ -517,13 +585,21 @@ namespace {
 			config.playback.mode = RibbonPlaybackMode::Full;
 			break;
 		}
+		float playbackDuration = 1.0f;
+		if (std::isfinite(config.playback.duration)) {
+			playbackDuration = config.playback.duration;
+		}
 		config.playback.duration = std::clamp(
-			std::isfinite(config.playback.duration) ? config.playback.duration : 1.0f,
+			playbackDuration,
 			0.001f,
 			3600.0f
 		);
+		float sweepLength = 1.0f;
+		if (std::isfinite(config.playback.sweepLength)) {
+			sweepLength = config.playback.sweepLength;
+		}
 		config.playback.sweepLength = std::clamp(
-			std::isfinite(config.playback.sweepLength) ? config.playback.sweepLength : 1.0f,
+			sweepLength,
 			0.001f,
 			100000.0f
 		);
@@ -531,16 +607,28 @@ namespace {
 			config.playback.progress,
 			1.0f,
 			[](float value) {
-				return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
+				float finiteValue = 0.0f;
+				if (std::isfinite(value)) {
+					finiteValue = value;
+				}
+				return std::clamp(finiteValue, 0.0f, 1.0f);
 			}
 		);
+		float pointLifetime = 0.5f;
+		if (std::isfinite(config.trail.pointLifetime)) {
+			pointLifetime = config.trail.pointLifetime;
+		}
 		config.trail.pointLifetime = std::clamp(
-			std::isfinite(config.trail.pointLifetime) ? config.trail.pointLifetime : 0.5f,
+			pointLifetime,
 			0.001f,
 			3600.0f
 		);
+		float minPointDistance = 0.05f;
+		if (std::isfinite(config.trail.minPointDistance)) {
+			minPointDistance = config.trail.minPointDistance;
+		}
 		config.trail.minPointDistance = std::clamp(
-			std::isfinite(config.trail.minPointDistance) ? config.trail.minPointDistance : 0.05f,
+			minPointDistance,
 			0.0f,
 			100000.0f
 		);
@@ -576,18 +664,35 @@ namespace {
 			config.geometry.widthOverLifetime,
 			1.0f,
 			[](float value) {
-				return std::clamp(std::isfinite(value) ? value : 0.5f, 0.0f, 100000.0f);
+				float finiteValue = 0.5f;
+				if (std::isfinite(value)) {
+					finiteValue = value;
+				}
+				return std::clamp(finiteValue, 0.0f, 100000.0f);
 			}
 		);
 		NormalizeTrack(
 			config.material.colorOverLifetime,
 			1.0f,
 			[](const Vector4& value) {
+				Vector4 finiteValue{ 1.0f, 1.0f, 1.0f, 1.0f };
+				if (std::isfinite(value.x)) {
+					finiteValue.x = value.x;
+				}
+				if (std::isfinite(value.y)) {
+					finiteValue.y = value.y;
+				}
+				if (std::isfinite(value.z)) {
+					finiteValue.z = value.z;
+				}
+				if (std::isfinite(value.w)) {
+					finiteValue.w = value.w;
+				}
 				return Vector4{
-					std::clamp(std::isfinite(value.x) ? value.x : 1.0f, 0.0f, 100.0f),
-					std::clamp(std::isfinite(value.y) ? value.y : 1.0f, 0.0f, 100.0f),
-					std::clamp(std::isfinite(value.z) ? value.z : 1.0f, 0.0f, 100.0f),
-					std::clamp(std::isfinite(value.w) ? value.w : 1.0f, 0.0f, 1.0f),
+					std::clamp(finiteValue.x, 0.0f, 100.0f),
+					std::clamp(finiteValue.y, 0.0f, 100.0f),
+					std::clamp(finiteValue.z, 0.0f, 100.0f),
+					std::clamp(finiteValue.w, 0.0f, 1.0f),
 				};
 			}
 		);
@@ -595,20 +700,40 @@ namespace {
 			config.material.globalAlpha,
 			config.playback.duration,
 			[](float value) {
-				return std::clamp(std::isfinite(value) ? value : 1.0f, 0.0f, 1.0f);
+				float finiteValue = 1.0f;
+				if (std::isfinite(value)) {
+					finiteValue = value;
+				}
+				return std::clamp(finiteValue, 0.0f, 1.0f);
 			}
 		);
 		if (config.material.textureName.empty()) {
 			config.material.textureName = "white2x2";
 		}
-		config.material.uvScale.x = std::isfinite(config.material.uvScale.x) ? config.material.uvScale.x : 1.0f;
-		config.material.uvScale.y = std::isfinite(config.material.uvScale.y) ? config.material.uvScale.y : 1.0f;
-		config.material.uvOffset.x = std::isfinite(config.material.uvOffset.x) ? config.material.uvOffset.x : 0.0f;
-		config.material.uvOffset.y = std::isfinite(config.material.uvOffset.y) ? config.material.uvOffset.y : 0.0f;
-		config.material.uvScroll.x = std::isfinite(config.material.uvScroll.x) ? config.material.uvScroll.x : 0.0f;
-		config.material.uvScroll.y = std::isfinite(config.material.uvScroll.y) ? config.material.uvScroll.y : 0.0f;
+		if (!std::isfinite(config.material.uvScale.x)) {
+			config.material.uvScale.x = 1.0f;
+		}
+		if (!std::isfinite(config.material.uvScale.y)) {
+			config.material.uvScale.y = 1.0f;
+		}
+		if (!std::isfinite(config.material.uvOffset.x)) {
+			config.material.uvOffset.x = 0.0f;
+		}
+		if (!std::isfinite(config.material.uvOffset.y)) {
+			config.material.uvOffset.y = 0.0f;
+		}
+		if (!std::isfinite(config.material.uvScroll.x)) {
+			config.material.uvScroll.x = 0.0f;
+		}
+		if (!std::isfinite(config.material.uvScroll.y)) {
+			config.material.uvScroll.y = 0.0f;
+		}
+		float tileLength = 1.0f;
+		if (std::isfinite(config.material.tileLength)) {
+			tileLength = config.material.tileLength;
+		}
 		config.material.tileLength = std::clamp(
-			std::isfinite(config.material.tileLength) ? config.material.tileLength : 1.0f,
+			tileLength,
 			0.001f,
 			100000.0f
 		);
@@ -632,7 +757,12 @@ namespace MadoEngine::Ribbon {
 	bool RibbonEffectAsset::SaveToFile(
 		const std::filesystem::path& filePath,
 		bool createBackup) const {
-		const std::filesystem::path outputPath = filePath.empty() ? filePath_ : filePath;
+		std::filesystem::path outputPath;
+		if (filePath.empty()) {
+			outputPath = filePath_;
+		} else {
+			outputPath = filePath;
+		}
 		if (outputPath.empty()) {
 			Logger::Output("Ribbon Effect Assetの保存先が指定されていません。", Logger::Level::Error);
 			return false;
@@ -691,7 +821,12 @@ namespace MadoEngine::Ribbon {
 		std::vector<std::string> usedNames;
 		usedNames.reserve(emitters_.size());
 		for (RibbonEmitterConfig& emitter : emitters_) {
-			const std::string baseName = emitter.name.empty() ? "Emitter" : emitter.name;
+			std::string baseName;
+			if (emitter.name.empty()) {
+				baseName = "Emitter";
+			} else {
+				baseName = emitter.name;
+			}
 			emitter.name = baseName;
 			for (uint32_t suffix = 1; std::find(usedNames.begin(), usedNames.end(), emitter.name) != usedNames.end(); ++suffix) {
 				emitter.name = baseName + std::to_string(suffix);

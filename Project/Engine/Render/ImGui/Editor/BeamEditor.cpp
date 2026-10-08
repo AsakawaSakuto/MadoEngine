@@ -131,9 +131,11 @@ namespace {
 			gapEnd = 1.0f;
 			largestGap = gapEnd - gapStart;
 		}
-		return largestGap > minimumGap
-			? std::optional<float>{ (gapStart + gapEnd) * 0.5f }
-			: std::nullopt;
+		if (largestGap > minimumGap) {
+			return std::optional<float>{ (gapStart + gapEnd) * 0.5f };
+		} else {
+			return std::nullopt;
+		}
 	}
 
 	/// @brief 操作しやすい表形式のEffect Track Editorを描画
@@ -159,9 +161,11 @@ namespace {
 				changed = true;
 			}
 			std::vector<EffectKeyframe<T>> keys = track.GetKeyframes();
-			selectedIndex = keys.empty()
-				? -1
-				: std::clamp(selectedIndex, 0, static_cast<int>(keys.size()) - 1);
+			if (keys.empty()) {
+				selectedIndex = -1;
+			} else {
+				selectedIndex = std::clamp(selectedIndex, 0, static_cast<int>(keys.size()) - 1);
+			}
 			const std::optional<float> insertionTime = FindInsertionTime(keys);
 			ImGui::BeginDisabled(!insertionTime.has_value());
 			if (ImGui::Button("追加", ImVec2(72.0f, 0.0f))) {
@@ -183,9 +187,11 @@ namespace {
 			ImGui::BeginDisabled(selectedIndex < 0);
 			if (ImGui::Button("削除", ImVec2(72.0f, 0.0f))) {
 				keys.erase(keys.begin() + selectedIndex);
-				selectedIndex = keys.empty()
-					? -1
-					: (std::min)(selectedIndex, static_cast<int>(keys.size()) - 1);
+				if (keys.empty()) {
+					selectedIndex = -1;
+				} else {
+					selectedIndex = (std::min)(selectedIndex, static_cast<int>(keys.size()) - 1);
+				}
 				changed = true;
 			}
 			ImGui::EndDisabled();
@@ -217,10 +223,20 @@ namespace {
 				ImGui::TableHeadersRow();
 				for (int index = 0; index < static_cast<int>(keys.size()); ++index) {
 					EffectKeyframe<T>& key = keys[index];
-					const float minimumTime = index > 0 ? keys[index - 1].time : 0.0f;
-					const float maximumTime = index + 1 < static_cast<int>(keys.size())
-						? keys[index + 1].time
-						: 1.0f;
+					const float minimumTime = [&]() {
+						if (index > 0) {
+							return (keys[index - 1].time);
+						} else {
+							return (0.0f);
+						}
+					}();
+					const float maximumTime = [&]() {
+						if (index + 1 < static_cast<int>(keys.size())) {
+							return (keys[index + 1].time);
+						} else {
+							return (1.0f);
+						}
+					}();
 					ImGui::PushID(index);
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
@@ -232,7 +248,13 @@ namespace {
 					ImGui::SetNextItemWidth(-FLT_MIN);
 					if (ImGui::DragFloat("##Time", &key.time, 0.01f, minimumTime, maximumTime, "%.3f")) {
 						key.time = std::clamp(
-							std::isfinite(key.time) ? key.time : minimumTime,
+							[&]() {
+								if (std::isfinite(key.time)) {
+									return (key.time);
+								} else {
+									return (minimumTime);
+								}
+							}(),
 							minimumTime,
 							maximumTime
 						);
@@ -467,9 +489,13 @@ namespace MadoEngine::Editor {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			renameOriginalName = selectedAssetName;
 		}
-		BeamEffectAsset* asset = selectedAssetName.empty()
-			? nullptr
-			: system.FindEditableAsset(selectedAssetName);
+		BeamEffectAsset* asset = [&]() -> BeamEffectAsset* {
+			if (selectedAssetName.empty()) {
+				return (nullptr);
+			} else {
+				return (system.FindEditableAsset(selectedAssetName));
+			}
+		}();
 		if (asset) {
 			savedSnapshots.try_emplace(selectedAssetName, asset->ToJson().dump());
 		}
@@ -540,9 +566,11 @@ namespace MadoEngine::Editor {
 			savedSnapshots.erase(selectedAssetName);
 			system.DeleteAsset(selectedAssetName);
 			assetNames = system.GetAssetNames();
-			selectedAssetIndex = assetNames.empty()
-				? 0
-				: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+			if (assetNames.empty()) {
+				selectedAssetIndex = 0;
+			} else {
+				selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+			}
 			renameOriginalName.clear();
 		}
 		if (assetNames.empty()) {

@@ -26,7 +26,11 @@ namespace Relic {
 
 	int Inventory::GetCount(const Id& id) const {
 		const auto iterator = counts_.find(id);
-		return iterator != counts_.end() ? iterator->second : 0;
+		if (iterator != counts_.end()) {
+			return iterator->second;
+		} else {
+			return 0;
+		}
 	}
 
 	bool Inventory::CanAdd(const Definition& definition) const {

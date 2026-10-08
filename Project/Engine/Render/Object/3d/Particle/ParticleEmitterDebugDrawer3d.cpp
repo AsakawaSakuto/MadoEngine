@@ -33,9 +33,13 @@ namespace {
 	/// @param outBitangent 従法線の出力先
 	void BuildPlaneBasis(const Vector3& normal, Vector3& outTangent, Vector3& outBitangent) {
 		const Vector3 normalized = NormalizeDirection(normal);
-		const Vector3 reference = std::abs(normalized.y) < 0.999f
-			? Vector3{ 0.0f, 1.0f, 0.0f }
-			: Vector3{ 1.0f, 0.0f, 0.0f };
+		const Vector3 reference = [&]() {
+			if (std::abs(normalized.y) < 0.999f) {
+				return (Vector3{ 0.0f, 1.0f, 0.0f });
+			} else {
+				return (Vector3{ 1.0f, 0.0f, 0.0f });
+			}
+		}();
 		outTangent = NormalizeDirection(Math::Cross(reference, normalized));
 		outBitangent = NormalizeDirection(Math::Cross(normalized, outTangent));
 	}

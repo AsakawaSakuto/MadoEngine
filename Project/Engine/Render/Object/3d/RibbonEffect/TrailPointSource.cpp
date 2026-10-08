@@ -33,7 +33,13 @@ namespace MadoEngine::Ribbon {
 
 	void TrailPointSource::Update(float deltaTime) {
 		const float safeDeltaTime = std::clamp(
-			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			[&]() {
+				if (std::isfinite(deltaTime)) {
+					return (deltaTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			0.1f
 		);
@@ -91,9 +97,11 @@ namespace MadoEngine::Ribbon {
 		RibbonPoint point;
 
 		// Local Simulationでは初期Transform空間へ固定してEmitterの後続移動から分離
-		point.position = config_.simulationSpace == RibbonSimulationSpace::Local
-			? Matrix::Transform(worldPosition, worldToLocal_)
-			: worldPosition;
+		if (config_.simulationSpace == RibbonSimulationSpace::Local) {
+			point.position = Matrix::Transform(worldPosition, worldToLocal_);
+		} else {
+			point.position = worldPosition;
+		}
 		point.age = 0.0f;
 		point.lifetime = config_.pointLifetime;
 		sourcePoints_.push_back(point);

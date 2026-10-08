@@ -139,7 +139,13 @@ namespace UI::Game {
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
 		if (choices.empty()) {
-			ImGui::TextDisabled(upgradeSystem.IsUpgrading() ? "候補を生成できませんでした" : "レベルアップ待機中");
+			ImGui::TextDisabled([&]() {
+				if (upgradeSystem.IsUpgrading()) {
+					return ("候補を生成できませんでした");
+				} else {
+					return ("レベルアップ待機中");
+				}
+			}());
 			ImGui::End();
 			return;
 		}

@@ -148,7 +148,13 @@ namespace UI::Game {
 
 		levelText->SetVisible(weapon != nullptr);
 		const std::string displayText =
-			weapon ? std::format("Lv.{}", weapon->GetUpgradeLevel()) : "";
+			[&]() -> std::string {
+				if (weapon) {
+					return (std::format("Lv.{}", weapon->GetUpgradeLevel()));
+				} else {
+					return ("");
+				}
+			}();
 		if (levelText->GetText() != displayText) {
 			levelText->SetText(displayText);
 		}

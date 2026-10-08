@@ -40,7 +40,11 @@ namespace {
 	/// @return 読み込んだ値
 	float ReadFloat(const JsonValue& json, const char* key, float fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_number() ? value->get<float>() : fallback;
+		if (value && value->is_number()) {
+			return value->get<float>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief JSONから符号なし整数を安全に読み込み
@@ -55,17 +59,21 @@ namespace {
 		}
 		if (value->is_number_unsigned()) {
 			const uint64_t number = value->get<uint64_t>();
-			return number <= (std::numeric_limits<uint32_t>::max)()
-				? static_cast<uint32_t>(number)
-				: fallback;
+			if (number <= (std::numeric_limits<uint32_t>::max)()) {
+				return static_cast<uint32_t>(number);
+			} else {
+				return fallback;
+			}
 		}
 		if (!value->is_number_integer()) {
 			return fallback;
 		}
 		const int64_t number = value->get<int64_t>();
-		return number >= 0 && number <= (std::numeric_limits<uint32_t>::max)()
-			? static_cast<uint32_t>(number)
-			: fallback;
+		if (number >= 0 && number <= (std::numeric_limits<uint32_t>::max)()) {
+			return static_cast<uint32_t>(number);
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief JSONからboolを安全に読み込み
@@ -75,7 +83,11 @@ namespace {
 	/// @return 読み込んだ値
 	bool ReadBool(const JsonValue& json, const char* key, bool fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_boolean() ? value->get<bool>() : fallback;
+		if (value && value->is_boolean()) {
+			return value->get<bool>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief JSONから文字列を安全に読み込み
@@ -85,7 +97,11 @@ namespace {
 	/// @return 読み込んだ値
 	std::string ReadString(const JsonValue& json, const char* key, const std::string& fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_string() ? value->get<std::string>() : fallback;
+		if (value && value->is_string()) {
+			return value->get<std::string>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Node Type文字列をEnumへ変換
@@ -117,7 +133,11 @@ namespace {
 	/// @param value 変換元種類
 	/// @return JSON保存用文字列
 	const char* ToString(PrimitiveEffectNodeKind value) {
-		return value == PrimitiveEffectNodeKind::Cylinder ? "cylinder" : "invalid";
+		if (value == PrimitiveEffectNodeKind::Cylinder) {
+			return "cylinder";
+		} else {
+			return "invalid";
+		}
 	}
 
 	/// @brief RenderLayer文字列を安全に解析
@@ -143,9 +163,27 @@ namespace {
 		const Vector3& fallback,
 		float minimum,
 		float maximum) {
-		value.x = std::clamp(std::isfinite(value.x) ? value.x : fallback.x, minimum, maximum);
-		value.y = std::clamp(std::isfinite(value.y) ? value.y : fallback.y, minimum, maximum);
-		value.z = std::clamp(std::isfinite(value.z) ? value.z : fallback.z, minimum, maximum);
+		value.x = std::clamp([&]() {
+			if (std::isfinite(value.x)) {
+				return (value.x);
+			} else {
+				return (fallback.x);
+			}
+		}(), minimum, maximum);
+		value.y = std::clamp([&]() {
+			if (std::isfinite(value.y)) {
+				return (value.y);
+			} else {
+				return (fallback.y);
+			}
+		}(), minimum, maximum);
+		value.z = std::clamp([&]() {
+			if (std::isfinite(value.z)) {
+				return (value.z);
+			} else {
+				return (fallback.z);
+			}
+		}(), minimum, maximum);
 	}
 
 	/// @brief Transformを安全な範囲へ補正
@@ -207,7 +245,13 @@ namespace MadoEngine::EffectSequence {
 	bool EffectSequenceAsset::SaveToFile(
 		const std::filesystem::path& filePath,
 		bool createBackup) const {
-		const std::filesystem::path outputPath = filePath.empty() ? filePath_ : filePath;
+		const std::filesystem::path outputPath = [&]() {
+			if (filePath.empty()) {
+				return (filePath_);
+			} else {
+				return (filePath);
+			}
+		}();
 		if (outputPath.empty()) {
 			Logger::Output("Effect Sequence Assetの保存先が指定されていません。", Logger::Level::Error);
 			return false;
@@ -277,9 +321,11 @@ namespace MadoEngine::EffectSequence {
 				switch (node.nodeType) {
 				case EffectSequenceNodeType::PrimitiveEffect: {
 					PrimitiveEffectNodeSettings primitive;
-					primitive.kind = ReadString(*settings, "primitiveType", "cylinder") == "cylinder"
-						? PrimitiveEffectNodeKind::Cylinder
-						: PrimitiveEffectNodeKind::Count;
+					if (ReadString(*settings, "primitiveType", "cylinder") == "cylinder") {
+						primitive.kind = PrimitiveEffectNodeKind::Cylinder;
+					} else {
+						primitive.kind = PrimitiveEffectNodeKind::Count;
+					}
 					node.settings = primitive;
 					break;
 				}
@@ -346,12 +392,16 @@ namespace MadoEngine::EffectSequence {
 				{ "playbackSpeed", node.playbackSpeed },
 				{ "localTransform", MadoEngine::Json::JsonSerializer::ToJson(node.localTransform) },
 			};
-			nodeJson["parentNodeId"] = node.parentNodeId.has_value()
-				? JsonValue(node.parentNodeId.value())
-				: JsonValue(nullptr);
-			nodeJson["renderLayer"] = node.renderLayer.has_value()
-				? JsonValue(MadoEngine::Render::GetRenderLayerName(node.renderLayer.value()))
-				: JsonValue(nullptr);
+			if (node.parentNodeId.has_value()) {
+				nodeJson["parentNodeId"] = JsonValue(node.parentNodeId.value());
+			} else {
+				nodeJson["parentNodeId"] = JsonValue(nullptr);
+			}
+			if (node.renderLayer.has_value()) {
+				nodeJson["renderLayer"] = JsonValue(MadoEngine::Render::GetRenderLayerName(node.renderLayer.value()));
+			} else {
+				nodeJson["renderLayer"] = JsonValue(nullptr);
+			}
 
 			JsonValue settings = JsonValue::object();
 			if (const auto* primitive = std::get_if<PrimitiveEffectNodeSettings>(&node.settings)) {
@@ -390,12 +440,24 @@ namespace MadoEngine::EffectSequence {
 		// 再生時間とNode数をRuntime上限へ制限して極端な入力を排除
 		version_ = kCurrentVersion;
 		config_.duration = std::clamp(
-			std::isfinite(config_.duration) ? config_.duration : 1.0f,
+			[&]() {
+				if (std::isfinite(config_.duration)) {
+					return (config_.duration);
+				} else {
+					return (1.0f);
+				}
+			}(),
 			kMinimumEffectSequenceDuration,
 			kMaximumEffectSequenceDuration
 		);
 		config_.playbackSpeed = std::clamp(
-			std::isfinite(config_.playbackSpeed) ? config_.playbackSpeed : 1.0f,
+			[&]() {
+				if (std::isfinite(config_.playbackSpeed)) {
+					return (config_.playbackSpeed);
+				} else {
+					return (1.0f);
+				}
+			}(),
 			kMinimumEffectSequencePlaybackSpeed,
 			kMaximumEffectSequencePlaybackSpeed
 		);
@@ -430,12 +492,24 @@ namespace MadoEngine::EffectSequence {
 				node.isEnabled = false;
 			}
 			node.startTime = std::clamp(
-				std::isfinite(node.startTime) ? node.startTime : 0.0f,
+				[&]() {
+					if (std::isfinite(node.startTime)) {
+						return (node.startTime);
+					} else {
+						return (0.0f);
+					}
+				}(),
 				0.0f,
 				config_.duration
 			);
 			node.playbackSpeed = std::clamp(
-				std::isfinite(node.playbackSpeed) ? node.playbackSpeed : 1.0f,
+				[&]() {
+					if (std::isfinite(node.playbackSpeed)) {
+						return (node.playbackSpeed);
+					} else {
+						return (1.0f);
+					}
+				}(),
 				kMinimumEffectSequencePlaybackSpeed,
 				kMaximumEffectSequencePlaybackSpeed
 			);

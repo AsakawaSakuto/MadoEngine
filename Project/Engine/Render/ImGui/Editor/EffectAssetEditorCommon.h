@@ -49,9 +49,11 @@ namespace MadoEngine::Editor::Detail {
 		bool isRenameNameAvailable,
 		bool isDirty) {
 		EffectAssetManagementActions actions;
-		actions.selectedAssetIndex = assetNames.empty()
-			? 0
-			: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		if (assetNames.empty()) {
+			actions.selectedAssetIndex = 0;
+		} else {
+			actions.selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+		}
 
 		ImGui::PushID(id);
 		ImGui::TextUnformatted("新規アセット名");

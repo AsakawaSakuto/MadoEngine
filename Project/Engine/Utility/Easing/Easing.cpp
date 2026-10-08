@@ -109,10 +109,18 @@ namespace Easing {
 			}
 
 		case EaseType::EaseInExpo:
-			return t == 0.0f ? 0.0f : std::pow(2.0f, 10.0f * (t - 1.0f));
+			if (t == 0.0f) {
+				return 0.0f;
+			} else {
+				return std::pow(2.0f, 10.0f * (t - 1.0f));
+			}
 
 		case EaseType::EaseOutExpo:
-			return t == 1.0f ? 1.0f : 1.0f - std::pow(2.0f, -10.0f * t);
+			if (t == 1.0f) {
+				return 1.0f;
+			} else {
+				return 1.0f - std::pow(2.0f, -10.0f * t);
+			}
 
 		case EaseType::EaseInOutExpo:
 			if (t == 0.0f) return 0.0f;

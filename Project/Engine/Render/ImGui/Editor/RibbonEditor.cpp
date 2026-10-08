@@ -174,15 +174,23 @@ namespace {
 
 		if (preferredIndex >= 0 && preferredIndex < static_cast<int>(keyframes.size())) {
 			const float preferredTime = keyframes[preferredIndex].time;
-			const float nextTime = preferredIndex + 1 < static_cast<int>(keyframes.size())
-				? keyframes[preferredIndex + 1].time
-				: safeMaximumTime;
+			const float nextTime = [&]() {
+				if (preferredIndex + 1 < static_cast<int>(keyframes.size())) {
+					return (keyframes[preferredIndex + 1].time);
+				} else {
+					return (safeMaximumTime);
+				}
+			}();
 			if (nextTime - preferredTime > minimumGap) {
 				return (preferredTime + nextTime) * 0.5f;
 			}
-			const float previousTime = preferredIndex > 0
-				? keyframes[preferredIndex - 1].time
-				: 0.0f;
+			const float previousTime = [&]() {
+				if (preferredIndex > 0) {
+					return (keyframes[preferredIndex - 1].time);
+				} else {
+					return (0.0f);
+				}
+			}();
 			if (preferredTime - previousTime > minimumGap) {
 				return (previousTime + preferredTime) * 0.5f;
 			}
@@ -341,12 +349,20 @@ namespace {
 				ImGui::TableHeadersRow();
 				for (int index = 0; index < static_cast<int>(keyframes.size()); ++index) {
 					EffectKeyframe<T>& keyframe = keyframes[index];
-					const float minimumKeyframeTime = index > 0
-						? keyframes[index - 1].time
-						: 0.0f;
-					const float requestedMaximumKeyframeTime = index + 1 < static_cast<int>(keyframes.size())
-						? keyframes[index + 1].time
-						: (std::max)(maximumTime, 0.001f);
+					const float minimumKeyframeTime = [&]() {
+						if (index > 0) {
+							return (keyframes[index - 1].time);
+						} else {
+							return (0.0f);
+						}
+					}();
+					const float requestedMaximumKeyframeTime = [&]() {
+						if (index + 1 < static_cast<int>(keyframes.size())) {
+							return (keyframes[index + 1].time);
+						} else {
+							return ((std::max)(maximumTime, 0.001f));
+						}
+					}();
 					const float maximumKeyframeTime = (std::max)(
 						minimumKeyframeTime,
 						requestedMaximumKeyframeTime
@@ -369,7 +385,13 @@ namespace {
 						timeFormat
 					)) {
 						keyframe.time = std::clamp(
-							std::isfinite(keyframe.time) ? keyframe.time : minimumKeyframeTime,
+							[&]() {
+								if (std::isfinite(keyframe.time)) {
+									return (keyframe.time);
+								} else {
+									return (minimumKeyframeTime);
+								}
+							}(),
 							minimumKeyframeTime,
 							maximumKeyframeTime
 						);
@@ -657,14 +679,24 @@ namespace {
 
 		ImGui::BeginDisabled(controlPoints.size() >= trail.maxPointCount);
 		if (ImGui::Button("追加", ImVec2(operationButtonWidth, 0.0f))) {
-			const Vector3 newPoint = hasSelection
-				? controlPoints[selectedControlPointIndex] + Vector3{ 1.0f, 0.0f, 0.0f }
-				: controlPoints.empty()
-				? Vector3{}
-				: controlPoints.back() + Vector3{ 1.0f, 0.0f, 0.0f };
-			selectedControlPointIndex = hasSelection
-				? selectedControlPointIndex + 1
-				: static_cast<int>(controlPoints.size());
+			const Vector3 newPoint = [&]() {
+				if (hasSelection) {
+					return (controlPoints[selectedControlPointIndex] + Vector3{ 1.0f, 0.0f, 0.0f });
+				} else {
+					return ([&]() {
+						if (controlPoints.empty()) {
+							return (Vector3{});
+						} else {
+							return (controlPoints.back() + Vector3{ 1.0f, 0.0f, 0.0f });
+						}
+					}());
+				}
+			}();
+			if (hasSelection) {
+				selectedControlPointIndex = selectedControlPointIndex + 1;
+			} else {
+				selectedControlPointIndex = static_cast<int>(controlPoints.size());
+			}
 			controlPoints.insert(
 				controlPoints.begin() + selectedControlPointIndex,
 				newPoint
@@ -731,9 +763,13 @@ namespace {
 		}
 		ImGui::EndDisabled();
 
-		const char* selectedPointLabel = selectedControlPointIndex >= 0
-			? "一覧から座標を直接編集できます。"
-			: "制御点を追加してください。";
+		const char* selectedPointLabel = [&]() {
+			if (selectedControlPointIndex >= 0) {
+				return ("一覧から座標を直接編集できます。");
+			} else {
+				return ("制御点を追加してください。");
+			}
+		}();
 		ImGui::TextDisabled(
 			"制御点数: %zu / %u  |  %s",
 			controlPoints.size(),
@@ -1067,17 +1103,25 @@ namespace MadoEngine::Editor {
 				static_cast<int>(assetNames.size()) - 1
 			);
 		}
-		std::string selectedAssetName = assetNames.empty()
-			? std::string{}
-			: assetNames[selectedAssetIndex];
+		std::string selectedAssetName = [&]() {
+			if (assetNames.empty()) {
+				return (std::string{});
+			} else {
+				return (assetNames[selectedAssetIndex]);
+			}
+		}();
 
 		if (!selectedAssetName.empty() && assetRenameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			assetRenameOriginalName = selectedAssetName;
 		}
-		RibbonEffectAsset* asset = selectedAssetName.empty()
-			? nullptr
-			: system.FindEditableAsset(selectedAssetName);
+		RibbonEffectAsset* asset = [&]() -> RibbonEffectAsset* {
+			if (selectedAssetName.empty()) {
+				return (nullptr);
+			} else {
+				return (system.FindEditableAsset(selectedAssetName));
+			}
+		}();
 		if (asset) {
 			savedAssetSnapshots.try_emplace(
 				selectedAssetName,
@@ -1190,9 +1234,11 @@ namespace MadoEngine::Editor {
 			if (system.DeleteAsset(selectedAssetName)) {
 				savedAssetSnapshots.erase(selectedAssetName);
 				assetNames = system.GetAssetNames();
-				selectedAssetIndex = assetNames.empty()
-					? 0
-					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				if (assetNames.empty()) {
+					selectedAssetIndex = 0;
+				} else {
+					selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				}
 				assetRenameOriginalName.clear();
 			}
 		}

@@ -86,7 +86,13 @@ namespace Projectile {
 		rotationYaw_ += kRotationSpeed * deltaTime;
 		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		if (Model* model = MyModel::TryGet(model_)) {
-			const float reductionProgress = isReductionStarted_ ? reductionTimer_.GetProgress() : 0.0f;
+			const float reductionProgress = [&]() {
+				if (isReductionStarted_) {
+					return (reductionTimer_.GetProgress());
+				} else {
+					return (0.0f);
+				}
+			}();
 			const Vector3 baseScale = Vector3{ kBaseModelScale, kBaseModelScale, kBaseModelScale } * sizeRate_;
 
 			// 消滅直前だけScaleを線形に縮小して突然の非表示を回避

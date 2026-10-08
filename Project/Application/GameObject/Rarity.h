@@ -52,7 +52,11 @@ inline constexpr const RarityDefinition* FindRarityDefinition(Rarity rarity) {
 /// @return 表示名、未定義の場合は不明
 inline constexpr const char* GetRarityDisplayName(Rarity rarity) {
 	const RarityDefinition* definition = FindRarityDefinition(rarity);
-	return definition ? definition->displayName : "不明";
+	if (definition) {
+		return definition->displayName;
+	} else {
+		return "不明";
+	}
 }
 
 /// @brief レアリティのシリアライズ名を取得
@@ -60,7 +64,11 @@ inline constexpr const char* GetRarityDisplayName(Rarity rarity) {
 /// @return シリアライズ名、未定義の場合は空文字列
 inline constexpr const char* GetRaritySerializedName(Rarity rarity) {
 	const RarityDefinition* definition = FindRarityDefinition(rarity);
-	return definition ? definition->serializedName : "";
+	if (definition) {
+		return definition->serializedName;
+	} else {
+		return "";
+	}
 }
 
 /// @brief レアリティのデフォルト表示色を取得
@@ -68,7 +76,11 @@ inline constexpr const char* GetRaritySerializedName(Rarity rarity) {
 /// @return RGBA形式の表示色
 inline constexpr const RarityColor& GetRarityDefaultColor(Rarity rarity) {
 	const RarityDefinition* definition = FindRarityDefinition(rarity);
-	return definition ? definition->displayColor : kInvalidRarityColor;
+	if (definition) {
+		return definition->displayColor;
+	} else {
+		return kInvalidRarityColor;
+	}
 }
 
 /// @brief レアリティの抽選ウェイトを取得
@@ -76,7 +88,11 @@ inline constexpr const RarityColor& GetRarityDefaultColor(Rarity rarity) {
 /// @return 抽選ウェイト、抽選対象外または未定義の場合は0
 inline constexpr int GetRaritySelectionWeight(Rarity rarity) {
 	const RarityDefinition* definition = FindRarityDefinition(rarity);
-	return definition ? definition->selectionWeight : 0;
+	if (definition) {
+		return definition->selectionWeight;
+	} else {
+		return 0;
+	}
 }
 
 /// @brief レアリティが通常抽選の対象か確認

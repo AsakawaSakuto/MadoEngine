@@ -170,10 +170,20 @@ namespace {
 
 		// 反対側の値を変更せず、編集中の値だけを動的な上下限で拘束
 		const bool hasValueLimits = minimum < maximum;
-		const float minimumLowerBound = hasValueLimits ? minimum : -FLT_MAX;
-		const float minimumUpperBound = hasValueLimits
-			? (std::min)(range.max, maximum)
-			: range.max;
+		const float minimumLowerBound = [&]() {
+			if (hasValueLimits) {
+				return (minimum);
+			} else {
+				return (-FLT_MAX);
+			}
+		}();
+		const float minimumUpperBound = [&]() {
+			if (hasValueLimits) {
+				return ((std::min)(range.max, maximum));
+			} else {
+				return (range.max);
+			}
+		}();
 		if (ImGui::DragFloat(
 			"最小",
 			&range.min,
@@ -182,10 +192,20 @@ namespace {
 			minimumUpperBound)) {
 			range.min = (std::min)(range.min, range.max);
 		}
-		const float maximumLowerBound = hasValueLimits
-			? (std::max)(range.min, minimum)
-			: range.min;
-		const float maximumUpperBound = hasValueLimits ? maximum : FLT_MAX;
+		const float maximumLowerBound = [&]() {
+			if (hasValueLimits) {
+				return ((std::max)(range.min, minimum));
+			} else {
+				return (range.min);
+			}
+		}();
+		const float maximumUpperBound = [&]() {
+			if (hasValueLimits) {
+				return (maximum);
+			} else {
+				return (FLT_MAX);
+			}
+		}();
 		if (ImGui::DragFloat(
 			"最大",
 			&range.max,
@@ -432,9 +452,19 @@ namespace {
 			);
 			DrawShapeEditor(emitter.shape);
 			const char* spaces[] = { "ローカル", "ワールド" };
-			int spaceIndex = emitter.simulationSpace == SimulationSpace::Local ? 0 : 1;
+			int spaceIndex = [&]() {
+				if (emitter.simulationSpace == SimulationSpace::Local) {
+					return (0);
+				} else {
+					return (1);
+				}
+			}();
 			if (ImGui::Combo("シミュレーション空間", &spaceIndex, spaces, static_cast<int>(std::size(spaces)))) {
-				emitter.simulationSpace = spaceIndex == 0 ? SimulationSpace::Local : SimulationSpace::World;
+				if (spaceIndex == 0) {
+					emitter.simulationSpace = SimulationSpace::Local;
+				} else {
+					emitter.simulationSpace = SimulationSpace::World;
+				}
 			}
 		}
 
@@ -446,9 +476,19 @@ namespace {
 			DrawFloatRange("回転", emitter.initial.rotation, 0.01f);
 			DrawFloatRange("回転速度", emitter.initial.angularVelocity, 0.01f);
 			const char* directionModes[] = { "設定した方向", "形状の外向き" };
-			int directionMode = emitter.initial.directionMode == DirectionMode::Configured ? 0 : 1;
+			int directionMode = [&]() {
+				if (emitter.initial.directionMode == DirectionMode::Configured) {
+					return (0);
+				} else {
+					return (1);
+				}
+			}();
 			if (ImGui::Combo("進行方向の決定方法", &directionMode, directionModes, static_cast<int>(std::size(directionModes)))) {
-				emitter.initial.directionMode = directionMode == 0 ? DirectionMode::Configured : DirectionMode::ShapeOutward;
+				if (directionMode == 0) {
+					emitter.initial.directionMode = DirectionMode::Configured;
+				} else {
+					emitter.initial.directionMode = DirectionMode::ShapeOutward;
+				}
 			}
 
 			ImGui::SeparatorText("移動");
@@ -469,9 +509,19 @@ namespace {
 			}
 
 			const char* sortModes[] = { "なし", "奥から手前" };
-			int sortMode = emitter.renderer.sortMode == SortMode::None ? 0 : 1;
+			int sortMode = [&]() {
+				if (emitter.renderer.sortMode == SortMode::None) {
+					return (0);
+				} else {
+					return (1);
+				}
+			}();
 			if (ImGui::Combo("並び替え", &sortMode, sortModes, static_cast<int>(std::size(sortModes)))) {
-				emitter.renderer.sortMode = sortMode == 0 ? SortMode::None : SortMode::BackToFront;
+				if (sortMode == 0) {
+					emitter.renderer.sortMode = SortMode::None;
+				} else {
+					emitter.renderer.sortMode = SortMode::BackToFront;
+				}
 			}
 
 			ImGui::SeparatorText("生存期間による変化");
@@ -521,15 +571,23 @@ namespace {
 			ImGui::ColorEdit4("開始色##ParticleTrail", &emitter.trail.startColor.x);
 			ImGui::ColorEdit4("終了色##ParticleTrail", &emitter.trail.endColor.x);
 			const char* interpolationModes[] = { "直線", "Catmull-Rom" };
-			int interpolationMode = emitter.trail.interpolation == ParticleTrailInterpolation::Linear ? 0 : 1;
+			int interpolationMode = [&]() {
+				if (emitter.trail.interpolation == ParticleTrailInterpolation::Linear) {
+					return (0);
+				} else {
+					return (1);
+				}
+			}();
 			if (ImGui::Combo(
 				"補間方式",
 				&interpolationMode,
 				interpolationModes,
 				static_cast<int>(std::size(interpolationModes)))) {
-				emitter.trail.interpolation = interpolationMode == 0
-					? ParticleTrailInterpolation::Linear
-					: ParticleTrailInterpolation::CatmullRom;
+				if (interpolationMode == 0) {
+					emitter.trail.interpolation = ParticleTrailInterpolation::Linear;
+				} else {
+					emitter.trail.interpolation = ParticleTrailInterpolation::CatmullRom;
+				}
 			}
 			if (emitter.trail.interpolation == ParticleTrailInterpolation::CatmullRom) {
 				int smoothingSubdivision = static_cast<int>(emitter.trail.smoothingSubdivision);
@@ -645,15 +703,25 @@ namespace MadoEngine::Editor {
 		if (!assetNames.empty()) {
 			selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
 		}
-		std::string selectedAssetName = assetNames.empty() ? std::string{} : assetNames[selectedAssetIndex];
+		std::string selectedAssetName = [&]() {
+			if (assetNames.empty()) {
+				return (std::string{});
+			} else {
+				return (assetNames[selectedAssetIndex]);
+			}
+		}();
 
 		if (!selectedAssetName.empty() && assetRenameOriginalName != selectedAssetName) {
 			CopyToBuffer(renameAssetNameBuffer, selectedAssetName);
 			assetRenameOriginalName = selectedAssetName;
 		}
-		ParticleEffectAsset* asset = selectedAssetName.empty()
-			? nullptr
-			: particleSystem.FindEditableAsset(selectedAssetName);
+		ParticleEffectAsset* asset = [&]() -> ParticleEffectAsset* {
+			if (selectedAssetName.empty()) {
+				return (nullptr);
+			} else {
+				return (particleSystem.FindEditableAsset(selectedAssetName));
+			}
+		}();
 		if (asset) {
 			savedAssetSnapshots.try_emplace(
 				selectedAssetName,
@@ -735,9 +803,11 @@ namespace MadoEngine::Editor {
 			savedAssetSnapshots.erase(selectedAssetName);
 			if (particleSystem.DeleteAsset(selectedAssetName)) {
 				assetNames = particleSystem.GetAssetNames();
-				selectedAssetIndex = assetNames.empty()
-					? 0
-					: std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				if (assetNames.empty()) {
+					selectedAssetIndex = 0;
+				} else {
+					selectedAssetIndex = std::clamp(selectedAssetIndex, 0, static_cast<int>(assetNames.size()) - 1);
+				}
 				assetRenameOriginalName.clear();
 				renameEmitterIndex = -1;
 			}

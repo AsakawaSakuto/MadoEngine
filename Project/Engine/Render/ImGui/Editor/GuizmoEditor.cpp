@@ -323,7 +323,13 @@ namespace MadoEngine::Editor {
             ImGuizmo::OPERATION operation = DrawGizmoOperationButtons(imageMin);
             const bool isSnapEnabled = ImGui::IsKeyDown(ImGuiKey_LeftShift);
             const float snapValue[3] = { 0.1f, 0.1f, 0.1f };
-            const float* snap = isSnapEnabled ? snapValue : nullptr;
+            const float* snap = [&]() -> const float* {
+                if (isSnapEnabled) {
+                    return (snapValue);
+                } else {
+                    return (nullptr);
+                }
+            }();
 
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());

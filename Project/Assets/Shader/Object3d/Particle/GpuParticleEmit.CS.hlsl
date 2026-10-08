@@ -40,9 +40,12 @@ void BuildGpuParticlePlaneBasis(
 		normal,
 		float3(0.0f, 1.0f, 0.0f)
 	);
-	const float3 reference = abs(normalizedNormal.y) < 0.999f
-		? float3(0.0f, 1.0f, 0.0f)
-		: float3(1.0f, 0.0f, 0.0f);
+	float3 reference;
+	if (abs(normalizedNormal.y) < 0.999f) {
+		reference = float3(0.0f, 1.0f, 0.0f);
+	} else {
+		reference = float3(1.0f, 0.0f, 0.0f);
+	}
 	tangent = NormalizeGpuParticleDirection(
 		cross(reference, normalizedNormal),
 		float3(1.0f, 0.0f, 0.0f)
@@ -76,9 +79,12 @@ GpuParticleShapeSample SampleGpuParticleShape(inout uint randomState) {
 		const float3 direction = SampleGpuParticleUnitSphere(randomState);
 
 		// 体積内発生では半径に立方根を適用して中心への密度偏りを補正
-		const float radiusScale = emitFromSurfaceOrEdge
-			? 1.0f
-			: pow(NextGpuParticleRandom01(randomState), 1.0f / 3.0f);
+		float radiusScale;
+		if (emitFromSurfaceOrEdge) {
+			radiusScale = 1.0f;
+		} else {
+			radiusScale = pow(NextGpuParticleRandom01(randomState), 1.0f / 3.0f);
+		}
 		sample.position =
 			direction * gGpuParticleShape0.x * radiusScale;
 		sample.outward = direction;
@@ -96,8 +102,12 @@ GpuParticleShapeSample SampleGpuParticleShape(inout uint randomState) {
 				(uint)(NextGpuParticleRandom01(randomState) * 3.0f),
 				2u
 			);
-			const float sign =
-				NextGpuParticleRandom01(randomState) < 0.5f ? -1.0f : 1.0f;
+			float sign;
+			if (NextGpuParticleRandom01(randomState) < 0.5f) {
+				sign = -1.0f;
+			} else {
+				sign = 1.0f;
+			}
 			sample.position[axis] = halfExtents[axis] * sign;
 			sample.outward[axis] = sign;
 		} else {
@@ -147,13 +157,16 @@ GpuParticleShapeSample SampleGpuParticleShape(inout uint randomState) {
 		sincos(angle, sine, cosine);
 
 		// 面積一様な環状分布にするため二乗半径を補間して平方根へ復元
-		const float radius = emitFromSurfaceOrEdge
-			? gGpuParticleShape0.y
-			: sqrt(SampleGpuParticleRange(
+		float radius;
+		if (emitFromSurfaceOrEdge) {
+			radius = gGpuParticleShape0.y;
+		} else {
+			radius = sqrt(SampleGpuParticleRange(
 				gGpuParticleShape0.x * gGpuParticleShape0.x,
 				gGpuParticleShape0.y * gGpuParticleShape0.y,
 				randomState
 			));
+		}
 		const float3 radial = tangent * cosine + bitangent * sine;
 		sample.position = radial * radius;
 		sample.outward = radial;
@@ -183,12 +196,15 @@ GpuParticleState CreateGpuParticleState(inout uint randomState, uint identifier)
 			kGpuParticleDirectionShapeOutward &&
 		dot(shapeSample.outward, shapeSample.outward) >
 			kGpuParticleEpsilon;
-	const float3 direction = useShapeOutward
-		? NormalizeGpuParticleDirection(
+	float3 direction;
+	if (useShapeOutward) {
+		direction = NormalizeGpuParticleDirection(
 			shapeSample.outward,
 			configuredDirection
-		)
-		: configuredDirection;
+		);
+	} else {
+		direction = configuredDirection;
+	}
 
 	GpuParticleState state;
 	state.position = shapeSample.position;

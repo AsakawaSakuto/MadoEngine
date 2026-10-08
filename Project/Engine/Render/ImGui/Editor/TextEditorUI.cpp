@@ -174,9 +174,13 @@ namespace {
 			}
 		}
 
-		const char* preview = currentAsset
-			? currentAsset->displayName.c_str()
-			: "未選択";
+		const char* preview = [&]() {
+			if (currentAsset) {
+				return (currentAsset->displayName.c_str());
+			} else {
+				return ("未選択");
+			}
+		}();
 
 		if (ImGui::BeginCombo("フォント", preview)) {
 			if (!fontAssets.empty()) {

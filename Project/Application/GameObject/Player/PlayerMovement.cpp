@@ -110,7 +110,11 @@ namespace Player {
 	}
 
 	void Movement::SetMoveSpeedMultiplier(float multiplier) {
-		moveSpeedMultiplier_ = std::isfinite(multiplier) ? std::max(multiplier, 0.0f) : 1.0f;
+		if (std::isfinite(multiplier)) {
+			moveSpeedMultiplier_ = std::max(multiplier, 0.0f);
+		} else {
+			moveSpeedMultiplier_ = 1.0f;
+		}
 	}
 
 	void Movement::SetAdditionalJumpCount(int additionalJumpCount) {
@@ -370,10 +374,22 @@ namespace Player {
 			transform.rotate.y = faceYaw_;
 		}
 
-		const float friction = isCrouching ? movementParams_.slideFriction_ : slideReleaseFriction_;
+		const float friction = [&]() {
+			if (isCrouching) {
+				return (movementParams_.slideFriction_);
+			} else {
+				return (slideReleaseFriction_);
+			}
+		}();
 
 		// 斜面加速を摩擦で相殺しないよう斜面上では減速を弱める
-		ApplySlideFriction(deltaTime, isCrouchingOnSlope ? movementParams_.slideFriction_ * 0.35f : friction);
+		ApplySlideFriction(deltaTime, [&]() {
+			if (isCrouchingOnSlope) {
+				return (movementParams_.slideFriction_ * 0.35f);
+			} else {
+				return (friction);
+			}
+		}());
 	}
 
 	bool Movement::TryGetSlopeDownDirection(Vector3& outDownDirection) const {

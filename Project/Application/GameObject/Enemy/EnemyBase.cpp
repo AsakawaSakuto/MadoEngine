@@ -60,7 +60,11 @@ namespace Enemy {
 		sceneType_ = desc.sceneType;
 		const TypeSettings& typeSettings = Settings::GetInstance().GetTypeSettings(type_);
 		const EliteSettings& eliteSettings = Settings::GetInstance().GetEliteSettings();
-		bodyScaleMultiplier_ = bonusType_ == Data::BonusType::Elite ? eliteSettings.bodyScaleMultiplier : 1.0f;
+		if (bonusType_ == Data::BonusType::Elite) {
+			bodyScaleMultiplier_ = eliteSettings.bodyScaleMultiplier;
+		} else {
+			bodyScaleMultiplier_ = 1.0f;
+		}
 		knockbackResistance_ = std::clamp(typeSettings.knockbackResistance, 0.0f, 1.0f);
 		if (bonusType_ == Data::BonusType::Elite) {
 
@@ -246,7 +250,13 @@ namespace Enemy {
 		// 確定率以上では乱数消費を避け、それ未満では1から100の整数値で命中ごとに抽選
 		const bool isCritical = criticalChance >= kGuaranteedCriticalChance ||
 			static_cast<float>(MyRand::GetInt(kCriticalRollMin, kCriticalRollMax)) <= criticalChance;
-		const float resolvedDamage = isCritical ? damage * criticalDamage : damage;
+		const float resolvedDamage = [&]() {
+			if (isCritical) {
+				return (damage * criticalDamage);
+			} else {
+				return (damage);
+			}
+		}();
 		if (!std::isfinite(resolvedDamage) || resolvedDamage <= 0.0f) {
 			return result;
 		}
@@ -424,7 +434,13 @@ namespace Enemy {
 	}
 
 	void Base::UpdateEmergence(float deltaTime) {
-		const float safeDeltaTime = std::isfinite(deltaTime) ? std::max(0.0f, deltaTime) : 0.0f;
+		const float safeDeltaTime = [&]() {
+			if (std::isfinite(deltaTime)) {
+				return (std::max(0.0f, deltaTime));
+			} else {
+				return (0.0f);
+			}
+		}();
 		transform_.translate.y =
 			std::min(emergenceTargetY_, transform_.translate.y + kEmergenceSpeed * safeDeltaTime);
 		if (transform_.translate.y < emergenceTargetY_ - kEmergenceCompletionEpsilon) {
@@ -467,7 +483,11 @@ namespace Enemy {
 	}
 
 	Vector3 Base::GetTargetPlayerPosition() const {
-		return targetPlayer_ ? targetPlayer_->GetPosition() : transform_.translate;
+		if (targetPlayer_) {
+			return targetPlayer_->GetPosition();
+		} else {
+			return transform_.translate;
+		}
 	}
 
 	void Base::ApplyModelTransform() {

@@ -403,8 +403,20 @@ static bool CheckSweptSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Col
         return false;
     }
 
-    float searchStart = isStartInsideBroad ? 0.0f : broadHit.entryTime;
-    float searchEnd = broadHit.isHit ? broadHit.exitTime : 1.0f;
+    float searchStart = [&]() {
+        if (isStartInsideBroad) {
+            return (0.0f);
+        } else {
+            return (broadHit.entryTime);
+        }
+    }();
+    float searchEnd = [&]() {
+        if (broadHit.isHit) {
+            return (broadHit.exitTime);
+        } else {
+            return (1.0f);
+        }
+    }();
     if (searchEnd < searchStart) {
         return false;
     }
@@ -599,9 +611,27 @@ static AABB MakeOBBBounds(const OBB& obb) {
         for (int y = 0; y < 2; ++y) {
             for (int z = 0; z < 2; ++z) {
                 const Vector3 local = {
-                    x == 0 ? obb.min.x : obb.max.x,
-                    y == 0 ? obb.min.y : obb.max.y,
-                    z == 0 ? obb.min.z : obb.max.z
+                    [&]() {
+                        if (x == 0) {
+                            return (obb.min.x);
+                        } else {
+                            return (obb.max.x);
+                        }
+                    }(),
+                    [&]() {
+                        if (y == 0) {
+                            return (obb.min.y);
+                        } else {
+                            return (obb.max.y);
+                        }
+                    }(),
+                    [&]() {
+                        if (z == 0) {
+                            return (obb.min.z);
+                        } else {
+                            return (obb.max.z);
+                        }
+                    }()
                 };
                 const Vector3 world = {
                     obb.center.x + obb.orientation[0].x * local.x + obb.orientation[1].x * local.y + obb.orientation[2].x * local.z,
@@ -705,8 +735,20 @@ void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB
     m_matrix[tagB][tagA] = { true, setting.enableResolve, setting.enableCCD };
     Logger::Output(
         "衝突ペア登録 : " + CollisionTagToString(tagA) + " <-> " + CollisionTagToString(tagB) +
-        " (押し出し : " + (setting.enableResolve ? "有効" : "無効") +
-        ", CCD : " + (setting.enableCCD ? "有効" : "無効") + ")",
+        " (押し出し : " + ([&]() {
+            if (setting.enableResolve) {
+                return ("有効");
+            } else {
+                return ("無効");
+            }
+        }()) +
+        ", CCD : " + ([&]() {
+            if (setting.enableCCD) {
+                return ("有効");
+            } else {
+                return ("無効");
+            }
+        }()) + ")",
         Logger::Level::Application
     );
 }
@@ -878,14 +920,38 @@ bool ColliderManager::CheckSweptCollision(ColliderInfo& a, ColliderInfo& b, floa
 
     // 実装済みのShape組み合わせだけを連続判定へ振り分け
     if ((isASphere && isBAABB) || (isAAABB && isBSphere)) {
-        ColliderInfo& sphereInfo = isASphere ? a : b;
-        ColliderInfo& aabbInfo = isASphere ? b : a;
+        ColliderInfo& sphereInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (a);
+            } else {
+                return (b);
+            }
+        }();
+        ColliderInfo& aabbInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (b);
+            } else {
+                return (a);
+            }
+        }();
         return CheckSweptSphereAABB(sphereInfo, aabbInfo, hitTime);
     }
 
     if ((isASphere && isBSlope) || (isASlope && isBSphere)) {
-        ColliderInfo& sphereInfo = isASphere ? a : b;
-        ColliderInfo& slopeInfo = isASphere ? b : a;
+        ColliderInfo& sphereInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (a);
+            } else {
+                return (b);
+            }
+        }();
+        ColliderInfo& slopeInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (b);
+            } else {
+                return (a);
+            }
+        }();
         return CheckSweptSphereSlope(sphereInfo, slopeInfo, hitTime);
     }
 
@@ -900,7 +966,13 @@ void ColliderManager::ApplySweptCollision(ColliderInfo& a, ColliderInfo& b, floa
     Vector3 moveA = *(a.pPosition) - a.previousPosition;
     Vector3 moveB = *(b.pPosition) - b.previousPosition;
     float relativeLength = (moveA - moveB).Length();
-    float backstepTime = relativeLength > 0.0001f ? 0.001f / relativeLength : 0.0f;
+    float backstepTime = [&]() {
+        if (relativeLength > 0.0001f) {
+            return (0.001f / relativeLength);
+        } else {
+            return (0.0f);
+        }
+    }();
     float resolveTime = std::clamp(hitTime - backstepTime, 0.0f, 1.0f);
 
     *(a.pPosition) = LerpVector3(a.previousPosition, *(a.pPosition), resolveTime);
@@ -981,11 +1053,23 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
             // 一番めり込みが浅い軸（最小移動ベクトル）を特定して押し戻す
             Vector3 pushVec = { 0,0,0 };
             if (overlapX < overlapY && overlapX < overlapZ) {
-                pushVec.x = (a.pPosition->x < b.pPosition->x) ? -(overlapX + kSkinWidth) : (overlapX + kSkinWidth);
+                if ((a.pPosition->x < b.pPosition->x)) {
+                    pushVec.x = -(overlapX + kSkinWidth);
+                } else {
+                    pushVec.x = (overlapX + kSkinWidth);
+                }
             } else if (overlapY < overlapX && overlapY < overlapZ) {
-                pushVec.y = (a.pPosition->y < b.pPosition->y) ? -(overlapY + kSkinWidth) : (overlapY + kSkinWidth);
+                if ((a.pPosition->y < b.pPosition->y)) {
+                    pushVec.y = -(overlapY + kSkinWidth);
+                } else {
+                    pushVec.y = (overlapY + kSkinWidth);
+                }
             } else {
-                pushVec.z = (a.pPosition->z < b.pPosition->z) ? -(overlapZ + kSkinWidth) : (overlapZ + kSkinWidth);
+                if ((a.pPosition->z < b.pPosition->z)) {
+                    pushVec.z = -(overlapZ + kSkinWidth);
+                } else {
+                    pushVec.z = (overlapZ + kSkinWidth);
+                }
             }
 
             *(a.pPosition) = *(a.pPosition) + pushVec * factorA;
@@ -1001,8 +1085,20 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     bool isBSphere = std::holds_alternative<Sphere>(*(b.pShape));
 
     if ((isASphere && isBAABB) || (isAAABB && isBSphere)) {
-        ColliderInfo& sphereInfo = isASphere ? a : b;
-        ColliderInfo& aabbInfo = isASphere ? b : a;
+        ColliderInfo& sphereInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (a);
+            } else {
+                return (b);
+            }
+        }();
+        ColliderInfo& aabbInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (b);
+            } else {
+                return (a);
+            }
+        }();
 
         auto& sphere = std::get<Sphere>(*(sphereInfo.pShape));
         auto& aabb = std::get<AABB>(*(aabbInfo.pShape));
@@ -1015,8 +1111,20 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         if (IsSphereOnAABBTop(center, sphere.radius, aabbMin, aabbMax)) {
             float pushY = aabbMax.y + sphere.radius + kSkinWidth - center.y;
             if (pushY > 0.0f) {
-                float factorSphere = isASphere ? factorA : factorB;
-                float factorAabb = isASphere ? factorB : factorA;
+                float factorSphere = [&]() {
+                    if (isASphere) {
+                        return (factorA);
+                    } else {
+                        return (factorB);
+                    }
+                }();
+                float factorAabb = [&]() {
+                    if (isASphere) {
+                        return (factorB);
+                    } else {
+                        return (factorA);
+                    }
+                }();
                 Vector3 pushVec = { 0.0f, pushY, 0.0f };
                 *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushVec * factorSphere;
                 *(aabbInfo.pPosition) = *(aabbInfo.pPosition) - pushVec * factorAabb;
@@ -1040,8 +1148,20 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
             float penetration = 0.0f;
             CalcSphereInsideAABBPush(center, sphere.radius, aabbMin, aabbMax, pushDir, penetration);
 
-            float factorSphere = isASphere ? factorA : factorB;
-            float factorAabb = isASphere ? factorB : factorA;
+            float factorSphere = [&]() {
+                if (isASphere) {
+                    return (factorA);
+                } else {
+                    return (factorB);
+                }
+            }();
+            float factorAabb = [&]() {
+                if (isASphere) {
+                    return (factorB);
+                } else {
+                    return (factorA);
+                }
+            }();
             *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushDir * (penetration * factorSphere);
             *(aabbInfo.pPosition) = *(aabbInfo.pPosition) - pushDir * (penetration * factorAabb);
             return;
@@ -1057,8 +1177,20 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
             }
 
             // weight に応じた比率で押し戻す（sphereInfo/aabbInfo が a/b のどちらかに対応）
-            float factorSphere = isASphere ? factorA : factorB;
-            float factorAabb   = isASphere ? factorB : factorA;
+            float factorSphere = [&]() {
+                if (isASphere) {
+                    return (factorA);
+                } else {
+                    return (factorB);
+                }
+            }();
+            float factorAabb   = [&]() {
+                if (isASphere) {
+                    return (factorB);
+                } else {
+                    return (factorA);
+                }
+            }();
             *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + pushDir * (penetration * factorSphere);
             *(aabbInfo.pPosition)   = *(aabbInfo.pPosition)   - pushDir * (penetration * factorAabb);
         }
@@ -1070,10 +1202,34 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     bool isBSlope = std::holds_alternative<Slope>(*(b.pShape));
 
     if ((isASphere && isBSlope) || (isASlope && isBSphere)) {
-        ColliderInfo& sphereInfo = isASphere ? a : b;
-        ColliderInfo& slopeInfo = isASphere ? b : a;
-        float factorSphere = isASphere ? factorA : factorB;
-        float factorSlope = isASphere ? factorB : factorA;
+        ColliderInfo& sphereInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (a);
+            } else {
+                return (b);
+            }
+        }();
+        ColliderInfo& slopeInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (b);
+            } else {
+                return (a);
+            }
+        }();
+        float factorSphere = [&]() {
+            if (isASphere) {
+                return (factorA);
+            } else {
+                return (factorB);
+            }
+        }();
+        float factorSlope = [&]() {
+            if (isASphere) {
+                return (factorB);
+            } else {
+                return (factorA);
+            }
+        }();
         ResolveSphereSlope(sphereInfo, slopeInfo, factorSphere, factorSlope);
         return;
     }
@@ -1082,8 +1238,20 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
     bool isAPlane = std::holds_alternative<Plane>(*(a.pShape));
 
     if ((isASphere && isBPlane) || (isAPlane && isBSphere)) {
-        ColliderInfo& sphereInfo = isASphere ? a : b;
-        ColliderInfo& planeInfo = isASphere ? b : a;
+        ColliderInfo& sphereInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (a);
+            } else {
+                return (b);
+            }
+        }();
+        ColliderInfo& planeInfo = [&]() -> ColliderInfo& {
+            if (isASphere) {
+                return (b);
+            } else {
+                return (a);
+            }
+        }();
 
         auto& sphere = std::get<Sphere>(*(sphereInfo.pShape));
         auto& plane = std::get<Plane>(*(planeInfo.pShape));
@@ -1098,11 +1266,29 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
         // 球の半径より近ければめり込んでいる
         if (std::abs(distToPlane) < sphere.radius) {
             float penetration = sphere.radius - std::abs(distToPlane);
-            float sign = (distToPlane < 0.0f) ? -1.0f : 1.0f;
+            float sign = [&]() {
+                if ((distToPlane < 0.0f)) {
+                    return (-1.0f);
+                } else {
+                    return (1.0f);
+                }
+            }();
 
             // weight に応じた比率で押し戻す
-            float factorSphere = isASphere ? factorA : factorB;
-            float factorPlane  = isASphere ? factorB : factorA;
+            float factorSphere = [&]() {
+                if (isASphere) {
+                    return (factorA);
+                } else {
+                    return (factorB);
+                }
+            }();
+            float factorPlane  = [&]() {
+                if (isASphere) {
+                    return (factorB);
+                } else {
+                    return (factorA);
+                }
+            }();
             *(sphereInfo.pPosition) = *(sphereInfo.pPosition) + normal * (penetration * sign * factorSphere);
             *(planeInfo.pPosition)  = *(planeInfo.pPosition)  - normal * (penetration * sign * factorPlane);
         }

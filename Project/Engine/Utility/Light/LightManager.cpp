@@ -179,10 +179,22 @@ DirectionalLight DirectionalLightFromJson(const nlohmann::json& json) {
 		return light;
 	}
 
-	light.color = json.contains("color") ? MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color) : light.color;
-	light.direction = json.contains("direction") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction) : light.direction;
+	if (json.contains("color")) {
+		light.color = MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color);
+	} else {
+		light.color = light.color;
+	}
+	if (json.contains("direction")) {
+		light.direction = MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction);
+	} else {
+		light.direction = light.direction;
+	}
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
-	light.useHalfLambert = MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(json, "useHalfLambert", light.useHalfLambert != 0) ? 1u : 0u;
+	if (MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(json, "useHalfLambert", light.useHalfLambert != 0)) {
+		light.useHalfLambert = 1u;
+	} else {
+		light.useHalfLambert = 0u;
+	}
 	NormalizeDirectionalLight(light);
 	return light;
 }
@@ -196,8 +208,16 @@ PointLight PointLightFromJson(const nlohmann::json& json) {
 		return light;
 	}
 
-	light.color = json.contains("color") ? MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color) : light.color;
-	light.position = json.contains("position") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position) : light.position;
+	if (json.contains("color")) {
+		light.color = MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color);
+	} else {
+		light.color = light.color;
+	}
+	if (json.contains("position")) {
+		light.position = MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position);
+	} else {
+		light.position = light.position;
+	}
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
 	light.radius = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "radius", light.radius);
 	light.decay = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "decay", light.decay);
@@ -213,9 +233,21 @@ SpotLight SpotLightFromJson(const nlohmann::json& json) {
 		return light;
 	}
 
-	light.color = json.contains("color") ? MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color) : light.color;
-	light.position = json.contains("position") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position) : light.position;
-	light.direction = json.contains("direction") ? MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction) : light.direction;
+	if (json.contains("color")) {
+		light.color = MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color);
+	} else {
+		light.color = light.color;
+	}
+	if (json.contains("position")) {
+		light.position = MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position);
+	} else {
+		light.position = light.position;
+	}
+	if (json.contains("direction")) {
+		light.direction = MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction);
+	} else {
+		light.direction = light.direction;
+	}
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
 	light.distance = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "distance", light.distance);
 	light.decay = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "decay", light.decay);
@@ -531,10 +563,20 @@ bool LightManager::LoadFromJson(const std::filesystem::path& filePath) {
 
 	const bool isLoaded = FromJson(root);
 	Logger::Output(
-		isLoaded
-			? "LightManagerの設定をJsonから読み込みました : " + filePath.generic_string()
-			: "LightManagerのJson形式が不正です : " + filePath.generic_string(),
-		isLoaded ? Logger::Level::Application : Logger::Level::Error
+		[&]() {
+			if (isLoaded) {
+				return ("LightManagerの設定をJsonから読み込みました : " + filePath.generic_string());
+			} else {
+				return ("LightManagerのJson形式が不正です : " + filePath.generic_string());
+			}
+		}(),
+		[&]() {
+			if (isLoaded) {
+				return (Logger::Level::Application);
+			} else {
+				return (Logger::Level::Error);
+			}
+		}()
 	);
 	return isLoaded;
 }
@@ -570,14 +612,24 @@ bool LightManager::FromJson(const nlohmann::json& root) {
 		const SceneType sceneType = ParseSceneType(sceneName);
 		const LightLayerMask layerMask = MadoEngine::Json::JsonSerializer::GetOrDefault<LightLayerMask>(lightJson, "layerMask", ToLightLayerMask(LightLayer::World));
 		const bool enabled = MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(lightJson, "enabled", true);
-		const nlohmann::json dataJson = lightJson.contains("data") ? lightJson.at("data") : nlohmann::json::object();
+		const nlohmann::json dataJson = [&]() {
+			if (lightJson.contains("data")) {
+				return (lightJson.at("data"));
+			} else {
+				return (nlohmann::json::object());
+			}
+		}();
 
 		// 共通MetaDataを検証後に種別固有Dataへ変換して対応Slotへ登録
 		switch (type) {
 		case LightType::Directional:
 		{
 			DirectionalLight light = DirectionalLightFromJson(dataJson);
-			light.useLight = enabled ? 1u : 0u;
+			if (enabled) {
+				light.useLight = 1u;
+			} else {
+				light.useLight = 0u;
+			}
 			CreateDirectionalLight(
 				name,
 				light,
@@ -589,7 +641,11 @@ bool LightManager::FromJson(const nlohmann::json& root) {
 		case LightType::Point:
 		{
 			PointLight light = PointLightFromJson(dataJson);
-			light.useLight = enabled ? 1u : 0u;
+			if (enabled) {
+				light.useLight = 1u;
+			} else {
+				light.useLight = 0u;
+			}
 			CreatePointLight(
 				name,
 				light,
@@ -601,7 +657,11 @@ bool LightManager::FromJson(const nlohmann::json& root) {
 		case LightType::Spot:
 		{
 			SpotLight light = SpotLightFromJson(dataJson);
-			light.useLight = enabled ? 1u : 0u;
+			if (enabled) {
+				light.useLight = 1u;
+			} else {
+				light.useLight = 0u;
+			}
 			CreateSpotLight(
 				name,
 				light,
@@ -629,13 +689,23 @@ bool LightManager::SetEnabled(LightHandle handle, bool enabled) {
 	meta->enabled = enabled;
 	ApplyEnabledToLight(handle, enabled);
 	AdvanceRevision();
-	Logger::Output("ライトの有効状態を変更しました : " + meta->name + " -> " + (enabled ? "有効" : "無効"), Logger::Level::Application);
+	Logger::Output("ライトの有効状態を変更しました : " + meta->name + " -> " + ([&]() {
+		if (enabled) {
+			return ("有効");
+		} else {
+			return ("無効");
+		}
+	}()), Logger::Level::Application);
 	return true;
 }
 
 bool LightManager::IsEnabled(LightHandle handle) const {
 	const LightMetaData* meta = GetMetaData(handle);
-	return meta ? meta->enabled : false;
+	if (meta) {
+		return meta->enabled;
+	} else {
+		return false;
+	}
 }
 
 bool LightManager::SetSceneType(LightHandle handle, SceneType sceneType) {
@@ -653,7 +723,11 @@ bool LightManager::SetSceneType(LightHandle handle, SceneType sceneType) {
 
 SceneType LightManager::GetSceneType(LightHandle handle) const {
 	const LightMetaData* meta = GetMetaData(handle);
-	return meta ? meta->sceneType : SceneType::None;
+	if (meta) {
+		return meta->sceneType;
+	} else {
+		return SceneType::None;
+	}
 }
 
 bool LightManager::SetLayerMask(LightHandle handle, LightLayerMask layerMask) {
@@ -671,27 +745,47 @@ bool LightManager::SetLayerMask(LightHandle handle, LightLayerMask layerMask) {
 
 LightLayerMask LightManager::GetLayerMask(LightHandle handle) const {
 	const LightMetaData* meta = GetMetaData(handle);
-	return meta ? meta->layerMask : ToLightLayerMask(LightLayer::None);
+	if (meta) {
+		return meta->layerMask;
+	} else {
+		return ToLightLayerMask(LightLayer::None);
+	}
 }
 
 const std::string& LightManager::GetName(LightHandle handle) const {
 	const LightMetaData* meta = GetMetaData(handle);
-	return meta ? meta->name : kEmptyLightName;
+	if (meta) {
+		return meta->name;
+	} else {
+		return kEmptyLightName;
+	}
 }
 
 const DirectionalLight* LightManager::GetDirectionalLightData(LightHandle handle) const {
 	const DirectionalLightEntry* entry = GetDirectionalLight(handle);
-	return entry ? &entry->light : nullptr;
+	if (entry) {
+		return &entry->light;
+	} else {
+		return nullptr;
+	}
 }
 
 const PointLight* LightManager::GetPointLightData(LightHandle handle) const {
 	const PointLightEntry* entry = GetPointLight(handle);
-	return entry ? &entry->light : nullptr;
+	if (entry) {
+		return &entry->light;
+	} else {
+		return nullptr;
+	}
 }
 
 const SpotLight* LightManager::GetSpotLightData(LightHandle handle) const {
 	const SpotLightEntry* entry = GetSpotLight(handle);
-	return entry ? &entry->light : nullptr;
+	if (entry) {
+		return &entry->light;
+	} else {
+		return nullptr;
+	}
 }
 
 bool LightManager::SetDirectionalLight(LightHandle handle, const DirectionalLight& light) {
@@ -733,17 +827,29 @@ bool LightManager::SetSpotLight(LightHandle handle, const SpotLight& light) {
 
 DirectionalLight* LightManager::MutableDirectionalLight(LightHandle handle) {
 	DirectionalLightEntry* entry = GetDirectionalLight(handle);
-	return entry ? &entry->light : nullptr;
+	if (entry) {
+		return &entry->light;
+	} else {
+		return nullptr;
+	}
 }
 
 PointLight* LightManager::MutablePointLight(LightHandle handle) {
 	PointLightEntry* entry = GetPointLight(handle);
-	return entry ? &entry->light : nullptr;
+	if (entry) {
+		return &entry->light;
+	} else {
+		return nullptr;
+	}
 }
 
 SpotLight* LightManager::MutableSpotLight(LightHandle handle) {
 	SpotLightEntry* entry = GetSpotLight(handle);
-	return entry ? &entry->light : nullptr;
+	if (entry) {
+		return &entry->light;
+	} else {
+		return nullptr;
+	}
 }
 
 DirectionalLightEntry* LightManager::GetDirectionalLight(LightHandle handle) {
@@ -928,7 +1034,13 @@ const LightMetaData* LightManager::GetMetaData(LightHandle handle) const {
 }
 
 void LightManager::ApplyEnabledToLight(LightHandle handle, bool enabled) {
-	const uint32_t useLight = enabled ? 1u : 0u;
+	const uint32_t useLight = [&]() {
+		if (enabled) {
+			return (1u);
+		} else {
+			return (0u);
+		}
+	}();
 
 	// MetaDataの有効状態をShaderへ渡す種別固有useLightへ同期
 	switch (handle.type) {

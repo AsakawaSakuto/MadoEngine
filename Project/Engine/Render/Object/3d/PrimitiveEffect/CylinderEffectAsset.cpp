@@ -88,7 +88,11 @@ namespace {
 	/// @return 読み込んだ値
 	std::string ReadString(const JsonValue& json, const char* key, const std::string& fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_string() ? value->get<std::string>() : fallback;
+		if (value && value->is_string()) {
+			return value->get<std::string>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからfloatを安全に読み込み
@@ -98,7 +102,11 @@ namespace {
 	/// @return 読み込んだ値
 	float ReadFloat(const JsonValue& json, const char* key, float fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_number() ? value->get<float>() : fallback;
+		if (value && value->is_number()) {
+			return value->get<float>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonから符号なし整数を安全に読み込み
@@ -108,7 +116,11 @@ namespace {
 	/// @return 読み込んだ値
 	uint32_t ReadUInt(const JsonValue& json, const char* key, uint32_t fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_number_unsigned() ? value->get<uint32_t>() : fallback;
+		if (value && value->is_number_unsigned()) {
+			return value->get<uint32_t>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief Jsonからboolを安全に読み込み
@@ -118,7 +130,11 @@ namespace {
 	/// @return 読み込んだ値
 	bool ReadBool(const JsonValue& json, const char* key, bool fallback) {
 		const JsonValue* value = FindValue(json, key);
-		return value && value->is_boolean() ? value->get<bool>() : fallback;
+		if (value && value->is_boolean()) {
+			return value->get<bool>();
+		} else {
+			return fallback;
+		}
 	}
 
 	/// @brief 文字列からイージング種類を取得
@@ -328,7 +344,11 @@ namespace {
 		config.isLoop = ReadBool(json, "loop", config.isLoop);
 
 		const auto readFloatValue = [](const JsonValue& value, float fallback) {
-			return value.is_number() ? value.get<float>() : fallback;
+			if (value.is_number()) {
+				return value.get<float>();
+			} else {
+				return fallback;
+			}
 		};
 		const auto readVector2Value = [](const JsonValue& value, const Vector2& fallback) {
 			return MadoEngine::Json::JsonSerializer::ToVector2(value, fallback);
@@ -450,38 +470,112 @@ namespace {
 	/// @brief Cylinder Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateCylinderEmitter(CylinderEmitterConfig& config) {
-		config.translateOffset.x = std::isfinite(config.translateOffset.x) ? config.translateOffset.x : 0.0f;
-		config.translateOffset.y = std::isfinite(config.translateOffset.y) ? config.translateOffset.y : 0.0f;
-		config.translateOffset.z = std::isfinite(config.translateOffset.z) ? config.translateOffset.z : 0.0f;
-		config.duration = std::clamp(std::isfinite(config.duration) ? config.duration : 1.0f, 0.001f, 3600.0f);
+		if (std::isfinite(config.translateOffset.x)) {
+			config.translateOffset.x = config.translateOffset.x;
+		} else {
+			config.translateOffset.x = 0.0f;
+		}
+		if (std::isfinite(config.translateOffset.y)) {
+			config.translateOffset.y = config.translateOffset.y;
+		} else {
+			config.translateOffset.y = 0.0f;
+		}
+		if (std::isfinite(config.translateOffset.z)) {
+			config.translateOffset.z = config.translateOffset.z;
+		} else {
+			config.translateOffset.z = 0.0f;
+		}
+		config.duration = std::clamp([&]() {
+			if (std::isfinite(config.duration)) {
+				return (config.duration);
+			} else {
+				return (1.0f);
+			}
+		}(), 0.001f, 3600.0f);
 		config.geometry.radialSegments = std::clamp(config.geometry.radialSegments, 3u, 256u);
 		config.geometry.heightSegments = std::clamp(config.geometry.heightSegments, 1u, 64u);
 
 		const auto normalizeRadii = [](Vector2 value) {
-			value.x = std::isfinite(value.x) ? (std::max)(0.0f, value.x) : 1.0f;
-			value.y = std::isfinite(value.y) ? (std::max)(0.0f, value.y) : 1.0f;
+			if (std::isfinite(value.x)) {
+				value.x = (std::max)(0.0f, value.x);
+			} else {
+				value.x = 1.0f;
+			}
+			if (std::isfinite(value.y)) {
+				value.y = (std::max)(0.0f, value.y);
+			} else {
+				value.y = 1.0f;
+			}
 			return value;
 		};
 		const auto normalizeHeight = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 1.0f, 0.001f, 10000.0f);
+			return std::clamp([&]() {
+				if (std::isfinite(value)) {
+					return (value);
+				} else {
+					return (1.0f);
+				}
+			}(), 0.001f, 10000.0f);
 		};
-		const auto normalizeAngle = [](float value) { return std::isfinite(value) ? value : 0.0f; };
+		const auto normalizeAngle = [](float value) { if (std::isfinite(value)) {
+			return value;
+		} else {
+			return 0.0f;
+		} };
 		const auto normalizeArc = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 360.0f, -360.0f, 360.0f);
+			return std::clamp([&]() {
+				if (std::isfinite(value)) {
+					return (value);
+				} else {
+					return (360.0f);
+				}
+			}(), -360.0f, 360.0f);
 		};
 		const auto normalizeUnit = [](float value) {
-			return std::clamp(std::isfinite(value) ? value : 0.0f, 0.0f, 1.0f);
+			return std::clamp([&]() {
+				if (std::isfinite(value)) {
+					return (value);
+				} else {
+					return (0.0f);
+				}
+			}(), 0.0f, 1.0f);
 		};
 		const auto normalizeVector2 = [](Vector2 value) {
-			value.x = std::isfinite(value.x) ? value.x : 0.0f;
-			value.y = std::isfinite(value.y) ? value.y : 0.0f;
+			if (std::isfinite(value.x)) {
+				value.x = value.x;
+			} else {
+				value.x = 0.0f;
+			}
+			if (std::isfinite(value.y)) {
+				value.y = value.y;
+			} else {
+				value.y = 0.0f;
+			}
 			return value;
 		};
 		const auto normalizeColor = [](Vector4 value) {
-			value.x = std::isfinite(value.x) ? (std::max)(0.0f, value.x) : 1.0f;
-			value.y = std::isfinite(value.y) ? (std::max)(0.0f, value.y) : 1.0f;
-			value.z = std::isfinite(value.z) ? (std::max)(0.0f, value.z) : 1.0f;
-			value.w = std::clamp(std::isfinite(value.w) ? value.w : 1.0f, 0.0f, 1.0f);
+			if (std::isfinite(value.x)) {
+				value.x = (std::max)(0.0f, value.x);
+			} else {
+				value.x = 1.0f;
+			}
+			if (std::isfinite(value.y)) {
+				value.y = (std::max)(0.0f, value.y);
+			} else {
+				value.y = 1.0f;
+			}
+			if (std::isfinite(value.z)) {
+				value.z = (std::max)(0.0f, value.z);
+			} else {
+				value.z = 1.0f;
+			}
+			value.w = std::clamp([&]() {
+				if (std::isfinite(value.w)) {
+					return (value.w);
+				} else {
+					return (1.0f);
+				}
+			}(), 0.0f, 1.0f);
 			return value;
 		};
 
@@ -539,7 +633,13 @@ namespace MadoEngine::Effect {
 	}
 
 	bool CylinderEffectAsset::SaveToFile(const std::filesystem::path& filePath, bool createBackup) const {
-		const std::filesystem::path outputPath = filePath.empty() ? filePath_ : filePath;
+		const std::filesystem::path outputPath = [&]() {
+			if (filePath.empty()) {
+				return (filePath_);
+			} else {
+				return (filePath);
+			}
+		}();
 		if (outputPath.empty()) {
 			Logger::Output("Cylinder Effect Assetの保存先が指定されていません。", Logger::Level::Error);
 			return false;
@@ -595,7 +695,13 @@ namespace MadoEngine::Effect {
 		std::vector<std::string> usedNames;
 		usedNames.reserve(emitters_.size());
 		for (CylinderEmitterConfig& emitter : emitters_) {
-			const std::string baseName = emitter.name.empty() ? "Emitter" : emitter.name;
+			const std::string baseName = [&]() -> std::string {
+				if (emitter.name.empty()) {
+					return ("Emitter");
+				} else {
+					return (emitter.name);
+				}
+			}();
 			emitter.name = baseName;
 			for (uint32_t suffix = 1; std::find(usedNames.begin(), usedNames.end(), emitter.name) != usedNames.end(); ++suffix) {
 				emitter.name = baseName + std::to_string(suffix);

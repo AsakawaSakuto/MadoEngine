@@ -92,7 +92,13 @@ namespace {
 			result.rotate.z = std::atan2(rotation[0][1], rotation[0][0]);
 		} else {
 			result.rotate.x = std::atan2(
-				sinY >= 0.0f ? rotation[1][0] : -rotation[1][0],
+				[&]() {
+					if (sinY >= 0.0f) {
+						return (rotation[1][0]);
+					} else {
+						return (-rotation[1][0]);
+					}
+				}(),
 				rotation[1][1]
 			);
 			result.rotate.z = 0.0f;
@@ -137,9 +143,11 @@ namespace MadoEngine::EffectSequence {
 		rootTransform_ = NormalizeRootTransform(desc.rootTransform);
 		colorMultiplier_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		sceneType_ = desc.sceneType;
-		defaultRenderLayer_ = MadoEngine::Render::IsValidRenderLayer(desc.renderLayer)
-			? desc.renderLayer
-			: MadoEngine::Render::RenderLayer::Effect;
+		if (MadoEngine::Render::IsValidRenderLayer(desc.renderLayer)) {
+			defaultRenderLayer_ = desc.renderLayer;
+		} else {
+			defaultRenderLayer_ = MadoEngine::Render::RenderLayer::Effect;
+		}
 		context_ = desc.context;
 		finishReason_ = EffectSequenceFinishReason::Natural;
 		playbackTime_ = 0.0f;
@@ -184,7 +192,13 @@ namespace MadoEngine::EffectSequence {
 		}
 
 		const float safeDeltaTime = std::clamp(
-			std::isfinite(deltaTime) ? deltaTime : 0.0f,
+			[&]() {
+				if (std::isfinite(deltaTime)) {
+					return (deltaTime);
+				} else {
+					return (0.0f);
+				}
+			}(),
 			0.0f,
 			kMaximumEffectSequenceDuration
 		);
@@ -334,7 +348,11 @@ namespace MadoEngine::EffectSequence {
 
 	const std::string& EffectSequenceInstance::GetAssetName() const {
 		static const std::string emptyName;
-		return asset_ ? asset_->GetName() : emptyName;
+		if (asset_) {
+			return asset_->GetName();
+		} else {
+			return emptyName;
+		}
 	}
 
 	void EffectSequenceInstance::FireNodes(
@@ -348,9 +366,13 @@ namespace MadoEngine::EffectSequence {
 			if (!node.isEnabled || firedNodeIds_.contains(node.nodeId)) {
 				continue;
 			}
-			const bool isAfterStart = includePrevious
-				? node.startTime >= previousTime
-				: node.startTime > previousTime;
+			const bool isAfterStart = [&]() {
+				if (includePrevious) {
+					return (node.startTime >= previousTime);
+				} else {
+					return (node.startTime > previousTime);
+				}
+			}();
 			if (isAfterStart && node.startTime <= currentTime + kSequenceTimeEpsilon) {
 				FireNode(node);
 			}
