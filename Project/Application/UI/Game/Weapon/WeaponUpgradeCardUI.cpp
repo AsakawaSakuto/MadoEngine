@@ -246,7 +246,7 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 		if (isOwnedWeaponUpgrade_) {
 			detailText->SetText(FormatUpgradeDetail(choice));
 		} else {
-			detailText->SetText("新しい武器を装備");
+			detailText->SetText(choice.weaponDescription);
 		}
 	}
 	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {

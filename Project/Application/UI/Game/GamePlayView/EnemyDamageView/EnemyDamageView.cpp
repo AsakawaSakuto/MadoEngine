@@ -3,6 +3,7 @@
 #include "GameObject/Combat/DamageEvent.h"
 #include "GameObject/Enemy/EnemyStatusEffectVisualSettings.h"
 #include "Math/Function/MatrixFunction.h"
+#include "Render/Object/2d/Sprite/MySprite.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Camera/Camera.h"
 #ifdef USE_IMGUI
@@ -25,6 +26,7 @@ namespace {
 		0.75f,
 	};
 	constexpr const char* kTextObjectNamePrefix = "EnemyDamageText_";
+	constexpr const char* kJokerObjectNamePrefix = "EnemyDamageJoker_";
 
 	/// @brief ダメージ量を表示用文字列へ変換
 	/// @param damage 表示するダメージ量
@@ -39,26 +41,34 @@ namespace UI::Game {
 	void EnemyDamageView::Initialize() {
 		Finalize();
 
-		// 実行中の生成破棄を避ける固定数Text Poolを事前構築
+		// 実行中の生成破棄を避ける固定数のTextとSpriteを事前構築
 		for (std::size_t index = 0; index < slots_.size(); ++index) {
-			DamageTextSlot& slot = slots_[index];
+			DamageViewSlot& slot = slots_[index];
 			slot.text = MyText::Create(
 				kTextObjectNamePrefix + std::to_string(index),
 				"0",
 				SceneType::Game,
 				MadoEngine::EditorManagementMode::RuntimeOnly,
 				MadoEngine::Render::RenderLayer::UI);
-			MadoEngine::Text* text = MyText::TryGet(slot.text);
-			if (!text) {
-				continue;
+			if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
+				text->SetFontAsset("Assets/Font/dot.ttf", "dot");
+				text->SetFontSize(fontSize_);
+				text->SetAnchorPoint({ 0.5f, 0.5f });
+				text->SetWordWrap(false);
+				text->SetVisible(false);
+				text->SetColor(damageTextColor_);
 			}
 
-			text->SetFontAsset("Assets/Font/dot.ttf", "dot");
-			text->SetFontSize(fontSize_);
-			text->SetAnchorPoint({ 0.5f, 0.5f });
-			text->SetWordWrap(false);
-			text->SetVisible(false);
-			text->SetColor(damageTextColor_);
+			slot.jokerSprite = MySprite::Create(
+				kJokerObjectNamePrefix + std::to_string(index),
+				"Joker",
+				SceneType::Game,
+				MadoEngine::EditorManagementMode::RuntimeOnly,
+				MadoEngine::Render::RenderLayer::UI);
+			if (Sprite* jokerSprite = MySprite::TryGet(slot.jokerSprite)) {
+				jokerSprite->SetAnchorPoint({ 0.5f, 0.5f });
+				jokerSprite->SetVisible(false);
+			}
 		}
 
 		nextSlotIndex_ = 0;
@@ -66,16 +76,19 @@ namespace UI::Game {
 	}
 
 	void EnemyDamageView::Spawn(const Combat::DamageEvent& event) {
-		if (!std::isfinite(event.displayDamage) || std::floor(event.displayDamage) <= 0.0f) {
+		const bool showsJoker = event.displayType == Combat::DamageDisplayType::InstantKill;
+		if (!showsJoker &&
+			(!std::isfinite(event.displayDamage) || std::floor(event.displayDamage) <= 0.0f)) {
 			return;
 		}
 
-		DamageTextSlot* slot = AcquireSlot();
+		DamageViewSlot* slot = AcquireSlot();
 		if (!slot) {
 			return;
 		}
 		MadoEngine::Text* text = MyText::TryGet(slot->text);
-		if (!text) {
+		Sprite* jokerSprite = MySprite::TryGet(slot->jokerSprite);
+		if ((!showsJoker && !text) || (showsJoker && !jokerSprite)) {
 			return;
 		}
 
@@ -95,16 +108,26 @@ namespace UI::Game {
 			kOffsetRates[verticalOffsetIndex]);
 		slot->elapsedTime = 0.0f;
 		slot->type = ResolveDamageTextType(event);
+		slot->showsJoker = showsJoker;
 		slot->isActive = true;
 		++spawnSequence_;
 
-		text->SetText(FormatDamage(event.displayDamage));
-		text->SetScale({
-			1.0f + initialScaleAddition_,
-			1.0f + initialScaleAddition_,
-		});
-		text->SetColor(GetDamageTextColor(slot->type));
-		text->SetVisible(isVisible_);
+		// 同じSlotを再利用した際に前回と異なる表示オブジェクトが残らないよう可視状態を切り替え
+		if (text) {
+			text->SetVisible(false);
+			if (!showsJoker) {
+				text->SetText(FormatDamage(event.displayDamage));
+				text->SetScale({
+					1.0f + initialScaleAddition_,
+					1.0f + initialScaleAddition_,
+				});
+				text->SetColor(GetDamageTextColor(slot->type));
+				text->SetVisible(isVisible_);
+			}
+		}
+		if (jokerSprite) {
+			jokerSprite->SetVisible(showsJoker && isVisible_);
+		}
 	}
 
 	void EnemyDamageView::Update(float deltaTime, const Camera& camera) {
@@ -113,9 +136,10 @@ namespace UI::Game {
 		}
 
 		// Activeな固定Slotだけを更新して表示中の動的確保を回避
-		for (DamageTextSlot& slot : slots_) {
+		for (DamageViewSlot& slot : slots_) {
 			MadoEngine::Text* text = MyText::TryGet(slot.text);
-			if (!slot.isActive || !text) {
+			Sprite* jokerSprite = MySprite::TryGet(slot.jokerSprite);
+			if (!slot.isActive || (!slot.showsJoker && !text) || (slot.showsJoker && !jokerSprite)) {
 				continue;
 			}
 
@@ -126,7 +150,12 @@ namespace UI::Game {
 			// 縮小演出の完了後にSlotを解放して次の表示へ再利用
 			if (slot.elapsedTime >= displayLifeTime_ + shrinkDuration_) {
 				slot.isActive = false;
-				text->SetVisible(false);
+				if (text) {
+					text->SetVisible(false);
+				}
+				if (jokerSprite) {
+					jokerSprite->SetVisible(false);
+				}
 				continue;
 			}
 
@@ -136,7 +165,12 @@ namespace UI::Game {
 
 			// Camera外の座標は寿命を進めたまま描画だけを抑制
 			if (!WorldToScreen(displayWorldPosition, camera, screenPosition)) {
-				text->SetVisible(false);
+				if (text) {
+					text->SetVisible(false);
+				}
+				if (jokerSprite) {
+					jokerSprite->SetVisible(false);
+				}
 				continue;
 			}
 
@@ -144,8 +178,6 @@ namespace UI::Game {
 				std::clamp(slot.elapsedTime / displayLifeTime_, 0.0f, 1.0f);
 
 			// 表示時間中に初期拡大を収束させ、寿命経過時のScaleからゼロへ縮小
-			const Vector4& textColor = GetDamageTextColor(slot.type);
-			const float alpha = 1.0f;
 			const float scaleSettleProgress =
 				std::clamp(displayProgress / scaleSettleProgress_, 0.0f, 1.0f);
 			const float displayScale = 1.0f +
@@ -159,15 +191,29 @@ namespace UI::Game {
 			screenPosition.x += slot.horizontalOffset;
 			screenPosition.y -= riseDistance_ * displayProgress;
 
+			if (slot.showsJoker) {
+
+				// 画像解像度と縦横比を維持しつつDamage表示と同じScale演出を適用
+				const Vector2 textureSize = jokerSprite->GetTextureSize();
+				const float textureMaxSize = std::max(textureSize.x, textureSize.y);
+				const float baseScale = textureMaxSize > 0.0f ? jokerPixelSize_ / textureMaxSize : 1.0f;
+				jokerSprite->SetPosition(screenPosition);
+				jokerSprite->SetScale({ baseScale * scale, baseScale * scale });
+				jokerSprite->SetVisible(true);
+				if (text) {
+					text->SetVisible(false);
+				}
+				continue;
+			}
+
+			const Vector4& textColor = GetDamageTextColor(slot.type);
 			text->SetPosition(screenPosition);
 			text->SetScale({ scale, scale });
-			text->SetColor({
-				textColor.x,
-				textColor.y,
-				textColor.z,
-				alpha,
-			});
+			text->SetColor({ textColor.x, textColor.y, textColor.z, 1.0f });
 			text->SetVisible(true);
+			if (jokerSprite) {
+				jokerSprite->SetVisible(false);
+			}
 		}
 	}
 
@@ -182,16 +228,24 @@ namespace UI::Game {
 		}
 
 		// 非表示中もSlot寿命を保持し、再表示時に残存表示を継続
-		for (DamageTextSlot& slot : slots_) {
+		for (DamageViewSlot& slot : slots_) {
 			if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
 				text->SetVisible(false);
+			}
+			if (Sprite* jokerSprite = MySprite::TryGet(slot.jokerSprite)) {
+				jokerSprite->SetVisible(false);
 			}
 		}
 	}
 
 	void EnemyDamageView::Finalize() {
-		for (std::size_t index = 0; index < slots_.size(); ++index) {
-			DamageTextSlot& slot = slots_[index];
+		for (DamageViewSlot& slot : slots_) {
+			if (slot.text.IsValid()) {
+				MyText::Destroy(slot.text);
+			}
+			if (slot.jokerSprite.IsValid()) {
+				MySprite::Destroy(slot.jokerSprite);
+			}
 			slot = {};
 		}
 
@@ -228,6 +282,7 @@ namespace UI::Game {
 			"最大: %.0f px");
 		const bool fontSizeChanged =
 			ImGui::DragFloat("フォントサイズ", &fontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
+		ImGui::DragFloat("Joker表示サイズ", &jokerPixelSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::ColorEdit4("通常ダメージ文字色", &damageTextColor_.x);
 		ImGui::ColorEdit4("クリティカルダメージ文字色", &criticalDamageTextColor_.x);
 		Enemy::StatusEffect::VisualSettings& visualSettings =
@@ -256,9 +311,10 @@ namespace UI::Game {
 			std::swap(horizontalOffsetMin_, horizontalOffsetMax_);
 		}
 		fontSize_ = std::clamp(fontSize_, 1.0f, 200.0f);
+		jokerPixelSize_ = std::clamp(jokerPixelSize_, 1.0f, 200.0f);
 
 		if (fontSizeChanged) {
-			for (DamageTextSlot& slot : slots_) {
+			for (DamageViewSlot& slot : slots_) {
 				if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
 					text->SetFontSize(fontSize_);
 				}
@@ -269,13 +325,13 @@ namespace UI::Game {
 #endif
 	}
 
-	EnemyDamageView::DamageTextSlot* EnemyDamageView::AcquireSlot() {
+	EnemyDamageView::DamageViewSlot* EnemyDamageView::AcquireSlot() {
 
 		// 次回位置から未使用Slotを循環探索して表示順の偏りを防止
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
 			const std::size_t index = (nextSlotIndex_ + offset) % slots_.size();
-			DamageTextSlot& slot = slots_[index];
-			if (!MyText::TryGet(slot.text) || slot.isActive) {
+			DamageViewSlot& slot = slots_[index];
+			if (!MyText::TryGet(slot.text) || !MySprite::TryGet(slot.jokerSprite) || slot.isActive) {
 				continue;
 			}
 
@@ -286,8 +342,8 @@ namespace UI::Game {
 		// 全Slot使用中は古い順に上書きしてPool容量を一定に維持
 		for (std::size_t offset = 0; offset < slots_.size(); ++offset) {
 			const std::size_t index = (nextSlotIndex_ + offset) % slots_.size();
-			DamageTextSlot& slot = slots_[index];
-			if (!MyText::TryGet(slot.text)) {
+			DamageViewSlot& slot = slots_[index];
+			if (!MyText::TryGet(slot.text) || !MySprite::TryGet(slot.jokerSprite)) {
 				continue;
 			}
 

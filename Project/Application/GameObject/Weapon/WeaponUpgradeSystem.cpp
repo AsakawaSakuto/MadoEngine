@@ -194,6 +194,7 @@ namespace Weapon {
 			choice.weaponType = weaponType;
 			choice.generation = generation;
 			choice.weaponDisplayName = Projectile::ProjectileTypeToDisplayName(weaponType);
+			choice.weaponDescription = Projectile::ProjectileTypeToDescription(weaponType);
 
 			const BaseWeapon* weapon = inventory.GetWeapon(weaponType);
 			if (!weapon) {

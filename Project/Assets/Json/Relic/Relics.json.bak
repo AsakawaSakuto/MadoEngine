@@ -1,7 +1,7 @@
 {
   "relics": [
     {
-      "description": "与ダメージ 10% Up",
+      "description": "ダメージ +10% ",
       "displayName": "ただのハンドグリップ",
       "effects": [
         {
@@ -17,7 +17,7 @@
       "textureName": "HandGrip"
     },
     {
-      "description": "最大 HP 15 増加",
+      "description": "最大HP +15",
       "displayName": "生命のミルク",
       "effects": [
         {
@@ -33,7 +33,7 @@
       "textureName": "Milk"
     },
     {
-      "description": "プレイヤー移動速度 5% Up",
+      "description": "移動速度 +5%",
       "displayName": "俊敏なローブ",
       "effects": [
         {
@@ -49,7 +49,7 @@
       "textureName": "SpeedRobe"
     },
     {
-      "description": "効果説明",
+      "description": "最大射撃数 +1",
       "displayName": "増幅器",
       "effects": [
         {
@@ -65,7 +65,7 @@
       "textureName": "Amplifier"
     },
     {
-      "description": "獲得Money 10% Up",
+      "description": "獲得コイン +10%",
       "displayName": "金の王冠",
       "effects": [
         {
@@ -157,7 +157,7 @@
       ],
       "id": "jump_count_boost",
       "maxStack": 10,
-      "rarity": "Uncommon",
+      "rarity": "Rare",
       "textureName": "Uchiwa"
     }
   ]

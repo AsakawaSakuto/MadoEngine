@@ -10,6 +10,12 @@
 
 namespace Projectile {
 
+	/// @brief Enemy命中時のダメージ計算方式
+	enum class DamageMode {
+		Standard,
+		RemainingHealth,
+	};
+
 	class IProjectile {
 	public:
 		/// @brief Projectileのデストラクタ
@@ -51,6 +57,10 @@ namespace Projectile {
 		/// @brief Projectileのダメージ量を取得
 		/// @return Projectileのダメージ量
 		float GetDamage() const { return damage_; }
+
+		/// @brief Projectileのダメージ計算方式を取得
+		/// @return Projectileのダメージ計算方式
+		DamageMode GetDamageMode() const { return damageMode_; }
 
 		/// @brief Projectileのクリティカル率を取得
 		/// @return Projectileのクリティカル率
@@ -144,6 +154,7 @@ namespace Projectile {
 			targetPosition = context.targetPosition;
 
 			damage_ = context.damage;
+			damageMode_ = DamageMode::Standard;
 			criticalChance_ = context.criticalChance;
 			criticalDamage_ = context.criticalDamage;
 			knockbackPower_ = context.knockbackPower;
@@ -237,6 +248,7 @@ namespace Projectile {
 		std::string colliderName_;       // Projectileのコライダー名
 
 		float damage_ = 10.0f;              // ダメージ量
+		DamageMode damageMode_ = DamageMode::Standard; // ダメージ計算方式
 		float criticalChance_ = 0.0f;       // クリティカル率
 		float criticalDamage_ = 1.0f;       // クリティカルダメージ倍率
 		float knockbackPower_ = 0.0f;        // ノックバック力

@@ -237,8 +237,11 @@ namespace Player {
 		lastMoveInput_ = {};
 		landingMarker_.SetVisible(false);
 
-		// 通常移動Animationによる上書きを止めて非Loopの死亡Animationを先頭から再生
+		// 通常移動Animationの停止状態を引き継がず非Loopの死亡Animationを先頭から再生
 		Model* model = MyModel::TryGet(model_);
+		if (model) {
+			model->SetAnimationPlaybackSpeed(1.0f);
+		}
 		isDeathAnimationPlaying_ = model && model->PlayAnimation("Die", 0.1f, true);
 		if (!isDeathAnimationPlaying_) {
 			Logger::Output("[Application] Player用AnimationClipが見つかりません: Die", Logger::Level::Warning);

@@ -112,16 +112,33 @@ namespace Projectile {
 	/// @return 武器種類の日本語表示名
 	inline const char* ProjectileTypeToDisplayName(Type type) {
 		switch (type) {
-		case Type::None:     return "None";
-		case Type::Axe:      return "Axe";
-		case Type::FireBall: return "FireBall";
-		case Type::Pistol:   return "Pistol";
-		case Type::Bow:      return "Bow";
-		case Type::Orb:      return "Orb";
-		case Type::Trump:    return "Trump";
-		case Type::Eye:      return "Eye";
-		case Type::ToxicBoots: return "ToxicBoots";
-		default:             return "Unknown";
+		case Type::None:       return "なし";
+		case Type::Axe:        return "斧";
+		case Type::FireBall:   return "火球";
+		case Type::Pistol:     return "拳銃";
+		case Type::Bow:        return "弓";
+		case Type::Orb:        return "スピオーブ";
+		case Type::Trump:      return "デストランプ";
+		case Type::Eye:        return "魔眼";
+		case Type::ToxicBoots: return "毒靴";
+		default:               return "不明";
+		}
+	}
+
+	/// @brief 武器種類の固有説明を取得
+	/// @param type 説明を取得する武器種類
+	/// @return 武器種類に対応する固有説明
+	inline const char* ProjectileTypeToDescription(Type type) {
+		switch (type) {
+		case Type::Axe:        return "前方へ投擲して\nその場に滞留する";
+		case Type::FireBall:   return "着弾時に範囲攻撃\n稀に火傷を付与";
+		case Type::Pistol:     return "近くの敵に向かって\n弾丸を連射する";
+		case Type::Bow:        return "近くの敵に向かって\n貫通する矢を放つ";
+		case Type::Orb:        return "弧を描くオーブを放つ\n稀に凍結を付与";
+		case Type::Trump:      return "1～13のダメージ\n稀にJokerが即死させる";
+		case Type::Eye:        return "足元にエリアを展開\n触れた敵にダメージ";
+		case Type::ToxicBoots: return "足元に魔法陣を設置\n触れた敵に毒を付与";
+		default:               return "武器の詳細情報なし";
 		}
 	}
 }

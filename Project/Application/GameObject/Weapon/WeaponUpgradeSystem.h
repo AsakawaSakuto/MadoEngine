@@ -31,6 +31,7 @@ namespace Weapon {
 		float calculatedAmount = 0.0f;
 		std::uint64_t generation = 0;
 		std::string weaponDisplayName;
+		std::string weaponDescription;
 		std::string choiceTypeDisplayName;
 		std::string statDisplayName;
 		std::string rarityDisplayName;

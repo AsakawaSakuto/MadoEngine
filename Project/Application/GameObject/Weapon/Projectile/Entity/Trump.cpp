@@ -60,8 +60,13 @@ namespace Projectile {
 
 	void Trump::OnEnemyHit() {
 
-		// 貫通数が後から設定された場合も、前回の加算値を累積せず命中ごとに再抽選
+		// 貫通数が後から設定された場合も、前回の命中結果を引き継がず命中ごとに再抽選
 		damage_ = baseDamage_ + static_cast<float>(
 			MyRand::GetInt(kMinRandomDamageBonus, kMaxRandomDamageBonus));
+		if (MyRand::GetInt(kInstantKillRollMin, kInstantKillRollMax) == kInstantKillRollSuccess) {
+			damageMode_ = DamageMode::RemainingHealth;
+		} else {
+			damageMode_ = DamageMode::Standard;
+		}
 	}
 }

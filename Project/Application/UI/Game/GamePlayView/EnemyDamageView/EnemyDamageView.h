@@ -18,26 +18,26 @@ namespace MadoEngine {
 }
 
 namespace UI::Game {
-	/// @brief Enemyへのダメージ数値をワールド座標へ追従表示するビュー
+	/// @brief Enemyへのダメージ内容をワールド座標へ追従表示するビュー
 	class EnemyDamageView {
 	public:
-		/// @brief ダメージ表示用Textプールを初期化
+		/// @brief ダメージ表示用オブジェクトプールを初期化
 		void Initialize();
 
-		/// @brief ダメージ数値の表示を開始
+		/// @brief ダメージ内容の表示を開始
 		/// @param event 表示するEnemyダメージイベント
 		void Spawn(const Combat::DamageEvent& event);
 
-		/// @brief 表示中のダメージ数値を更新
+		/// @brief 表示中のダメージ内容を更新
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param camera ワールド座標の投影に使用するカメラ
 		void Update(float deltaTime, const Camera& camera);
 
-		/// @brief ダメージ数値の表示可否を設定
+		/// @brief ダメージ内容の表示可否を設定
 		/// @param isVisible 表示する場合はtrue
 		void SetVisible(bool isVisible);
 
-		/// @brief ダメージ表示用Textプールを終了
+		/// @brief ダメージ表示用オブジェクトプールを終了
 		void Finalize();
 
 		/// @brief ダメージ表示設定をImGuiへ描画
@@ -52,21 +52,23 @@ namespace UI::Game {
 			Poison,
 		};
 
-		struct DamageTextSlot {
+		struct DamageViewSlot {
 			MadoEngine::TextHandle text{};
+			MadoEngine::SpriteHandle jokerSprite{};
 			Vector3 worldPosition = { 0.0f, 0.0f, 0.0f };
 			float horizontalOffset = 0.0f;
 			float verticalOffset = 0.0f;
 			float elapsedTime = 0.0f;
 			DamageTextType type = DamageTextType::Normal;
+			bool showsJoker = false;
 			bool isActive = false;
 		};
 
 		static constexpr std::size_t kPoolSize = 96;
 
-		/// @brief 表示に使用できるTextスロットを取得
-		/// @return 使用可能なTextスロット、生成済みTextがない場合はnullptr
-		DamageTextSlot* AcquireSlot();
+		/// @brief 表示に使用できるスロットを取得
+		/// @return 使用可能なスロット、生成済み表示オブジェクトがない場合はnullptr
+		DamageViewSlot* AcquireSlot();
 
 		/// @brief Enemyダメージイベントを文字表示種別へ変換
 		/// @param event 変換するEnemyダメージイベント
@@ -88,7 +90,7 @@ namespace UI::Game {
 			const Camera& camera,
 			Vector2& outScreenPosition) const;
 
-		std::array<DamageTextSlot, kPoolSize> slots_;
+		std::array<DamageViewSlot, kPoolSize> slots_;
 		std::size_t nextSlotIndex_ = 0;
 		std::uint64_t spawnSequence_ = 0;
 		bool isVisible_ = true;
@@ -102,6 +104,7 @@ namespace UI::Game {
 		float horizontalOffsetMin_ = -24.0f;   // ダメージ表示の最小左右オフセット
 		float horizontalOffsetMax_ = 24.0f;    // ダメージ表示の最大左右オフセット
 		float fontSize_ = 32.0f;               // ダメージ表示のフォントサイズ
+		float jokerPixelSize_ = 48.0f;         // Joker表示の最大辺サイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
 		Vector4 criticalDamageTextColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
 	};

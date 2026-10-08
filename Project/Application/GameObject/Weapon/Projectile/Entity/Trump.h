@@ -18,7 +18,7 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
-		/// @brief Enemy命中時に1から13のランダムダメージを加算
+		/// @brief Enemy命中時にランダムダメージと即死抽選を適用
 		void OnEnemyHit() override;
 
 	private:
@@ -27,6 +27,9 @@ namespace Projectile {
 		static constexpr float kMinLifeTime = 0.1f;
 		static constexpr int kMinRandomDamageBonus = 1;
 		static constexpr int kMaxRandomDamageBonus = 13;
+		static constexpr int kInstantKillRollMin = 1;
+		static constexpr int kInstantKillRollMax = 100;
+		static constexpr int kInstantKillRollSuccess = 1;
 
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;

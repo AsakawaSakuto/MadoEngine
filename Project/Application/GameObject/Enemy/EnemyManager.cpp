@@ -1,4 +1,5 @@
 #include "EnemyManager.h"
+#include "Audio/MyAudio.h"
 #include "EnemyFactory.h"
 #include "GameObject/Player/Player.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
@@ -295,16 +296,30 @@ namespace Enemy {
 			}
 
 			Base* enemy = enemyIterator->second;
+			const bool dealsRemainingHealthDamage =
+				hitInfo.damageMode == Projectile::DamageMode::RemainingHealth &&
+				enemy->GetType() != Data::Type::Boss;
+
+			// 即死抽選成功時は適用直前の残りHPを使い、Critical倍率による過剰Damageを抑制
+			const float damage = dealsRemainingHealthDamage ? enemy->GetCurrentHealth() : hitInfo.damage;
+			const float criticalChance = dealsRemainingHealthDamage ? 0.0f : hitInfo.criticalChance;
+			const float criticalDamage = dealsRemainingHealthDamage ? 1.0f : hitInfo.criticalDamage;
 			const DamageResult damageResult =
 				enemy->TakeProjectileDamage(
 					hitInfo.projectileId,
-					hitInfo.damage,
-					hitInfo.criticalChance,
-					hitInfo.criticalDamage,
+					damage,
+					criticalChance,
+					criticalDamage,
 					hitInfo.knockbackDirection,
 					hitInfo.knockbackPower);
 			if (!damageResult.wasApplied) {
 				continue;
+			}
+			const bool wasInstantKilled = dealsRemainingHealthDamage && damageResult.wasKilled;
+
+			// Trumpの即死成立時だけ専用SEを重ねて通常撃破と区別
+			if (wasInstantKilled && MyAudio::IsLoaded("Joker")) {
+				MyAudio::Play("Joker");
 			}
 
 			damageEvents_.push_back({
@@ -315,6 +330,8 @@ namespace Enemy {
 				Combat::DamageSourceType::Weapon,
 				damageResult.isCritical,
 				damageResult.wasKilled,
+				wasInstantKilled ?
+					Combat::DamageDisplayType::InstantKill : Combat::DamageDisplayType::Number,
 			});
 
 			// 撃破済みEnemyへの不要な状態登録を避け、実ダメージ成立後だけ付与抽選
