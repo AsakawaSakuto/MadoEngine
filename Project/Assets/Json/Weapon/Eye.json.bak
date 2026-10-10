@@ -1,27 +1,5 @@
 {
     "name": "Eye",
-    "statusEffects": {
-        "frozen": {
-            "applyChance": {
-                "fixedAddValue": 5.0,
-                "isSelected": true,
-                "rarityAddValue": 1.0,
-                "value": 50.0
-            },
-            "duration": {
-                "fixedAddValue": 1.0,
-                "isSelected": true,
-                "rarityAddValue": 0.25,
-                "value": 5.0
-            },
-            "slowRate": {
-                "fixedAddValue": 5.0,
-                "isSelected": true,
-                "rarityAddValue": 1.0,
-                "value": 50.0
-            }
-        }
-    },
     "upgradeStatus": {
         "bounceCount": {
             "fixedAddValue": 0.0,
@@ -30,19 +8,19 @@
             "value": 0.0
         },
         "criticalChance": {
-            "fixedAddValue": 0.0,
-            "isSelected": false,
-            "rarityAddValue": 0.0,
-            "value": 50.0
+            "fixedAddValue": 5.0,
+            "isSelected": true,
+            "rarityAddValue": 2.5,
+            "value": 0.0
         },
         "criticalDamage": {
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 2.0
+            "value": 1.5
         },
         "damage": {
-            "fixedAddValue": 2.0,
+            "fixedAddValue": 1.0,
             "isSelected": true,
             "rarityAddValue": 0.5,
             "value": 5.0
@@ -84,7 +62,7 @@
             "value": 1.0
         },
         "size": {
-            "fixedAddValue": 0.25,
+            "fixedAddValue": 0.10000000149011612,
             "isSelected": true,
             "rarityAddValue": 0.05000000074505806,
             "value": 1.0

@@ -2,9 +2,24 @@
     "name": "ToxicBoots",
     "statusEffects": {
         "poison": {
-            "applyChance": 30.0,
-            "damagePerTick": 2.0,
-            "duration": 8.0
+            "applyChance": {
+                "fixedAddValue": 5.0,
+                "isSelected": true,
+                "rarityAddValue": 2.0,
+                "value": 30.0
+            },
+            "damagePerTick": {
+                "fixedAddValue": 1.0,
+                "isSelected": true,
+                "rarityAddValue": 0.5,
+                "value": 2.0
+            },
+            "duration": {
+                "fixedAddValue": 1.0,
+                "isSelected": true,
+                "rarityAddValue": 0.5,
+                "value": 8.0
+            }
         }
     },
     "upgradeStatus": {
@@ -28,9 +43,9 @@
         },
         "damage": {
             "fixedAddValue": 2.0,
-            "isSelected": true,
+            "isSelected": false,
             "rarityAddValue": 0.5,
-            "value": 5.0
+            "value": 1.0
         },
         "knockbackPower": {
             "fixedAddValue": 0.0,
@@ -39,10 +54,10 @@
             "value": 0.0
         },
         "lifeTime": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 0.5,
             "isSelected": true,
             "rarityAddValue": 0.25,
-            "value": 5.0
+            "value": 1.0
         },
         "penetrationCount": {
             "fixedAddValue": 0.0,
@@ -51,9 +66,9 @@
             "value": 0.0
         },
         "shotCooldown": {
-            "fixedAddValue": 0.1,
+            "fixedAddValue": 2.0,
             "isSelected": true,
-            "rarityAddValue": 0.05,
+            "rarityAddValue": 1.0,
             "value": 2.0
         },
         "shotIntervalTime": {
@@ -64,14 +79,14 @@
         },
         "shotMaxCount": {
             "fixedAddValue": 0.0,
-            "isSelected": false,
+            "isSelected": true,
             "rarityAddValue": 0.0,
             "value": 1.0
         },
         "size": {
-            "fixedAddValue": 0.25,
+            "fixedAddValue": 0.10000000149011612,
             "isSelected": true,
-            "rarityAddValue": 0.05,
+            "rarityAddValue": 0.05000000074505806,
             "value": 1.0
         },
         "speed": {

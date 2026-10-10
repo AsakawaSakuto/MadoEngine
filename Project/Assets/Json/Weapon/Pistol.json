@@ -4,25 +4,25 @@
         "bounceCount": {
             "fixedAddValue": 1.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
+            "rarityAddValue": 0.5,
             "value": 0.0
         },
         "criticalChance": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 5.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "rarityAddValue": 5.0,
+            "value": 10.0
         },
         "criticalDamage": {
-            "fixedAddValue": 1.0,
-            "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 2.0
         },
         "damage": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 2.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
+            "rarityAddValue": 1.0,
             "value": 5.0
         },
         "knockbackPower": {
@@ -44,10 +44,10 @@
             "value": 0.0
         },
         "shotCooldown": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 2.5,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "rarityAddValue": 2.5,
+            "value": 1.5
         },
         "shotIntervalTime": {
             "fixedAddValue": 0.0,
@@ -58,7 +58,7 @@
         "shotMaxCount": {
             "fixedAddValue": 1.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
+            "rarityAddValue": 0.5,
             "value": 5.0
         },
         "size": {
