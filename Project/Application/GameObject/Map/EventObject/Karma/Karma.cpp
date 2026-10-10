@@ -73,5 +73,5 @@ bool Karma::Interact(Player::Base& player) {
 }
 
 std::string_view Karma::GetInteractionText() const {
-	return "カルマを獲得";
+	return "難易度を上げる";
 }

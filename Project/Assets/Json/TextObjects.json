@@ -234,7 +234,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 20",
+            "text": "Enemy : 30",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -274,7 +274,7 @@
                 0.0,
                 0.0
             ],
-            "text": "03:49",
+            "text": "04:12",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 89 / 100",
+            "text": "HP : 89 / 130",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -354,47 +354,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.9",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 40.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "KillCountText",
-            "position": [
-                840.0,
-                50.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "182",
+            "text": "FPS : 60.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -442,7 +402,7 @@
         },
         {
             "anchorPoint": [
-                1.0,
+                0.0,
                 0.0
             ],
             "characterSpacing": 0.0,
@@ -454,14 +414,14 @@
             ],
             "fontFamily": "游ゴシック",
             "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
+            "fontSize": 40.0,
             "horizontalAlign": "Left",
             "layer": "Default",
             "lineSpacing": 1.0,
-            "name": "SeedValueText",
+            "name": "KillCountText",
             "position": [
-                1265.0,
-                80.0
+                840.0,
+                50.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -474,7 +434,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 1567498515",
+            "text": "36",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -515,6 +475,46 @@
                 0.0
             ],
             "text": "5分間敵を倒し続けよう",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                1.0,
+                0.0
+            ],
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "SeedValueText",
+            "position": [
+                1265.0,
+                80.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Seed : 1846964123",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "182",
+            "text": "62",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -634,7 +634,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10Gで開ける",
+            "text": "壺を壊す",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,

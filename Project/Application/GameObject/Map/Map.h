@@ -211,6 +211,7 @@ private:
 
 	MadoEngine::ModelHandle interactionMarkerModel_{};
 	MadoEngine::TextHandle interactionText_{};
+	MadoEngine::SpriteHandle interactionIcon_{};
 	Vector3 interactionMarkerStartScale_ = { 0.35f, 0.35f, 0.35f };
 	Vector3 interactionMarkerEndScale_ = { 0.5f, 0.5f, 0.5f };
 	GameTimer interactionMarkerScaleTimer_;

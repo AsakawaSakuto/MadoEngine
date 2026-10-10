@@ -128,13 +128,13 @@ bool Chest::CanInteract(const Player::Base& player) const {
 
 std::string_view Chest::GetInteractionText() const {
 	if (type_ == ChestType::Free) {
-		return "0Gで開ける";
+		return "0で開ける";
 	}
 
 	// 共有費用が変化した場合だけ案内文を再構築して毎フレームの文字列確保を抑制
 	const int currentOpenCost = openCostState_->GetCurrentCost();
 	if (displayedOpenCost_ != currentOpenCost) {
-		interactionText_ = std::to_string(currentOpenCost) + "Gで開ける";
+		interactionText_ = std::to_string(currentOpenCost) + "で開ける";
 		displayedOpenCost_ = currentOpenCost;
 	}
 

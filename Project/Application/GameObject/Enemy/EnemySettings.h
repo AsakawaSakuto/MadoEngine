@@ -150,7 +150,7 @@ namespace Enemy {
 		static constexpr std::size_t kTypeCount = 4;
 		std::array<TypeSettings, kTypeCount> typeSettings_;
 		EliteSettings eliteSettings_;
-		std::size_t maxAliveEnemies_ = 500;
+		std::size_t maxAliveEnemies_ = 999;
 		std::vector<WaveSettings> waves_;
 		WaveSpawnSettings bonusWaveSettings_;
 	};

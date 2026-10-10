@@ -7,7 +7,7 @@
             15.0
         ],
         "eventObjectCounts": {
-            "bossSpawner": 1,
+            "bossSpawner": 0,
             "chest": 50,
             "chestTypes": {
                 "free": 5,
@@ -32,7 +32,7 @@
             16,
             16
         ],
-        "seed": 1998931482,
+        "seed": 2051117180,
         "slopeSpawnRate": 1.0
     }
 }

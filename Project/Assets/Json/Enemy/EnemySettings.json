@@ -16,7 +16,7 @@
             "spawnInterval": 0.25,
             "tankSpawnRate": 0.10000000149011612
         },
-        "maxAliveEnemies": 500,
+        "maxAliveEnemies": 999,
         "waves": [
             {
                 "eliteSpawnInterval": 50,

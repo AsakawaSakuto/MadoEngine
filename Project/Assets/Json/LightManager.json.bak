@@ -13,7 +13,7 @@
                     -0.8638684153556824,
                     0.2591605484485626
                 ],
-                "intensity": 0.5,
+                "intensity": 0.10000000149011612,
                 "useHalfLambert": true
             },
             "enabled": true,
@@ -21,6 +21,36 @@
             "name": "DirectionalLight",
             "scene": "None",
             "type": "Directional"
+        },
+        {
+            "data": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "cosAngle": 1.0,
+                "cosFalloffStart": 0.5,
+                "decay": 1.0,
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "distance": 25.0,
+                "intensity": 2.5,
+                "position": [
+                    206.27630615234375,
+                    30.500999450683594,
+                    167.4189910888672
+                ]
+            },
+            "enabled": true,
+            "layerMask": 1,
+            "name": "PlayerSpotLight",
+            "scene": "Game",
+            "type": "Spot"
         }
     ],
     "version": 1

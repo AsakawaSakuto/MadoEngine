@@ -66,6 +66,10 @@ public:
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
 
+	/// @brief Chestの操作案内へ表示するアイコンのテクスチャ名を取得
+	/// @return Moneyアイコンのテクスチャ名
+	std::string_view GetInteractionIconTextureName() const override { return "Money"; }
+
 	/// @brief ChestのEventObject名を取得
 	/// @return ChestのEventObject名
 	std::string_view GetEventObjectName() const override { return "Chest"; }

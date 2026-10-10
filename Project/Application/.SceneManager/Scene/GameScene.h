@@ -91,11 +91,15 @@ private:
 	/// @brief 所持レリックの変更をPlayerとWeaponへ反映
 	void ApplyRelicModifiersIfChanged();
 
+	/// @brief PlayerSpotLightをPlayerの頭上座標へ同期
+	void SynchronizePlayerSpotLight();
+
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
 	
 	CameraHandle debugCameraHandle_{};
 	CameraHandle tpsCameraHandle_{};
+	LightHandle playerSpotLightHandle_{};
 
 	ColliderShape mapLimitBox_;
 	Vector3 mapLimitBoxPos_;
@@ -135,7 +139,7 @@ private:
 	bool useDebugCamera_ = false;
 	std::uint64_t appliedRelicRevision_ = 0;
 
-	const int weaponSlotCount_ = 4;
+	const int weaponSlotCount_ = 6;
 
 	// System
 	std::unique_ptr<System::InGameSession> inGameSession_;

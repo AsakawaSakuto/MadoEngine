@@ -91,7 +91,7 @@ SceneManager::~SceneManager() {
 		return;
 	}
 
-	// Scene本体を終了してから所属Resourceを管理Systemごとに一括破棄
+	// Scene本体を終了してからScene寿命のResourceを管理Systemごとに破棄
 	const SceneType previousSceneType = currentSceneType_;
 	MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
@@ -104,7 +104,7 @@ SceneManager::~SceneManager() {
 	MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
-	LightManager::GetInstance().DestroyByScene(previousSceneType);
+	LightManager::GetInstance().DestroyRuntimeByScene(previousSceneType);
 	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
@@ -490,7 +490,7 @@ void SceneManager::ChangeScene(SceneType type) {
 
 	if (currentScene_) {
 
-		// 旧SceneのHandleが新Sceneへ残らないよう全所属Resourceを生成前に破棄
+		// 旧SceneのHandleが新Sceneへ残らないようScene寿命のResourceを生成前に破棄
 		const SceneType previousSceneType = currentSceneType_;
 		MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
@@ -503,7 +503,7 @@ void SceneManager::ChangeScene(SceneType type) {
 		MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
-		LightManager::GetInstance().DestroyByScene(previousSceneType);
+		LightManager::GetInstance().DestroyRuntimeByScene(previousSceneType);
 		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);

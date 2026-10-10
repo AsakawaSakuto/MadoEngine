@@ -414,44 +414,28 @@ void LightManager::DestroyByScene(SceneType sceneType) {
 		return;
 	}
 
-	size_t destroyCount = 0;
-
 	// RuntimeとEditor管理を問わず指定Scene所属だけを各Light種別から無効化
-	for (DirectionalSlot& slot : directionalLights_) {
-		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
-			continue;
-		}
-
-		nameToHandle_.erase(slot.entry.meta.name);
-		slot.active = false;
-		++slot.generation;
-		++destroyCount;
-	}
-
-	for (PointSlot& slot : pointLights_) {
-		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
-			continue;
-		}
-
-		nameToHandle_.erase(slot.entry.meta.name);
-		slot.active = false;
-		++slot.generation;
-		++destroyCount;
-	}
-
-	for (SpotSlot& slot : spotLights_) {
-		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
-			continue;
-		}
-
-		nameToHandle_.erase(slot.entry.meta.name);
-		slot.active = false;
-		++slot.generation;
-		++destroyCount;
-	}
+	size_t destroyCount = DestroySlotsByScene(directionalLights_, sceneType, false);
+	destroyCount += DestroySlotsByScene(pointLights_, sceneType, false);
+	destroyCount += DestroySlotsByScene(spotLights_, sceneType, false);
 
 	AdvanceRevision();
 	Logger::Output("シーン内のLightを削除しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyCount), Logger::Level::Application);
+}
+
+void LightManager::DestroyRuntimeByScene(SceneType sceneType) {
+	if (sceneType == SceneType::None) {
+		Logger::Output("SceneType::Noneは全シーン共通のため、実行時Lightのシーン単位削除をスキップしました", Logger::Level::Warning);
+		return;
+	}
+
+	// Jsonから一括登録したEditor管理Lightを維持し、Scene寿命の実行時Lightだけを破棄
+	size_t destroyCount = DestroySlotsByScene(directionalLights_, sceneType, true);
+	destroyCount += DestroySlotsByScene(pointLights_, sceneType, true);
+	destroyCount += DestroySlotsByScene(spotLights_, sceneType, true);
+
+	AdvanceRevision();
+	Logger::Output("シーン内の実行時Lightを削除しました : " + SceneTypeToString(sceneType) + " 件数 : " + std::to_string(destroyCount), Logger::Level::Application);
 }
 
 bool LightManager::RenameLight(LightHandle handle, const std::string& newName) {
@@ -1101,6 +1085,30 @@ void LightManager::ClearEditorManagedSlots(std::vector<TSlot>& slots) {
 		slot.active = false;
 		++slot.generation;
 	}
+}
+
+template <typename TSlot>
+size_t LightManager::DestroySlotsByScene(
+	std::vector<TSlot>& slots,
+	SceneType sceneType,
+	bool runtimeOnly) {
+	size_t destroyCount = 0;
+	for (TSlot& slot : slots) {
+		if (!slot.active || slot.entry.meta.sceneType != sceneType) {
+			continue;
+		}
+		if (runtimeOnly &&
+			slot.entry.meta.managementMode != MadoEngine::EditorManagementMode::RuntimeOnly) {
+			continue;
+		}
+
+		nameToHandle_.erase(slot.entry.meta.name);
+		slot.active = false;
+		++slot.generation;
+		++destroyCount;
+	}
+
+	return destroyCount;
 }
 
 template <typename TSlot>

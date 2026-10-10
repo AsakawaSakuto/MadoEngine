@@ -182,6 +182,10 @@ public:
 	/// @param sceneType 削除対象のシーン種別
 	void DestroyByScene(SceneType sceneType);
 
+	/// @brief 指定したシーンに属する実行時専用ライトをすべて削除
+	/// @param sceneType 削除対象のシーン種別
+	void DestroyRuntimeByScene(SceneType sceneType);
+
 	/// @brief ライト名を変更
 	/// @param handle 対象ライトのハンドル
 	/// @param newName 新しいライト名
@@ -443,6 +447,17 @@ private:
 	/// @param slots 無効化するライトスロット配列
 	template <typename TSlot>
 	void ClearEditorManagedSlots(std::vector<TSlot>& slots);
+
+	/// @brief ライトスロット配列から指定シーン所属を無効化
+	/// @param slots 削除対象のライトスロット配列
+	/// @param sceneType 削除対象のシーン種別
+	/// @param runtimeOnly 実行時専用ライトのみ削除する場合はtrue
+	/// @return 削除したライト数
+	template <typename TSlot>
+	size_t DestroySlotsByScene(
+		std::vector<TSlot>& slots,
+		SceneType sceneType,
+		bool runtimeOnly);
 
 	/// @brief ライトスロット配列から有効なハンドル一覧を取得
 	/// @param slots 検索対象のライトスロット配列

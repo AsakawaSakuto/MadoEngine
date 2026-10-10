@@ -1,24 +1,24 @@
 {
     "name": "Eye",
     "statusEffects": {
-        "burn": {
+        "frozen": {
             "applyChance": {
                 "fixedAddValue": 5.0,
                 "isSelected": true,
                 "rarityAddValue": 1.0,
                 "value": 50.0
             },
-            "damagePerTick": {
+            "duration": {
                 "fixedAddValue": 1.0,
                 "isSelected": true,
                 "rarityAddValue": 0.25,
                 "value": 5.0
             },
-            "duration": {
-                "fixedAddValue": 1.0,
+            "slowRate": {
+                "fixedAddValue": 5.0,
                 "isSelected": true,
-                "rarityAddValue": 0.25,
-                "value": 1.0
+                "rarityAddValue": 1.0,
+                "value": 50.0
             }
         }
     },

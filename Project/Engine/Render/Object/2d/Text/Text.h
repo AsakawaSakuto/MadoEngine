@@ -59,6 +59,10 @@ public:
 	/// @return 表示中のUTF-8文字列
 	const std::string& GetText() const { return text_; }
 
+	/// @brief 生成済みTextテクスチャのピクセルサイズを取得
+	/// @return Textテクスチャのピクセルサイズ
+	const Vector2& GetTextureSize() const { return size_; }
+
 	/// @brief 使用フォント名を設定
 	/// @param fontFamily DirectWriteで使用するフォントファミリー名
 	void SetFontFamily(const std::string& fontFamily);

@@ -97,7 +97,7 @@
       "textureName": "Candy"
     },
     {
-      "description": "獲得EXP 10% Up",
+      "description": "獲得EXP +10%",
       "displayName": "知恵のフラスコ",
       "effects": [
         {
@@ -113,7 +113,7 @@
       "textureName": "Flask"
     },
     {
-      "description": "クリティカル発生確率 5% Up",
+      "description": "クリティカル発生 +5%",
       "displayName": "幸運魚",
       "effects": [
         {
@@ -129,7 +129,7 @@
       "textureName": "CriticalFish"
     },
     {
-      "description": "発射クールタイム 5% 短縮",
+      "description": "射撃クールタイム -5%",
       "displayName": "加速器",
       "effects": [
         {

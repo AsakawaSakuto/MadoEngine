@@ -23,6 +23,9 @@ constexpr const char* kMapGeneratorJsonPath = "Assets/Json/MapGenerator.json";
 constexpr int kMinimumMapSize = 2;
 constexpr int kMaximumMapSize = 128;
 constexpr int kMaximumEventObjectCount = 4096;
+constexpr const char* kInteractionIconSpriteName = "MapInteractionIcon";
+constexpr float kInteractionIconPixelSize = 48.0f;
+constexpr float kInteractionIconSpacing = 8.0f;
 const Vector4 kInteractionTextDefaultColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 const Vector4 kInteractionTextUnavailableColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 
@@ -226,6 +229,11 @@ void Map::SetInteractionTextVisible(bool isVisible) {
 	if (MadoEngine::Text* interactionText = MyText::TryGet(interactionText_)) {
 		interactionText->SetVisible(isInteractionTextVisible_ && currentHitEventObject_ != nullptr);
 	}
+	if (!isInteractionTextVisible_) {
+		if (Sprite* interactionIcon = MySprite::TryGet(interactionIcon_)) {
+			interactionIcon->SetVisible(false);
+		}
+	}
 }
 
 void Map::SetEventActionEnabled(MapEventAction action, bool isEnabled) {
@@ -268,12 +276,25 @@ void Map::Generate(const GenerationSettings& settings) {
 	currentHitEventObject_ = nullptr;
 	interactionMarkerModel_ = MyModel::Find("Interact_x");
 	interactionText_ = MyText::Find("InteractText");
+	interactionIcon_ = MySprite::Find(kInteractionIconSpriteName);
+	if (!interactionIcon_.IsValid()) {
+		interactionIcon_ = MySprite::Create(
+			kInteractionIconSpriteName,
+			"Money",
+			SceneType::Game,
+			MadoEngine::EditorManagementMode::RuntimeOnly,
+			MadoEngine::Render::RenderLayer::Default);
+	}
 	interactionMarkerScaleTimer_.Reset();
 	if (Model* interactionMarkerModel = MyModel::TryGet(interactionMarkerModel_)) {
 		interactionMarkerModel->SetVisible(false);
 	}
 	if (MadoEngine::Text* interactionText = MyText::TryGet(interactionText_)) {
 		interactionText->SetVisible(false);
+	}
+	if (Sprite* interactionIcon = MySprite::TryGet(interactionIcon_)) {
+		interactionIcon->SetAnchorPoint({ 0.5f, 0.5f });
+		interactionIcon->SetVisible(false);
 	}
 
 
@@ -1415,7 +1436,11 @@ void Map::UpdateInteractionMarker(float deltaTime) {
 
 void Map::UpdateInteractionText(const Player::Base& player) {
 	MadoEngine::Text* interactionText = MyText::TryGet(interactionText_);
+	Sprite* interactionIcon = MySprite::TryGet(interactionIcon_);
 	if (!interactionText) {
+		if (interactionIcon) {
+			interactionIcon->SetVisible(false);
+		}
 		return;
 	}
 
@@ -1423,6 +1448,9 @@ void Map::UpdateInteractionText(const Player::Base& player) {
 		isInteractionTextVisible_ && currentHitEventObject_ != nullptr;
 	interactionText->SetVisible(shouldShowInteractionText);
 	if (!shouldShowInteractionText) {
+		if (interactionIcon) {
+			interactionIcon->SetVisible(false);
+		}
 		return;
 	}
 
@@ -1440,6 +1468,52 @@ void Map::UpdateInteractionText(const Player::Base& player) {
 
 	// 文言の決定を各MapEventObjectへ委譲してObject固有の操作内容を表示
 	interactionText->SetText(std::string(currentHitEventObject_->GetInteractionText()));
+
+	if (!interactionIcon) {
+		return;
+	}
+
+	const std::string_view iconTextureName =
+		currentHitEventObject_->GetInteractionIconTextureName();
+	if (iconTextureName.empty()) {
+		interactionIcon->SetVisible(false);
+		return;
+	}
+
+	// 操作案内Textの左端を基準に配置し、費用の桁数が変化しても並びを維持
+	const std::string iconTextureNameString(iconTextureName);
+	if (interactionIcon->GetTextureName() != iconTextureNameString &&
+		!interactionIcon->SetTexture(iconTextureNameString)) {
+		interactionIcon->SetVisible(false);
+		return;
+	}
+
+	const Vector2 iconTextureSize = interactionIcon->GetTextureSize();
+	const float iconTextureMaxSize = std::max(iconTextureSize.x, iconTextureSize.y);
+	if (iconTextureMaxSize <= 0.0f) {
+		interactionIcon->SetVisible(false);
+		return;
+	}
+
+	const Vector2 textTextureSize = interactionText->GetTextureSize();
+	const Vector2 textScale = interactionText->GetScale();
+	const Vector2 textAnchorPoint = interactionText->GetAnchorPoint();
+	const Vector2 textPosition = interactionText->GetPosition();
+	const Vector2 textDrawSize = {
+		textTextureSize.x * textScale.x,
+		textTextureSize.y * textScale.y,
+	};
+	const float textLeft = textPosition.x - textDrawSize.x * textAnchorPoint.x;
+	const float textCenterY =
+		textPosition.y + textDrawSize.y * (0.5f - textAnchorPoint.y);
+	const float iconScale = kInteractionIconPixelSize / iconTextureMaxSize;
+	const float iconWidth = iconTextureSize.x * iconScale;
+	interactionIcon->SetPosition({
+		textLeft - kInteractionIconSpacing - iconWidth * 0.5f,
+		textCenterY,
+	});
+	interactionIcon->SetScale({ iconScale, iconScale });
+	interactionIcon->SetVisible(true);
 }
 
 bool Map::IsEventActionEnabled(MapEventAction action) const {

@@ -1,7 +1,7 @@
 {
     "emitters": [
         {
-            "backend": "auto",
+            "backend": "gpu",
             "colorOverLifetime": {
                 "end": {
                     "max": [

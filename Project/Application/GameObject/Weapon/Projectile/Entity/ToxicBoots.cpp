@@ -1,5 +1,8 @@
 #include "ToxicBoots.h"
+#include <algorithm>
+#include <cmath>
 #include <limits>
+#include <numbers>
 
 namespace Projectile {
 
@@ -65,6 +68,8 @@ namespace Projectile {
 		isReductionStarted_ = false;
 		reductionTimer_.Reset();
 		lifeTimer_.Start(lifeTime_, false);
+		colorAnimationTimer_.Start(kColorCycleDuration, true);
+		UpdateColor(0.0f);
 	}
 
 	void ToxicBoots::Update(float deltaTime) {
@@ -102,7 +107,27 @@ namespace Projectile {
 
 		lifeTimer_.Update(deltaTime);
 		reductionTimer_.Update(deltaTime);
+		UpdateColor(deltaTime);
 
 		MyDebugLine::AddShape(std::get<Sphere>(hitbox_));
+	}
+
+	void ToxicBoots::UpdateColor(float deltaTime) {
+		float safeDeltaTime = 0.0f;
+		if (std::isfinite(deltaTime)) {
+			safeDeltaTime = std::max(deltaTime, 0.0f);
+		}
+		colorAnimationTimer_.Update(safeDeltaTime);
+
+		// Eyeと同じCos波の往復補間で黄緑と緑の境界を滑らかに接続
+		const float cycleRatio = colorAnimationTimer_.GetProgress();
+		const float blendFactor = 0.5f - 0.5f * std::cos(
+			cycleRatio * 2.0f * std::numbers::pi_v<float>
+		);
+		const Vector4 color = kColorStart + (kColorEnd - kColorStart) * blendFactor;
+
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetColor(color);
+		}
 	}
 }

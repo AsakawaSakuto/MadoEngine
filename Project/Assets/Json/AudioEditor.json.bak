@@ -93,6 +93,10 @@
             "type": "SE",
             "volume": 1.0
         },
+        "joker": {
+            "type": "SE",
+            "volume": 1.0
+        },
         "jump": {
             "type": "SE",
             "volume": 1.0
