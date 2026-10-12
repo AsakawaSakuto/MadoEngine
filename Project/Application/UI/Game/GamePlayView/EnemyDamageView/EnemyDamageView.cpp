@@ -52,7 +52,7 @@ namespace UI::Game {
 				MadoEngine::Render::RenderLayer::UI);
 			if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
 				text->SetFontAsset("Assets/Font/dot.ttf", "dot");
-				text->SetFontSize(fontSize_);
+				text->SetFontSize(normalFontSize_);
 				text->SetAnchorPoint({ 0.5f, 0.5f });
 				text->SetWordWrap(false);
 				text->SetVisible(false);
@@ -116,6 +116,9 @@ namespace UI::Game {
 		if (text) {
 			text->SetVisible(false);
 			if (!showsJoker) {
+
+				// Slot再利用時にクリティカルの拡大を通常表示へ持ち越さないため、表示種別に応じたサイズを再適用
+				text->SetFontSize(GetDamageTextFontSize(slot->type));
 				text->SetText(FormatDamage(event.displayDamage));
 				text->SetScale({
 					1.0f + initialScaleAddition_,
@@ -286,8 +289,10 @@ namespace UI::Game {
 			500.0f,
 			"最小: %.0f px",
 			"最大: %.0f px");
-		const bool fontSizeChanged =
-			ImGui::DragFloat("フォントサイズ", &fontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
+		const bool normalFontSizeChanged =
+			ImGui::DragFloat("通常フォントサイズ", &normalFontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
+		const bool criticalFontSizeChanged =
+			ImGui::DragFloat("クリティカルフォントサイズ", &criticalFontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::DragFloat("Joker表示サイズ", &jokerPixelSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::ColorEdit4("通常ダメージ文字色", &damageTextColor_.x);
 		ImGui::ColorEdit4("クリティカルダメージ文字色", &criticalDamageTextColor_.x);
@@ -316,13 +321,16 @@ namespace UI::Game {
 		if (horizontalOffsetMin_ > horizontalOffsetMax_) {
 			std::swap(horizontalOffsetMin_, horizontalOffsetMax_);
 		}
-		fontSize_ = std::clamp(fontSize_, 1.0f, 200.0f);
+		normalFontSize_ = std::clamp(normalFontSize_, 1.0f, 200.0f);
+		criticalFontSize_ = std::clamp(criticalFontSize_, 1.0f, 200.0f);
 		jokerPixelSize_ = std::clamp(jokerPixelSize_, 1.0f, 200.0f);
 
-		if (fontSizeChanged) {
+		if (normalFontSizeChanged || criticalFontSizeChanged) {
+
+			// 表示中の文字にも各種別のサイズ設定を即時反映
 			for (DamageViewSlot& slot : slots_) {
 				if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
-					text->SetFontSize(fontSize_);
+					text->SetFontSize(GetDamageTextFontSize(slot.type));
 				}
 			}
 		}
@@ -379,6 +387,13 @@ namespace UI::Game {
 		} else {
 			return DamageTextType::Normal;
 		}
+	}
+
+	float EnemyDamageView::GetDamageTextFontSize(DamageTextType type) const {
+		if (type == DamageTextType::Critical) {
+			return criticalFontSize_;
+		}
+		return normalFontSize_;
 	}
 
 	const Vector4& EnemyDamageView::GetDamageTextColor(DamageTextType type) const {

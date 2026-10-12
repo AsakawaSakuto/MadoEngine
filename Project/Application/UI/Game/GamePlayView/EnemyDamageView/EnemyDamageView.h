@@ -75,6 +75,11 @@ namespace UI::Game {
 		/// @return ダメージ文字の表示種別
 		DamageTextType ResolveDamageTextType(const Combat::DamageEvent& event) const;
 
+		/// @brief 表示種別に対応するダメージ文字サイズを取得
+		/// @param type ダメージ文字の表示種別
+		/// @return 表示に使用するフォントサイズ
+		float GetDamageTextFontSize(DamageTextType type) const;
+
 		/// @brief 表示種別に対応するダメージ文字色を取得
 		/// @param type ダメージ文字の表示種別
 		/// @return 表示に使用する文字色
@@ -94,17 +99,18 @@ namespace UI::Game {
 		std::size_t nextSlotIndex_ = 0;
 		std::uint64_t spawnSequence_ = 0;
 		bool isVisible_ = true;
-		float displayLifeTime_ = 0.5f;         // ダメージ表示の寿命（秒）
-		float shrinkDuration_ = 0.1f;          // 表示寿命後の縮小時間（秒）
-		float scaleSettleProgress_ = 1.0f;     // ダメージ表示のスケールが落ち着くタイミング
-		float initialScaleAddition_ = 1.0f;    // ダメージ表示の初期スケール増加量
-		float riseDistance_ = 64.0f;           // ダメージ表示の上昇距離（ピクセル）
-		float enemyHeadOffsetMin_ = 1.0f;      // Enemy座標から頭上への最小オフセット
-		float enemyHeadOffsetMax_ = 2.0f;      // Enemy座標から頭上への最大オフセット
-		float horizontalOffsetMin_ = -24.0f;   // ダメージ表示の最小左右オフセット
-		float horizontalOffsetMax_ = 24.0f;    // ダメージ表示の最大左右オフセット
-		float fontSize_ = 32.0f;               // ダメージ表示のフォントサイズ
-		float jokerPixelSize_ = 48.0f;         // Joker表示の最大辺サイズ
+		float displayLifeTime_ = 0.5f;            // ダメージ表示の寿命（秒）
+		float shrinkDuration_ = 0.1f;             // 表示寿命後の縮小時間（秒）
+		float scaleSettleProgress_ = 1.0f;        // ダメージ表示のスケールが落ち着くタイミング
+		float initialScaleAddition_ = 1.0f;       // ダメージ表示の初期スケール増加量
+		float riseDistance_ = 64.0f;              // ダメージ表示の上昇距離（ピクセル）
+		float enemyHeadOffsetMin_ = 1.0f;         // Enemy座標から頭上への最小オフセット
+		float enemyHeadOffsetMax_ = 2.0f;         // Enemy座標から頭上への最大オフセット
+		float horizontalOffsetMin_ = -24.0f;      // ダメージ表示の最小左右オフセット
+		float horizontalOffsetMax_ = 24.0f;       // ダメージ表示の最大左右オフセット
+		float normalFontSize_ = 24.0f;            // 通常ダメージ表示のフォントサイズ
+		float criticalFontSize_ = 36.0f;          // クリティカルダメージ表示のフォントサイズ
+		float jokerPixelSize_ = 64.0f;            // Joker表示の最大辺サイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
 		Vector4 criticalDamageTextColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
 	};

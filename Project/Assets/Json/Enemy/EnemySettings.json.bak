@@ -23,8 +23,8 @@
                 "endTime": 20.0,
                 "healthIncreaseAmount": 1.0,
                 "healthIncreaseInterval": 60.0,
-                "maxSpawnRadius": 8.0,
-                "minSpawnRadius": 8.0,
+                "maxSpawnRadius": 16.0,
+                "minSpawnRadius": 16.0,
                 "moveSpeedIncreaseAmount": 0.05999999865889549,
                 "moveSpeedIncreaseInterval": 60.0,
                 "name": "Wave 1",
@@ -263,7 +263,7 @@
                 0.1991996020078659,
                 1.0
             ],
-            "health": 40.0,
+            "health": 25.0,
             "hitboxMax": [
                 0.550000011920929,
                 2.0,

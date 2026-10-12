@@ -171,8 +171,6 @@ namespace Player {
 
 		MapLimit mapLimit_; // Mapの制限範囲
 
-		GamingColor gamingColor_; // ゲーミングカラー
-
 		GameTimer regenerationTimer_; // HPの自動回復タイマー
 		std::vector<ResourceGainEvent> resourceGainEvents_; // 未処理のリソース獲得イベント
 		bool isDead_ = false; // 死亡状態の場合はtrue

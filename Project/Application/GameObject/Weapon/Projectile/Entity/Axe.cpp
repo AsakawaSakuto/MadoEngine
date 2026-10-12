@@ -57,11 +57,11 @@ namespace Projectile {
 			}
 		}
 
-		if (lifeTimer_.IsActive() && lifeTimer_.GetProgress() >= 0.9f && !isReductionStarted_) {
+		if (lifeTimer_.IsActive() && lifeTimer_.GetProgress() >= 0.7f && !isReductionStarted_) {
 
-			// 寿命末尾の一割を縮小演出へ割り当て
+			// 寿命末尾の三割を縮小演出へ割り当て
 			isReductionStarted_ = true;
-			reductionTimer_.Start(lifeTime_ * 0.1f, false);
+			reductionTimer_.Start(lifeTime_ * 0.3f, false);
 		}
 
 		// 滞留中も武器らしい視認性を保つ一定速度の回転

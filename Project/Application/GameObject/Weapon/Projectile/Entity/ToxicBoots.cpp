@@ -82,7 +82,7 @@ namespace Projectile {
 
 		if (lifeTimer_.GetProgress() >= kReductionStartRatio && !isReductionStarted_) {
 
-			// Axeと同様に寿命末尾の一割を縮小演出へ割り当て
+			// Axeと同様に寿命末尾の三割を縮小演出へ割り当て
 			isReductionStarted_ = true;
 			reductionTimer_.Start(lifeTime_ * (1.0f - kReductionStartRatio), false);
 		}

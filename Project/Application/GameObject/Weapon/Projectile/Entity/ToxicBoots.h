@@ -26,7 +26,7 @@ namespace Projectile {
 		float kBaseModelScale = 2.0f;      // Eyeモデルの基本スケール
 		float kRotationSpeed = 3.14f;      // Y軸回転速度
 		float kGroundOffset = 0.05f;       // 地面とのZファイティングを防ぐ表示オフセット
-		float kReductionStartRatio = 0.9f; // 縮小開始時の寿命進行率
+		float kReductionStartRatio = 0.7f; // 縮小開始時の寿命進行率
 		static constexpr float kColorCycleDuration = 5.0f; // 色が開始色へ戻るまでの時間
 		static constexpr Vector4 kColorStart = { 0.5f, 1.0f, 0.0f, 0.95f };
 		static constexpr Vector4 kColorEnd = { 0.0f, 1.0f, 0.0f, 0.95f };

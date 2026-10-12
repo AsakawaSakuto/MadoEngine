@@ -49,7 +49,7 @@
         },
         {
             "camera": "GamePlayerCamera",
-            "distance": 20.0,
+            "distance": 30.0,
             "followStrength": 0.5,
             "gamePadSensitivity": 2.5,
             "maxPitch": 1.5,
@@ -60,11 +60,11 @@
                 2.0,
                 -10.0
             ],
-            "pitch": 0.6042286157608032,
+            "pitch": 0.4690704643726349,
             "type": "TPS",
             "useGamePadInput": true,
             "useMouseInput": true,
-            "yaw": -17.45901107788086
+            "yaw": -68.3135757446289
         }
     ],
     "version": 3

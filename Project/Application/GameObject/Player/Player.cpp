@@ -54,6 +54,7 @@ namespace Player {
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 			model->SetTexture("white2x2");
+			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);
 			animationController_.Initialize(*model);
@@ -393,6 +394,9 @@ namespace Player {
 		if (model) {
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);
+
+			// 動作や生死に関係なくPlayerのModel色を白色へ固定
+			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 			if (!isDead_) {
 				const Vector3 slideVelocity = movement_.GetSlideVelocity();
 				const bool isCrouchingMoving =
@@ -408,12 +412,6 @@ namespace Player {
 		}
 
 		UpdateShadowTransform();
-
-		if (!isDead_ && model && movement_.GetCurrentMotion() == Player::Motion::Crouching) {
-			model->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-		} else if (model) {
-			model->SetColor(gamingColor_.Update(lastDeltaTime_, 1.0f));
-		}
 
 		// 描画結果とColliderのずれを検証できるよう判定形状を可視化
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };

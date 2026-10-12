@@ -531,7 +531,7 @@ void GameScene::SynchronizePlayerSpotLight() {
 		return;
 	}
 
-	const float offsetY = 15.0f;
+	const float offsetY = 50.0f;
 	const Vector3 playerPosition = player_->GetPosition();
 	playerSpotLight->position = { playerPosition.x,playerPosition.y + offsetY ,playerPosition.z };
 }
