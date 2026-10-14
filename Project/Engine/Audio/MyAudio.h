@@ -38,6 +38,21 @@ namespace MyAudio {
 		return MadoEngine::AudioManager::GetInstance().GetVolume(key);
 	}
 
+	/// @brief 再生速度を維持した個別音声の音程を変更
+	/// @param key ファイル名、拡張子なし
+	/// @param semitones 元の音程からの半音数、-12から12の範囲
+	/// @return 音程の適用に成功した場合はtrue
+	inline bool SetPitch(const std::string& key, float semitones) {
+		return MadoEngine::AudioManager::GetInstance().SetPitch(key, semitones);
+	}
+
+	/// @brief 個別音声の音程設定を取得
+	/// @param key ファイル名、拡張子なし
+	/// @return 元の音程からの半音数、未登録の場合は0
+	inline float GetPitch(const std::string& key) {
+		return MadoEngine::AudioManager::GetInstance().GetPitch(key);
+	}
+
 	/// @brief マスターボリュームを設定
 	/// @param volume 音量（0.0f～1.0f）
 	inline void SetMasterVolume(float volume) {

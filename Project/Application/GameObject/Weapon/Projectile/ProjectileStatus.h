@@ -8,22 +8,23 @@
 namespace Projectile {
 	
 	struct  InitializeDesc {
-		std::uint64_t projectileId = 0; // 投射物の一意なID
+		std::uint64_t projectileId = 0;   // 投射物の一意なID
 		std::uint64_t sourceWeaponId = 0; // 発射元Weaponインスタンスの識別番号
-		std::string projectileName;     // 投射物の名前
-		int projectileCount;            // 投射物の生成順序番号
-		Vector3 ownerPosition;          // 投射物の生成元の座標
-		Vector3 targetPosition;         // 投射物の目標座標
+		std::string projectileName;       // 投射物の名前
+		int projectileCount;              // 投射物の生成順序番号
+		Vector3 ownerPosition;            // 投射物の生成元の座標
+		Vector3 targetPosition;           // 投射物の目標座標
 
-		float damage = 10.0f;           // 投射物のダメージ量
-		float criticalChance = 0.0f;    // 投射物のクリティカル率
-		float criticalDamage = 1.0f;    // 投射物のクリティカルダメージ倍率
-		float knockbackPower = 0.0f;    // 投射物のノックバック力
-		float moveSpeed = 10.0f;        // 投射物の移動速度
-		float sizeRate = 1.0f;          // 投射物のサイズ倍率
-		float lifeTime = 5.0f;          // 投射物の寿命
-		int bounceCount = 0;             // 投射物の残り跳弾回数
-		int penetrationCount = 0;        // 投射物の残り貫通回数
+		float damage = 10.0f;        // 投射物のダメージ量
+		float criticalChance = 0.0f; // 投射物のクリティカル率
+		float criticalDamage = 1.0f; // 投射物のクリティカルダメージ倍率
+		float knockbackPower = 0.0f; // 投射物のノックバック力
+		float moveSpeed = 10.0f;     // 投射物の移動速度
+		float sizeRate = 1.0f;       // 投射物のサイズ倍率
+		float lifeTime = 5.0f;       // 投射物の寿命
+		int bounceCount = 0;         // 投射物の残り跳弾回数
+		int penetrationCount = 0;    // 投射物の残り貫通回数
+
 		Weapon::StatusEffectStatus statusEffects; // 投射物が付与できる状態異常設定
 
 		float explotionDamageDecreaseRate = 10.0f; // 爆発ダメージの減衰率（1.0fで減衰なし、0.0fで爆発ダメージなし）

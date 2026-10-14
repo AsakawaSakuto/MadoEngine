@@ -218,6 +218,11 @@
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
+    <ClCompile Include="Engine\Audio\Data\AudioPitchStream.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)Externals\SignalsmithLinear\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>MaxSpeed</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+    </ClCompile>
     <ClCompile Include="Engine\Core\Command\Command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DepthStencilBuffer\DepthStencilBuffer.cpp" />
@@ -465,6 +470,7 @@
     <ClInclude Include="Engine\Audio\AudioType.h" />
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
     <ClInclude Include="Engine\Audio\Data\AudioData.h" />
+    <ClInclude Include="Engine\Audio\Data\AudioPitchStream.h" />
     <ClInclude Include="Engine\Audio\MyAudio.h" />
     <ClInclude Include="Engine\CoreHeaders.h" />
     <ClInclude Include="Engine\Core\Command\Command.h" />

@@ -276,6 +276,30 @@ namespace MadoEngine {
 		return 1.0f;
 	}
 
+	bool AudioManager::SetPitch(const std::string& key, float semitones) {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
+			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const auto it = audioMap_.find(lowerKey);
+		if (it == audioMap_.end() || !it->second) {
+			return false;
+		}
+
+		// 音程設定はAudioXが所有し、再生中の変更と次回再生を同じ値へ同期
+		return it->second->SetPitch(semitones);
+	}
+
+	float AudioManager::GetPitch(const std::string& key) const {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
+			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const auto it = audioMap_.find(lowerKey);
+		if (it != audioMap_.end() && it->second) {
+			return it->second->GetPitch();
+		}
+		return 0.0f;
+	}
+
 	bool AudioManager::IsLoaded(const std::string& key) const {
 
 		// キーを小文字に変換して検索

@@ -39,6 +39,7 @@
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
+    <ClCompile Include="Engine\Audio\Data\AudioPitchStream.cpp" />
     <ClCompile Include="Engine\Core\Command\Command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
     <ClCompile Include="Engine\Core\DxDevice\DxDevice.cpp" />
@@ -333,6 +334,7 @@
     <ClInclude Include="Engine\Audio\Data\AudioData.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Audio\Data\AudioPitchStream.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>

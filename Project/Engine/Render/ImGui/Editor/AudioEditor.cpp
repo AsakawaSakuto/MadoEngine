@@ -56,9 +56,31 @@ namespace MadoEngine::Editor {
             return ReadVolumeValue(*it, fallback);
         }
 
-        /// @brief AudioEditorの音量設定をJsonへ変換
-        /// @return 音量設定Json
-        nlohmann::json SerializeAudioEditorVolume() {
+        /// @brief Jsonから音程設定を読み込み
+        /// @param value 個別音声の設定Json
+        /// @return 元の音程からの半音数、旧形式または不正値の場合は0
+        float ReadPitchSemitones(const nlohmann::json& value) {
+            if (!value.is_object()) {
+                return 0.0f;
+            }
+            const auto it = value.find("pitchSemitones");
+            if (it == value.end() || !it->is_number()) {
+                return 0.0f;
+            }
+
+            // 旧Jsonの音程は0へ復元し、極端な数値はFloat変換前に許容範囲へ制限
+            const double semitones = it->get<double>();
+            if (!std::isfinite(semitones)) {
+                return 0.0f;
+            }
+            return static_cast<float>(std::clamp(semitones,
+                static_cast<double>(AudioManager::kMinPitchSemitones),
+                static_cast<double>(AudioManager::kMaxPitchSemitones)));
+        }
+
+        /// @brief AudioEditorの音量と音程設定をJsonへ変換
+        /// @return 音声設定Json
+        nlohmann::json SerializeAudioEditorSettings() {
             AudioManager& audioManager = AudioManager::GetInstance();
 
             nlohmann::json root;
@@ -75,7 +97,8 @@ namespace MadoEngine::Editor {
             for (const std::string& key : keys) {
                 individualVolumes[key] = {
                     {"type", AudioTypeToString(audioManager.GetAudioType(key))},
-                    {"volume", audioManager.GetVolume(key)}
+                    {"volume", audioManager.GetVolume(key)},
+                    {"pitchSemitones", audioManager.GetPitch(key)}
                 };
             }
             root["individualVolumes"] = individualVolumes;
@@ -96,9 +119,9 @@ namespace MadoEngine::Editor {
             audioManager.SetVoiceVolume(ReadVolumeMember(categoryVolumes, "Voice", audioManager.GetVoiceVolume()));
         }
 
-        /// @brief Jsonから個別音量を読み込み
-        /// @param individualVolumes 個別音量Json
-        void ApplyIndividualVolumes(const nlohmann::json& individualVolumes) {
+        /// @brief Jsonから個別音量と音程を読み込み
+        /// @param individualVolumes 個別音声設定Json
+        void ApplyIndividualSettings(const nlohmann::json& individualVolumes) {
             if (!individualVolumes.is_object()) {
                 return;
             }
@@ -115,19 +138,22 @@ namespace MadoEngine::Editor {
                 } else if (value.is_number()) {
                     audioManager.SetVolume(key, ReadVolumeValue(value, audioManager.GetVolume(key)));
                 }
+
+                // 音量だけを持つ旧形式にも対応し、保存前の音程が読込後へ残る状態を防止
+                audioManager.SetPitch(key, ReadPitchSemitones(value));
             }
         }
 
-        /// @brief AudioEditorの音量設定をJsonへ保存
+        /// @brief AudioEditorの音量と音程設定をJsonへ保存
         /// @return 保存に成功した場合はtrue
-        bool SaveAudioEditorVolumeJson() {
-            const bool succeeded = Json::JsonFile::Save(kAudioEditorJsonPath, SerializeAudioEditorVolume(), 4, true);
+        bool SaveAudioEditorSettingsJson() {
+            const bool succeeded = Json::JsonFile::Save(kAudioEditorJsonPath, SerializeAudioEditorSettings(), 4, true);
             Logger::Output(
                 [&]() {
                     if (succeeded) {
-                        return ("AudioEditor : 音量設定Jsonを保存しました");
+                        return ("AudioEditor : 音声設定Jsonを保存しました");
                     } else {
-                        return ("AudioEditor : 音量設定Jsonの保存に失敗しました");
+                        return ("AudioEditor : 音声設定Jsonの保存に失敗しました");
                     }
                 }(),
                 [&]() {
@@ -141,33 +167,33 @@ namespace MadoEngine::Editor {
             return succeeded;
         }
 
-        /// @brief AudioEditorの音量設定をJsonから読み込み
+        /// @brief AudioEditorの音量と音程設定をJsonから読み込み
         /// @return 読み込みに成功した場合はtrue
-        bool LoadAudioEditorVolumeJson() {
+        bool LoadAudioEditorSettingsJson() {
             nlohmann::json root;
             if (!Json::JsonFile::Load(kAudioEditorJsonPath, root)) {
-                Logger::Output("AudioEditor : 音量設定Jsonの読み込みに失敗しました", Logger::Level::Error);
+                Logger::Output("AudioEditor : 音声設定Jsonの読み込みに失敗しました", Logger::Level::Error);
                 return false;
             }
 
             if (!root.is_object()) {
-                Logger::Output("AudioEditor : 音量設定Jsonの形式が不正です", Logger::Level::Error);
+                Logger::Output("AudioEditor : 音声設定Jsonの形式が不正です", Logger::Level::Error);
                 return false;
             }
 
             AudioManager& audioManager = AudioManager::GetInstance();
             audioManager.SetMasterVolume(ReadVolumeMember(root, "masterVolume", audioManager.GetMasterVolume()));
             ApplyCategoryVolumes(root.value("categoryVolumes", nlohmann::json::object()));
-            ApplyIndividualVolumes(root.value("individualVolumes", nlohmann::json::object()));
+            ApplyIndividualSettings(root.value("individualVolumes", nlohmann::json::object()));
 
-            Logger::Output("AudioEditor : 音量設定Jsonを読み込みました", Logger::Level::Assets);
+            Logger::Output("AudioEditor : 音声設定Jsonを読み込みました", Logger::Level::Assets);
             return true;
         }
 
     }
 
     std::string CaptureAudioEditorState() {
-        return SerializeAudioEditorVolume().dump();
+        return SerializeAudioEditorSettings().dump();
     }
 
     bool RestoreAudioEditorState(const std::string& snapshot) {
@@ -179,16 +205,16 @@ namespace MadoEngine::Editor {
         AudioManager& audioManager = AudioManager::GetInstance();
         audioManager.SetMasterVolume(ReadVolumeMember(root, "masterVolume", audioManager.GetMasterVolume()));
         ApplyCategoryVolumes(root.value("categoryVolumes", nlohmann::json::object()));
-        ApplyIndividualVolumes(root.value("individualVolumes", nlohmann::json::object()));
+        ApplyIndividualSettings(root.value("individualVolumes", nlohmann::json::object()));
         return true;
     }
 
     bool SaveAudioEditorJson() {
-        return SaveAudioEditorVolumeJson();
+        return SaveAudioEditorSettingsJson();
     }
 
     bool LoadAudioEditorJson() {
-        return LoadAudioEditorVolumeJson();
+        return LoadAudioEditorSettingsJson();
     }
 
 #ifdef USE_IMGUI
@@ -211,10 +237,11 @@ namespace MadoEngine::Editor {
                 if (ImGui::BeginTabItem(tabNames[i])) {
                     static std::unordered_map<std::string, bool> loopStates;
 
-                    // 個別音量とLoop状態を音源単位で操作できる四列構成
-                    if (ImGui::BeginTable("AudioTable", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
+                    // 音量と速度を維持した音程変更を音源単位で操作できる五列構成
+                    if (ImGui::BeginTable("AudioTable", 5, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
                         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
                         ImGui::TableSetupColumn("Volume", ImGuiTableColumnFlags_WidthFixed, 90.0f); // 【追加】個別ボリューム列
+                        ImGui::TableSetupColumn("Pitch (半音)", ImGuiTableColumnFlags_WidthFixed, 120.0f);
                         ImGui::TableSetupColumn("Loop", ImGuiTableColumnFlags_WidthFixed, 40.0f);
                         ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);
                         ImGui::TableHeadersRow();
@@ -233,20 +260,35 @@ namespace MadoEngine::Editor {
                                 ImGui::PushID((key + "_vol").c_str());
 
                                 float vol = AudioManager::GetInstance().GetVolume(key); // 現在の音量を取得
-                                ImGui::PushItemWidth(-1); // スライダーを列の横幅いっぱいに広げる
-                                if (ImGui::SliderFloat("##Volume", &vol, 0.0f, 1.0f, "%.2f")) {
+                                ImGui::PushItemWidth(-1);
+                                if (ImGui::DragFloat("##Volume", &vol, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
                                     AudioManager::GetInstance().SetVolume(key, vol); // 変更されたら即座に反映
                                 }
                                 ImGui::PopItemWidth();
                                 ImGui::PopID();
 
-                                // --- 3列目: Loopチェックボックス ---
+                                // 半音数を保存対象へ直接反映して再生中と次回再生の設定を一致
+                                ImGui::TableNextColumn();
+                                ImGui::PushID((key + "_pitch").c_str());
+                                float semitones = AudioManager::GetInstance().GetPitch(key);
+                                ImGui::SetNextItemWidth(-1);
+                                if (ImGui::DragFloat("##Pitch", &semitones, 0.1f,
+                                    AudioManager::kMinPitchSemitones, AudioManager::kMaxPitchSemitones,
+                                    "%+.1f", ImGuiSliderFlags_AlwaysClamp)) {
+                                    AudioManager::GetInstance().SetPitch(key, semitones);
+                                }
+                                if (ImGui::IsItemHovered()) {
+                                    ImGui::SetTooltip("再生速度を維持して音程を変更\n0: 元の音程 / +12: 1オクターブ上 / -12: 1オクターブ下\nCtrl+クリックで数値入力");
+                                }
+                                ImGui::PopID();
+
+                                // ループ指定は既存の再生操作へ引き継ぎ
                                 ImGui::TableNextColumn();
                                 ImGui::PushID((key + "_loop").c_str());
                                 ImGui::Checkbox("##Loop", &loopStates[key]);
                                 ImGui::PopID();
 
-                                // --- 4列目: Playボタン ---
+                                // 現在の音量と音程設定で新しい再生インスタンスを開始
                                 ImGui::TableNextColumn();
                                 ImGui::PushID((key + "_play").c_str());
                                 if (ImGui::Button("Play", ImVec2(60, 0))) {
@@ -269,7 +311,7 @@ namespace MadoEngine::Editor {
                 ImGui::Spacing();
 
                 float masterVol = AudioManager::GetInstance().GetMasterVolume();
-                if (ImGui::SliderFloat("Master Volume", &masterVol, 0.0f, 1.0f, "%.2f")) {
+                if (ImGui::DragFloat("Master Volume", &masterVol, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
                     AudioManager::GetInstance().SetMasterVolume(masterVol);
                 }
 
@@ -278,17 +320,17 @@ namespace MadoEngine::Editor {
                 ImGui::Spacing();
 
                 float seVol = AudioManager::GetInstance().GetSEVolume();
-                if (ImGui::SliderFloat("SE Volume", &seVol, 0.0f, 1.0f, "%.2f")) {
+                if (ImGui::DragFloat("SE Volume", &seVol, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
                     AudioManager::GetInstance().SetSEVolume(seVol);
                 }
 
                 float bgmVol = AudioManager::GetInstance().GetBGMVolume();
-                if (ImGui::SliderFloat("BGM Volume", &bgmVol, 0.0f, 1.0f, "%.2f")) {
+                if (ImGui::DragFloat("BGM Volume", &bgmVol, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
                     AudioManager::GetInstance().SetBGMVolume(bgmVol);
                 }
 
                 float voiceVol = AudioManager::GetInstance().GetVoiceVolume();
-                if (ImGui::SliderFloat("Voice Volume", &voiceVol, 0.0f, 1.0f, "%.2f")) {
+                if (ImGui::DragFloat("Voice Volume", &voiceVol, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
                     AudioManager::GetInstance().SetVoiceVolume(voiceVol);
                 }
 
@@ -297,13 +339,13 @@ namespace MadoEngine::Editor {
                 ImGui::Spacing();
 
                 if (ImGui::Button("保存")) {
-                    SaveAudioEditorVolumeJson();
+                    SaveAudioEditorSettingsJson();
                 }
 
                 ImGui::SameLine();
                 if (ImGui::Button("読込")) {
                     EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
-                    LoadAudioEditorVolumeJson();
+                    LoadAudioEditorSettingsJson();
                 }
 
                 ImGui::EndTabItem();

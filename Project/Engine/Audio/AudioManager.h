@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <vector>
 #include "Data/Audio.h"
+#include "Data/AudioPitchStream.h"
 #include "AudioType.h"
 
 namespace MadoEngine {
@@ -13,6 +14,8 @@ namespace MadoEngine {
 	/// Assets/Audio内の音声ファイルを自動管理し、文字列キーで再生可能
 	class AudioManager {
 	public:
+		static constexpr float kMinPitchSemitones = AudioPitchStream::kMinSemitones;
+		static constexpr float kMaxPitchSemitones = AudioPitchStream::kMaxSemitones;
 
 		/// @brief シングルトンインスタンスを取得
 		/// @return AudioManagerのインスタンスポインタ
@@ -52,6 +55,17 @@ namespace MadoEngine {
 		/// @param key ファイル名（拡張子なし）
 		/// @return 音量（見つからない場合は1.0f）
 		float GetVolume(const std::string& key) const;
+
+		/// @brief 再生速度を維持した個別音声の音程を現在および後続の再生へ適用
+		/// @param key ファイル名、拡張子なし
+		/// @param semitones 元の音程からの半音数、-12から12の範囲
+		/// @return 音程の適用に成功した場合はtrue
+		bool SetPitch(const std::string& key, float semitones);
+
+		/// @brief 個別音声の音程設定を取得
+		/// @param key ファイル名、拡張子なし
+		/// @return 元の音程からの半音数、未登録の場合は0
+		float GetPitch(const std::string& key) const;
 
 		/// @brief BGM音量を設定
 		/// @param volume 音量（0.0f～1.0f）
