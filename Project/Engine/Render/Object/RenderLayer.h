@@ -14,6 +14,7 @@ namespace MadoEngine::Render {
 	X(Effect, "Effect") \
 	X(UI, "UI") \
 	X(Debug, "Debug") \
+	X(ScreenEffect, "ScreenEffect") \
     /*X(Test, "Test") \*/
 
 	/// @brief 描画対象を分類するレイヤー

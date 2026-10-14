@@ -55,6 +55,8 @@ namespace UI::Game {
 
 		ApplyAppearanceSettings();
 
+		isDisplayEnabled_ = true;
+		isBackgroundEnabled_ = true;
 		isInitialized_ = true;
 		SetVisible(false);
 	}
@@ -67,9 +69,34 @@ namespace UI::Game {
 		displayedRevision_ = 0;
 		isVisible_ = false;
 		isInitialized_ = false;
+		isDisplayEnabled_ = true;
+		isBackgroundEnabled_ = true;
 	}
 
-	void RelicAcquisitionUI::Update(Relic::System& relicSystem) {
+	void RelicAcquisitionUI::SetDisplayEnabled(bool isDisplayEnabled) {
+		isDisplayEnabled_ = isDisplayEnabled;
+
+		// Chest表示開始Frameの描画より前に既存のカードやプレビューを非表示化
+		if (!isDisplayEnabled_) {
+			SetVisible(false);
+		}
+	}
+
+	void RelicAcquisitionUI::SetBackgroundEnabled(bool isBackgroundEnabled) {
+		isBackgroundEnabled_ = isBackgroundEnabled;
+		if (Sprite* overlay = ResolveSprite(panelSprites_[0])) {
+			overlay->SetVisible(isVisible_ && isDisplayEnabled_ && isBackgroundEnabled_);
+		}
+	}
+
+	void RelicAcquisitionUI::Update(Relic::System& relicSystem, bool acceptDecisionInput) {
+
+		// 開封待ち中は非表示のカードに対する獲得確定入力も禁止
+		if (!isDisplayEnabled_) {
+			SetVisible(false);
+			return;
+		}
+
 		const Relic::Definition* definition = relicSystem.GetPendingReward();
 		if (!definition) {
 			SetVisible(false);
@@ -83,7 +110,8 @@ namespace UI::Game {
 			SetVisible(true);
 		}
 
-		if (MyInput::Trigger("Decision") && relicSystem.ConfirmPendingReward()) {
+		// 前段の開封入力で獲得表示まで閉じないよう表示開始と決定受付を分離
+		if (acceptDecisionInput && MyInput::Trigger("Decision") && relicSystem.ConfirmPendingReward()) {
 			SetVisible(false);
 			displayedRelicId_.clear();
 			displayedRevision_ = 0;
@@ -195,9 +223,13 @@ namespace UI::Game {
 			ApplyAppearanceSettings();
 		}
 
-		const Relic::Definition* displayDefinition = relicSystem.GetPendingReward();
-		if (!displayDefinition && isPreviewEnabled_ && !definitions.empty()) {
-			displayDefinition = &definitions[previewRelicIndex_];
+		// 開封前の報酬をImGui経由で再表示しないよう通常表示と同じ許可状態を使用
+		const Relic::Definition* displayDefinition = nullptr;
+		if (isDisplayEnabled_) {
+			displayDefinition = relicSystem.GetPendingReward();
+			if (!displayDefinition && isPreviewEnabled_ && !definitions.empty()) {
+				displayDefinition = &definitions[previewRelicIndex_];
+			}
 		}
 
 		// 実報酬を優先し、待機中でない場合だけEditor用レリックへ表示内容を差し替え
@@ -281,10 +313,19 @@ namespace UI::Game {
 	}
 
 	void RelicAcquisitionUI::SetVisible(bool isVisible) {
+
+		// 表示要求の発生元にかかわらず開封待ち中の描画を抑止
+		isVisible = isVisible && isDisplayEnabled_;
 		isVisible_ = isVisible;
-		for (MadoEngine::SpriteHandle handle : panelSprites_) {
-			if (Sprite* sprite = ResolveSprite(handle)) {
-				sprite->SetVisible(isVisible);
+
+		// フラッシュ中の背景暗転だけを抑止し、ImGui経由の表示要求にも同じ条件を適用
+		for (std::size_t index = 0; index < panelSprites_.size(); ++index) {
+			bool isPanelVisible = isVisible;
+			if (index == 0) {
+				isPanelVisible = isPanelVisible && isBackgroundEnabled_;
+			}
+			if (Sprite* sprite = ResolveSprite(panelSprites_[index])) {
+				sprite->SetVisible(isPanelVisible);
 			}
 		}
 		if (Sprite* icon = ResolveSprite(iconSprite_)) {

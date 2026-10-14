@@ -17,6 +17,7 @@
 #include "Utility/Light/LightManager.h"
 #include "Utility/Random.h"
 #include "UI/UIHeaders.h"
+#include "UI/Game/Chest/ChestOpeningPresentation.h"
 #include "System/InGameSession/InGameSession.h"
 #include <cstdint>
 
@@ -94,6 +95,10 @@ private:
 	/// @brief PlayerSpotLightをPlayerの頭上座標へ同期
 	void SynchronizePlayerSpotLight();
 
+	/// @brief Chest演出に応じたPlayerOutlineの有効状態の切り替え
+	/// @param isSuppressed PlayerOutlineを無効化する場合はtrue
+	void SetPlayerOutlineSuppressed(bool isSuppressed);
+
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
 	
@@ -125,6 +130,7 @@ private:
 	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
 	UI::Game::UpgradeUI weaponUpgradeUI_;
 	UI::Game::RelicAcquisitionUI relicAcquisitionUI_;
+	UI::Game::ChestOpeningPresentation chestOpeningPresentation_;
 	UI::Game::RelicInventoryUI relicInventoryUI_;
 
 	MadoEngine::TextHandle enemyCountText_{};

@@ -3,6 +3,7 @@
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
 #include "Render/Object/2d/Text/MyText.h"
+#include "Render/PostEffectManager.h"
 #include "Utility/Logger/Logger.h"
 #include "imguiHeaders.h"
 #include <algorithm>
@@ -21,6 +22,7 @@ namespace {
 	constexpr int kEnemyDamageSoundFirstIndex = 1;
 	constexpr int kEnemyDamageSoundLastIndex = 5;
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
+	constexpr const char* kPlayerOutlinePassName = "PlayerOutline";
 }
 
 GameScene::GameScene(CommonData& commonData)
@@ -111,6 +113,7 @@ void GameScene::Initialize() {
 	weaponUpgradeUI_.Initialize();
 	relicInventoryUI_.Initialize(*relicSystem_);
 	relicAcquisitionUI_.Initialize();
+	chestOpeningPresentation_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始
 	inGameSession_ = std::make_unique<System::InGameSession>();
@@ -185,7 +188,13 @@ SceneType GameScene::Update(float dt) {
 				enemyManager_->SpawnBoss(request.position, SceneType::Game);
 				break;
 			case MapEventAction::RequestRelicReward:
-				relicSystem_->RequestReward();
+
+				// 報酬を保留して獲得UIの前に専用Modelの開封待ち表示を開始
+				if (relicSystem_->RequestReward()) {
+					if (const Relic::Definition* reward = relicSystem_->GetPendingReward()) {
+						chestOpeningPresentation_.Show(reward->rarity);
+					}
+				}
 				break;
 			case MapEventAction::None:
 				break;
@@ -211,6 +220,7 @@ SceneType GameScene::Update(float dt) {
 	// HPが0になったFrameでGame進行を固定し、死亡Animationだけを描画System側で継続
 	if (player_->IsDead()) {
 		inGameSession_->SetGameOver();
+		chestOpeningPresentation_.Hide();
 	}
 
 	// Pause中も現在の判定形状を確認できるようEnemy Colliderを毎Frame登録
@@ -219,7 +229,8 @@ SceneType GameScene::Update(float dt) {
 
 	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
-		const bool isCameraInputEnabled = inGameSession_->GetCurrentPhase() != InGamePhase::Paused;
+		const bool isCameraInputEnabled = inGameSession_->GetCurrentPhase() != InGamePhase::Paused &&
+			!chestOpeningPresentation_.IsActive();
 		tpsCamera->SetInputEnabled(isCameraInputEnabled);
 
 		if (isCameraInputEnabled) {
@@ -253,8 +264,30 @@ SceneType GameScene::Update(float dt) {
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
+
+	// Editorの報酬解除時にも宝箱表示を残さず通常の待機解除へ追従
+	if (chestOpeningPresentation_.IsActive() && !relicSystem_->HasPendingReward()) {
+		chestOpeningPresentation_.Hide();
+	}
+
+	// 獲得待ち中も進む時間を使用し、獲得確定後も開封フラッシュの透明化を継続
+	const bool didFinishChestPresentation = chestOpeningPresentation_.Update(
+		dt, inGameSession_->IsWaitingItemAcquisition());
+
+	// Chestの表示開始Frameからフラッシュ終了までPlayerの輪郭が前面へ重なる描画を抑止
+	SetPlayerOutlineSuppressed(chestOpeningPresentation_.IsActive() || chestOpeningPresentation_.IsFlashActive());
+
+	// ImGuiのプレビュー経路も含め、宝箱の膨張演出が完了するまではカード表示を禁止
+	relicAcquisitionUI_.SetDisplayEnabled(!chestOpeningPresentation_.IsActive());
+
+	// 背景の暗転だけをフラッシュ終了まで待たせ、カードの表示開始時期を維持
+	relicAcquisitionUI_.SetBackgroundEnabled(!chestOpeningPresentation_.IsFlashActive());
 	if (inGameSession_->IsWaitingItemAcquisition()) {
-		relicAcquisitionUI_.Update(*relicSystem_);
+		if (!chestOpeningPresentation_.IsActive()) {
+
+			// 膨張終了FrameのGamePad Aで表示直後のカードまで閉じないよう決定入力を抑止
+			relicAcquisitionUI_.Update(*relicSystem_, !didFinishChestPresentation);
+		}
 	} else if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
 		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_, *player_);
 	}
@@ -351,6 +384,9 @@ SceneType GameScene::Update(float dt) {
 			}
 		}());
 	}
+
+	// Camera切り替え後の描画姿勢へ追従し、表示開始Frameから宝箱を画面中央へ配置
+	chestOpeningPresentation_.FollowCamera(cameraManager_.GetRenderCamera());
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
 	enemyDamageView_.SetVisible(inGameSession_->IsPlaying());
 	enemyDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
@@ -536,6 +572,20 @@ void GameScene::SynchronizePlayerSpotLight() {
 	playerSpotLight->position = { playerPosition.x,playerPosition.y + offsetY ,playerPosition.z };
 }
 
+void GameScene::SetPlayerOutlineSuppressed(bool isSuppressed) {
+	MadoEngine::Render::PostEffectManager& postEffectManager =
+		MadoEngine::Render::PostEffectManager::GetInstance();
+
+	// 対象Passだけを名前で特定し、Chest演出の有無で有効状態を直接切り替え
+	for (MadoEngine::Render::PostEffectPassHandle handle : postEffectManager.GetLayerPassHandles()) {
+		const MadoEngine::Render::PostEffectPass* pass = postEffectManager.TryGet(handle);
+		if (pass && pass->GetName() == kPlayerOutlinePassName) {
+			postEffectManager.SetEnabled(handle, !isSuppressed);
+			return;
+		}
+	}
+}
+
 Vector3 GameScene::GetShadowFocusPosition() const {
 	if (!player_) {
 		return GetCamera().GetPosition();
@@ -555,6 +605,10 @@ bool GameScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 }
 
 void GameScene::Finalize() {
+
+	// 演出途中のScene遷移でもPlayerOutlineが無効のまま残らないよう有効化
+	SetPlayerOutlineSuppressed(false);
+	chestOpeningPresentation_.Finalize();
 	relicAcquisitionUI_.Finalize();
 	relicInventoryUI_.Finalize();
 	weaponUpgradeUI_.Finalize();

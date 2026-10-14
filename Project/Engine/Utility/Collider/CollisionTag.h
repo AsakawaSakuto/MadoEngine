@@ -4,7 +4,7 @@
 
 /// @brief 衝突タグの列挙型
 enum class CollisionTag {
-	PlayerHitBox,
+	PlayerHitBox,         // プレイヤーの当たり判定用Box
 	PlayerMovementSphere,
 	PlayerDropObjectGetSphere,
 	PlayerProjectileHitBox,

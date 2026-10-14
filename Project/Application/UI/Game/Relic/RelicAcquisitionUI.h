@@ -22,9 +22,18 @@ namespace UI::Game {
 		/// @brief 描画オブジェクトの参照を解放
 		void Finalize();
 
+		/// @brief 獲得表示とEditorプレビューの表示許可を設定
+		/// @param isDisplayEnabled レリックカードの表示を許可する場合はtrue
+		void SetDisplayEnabled(bool isDisplayEnabled);
+
+		/// @brief 背景を暗くするSpriteの表示許可を設定
+		/// @param isBackgroundEnabled 背景の暗転表示を許可する場合はtrue
+		void SetBackgroundEnabled(bool isBackgroundEnabled);
+
 		/// @brief 獲得待ちレリックの表示と決定入力を更新
 		/// @param relicSystem 更新対象のレリックシステム
-		void Update(Relic::System& relicSystem);
+		/// @param acceptDecisionInput 決定入力を受け付ける場合はtrue
+		void Update(Relic::System& relicSystem, bool acceptDecisionInput = true);
 
 		/// @brief レリック獲得UIの見た目を調整するImGuiを描画
 		/// @param relicSystem プレビューに使用するレリックシステム
@@ -92,6 +101,8 @@ namespace UI::Game {
 		std::size_t previewRelicIndex_ = 0;
 		std::uint64_t displayedRevision_ = 0;
 		bool isPreviewEnabled_ = false;
+		bool isDisplayEnabled_ = true;
+		bool isBackgroundEnabled_ = true;
 		bool isVisible_ = false;
 		bool isInitialized_ = false;
 	};

@@ -159,6 +159,22 @@
       "maxStack": 10,
       "rarity": "Rare",
       "textureName": "Uchiwa"
+    },
+    {
+      "description": "効果説明",
+      "displayName": "epic",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "OutgoingDamage",
+          "type": "StatModifier",
+          "valuePerStack": 0.0
+        }
+      ],
+      "id": "relic_2",
+      "maxStack": 9,
+      "rarity": "Epic",
+      "textureName": "None"
     }
   ]
 }
