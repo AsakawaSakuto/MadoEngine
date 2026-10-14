@@ -41,6 +41,10 @@ public:
 	/// @return JarのEventObject名
 	std::string_view GetEventObjectName() const override { return "Jar"; }
 
+	/// @brief 成功したJar取得の種別を取得
+	/// @return 経験値またはお金のJar取得通知
+	MapInteractionEvent GetInteractionEvent() const override;
+
 private:
 	JarType type_ = JarType::Money;
 	JarSize size_ = JarSize::Small;

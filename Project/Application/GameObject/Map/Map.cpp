@@ -272,6 +272,7 @@ void Map::Generate(const GenerationSettings& settings) {
 	ClampHeightSettings();
 	eventObjects_.clear();
 	pendingEventRequests_.clear();
+	pendingInteractionEvents_.clear();
 	DestroyMapInstancedBatches();
 	currentHitEventObject_ = nullptr;
 	interactionMarkerModel_ = MyModel::Find("Interact_x");
@@ -425,6 +426,14 @@ std::vector<MapEventRequest> Map::ConsumeEventRequests() {
 	// 同じ相互作用を複数Frameで処理しないよう未処理要求の所有権を呼び出し側へ移動
 	requests.swap(pendingEventRequests_);
 	return requests;
+}
+
+std::vector<MapInteractionEvent> Map::ConsumeInteractionEvents() {
+	std::vector<MapInteractionEvent> events;
+
+	// Objectの破棄後も型付きの成功結果をSceneへ一度だけ配送
+	events.swap(pendingInteractionEvents_);
+	return events;
 }
 
 void Map::Update(Player::Base& player, float deltaTime) {
@@ -1385,6 +1394,7 @@ void Map::HandleEventObjectInteraction(Player::Base& player) {
 	if (!interactedObject->Interact(player)) {
 		return;
 	}
+	pendingInteractionEvents_.push_back(interactedObject->GetInteractionEvent());
 
 	// 相互作用が成立した場合だけEventObject名と同じSEを一度再生
 	const std::string eventObjectName(interactedObject->GetEventObjectName());

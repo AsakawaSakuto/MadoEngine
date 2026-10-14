@@ -5,6 +5,7 @@
 #include "Render/Object/2d/Text/MyText.h"
 #include "Render/PostEffectManager.h"
 #include "Utility/Logger/Logger.h"
+#include "System/PlayLog/PlayLogJsonWriter.h"
 #include "imguiHeaders.h"
 #include <algorithm>
 #include <cmath>
@@ -35,6 +36,8 @@ void GameScene::Initialize() {
 	// Titleの選択状態を消費し、未選択時だけ新規抽選と履歴登録を実行
 	gameSeed_ = commonData_.GetGameSeedSystem().BeginGame();
 	MyRand::SetSeed(gameSeed_);
+	playLogRecorder_.Initialize(gameSeed_);
+	playLogSaveAttempted_ = false;
 	
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 	Enemy::Settings::GetInstance().LoadOrCreate();
@@ -118,6 +121,7 @@ void GameScene::Initialize() {
 	// Game進行Phaseと制限時間を全Object初期化後に開始
 	inGameSession_ = std::make_unique<System::InGameSession>();
 	inGameSession_->Initialize(kGameSceneTimeLimit);
+	ConsumePlayLogEvents();
 
 	auto textHandle = MyText::Find("Text");
 	if (MadoEngine::Text* text = MyText::TryGet(textHandle)) {
@@ -135,6 +139,9 @@ void GameScene::Initialize() {
 }
 
 SceneType GameScene::Update(float dt) {
+
+	// 前FrameのEditor変更を時間加算前に配送して取得時刻と削除時刻を維持
+	ConsumePlayLogEvents();
 	inGameSession_->Update(dt);
 
 	// Pauseと強化選択中はGameObjectへ渡す時間だけを停止
@@ -147,6 +154,7 @@ SceneType GameScene::Update(float dt) {
 	}();
 
 	if (inGameSession_->IsPlaying()) {
+		playLogRecorder_.AdvancePlayTime(deltaTime);
 		player_->Update(deltaTime);
 		enemySpawner_->Update(deltaTime);
 		enemyManager_->Update(deltaTime);
@@ -172,14 +180,23 @@ SceneType GameScene::Update(float dt) {
 				MyAudio::Play(damageSoundKey);
 			}
 			enemyDamageView_.Spawn(event);
-			weaponInventory_->RecordWeaponDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
+			playLogRecorder_.RecordDamage(event);
+
+			// 毒と火傷を武器戦績へ重複加算せず、直接攻撃だけを既存Weaponへ反映
+			if (event.sourceType == Combat::DamageSourceType::Weapon) {
+				weaponInventory_->RecordWeaponDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
+			}
 		}
 
 		// 全レリック上限時は支払い前に宝箱操作を拒否して一個獲得の契約を維持
 		map_->SetEventActionEnabled(
 			MapEventAction::RequestRelicReward,
 			relicSystem_->CanRequestReward());
-		map_->Update(*player_, deltaTime);
+		if (!player_->IsDead()) {
+
+			// 致死Damageの成立後に新しいインタラクトを受け付けない順序保証
+			map_->Update(*player_, deltaTime);
+		}
 		for (const MapEventRequest& request : map_->ConsumeEventRequests()) {
 
 			// Mapを各Game Systemへ依存させずSceneでイベント要求を仲介
@@ -200,16 +217,23 @@ SceneType GameScene::Update(float dt) {
 				break;
 			}
 		}
-		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
+		if (!player_->IsDead()) {
+
+			// 死亡確定後の所持金や経験値の変化を防ぐためDrop回収を停止
+			DropObject::Manager::GetInstance().Update(deltaTime, *player_);
+		}
 
 		// Playerの状態変更を描画処理へ依存させずSceneで獲得通知へ変換
 		for (const Player::ResourceGainEvent& event :
 			player_->ConsumeResourceGainEvents()) {
 			playerResourceGainView_.Spawn(event.type, event.amount);
+			if (event.type == Player::ResourceGainType::Money) {
+				playLogRecorder_.RecordMoneyGain(event.amount);
+			}
 		}
 
 		// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新
-		if (MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
+		if (!player_->IsDead() && MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
 			Vector3 nearestEnemyPosition;
 			if (enemyManager_->TryGetNearestEnemyPosition(nearestEnemyPosition)) {
 				weaponInventory_->Update(deltaTime, player_->GetPosition(), nearestEnemyPosition);
@@ -221,6 +245,7 @@ SceneType GameScene::Update(float dt) {
 	if (player_->IsDead()) {
 		inGameSession_->SetGameOver();
 		chestOpeningPresentation_.Hide();
+		FinishPlayLog(System::PlayEndReason::Death);
 	}
 
 	// Pause中も現在の判定形状を確認できるようEnemy Colliderを毎Frame登録
@@ -293,6 +318,7 @@ SceneType GameScene::Update(float dt) {
 	}
 	ApplyRelicModifiersIfChanged();
 	relicInventoryUI_.Update(*relicSystem_);
+	ConsumePlayLogEvents();
 
 	// レリック獲得を先に解決し、終了後に保留中のLevel Up選択へ遷移
 	const bool isRelicRewardPending = relicSystem_->HasPendingReward();
@@ -346,7 +372,7 @@ SceneType GameScene::Update(float dt) {
 		killCountText = MyText::TryGet(killCountText_);
 	}
 	if (killCountText) {
-		const std::string displayText = std::format("{}", weaponInventory_->GetTotalKillCount());
+		const std::string displayText = std::format("{}", playLogRecorder_.GetData().totalCombat.killCount);
 		if (killCountText->GetText() != displayText) {
 			killCountText->SetText(displayText);
 		}
@@ -606,6 +632,18 @@ bool GameScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 
 void GameScene::Finalize() {
 
+	// 終了要求のない通常Shutdownにも対応し、Resource解放前に一回だけ保存
+	if (!playLogRecorder_.IsFinished()) {
+		FinishPlayLog(System::PlayEndReason::ApplicationExit);
+	}
+#ifdef ENABLE_PLAY_LOG_SAVE
+	if (!playLogSaveAttempted_ && playLogRecorder_.IsFinished()) {
+		playLogSaveAttempted_ = true;
+		System::PlayLogJsonWriter writer;
+		writer.Save(playLogRecorder_.GetData());
+	}
+#endif
+
 	// 演出途中のScene遷移でもPlayerOutlineが無効のまま残らないよう有効化
 	SetPlayerOutlineSuppressed(false);
 	chestOpeningPresentation_.Finalize();
@@ -648,4 +686,66 @@ void GameScene::Finalize() {
 	playerSpotLightHandle_ = {};
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
+}
+
+void GameScene::ConsumePlayLogEvents() {
+
+	// UI経由の操作もゲーム本体の成功通知として同じ集計へ配送
+	for (const Weapon::InventoryChangeEvent& event : weaponInventory_->ConsumeInventoryChangeEvents()) {
+		playLogRecorder_.RecordWeaponChange(event);
+	}
+	for (const int paidMoney : weaponUpgradeSystem_->ConsumeRerollPayments()) {
+		playLogRecorder_.RecordReroll(paidMoney);
+	}
+	for (const MapInteractionEvent& event : map_->ConsumeInteractionEvents()) {
+		playLogRecorder_.RecordInteraction(event);
+	}
+}
+
+void GameScene::FinishPlayLog(System::PlayEndReason reason) {
+	if (playLogRecorder_.IsFinished()) {
+		return;
+	}
+
+	// 死亡Frame内で成立した通知を回収してから所持品の最終状態を固定
+	ConsumePlayLogEvents();
+	for (std::size_t slot = 0; slot < static_cast<std::size_t>(weaponSlotCount_); ++slot) {
+		if (const Weapon::BaseWeapon* weapon = weaponInventory_->GetWeaponAtSlot(slot)) {
+			playLogRecorder_.UpdateWeaponLevel(weapon->GetWeaponId(), weapon->GetUpgradeLevel());
+		}
+	}
+	std::vector<System::PlayRelicRecord> relics;
+	for (const Relic::Definition& definition : relicSystem_->GetDefinitions()) {
+		const int count = relicSystem_->GetInventory().GetCount(definition.id);
+		if (count > 0) {
+			relics.push_back({ definition.displayName, count, definition.rarity });
+		}
+	}
+	playLogRecorder_.Finish(reason, player_->GetStatus().currentMoney, player_->GetKarmaCount(), std::move(relics));
+
+	// 死亡以外の終了要求でも演出完了待ちの間にゲーム状態が変化しない停止状態へ移行
+	inGameSession_->SetGameOver();
+}
+
+void GameScene::OnExitRequested(SceneType destination) {
+
+	// 死亡による終了を後続のScene操作で別理由へ変更しない優先判定
+	if (player_->IsDead()) {
+		FinishPlayLog(System::PlayEndReason::Death);
+		return;
+	}
+	switch (destination) {
+	case SceneType::Game:
+		FinishPlayLog(System::PlayEndReason::Restart);
+		break;
+	case SceneType::Title:
+		FinishPlayLog(System::PlayEndReason::ReturnToTitle);
+		break;
+	case SceneType::None:
+		FinishPlayLog(System::PlayEndReason::ApplicationExit);
+		break;
+	default:
+		FinishPlayLog(System::PlayEndReason::SceneChange);
+		break;
+	}
 }

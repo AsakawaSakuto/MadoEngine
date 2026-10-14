@@ -114,13 +114,13 @@ public:
 	/// @param type 遷移先のシーンのタイプ
 	void RequestConfirmedEditorSceneChange(SceneType type);
 
+	/// @brief 遷移Effectを伴うScene変更または現在Sceneの再開を要求
+	/// @param type 遷移先のScene、現在と同じ場合はSceneの再生成
+	void RequestSceneChange(SceneType type);
+
 private:
 	/// @brief SceneManagerのデバッグ用ImGuiを描画
 	void DrawSceneManagerImGui();
-
-	/// @brief 遷移Effectを伴うシーン遷移を要求
-	/// @param type 遷移先のシーンのタイプ
-	void RequestSceneChange(SceneType type);
 
 	/// @brief Effect最大到達後のシーン切替をフレーム末尾へ予約
 	/// @param type 遷移先のシーンのタイプ

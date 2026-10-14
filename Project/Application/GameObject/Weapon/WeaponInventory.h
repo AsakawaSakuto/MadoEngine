@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseWeapon.h"
+#include "WeaponInventoryEvent.h"
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -73,6 +74,10 @@ namespace Weapon {
 		/// @return 発生順に格納された武器攻撃イベント
 		std::vector<WeaponAttackEvent> ConsumeWeaponAttackEvents();
 
+		/// @brief 未処理の武器装備変更を取得してキューをクリア
+		/// @return 発生順に格納された装備変更通知
+		std::vector<InventoryChangeEvent> ConsumeInventoryChangeEvents();
+
 		/// @brief ダメージと撃破結果を発生元Weaponへ記録
 		/// @param sourceWeaponId 発生元Weaponインスタンスの識別番号
 		/// @param appliedDamage Enemyへ実際に適用されたダメージ量
@@ -91,6 +96,7 @@ namespace Weapon {
 		Projectile::Type selectedAddWeaponType_ = Projectile::Type::Pistol;
 		std::vector<std::unique_ptr<BaseWeapon>> weapons_;
 		std::vector<WeaponAttackEvent> weaponAttackEvents_;
+		std::vector<InventoryChangeEvent> inventoryChangeEvents_;
 		RuntimeModifiers runtimeModifiers_;
 		std::uint64_t revision_ = 0;
 	};

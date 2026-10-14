@@ -1,5 +1,6 @@
 #pragma once
 #include "../../IGameObject.h"
+#include "MapInteractionEvent.h"
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -85,6 +86,10 @@ public:
 	/// @brief 相互作用成立時にGameへ渡す処理要求を取得
 	/// @return 相互作用によって発生する処理要求
 	virtual MapEventRequest GetInteractionRequest() const { return {}; }
+
+	/// @brief 最後に成功した相互作用の結果通知を取得
+	/// @return 種別と実際の支払額を含む結果通知
+	virtual MapInteractionEvent GetInteractionEvent() const { return {}; }
 
 protected:
 	/// @brief Collider登録名を設定

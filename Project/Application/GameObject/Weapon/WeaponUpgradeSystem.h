@@ -82,6 +82,10 @@ namespace Weapon {
 		/// @return 再抽選に成功した場合はtrue
 		bool RerollChoicesForDebug(const Inventory& inventory);
 
+		/// @brief 支払いまで成功したリロールの料金通知を取得
+		/// @return 発生順に格納された実際の支払額
+		std::vector<int> ConsumeRerollPayments();
+
 		/// @brief 指定した武器アップグレード選択肢を適用
 		/// @param choiceIndex 適用する選択肢の番号
 		/// @param generation UIが取得した選択肢の世代番号
@@ -105,6 +109,7 @@ namespace Weapon {
 		int previousPlayerLevel_ = 0;
 		int pendingUpgradeCount_ = 0;
 		int rerollCost_ = kInitialRerollCost;
+		std::vector<int> rerollPayments_;
 		std::vector<UpgradeChoice> choices_;
 		Random random_;
 		std::uint64_t nextGeneration_ = 1;

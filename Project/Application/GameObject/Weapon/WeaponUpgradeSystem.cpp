@@ -30,6 +30,7 @@ namespace Weapon {
 		previousPlayerLevel_ = currentPlayerLevel;
 		pendingUpgradeCount_ = 0;
 		rerollCost_ = kInitialRerollCost;
+		rerollPayments_.clear();
 		choices_.clear();
 		random_.SetSeed(randomSeed);
 		nextGeneration_ = 1;
@@ -129,6 +130,8 @@ namespace Weapon {
 			return false;
 		}
 
+		rerollPayments_.push_back(paidCost);
+
 		// 長時間のプレイでも整数Overflowを起こさない範囲で次回料金を増加
 		if (rerollCost_ <= (std::numeric_limits<int>::max)() - kRerollCostIncrement) {
 			rerollCost_ += kRerollCostIncrement;
@@ -142,6 +145,14 @@ namespace Weapon {
 			Logger::Level::Application
 		);
 		return true;
+	}
+
+	std::vector<int> UpgradeSystem::ConsumeRerollPayments() {
+		std::vector<int> payments;
+
+		// Debug用の無料再抽選を含めず支払い成功分だけを一度配送
+		payments.swap(rerollPayments_);
+		return payments;
 	}
 
 	bool UpgradeSystem::RerollChoicesForDebug(const Inventory& inventory) {

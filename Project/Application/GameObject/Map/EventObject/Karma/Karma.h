@@ -36,4 +36,8 @@ public:
 	/// @brief KarmaのEventObject名を取得
 	/// @return KarmaのEventObject名
 	std::string_view GetEventObjectName() const override { return "Karma"; }
+
+	/// @brief 成功したKarma取得の結果を取得
+	/// @return Karma取得通知
+	MapInteractionEvent GetInteractionEvent() const override { return { MapInteractionType::Karma, 0 }; }
 };

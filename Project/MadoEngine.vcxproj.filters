@@ -211,6 +211,8 @@
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
+    <ClCompile Include="Application\System\PlayLog\PlayLogRecorder.cpp" />
+    <ClCompile Include="Application\System\PlayLog\PlayLogJsonWriter.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyMovement.cpp" />
@@ -883,6 +885,11 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\System\GameSeed\GameSeedSystem.h" />
+    <ClInclude Include="Application\System\PlayLog\PlayLogData.h" />
+    <ClInclude Include="Application\System\PlayLog\PlayLogRecorder.h" />
+    <ClInclude Include="Application\System\PlayLog\PlayLogJsonWriter.h" />
+    <ClInclude Include="Application\GameObject\Weapon\WeaponInventoryEvent.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\MapInteractionEvent.h" />
     <ClInclude Include="Application\System\InGameSession\InGamePhase.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

@@ -78,8 +78,13 @@ public:
 	/// @return レリック報酬開始要求
 	MapEventRequest GetInteractionRequest() const override;
 
+	/// @brief 開封成功時の種別と実際の支払額を取得
+	/// @return 最後に成功したChest開封の結果通知
+	MapInteractionEvent GetInteractionEvent() const override;
+
 private:
 	ChestType type_ = ChestType::Normal;
+	int lastPaidMoney_ = 0;
 	std::shared_ptr<OpenCostState> openCostState_;
 	mutable std::string interactionText_ = "10Gで宝箱を開ける";
 	mutable int displayedOpenCost_ = -1;

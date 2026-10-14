@@ -99,6 +99,7 @@ SceneManager::~SceneManager() {
 #else
 	selectedModel_ = {};
 #endif // USE_IMGUI
+	currentScene_->OnExitRequested(SceneType::None);
 	currentScene_->Finalize();
 	currentScene_.reset();
 	MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
@@ -452,7 +453,7 @@ bool SceneManager::IsSceneTransitioning() const {
 }
 
 void SceneManager::RequestSceneChange(SceneType type) {
-	if (type == SceneType::None || type == currentSceneType_) {
+	if (type == SceneType::None) {
 		return;
 	}
 
@@ -466,12 +467,17 @@ void SceneManager::RequestSceneChange(SceneType type) {
 
 	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
 	if (transitionController.Request(type)) {
+
+		// 遷移演出中の追加プレイを含めないよう受理時点で終了理由と戦績を確定
+		if (currentScene_) {
+			currentScene_->OnExitRequested(type);
+		}
 		Logger::Output("シーン遷移演出を開始しました: " + SceneTypeToString(type), Logger::Level::Debug);
 	}
 }
 
 void SceneManager::QueueSceneChange(SceneType type) {
-	if (type == SceneType::None || type == currentSceneType_ || hasPendingSceneChange_) {
+	if (type == SceneType::None || hasPendingSceneChange_) {
 		return;
 	}
 

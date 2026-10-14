@@ -77,6 +77,10 @@ public:
 	/// @return 発生順に格納されたMapイベント要求
 	std::vector<MapEventRequest> ConsumeEventRequests();
 
+	/// @brief 成功したインタラクトの結果を取得してキューをクリア
+	/// @return 発生順に格納されたインタラクト結果
+	std::vector<MapInteractionEvent> ConsumeInteractionEvents();
+
 private:
 	/// @brief Map生成Editorで編集する生成条件
 	struct GenerationSettings {
@@ -206,6 +210,7 @@ private:
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
 	std::vector<MapEventRequest> pendingEventRequests_;
+	std::vector<MapInteractionEvent> pendingInteractionEvents_;
 	std::array<bool, static_cast<std::size_t>(MapEventAction::Count)> eventActionEnabled_{};
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
 

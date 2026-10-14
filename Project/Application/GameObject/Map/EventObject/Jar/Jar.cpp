@@ -163,3 +163,12 @@ std::string_view Jar::GetInteractionText() const {
 		return "壺を壊す";
 	}
 }
+
+MapInteractionEvent Jar::GetInteractionEvent() const {
+
+	// 報酬種別を文字列名から推測せず確定したJar種別から通知
+	if (type_ == JarType::Exp) {
+		return { MapInteractionType::ExpJar, 0 };
+	}
+	return { MapInteractionType::MoneyJar, 0 };
+}

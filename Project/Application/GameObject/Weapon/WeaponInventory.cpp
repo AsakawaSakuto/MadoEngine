@@ -15,6 +15,7 @@ namespace Weapon {
 		weapons_.clear();
 		weapons_.resize(slotCount_);
 		weaponAttackEvents_.clear();
+		inventoryChangeEvents_.clear();
 		runtimeModifiers_ = {};
 		revision_ = 0;
 
@@ -82,6 +83,13 @@ namespace Weapon {
 				}
 
 				weapons_[slotIndex] = std::move(weapon);
+				inventoryChangeEvents_.push_back({
+					InventoryChangeType::Acquired,
+					weapons_[slotIndex]->GetWeaponId(),
+					slotIndex,
+					Projectile::ProjectileTypeToDisplayName(type),
+					weapons_[slotIndex]->GetUpgradeLevel(),
+				});
 
 				// 強化候補など装備状態に依存する外部キャッシュを無効化
 				++revision_;
@@ -166,6 +174,14 @@ namespace Weapon {
 		return events;
 	}
 
+	std::vector<InventoryChangeEvent> Inventory::ConsumeInventoryChangeEvents() {
+		std::vector<InventoryChangeEvent> events;
+
+		// 削除済み武器の通知も所有権を移動してScene側へ一度だけ配送
+		events.swap(inventoryChangeEvents_);
+		return events;
+	}
+
 	void Inventory::RecordWeaponDamage(
 		std::uint64_t sourceWeaponId,
 		float appliedDamage,
@@ -206,6 +222,15 @@ namespace Weapon {
 		}
 
 		if (weapons_[weaponIndex]) {
+
+			// 武器本体の破棄前に最終Levelを含む履歴を退避
+			inventoryChangeEvents_.push_back({
+				InventoryChangeType::Removed,
+				weapons_[weaponIndex]->GetWeaponId(),
+				weaponIndex,
+				Projectile::ProjectileTypeToDisplayName(weapons_[weaponIndex]->GetProjectileType()),
+				weapons_[weaponIndex]->GetUpgradeLevel(),
+			});
 			weapons_[weaponIndex].reset();
 
 			// 装備削除を強化候補の世代管理へ通知

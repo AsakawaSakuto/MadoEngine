@@ -16,6 +16,10 @@ public:
 	virtual void DrawImGui() = 0;
 	virtual void Finalize() = 0;
 
+	/// @brief 受理された終了要求をResource破棄前に通知
+	/// @param destination 遷移先Scene、アプリ終了の場合はSceneType::None
+	virtual void OnExitRequested(SceneType destination) { (void)destination; }
+
 	/// @brief Map生成Editorを提供しているか確認
 	/// @return Map生成Editorを提供している場合はtrue
 	virtual bool HasMapGeneratorEditor() const { return false; }

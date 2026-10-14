@@ -30,6 +30,7 @@ Chest::~Chest() {
 
 void Chest::Initialize(const InitializeDesc& desc) {
 	type_ = desc.type;
+	lastPaidMoney_ = 0;
 	if (desc.openCostState) {
 		openCostState_ = desc.openCostState;
 	} else {
@@ -103,13 +104,16 @@ bool Chest::Interact(Player::Base& player) {
 
 	// Freeは共有費用の支払いと増加を発生させず、そのまま開封成功
 	if (type_ == ChestType::Free) {
+		lastPaidMoney_ = 0;
 		return true;
 	}
 
 	// 残高不足時は費用を据え置き、ChestをMap上に維持
-	if (!player.TrySpendMoney(openCostState_->GetCurrentCost())) {
+	const int paidMoney = openCostState_->GetCurrentCost();
+	if (!player.TrySpendMoney(paidMoney)) {
 		return false;
 	}
+	lastPaidMoney_ = paidMoney;
 
 	// 支払い成立後に次の通常Chestへ適用する費用を更新
 	openCostState_->IncreaseCost();
@@ -143,4 +147,13 @@ std::string_view Chest::GetInteractionText() const {
 
 MapEventRequest Chest::GetInteractionRequest() const {
 	return { MapEventAction::RequestRelicReward, GetPosition() };
+}
+
+MapInteractionEvent Chest::GetInteractionEvent() const {
+
+	// 共有費用の更新後も今回支払った料金を通知
+	if (type_ == ChestType::Free) {
+		return { MapInteractionType::FreeChest, 0 };
+	}
+	return { MapInteractionType::PaidChest, lastPaidMoney_ };
 }

@@ -19,6 +19,7 @@
 #include "UI/UIHeaders.h"
 #include "UI/Game/Chest/ChestOpeningPresentation.h"
 #include "System/InGameSession/InGameSession.h"
+#include "System/PlayLog/PlayLogRecorder.h"
 #include <cstdint>
 
 /// @brief ゲームシーン
@@ -43,6 +44,10 @@ public:
 
 	/// @brief 終了処理
 	void Finalize() override;
+
+	/// @brief Scene終了要求に対応するプレイ記録を確定
+	/// @param destination 遷移先Scene、アプリ終了の場合はSceneType::None
+	void OnExitRequested(SceneType destination) override;
 
 	/// @brief 描画処理
 	void Draw() override;
@@ -86,6 +91,13 @@ public:
 	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
+	/// @brief 成功したゲーム操作の通知をプレイ集計へ配送
+	void ConsumePlayLogEvents();
+
+	/// @brief 終了時の装備と所持品をSnapshotへ固定
+	/// @param reason プレイの終了理由
+	void FinishPlayLog(System::PlayEndReason reason);
+
 	/// @brief 現在Mapに依存する移動制限を各Game Systemへ同期
 	void SynchronizeMapDependentState();
 
@@ -149,4 +161,6 @@ private:
 
 	// System
 	std::unique_ptr<System::InGameSession> inGameSession_;
+	System::PlayLogRecorder playLogRecorder_;
+	bool playLogSaveAttempted_ = false;
 };
