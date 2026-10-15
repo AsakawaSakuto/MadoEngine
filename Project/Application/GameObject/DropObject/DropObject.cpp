@@ -23,16 +23,6 @@ namespace DropObject {
 
 	void Base::Initialize(Type type, const Vector3& position, int index) {
 		type_ = type;
-		transform_.translate = position;
-		transform_.scale = { 0.2f, 0.2f, 0.2f };
-		isMoving_ = type_ == Type::Money;
-		if (type_ == Type::Money) {
-
-			// 生成直後のMoneyに上昇しながら後退する予備動作を付与
-			backTimer_.Start(kBackDuration);
-		}
-
-		isAlive_ = true;
 		isReleased_ = false;
 		colliderName_ = "DropObject" + std::to_string(index);
 		modelName_ = "DropObject" + std::to_string(index);
@@ -40,7 +30,7 @@ namespace DropObject {
 		model_ = MyModel::Create(modelName_, "Plane", SceneType::Game);
 
 		AABB aabb;
-		aabb.center = transform_.translate;
+		aabb.center = position;
 		aabb.min = { -0.125f, 0.0f, -0.125f };
 		aabb.max = { 0.125f, 0.25f, 0.125f };
 
@@ -51,7 +41,6 @@ namespace DropObject {
 			break;
 		case Type::Money:
 			textureName = "Coin";
-			transform_.scale = { 0.1f, 0.1f, 0.1f };
 			break;
 		case Type::Heal:
 			textureName = "Heal";
@@ -60,13 +49,15 @@ namespace DropObject {
 
 		colliderShape_ = aabb;
 
-		// 回収判定とPlayer本体への到達判定を分離するため専用Tagで登録
+		// 生存状態を参照して未使用Pool枠を除外し、配置ごとのCollider再登録を回避
 		MyCollider::RegisterCollider(
 			colliderName_,
 			CollisionTag::DropObjectHitBox,
 			&colliderShape_,
 			&transform_.translate,
-			0.0f
+			0.0f,
+			nullptr,
+			&isAlive_
 		);
 
 		if (Model* model = MyModel::TryGet(model_)) {
@@ -75,8 +66,60 @@ namespace DropObject {
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);
 			model->SetLightingEnabled(false);
-			model->SetTransform(transform_);
 		}
+		Activate(position);
+	}
+
+	void Base::Activate(const Vector3& position) {
+
+		// 上書き前の吸着状態と予備動作を持ち越さず、新しいDropとして配置
+		transform_.translate = position;
+		transform_.rotate = {};
+		transform_.scale = { 0.2f, 0.2f, 0.2f };
+		targetPosition_ = position;
+		backTimer_.Reset();
+		collectedRewardAmount_ = 0;
+		isMoving_ = type_ == Type::Money;
+		isAlive_ = true;
+		if (type_ == Type::Money) {
+
+			// Moneyだけは配置直後から上昇付きの吸着予備動作を開始
+			transform_.scale = { 0.1f, 0.1f, 0.1f };
+			backTimer_.Start(kBackDuration);
+		}
+
+		std::get<AABB>(colliderShape_).center = position;
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTransform(transform_);
+			model->SetVisible(true);
+		}
+	}
+
+	void Base::Deactivate() {
+
+		// Colliderが参照する生存状態とModel表示を同時に停止し、リソースは次の配置まで保持
+		isAlive_ = false;
+		isMoving_ = false;
+		backTimer_.Reset();
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetVisible(false);
+		}
+	}
+
+	int Base::GetRewardAmount() const {
+		if (type_ == Type::Exp) {
+			return kExpAmount;
+		}
+		if (type_ == Type::Money) {
+			return kMoneyAmount;
+		}
+		return 0;
+	}
+
+	int Base::ConsumeCollectedRewardAmount() {
+		const int amount = collectedRewardAmount_;
+		collectedRewardAmount_ = 0;
+		return amount;
 	}
 
 	void Base::Update(float deltaTime) {
@@ -89,7 +132,7 @@ namespace DropObject {
 
 	void Base::UpdateInternal(float deltaTime, Player::Base* player) {
 
-		// 回収済みObjectのModelとColliderをManager削除まで更新対象外に設定
+		// 回収済みPool枠を再配置まで更新対象外に設定
 		if (!isAlive_) {
 			return;
 		}
@@ -146,7 +189,7 @@ namespace DropObject {
 				return;
 			}
 
-			isAlive_ = false;
+			Deactivate();
 		}
 
 		if (Model* model = MyModel::TryGet(model_)) {
@@ -162,13 +205,11 @@ namespace DropObject {
 			return;
 		}
 
-		// 報酬の加算先をDropObjectの種類ごとに分離
+		// ExpとMoneyは各Poolの上書き分とManagerで合算し、Healだけをその場で適用
 		switch (type_) {
 		case Type::Exp:
-			player.AddExp(kExpAmount);
-			break;
 		case Type::Money:
-			player.AddMoney(kMoneyAmount);
+			collectedRewardAmount_ = GetRewardAmount();
 			break;
 		case Type::Heal:
 			player.RecoverHealth(kHealAmount);
@@ -179,7 +220,7 @@ namespace DropObject {
 		const std::string soundKey = DropObjectTypeToString(type_);
 		MyAudio::Play(soundKey);
 
-		isAlive_ = false;
+		Deactivate();
 	}
 
 	void Base::Release() {

@@ -14,8 +14,9 @@ namespace MyCollider {
 	/// @param pPos アクターの現在座標へのポインタ（Shape内のcenterを自動更新するために必要）
 	/// @param callback 衝突時のコールバック関数（省略可）
 	/// @param weight 押し戻しの重み（省略可、デフォルトは0.5f）
-	inline void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.5f, CollisionCallback callback = nullptr) {
-		ColliderManager::GetInstance().RegisterCollider(name, tag, pShape, pPos, weight, callback);
+	/// @param pIsActive 登録期間中に有効な状態参照、nullptrの場合は常時有効
+	inline void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.5f, CollisionCallback callback = nullptr, const bool* pIsActive = nullptr) {
+		ColliderManager::GetInstance().RegisterCollider(name, tag, pShape, pPos, weight, callback, pIsActive);
 	}
 
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）

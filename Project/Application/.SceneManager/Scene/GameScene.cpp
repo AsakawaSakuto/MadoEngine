@@ -87,6 +87,9 @@ void GameScene::Initialize() {
 	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
 	SynchronizePlayerPointLight();
 
+	// 大量撃破時の生成負荷を読み込み時へ移してExp512枠とMoney128枠を事前確保
+	DropObject::Manager::GetInstance().Initialize();
+
 	enemyManager_ = std::make_unique<Enemy::Manager>();
 	enemyManager_->Initialize(player_.get());
 	enemySpawner_ = std::make_unique<Enemy::Spawner>();
@@ -670,7 +673,7 @@ void GameScene::Finalize() {
 		enemyManager_->Clear();
 	}
 
-	DropObject::Manager::GetInstance().Clear();
+	DropObject::Manager::GetInstance().Finalize();
 	Projectile::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
 	fpsMeasurementView_.Finalize();

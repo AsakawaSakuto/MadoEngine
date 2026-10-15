@@ -40,10 +40,20 @@ public:
 		CollisionTag tag;              // グループ (例: CollisionTag::Enemy)
 		ColliderShape* pShape = nullptr;       // 形状データ (std::variant)
 		Vector3* pPosition = nullptr;  // アクターの現在座標へのポインタ
+		const bool* pIsActive = nullptr; // 有効状態への参照、未指定時は常時有効
 		CollisionCallback onHit = nullptr;
 		float weight = 0.0f;           // 押し戻されにくさ (0.0: 通常, 1.0: 完全固定)
 		Vector3 previousPosition = { 0.0f, 0.0f, 0.0f }; // CCDで使う前回座標
 		bool hasPreviousPosition = false;                // 前回座標が有効か
+
+		/// @brief 参照先の有効状態からColliderの判定可否を取得
+		/// @return 衝突判定の対象となる場合はtrue
+		bool IsActive() const {
+			if (pIsActive) {
+				return *pIsActive;
+			}
+			return true;
+		}
 	};
 
 	static ColliderManager& GetInstance() {
@@ -56,11 +66,12 @@ public:
 	/// @brief コライダーを登録
 	/// @param name 識別名（例: "Enemy_0001"）
 	/// @param tag グループ（例: CollisionTag::Enemy）
-	/// @param shape 形状データ（AABB, OBB, Sphere, OvalSphere, Plane, Segment, Lineのいずれか）
+	/// @param pShape 形状データ（AABB, OBB, Sphere, OvalSphere, Plane, Segment, Lineのいずれか）
 	/// @param pPos アクターの現在座標へのポインタ（Shape内のcenterを自動更新するために必要）
 	/// @param callback 衝突時のコールバック関数（省略可）
 	/// @param weight 押し戻されにくさ（0.0: 通常, 1.0: 完全固定、省略可）
-	void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.0f, CollisionCallback callback = nullptr);
+	/// @param pIsActive 登録期間中に有効な状態参照、nullptrの場合は常時有効
+	void RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight = 0.0f, CollisionCallback callback = nullptr, const bool* pIsActive = nullptr);
 
 	/// @brief コライダーを削除する（デストラクタで必ず呼ぶ）
 	void RemoveCollider(const std::string& name);
