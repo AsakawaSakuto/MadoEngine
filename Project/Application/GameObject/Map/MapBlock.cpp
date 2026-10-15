@@ -3,6 +3,8 @@
 
 namespace {
 
+	const char* kMaxBlockTextureName = "blockTexture4";
+
 /// @brief 坂の向きに対応するY軸回転角を取得
 /// @param direction 坂の向き
 /// @return Y軸回転角（ラジアン）
@@ -143,13 +145,13 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 		CreateGroundModelName(),
 		"block",
 		SceneType::Game,
-		MadoEngine::Render::RenderLayer::Default);
+		MadoEngine::Render::RenderLayer::MapBlock);
 	InstancedModel* groundModel = MyInstancedModel::TryGet(groundInstancedModel_);
 	if (!groundModel) {
 		return;
 	}
 
-	groundModel->SetTexture("blockTexture2");
+	groundModel->SetTexture(kMaxBlockTextureName);
 
 	// 高さ分の土台をブロック中心から上方向へ拡張
 	InstancedModel::InstanceDesc instanceDesc;
@@ -166,13 +168,13 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 		CreateSlopeModelName(),
 		"Slope",
 		SceneType::Game,
-		MadoEngine::Render::RenderLayer::Default);
+		MadoEngine::Render::RenderLayer::MapBlock);
 	InstancedModel* slopeModel = MyInstancedModel::TryGet(slopeInstancedModel_);
 	if (!slopeModel) {
 		return;
 	}
 
-	slopeModel->SetTexture("blockTexture2");
+	slopeModel->SetTexture(kMaxBlockTextureName);
 
 	// 坂Modelの既定方向を上り方向へ合わせて土台上へ配置
 	InstancedModel::InstanceDesc instanceDesc;

@@ -5,20 +5,20 @@
             "applyChance": {
                 "fixedAddValue": 5.0,
                 "isSelected": true,
-                "rarityAddValue": 2.0,
-                "value": 30.0
+                "rarityAddValue": 2.5,
+                "value": 50.0
             },
             "damagePerTick": {
                 "fixedAddValue": 1.0,
                 "isSelected": true,
-                "rarityAddValue": 0.5,
-                "value": 2.0
+                "rarityAddValue": 1.0,
+                "value": 1.0
             },
             "duration": {
                 "fixedAddValue": 1.0,
                 "isSelected": true,
                 "rarityAddValue": 0.5,
-                "value": 8.0
+                "value": 5.0
             }
         }
     },

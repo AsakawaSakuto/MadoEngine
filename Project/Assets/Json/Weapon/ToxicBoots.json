@@ -78,9 +78,9 @@
             "value": 0.25
         },
         "shotMaxCount": {
-            "fixedAddValue": 0.0,
+            "fixedAddValue": 1.0,
             "isSelected": true,
-            "rarityAddValue": 0.0,
+            "rarityAddValue": 0.5,
             "value": 1.0
         },
         "size": {

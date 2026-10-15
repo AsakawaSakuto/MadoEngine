@@ -9,6 +9,7 @@
 
 namespace {
 	constexpr const char* kSceneTransitionPassName = "PixelArt";
+	constexpr const char* kSceneTransitionUiPassName = "UI_PixelArt";
 	constexpr const char* kPixelSizeParameterKey = "PixelSize";
 	constexpr float kMinimumPixelSize = 1.0f;
 	constexpr float kMaximumPixelSize = 64.0f;
@@ -84,7 +85,21 @@ void Terminal::UpdateSceneTransitionPixelArt() {
 		// 遷移完了時は通常描画の負荷を避けるためPixelArt Passを無効化
 		postEffectManager.SetFloatParameter(handle, kPixelSizeParameterKey, pixelSize);
 		postEffectManager.SetEnabled(handle, isTransitioning);
-		return;
+		break;
+	}
+
+	// 画面用Passの有無に依存せずUI用Passにも同じ遷移進行度と有効状態を反映
+	for (MadoEngine::Render::PostEffectPassHandle handle : postEffectManager.GetLayerPassHandles()) {
+		MadoEngine::Render::PostEffectPass* pass = postEffectManager.TryGet(handle);
+		if (!pass || pass->GetName() != kSceneTransitionUiPassName ||
+			pass->GetPostEffectType() != MadoEngine::Render::PostEffectType::PixelArt) {
+			continue;
+		}
+
+		// 通常時のUI描画を維持するため遷移完了後はUI用Passも無効化
+		postEffectManager.SetFloatParameter(handle, kPixelSizeParameterKey, pixelSize);
+		postEffectManager.SetEnabled(handle, isTransitioning);
+		break;
 	}
 }
 

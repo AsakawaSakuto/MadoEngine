@@ -175,6 +175,22 @@
       "maxStack": 9,
       "rarity": "Epic",
       "textureName": "None"
+    },
+    {
+      "description": "効果説明",
+      "displayName": "Legend",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "OutgoingDamage",
+          "type": "StatModifier",
+          "valuePerStack": 0.0
+        }
+      ],
+      "id": "relic_3",
+      "maxStack": 9,
+      "rarity": "Legendary",
+      "textureName": "None"
     }
   ]
 }

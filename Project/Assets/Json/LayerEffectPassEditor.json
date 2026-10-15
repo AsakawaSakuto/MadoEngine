@@ -117,6 +117,44 @@
             },
             "scope": "Layer",
             "targetLayerMask": 8
+        },
+        {
+            "effectShaderKey": "PostEffect/PixelArt.PS",
+            "effectType": "PixelArt",
+            "enabled": false,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_7",
+            "layerEffectStage": "Overlay",
+            "name": "UI_PixelArt",
+            "parameters": {
+                "ColorSteps": 8.0,
+                "Contrast": 1.149999976158142,
+                "Intensity": 1.0,
+                "PixelSize": 1.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 128
+        },
+        {
+            "effectShaderKey": "PostEffect/Bloom.PS",
+            "effectType": "Bloom",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_8",
+            "layerEffectStage": "Scene",
+            "name": "MapBlockBloom",
+            "parameters": {
+                "BloomColorA": 1.0,
+                "BloomColorB": 1.0,
+                "BloomColorG": 1.0,
+                "BloomColorR": 1.0,
+                "Intensity": 5.0,
+                "Radius": 4.5,
+                "SoftKnee": 1.0,
+                "Threshold": 1.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 1024
         }
     ],
     "screenPasses": [
@@ -132,7 +170,7 @@
                 "ColorG": 0.6800000071525574,
                 "ColorR": 0.5799999833106995,
                 "Density": 1.0,
-                "EndDistance": 85.0,
+                "EndDistance": 120.0,
                 "FarClip": 1000.0,
                 "HeightStrength": 0.0,
                 "NearClip": 0.10000000149011612,
@@ -177,7 +215,7 @@
         {
             "effectShaderKey": "PostEffect/ToneMapping.PS",
             "effectType": "ToneMapping",
-            "enabled": true,
+            "enabled": false,
             "key": "ScreenEffectPass_4",
             "name": "ToneMapping",
             "parameters": {

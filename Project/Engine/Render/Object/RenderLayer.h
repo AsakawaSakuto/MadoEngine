@@ -3,7 +3,7 @@
 #include <string>
 
 namespace MadoEngine::Render {
-	// 描画レイヤーを追加するときは、この一覧に1行追加する
+	// 保存済みLayerMaskの割り当てを維持するため、描画レイヤーは一覧の末尾へ追加
 #define MADO_RENDER_LAYER_DEFINITIONS(X) \
 	X(Default, "Default") \
 	X(World, "World") \
@@ -15,6 +15,7 @@ namespace MadoEngine::Render {
 	X(UI, "UI") \
 	X(Debug, "Debug") \
 	X(ScreenEffect, "ScreenEffect") \
+	X(MapBlock, "MapBlock") \
     /*X(Test, "Test") \*/
 
 	/// @brief 描画対象を分類するレイヤー

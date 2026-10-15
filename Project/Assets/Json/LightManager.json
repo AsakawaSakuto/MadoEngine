@@ -30,6 +30,29 @@
                     1.0,
                     1.0
                 ],
+                "decay": 1.0,
+                "intensity": 1.0,
+                "position": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "radius": 5.0
+            },
+            "enabled": false,
+            "layerMask": 1,
+            "name": "PlayerPointLight",
+            "scene": "Game",
+            "type": "Point"
+        },
+        {
+            "data": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
                 "cosAngle": 1.0,
                 "cosFalloffStart": 0.5,
                 "decay": 1.0,
@@ -38,12 +61,12 @@
                     -1.0,
                     0.0
                 ],
-                "distance": 65.0,
+                "distance": 58.5,
                 "intensity": 3.0,
                 "position": [
-                    81.62540435791016,
-                    72.62171936035156,
-                    72.98213195800781
+                    110.0579833984375,
+                    58.128143310546875,
+                    172.63601684570313
                 ]
             },
             "enabled": true,
