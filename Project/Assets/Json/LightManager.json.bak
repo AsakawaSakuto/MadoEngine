@@ -30,27 +30,20 @@
                     1.0,
                     1.0
                 ],
-                "cosAngle": 1.0,
-                "cosFalloffStart": 0.5,
                 "decay": 1.0,
-                "direction": [
+                "intensity": 1.0,
+                "position": [
                     0.0,
-                    -1.0,
+                    1.0,
                     0.0
                 ],
-                "distance": 58.5,
-                "intensity": 3.0,
-                "position": [
-                    111.9990005493164,
-                    59.60389709472656,
-                    88.99433135986328
-                ]
+                "radius": 5.0
             },
             "enabled": true,
             "layerMask": 1,
-            "name": "PlayerSpotLight",
+            "name": "PlayerPointLight",
             "scene": "Game",
-            "type": "Spot"
+            "type": "Point"
         }
     ],
     "version": 1

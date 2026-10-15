@@ -19,6 +19,8 @@ namespace {
 	constexpr float kTpsCameraMouseWheelZoomStep = 2.0f; // マウスホイール1回転でのズーム距離変化量
 	constexpr float kTpsCameraMinDistance = 5.0f;        // TPS_Cameraの最短距離
 	constexpr float kTpsCameraMaxDistance = 30.0f;       // TPS_Cameraの最長距離
+	constexpr float kPlayerPointLightHeight = 32.0f;
+	constexpr const char* kPlayerPointLightName = "PlayerPointLight";
 	
 	constexpr int kEnemyDamageSoundFirstIndex = 1;
 	constexpr int kEnemyDamageSoundLastIndex = 5;
@@ -83,7 +85,7 @@ void GameScene::Initialize() {
 	player_ = std::make_unique<Player::Base>();
 	player_->Initialize(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
 	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
-	SynchronizePlayerSpotLight();
+	SynchronizePlayerPointLight();
 
 	enemyManager_ = std::make_unique<Enemy::Manager>();
 	enemyManager_->Initialize(player_.get());
@@ -422,7 +424,7 @@ SceneType GameScene::Update(float dt) {
 	playerResourceGainView_.Update(deltaTime);
 
 	// Playerの移動と衝突解決後の最終座標へライトを追従
-	SynchronizePlayerSpotLight();
+	SynchronizePlayerPointLight();
 
 	if (player_->IsDeathAnimationFinished()) {
 		return SceneType::Result;
@@ -576,26 +578,29 @@ void GameScene::ApplyRelicModifiersIfChanged() {
 	appliedRelicRevision_ = relicSystem_->GetRevision();
 }
 
-void GameScene::SynchronizePlayerSpotLight() {
+void GameScene::SynchronizePlayerPointLight() {
 	if (!player_) {
 		return;
 	}
 
 	LightManager& lightManager = LightManager::GetInstance();
-	if (!lightManager.IsValid(playerSpotLightHandle_)) {
+	if (!lightManager.IsValid(playerPointLightHandle_)) {
 
 		// Json再読み込み後のHandle再生成に追従できるよう名前から再解決
-		playerSpotLightHandle_ = lightManager.Find("PlayerSpotLight");
+		playerPointLightHandle_ = lightManager.Find(kPlayerPointLightName);
 	}
 
-	SpotLight* playerSpotLight = lightManager.MutableSpotLight(playerSpotLightHandle_);
-	if (!playerSpotLight) {
+	PointLight* playerPointLight = lightManager.MutablePointLight(playerPointLightHandle_);
+	if (!playerPointLight) {
 		return;
 	}
 
-	const float offsetY = 50.0f;
 	const Vector3 playerPosition = player_->GetPosition();
-	playerSpotLight->position = { playerPosition.x,playerPosition.y + offsetY ,playerPosition.z };
+	playerPointLight->position = {
+		playerPosition.x,
+		playerPosition.y + kPlayerPointLightHeight,
+		playerPosition.z
+	};
 }
 
 void GameScene::SetPlayerOutlineSuppressed(bool isSuppressed) {
@@ -683,7 +688,7 @@ void GameScene::Finalize() {
 	cameraManager_.Clear();
 	debugCameraHandle_ = {};
 	tpsCameraHandle_ = {};
-	playerSpotLightHandle_ = {};
+	playerPointLightHandle_ = {};
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);
 }

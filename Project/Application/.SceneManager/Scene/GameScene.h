@@ -104,8 +104,8 @@ private:
 	/// @brief 所持レリックの変更をPlayerとWeaponへ反映
 	void ApplyRelicModifiersIfChanged();
 
-	/// @brief PlayerSpotLightをPlayerの頭上座標へ同期
-	void SynchronizePlayerSpotLight();
+	/// @brief PlayerPointLightをPlayerの頭上座標へ同期
+	void SynchronizePlayerPointLight();
 
 	/// @brief Chest演出に応じたPlayerOutlineの有効状態の切り替え
 	/// @param isSuppressed PlayerOutlineを無効化する場合はtrue
@@ -116,7 +116,7 @@ private:
 	
 	CameraHandle debugCameraHandle_{};
 	CameraHandle tpsCameraHandle_{};
-	LightHandle playerSpotLightHandle_{};
+	LightHandle playerPointLightHandle_{};
 
 	ColliderShape mapLimitBox_;
 	Vector3 mapLimitBoxPos_;
