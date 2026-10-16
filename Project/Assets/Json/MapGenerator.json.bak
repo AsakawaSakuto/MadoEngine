@@ -19,7 +19,7 @@
                 "money": 50
             },
             "karma": 10,
-            "magnet": 1
+            "magnet": 5
         },
         "height": {
             "max": 10,
@@ -33,7 +33,7 @@
             16,
             16
         ],
-        "seed": 3727932986,
+        "seed": 2992417479,
         "slopeSpawnRate": 1.0
     }
 }

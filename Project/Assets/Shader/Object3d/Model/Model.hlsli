@@ -186,12 +186,11 @@ LightContribution CalculateDirectionalLightContribution(
     return contribution;
 }
 
-/// @brief Point Light一灯分の反射寄与を計算
+/// @brief 真上視点へ固定したPoint Light一灯分の反射寄与を計算
 /// @param light Point Light情報
 /// @param albedo MaterialとTextureを反映した基本色
 /// @param normal World空間の単位法線
 /// @param worldPosition 描画点のWorld座標
-/// @param toEye 描画点からCameraへ向かう単位Vector
 /// @param shininess 鏡面反射の鋭さ
 /// @param specularIntensity 鏡面反射の強度
 /// @return 距離減衰を含む拡散反射と鏡面反射の寄与
@@ -200,7 +199,6 @@ LightContribution CalculatePointLightContribution(
     float3 albedo,
     float3 normal,
     float3 worldPosition,
-    float3 toEye,
     float shininess,
     float specularIntensity)
 {
@@ -216,7 +214,11 @@ LightContribution CalculatePointLightContribution(
 
     // Radius外をゼロに固定した減衰でLightの影響範囲を有限化
     float attenuation = pow(saturate(-distanceToLight / light.radius + 1.0f), light.decay);
-    float3 halfVector = normalize(lightDirection + toEye);
+
+    // Camera位置に依存しない真上視点の光沢とし、光方向との相殺時もゼロ除算を抑制
+    const float3 fixedViewDirection = float3(0.0f, 1.0f, 0.0f);
+    float3 halfVector = lightDirection + fixedViewDirection;
+    halfVector *= rsqrt(max(dot(halfVector, halfVector), 0.000001f));
     float normalDotLight = saturate(dot(normal, lightDirection));
     float diffuseFactor = pow(normalDotLight * 0.5f + 0.5f, 2.0f);
     float specularFactor;
@@ -326,7 +328,6 @@ LightContribution CalculateLightGpuDataContribution(
                 albedo,
                 normal,
                 worldPosition,
-                toEye,
                 shininess,
                 specularIntensity));
     }
