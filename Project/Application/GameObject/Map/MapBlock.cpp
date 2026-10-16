@@ -3,7 +3,7 @@
 
 namespace {
 
-	const char* kMaxBlockTextureName = "blockTexture4";
+	const char* kMaxBlockTextureName = "blockTexture2";
 
 /// @brief 坂の向きに対応するY軸回転角を取得
 /// @param direction 坂の向き

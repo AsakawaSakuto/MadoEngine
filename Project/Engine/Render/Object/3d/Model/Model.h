@@ -1,5 +1,6 @@
 #pragma once
 #include "ModelSharedData.h"
+#include "ModelMaterialBuffer.h"
 #include "../Animation/Animator.h"
 #include "Render/Object/IRenderObject3d.h"
 #include "Utility/Light/LightManager.h"
@@ -267,7 +268,8 @@ private:
 	SkinCluster skinClusterData_;
 	uint32_t skinClusterIndex_ = UINT32_MAX;
 
-	ModelMaterial* materialData_ = nullptr;
+	ModelMaterial materialData_{};
+	ModelMaterialBuffer materialBuffer_;
 	ModelTransformationMatrix* transformationData_ = nullptr;
 	ModelTransformationMatrix* shadowTransformationData_ = nullptr;
 	ModelShadowGpuData* shadowGpuData_ = nullptr;

@@ -6,6 +6,7 @@
 #include "Math/Function/MatrixFunction.h"
 #include "Math/Transform.h"
 #include <assimp/scene.h>
+#include <assimp/material.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <algorithm>
@@ -112,11 +113,15 @@ struct ModelData {
 	std::vector<ModelVertexData> vertices;                  // 全サブメッシュの頂点を連結して格納
 	std::vector<uint32_t> indeces;                          // 全サブメッシュのインデックスを連結して格納
     std::vector<std::string> materialPaths;                 // マルチマテリアル対応
+    std::vector<Vector4> materialColors;                    // Materialごとの拡散反射色
     std::vector<ModelSubMesh> subMeshes;                    // サブメッシュ情報
 	ModelBounds bounds;                                     // ローカル空間AABB
 	ModelNode rootNode;                                     // ノード階層のルート
 };
 
+/// @brief ModelファイルからMeshとMaterialを読み込み
+/// @param filepath 読み込むModelファイルのパス
+/// @return MeshとMaterialを格納したModel Data
 inline ModelData LoadObject3dFile(const std::string& filepath) {
     ModelData modelData;
     std::filesystem::path path(filepath);
@@ -131,10 +136,18 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
 
     modelData.rootNode = modelData.rootNode.ReadNode(scene->mRootNode);
 
-    // マテリアルを先に読み込む
+    // SubMeshのMaterial Indexと同じ順序でTextureと拡散反射色を保持
     modelData.materialPaths.resize(scene->mNumMaterials);
+    modelData.materialColors.resize(scene->mNumMaterials, { 1.0f, 1.0f, 1.0f, 1.0f });
     for (uint32_t matIndex = 0; matIndex < scene->mNumMaterials; ++matIndex) {
         aiMaterial* material = scene->mMaterials[matIndex];
+        aiColor3D diffuseColor;
+        if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor) == AI_SUCCESS) {
+
+            // Alphaは既存のModel色で制御し、MTLのKdからRGBだけを取得
+            modelData.materialColors[matIndex] = { diffuseColor.r, diffuseColor.g, diffuseColor.b, 1.0f };
+        }
+
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             aiString texPath;
             if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
@@ -142,34 +155,33 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
 
                 // uvChecker.pngが設定されている場合、white1x1.pngに置き換え
                 if (textureFilePath.find("uvChecker.png") != std::string::npos) {
-                    modelData.materialPaths[matIndex] = "Assets/.EngineResource/white1x1.png";
+                    modelData.materialPaths[matIndex] = "Assets/Texture/.Engine/white1x1.png";
                 } else {
                     modelData.materialPaths[matIndex] = textureFilePath;
                 }
             } else {
-                modelData.materialPaths[matIndex] = "Assets/.EngineResource/white1x1.png";
+                modelData.materialPaths[matIndex] = "Assets/Texture/.Engine/white1x1.png";
             }
         } else {
-            modelData.materialPaths[matIndex] = "Assets/.EngineResource/white1x1.png";
+            modelData.materialPaths[matIndex] = "Assets/Texture/.Engine/white1x1.png";
         }
     }
 
-    // マテリアルがない場合のデフォルト
+    // Materialを持たないAssetもSubMeshの先頭Indexで参照できるよう白色を補完
     if (modelData.materialPaths.empty()) {
-        modelData.materialPaths.push_back("Assets/.EngineResource/white1x1.png");
+        modelData.materialPaths.push_back("Assets/Texture/.Engine/white1x1.png");
+        modelData.materialColors.push_back({ 1.0f, 1.0f, 1.0f, 1.0f });
     }
 
-    // 各メッシュを処理
+    // SubMeshの描画範囲を維持しながら全Meshを共有Vertex Bufferへ連結
     uint32_t indexOffset = 0;
     for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
         aiMesh* mesh = scene->mMeshes[meshIndex];
         assert(mesh->HasNormals());
-        // テクスチャ座標のチェックを削除
-        // assert(mesh->HasTextureCoords(0));
 
         uint32_t vertexStart = static_cast<uint32_t>(modelData.vertices.size());
 
-        // 頂点データを追加
+        // MeshごとのLocal Indexを後段で共有BufferのIndexへ補正するため開始位置を保持
         for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
             ModelVertexData vertex;
             aiVector3D& position = mesh->mVertices[vertexIndex];
@@ -197,7 +209,7 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
                 modelData.bounds.max.z = (std::max)(modelData.bounds.max.z, localPosition.z);
             }
 
-            // テクスチャ座標が存在する場合のみ取得、なければデフォルト値(0,0)
+            // 単色MaterialのMeshはUVを持たないため白Textureを参照できるゼロ座標を補完
             if (mesh->HasTextureCoords(0)) {
                 aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
                 vertex.texcoord = { texcoord.x, texcoord.y };
@@ -208,7 +220,7 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
             modelData.vertices.push_back(vertex);
         }
 
-        // インデックスデータを追加
+        // MeshのLocal Indexを連結済みVertex Bufferの絶対Indexへ変換
         uint32_t indexStart = static_cast<uint32_t>(modelData.indeces.size());
         for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
             aiFace& face = mesh->mFaces[faceIndex];
@@ -221,12 +233,13 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
         }
         uint32_t indexCount = static_cast<uint32_t>(modelData.indeces.size()) - indexStart;
 
-        // サブメッシュ情報を追加
+        // Material単位の色とTextureを切り替えるためMeshごとの描画範囲を保持
         ModelSubMesh subMesh;
         subMesh.indexStart = indexStart;
         subMesh.indexCount = indexCount;
         subMesh.materialIndex = mesh->mMaterialIndex;
-        // マテリアルインデックスが範囲外の場合はクランプ
+
+        // Material配列の範囲外参照を防ぐため不正なIndexを先頭Materialへ制限
         if (subMesh.materialIndex >= modelData.materialPaths.size()) {
             subMesh.materialIndex = 0;
         }

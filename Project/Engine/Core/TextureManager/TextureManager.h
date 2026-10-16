@@ -99,10 +99,10 @@ namespace MadoEngine {
         TextureManager() = default;
         ~TextureManager() = default;
 
-        /// @brief WICファイルを読み込みミップマップを生成
+        /// @brief WICファイルを読み込み、画像サイズに応じたMipを用意
         /// @param filePath 読み込む画像ファイルのパス（ワイド文字列）
         /// @param mipImage 出力先 ScratchImage
-        /// @return 成功した場合 true
+        /// @return 成功した場合はtrue
         bool LoadTexture(const std::wstring& filePath, DirectX::ScratchImage& mipImage) const;
 
         /// @brief テクスチャ用 GPU リソースを生成

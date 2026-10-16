@@ -86,18 +86,18 @@ void InstancedModel::InitializeInstanceResources() {
 		textureIndex_ = textureIndices_[0];
 	}
 
-	materialData_ = CreateMappedBuffer<ModelMaterial>(device_.Get(), materialResource_);
-	materialData_->color = color_;
+	materialBuffer_.Initialize(device_.Get(), sharedData_->modelData.materialColors);
+	materialData_.color = color_;
 	if (enableLighting_) {
-		materialData_->enableLighting = 1;
+		materialData_.enableLighting = 1;
 	} else {
-		materialData_->enableLighting = 0;
+		materialData_.enableLighting = 0;
 	}
-	materialData_->uvTransformMatrix = Matrix::MakeIdentity();
+	materialData_.uvTransformMatrix = Matrix::MakeIdentity();
 	if (useEnvironmentMap_) {
-		materialData_->useEnvironmentMap = 1;
+		materialData_.useEnvironmentMap = 1;
 	} else {
-		materialData_->useEnvironmentMap = 0;
+		materialData_.useEnvironmentMap = 0;
 	}
 
 	cameraData_ = CreateMappedBuffer<CameraForGPU>(device_.Get(), cameraResource_);
@@ -146,7 +146,7 @@ void InstancedModel::SetShadowMap(
 
 void InstancedModel::Update(float deltaTime) {
 	(void)deltaTime;
-	if (!materialData_) {
+	if (!sharedData_) {
 		return;
 	}
 
@@ -164,17 +164,18 @@ void InstancedModel::Update(float deltaTime) {
 	trans.m[3][0] = uvTransform_.translate.x;
 	trans.m[3][1] = uvTransform_.translate.y;
 
-	materialData_->color = color_;
+	// UV変換とModel全体の色を共通設定として保持し、Draw時にAsset色を合成
+	materialData_.color = color_;
 	if (enableLighting_) {
-		materialData_->enableLighting = 1;
+		materialData_.enableLighting = 1;
 	} else {
-		materialData_->enableLighting = 0;
+		materialData_.enableLighting = 0;
 	}
-	materialData_->uvTransformMatrix = scale * rot * trans;
+	materialData_.uvTransformMatrix = scale * rot * trans;
 	if (useEnvironmentMap_) {
-		materialData_->useEnvironmentMap = 1;
+		materialData_.useEnvironmentMap = 1;
 	} else {
-		materialData_->useEnvironmentMap = 0;
+		materialData_.useEnvironmentMap = 0;
 	}
 }
 
@@ -210,7 +211,9 @@ void InstancedModel::Draw(Camera& useCamera) {
 	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	commandList_->SetGraphicsRootConstantBufferView(kInstancedRootMaterial, materialResource_->GetGPUVirtualAddress());
+	// Instance色はVertex Shaderで乗算されるため、ここではModel色とAsset色だけを合成
+	materialBuffer_.Update(materialData_);
+	commandList_->SetGraphicsRootConstantBufferView(kInstancedRootMaterial, materialBuffer_.GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(kInstancedRootInstance, MadoEngine::Core::SRVManager::GetInstance().GetGPUHandle(instanceSrvIndex_));
 	commandList_->SetGraphicsRootDescriptorTable(kInstancedRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
 	commandList_->SetGraphicsRootConstantBufferView(kInstancedRootCamera, cameraResource_->GetGPUVirtualAddress());
@@ -232,12 +235,15 @@ void InstancedModel::Draw(Camera& useCamera) {
 	commandList_->SetGraphicsRootDescriptorTable(kInstancedRootShadowMap, shadowSrv);
 
 	if (!sharedData_->modelData.subMeshes.empty()) {
+
+		// 同じInstance群でもSubMeshごとのMaterial色とTextureを維持
 		for (const auto& subMesh : sharedData_->modelData.subMeshes) {
 			uint32_t texIndex = textureIndex_;
 			if (subMesh.materialIndex < textureIndices_.size()) {
 				texIndex = textureIndices_[subMesh.materialIndex];
 			}
 
+			commandList_->SetGraphicsRootConstantBufferView(kInstancedRootMaterial, materialBuffer_.GetGPUVirtualAddress(subMesh.materialIndex));
 			commandList_->SetGraphicsRootDescriptorTable(kInstancedRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(texIndex));
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, static_cast<UINT>(drawInstanceCount_), subMesh.indexStart, 0, 0);
 		}

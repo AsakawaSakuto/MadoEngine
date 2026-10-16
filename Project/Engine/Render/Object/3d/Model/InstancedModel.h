@@ -1,5 +1,6 @@
 #pragma once
 #include "ModelSharedData.h"
+#include "ModelMaterialBuffer.h"
 #include "Render/Object/IRenderObject3d.h"
 #include "Utility/Light/LightManager.h"
 #include ".SceneManager/SceneType.h"
@@ -150,7 +151,8 @@ private:
 	std::unique_ptr<ModelSharedData> ownedSharedData_;
 	std::vector<InstanceDesc> instances_;
 
-	ModelMaterial* materialData_ = nullptr;
+	ModelMaterial materialData_{};
+	ModelMaterialBuffer materialBuffer_;
 	CameraForGPU* cameraData_ = nullptr;
 	LightGpuData* lightGpuData_ = nullptr;
 	ModelShadowGpuData* shadowGpuData_ = nullptr;

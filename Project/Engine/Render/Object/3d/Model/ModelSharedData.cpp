@@ -248,8 +248,8 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 		outData.textureIndices[i] = MadoEngine::TextureManager::GetInstance().GetTextureIndex(outData.textureNames[i]);
 		if (outData.textureIndices[i] == UINT32_MAX) {
 
-			// 欠損TextureでもDescriptor参照を有効に保つためChecker Textureへ置換
-			outData.textureNames[i] = "uvChecker";
+			// 欠損TextureでもMaterialの拡散反射色を表示できるよう白Textureへ置換
+			outData.textureNames[i] = "white1x1";
 			outData.textureIndices[i] = MadoEngine::TextureManager::GetInstance().GetTextureIndex(outData.textureNames[i]);
 		}
 	}

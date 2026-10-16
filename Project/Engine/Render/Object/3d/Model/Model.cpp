@@ -302,12 +302,12 @@ bool Model::ResetTexture() {
 
 void Model::SetLightingEnabled(bool enabled) {
 	enableLighting_ = enabled;
-	if (materialData_) {
-		if (enabled) {
-			materialData_->enableLighting = 1;
-		} else {
-			materialData_->enableLighting = 0;
-		}
+
+	// Draw直前の設定変更も全Materialへ反映するためCPU側の共通設定を更新
+	if (enabled) {
+		materialData_.enableLighting = 1;
+	} else {
+		materialData_.enableLighting = 0;
 	}
 }
 
@@ -389,18 +389,18 @@ void Model::InitializeInstanceResources() {
 	}
 	animator_.Initialize(&sharedData_->animationSet, skeletonData_);
 
-	materialData_ = CreateMappedBuffer<ModelMaterial>(device_.Get(), materialResource_);
-	materialData_->color = color_;
+	materialBuffer_.Initialize(device_.Get(), sharedData_->modelData.materialColors);
+	materialData_.color = color_;
 	if (enableLighting_) {
-		materialData_->enableLighting = 1;
+		materialData_.enableLighting = 1;
 	} else {
-		materialData_->enableLighting = 0;
+		materialData_.enableLighting = 0;
 	}
-	materialData_->uvTransformMatrix = Matrix::MakeIdentity();
+	materialData_.uvTransformMatrix = Matrix::MakeIdentity();
 	if (useEnvironmentMap_) {
-		materialData_->useEnvironmentMap = 1;
+		materialData_.useEnvironmentMap = 1;
 	} else {
-		materialData_->useEnvironmentMap = 0;
+		materialData_.useEnvironmentMap = 0;
 	}
 
 	transformationData_ = CreateMappedBuffer<ModelTransformationMatrix>(device_.Get(), transformationResource_);
@@ -462,7 +462,7 @@ void Model::UpdateLightGpuData() {
 }
 
 void Model::Update(float deltaTime) {
-	if (!sharedData_ || !materialData_ || !transformationData_ || !cameraData_) {
+	if (!sharedData_ || !transformationData_ || !cameraData_) {
 		return;
 	}
 
@@ -501,18 +501,18 @@ void Model::Update(float deltaTime) {
 	trans.m[3][0] = uvTransform_.translate.x;
 	trans.m[3][1] = uvTransform_.translate.y;
 
-	// UV変換をScale、Rotation、Translation順で合成してMaterial Bufferへ反映
-	materialData_->color = color_;
+	// UV変換をScale、Rotation、Translation順で合成してMaterialの共通設定へ反映
+	materialData_.color = color_;
 	if (enableLighting_) {
-		materialData_->enableLighting = 1;
+		materialData_.enableLighting = 1;
 	} else {
-		materialData_->enableLighting = 0;
+		materialData_.enableLighting = 0;
 	}
-	materialData_->uvTransformMatrix = scale * rot * trans;
+	materialData_.uvTransformMatrix = scale * rot * trans;
 	if (useEnvironmentMap_) {
-		materialData_->useEnvironmentMap = 1;
+		materialData_.useEnvironmentMap = 1;
 	} else {
-		materialData_->useEnvironmentMap = 0;
+		materialData_.useEnvironmentMap = 0;
 	}
 }
 
@@ -713,7 +713,9 @@ void Model::Draw(Camera& useCamera) {
 	commandList_->IASetIndexBuffer(&sharedData_->indexBufferView);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	commandList_->SetGraphicsRootConstantBufferView(kModelRootMaterial, materialResource_->GetGPUVirtualAddress());
+	// Model色とAsset色を合成した全MaterialをDraw前に一度だけ書き込み
+	materialBuffer_.Update(materialData_);
+	commandList_->SetGraphicsRootConstantBufferView(kModelRootMaterial, materialBuffer_.GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootConstantBufferView(kModelRootTransform, transformationResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(kModelRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
 	commandList_->SetGraphicsRootConstantBufferView(kModelRootCamera, cameraResource_->GetGPUVirtualAddress());
@@ -766,13 +768,14 @@ void Model::Draw(Camera& useCamera) {
 
 	if (!sharedData_->modelData.subMeshes.empty()) {
 
-		// Material境界ごとにTextureを切り替えながら対応Index範囲だけを描画
+		// Material境界ごとに色の定数BufferとTextureを切り替えて対応Index範囲を描画
 		for (const auto& subMesh : sharedData_->modelData.subMeshes) {
 			uint32_t texIndex = textureIndex_;
 			if (subMesh.materialIndex < textureIndices_.size()) {
 				texIndex = textureIndices_[subMesh.materialIndex];
 			}
 
+			commandList_->SetGraphicsRootConstantBufferView(kModelRootMaterial, materialBuffer_.GetGPUVirtualAddress(subMesh.materialIndex));
 			commandList_->SetGraphicsRootDescriptorTable(kModelRootTexture, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(texIndex));
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 		}

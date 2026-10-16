@@ -109,6 +109,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationSet.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\Animator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\GpuParticleEmitterRuntime.cpp" />
@@ -616,6 +617,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\InstancedModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyInstancedModel.h" />

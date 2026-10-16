@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <cassert>
 #include <algorithm>
+#include <utility>
 #include "Utility/Logger/Logger.h"
 
 namespace MadoEngine {
@@ -261,6 +262,14 @@ namespace MadoEngine {
             return false;
         }
 
+        if (image.GetMetadata().width == 1 && image.GetMetadata().height == 1) {
+
+            // 1x1画像は追加Mipを生成できないため、Decode済みの単一Mipをそのまま使用
+            mipImage = std::move(image);
+            return true;
+        }
+
+        // 縮小可能な画像ではMipを生成し、遠距離のTexture参照を安定化
         hr = DirectX::GenerateMipMaps(
             image.GetImages(),
             image.GetImageCount(),
