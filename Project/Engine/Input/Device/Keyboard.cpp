@@ -1,18 +1,18 @@
-#include "Keybord.h"
+#include "Keyboard.h"
 
 namespace MadoEngine::InputDevice
 {
-	Keybord::Keybord()
+	Keyboard::Keyboard()
 		: currentState_{}
 		, previousState_{}
 	{
 	}
 
-	Keybord::~Keybord()
+	Keyboard::~Keyboard()
 	{
 	}
 
-	int Keybord::ConvertDIKToVK(int key) const
+	int Keyboard::ConvertDIKToVK(int key) const
 	{
 
 		// DIK_XXXキーコードをVK_XXXに変換
@@ -121,7 +121,7 @@ namespace MadoEngine::InputDevice
 		}
 	}
 
-	void Keybord::Update()
+	void Keyboard::Update()
 	{
 		previousState_ = currentState_;
 
@@ -131,7 +131,7 @@ namespace MadoEngine::InputDevice
 		}
 	}
 
-	bool Keybord::IsPress(int key) const
+	bool Keyboard::IsPress(int key) const
 	{
 		int vkKey = ConvertDIKToVK(key);
 		if (vkKey < 0 || vkKey >= KEY_COUNT)
@@ -141,7 +141,7 @@ namespace MadoEngine::InputDevice
 		return currentState_[vkKey];
 	}
 
-	bool Keybord::IsTrigger(int key) const
+	bool Keyboard::IsTrigger(int key) const
 	{
 		int vkKey = ConvertDIKToVK(key);
 		if (vkKey < 0 || vkKey >= KEY_COUNT)
@@ -151,7 +151,7 @@ namespace MadoEngine::InputDevice
 		return currentState_[vkKey] && !previousState_[vkKey];
 	}
 
-	bool Keybord::IsRelease(int key) const
+	bool Keyboard::IsRelease(int key) const
 	{
 		int vkKey = ConvertDIKToVK(key);
 		if (vkKey < 0 || vkKey >= KEY_COUNT)

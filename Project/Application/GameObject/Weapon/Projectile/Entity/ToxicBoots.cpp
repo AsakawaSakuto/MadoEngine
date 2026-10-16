@@ -20,14 +20,14 @@ namespace Projectile {
 		groundNormal_ = { 0.0f, 1.0f, 0.0f };
 
 		// Playerの移動Collider中心ではなく生成地点の地表へ固定
-		transform_.translate = ownerPosition - Vector3(0.0f, 0.45f, 0.0f);
+		transform_.translate = ownerPosition_ - Vector3(0.0f, 0.45f, 0.0f);
 		constexpr float kMaxGroundSearchDistance = std::numeric_limits<float>::max();
 		float groundSurfaceY = 0.0f;
 		float surfaceY = 0.0f;
 		bool foundGround = false;
 
 		if (MyCollider::TryGetGroundSurfaceY(
-			ownerPosition, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
+			ownerPosition_, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
 			groundSurfaceY = surfaceY;
 			foundGround = true;
 		}
@@ -35,7 +35,7 @@ namespace Projectile {
 		// 通常床と坂が重なる場所では生成地点に近い上側の地表を採用
 		Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
 		if (MyCollider::TryGetGroundSurface(
-			ownerPosition, CollisionTag::MapSlope, surfaceY, slopeNormal, kMaxGroundSearchDistance) &&
+			ownerPosition_, CollisionTag::MapSlope, surfaceY, slopeNormal, kMaxGroundSearchDistance) &&
 			(!foundGround || surfaceY > groundSurfaceY)) {
 			groundSurfaceY = surfaceY;
 			groundNormal_ = slopeNormal;
@@ -43,10 +43,10 @@ namespace Projectile {
 		}
 
 		if (foundGround) {
-			transform_.translate.y = groundSurfaceY + kGroundOffset + MyRand::GetFloat(0.01f, 0.1f);
+			transform_.translate.y = groundSurfaceY + kGroundOffset_ + MyRand::GetFloat(0.01f, 0.1f);
 		}
 		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
-		transform_.scale = Vector3{ kBaseModelScale, kBaseModelScale, kBaseModelScale } * sizeRate_;
+		transform_.scale = Vector3{ kBaseModelScale_, kBaseModelScale_, kBaseModelScale_ } * sizeRate_;
 
 		// 専用Modelが用意されるまでEyeのModelとTextureを仮表示に使用
 		model_ = MyModel::Create(objectName_, "Eye", SceneType::Game);
@@ -59,7 +59,7 @@ namespace Projectile {
 		}
 
 		Sphere hitbox;
-		hitbox.radius = kBaseAttackRadius * sizeRate_;
+		hitbox.radius = kBaseAttackRadius_ * sizeRate_;
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 
@@ -80,15 +80,15 @@ namespace Projectile {
 			return;
 		}
 
-		if (lifeTimer_.GetProgress() >= kReductionStartRatio && !isReductionStarted_) {
+		if (lifeTimer_.GetProgress() >= kReductionStartRatio_ && !isReductionStarted_) {
 
 			// Axeと同様に寿命末尾の三割を縮小演出へ割り当て
 			isReductionStarted_ = true;
-			reductionTimer_.Start(lifeTime_ * (1.0f - kReductionStartRatio), false);
+			reductionTimer_.Start(lifeTime_ * (1.0f - kReductionStartRatio_), false);
 		}
 
 		// 生成位置を維持したまま接地面の法線を軸に回転
-		rotationYaw_ += kRotationSpeed * deltaTime;
+		rotationYaw_ += kRotationSpeed_ * deltaTime;
 		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		if (Model* model = MyModel::TryGet(model_)) {
 			const float reductionProgress = [&]() {
@@ -98,7 +98,7 @@ namespace Projectile {
 					return (0.0f);
 				}
 			}();
-			const Vector3 baseScale = Vector3{ kBaseModelScale, kBaseModelScale, kBaseModelScale } * sizeRate_;
+			const Vector3 baseScale = Vector3{ kBaseModelScale_, kBaseModelScale_, kBaseModelScale_ } * sizeRate_;
 
 			// 消滅直前だけScaleを線形に縮小して突然の非表示を回避
 			transform_.scale = Easing::Lerp(baseScale, Vector3{}, reductionProgress, EaseType::Linear);

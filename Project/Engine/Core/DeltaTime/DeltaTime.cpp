@@ -4,66 +4,66 @@
 namespace MadoEngine
 {
     DeltaTime::DeltaTime()
-        : m_deltaTime(0.0)
-        , m_fps(0.0)
-        , m_targetFPS(60.0)
-        , m_targetFrameTime(1.0 / 60.0)
-        , m_enableFPSLimit(false)
+        : deltaTime_(0.0)
+        , fps_(0.0)
+        , targetFPS_(60.0)
+        , targetFrameTime_(1.0 / 60.0)
+        , enableFPSLimit_(false)
     {
-        m_lastTime = std::chrono::high_resolution_clock::now();
-        m_currentTime = m_lastTime;
+        lastTime_ = std::chrono::high_resolution_clock::now();
+        currentTime_ = lastTime_;
     }
 
     void DeltaTime::Update()
     {
 
         // 計測前に前Frame基準の目標時刻まで待機してFrame Rateを制限
-        if (m_enableFPSLimit)
+        if (enableFPSLimit_)
         {
             WaitForTargetFrameTime();
         }
 
-        m_currentTime = std::chrono::high_resolution_clock::now();
+        currentTime_ = std::chrono::high_resolution_clock::now();
 
-        std::chrono::duration<double> elapsed = m_currentTime - m_lastTime;
-        m_deltaTime = elapsed.count();
+        std::chrono::duration<double> elapsed = currentTime_ - lastTime_;
+        deltaTime_ = elapsed.count();
 
-        if (m_enableFPSLimit)
+        if (enableFPSLimit_)
         {
 
             // Sleep精度の揺らぎをGame側へ伝えず固定Stepとして扱う補正
-            m_deltaTime = m_targetFrameTime;
+            deltaTime_ = targetFrameTime_;
         }
 
-        if (m_deltaTime > 0.0)
+        if (deltaTime_ > 0.0)
         {
-            m_fps = 1.0 / m_deltaTime;
+            fps_ = 1.0 / deltaTime_;
         }
 
-        m_lastTime = m_currentTime;
+        lastTime_ = currentTime_;
     }
 
     void DeltaTime::SetTargetFPS(double targetFPS)
     {
         if (targetFPS > 0.0)
         {
-            m_targetFPS = targetFPS;
-            m_targetFrameTime = 1.0 / targetFPS;
+            targetFPS_ = targetFPS;
+            targetFrameTime_ = 1.0 / targetFPS;
         }
     }
 
     void DeltaTime::EnableFPSLimit(bool enable)
     {
-        m_enableFPSLimit = enable;
+        enableFPSLimit_ = enable;
         if (enable)
         {
-            m_lastTime = std::chrono::high_resolution_clock::now();
+            lastTime_ = std::chrono::high_resolution_clock::now();
         }
     }
 
     void DeltaTime::WaitForTargetFrameTime()
     {
-        auto targetTime = m_lastTime + std::chrono::duration<double>(m_targetFrameTime);
+        auto targetTime = lastTime_ + std::chrono::duration<double>(targetFrameTime_);
         auto now = std::chrono::high_resolution_clock::now();
 
         if (now < targetTime)

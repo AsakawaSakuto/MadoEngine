@@ -16,7 +16,7 @@ SceneType ResultScene::Update(float dt) {
 		return SceneType::Result;
 	}
 
-	MadoEngine::InputDevice::Keybord* keyboard = MyInput::GetKeybord();
+	MadoEngine::InputDevice::Keyboard* keyboard = MyInput::GetKeyboard();
 	MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
 	const bool isTitleTriggered =
 		(keyboard && keyboard->IsTrigger(DIK_SPACE)) ||

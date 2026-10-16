@@ -136,7 +136,7 @@ namespace MadoEngine::Render {
 				*outElements = kStaticModelLayout;
 				*outCount    = _countof(kStaticModelLayout);
 				break;
-			case InputLayoutType::SkiningModel:
+			case InputLayoutType::SkinningModel:
 				*outElements = kSkinModelLayout;
 				*outCount    = _countof(kSkinModelLayout);
 				break;

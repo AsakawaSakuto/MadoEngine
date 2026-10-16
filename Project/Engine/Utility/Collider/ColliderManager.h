@@ -207,9 +207,9 @@ private:
 	};
 
 	// 管理データ
-	std::unordered_map<std::string, ColliderInfo> m_colliders;
-	std::unordered_map<CollisionTag, std::vector<std::string>> m_colliderNamesByTag;
-	std::unordered_map<CollisionTag, std::unordered_map<CollisionTag, CollisionRule>> m_matrix;
+	std::unordered_map<std::string, ColliderInfo> colliders_;
+	std::unordered_map<CollisionTag, std::vector<std::string>> colliderNamesByTag_;
+	std::unordered_map<CollisionTag, std::unordered_map<CollisionTag, CollisionRule>> matrix_;
 	StaticBVH staticTerrainBVH_;
 	std::vector<StaticBVH::Entry> staticTerrainEntries_;
 	std::vector<const std::string*> bvhQueryResults_;

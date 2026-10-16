@@ -150,8 +150,8 @@ namespace Projectile {
 			projectileId_ = context.projectileId;
 			sourceWeaponId_ = context.sourceWeaponId;
 			colliderName_ = colliderName;
-			ownerPosition = context.ownerPosition;
-			targetPosition = context.targetPosition;
+			ownerPosition_ = context.ownerPosition;
+			targetPosition_ = context.targetPosition;
 
 			damage_ = context.damage;
 			damageMode_ = DamageMode::Standard;
@@ -186,7 +186,7 @@ namespace Projectile {
 				return false;
 			}
 
-			targetPosition = position;
+			targetPosition_ = position;
 			moveDirection_ = toTarget.Normalized();
 			const float horizontalLength = std::sqrt(
 				moveDirection_.x * moveDirection_.x + moveDirection_.z * moveDirection_.z);
@@ -267,8 +267,8 @@ namespace Projectile {
 		ColliderShape hitbox_;
 
 		Vector3 moveDirection_ = { 0.0f, 0.0f, 0.0f };
-		Vector3 ownerPosition = { 0.0f, 0.0f, 0.0f };
-		Vector3 targetPosition = { 0.0f, 0.0f, 0.0f };
+		Vector3 ownerPosition_ = { 0.0f, 0.0f, 0.0f };
+		Vector3 targetPosition_ = { 0.0f, 0.0f, 0.0f };
 
 		std::unordered_set<std::uint32_t> previousContactEnemyIds_; // 前フレームで接触していたEnemyの識別番号
 		std::unordered_set<std::uint32_t> currentContactEnemyIds_;  // 今フレームで接触しているEnemyの識別番号

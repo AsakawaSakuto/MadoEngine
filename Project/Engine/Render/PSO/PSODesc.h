@@ -51,7 +51,7 @@ namespace MadoEngine::Render {
 		Triangle,
 		Sprite,
 		StaticModel,
-		SkiningModel,
+		SkinningModel,
 		Line,
 		Ribbon,
 	};

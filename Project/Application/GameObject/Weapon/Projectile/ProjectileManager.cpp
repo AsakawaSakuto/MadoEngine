@@ -11,7 +11,7 @@ namespace Projectile {
 		constexpr float kMinBounceDirectionLengthSq = 0.000001f;
 		constexpr float kMinKnockbackDirectionLengthSq = 0.000001f;
 		constexpr const char* kProjectileDeleteEffectName = "ProjectileDelete";
-		constexpr const char* kExplosionSoundKey = "Explotion";
+		constexpr const char* kExplosionSoundKey = "Explosion";
 
 		/// @brief Projectileの種類と同名の生成音を再生
 		/// @param type 生成したProjectileの種類
@@ -93,7 +93,7 @@ namespace Projectile {
 
 		// Update中に派生Projectileが追加されてもContainerを無効化しない走査状態
 		isTraversingProjectiles_ = true;
-		for (auto& projectile : projectiles) {
+		for (auto& projectile : projectiles_) {
 			if (projectile && !projectile->IsDead()) {
 				projectile->Update(deltaTime);
 			}
@@ -101,8 +101,8 @@ namespace Projectile {
 		isTraversingProjectiles_ = false;
 
 		// 全Projectileの更新完了後に削除予約を確定し、実体の破棄前に終了Effectを発火
-		projectiles.erase(
-			std::remove_if(projectiles.begin(), projectiles.end(), [this](const std::unique_ptr<IProjectile>& projectile) {
+		projectiles_.erase(
+			std::remove_if(projectiles_.begin(), projectiles_.end(), [this](const std::unique_ptr<IProjectile>& projectile) {
 				if (!projectile || !projectile->IsDead()) {
 					return false;
 				}
@@ -110,7 +110,7 @@ namespace Projectile {
 				PlayProjectileDeleteEffect(*projectile);
 				return true;
 			}),
-			projectiles.end()
+			projectiles_.end()
 		);
 
 		FlushPendingProjectiles();
@@ -133,7 +133,7 @@ namespace Projectile {
 		}
 
 		// 発射元Weaponごとに常時展開Projectileを一個へ限定
-		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles_) {
 			if (!projectile || projectile->IsDead() ||
 				projectile->GetSourceWeaponId() != context.sourceWeaponId) {
 				continue;
@@ -153,7 +153,7 @@ namespace Projectile {
 		}
 
 		// 管理列の走査状態に依存せず次回Updateの一括破棄へ集約
-		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles_) {
 			if (projectile && projectile->GetSourceWeaponId() == sourceWeaponId) {
 				projectile->RequestDestroy();
 			}
@@ -162,7 +162,7 @@ namespace Projectile {
 
 	void Manager::Clear() {
 		pendingProjectileAddRequests_.clear();
-		projectiles.clear();
+		projectiles_.clear();
 		nextProjectileId_ = 1;
 		isTraversingProjectiles_ = false;
 	}
@@ -189,7 +189,7 @@ namespace Projectile {
 
 		// 初期化が完了したProjectileだけを管理対象と生成音の再生対象へ登録
 		projectile->Initialize(context);
-		projectiles.push_back(std::move(projectile));
+		projectiles_.push_back(std::move(projectile));
 		PlayProjectileCreateSound(type);
 	}
 
@@ -226,11 +226,11 @@ namespace Projectile {
 			return;
 		}
 
-		outHitInfos.reserve(projectiles.size());
+		outHitInfos.reserve(projectiles_.size());
 		isTraversingProjectiles_ = true;
 
 		// Projectile単位で当Frameの接触履歴を管理して同一Enemyへの重複Hitを抑制
-		for (const std::unique_ptr<IProjectile>& projectile : projectiles) {
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles_) {
 			if (!projectile || projectile->IsDead() || projectile->GetColliderName().empty()) {
 				continue;
 			}

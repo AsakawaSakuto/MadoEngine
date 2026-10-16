@@ -17,10 +17,10 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 
-		transform_.translate = ownerPosition;
+		transform_.translate = ownerPosition_;
 		transform_.scale = { 0.5f * sizeRate_, 0.5f * sizeRate_, 0.5f * sizeRate_ };
 
-		SetMoveDirectionTowards(targetPosition, true);
+		SetMoveDirectionTowards(targetPosition_, true);
 
 		AABB hitbox;
 		float boxSize = 0.5f * sizeRate_;

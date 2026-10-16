@@ -364,11 +364,11 @@ namespace Player {
 		transform_.translate.y = std::clamp(transform_.translate.y, mapLimit_.min.y, mapLimit_.max.y);
 		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
-		if (!isDead_ && MyInput::GetKeybord()->IsTrigger(DIK_F3)) {
+		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F3)) {
 			transform_.translate = { 0.0f, 100.0f, 0.0f };
 		}
 
-		if (!isDead_ && MyInput::GetKeybord()->IsTrigger(DIK_F4)) {
+		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F4)) {
 			AddExp(static_cast<int>(status_.expToNextLevel));
 		}
 	}

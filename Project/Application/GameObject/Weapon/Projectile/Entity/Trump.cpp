@@ -16,7 +16,7 @@ namespace Projectile {
 		InitializeCommonProperties(context, objectName_);
 		baseDamage_ = damage_;
 
-		transform_.translate = ownerPosition;
+		transform_.translate = ownerPosition_;
 		const float safeSizeRate = [&]() {
 			if (std::isfinite(sizeRate_)) {
 				return (std::max(sizeRate_, kMinSizeRate));
@@ -26,7 +26,7 @@ namespace Projectile {
 		}();
 		const float size = kBaseSize * safeSizeRate;
 		transform_.scale = { size, size, size };
-		SetMoveDirectionTowards(targetPosition);
+		SetMoveDirectionTowards(targetPosition_);
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {

@@ -57,7 +57,7 @@ namespace MadoEngine {
 
 	void DebugLineManager::Draw(const Camera& camera) {
 
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F2)) {
+		if (MyInput::GetKeyboard()->IsTrigger(DIK_F2)) {
 			if (isDrawing_) {
 				isDrawing_ = false;
 			} else {

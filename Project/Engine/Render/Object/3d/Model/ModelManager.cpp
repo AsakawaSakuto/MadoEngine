@@ -80,7 +80,7 @@ bool TryGetModelType(const std::filesystem::path& modelRoot, const std::filesyst
 		outType = ModelType::Animated;
 		return true;
 	}
-	if (firstDirectory == "skining" || firstDirectory == "skinning") {
+	if (firstDirectory == "skinning") {
 		outType = ModelType::Skinning;
 		return true;
 	}

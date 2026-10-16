@@ -19,12 +19,12 @@ namespace Projectile {
 		InitializeCommonProperties(context, objectName_);
 
 		// Modelを持たずEffect Sequenceを本体表示として使用
-		transform_.translate = ownerPosition;
+		transform_.translate = ownerPosition_;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
 		lifeTimer_.Start(lifeTime_, false);
 		StartEffectSequence();
 
-		SetMoveDirectionTowards(targetPosition);
+		SetMoveDirectionTowards(targetPosition_);
 
 		AABB hitbox;
 		float size = 0.5f;
@@ -95,7 +95,7 @@ namespace Projectile {
 		context.criticalDamage = criticalDamage_;
 		context.knockbackPower = knockbackPower_;
 		context.statusEffects = statusEffects_;
-		context.explotionDamageDecreaseRate = 0.75f;
+		context.explosionDamageDecreaseRate = 0.75f;
 		context.explosionRadius = sizeRate_;
 		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
 

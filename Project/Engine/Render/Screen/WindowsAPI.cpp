@@ -377,7 +377,7 @@ namespace MadoEngine::Screen {
 
 	// 入力処理（フルスクリーン切り替えなど）
 	void WindowsAPI::ProcessInput() {
-		auto* keyboard = MadoEngine::InputManager::GetInstance().GetKeybord();
+		auto* keyboard = MadoEngine::InputManager::GetInstance().GetKeyboard();
 		if (keyboard) {
 
 			// ALT+Enterでフルスクリーン切り替え

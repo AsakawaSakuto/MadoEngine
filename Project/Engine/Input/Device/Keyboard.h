@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <array>
 
-#pragma region KeybordMacro
+#pragma region KeyboardMacro
 
 // DirectInput Key Codes (DIK_XXX)
 #define DIK_ESCAPE          0x01
@@ -110,11 +110,11 @@
 
 namespace MadoEngine::InputDevice
 {
-	class Keybord
+	class Keyboard
 	{
 	public:
-		Keybord();
-		~Keybord();
+		Keyboard();
+		~Keyboard();
 
 		void Update();
 

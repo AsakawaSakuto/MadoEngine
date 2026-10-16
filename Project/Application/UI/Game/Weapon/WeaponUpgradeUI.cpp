@@ -79,7 +79,7 @@ namespace UI::Game {
 			return;
 		}
 
-		if (MyInput::GetKeybord()->IsTrigger(DIK_F5)) {
+		if (MyInput::GetKeyboard()->IsTrigger(DIK_F5)) {
 			if (upgradeSystem.RerollChoicesForDebug(inventory)) {
 				SynchronizeSelection(upgradeSystem);
 				UpdateCards(0.0f);

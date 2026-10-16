@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="Assets\Model\Skining\walk.animations.json" />
+    <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -51,7 +51,7 @@
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
     <ClCompile Include="Engine\.Execution\Execution.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
-    <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
+    <ClCompile Include="Engine\Input\Device\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
     <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
@@ -205,7 +205,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Eye.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
-    <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
+    <ClCompile Include="Application\GameObject\Item\ItemInventory.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObjectManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.cpp" />
@@ -224,7 +224,7 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffect.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\FpsMeasurementView\FpsMeasurementView.cpp" />
-    <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
+    <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSelectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.cpp" />
   </ItemGroup>
@@ -323,7 +323,7 @@
     <ClInclude Include="Engine\Input\InputManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Input\Device\Keybord.h">
+    <ClInclude Include="Engine\Input\Device\Keyboard.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Logger\Logger.h">
@@ -865,7 +865,7 @@
     <ClInclude Include="Application\GameObject\Item\BaseItem.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObject\Item\ItemInventry.h">
+    <ClInclude Include="Application\GameObject\Item\ItemInventory.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\DropObject\DropObject.h">
@@ -930,7 +930,7 @@
     <ClInclude Include="Application\ColliderPairRegister.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h">
+    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSelectIcon.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h">

@@ -20,7 +20,7 @@ public:
     /// デバッグやテスト時に再現可能な乱数列を生成したい場合に使用
     /// 
     /// @param seed シード値
-    explicit Random(uint32_t seed) : seed_(seed), engine(seed) {}
+    explicit Random(uint32_t seed) : seed_(seed), engine_(seed) {}
 
     /// @brief シード値を設定
     /// 
@@ -30,7 +30,7 @@ public:
     /// @param seed 新しいシード値
     void SetSeed(uint32_t seed) {
         seed_ = seed;
-        engine.seed(seed);
+        engine_.seed(seed);
     }
 
     /// @brief 現在設定されているシード値を取得
@@ -53,14 +53,14 @@ public:
         }
 
         std::uniform_int_distribution<int> dist(min, max);
-        return dist(engine);
+        return dist(engine_);
     }
 
     /// @brief 符号なし32ビット整数の乱数を生成
     /// @return 生成された符号なし32ビット整数
     uint32_t UInt() {
         std::uniform_int_distribution<uint32_t> dist;
-        return dist(engine);
+        return dist(engine_);
     }
 
     /// @brief 浮動小数点乱数を生成
@@ -77,7 +77,7 @@ public:
         }
 
         std::uniform_real_distribution<float> dist(min, max);
-        return dist(engine);
+        return dist(engine_);
     }
 
 private:
@@ -88,7 +88,7 @@ private:
     }
 
     uint32_t seed_ = 0; ///< 現在設定されているシード値
-    std::mt19937 engine; ///< メルセンヌ・ツイスタ乱数エンジン
+    std::mt19937 engine_; ///< メルセンヌ・ツイスタ乱数エンジン
 };
 
 /// @brief グローバル乱数生成機能を提供する名前空間

@@ -121,7 +121,7 @@ namespace {
 	/// @return スキニングモデル用のシャドウマップ生成PSO設定
 	MadoEngine::Render::PSODesc CreateSkinningShadowPSODesc() {
 		MadoEngine::Render::PSODesc desc = MadoEngine::Render::ShadowMap::CreatePSODesc();
-		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkiningModel;
+		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkinningModel;
 		desc.vsKey = "Object3d/Shadow/SkinningShadowMap.VS";
 		desc.rootSigKey = "SkinningModel.RootSig";
 		return desc;
@@ -780,7 +780,7 @@ void Model::Draw(Camera& useCamera) {
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 		}
 	} else {
-		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), 1, 0, 0, 0);
+		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indices.size()), 1, 0, 0, 0);
 	}
 }
 
@@ -844,6 +844,6 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 		}
 	} else {
-		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), 1, 0, 0, 0);
+		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indices.size()), 1, 0, 0, 0);
 	}
 }

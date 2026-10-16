@@ -564,8 +564,8 @@ static void ResolveSphereSlope(ColliderManager::ColliderInfo& sphereInfo, Collid
 }
 
 const std::vector<std::string>* ColliderManager::FindColliderNames(CollisionTag tag) const {
-    auto it = m_colliderNamesByTag.find(tag);
-    if (it == m_colliderNamesByTag.end()) {
+    auto it = colliderNamesByTag_.find(tag);
+    if (it == colliderNamesByTag_.end()) {
         return nullptr;
     }
 
@@ -652,7 +652,7 @@ static AABB MakeOBBBounds(const OBB& obb) {
 }
 
 void ColliderManager::AddColliderNameToTag(CollisionTag tag, const std::string& name) {
-    auto& names = m_colliderNamesByTag[tag];
+    auto& names = colliderNamesByTag_[tag];
     if (std::find(names.begin(), names.end(), name) != names.end()) {
         return;
     }
@@ -661,8 +661,8 @@ void ColliderManager::AddColliderNameToTag(CollisionTag tag, const std::string& 
 }
 
 void ColliderManager::RemoveColliderNameFromTag(CollisionTag tag, const std::string& name) {
-    auto it = m_colliderNamesByTag.find(tag);
-    if (it == m_colliderNamesByTag.end()) {
+    auto it = colliderNamesByTag_.find(tag);
+    if (it == colliderNamesByTag_.end()) {
         return;
     }
 
@@ -671,15 +671,15 @@ void ColliderManager::RemoveColliderNameFromTag(CollisionTag tag, const std::str
 
     // 空の索引を残さずタグ未登録状態をFind結果へ反映
     if (names.empty()) {
-        m_colliderNamesByTag.erase(it);
+        colliderNamesByTag_.erase(it);
     }
 }
 
 void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag, ColliderShape* pShape, Vector3* pPos, float weight, CollisionCallback callback, const bool* pIsActive) {
-    auto existing = m_colliders.find(name);
+    auto existing = colliders_.find(name);
 
     // 同名更新時に旧タグ側の逆引きだけが残る状態を防止
-    if (existing != m_colliders.end()) {
+    if (existing != colliders_.end()) {
         RemoveColliderNameFromTag(existing->second.tag, name);
     }
 
@@ -696,7 +696,7 @@ void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag
         info.hasPreviousPosition = true;
     }
 
-    m_colliders[name] = info;
+    colliders_[name] = info;
     AddColliderNameToTag(tag, name);
     MarkStaticTerrainBVHDirtyIfNeeded(tag);
 #ifdef _DEBUG
@@ -705,11 +705,11 @@ void ColliderManager::RegisterCollider(const std::string& name, CollisionTag tag
 }
 
 void ColliderManager::RemoveCollider(const std::string& name) {
-    auto it = m_colliders.find(name);
-    if (it != m_colliders.end()) {
+    auto it = colliders_.find(name);
+    if (it != colliders_.end()) {
         const CollisionTag removedTag = it->second.tag;
         RemoveColliderNameFromTag(it->second.tag, name);
-        m_colliders.erase(it);
+        colliders_.erase(it);
         MarkStaticTerrainBVHDirtyIfNeeded(removedTag);
         Logger::Output("コライダー削除 : " + name, Logger::Level::Application);
     } else {
@@ -718,8 +718,8 @@ void ColliderManager::RemoveCollider(const std::string& name) {
 }
 
 void ColliderManager::RemoveColliderAll() {
-    m_colliders.clear();
-    m_colliderNamesByTag.clear();
+    colliders_.clear();
+    colliderNamesByTag_.clear();
     staticTerrainBVH_.Clear();
     staticTerrainEntries_.clear();
     bvhQueryResults_.clear();
@@ -732,8 +732,8 @@ void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB
 }
 
 void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB, const CollisionPairSetting& setting) {
-    m_matrix[tagA][tagB] = { true, setting.enableResolve, setting.enableCCD };
-    m_matrix[tagB][tagA] = { true, setting.enableResolve, setting.enableCCD };
+    matrix_[tagA][tagB] = { true, setting.enableResolve, setting.enableCCD };
+    matrix_[tagB][tagA] = { true, setting.enableResolve, setting.enableCCD };
     Logger::Output(
         "衝突ペア登録 : " + CollisionTagToString(tagA) + " <-> " + CollisionTagToString(tagB) +
         " (押し出し : " + ([&]() {
@@ -759,7 +759,7 @@ void ColliderManager::RegisterCollisionPair(CollisionTag tagA, CollisionTag tagB
 }
 
 void ColliderManager::SyncPositions() {
-    for (auto& [name, info] : m_colliders) {
+    for (auto& [name, info] : colliders_) {
 
         // 未使用Pool枠は形状同期から除外し、再有効化まで前回座標を無効化
         if (!info.IsActive()) {
@@ -877,10 +877,10 @@ void ColliderManager::RebuildStaticTerrainBVHIfNeeded() {
     }
 
     staticTerrainEntries_.clear();
-    staticTerrainEntries_.reserve(m_colliders.size());
+    staticTerrainEntries_.reserve(colliders_.size());
 
     // 頻繁に動かない地形だけをBVHへ集約して動的Colliderの探索量を削減
-    for (const auto& [name, info] : m_colliders) {
+    for (const auto& [name, info] : colliders_) {
         if (!IsStaticTerrainTag(info.tag)) {
             continue;
         }
@@ -991,7 +991,7 @@ void ColliderManager::ApplySweptCollision(ColliderInfo& a, ColliderInfo& b, floa
 void ColliderManager::StorePreviousPositions() {
 
     // 未使用枠の座標をCCDの移動開始点として持ち越さないため有効枠だけを保存
-    for (auto& [name, info] : m_colliders) {
+    for (auto& [name, info] : colliders_) {
         if (!info.IsActive() || !info.pPosition) {
             info.hasPreviousPosition = false;
             continue;
@@ -1306,8 +1306,8 @@ void ColliderManager::ResolveOverlap(ColliderInfo& a, ColliderInfo& b) {
 }
 
 bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targetTag) {
-    auto it = m_colliders.find(name);
-    if (it == m_colliders.end() || !it->second.IsActive()) return false;
+    auto it = colliders_.find(name);
+    if (it == colliders_.end() || !it->second.IsActive()) return false;
 
     const ColliderInfo& playerInfo = it->second;
     if (!playerInfo.pShape || !playerInfo.pPosition) return false;
@@ -1323,8 +1323,8 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
 
         for (const auto& otherName : *targetNames) {
             if (otherName == name) continue;
-            auto otherIt = m_colliders.find(otherName);
-            if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+            auto otherIt = colliders_.find(otherName);
+            if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
             const ColliderInfo& otherInfo = otherIt->second;
             if (!otherInfo.pShape || !otherInfo.pPosition) continue;
@@ -1364,8 +1364,8 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
                 QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
                 for (const std::string* candidateName : bvhQueryResults_) {
                     if (!candidateName || *candidateName == name) continue;
-                    auto otherIt = m_colliders.find(*candidateName);
-                    if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+                    auto otherIt = colliders_.find(*candidateName);
+                    if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
                     const ColliderInfo& otherInfo = otherIt->second;
                     if (otherInfo.tag != targetTag) continue;
@@ -1409,8 +1409,8 @@ bool ColliderManager::IsGroundContact(const std::string& name, CollisionTag targ
 
         for (const auto& otherName : *targetNames) {
             if (otherName == name) continue;
-            auto otherIt = m_colliders.find(otherName);
-            if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+            auto otherIt = colliders_.find(otherName);
+            if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
             const ColliderInfo& otherInfo = otherIt->second;
             if (!otherInfo.pShape || !otherInfo.pPosition) continue;
@@ -1474,8 +1474,8 @@ bool ColliderManager::IsGroundContact(CollisionTag selfTag, CollisionTag targetT
 }
 
 bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag targetTag) {
-    auto it = m_colliders.find(name);
-    if (it == m_colliders.end() || !it->second.IsActive()) return false;
+    auto it = colliders_.find(name);
+    if (it == colliders_.end() || !it->second.IsActive()) return false;
 
     const ColliderInfo& playerInfo = it->second;
     if (!playerInfo.pShape || !playerInfo.pPosition) return false;
@@ -1495,8 +1495,8 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
-                auto otherIt = m_colliders.find(*candidateName);
-                if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+                auto otherIt = colliders_.find(*candidateName);
+                if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
                 const ColliderInfo& otherInfo = otherIt->second;
                 if (otherInfo.tag != targetTag) continue;
@@ -1517,8 +1517,8 @@ bool ColliderManager::IsSlopeGroundContact(const std::string& name, CollisionTag
 
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
-        auto otherIt = m_colliders.find(otherName);
-        if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+        auto otherIt = colliders_.find(otherName);
+        if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
         const ColliderInfo& otherInfo = otherIt->second;
         if (!otherInfo.pShape || !otherInfo.pPosition) continue;
@@ -1626,8 +1626,8 @@ bool ColliderManager::TryGetGroundSurface(const Vector3& origin, CollisionTag ta
                 continue;
             }
 
-            auto colliderIt = m_colliders.find(*candidateName);
-            if (colliderIt == m_colliders.end() || colliderIt->second.tag != targetTag) {
+            auto colliderIt = colliders_.find(*candidateName);
+            if (colliderIt == colliders_.end() || colliderIt->second.tag != targetTag) {
                 continue;
             }
 
@@ -1635,8 +1635,8 @@ bool ColliderManager::TryGetGroundSurface(const Vector3& origin, CollisionTag ta
         }
     } else {
         for (const auto& targetName : *targetNames) {
-            auto colliderIt = m_colliders.find(targetName);
-            if (colliderIt == m_colliders.end()) {
+            auto colliderIt = colliders_.find(targetName);
+            if (colliderIt == colliders_.end()) {
                 continue;
             }
 
@@ -1654,8 +1654,8 @@ bool ColliderManager::TryGetGroundSurface(const Vector3& origin, CollisionTag ta
 }
 
 bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, CollisionTag targetTag, float& outCenterY, float maxSnapDownDistance) {
-    auto it = m_colliders.find(name);
-    if (it == m_colliders.end() || !it->second.IsActive()) return false;
+    auto it = colliders_.find(name);
+    if (it == colliders_.end() || !it->second.IsActive()) return false;
 
     const ColliderInfo& playerInfo = it->second;
     if (!playerInfo.pShape || !playerInfo.pPosition) return false;
@@ -1679,8 +1679,8 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
-                auto otherIt = m_colliders.find(*candidateName);
-                if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+                auto otherIt = colliders_.find(*candidateName);
+                if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
                 const ColliderInfo& otherInfo = otherIt->second;
                 if (otherInfo.tag != targetTag) continue;
@@ -1720,8 +1720,8 @@ bool ColliderManager::TryGetSlopeGroundCenterY(const std::string& name, Collisio
 
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
-        auto otherIt = m_colliders.find(otherName);
-        if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+        auto otherIt = colliders_.find(otherName);
+        if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
         const ColliderInfo& otherInfo = otherIt->second;
         if (!otherInfo.pShape || !otherInfo.pPosition) continue;
@@ -1771,8 +1771,8 @@ bool ColliderManager::TryGetSlopeGroundCenterY(CollisionTag selfTag, CollisionTa
 }
 
 bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, CollisionTag targetTag, Vector3& outNormal) {
-    auto it = m_colliders.find(name);
-    if (it == m_colliders.end() || !it->second.IsActive()) return false;
+    auto it = colliders_.find(name);
+    if (it == colliders_.end() || !it->second.IsActive()) return false;
 
     const ColliderInfo& playerInfo = it->second;
     if (!playerInfo.pShape || !playerInfo.pPosition) return false;
@@ -1796,8 +1796,8 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
             QueryStaticTerrainBVH(queryBounds, targetTag, bvhQueryResults_);
             for (const std::string* candidateName : bvhQueryResults_) {
                 if (!candidateName || *candidateName == name) continue;
-                auto otherIt = m_colliders.find(*candidateName);
-                if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+                auto otherIt = colliders_.find(*candidateName);
+                if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
                 const ColliderInfo& otherInfo = otherIt->second;
                 if (otherInfo.tag != targetTag) continue;
@@ -1831,8 +1831,8 @@ bool ColliderManager::TryGetSlopeGroundNormal(const std::string& name, Collision
 
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
-        auto otherIt = m_colliders.find(otherName);
-        if (otherIt == m_colliders.end() || !otherIt->second.IsActive()) continue;
+        auto otherIt = colliders_.find(otherName);
+        if (otherIt == colliders_.end() || !otherIt->second.IsActive()) continue;
 
         const ColliderInfo& otherInfo = otherIt->second;
         if (!otherInfo.pShape || !otherInfo.pPosition) continue;
@@ -1876,11 +1876,11 @@ bool ColliderManager::TryGetSlopeGroundNormal(CollisionTag selfTag, CollisionTag
 }
 
 bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nameB) {
-    const auto itA = m_colliders.find(nameA);
-    const auto itB = m_colliders.find(nameB);
+    const auto itA = colliders_.find(nameA);
+    const auto itB = colliders_.find(nameB);
 
     // 明示的な名前指定でも未使用Pool枠への衝突を抑制
-    if (itA == m_colliders.end() || itB == m_colliders.end() ||
+    if (itA == colliders_.end() || itB == colliders_.end() ||
         !itA->second.IsActive() || !itB->second.IsActive()) {
         return false;
     }
@@ -1890,10 +1890,10 @@ bool ColliderManager::IsHitName(const std::string& nameA, const std::string& nam
 }
 
 bool ColliderManager::IsHitWithTag(const std::string& name, CollisionTag targetTag) {
-    const auto it = m_colliders.find(name);
+    const auto it = colliders_.find(name);
 
     // 回収済みObjectを登録したまま保持しても、直接問い合わせの結果を無効化
-    if (it == m_colliders.end() || !it->second.IsActive()) {
+    if (it == colliders_.end() || !it->second.IsActive()) {
         return false;
     }
     const auto* targetNames = FindColliderNames(targetTag);
@@ -1904,8 +1904,8 @@ bool ColliderManager::IsHitWithTag(const std::string& name, CollisionTag targetT
     auto shapeA = GetSyncedShape(it->second);
     for (const auto& otherName : *targetNames) {
         if (otherName == name) continue;
-        auto itB = m_colliders.find(otherName);
-        if (itB == m_colliders.end() || !itB->second.IsActive()) continue;
+        auto itB = colliders_.find(otherName);
+        if (itB == colliders_.end() || !itB->second.IsActive()) continue;
 
         const auto& infoB = itB->second;
         auto shapeB = GetSyncedShape(infoB);
@@ -1927,13 +1927,13 @@ bool ColliderManager::IsHitTags(CollisionTag tagA, CollisionTag tagB) {
 
         // 同一Collection内の自己衝突と対称な重複Pairを除外
         for (size_t i = 0; i < namesA->size(); ++i) {
-            auto itA = m_colliders.find((*namesA)[i]);
-            if (itA == m_colliders.end() || !itA->second.IsActive()) continue;
+            auto itA = colliders_.find((*namesA)[i]);
+            if (itA == colliders_.end() || !itA->second.IsActive()) continue;
             auto shapeA = GetSyncedShape(itA->second);
 
             for (size_t j = i + 1; j < namesA->size(); ++j) {
-                auto itB = m_colliders.find((*namesA)[j]);
-                if (itB == m_colliders.end() || !itB->second.IsActive()) continue;
+                auto itB = colliders_.find((*namesA)[j]);
+                if (itB == colliders_.end() || !itB->second.IsActive()) continue;
                 auto shapeB = GetSyncedShape(itB->second);
 
                 if (CheckVariantCollision(shapeA, shapeB)) {
@@ -1945,14 +1945,14 @@ bool ColliderManager::IsHitTags(CollisionTag tagA, CollisionTag tagB) {
     }
 
     for (const auto& nameA : *namesA) {
-        auto itA = m_colliders.find(nameA);
-        if (itA == m_colliders.end() || !itA->second.IsActive()) continue;
+        auto itA = colliders_.find(nameA);
+        if (itA == colliders_.end() || !itA->second.IsActive()) continue;
         const auto& infoA = itA->second;
         auto shapeA = GetSyncedShape(infoA);
 
         for (const auto& nameB : *namesB) {
-            auto itB = m_colliders.find(nameB);
-            if (itB == m_colliders.end() || !itB->second.IsActive()) continue;
+            auto itB = colliders_.find(nameB);
+            if (itB == colliders_.end() || !itB->second.IsActive()) continue;
             const auto& infoB = itB->second;
             auto shapeB = GetSyncedShape(infoB);
 
@@ -2013,8 +2013,8 @@ void ColliderManager::ProcessStaticTerrainPair(std::vector<ColliderInfo*>& dynam
                 continue;
             }
 
-            auto candidateIt = m_colliders.find(*candidateName);
-            if (candidateIt == m_colliders.end()) {
+            auto candidateIt = colliders_.find(*candidateName);
+            if (candidateIt == colliders_.end()) {
                 continue;
             }
 
@@ -2045,14 +2045,14 @@ void ColliderManager::Update() {
         std::unordered_map<CollisionTag, std::vector<ColliderInfo*>> groups;
 
         // 非アクティブ枠をGroupへ追加せず、Pool容量による衝突Pair数の増加を抑制
-        for (auto& [name, info] : m_colliders) {
+        for (auto& [name, info] : colliders_) {
             if (!info.IsActive()) {
                 continue;
             }
             groups[info.tag].push_back(&info);
         }
 
-        for (auto& [tagA, pairsMap] : m_matrix) {
+        for (auto& [tagA, pairsMap] : matrix_) {
             for (auto& [tagB, rule] : pairsMap) {
                 if (!rule.isRegistered) {
                     continue;
@@ -2110,12 +2110,12 @@ void ColliderManager::Update() {
 
     // タグ別にコライダーをグループ化
     std::unordered_map<CollisionTag, std::vector<ColliderInfo*>> groups;
-    for (auto& [name, info] : m_colliders) {
+    for (auto& [name, info] : colliders_) {
         groups[info.tag].push_back(&info);
     }
 
     // 登録されたペアのみをチェック（O(N²)全探索を回避）
-    for (auto& [tagA, pairsMap] : m_matrix) {
+    for (auto& [tagA, pairsMap] : matrix_) {
         for (auto& [tagB, rule] : pairsMap) {
             if (!rule.isRegistered) continue;
 

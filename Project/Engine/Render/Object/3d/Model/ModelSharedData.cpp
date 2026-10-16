@@ -183,7 +183,7 @@ MadoEngine::Render::PSODesc CreatePSODesc(ModelType type) {
 
 	switch (type) {
 	case ModelType::Skinning:
-		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkiningModel;
+		desc.inputLayout = MadoEngine::Render::InputLayoutType::SkinningModel;
 		desc.vsKey = "Object3d/Model/SkinningModel.VS";
 		desc.psKey = "Object3d/Model/SkinningModel.PS";
 		desc.rootSigKey = "SkinningModel.RootSig";
@@ -258,15 +258,15 @@ void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::strin
 	ModelVertexData* vertexData = CreateMappedBuffer<ModelVertexData>(device, outData.vertexResource, outData.modelData.vertices.size());
 	std::memcpy(vertexData, outData.modelData.vertices.data(), sizeof(ModelVertexData) * outData.modelData.vertices.size());
 
-	uint32_t* indexData = CreateMappedBuffer<uint32_t>(device, outData.indexResource, outData.modelData.indeces.size());
-	std::memcpy(indexData, outData.modelData.indeces.data(), sizeof(uint32_t) * outData.modelData.indeces.size());
+	uint32_t* indexData = CreateMappedBuffer<uint32_t>(device, outData.indexResource, outData.modelData.indices.size());
+	std::memcpy(indexData, outData.modelData.indices.data(), sizeof(uint32_t) * outData.modelData.indices.size());
 
 	outData.vertexBufferView.BufferLocation = outData.vertexResource->GetGPUVirtualAddress();
 	outData.vertexBufferView.SizeInBytes = UINT(sizeof(ModelVertexData) * outData.modelData.vertices.size());
 	outData.vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
 
 	outData.indexBufferView.BufferLocation = outData.indexResource->GetGPUVirtualAddress();
-	outData.indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * outData.modelData.indeces.size());
+	outData.indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * outData.modelData.indices.size());
 	outData.indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 }
 

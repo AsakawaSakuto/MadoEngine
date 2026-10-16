@@ -13,13 +13,13 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId) + "_Explosion";
 		InitializeCommonProperties(context, objectName_);
 
-		transform_.translate = ownerPosition;
+		transform_.translate = ownerPosition_;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
 
-		damage_ = context.damage * context.explotionDamageDecreaseRate;
+		damage_ = context.damage * context.explosionDamageDecreaseRate;
 
 		Sphere hitbox;
-		hitbox.center = ownerPosition;
+		hitbox.center = ownerPosition_;
 		hitbox.radius = context.explosionRadius;
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);

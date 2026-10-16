@@ -15,7 +15,7 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
-		startPosition_ = ownerPosition;
+		startPosition_ = ownerPosition_;
 		transform_.translate = startPosition_;
 		const float safeSizeRate = [&]() {
 			if (std::isfinite(sizeRate_)) {
@@ -27,7 +27,7 @@ namespace Projectile {
 		const float modelScale = kBaseModelScale * safeSizeRate;
 		transform_.scale = { modelScale, modelScale, modelScale };
 
-		const Vector3 toTarget = targetPosition - startPosition_;
+		const Vector3 toTarget = targetPosition_ - startPosition_;
 		const float distance = toTarget.Length();
 		const float safeMoveSpeed = [&]() {
 			if (std::isfinite(moveSpeed_)) {
@@ -77,7 +77,7 @@ namespace Projectile {
 				flightElapsedTime_ / flightDuration_, 0.0f, 1.0f);
 
 			// 直線補間へ4t(1-t)の高さを加え、両端を固定した上向きの放物線を作る
-			transform_.translate = Math::Lerp(startPosition_, targetPosition, progress);
+			transform_.translate = Math::Lerp(startPosition_, targetPosition_, progress);
 			transform_.translate.y += 4.0f * arcHeight_ * progress * (1.0f - progress);
 			transform_.rotate.y += kRotationSpeed * safeDeltaTime;
 

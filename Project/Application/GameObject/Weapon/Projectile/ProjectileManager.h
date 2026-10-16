@@ -88,7 +88,7 @@ namespace Projectile {
 		/// @param projectile 破棄するProjectile
 		void PlayProjectileDeleteEffect(const IProjectile& projectile) const;
 
-		std::vector<std::unique_ptr<IProjectile>> projectiles;
+		std::vector<std::unique_ptr<IProjectile>> projectiles_;
 		std::vector<ProjectileAddRequest> pendingProjectileAddRequests_;
 		std::uint64_t nextProjectileId_ = 1;
 		bool isTraversingProjectiles_ = false;

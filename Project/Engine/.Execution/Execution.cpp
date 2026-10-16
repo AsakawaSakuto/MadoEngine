@@ -479,7 +479,7 @@ namespace MadoEngine
 
 		// InputManagerの更新（キーボード、マウス、ゲームパッドの状態を更新）
 		MadoEngine::InputManager::GetInstance().Update(windowsAPI_->GetHWnd(), dt);
-		if (MadoEngine::InputManager::GetInstance().GetKeybord()->IsTrigger(kGameViewCaptureKey)) {
+		if (MadoEngine::InputManager::GetInstance().GetKeyboard()->IsTrigger(kGameViewCaptureKey)) {
 			isGameViewCaptureRequested_ = true;
 		}
 

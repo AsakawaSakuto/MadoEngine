@@ -20,27 +20,27 @@ namespace MadoEngine
         void EnableFPSLimit(bool enable = true);
 
 		/// @return 前フレームからの経過時間（秒）
-        double GetDeltaTime() const { return m_deltaTime; }
+        double GetDeltaTime() const { return deltaTime_; }
 
 		/// @return 現在のFPS
-        double GetFPS() const { return m_fps; }
+        double GetFPS() const { return fps_; }
 
 		/// @return 目標FPS
-        double GetTargetFPS() const { return m_targetFPS; }
+        double GetTargetFPS() const { return targetFPS_; }
 
 		/// @return FPS制限が有効な場合はtrue
-        bool IsFPSLimitEnabled() const { return m_enableFPSLimit; }
+        bool IsFPSLimitEnabled() const { return enableFPSLimit_; }
 
     private:
         void WaitForTargetFrameTime();
 
-        std::chrono::high_resolution_clock::time_point m_lastTime;
-        std::chrono::high_resolution_clock::time_point m_currentTime;
+        std::chrono::high_resolution_clock::time_point lastTime_;
+        std::chrono::high_resolution_clock::time_point currentTime_;
 
-        double m_deltaTime;
-        double m_fps;
-        double m_targetFPS;
-        double m_targetFrameTime;
-        bool m_enableFPSLimit;
+        double deltaTime_;
+        double fps_;
+        double targetFPS_;
+        double targetFrameTime_;
+        bool enableFPSLimit_;
     };
 }

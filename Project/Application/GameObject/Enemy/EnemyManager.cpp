@@ -369,7 +369,7 @@ namespace Enemy {
 			return;
 		}
 
-		const bool killAllEnemies = MyInput::GetKeybord()->IsTrigger(DIK_7);
+		const bool killAllEnemies = MyInput::GetKeyboard()->IsTrigger(DIK_7);
 		for (std::unique_ptr<Base>& enemy : enemies_) {
 			if (!enemy || !enemy->IsActive()) {
 				continue;

@@ -7,16 +7,16 @@ namespace MyInput {
 
 	/// @brief 入力アクションに複数のキー/ボタンを登録
 	/// @param actionName アクション名（例: "Jump"）
-	/// @param keybordKeys キーボードのキーコード配列（例: {DIK_SPACE, DIK_Z}）
+	/// @param keyboardKeys キーボードのキーコード配列（例: {DIK_SPACE, DIK_Z}）
 	/// @param gamePadButtons ゲームパッドのボタン配列（例: {GAMEPAD_A}）
 	/// @param mouseButtons マウスのボタン配列（例: {MOUSE_LEFT}）
 	inline void RegisterInput(
 		const std::string& actionName,
-		const std::vector<int>& keybordKeys = {},
+		const std::vector<int>& keyboardKeys = {},
 		const std::vector<int>& gamePadButtons = {},
 		const std::vector<int>& mouseButtons = {}) 
 	{
-		MadoEngine::InputManager::GetInstance().SetInput(actionName, keybordKeys, gamePadButtons, mouseButtons);
+		MadoEngine::InputManager::GetInstance().SetInput(actionName, keyboardKeys, gamePadButtons, mouseButtons);
 	}
 
 	/// @brief 入力アクションに複数のキー/ボタンを登録（可変長引数版）
@@ -49,9 +49,9 @@ namespace MyInput {
 	}
 
 	/// @brief キーボードへ直接アクセス
-	/// @return Keybordインスタンスへのポインタ
-	inline MadoEngine::InputDevice::Keybord* GetKeybord() {
-		return MadoEngine::InputManager::GetInstance().GetKeybord();
+	/// @return Keyboardインスタンスへのポインタ
+	inline MadoEngine::InputDevice::Keyboard* GetKeyboard() {
+		return MadoEngine::InputManager::GetInstance().GetKeyboard();
 	}
 
 	/// @brief マウスへ直接アクセス

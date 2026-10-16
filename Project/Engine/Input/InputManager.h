@@ -5,7 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <cctype>
-#include "Device/Keybord.h"
+#include "Device/Keyboard.h"
 #include "Device/Mouse.h"
 #include "Device/GamePad.h"
 
@@ -27,7 +27,7 @@ namespace MadoEngine
 		// 例: SetInput("Jump", {DIK_SPACE, DIK_Z}, {GAMEPAD_A}, {MOUSE_LEFT});
 		void SetInput(
 			const std::string& actionName,
-			const std::vector<int>& keybordKeys = {},
+			const std::vector<int>& keyboardKeys = {},
 			const std::vector<int>& gamePadButtons = {},
 			const std::vector<int>& mouseButtons = {}
 		);
@@ -47,7 +47,7 @@ namespace MadoEngine
 		inline bool Release(const std::string& actionName) const { return IsRelease(actionName); }
 
 		// デバイスへの直接アクセス
-		MadoEngine::InputDevice::Keybord* GetKeybord() { return keybord_.get(); }
+		MadoEngine::InputDevice::Keyboard* GetKeyboard() { return keyboard_.get(); }
 		MadoEngine::InputDevice::Mouse* GetMouse() { return mouse_.get(); }
 		MadoEngine::InputDevice::GamePad* GetGamePad() { return gamePad_.get(); }
 
@@ -57,12 +57,12 @@ namespace MadoEngine
 		InputManager& operator=(const InputManager&) = delete;
 		struct InputAction
 		{
-			std::vector<int> keybordKeys;
+			std::vector<int> keyboardKeys;
 			std::vector<int> gamePadButtons;
 			std::vector<int> mouseButtons;
 		};
 
-		std::unique_ptr<MadoEngine::InputDevice::Keybord> keybord_;
+		std::unique_ptr<MadoEngine::InputDevice::Keyboard> keyboard_;
 		std::unique_ptr<MadoEngine::InputDevice::Mouse> mouse_;
 		std::unique_ptr<MadoEngine::InputDevice::GamePad> gamePad_;
 
@@ -84,7 +84,7 @@ namespace MadoEngine
 	void InputManager::SetInputKeys(const std::string& actionName, Args... keys)
 	{
 		std::vector<int> keyList = { keys... };
-		std::vector<int> keybordKeys;
+		std::vector<int> keyboardKeys;
 		std::vector<int> gamePadKeys;
 		std::vector<int> mouseKeys;
 
@@ -109,10 +109,10 @@ namespace MadoEngine
 			// キーボード: DIK_* (0x01-0xD3)
 			else if (key >= 0x01 && key <= 0xD3)
 			{
-				keybordKeys.push_back(key);
+				keyboardKeys.push_back(key);
 			}
 		}
 
-		SetInput(actionName, keybordKeys, gamePadKeys, mouseKeys);
+		SetInput(actionName, keyboardKeys, gamePadKeys, mouseKeys);
 	}
 }

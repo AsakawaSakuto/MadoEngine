@@ -109,7 +109,7 @@ namespace UI::Game {
 
 				// 空Slotでは前武器のAnimationとGauge進捗を破棄
 				animationStates_[slotIndex] = {};
-				weaponIcon->SetScale(startIconScale);
+				weaponIcon->SetScale(startIconScale_);
 				shotGauge->SetScale({ shotGaugeSize_, 0.0f });
 				continue;
 			}
@@ -171,7 +171,7 @@ namespace UI::Game {
 			return;
 		}
 		if (!state.isPlaying) {
-			weaponIcon->SetScale(startIconScale);
+			weaponIcon->SetScale(startIconScale_);
 			return;
 		}
 
@@ -183,15 +183,15 @@ namespace UI::Game {
 			0.0f,
 			1.0f);
 		const Vector2 scale = Easing::LerpBack(
-			startIconScale,
-			endIconScale,
+			startIconScale_,
+			endIconScale_,
 			progress,
 			EaseType::EaseOutCubic,
 			EaseType::EaseInCubic);
 
 		weaponIcon->SetScale(scale);
 		if (progress >= 1.0f) {
-			weaponIcon->SetScale(startIconScale);
+			weaponIcon->SetScale(startIconScale_);
 			state.isPlaying = false;
 		}
 	}

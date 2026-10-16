@@ -227,7 +227,7 @@ void Terminal::Run() {
 		execution_->Update();
 
 		// ESC入力をアプリケーション全体の終了として最優先で処理
-		/*if (MyInput::GetKeybord()->IsTrigger(DIK_ESCAPE)) {
+		/*if (MyInput::GetKeyboard()->IsTrigger(DIK_ESCAPE)) {
 			execution_->ConfirmApplicationExit();
 			break;
 		}*/

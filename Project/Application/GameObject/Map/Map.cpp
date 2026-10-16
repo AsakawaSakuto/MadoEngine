@@ -443,7 +443,7 @@ std::vector<MapInteractionEvent> Map::ConsumeInteractionEvents() {
 
 void Map::Update(Player::Base& player, float deltaTime) {
 
-	if (MyInput::GetKeybord()->IsTrigger(DIK_F1)) {
+	if (MyInput::GetKeyboard()->IsTrigger(DIK_F1)) {
 		isModelDraw_ = !isModelDraw_;
 
 		// 共有描画バッチの各インスタンスへ表示状態を同期

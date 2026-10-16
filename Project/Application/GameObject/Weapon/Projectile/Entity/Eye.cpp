@@ -57,7 +57,7 @@ namespace Projectile {
 	}
 
 	void Eye::SynchronizePersistentState(const InitializeDesc& context) {
-		ownerPosition = context.ownerPosition;
+		ownerPosition_ = context.ownerPosition;
 		UpdateGroundPosition();
 		damage_ = context.damage;
 		criticalChance_ = context.criticalChance;
@@ -79,8 +79,8 @@ namespace Projectile {
 	}
 
 	void Eye::UpdateGroundPosition() {
-		transform_.translate.x = ownerPosition.x;
-		transform_.translate.z = ownerPosition.z;
+		transform_.translate.x = ownerPosition_.x;
+		transform_.translate.z = ownerPosition_.z;
 
 		constexpr float kMaxGroundSearchDistance = std::numeric_limits<float>::max();
 		float groundSurfaceY = 0.0f;
@@ -89,7 +89,7 @@ namespace Projectile {
 		groundNormal_ = { 0.0f, 1.0f, 0.0f };
 
 		if (MyCollider::TryGetGroundSurfaceY(
-			ownerPosition, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
+			ownerPosition_, CollisionTag::MapBlock, surfaceY, kMaxGroundSearchDistance)) {
 			groundSurfaceY = surfaceY;
 			foundGround = true;
 		}
@@ -97,7 +97,7 @@ namespace Projectile {
 		// 通常床と坂が重なる場所では所有者に近い上側の地表を採用
 		Vector3 slopeNormal = { 0.0f, 1.0f, 0.0f };
 		if (MyCollider::TryGetGroundSurface(
-			ownerPosition, CollisionTag::MapSlope, surfaceY, slopeNormal, kMaxGroundSearchDistance) &&
+			ownerPosition_, CollisionTag::MapSlope, surfaceY, slopeNormal, kMaxGroundSearchDistance) &&
 			(!foundGround || surfaceY > groundSurfaceY)) {
 			groundSurfaceY = surfaceY;
 			groundNormal_ = slopeNormal;
@@ -110,7 +110,7 @@ namespace Projectile {
 		} else if (!hasGroundPosition_) {
 
 			// Map生成前など地表Colliderが未登録の初回だけ従来位置へ退避
-			transform_.translate.y = ownerPosition.y - kOwnerGroundOffset;
+			transform_.translate.y = ownerPosition_.y - kOwnerGroundOffset;
 		}
 
 		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);

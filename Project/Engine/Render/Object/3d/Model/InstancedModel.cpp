@@ -248,7 +248,7 @@ void InstancedModel::Draw(Camera& useCamera) {
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, static_cast<UINT>(drawInstanceCount_), subMesh.indexStart, 0, 0);
 		}
 	} else {
-		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), static_cast<UINT>(drawInstanceCount_), 0, 0, 0);
+		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indices.size()), static_cast<UINT>(drawInstanceCount_), 0, 0, 0);
 	}
 }
 
@@ -295,7 +295,7 @@ void InstancedModel::DrawShadowInternal(const Matrix4x4& lightViewProjection, co
 			commandList_->DrawIndexedInstanced(subMesh.indexCount, static_cast<UINT>(shadowDrawInstanceCount_), subMesh.indexStart, 0, 0);
 		}
 	} else {
-		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indeces.size()), static_cast<UINT>(shadowDrawInstanceCount_), 0, 0, 0);
+		commandList_->DrawIndexedInstanced(static_cast<UINT>(sharedData_->modelData.indices.size()), static_cast<UINT>(shadowDrawInstanceCount_), 0, 0, 0);
 	}
 }
 

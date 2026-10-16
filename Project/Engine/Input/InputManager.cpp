@@ -11,14 +11,14 @@ namespace MadoEngine
 
 	void InputManager::Initialize()
 	{
-		keybord_ = std::make_unique<MadoEngine::InputDevice::Keybord>();
+		keyboard_ = std::make_unique<MadoEngine::InputDevice::Keyboard>();
 		mouse_ = std::make_unique<MadoEngine::InputDevice::Mouse>();
 		gamePad_ = std::make_unique<MadoEngine::InputDevice::GamePad>();
 	}
 
 	void InputManager::Finalize()
 	{
-		keybord_.reset();
+		keyboard_.reset();
 		mouse_.reset();
 		gamePad_.reset();
 		inputActions_.clear();
@@ -26,19 +26,19 @@ namespace MadoEngine
 
 	void InputManager::Update(HWND hwnd, float deltaTime)
 	{
-		keybord_->Update();
+		keyboard_->Update();
 		mouse_->Update(hwnd);
 		gamePad_->Update(deltaTime);
 	}
 
 	void InputManager::SetInput(
 		const std::string& actionName,
-		const std::vector<int>& keybordKeys,
+		const std::vector<int>& keyboardKeys,
 		const std::vector<int>& gamePadButtons,
 		const std::vector<int>& mouseButtons)
 	{
 		InputAction action;
-		action.keybordKeys = keybordKeys;
+		action.keyboardKeys = keyboardKeys;
 		action.gamePadButtons = gamePadButtons;
 		action.mouseButtons = mouseButtons;
 
@@ -124,9 +124,9 @@ namespace MadoEngine
 	{
 
 		// キーボードチェック
-		for (int key : action.keybordKeys)
+		for (int key : action.keyboardKeys)
 		{
-			if (keybord_->IsPress(key))
+			if (keyboard_->IsPress(key))
 			{
 				return true;
 			}
@@ -157,9 +157,9 @@ namespace MadoEngine
 	{
 
 		// キーボードチェック
-		for (int key : action.keybordKeys)
+		for (int key : action.keyboardKeys)
 		{
-			if (keybord_->IsTrigger(key))
+			if (keyboard_->IsTrigger(key))
 			{
 				return true;
 			}
@@ -190,9 +190,9 @@ namespace MadoEngine
 	{
 
 		// キーボードチェック
-		for (int key : action.keybordKeys)
+		for (int key : action.keyboardKeys)
 		{
-			if (keybord_->IsRelease(key))
+			if (keyboard_->IsRelease(key))
 			{
 				return true;
 			}

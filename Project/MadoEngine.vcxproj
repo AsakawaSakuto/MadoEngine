@@ -135,7 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="Assets\Model\Skining\walk.animations.json" />
+    <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application\.Core\Terminal.cpp" />
@@ -154,8 +154,6 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemySettings.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyTank.cpp" />
-    <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
-    <ClCompile Include="Application\GameObject\Item\ItemInventry.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
@@ -208,7 +206,7 @@
     <ClCompile Include="Application\UI\Game\Chest\ChestOpeningPresentation.cpp" />
     <ClCompile Include="Application\UI\Game\Relic\RelicInventoryUI.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.cpp" />
-    <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.cpp" />
+    <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSelectIcon.cpp" />
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponUpgradeUI.cpp" />
@@ -236,7 +234,7 @@
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
     <ClCompile Include="Engine\.Execution\Execution.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
-    <ClCompile Include="Engine\Input\Device\Keybord.cpp" />
+    <ClCompile Include="Engine\Input\Device\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
     <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Engine\Math\Function\MathFunction.cpp" />
@@ -388,9 +386,6 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h" />
     <ClInclude Include="Application\GameObject\Enemy\Type\EnemyTank.h" />
     <ClInclude Include="Application\GameObject\GameObjectHeaders.h" />
-    <ClInclude Include="Application\GameObject\Item\BaseItem.h" />
-    <ClInclude Include="Application\GameObject\Item\ItemInventry.h" />
-    <ClInclude Include="Application\GameObject\Item\ItemStatus.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
@@ -461,7 +456,7 @@
     <ClInclude Include="Application\UI\Game\Chest\ChestOpeningPresentation.h" />
     <ClInclude Include="Application\UI\Game\Relic\RelicInventoryUI.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.h" />
-    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSclectIcon.h" />
+    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSelectIcon.h" />
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h" />
     <ClInclude Include="Application\UI\UIHeaders.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponIconUI.h" />
@@ -491,7 +486,7 @@
     <ClInclude Include="Engine\EditorUIHeaders.h" />
     <ClInclude Include="Engine\ImGuiHeaders.h" />
     <ClInclude Include="Engine\Input\Device\GamePad.h" />
-    <ClInclude Include="Engine\Input\Device\Keybord.h" />
+    <ClInclude Include="Engine\Input\Device\Keyboard.h" />
     <ClInclude Include="Engine\Input\Device\Mouse.h" />
     <ClInclude Include="Engine\Input\MyInput.h" />
     <ClInclude Include="Engine\Input\InputManager.h" />

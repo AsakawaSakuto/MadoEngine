@@ -111,7 +111,7 @@ struct JointWeightData {
 struct ModelData {
 	std::map<std::string, JointWeightData> skinClusterData; // スキンクラスター（ジョイント）ごとの頂点ウェイトデータ
 	std::vector<ModelVertexData> vertices;                  // 全サブメッシュの頂点を連結して格納
-	std::vector<uint32_t> indeces;                          // 全サブメッシュのインデックスを連結して格納
+	std::vector<uint32_t> indices;                          // 全サブメッシュのインデックスを連結して格納
     std::vector<std::string> materialPaths;                 // マルチマテリアル対応
     std::vector<Vector4> materialColors;                    // Materialごとの拡散反射色
     std::vector<ModelSubMesh> subMeshes;                    // サブメッシュ情報
@@ -221,17 +221,17 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
         }
 
         // MeshのLocal Indexを連結済みVertex Bufferの絶対Indexへ変換
-        uint32_t indexStart = static_cast<uint32_t>(modelData.indeces.size());
+        uint32_t indexStart = static_cast<uint32_t>(modelData.indices.size());
         for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
             aiFace& face = mesh->mFaces[faceIndex];
             assert(face.mNumIndices == 3); // 三角形のみ対応
 
             for (uint32_t element = 0; element < face.mNumIndices; ++element) {
                 uint32_t vertexIndex = face.mIndices[element];
-                modelData.indeces.push_back(vertexStart + vertexIndex);
+                modelData.indices.push_back(vertexStart + vertexIndex);
             }
         }
-        uint32_t indexCount = static_cast<uint32_t>(modelData.indeces.size()) - indexStart;
+        uint32_t indexCount = static_cast<uint32_t>(modelData.indices.size()) - indexStart;
 
         // Material単位の色とTextureを切り替えるためMeshごとの描画範囲を保持
         ModelSubMesh subMesh;

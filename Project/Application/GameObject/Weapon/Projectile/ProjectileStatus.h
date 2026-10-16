@@ -27,7 +27,7 @@ namespace Projectile {
 
 		Weapon::StatusEffectStatus statusEffects; // 投射物が付与できる状態異常設定
 
-		float explotionDamageDecreaseRate = 10.0f; // 爆発ダメージの減衰率（1.0fで減衰なし、0.0fで爆発ダメージなし）
+		float explosionDamageDecreaseRate = 10.0f; // 爆発ダメージの減衰率（1.0fで減衰なし、0.0fで爆発ダメージなし）
 		float explosionRadius = 1.0f;              // 爆発の半径
 	};
 

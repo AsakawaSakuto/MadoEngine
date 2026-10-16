@@ -86,8 +86,8 @@ void DebugCamera::Update(float deltaTime) {
 
 	// ホイール中ボタン長押しドラッグ
 	if (mouse->IsPress(MOUSE_M)) {
-		auto* keybord = MyInput::GetKeybord();
-		bool isShift = keybord && (keybord->IsPress(DIK_LSHIFT) || keybord->IsPress(DIK_RSHIFT));
+		auto* keyboard = MyInput::GetKeyboard();
+		bool isShift = keyboard && (keyboard->IsPress(DIK_LSHIFT) || keyboard->IsPress(DIK_RSHIFT));
 
 		if (isShift) {
 

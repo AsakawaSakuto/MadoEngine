@@ -393,7 +393,7 @@ SceneType GameScene::Update(float dt) {
 	fpsMeasurementView_.Update(dt);
 	gamePlayTimerView_.Update(inGameSession_->GetRemainingTime());
 
-	if (inGameSession_->IsPlaying() && MyInput::GetKeybord()->IsTrigger(DIK_9)) {
+	if (inGameSession_->IsPlaying() && MyInput::GetKeyboard()->IsTrigger(DIK_9)) {
 		if (!weaponInventory_->AddWeapon(Projectile::Type::Pistol)) {
 			Logger::Output("[Debug] デバッグ操作による武器追加は拒否されました。", Logger::Level::Debug);
 		}
@@ -406,7 +406,7 @@ SceneType GameScene::Update(float dt) {
 		useDebugCamera_ = false;
 	}
 
-	if (MyInput::GetKeybord()->IsTrigger(DIK_F9)) {
+	if (MyInput::GetKeyboard()->IsTrigger(DIK_F9)) {
 
 		// EditorやJson復元で変更されたActive Cameraと同期した上で二つの操作Cameraを交互に選択
 		useDebugCamera_ = !useDebugCamera_;

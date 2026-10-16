@@ -19,10 +19,10 @@ namespace Projectile {
 			model->SetColor({ 0.5f, 0.5f, 0.5f, 1.0f });
 		}
 
-		transform_.translate = ownerPosition;
+		transform_.translate = ownerPosition_;
 		transform_.scale = { 0.5f, 0.5f, 0.5f };
 
-		SetMoveDirectionTowards(targetPosition);
+		SetMoveDirectionTowards(targetPosition_);
 
 		AABB hitbox;
 		hitbox.min = { -0.5f, -0.5f, -0.5f };
