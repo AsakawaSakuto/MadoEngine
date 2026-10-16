@@ -4,6 +4,7 @@
 #include "GameObject/Map/EventObject/Chest/Chest.h"
 #include "GameObject/Map/EventObject/Jar/Jar.h"
 #include "GameObject/Map/EventObject/Karma/Karma.h"
+#include "GameObject/Map/EventObject/Magnet/Magnet.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Collider/CollisionFunction.h"
 #include "Utility/Json/Core/JsonFile.h"
@@ -205,6 +206,8 @@ void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("Chest.Outline");
 	MyInstancedModel::Destroy("Karma.Normal");
 	MyInstancedModel::Destroy("Karma.Outline");
+	MyInstancedModel::Destroy("Magnet.Normal");
+	MyInstancedModel::Destroy("Magnet.Outline");
 	MyInstancedModel::Destroy("BossSpawner.Normal");
 	MyInstancedModel::Destroy("BossSpawner.Outline");
 }
@@ -256,6 +259,7 @@ void Map::Generate(const GenerationSettings& settings) {
 	normalChestSpawnCount_ = safeSettings.normalChestSpawnCount;
 	freeChestSpawnCount_ = safeSettings.freeChestSpawnCount;
 	karmaSpawnCount_ = safeSettings.karmaSpawnCount;
+	magnetSpawnCount_ = safeSettings.magnetSpawnCount;
 	bossSpawnerSpawnCount_ = safeSettings.bossSpawnerSpawnCount;
 	blockSize_ = safeSettings.blockSize;
 	minHeight_ = safeSettings.minHeight;
@@ -381,6 +385,7 @@ void Map::Generate(const GenerationSettings& settings) {
 	GenerateChests();
 	GenerateKarmas();
 	GenerateBossSpawner();
+	GenerateMagnets();
 }
 
 Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
@@ -587,6 +592,11 @@ void Map::DrawEventObjectStatusEditor() {
 	ImGui::DragInt("総数##Karma", &editorSettings_.karmaSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::Unindent();
 
+	ImGui::TextUnformatted("Magnet");
+	ImGui::Indent();
+	ImGui::DragInt("総数##Magnet", &editorSettings_.magnetSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Unindent();
+
 	ImGui::TextUnformatted("BossSpawner");
 	ImGui::Indent();
 	ImGui::DragInt("総数##BossSpawner", &editorSettings_.bossSpawnerSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
@@ -608,7 +618,7 @@ void Map::DrawMapViewEditor(const Player::Base* player) const {
 	ImGui::Text("Slope: %zu / Event Object: %zu", slopeCount, eventObjects_.size());
 	ImGui::Text("Jar: %d  Money: %d  Exp: %d", jarSpawnCount_, moneyJarSpawnCount_, expJarSpawnCount_);
 	ImGui::Text("Chest: %d  Normal: %d  Free: %d", chestSpawnCount_, normalChestSpawnCount_, freeChestSpawnCount_);
-	ImGui::Text("Karma: %d  BossSpawner: %d", karmaSpawnCount_, bossSpawnerSpawnCount_);
+	ImGui::Text("Karma: %d  Magnet: %d  BossSpawner: %d", karmaSpawnCount_, magnetSpawnCount_, bossSpawnerSpawnCount_);
 	if (player) {
 		const Vector3 playerPosition = player->GetPosition();
 		ImGui::Text("Player: X %.2f  Y %.2f  Z %.2f", playerPosition.x, playerPosition.y, playerPosition.z);
@@ -715,6 +725,7 @@ Map::GenerationSettings Map::CreateAppliedSettings() const {
 	settings.normalChestSpawnCount = normalChestSpawnCount_;
 	settings.freeChestSpawnCount = freeChestSpawnCount_;
 	settings.karmaSpawnCount = karmaSpawnCount_;
+	settings.magnetSpawnCount = magnetSpawnCount_;
 	settings.bossSpawnerSpawnCount = bossSpawnerSpawnCount_;
 	settings.blockSize = blockSize_;
 	settings.minHeight = minHeight_;
@@ -737,6 +748,7 @@ void Map::ClampGenerationSettings(GenerationSettings& settings) {
 	settings.normalChestSpawnCount = std::clamp(settings.normalChestSpawnCount, 0, settings.chestSpawnCount);
 	settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
 	settings.karmaSpawnCount = std::clamp(settings.karmaSpawnCount, 0, kMaximumEventObjectCount);
+	settings.magnetSpawnCount = std::clamp(settings.magnetSpawnCount, 0, kMaximumEventObjectCount);
 	settings.bossSpawnerSpawnCount = std::clamp(settings.bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
 	settings.blockSize.x = std::clamp([&]() {
 		if (std::isfinite(settings.blockSize.x)) {
@@ -789,6 +801,7 @@ bool Map::AreGenerationSettingsEqual(const GenerationSettings& lhs, const Genera
 		lhs.normalChestSpawnCount == rhs.normalChestSpawnCount &&
 		lhs.freeChestSpawnCount == rhs.freeChestSpawnCount &&
 		lhs.karmaSpawnCount == rhs.karmaSpawnCount &&
+		lhs.magnetSpawnCount == rhs.magnetSpawnCount &&
 		lhs.bossSpawnerSpawnCount == rhs.bossSpawnerSpawnCount &&
 		lhs.blockSize.x == rhs.blockSize.x &&
 		lhs.blockSize.y == rhs.blockSize.y &&
@@ -810,6 +823,7 @@ nlohmann::json Map::GenerationSettingsToJson(const GenerationSettings& settings)
 		{ "jar", settings.jarSpawnCount },
 		{ "chest", settings.chestSpawnCount },
 		{ "karma", settings.karmaSpawnCount },
+		{ "magnet", settings.magnetSpawnCount },
 		{ "bossSpawner", settings.bossSpawnerSpawnCount },
 		{ "jarTypes", {
 			{ "money", settings.moneyJarSpawnCount },
@@ -851,6 +865,7 @@ bool Map::GenerationSettingsFromJson(const nlohmann::json& json, GenerationSetti
 			settings.jarSpawnCount = countIt->value("jar", settings.jarSpawnCount);
 			settings.chestSpawnCount = countIt->value("chest", settings.chestSpawnCount);
 			settings.karmaSpawnCount = countIt->value("karma", settings.karmaSpawnCount);
+			settings.magnetSpawnCount = countIt->value("magnet", settings.magnetSpawnCount);
 			settings.bossSpawnerSpawnCount = countIt->value("bossSpawner", settings.bossSpawnerSpawnCount);
 
 			// 旧Jsonにタイプ別設定がない場合は総数を均等配分して互換性を維持
@@ -1345,6 +1360,62 @@ void Map::GenerateBossSpawner() {
 	if (createdCount < bossSpawnerSpawnCount_) {
 		Logger::Output("Map : BossSpawnerの配置可能数が設定数を下回りました", Logger::Level::Warning);
 	}
+}
+
+void Map::GenerateMagnets() {
+	if (magnetSpawnCount_ <= 0) {
+		return;
+	}
+
+	eventObjects_.reserve(eventObjects_.size() + static_cast<std::size_t>(magnetSpawnCount_));
+	const AABB localCollider = Magnet::CreatePlacementCollider({});
+	const float halfSizeX = std::max(std::abs(localCollider.min.x), std::abs(localCollider.max.x));
+	const float halfSizeZ = std::max(std::abs(localCollider.min.z), std::abs(localCollider.max.z));
+	int createdCount = 0;
+	int retryCount = 0;
+	const int maxRetryCount = magnetSpawnCount_ * 20;
+
+	// 空き場所が不足するMapでも無限試行にならないよう配置回数を制限
+	while (createdCount < magnetSpawnCount_ && retryCount < maxRetryCount) {
+		++retryCount;
+		const int x = eventObjectRandom_.Int(0, mapWidth_ - 1);
+		const int z = eventObjectRandom_.Int(0, mapHeight_ - 1);
+		const MapBlock& spawnBlock = mapBlocks_[z][x];
+		if (spawnBlock.GetType() == MapBlockType::Air) {
+			continue;
+		}
+
+		// Modelの占有幅を確保してBlock内へ配置し、Slopeでは地表面の高さへ接地
+		const float spawnRangeX = std::max(0.0f, blockSize_.x * 0.5f - halfSizeX);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z * 0.5f - halfSizeZ);
+		Vector3 position = {
+			static_cast<float>(x) * blockSize_.x + eventObjectRandom_.Float(-spawnRangeX, spawnRangeX),
+			0.0f,
+			static_cast<float>(z) * blockSize_.z + eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ)
+		};
+		const Vector3 blockCenter = {
+			static_cast<float>(x) * blockSize_.x,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z
+		};
+		position.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, position);
+		if (IsEventObjectColliderOverlapping(Magnet::CreatePlacementCollider(position))) {
+			continue;
+		}
+
+		// 既存イベントとの非重複を確認後にColliderと描画Instanceを登録
+		Magnet::InitializeDesc desc;
+		desc.position = position;
+		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, yaw);
+		desc.colliderName = "MagnetAABB_" + std::to_string(createdCount);
+		auto magnet = std::make_unique<Magnet>();
+		magnet->Initialize(desc);
+		eventObjects_.push_back(std::move(magnet));
+		++createdCount;
+	}
+
+	Logger::Output("Map : Magnetを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
 }
 
 void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {

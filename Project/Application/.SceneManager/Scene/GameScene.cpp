@@ -218,6 +218,9 @@ SceneType GameScene::Update(float dt) {
 					}
 				}
 				break;
+			case MapEventAction::AttractAllExp:
+				DropObject::Manager::GetInstance().AttractAllExp(player_->GetPosition());
+				break;
 			case MapEventAction::None:
 				break;
 			}

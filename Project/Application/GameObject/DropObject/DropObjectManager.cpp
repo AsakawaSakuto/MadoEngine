@@ -90,6 +90,17 @@ namespace DropObject {
 		spawnCount_++;
 	}
 
+	void Manager::AttractAllExp(const Vector3& targetPosition) {
+
+		// 使用中のExpだけを対象とし、未使用枠や別種Dropへの効果適用を防止
+		for (PoolEntry& entry : expPool_.entries) {
+			if (!entry.object || !entry.object->IsAlive()) {
+				continue;
+			}
+			entry.object->AttractTo(targetPosition);
+		}
+	}
+
 	template<std::size_t Capacity>
 	void Manager::SpawnPooled(Pool<Capacity>& pool, const Vector3& position) {
 		std::size_t selectedIndex = pool.nextIndex;

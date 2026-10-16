@@ -28,6 +28,10 @@ namespace DropObject {
 		/// @brief ModelとColliderを保持したまま回収と表示を停止
 		void Deactivate();
 
+		/// @brief 配置中のDropの予備動作を終了して指定座標への吸着を開始
+		/// @param targetPosition 吸着先のワールド座標
+		void AttractTo(const Vector3& targetPosition);
+
 		/// @brief Poolで管理するDrop一個分の報酬量を取得
 		/// @return Expの場合は経験値量、Moneyの場合は金額、それ以外の場合は0
 		int GetRewardAmount() const;

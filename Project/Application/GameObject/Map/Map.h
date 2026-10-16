@@ -94,6 +94,7 @@ private:
 		int normalChestSpawnCount = 25;
 		int freeChestSpawnCount = 25;
 		int karmaSpawnCount = 50;
+		int magnetSpawnCount = 1;
 		int bossSpawnerSpawnCount = 1;
 		Vector3 blockSize = { 15.0f, 7.5f, 15.0f };
 		int minHeight = 1;
@@ -173,6 +174,9 @@ private:
 	/// @brief Map上にKarmaをランダム配置
 	void GenerateKarmas();
 
+	/// @brief Map上に設定数のMagnetをランダム配置
+	void GenerateMagnets();
+
 	/// @brief 通常ブロック上に設定数のBossSpawnerを配置
 	void GenerateBossSpawner();
 
@@ -237,6 +241,7 @@ private:
 	int normalChestSpawnCount_ = 25;
 	int freeChestSpawnCount_ = 25;
 	int karmaSpawnCount_ = 50;
+	int magnetSpawnCount_ = 1;
 	int bossSpawnerSpawnCount_ = 1;
 
 	bool isModelDraw_ = true;

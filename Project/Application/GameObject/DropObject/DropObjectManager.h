@@ -32,6 +32,10 @@ namespace DropObject {
 		/// @param position 生成位置
 		void Spawn(Type type, const Vector3& position);
 
+		/// @brief 配置中のExpすべてを指定座標へ吸着開始
+		/// @param targetPosition Playerの現在ワールド座標
+		void AttractAllExp(const Vector3& targetPosition);
+
 		/// @brief 各Poolの確保枠を保持して全Dropと未回収報酬をリセット
 		void Clear();
 

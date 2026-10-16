@@ -151,6 +151,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Karma\Karma.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\Magnet\Magnet.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\BeamEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\CameraManagerEditor.cpp" />
@@ -721,6 +722,7 @@
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Karma\Karma.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\Magnet\Magnet.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

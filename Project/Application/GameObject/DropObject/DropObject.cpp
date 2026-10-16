@@ -106,6 +106,17 @@ namespace DropObject {
 		}
 	}
 
+	void Base::AttractTo(const Vector3& targetPosition) {
+		if (!isAlive_) {
+			return;
+		}
+
+		// 回収済み枠を復活させず、予備動作中でも現在位置から直接吸着を開始
+		targetPosition_ = targetPosition;
+		backTimer_.Reset();
+		isMoving_ = true;
+	}
+
 	int Base::GetRewardAmount() const {
 		if (type_ == Type::Exp) {
 			return kExpAmount;
