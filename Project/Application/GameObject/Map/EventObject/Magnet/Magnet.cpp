@@ -68,7 +68,7 @@ bool Magnet::Interact(Player::Base& player) {
 }
 
 std::string_view Magnet::GetInteractionText() const {
-	return "経験値をすべて引き寄せる";
+	return "経験値を引き寄せる";
 }
 
 MapEventRequest Magnet::GetInteractionRequest() const {

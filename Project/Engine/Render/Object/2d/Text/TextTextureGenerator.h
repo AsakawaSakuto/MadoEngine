@@ -55,6 +55,14 @@ struct TextTexturePixels {
 	uint32_t height = 1;
 };
 
+/// @brief 一文字の描画位置と次の文字までの送り幅
+struct TextGlyphMetrics {
+	Vector2 offset = {};
+	float advance = 0.0f;
+	float lineHeight = 0.0f;
+	float baseline = 0.0f;
+};
+
 /// @brief DirectWrite、Direct2D、WICを使ってText用のRGBAテクスチャデータを生成
 class TextTextureGenerator {
 public:
@@ -72,8 +80,17 @@ public:
 	/// @brief Text設定からRGBAピクセルを生成
 	/// @param desc 生成に使用するText設定
 	/// @param outPixels 生成されたRGBAピクセル
+	/// @param rasterScale 配置設定を維持した画像化倍率、通常描画の場合は1
 	/// @return 生成に成功した場合はtrue
-	bool Generate(const TextTextureDesc& desc, TextTexturePixels& outPixels);
+	bool Generate(const TextTextureDesc& desc, TextTexturePixels& outPixels, float rasterScale = 1.0f);
+
+	/// @brief 指定フォントの一文字を張り出し部分まで画像化
+	/// @param desc 使用するフォント設定
+	/// @param character 描画する文字
+	/// @param outPixels 一文字のRGBAピクセル
+	/// @param outMetrics 一文字の送り幅と基準位置
+	/// @return 生成に成功した場合はtrue
+	bool GenerateGlyph(const TextTextureDesc& desc, wchar_t character, TextTexturePixels& outPixels, TextGlyphMetrics& outMetrics);
 
 	/// @brief Assets/Fontから読み込んだフォント一覧を取得
 	/// @return 選択可能なフォント情報一覧
@@ -85,6 +102,14 @@ private:
 
 	TextTextureGenerator(const TextTextureGenerator&) = delete;
 	TextTextureGenerator& operator=(const TextTextureGenerator&) = delete;
+
+	/// @brief 文字列画像と必要に応じた一文字の計測結果を生成
+	/// @param desc 描画設定
+	/// @param outPixels 生成されたRGBAピクセル
+	/// @param outGlyphMetrics 一文字の計測先、nullptrの場合は通常文字列の描画
+	/// @param rasterScale 配置設定を維持した画像化倍率
+	/// @return 生成に成功した場合はtrue
+	bool GenerateInternal(const TextTextureDesc& desc, TextTexturePixels& outPixels, TextGlyphMetrics* outGlyphMetrics, float rasterScale);
 
 	/// @brief 指定ディレクトリ内のフォントファイルを読み込み
 	/// @param fontDirectory フォントを検索するディレクトリ

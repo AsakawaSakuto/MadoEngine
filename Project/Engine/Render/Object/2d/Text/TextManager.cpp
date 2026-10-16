@@ -46,11 +46,53 @@ void TextManager::Finalize() {
 		freeSlots_.push_back(index);
 	}
 	sharedGeometry_.Finalize();
+
+	// Textの個別参照を解放後に共有Textureを一度だけ破棄
+	for (const auto& atlas : numericAtlases_) {
+		TextureManager::GetInstance().DestroyTexture(atlas->textureKey);
+	}
+	numericAtlases_.clear();
 	TextTextureGenerator::GetInstance().Finalize();
 	device_ = nullptr;
 	commandList_ = nullptr;
 	psoRegistry_ = nullptr;
 	Logger::Output("TextManagerの全リソースを解放しました", Logger::Level::Engine);
+}
+
+const TextAtlasResource* TextManager::AcquireNumericAtlas(const std::string& fontFamily, const std::string& fontFilePath, float rasterSize, bool sdfEnabled) {
+
+	// フォントと画像化サイズが同じ全Textで共有し、数字の変更ではTextureを生成しない構成
+	for (const auto& atlas : numericAtlases_) {
+		if (atlas->fontFamily == fontFamily && atlas->fontFilePath == fontFilePath && atlas->rasterSize == rasterSize && atlas->sdfEnabled == sdfEnabled) {
+			return atlas.get();
+		}
+	}
+	if (!device_) {
+		return nullptr;
+	}
+	TextTextureDesc desc;
+	desc.fontFamily = Text::Utf8ToWide(fontFamily);
+	desc.fontFilePath = fontFilePath;
+	desc.fontSize = rasterSize;
+	auto atlas = std::make_unique<TextAtlasResource>();
+	TextTexturePixels pixels;
+	if (!atlas->glyphs.Generate(desc, pixels, sdfEnabled)) {
+		return nullptr;
+	}
+	atlas->textureKey = "__NumericTextAtlas_" + std::to_string(numericAtlases_.size());
+	atlas->fontFamily = fontFamily;
+	atlas->fontFilePath = fontFilePath;
+	atlas->rasterSize = rasterSize;
+	atlas->sdfEnabled = sdfEnabled;
+	atlas->textureSize = { static_cast<float>(pixels.width), static_cast<float>(pixels.height) };
+	atlas->textureIndex = TextureManager::GetInstance().RegisterOrUpdateRGBA(
+		atlas->textureKey, pixels.width, pixels.height, pixels.pixels.data(), static_cast<uint32_t>(pixels.pixels.size()));
+	if (atlas->textureIndex == UINT32_MAX) {
+		return nullptr;
+	}
+	const TextAtlasResource* result = atlas.get();
+	numericAtlases_.push_back(std::move(atlas));
+	return result;
 }
 
 void TextManager::SetScreenSize(float width, float height) {

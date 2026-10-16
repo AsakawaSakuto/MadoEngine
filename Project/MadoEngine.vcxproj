@@ -267,6 +267,8 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\TextGlyphAtlas.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\TextSdfGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Gauge\Gauge3d.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationSet.cpp" />
@@ -534,6 +536,9 @@
     <ClInclude Include="Engine\Render\Object\2d\Text\TextFont.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextManager.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextTextureGenerator.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextGlyphAtlas.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextSdfGenerator.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextData.h" />
     <ClInclude Include="Engine\Render\Object\3d\Gauge\Gauge3d.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationFunction.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationSet.h" />

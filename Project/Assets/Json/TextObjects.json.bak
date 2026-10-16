@@ -205,6 +205,7 @@
                 0.5,
                 0.5
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -219,10 +220,18 @@
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "GamePlayTimerText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 640.0,
                 80.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -230,11 +239,12 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "03:29",
+            "text": "04:54",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -245,6 +255,7 @@
                 1.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -259,10 +270,18 @@
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "EnemyCountText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1265.0,
                 120.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -270,11 +289,12 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 22",
+            "text": "Enemy : 6",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -285,6 +305,7 @@
                 0.5,
                 0.5
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -299,10 +320,18 @@
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "PlayerHealthText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 155.0,
                 84.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -310,11 +339,12 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "HP : 85 / 100",
+            "text": "HP : 100 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -325,6 +355,7 @@
                 0.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -339,10 +370,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "KillCountText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 840.0,
                 50.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -350,11 +389,12 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "72",
+            "text": "2",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -365,6 +405,7 @@
                 0.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -379,10 +420,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text3",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1070.0,
                 622.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -390,6 +439,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
@@ -405,6 +455,7 @@
                 0.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -419,10 +470,18 @@
             "layer": "UI",
             "lineSpacing": 1.0,
             "name": "FpsText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1110.0,
                 40.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -430,6 +489,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
@@ -445,6 +505,7 @@
                 0.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -459,10 +520,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1070.0,
                 434.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -470,6 +539,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
@@ -482,9 +552,60 @@
         },
         {
             "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 36.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "Text4",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
+            "position": [
+                40.0,
+                200.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "5分間敵を倒し続けよう",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
                 1.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -499,10 +620,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "SeedValueText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1265.0,
                 80.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -510,11 +639,12 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "Seed : 2992417479",
+            "text": "Seed : 381704930",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -525,46 +655,7 @@
                 0.0,
                 0.0
             ],
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 24.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "Text4",
-            "position": [
-                40.0,
-                220.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "5分間敵を倒し続けよう",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -579,10 +670,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "MoneyText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 400.0,
                 50.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -590,11 +689,12 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "10079",
+            "text": "10001",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -605,6 +705,7 @@
                 0.5,
                 0.5
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -619,10 +720,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "InteractText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 640.0,
                 376.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -630,6 +739,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
@@ -645,6 +755,7 @@
                 0.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -659,10 +770,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text2",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1070.0,
                 562.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -670,6 +789,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0
@@ -685,6 +805,7 @@
                 0.0,
                 0.0
             ],
+            "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
                 1.0,
@@ -699,10 +820,18 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text1",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
             "position": [
                 1070.0,
                 498.0
             ],
+            "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
                 1.0,
@@ -710,6 +839,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
+            "sdfEnabled": false,
             "size": [
                 0.0,
                 0.0

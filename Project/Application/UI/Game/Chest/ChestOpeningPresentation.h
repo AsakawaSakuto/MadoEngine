@@ -66,6 +66,7 @@ namespace UI::Game {
 		State state_ = State::Hidden;
 		Rarity openingRarity_ = Rarity::Uncommon;
 		std::size_t openingPulseCount_ = 1;
+		std::size_t appliedOpeningPulseCount_ = 0;
 		float openingElapsedTime_ = 0.0f;
 		float openingScaleMultiplier_ = 1.0f;
 		float flashRemainingTime_ = 0.0f;

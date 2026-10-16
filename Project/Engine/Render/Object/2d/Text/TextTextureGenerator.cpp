@@ -194,10 +194,28 @@ void TextTextureGenerator::Finalize() {
 	Logger::Output("[Engine] TextTextureGeneratorを終了しました。", Logger::Level::Engine);
 }
 
-bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixels& outPixels) {
-	if (!Initialize()) {
+bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixels& outPixels, float rasterScale) {
+	return GenerateInternal(desc, outPixels, nullptr, rasterScale);
+}
+
+bool TextTextureGenerator::GenerateGlyph(const TextTextureDesc& desc, wchar_t character, TextTexturePixels& outPixels, TextGlyphMetrics& outMetrics) {
+	TextTextureDesc glyphDesc = desc;
+	glyphDesc.text.assign(1, character);
+	glyphDesc.areaSize = {};
+	glyphDesc.horizontalAlign = TextHorizontalAlign::Left;
+	glyphDesc.verticalAlign = TextVerticalAlign::Top;
+	glyphDesc.wordWrap = false;
+	glyphDesc.characterSpacing = 0.0f;
+	glyphDesc.lineSpacing = 1.0f;
+	return GenerateInternal(glyphDesc, outPixels, &outMetrics, 1.0f);
+}
+
+bool TextTextureGenerator::GenerateInternal(const TextTextureDesc& desc, TextTexturePixels& outPixels, TextGlyphMetrics* outGlyphMetrics, float rasterScale) {
+	if (!std::isfinite(rasterScale) || rasterScale < 1.0f || rasterScale > 4.0f || !Initialize()) {
 		return false;
 	}
+	const float rasterFontSize = desc.fontSize * rasterScale;
+	const Vector2 rasterAreaSize = { desc.areaSize.x * rasterScale, desc.areaSize.y * rasterScale };
 
 	const std::wstring text = [&]() -> std::wstring {
 		if (desc.text.empty()) {
@@ -208,16 +226,16 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 	}();
 	const float layoutWidth = [&]() {
 		if (desc.areaSize.x > 0.0f) {
-			return (desc.areaSize.x);
+			return (rasterAreaSize.x);
 		} else {
-			return (4096.0f);
+			return (4096.0f * rasterScale);
 		}
 	}();
 	const float layoutHeight = [&]() {
 		if (desc.areaSize.y > 0.0f) {
-			return (desc.areaSize.y);
+			return (rasterAreaSize.y);
 		} else {
-			return (4096.0f);
+			return (4096.0f * rasterScale);
 		}
 	}();
 	IDWriteFontCollection* fontCollection = nullptr;
@@ -241,7 +259,7 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 		DWRITE_FONT_WEIGHT_NORMAL,
 		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		desc.fontSize,
+		rasterFontSize,
 		L"ja-jp",
 		textFormat.GetAddressOf());
 	if (FAILED(hr)) {
@@ -259,7 +277,7 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 		}
 	}());
 	if (desc.lineSpacing > 0.0f && desc.lineSpacing != 1.0f) {
-		const float lineSpacing = desc.fontSize * desc.lineSpacing;
+		const float lineSpacing = rasterFontSize * desc.lineSpacing;
 		const float baseline = lineSpacing * 0.8f;
 		hr = textFormat->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, lineSpacing, baseline);
 		if (FAILED(hr)) {
@@ -292,7 +310,7 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 		DWRITE_TEXT_RANGE range{};
 		range.startPosition = 0;
 		range.length = static_cast<UINT32>(text.size());
-		hr = textLayout1->SetCharacterSpacing(0.0f, desc.characterSpacing, 0.0f, range);
+		hr = textLayout1->SetCharacterSpacing(0.0f, desc.characterSpacing * rasterScale, 0.0f, range);
 		if (FAILED(hr)) {
 			LogIfFailed("[Engine] Textの文字間隔設定に失敗しました。", hr);
 			return false;
@@ -303,9 +321,32 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 	uint32_t height = 1;
 
 	// Layout計測後に必要最小限のBitmap Sizeへ確定
-	ResolveTextureSize(textLayout.Get(), desc.areaSize, width, height);
+	ResolveTextureSize(textLayout.Get(), rasterAreaSize, width, height);
 	textLayout->SetMaxWidth(static_cast<float>(width));
 	textLayout->SetMaxHeight(static_cast<float>(height));
+	D2D1_POINT_2F drawOrigin = D2D1::Point2F(0.0f, 0.0f);
+	if (outGlyphMetrics) {
+
+		// 送り幅と画像幅を分離し、斜体や記号の張り出しによる欠けと字間のずれを防止
+		DWRITE_TEXT_METRICS metrics{};
+		DWRITE_LINE_METRICS lineMetrics{};
+		DWRITE_OVERHANG_METRICS overhang{};
+		UINT32 lineCount = 0;
+		if (FAILED(textLayout->GetMetrics(&metrics)) ||
+			FAILED(textLayout->GetLineMetrics(&lineMetrics, 1, &lineCount)) ||
+			FAILED(textLayout->GetOverhangMetrics(&overhang))) {
+			return false;
+		}
+		const float left = std::ceil((std::max)(0.0f, overhang.left));
+		const float top = std::ceil((std::max)(0.0f, overhang.top));
+		width += static_cast<uint32_t>(left + std::ceil((std::max)(0.0f, overhang.right)));
+		height += static_cast<uint32_t>(top + std::ceil((std::max)(0.0f, overhang.bottom)));
+		drawOrigin = D2D1::Point2F(left, top);
+		outGlyphMetrics->offset = { -left, -top };
+		outGlyphMetrics->advance = metrics.widthIncludingTrailingWhitespace;
+		outGlyphMetrics->lineHeight = lineMetrics.height;
+		outGlyphMetrics->baseline = lineMetrics.baseline;
+	}
 
 	Microsoft::WRL::ComPtr<IWICBitmap> bitmap;
 	hr = wicFactory_->CreateBitmap(
@@ -345,7 +386,7 @@ bool TextTextureGenerator::Generate(const TextTextureDesc& desc, TextTexturePixe
 	// 透明背景へ白文字を描き色付けはSprite Material側へ委譲
 	renderTarget->BeginDraw();
 	renderTarget->Clear(D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f));
-	renderTarget->DrawTextLayout(D2D1::Point2F(0.0f, 0.0f), textLayout.Get(), brush.Get());
+	renderTarget->DrawTextLayout(drawOrigin, textLayout.Get(), brush.Get());
 	hr = renderTarget->EndDraw();
 	if (FAILED(hr)) {
 		LogIfFailed("[Engine] Text描画に失敗しました。", hr);

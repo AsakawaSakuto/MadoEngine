@@ -1,4 +1,5 @@
 #include "ChestOpeningPresentation.h"
+#include "Audio/MyAudio.h"
 #include "Input/MyInput.h"
 #include "Math/Function/MathFunction.h"
 #include <algorithm>
@@ -124,6 +125,7 @@ namespace UI::Game {
 		state_ = State::Hidden;
 		openingRarity_ = Rarity::Uncommon;
 		openingPulseCount_ = 1;
+		appliedOpeningPulseCount_ = 0;
 		openingElapsedTime_ = 0.0f;
 		openingScaleMultiplier_ = 1.0f;
 		flashRemainingTime_ = 0.0f;
@@ -168,7 +170,14 @@ namespace UI::Game {
 			if (openingElapsedTime_ < expansionTime) {
 				return false;
 			}
+
+			// 到達済みの膨張段階を除外し、倍率変更と効果音を各段階で一度だけ反映
+			if (pulseIndex < appliedOpeningPulseCount_) {
+				continue;
+			}
 			openingScaleMultiplier_ = kOpeningPulseScales[pulseIndex];
+			++appliedOpeningPulseCount_;
+			MyAudio::Play("ChestNextRarity");
 		}
 
 		// 抽選レアリティの最終倍率から専用時間だけ待機し、未到達の上位段階の待ち時間を除外
@@ -187,6 +196,7 @@ namespace UI::Game {
 		// 膨張終了FrameはAlphaを1に保ち、次のFrameから透明化を開始
 		state_ = State::Flashing;
 		flashRemainingTime_ = kFlashDuration;
+		MyAudio::Play("ChestOpen");
 		if (Sprite* flash = MySprite::TryGet(flashSprite_)) {
 			flash->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 			flash->SetVisible(true);

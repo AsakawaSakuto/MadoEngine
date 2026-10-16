@@ -6,9 +6,19 @@
 #include "Utility/Json/Core/IJsonSerializable.h"
 #include ".SceneManager/SceneType.h"
 #include "TextFont.h"
+#include "TextData.h"
+#include <span>
 #include <string>
 
 namespace MadoEngine {
+
+struct TextAtlasResource;
+
+/// @brief Textの文字画像の生成と描画の方式
+enum class TextRenderMode {
+	Rasterized,
+	NumericAtlas,
+};
 
 /// @brief Textフォント種別の表示名を取得
 /// @param type フォント種別
@@ -51,6 +61,50 @@ public:
 	/// @brief Text用に生成した動的テクスチャを解放
 	void ReleaseTexture();
 
+	/// @brief 文字列の描画方式を設定
+	/// @param mode 数字アトラスまたは全文字列画像の描画方式
+	void SetRenderMode(TextRenderMode mode);
+
+	/// @brief 指定された文字列の描画方式を取得
+	/// @return 現在指定されている描画方式
+	TextRenderMode GetRenderMode() const { return renderMode_; }
+
+	/// @brief アトラスを画像化する基準フォントサイズを設定
+	/// @param fontSize 共有画像の一文字を生成する基準サイズ
+	void SetAtlasRasterSize(float fontSize);
+
+	/// @brief アトラスを画像化する基準フォントサイズを取得
+	/// @return 共有画像の基準フォントサイズ
+	float GetAtlasRasterSize() const { return atlasRasterSize_; }
+
+	/// @brief 通常文字列と数字アトラスのSDF描画を設定
+	/// @param enabled 単一チャンネルSDFで描画する場合はtrue
+	void SetSdfEnabled(bool enabled);
+
+	/// @brief SDF描画の指定状態を取得
+	/// @return SDF描画を指定している場合はtrue
+	bool IsSdfEnabled() const { return sdfEnabled_; }
+
+	/// @brief SDFアウトラインの色を設定
+	/// @param color 縁のRGBA色、Alphaへ文字全体の透明度を乗算
+	void SetOutlineColor(const Vector4& color) { outlineColor_ = color; }
+
+	/// @brief SDFアウトラインの色を取得
+	/// @return 縁のRGBA色
+	const Vector4& GetOutlineColor() const { return outlineColor_; }
+
+	/// @brief SDFアウトラインの画面上の太さを設定
+	/// @param width 画面Pixel単位の縁幅、生成済み距離範囲内に制限
+	void SetOutlineWidth(float width);
+
+	/// @brief SDFアウトラインの指定幅を取得
+	/// @return 画面Pixel単位の縁幅
+	float GetOutlineWidth() const { return outlineWidth_; }
+
+	/// @brief 非表示中も描画リソースを事前構築
+	/// @return 描画用Textureの準備に成功した場合はtrue
+	bool PrepareRendering();
+
 	/// @brief 表示文字列を設定
 	/// @param text 表示するUTF-8文字列
 	void SetText(const std::string& text);
@@ -59,8 +113,8 @@ public:
 	/// @return 表示中のUTF-8文字列
 	const std::string& GetText() const { return text_; }
 
-	/// @brief 生成済みTextテクスチャのピクセルサイズを取得
-	/// @return Textテクスチャのピクセルサイズ
+	/// @brief SDF用の余白を除くTextの表示サイズを取得
+	/// @return 表示倍率適用前の文字列の表示領域サイズ
 	const Vector2& GetTextureSize() const { return size_; }
 
 	/// @brief 使用フォント名を設定
@@ -185,6 +239,19 @@ private:
 	/// @brief 必要であればTextテクスチャを再生成
 	void RebuildTextureIfNeeded();
 
+	/// @brief 共有アトラスと確保済み頂点から文字列全体の描画を準備
+	/// @return 数字アトラス方式で準備できた場合はtrue
+	bool RebuildAtlasGeometry();
+
+	/// @brief 余白付きSDF文字列画像の描画頂点を構築
+	/// @param textureSize 余白込みの画像Pixel数
+	/// @param rasterScale 画像化時の拡大率
+	void RebuildSdfQuad(const Vector2& textureSize, float rasterScale);
+
+	/// @brief 固定頂点領域を初回確保して描画頂点を更新
+	/// @param vertices 更新する文字列の頂点
+	void UpdateTextVertices(std::span<const SpriteVertexData> vertices);
+
 	/// @brief UTF-8文字列をUTF-16文字列へ変換
 	/// @param text UTF-8文字列
 	/// @return UTF-16文字列
@@ -213,7 +280,7 @@ private:
 	const D3D12_VERTEX_BUFFER_VIEW* activeVBV_ = nullptr;
 	const D3D12_INDEX_BUFFER_VIEW* activeIBV_ = nullptr;
 
-	SpriteMaterial* materialData_ = nullptr;
+	TextMaterial* materialData_ = nullptr;
 	SpriteTransformationMatrix* transformationData_ = nullptr;
 
 	std::string text_ = "Text";
@@ -228,6 +295,20 @@ private:
 	TextVerticalAlign verticalAlign_ = TextVerticalAlign::Top;
 	bool wordWrap_ = true;
 	bool isTextureDirty_ = true;
+	bool hasOwnedTexture_ = false;
+	bool usesAtlas_ = false;
+	bool sdfEnabled_ = false;
+	bool usesSdf_ = false;
+	Vector4 outlineColor_ = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float outlineWidth_ = 0.0f;
+	Vector2 texturePixelSize_ = {};
+	TextRenderMode renderMode_ = TextRenderMode::Rasterized;
+	float atlasRasterSize_ = 128.0f;
+	const TextAtlasResource* atlas_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> textVertexResource_;
+	SpriteVertexData* textVertices_ = nullptr;
+	D3D12_VERTEX_BUFFER_VIEW textVertexBufferView_{};
+	uint32_t textVertexCount_ = 0;
 
 	std::string textureKey_;
 	std::string targetScreen_ = "BackBuffer";

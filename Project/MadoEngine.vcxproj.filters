@@ -175,6 +175,8 @@
     <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\TextGlyphAtlas.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\Text\TextSdfGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Gauge\Gauge3d.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerExpGauge.cpp" />
@@ -780,6 +782,9 @@
     <ClInclude Include="Engine\Render\Object\2d\Text\TextTextureGenerator.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextGlyphAtlas.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextSdfGenerator.h" />
+    <ClInclude Include="Engine\Render\Object\2d\Text\TextData.h" />
     <ClInclude Include="Engine\Render\Object\2d\Text\TextFont.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

@@ -367,6 +367,26 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 			selectedText->SetText(textBuffer.data());
 		}
 		DrawFontCombo(*selectedText);
+		const char* renderModeItems[] = { "文字列画像", "数字アトラス" };
+		int renderModeIndex = static_cast<int>(selectedText->GetRenderMode());
+		if (ImGui::Combo("描画方式", &renderModeIndex, renderModeItems, 2)) {
+			selectedText->SetRenderMode(static_cast<TextRenderMode>(renderModeIndex));
+		}
+		bool sdfEnabled = selectedText->IsSdfEnabled();
+		if (ImGui::Checkbox("SDF描画", &sdfEnabled)) {
+			selectedText->SetSdfEnabled(sdfEnabled);
+		}
+		if (sdfEnabled) {
+			float outlineWidth = selectedText->GetOutlineWidth();
+			if (ImGui::DragFloat("アウトライン幅 (px)", &outlineWidth, 0.1f, 0.0f, 32.0f, "%.1f")) {
+				selectedText->SetOutlineWidth(outlineWidth);
+			}
+			const Vector4 outlineColor = selectedText->GetOutlineColor();
+			float outlineValues[4] = { outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w };
+			if (ImGui::ColorEdit4("アウトライン色", outlineValues)) {
+				selectedText->SetOutlineColor({ outlineValues[0], outlineValues[1], outlineValues[2], outlineValues[3] });
+			}
+		}
 
 		float fontSize = selectedText->GetFontSize();
 		if (ImGui::DragFloat("フォントサイズ", &fontSize, 0.5f, 1.0f, 1024.0f)) {

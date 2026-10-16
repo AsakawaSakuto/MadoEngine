@@ -2,6 +2,7 @@
 
 #include "Render/Object/2d/Sprite/SpriteSharedGeometry.h"
 #include "Render/Object/2d/Text/Text.h"
+#include "Render/Object/2d/Text/TextGlyphAtlas.h"
 #include "Render/Object/ObjectHandle.h"
 #include "Render/PSO/PSORegistry.h"
 #include "Utility/EditorManagementMode.h"
@@ -27,6 +28,18 @@ struct TextCreateDesc {
 	EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
 };
 
+/// @brief フォントごとにTextManagerが所有する共有アトラスリソース
+struct TextAtlasResource {
+	TextGlyphAtlas glyphs;
+	std::string textureKey;
+	std::string fontFamily;
+	std::string fontFilePath;
+	float rasterSize = 128.0f;
+	bool sdfEnabled = false;
+	Vector2 textureSize = {};
+	uint32_t textureIndex = UINT32_MAX;
+};
+
 /// @brief Textの所有と世代付き参照を管理するManager
 class TextManager {
 public:
@@ -47,6 +60,14 @@ public:
 
 	/// @brief 全Textと共有リソースを解放
 	void Finalize();
+
+	/// @brief フォントごとの数字アトラスを取得し、初回だけ生成
+	/// @param fontFamily 使用するフォントファミリー名
+	/// @param fontFilePath 使用するアセットフォントのパス
+	/// @param rasterSize 一文字を画像化する基準サイズ
+	/// @param sdfEnabled 単一チャンネルSDFを共有する場合はtrue
+	/// @return Manager終了まで有効な共有アトラス、生成失敗の場合はnullptr
+	const TextAtlasResource* AcquireNumericAtlas(const std::string& fontFamily, const std::string& fontFilePath, float rasterSize, bool sdfEnabled = false);
 
 	/// @brief 全Textへスクリーンサイズを設定
 	/// @param width スクリーン幅
@@ -254,6 +275,7 @@ private:
 	std::vector<uint32_t> freeSlots_;
 	std::unordered_map<std::string, TextHandle> nameToHandle_;
 	std::vector<TextHandle> pendingDestroyHandles_;
+	std::vector<std::unique_ptr<TextAtlasResource>> numericAtlases_;
 };
 
 } // namespace MadoEngine

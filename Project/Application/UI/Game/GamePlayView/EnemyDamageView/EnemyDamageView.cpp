@@ -53,10 +53,16 @@ namespace UI::Game {
 			if (MadoEngine::Text* text = MyText::TryGet(slot.text)) {
 				text->SetFontAsset("Assets/Font/dot.ttf", "dot");
 				text->SetFontSize(normalFontSize_);
+				text->SetRenderMode(MadoEngine::TextRenderMode::NumericAtlas);
+				text->SetSdfEnabled(true);
+				text->SetOutlineWidth(1.5f);
 				text->SetAnchorPoint({ 0.5f, 0.5f });
 				text->SetWordWrap(false);
 				text->SetVisible(false);
 				text->SetColor(damageTextColor_);
+
+				// 初回被弾Frameへ共有アトラス生成と固定頂点領域の確保を持ち越さないため事前準備
+				text->PrepareRendering();
 			}
 
 			slot.jokerSprite = MySprite::Create(
