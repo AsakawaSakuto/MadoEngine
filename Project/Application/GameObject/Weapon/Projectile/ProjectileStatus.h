@@ -44,12 +44,13 @@ namespace Projectile {
 		Eye,
 		ToxicBoots,
 		Thunder,
+		Hammer,
 
 		Explosion, // 爆発で使用される、武器ではない
 	};
 
 	// ゲームロジックで使用できる武器を一か所で管理
-	inline constexpr std::array<Type, 9> kPlayableWeaponTypes = {
+	inline constexpr std::array<Type, 10> kPlayableWeaponTypes = {
 		Type::Pistol,
 		Type::Bow,
 		Type::FireBall,
@@ -59,6 +60,7 @@ namespace Projectile {
 		Type::Eye,
 		Type::ToxicBoots,
 		Type::Thunder,
+		Type::Hammer,
 	};
 
 	/// @brief 武器種類をリソース名へ変換
@@ -76,6 +78,7 @@ namespace Projectile {
 		case Type::Eye:      return "Eye";
 		case Type::ToxicBoots: return "ToxicBoots";
 		case Type::Thunder:   return "Thunder";
+		case Type::Hammer:    return "Hammer";
 		default:             return "Unknown";
 		}
 	}
@@ -126,6 +129,7 @@ namespace Projectile {
 		case Type::Eye:        return "魔眼";
 		case Type::ToxicBoots: return "毒靴";
 		case Type::Thunder:   return "雷";
+		case Type::Hammer:    return "ハンマー";
 		default:               return "不明";
 		}
 	}
@@ -143,7 +147,8 @@ namespace Projectile {
 		case Type::Trump:      return "1～13のダメージ\n稀にJokerが即死させる";
 		case Type::Eye:        return "足元にエリアを展開\n触れた敵にダメージ";
 		case Type::ToxicBoots: return "足元に魔法陣を設置\n触れた敵に毒を付与";
-		case Type::Thunder:   return "狙った敵の頭上に生成\n雷が真下へ落下する";
+		case Type::Thunder:    return "敵の頭上に雷を生成\n跳弾して敵を攻撃する";
+		case Type::Hammer:     return "頭上にハンマーを構え\n敵へ向けて振り下ろす";
 		default:               return "武器の詳細情報なし";
 		}
 	}

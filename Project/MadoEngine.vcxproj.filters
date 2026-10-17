@@ -205,6 +205,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Eye.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Thunder.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Hammer.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
     <ClCompile Include="Application\GameObject\Item\ItemInventory.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
@@ -853,6 +854,7 @@
     </ClInclude>
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Thunder.h" />
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Hammer.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

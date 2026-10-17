@@ -9,6 +9,7 @@
 #include "Entity/FireBall.h"
 #include "Entity/ToxicBoots.h"
 #include "Entity/Thunder.h"
+#include "Entity/Hammer.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -44,7 +45,8 @@ namespace Projectile {
 
 		/// @brief すべてのProjectileを更新
 		/// @param deltaTime 前フレームからの経過時間
-		void Update(float deltaTime);
+		/// @param ownerPosition 武器所有者の現在座標
+		void Update(float deltaTime, const Vector3& ownerPosition);
 
 		/// @brief Projectileを追加
 		/// @param type 追加するProjectileの種類

@@ -336,7 +336,8 @@ namespace Weapon {
 		context.projectileName = weaponName_;
 		context.projectileCount = projectileCount_;
 		context.ownerPosition = ownerPosition;
-		if (type_ != Projectile::Type::Eye && type_ != Projectile::Type::ToxicBoots) {
+		if (type_ != Projectile::Type::Eye && type_ != Projectile::Type::ToxicBoots &&
+			type_ != Projectile::Type::Hammer) {
 
 			// 投射武器がPlayer中心より少し上から飛び始めるよう生成位置だけを補正
 			context.ownerPosition.y += kProjectileSpawnHeightOffset;

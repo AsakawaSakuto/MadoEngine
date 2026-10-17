@@ -89,12 +89,15 @@ namespace Projectile {
 		return instance;
 	}
 
-	void Manager::Update(float deltaTime) {
+	void Manager::Update(float deltaTime, const Vector3& ownerPosition) {
 
 		// Update中に派生Projectileが追加されてもContainerを無効化しない走査状態
 		isTraversingProjectiles_ = true;
 		for (auto& projectile : projectiles_) {
 			if (projectile && !projectile->IsDead()) {
+
+				// 振り下ろしなどの追従型だけへ移動後の所有者座標を反映
+				projectile->SynchronizeOwnerPosition(ownerPosition);
 				projectile->Update(deltaTime);
 			}
 		}
@@ -184,6 +187,7 @@ namespace Projectile {
 		case Projectile::Type::Axe:        projectile = std::make_unique<Axe>();        break;
 		case Projectile::Type::ToxicBoots: projectile = std::make_unique<ToxicBoots>(); break;
 		case Projectile::Type::Thunder:    projectile = std::make_unique<Thunder>();    break;
+		case Projectile::Type::Hammer:     projectile = std::make_unique<Hammer>();     break;
 		default:
 			return;
 		}

@@ -167,7 +167,7 @@ SceneType GameScene::Update(float dt) {
 
 		// Targetが存在しないFrameも常時展開型ProjectileをPlayerへ追従
 		weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
-		Projectile::Manager::GetInstance().Update(deltaTime);
+		Projectile::Manager::GetInstance().Update(deltaTime, player_->GetPosition());
 
 		// 全GameObjectの移動結果へ衝突解決を適用してから接地と壁登り状態を確定
 		MyCollider::Update();

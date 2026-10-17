@@ -189,6 +189,7 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Eye.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Thunder.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Hammer.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponInventory.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusJson.cpp" />
@@ -431,6 +432,7 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Eye.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Thunder.h" />
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Hammer.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\IProjectile.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Pistol.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileManager.h" />

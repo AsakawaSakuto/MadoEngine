@@ -29,6 +29,12 @@ namespace Projectile {
 		/// @param deltaTime 前フレームからの経過時間
 		virtual void Update(float deltaTime) = 0;
 
+		/// @brief 武器所有者の現在座標を追従型Projectileへ同期
+		/// @param ownerPosition 武器所有者の現在座標
+		virtual void SynchronizeOwnerPosition(const Vector3& ownerPosition) {
+			(void)ownerPosition;
+		}
+
 		/// @brief 常時展開中に所有者の状態を同期
 		/// @param context 同期するProjectile情報
 		virtual void SynchronizePersistentState(const InitializeDesc& context) {
@@ -105,7 +111,7 @@ namespace Projectile {
 		/// @param enemyId 衝突したEnemyの識別番号
 		/// @param bounceTargetPosition 跳弾先の座標、跳弾先が存在しない場合はnullptr
 		/// @return ダメージを適用する新しい衝突の場合はtrue
-		bool HandleEnemyCollision(std::uint32_t enemyId, const Vector3* bounceTargetPosition) {
+		virtual bool HandleEnemyCollision(std::uint32_t enemyId, const Vector3* bounceTargetPosition) {
 			currentContactEnemyIds_.insert(enemyId);
 
 			if (isDead_) {
