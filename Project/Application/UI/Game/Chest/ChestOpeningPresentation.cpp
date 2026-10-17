@@ -12,6 +12,7 @@ namespace {
 	constexpr float kReferenceScale = 0.65f;
 	constexpr float kReferenceFovY = 0.45f;
 	constexpr float kFlashDuration = 1.0f;
+	constexpr float kOpeningPulsePitchStepSemitones = 2.0f;
 	constexpr std::array<float, 4> kOpeningPulseScales = { 1.1f, 1.2f, 1.3f, 1.5f };
 
 	// 各膨張段階までの待ち時間（秒）
@@ -177,6 +178,9 @@ namespace UI::Game {
 			}
 			openingScaleMultiplier_ = kOpeningPulseScales[pulseIndex];
 			++appliedOpeningPulseCount_;
+
+			// 膨張段階から音程を算出し、次の宝箱も元の音程から開始
+			MyAudio::SetPitch("ChestNextRarity", static_cast<float>(pulseIndex) * kOpeningPulsePitchStepSemitones);
 			MyAudio::Play("ChestNextRarity");
 		}
 

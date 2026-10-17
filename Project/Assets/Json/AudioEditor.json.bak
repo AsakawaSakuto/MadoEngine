@@ -50,6 +50,16 @@
             "type": "SE",
             "volume": 1.0
         },
+        "chestnextrarity": {
+            "pitchSemitones": 4.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "chestopen": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
         "confirm": {
             "pitchSemitones": 0.0,
             "type": "SE",
@@ -86,7 +96,7 @@
             "volume": 1.0
         },
         "exp": {
-            "pitchSemitones": 0.0,
+            "pitchSemitones": 1.8000000715255737,
             "type": "SE",
             "volume": 1.0
         },
@@ -135,10 +145,15 @@
             "type": "SE",
             "volume": 1.0
         },
-        "money": {
+        "magnet": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
+        },
+        "money": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 0.0
         },
         "pistol": {
             "pitchSemitones": 0.0,

@@ -11,6 +11,7 @@ namespace DropObject {
 		constexpr float kBackDuration = 0.2f;    // DropObjectがPlayerから後退する予備動作の継続時間
 
 		constexpr int kExpAmount = 10;           // DropObjectのExpがPlayerに加算する経験値量
+		constexpr float kMaxExpSoundPitchSemitones = 6.0f;
 
 		constexpr float kMoneyRiseSpeed = 8.0f;  // DropObjectのMoneyが後退中に上昇する速度
 		constexpr int kMoneyAmount = 1;          // DropObjectのMoneyがPlayerに加算する所持金量
@@ -229,6 +230,20 @@ namespace DropObject {
 
 		// 報酬の取得成立後にDropObject名と同じSEを一度再生
 		const std::string soundKey = DropObjectTypeToString(type_);
+
+		if (type_ == Type::Exp) {
+
+			const Player::Status status = player.GetStatus();
+			float levelProgress = 0.0f;
+
+			// 次のレベルまでの進行度を計算
+			if (status.expToNextLevel > 0.0f) {
+				levelProgress = std::clamp(status.currentExp / status.expToNextLevel, 0.0f, 1.0f);
+			}
+
+			// 進行度に応じてSEのピッチを変化させる
+			MyAudio::SetPitch(soundKey, levelProgress * kMaxExpSoundPitchSemitones);
+		}
 		MyAudio::Play(soundKey);
 
 		Deactivate();

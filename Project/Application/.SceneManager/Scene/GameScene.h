@@ -42,6 +42,14 @@ public:
 	/// @return 次に遷移するシーンの種類
 	SceneType Update(float dt) override;
 
+	/// @brief 武器選択とレリック獲得演出に応じたBGM一時停止の要否を取得
+	/// @return 武器選択またはレリック獲得演出中の場合はtrue
+	bool ShouldPauseBgm() const override;
+
+	/// @brief 武器選択とレリック獲得用BGMの再生区間を識別する値を取得
+	/// @return 武器選択では未処理回数、開封後のレリック獲得待機では-1、それ以外は0
+	int GetSelectionBgmPlaybackId() const override;
+
 	/// @brief 終了処理
 	void Finalize() override;
 

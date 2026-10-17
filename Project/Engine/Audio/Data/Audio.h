@@ -53,6 +53,10 @@ public:
     /// @param loop ループ再生する場合はtrue
     void PlayAudio(float volume = 1.0f, bool loop = false);
 
+    /// @brief 現在と後続の再生へ再生位置を保持した一時停止状態を適用
+    /// @param isPaused 一時停止する場合はtrue
+    void SetPaused(bool isPaused);
+
     /// @brief 再生終了したインスタンスを解放
     void Update();
 
@@ -62,6 +66,10 @@ public:
     /// @brief 再生中の全インスタンスへ音量を適用
     /// @param volume 音量、0から1の範囲
     void SetVolume(float volume);
+
+    /// @brief 個別音量設定を保持したまま一時的な音量係数を適用
+    /// @param gain 0から1の音量係数
+    void SetPlaybackGain(float gain);
 
     /// @brief 再生速度を維持した音程変更を現在および後続の再生へ適用
     /// @param semitones 元の音程からの半音数、-12から12の範囲
@@ -92,5 +100,8 @@ private:
     std::shared_ptr<const std::vector<BYTE>> pcmShared_;
     WAVEFORMATEX wfex_{};
     float pitchSemitones_ = 0.0f;
+    float volume_ = 1.0f;
+    float playbackGain_ = 1.0f;
+    bool isPaused_ = false;
     std::vector<std::unique_ptr<ClipInstance>> actives_;
 };

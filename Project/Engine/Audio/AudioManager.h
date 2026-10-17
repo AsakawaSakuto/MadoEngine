@@ -56,6 +56,11 @@ namespace MadoEngine {
 		/// @return 音量（見つからない場合は1.0f）
 		float GetVolume(const std::string& key) const;
 
+		/// @brief 個別音量設定を保持したまま一時的な音量係数を適用
+		/// @param key ファイル名、拡張子なし
+		/// @param gain 0から1の音量係数
+		void SetPlaybackGain(const std::string& key, float gain);
+
 		/// @brief 再生速度を維持した個別音声の音程を現在および後続の再生へ適用
 		/// @param key ファイル名、拡張子なし
 		/// @param semitones 元の音程からの半音数、-12から12の範囲
@@ -103,6 +108,11 @@ namespace MadoEngine {
 		/// @param key ファイル名（拡張子なし）、例: "fire.mp3" → "fire"
 		/// @param loop ループ再生するか（デフォルト: false）
 		void Play(const std::string& key, bool loop = false);
+
+		/// @brief 指定音声の再生位置を保持して一時停止状態を変更
+		/// @param key ファイル名、拡張子なし
+		/// @param isPaused 一時停止する場合はtrue
+		void SetPaused(const std::string& key, bool isPaused);
 
 		/// @brief 特定の音声を停止
 		/// @param key ファイル名（拡張子なし）

@@ -44,10 +44,12 @@ public:
     /// @param engine XAudio2の再生環境
     /// @param volume 音量、0から1の範囲
     /// @param semitones 元の音程からの半音数
+    /// @param isPaused 再生開始時から一時停止する場合はtrue
     /// @return 再生開始に成功した場合はtrue
-    bool Play(IXAudio2* engine, float volume, float semitones) {
+    bool Play(IXAudio2* engine, float volume, float semitones, bool isPaused) {
         engine_ = engine;
         volume_ = std::clamp(volume, 0.0f, 1.0f);
+        isPaused_ = isPaused;
         if (semitones != 0.0f) {
             return StartPitchVoice(semitones, 0);
         }
@@ -70,7 +72,31 @@ public:
         if (FAILED(voice_->SubmitSourceBuffer(&buffer))) {
             return false;
         }
+
+        // 一時停止中の新規再生はバッファ投入までに留め、瞬間的な音漏れを防止
+        if (isPaused_) {
+            return true;
+        }
         return SUCCEEDED(voice_->Start());
+    }
+
+    /// @brief 再生位置と投入済みバッファを維持して一時停止状態を変更
+    /// @param isPaused 一時停止する場合はtrue
+    void SetPaused(bool isPaused) {
+        if (isPaused_ == isPaused) {
+            return;
+        }
+        isPaused_ = isPaused;
+        if (!voice_) {
+            return;
+        }
+
+        // バッファを破棄せずVoiceだけを停止し、再開時も同じサンプル位置から継続
+        if (isPaused_) {
+            voice_->Stop();
+        } else {
+            voice_->Start();
+        }
     }
 
     /// @brief 再生中の音量を変更
@@ -197,7 +223,7 @@ private:
         // 先読みと最初のバッファ投入が成功するまで以前の直接再生を保持
         voice_.reset();
         voice_ = std::move(nextVoice);
-        if (FAILED(voice_->Start())) {
+        if (!isPaused_ && FAILED(voice_->Start())) {
             return false;
         }
         worker_ = std::jthread([this](std::stop_token stop) { StreamAudio(stop); });
@@ -298,6 +324,7 @@ private:
     std::shared_ptr<const std::vector<BYTE>> pcm_;
     WAVEFORMATEX format_{};
     bool loop_ = false;
+    bool isPaused_ = false;
     float volume_ = 1.0f;
     IXAudio2* engine_ = nullptr;
     UniqueEvent event_;
@@ -345,11 +372,24 @@ void AudioX::PlayAudio(float volume, bool loop) {
     }
 
     // 再生ごとに独立したVoiceと変換状態を保持して同一音源の同時再生を許容
+    volume_ = volume;
     auto instance = std::make_unique<ClipInstance>(pcmShared_, wfex_, loop);
-    if (instance->Play(xAudio2_.Get(), volume, pitchSemitones_)) {
+    if (instance->Play(xAudio2_.Get(), volume_ * playbackGain_, pitchSemitones_, isPaused_)) {
         actives_.push_back(std::move(instance));
     } else {
         Logger::Output("Audio : 音声の再生開始に失敗しました: " + filePath_, Logger::Level::Error);
+    }
+}
+
+void AudioX::SetPaused(bool isPaused) {
+    if (isPaused_ == isPaused) {
+        return;
+    }
+
+    // 後続の再生と音程変換によるVoice再生成にも同じ一時停止状態を適用
+    isPaused_ = isPaused;
+    for (auto& instance : actives_) {
+        instance->SetPaused(isPaused_);
     }
 }
 
@@ -367,12 +407,28 @@ void AudioX::Reset() {
     mastering_.reset();
     xAudio2_.Reset();
     pitchSemitones_ = 0.0f;
+    volume_ = 1.0f;
+    playbackGain_ = 1.0f;
+    isPaused_ = false;
 }
 
 void AudioX::SetVolume(float volume) {
+    volume_ = volume;
+
+    // MasterやCategoryの更新でも一時的なフェード係数を維持
     for (auto& instance : actives_) {
-        instance->SetVolume(volume);
+        instance->SetVolume(volume_ * playbackGain_);
     }
+}
+
+void AudioX::SetPlaybackGain(float gain) {
+    if (!std::isfinite(gain)) {
+        return;
+    }
+
+    // 元の設定音量とフェード係数を分離し、フェード終了時の設定復元を不要化
+    playbackGain_ = std::clamp(gain, 0.0f, 1.0f);
+    SetVolume(volume_);
 }
 
 bool AudioX::SetPitch(float semitones) {
@@ -398,7 +454,10 @@ bool AudioX::SetPitch(float semitones) {
 }
 
 void AudioX::StopAll() {
+
+    // 完全停止後の新規再生へ一時停止状態を持ち越さないため初期化
     actives_.clear();
+    isPaused_ = false;
 }
 
 void AudioX::StopLatest() {

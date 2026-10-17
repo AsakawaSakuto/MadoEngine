@@ -116,6 +116,32 @@ namespace MadoEngine {
 		it->second->PlayAudio(volume, loop);
 	}
 
+	void AudioManager::SetPlaybackGain(const std::string& key, float gain) {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
+			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const auto it = audioMap_.find(lowerKey);
+		if (it == audioMap_.end() || !it->second) {
+			return;
+		}
+
+		// 毎Frameのフェード更新では設定音量の変更やログ出力を発生させない制約
+		it->second->SetPlaybackGain(gain);
+	}
+
+	void AudioManager::SetPaused(const std::string& key, bool isPaused) {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
+			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const auto it = audioMap_.find(lowerKey);
+		if (it == audioMap_.end() || !it->second) {
+			return;
+		}
+
+		// 再生インスタンスを保持して一時停止と再開を切り替え、先頭からの再生を回避
+		it->second->SetPaused(isPaused);
+	}
+
 	void AudioManager::Stop(const std::string& key) {
 
 		// キーを小文字に変換して検索

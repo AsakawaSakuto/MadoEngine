@@ -134,10 +134,16 @@ void SceneManager::Initialize(SceneType initialScene) {
 void SceneManager::Update(float dt) {
 	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
 	transitionController.Update(dt);
-	sceneBgmController_.Update(transitionController.GetEffectProgress());
 
 	if (currentScene_) {
 		SceneType next = currentScene_->Update(dt);
+
+		// 当Frameで開始または終了した選択と獲得演出をBGMへ即時反映
+		sceneBgmController_.Update(
+			dt,
+			transitionController.GetEffectProgress(),
+			currentScene_->ShouldPauseBgm(),
+			currentScene_->GetSelectionBgmPlaybackId());
 		if (next != currentSceneType_) {
 
 			// Scene側は遷移先だけを通知し、Effect進行と実際の切替時期はManager側で管理

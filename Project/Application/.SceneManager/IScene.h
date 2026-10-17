@@ -16,6 +16,14 @@ public:
 	virtual void DrawImGui() = 0;
 	virtual void Finalize() = 0;
 
+	/// @brief Sceneの進行状態に応じたBGM一時停止の要否を取得
+	/// @return BGMを一時停止する場合はtrue
+	virtual bool ShouldPauseBgm() const { return false; }
+
+	/// @brief 選択待機用BGMの再生区間を識別する値を取得
+	/// @return 再生区間の識別値、再生不要の場合は0
+	virtual int GetSelectionBgmPlaybackId() const { return 0; }
+
 	/// @brief 受理された終了要求をResource破棄前に通知
 	/// @param destination 遷移先Scene、アプリ終了の場合はSceneType::None
 	virtual void OnExitRequested(SceneType destination) { (void)destination; }

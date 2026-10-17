@@ -7,9 +7,6 @@
 
 namespace {
 
-	constexpr float kMinDistance = 1.0f;
-	constexpr float kMaxDistance = 1000.0f;
-	constexpr float kMaxSensitivity = 1000.0f;
 	constexpr float kPitchLimit = static_cast<float>(M_PI) * 0.499f;
 
 } // namespace
@@ -33,43 +30,14 @@ DebugCameraSettings DebugCamera::GetSettings() const {
 
 void DebugCamera::ApplySettings(const DebugCameraSettings& settings) {
 
-	// JsonやEditor経由の非有限値がCamera行列へ伝播しないよう項目単位で現在値へFallback
-	if (std::isfinite(settings.target.x) &&
-		std::isfinite(settings.target.y) &&
-		std::isfinite(settings.target.z)) {
-		target_ = settings.target;
-	}
-	if (std::isfinite(settings.distance)) {
-		distance_ = std::clamp(settings.distance, kMinDistance, kMaxDistance);
-	} else {
-		distance_ = distance_;
-	}
-	if (std::isfinite(settings.yaw)) {
-		yaw_ = settings.yaw;
-	} else {
-		yaw_ = yaw_;
-	}
-	if (std::isfinite(settings.pitch)) {
-		pitch_ = std::clamp(settings.pitch, -kPitchLimit, kPitchLimit);
-	} else {
-		pitch_ = pitch_;
-	}
-	if (std::isfinite(settings.rotateSensitivity)) {
-		rotateSensitivity_ = std::clamp(settings.rotateSensitivity, 0.0f, kMaxSensitivity);
-	} else {
-		rotateSensitivity_ = rotateSensitivity_;
-	}
-	if (std::isfinite(settings.panSensitivity)) {
-		panSensitivity_ = std::clamp(settings.panSensitivity, 0.0f, kMaxSensitivity);
-	} else {
-		panSensitivity_ = panSensitivity_;
-	}
-	if (std::isfinite(settings.dollySensitivity)) {
-		dollySensitivity_ = std::clamp(settings.dollySensitivity, 0.0f, kMaxSensitivity);
-	} else {
-		dollySensitivity_ = dollySensitivity_;
-	}
-
+	target_            = settings.target;
+	distance_          = settings.distance;
+	yaw_               = settings.yaw;
+	pitch_             = settings.pitch;
+	rotateSensitivity_ = settings.rotateSensitivity;
+	panSensitivity_    = settings.panSensitivity;
+	dollySensitivity_  = settings.dollySensitivity;
+	
 	// 設定変更Frameから描画状態へ反映するため球面座標とCamera行列を即時更新
 	ApplySphericalCoord();
 	Camera::Update(0.0f);
@@ -119,7 +87,6 @@ void DebugCamera::Update(float deltaTime) {
 	float wheel = mouse->GetWheelDelta();
 	if (wheel != 0.0f) {
 		distance_ -= wheel * dollySensitivity_ * distance_ * 0.1f * deltaTime;
-		distance_ = std::clamp(distance_, kMinDistance, kMaxDistance);
 	}
 
 	ApplySphericalCoord();

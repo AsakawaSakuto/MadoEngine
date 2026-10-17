@@ -26,6 +26,7 @@ namespace {
 	constexpr int kEnemyDamageSoundLastIndex = 5;
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
 	constexpr const char* kPlayerOutlinePassName = "PlayerOutline";
+	constexpr int kRelicAcquisitionBgmPlaybackId = -1;
 }
 
 GameScene::GameScene(CommonData& commonData)
@@ -639,6 +640,38 @@ bool GameScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 
 	outPosition = player_->GetModelPosition();
 	return true;
+}
+
+bool GameScene::ShouldPauseBgm() const {
+
+	// レリックから武器選択へ連続遷移する場合も途中でBGMを再開しない条件
+	if (inGameSession_ &&
+		(inGameSession_->IsWaitingUpgradeSelection() || inGameSession_->IsWaitingItemAcquisition())) {
+		return true;
+	}
+
+	// 獲得確定後に残る開封フラッシュの終了まで一時停止を継続
+	return chestOpeningPresentation_.IsActive() || chestOpeningPresentation_.IsFlashActive();
+}
+
+int GameScene::GetSelectionBgmPlaybackId() const {
+	if (!inGameSession_) {
+		return 0;
+	}
+	if (inGameSession_->IsWaitingItemAcquisition()) {
+
+		// 開封フラッシュ開始から獲得確定まで同じBGMを継続し、開封待ちと膨張中は無音を維持
+		if (relicSystem_ && relicSystem_->HasPendingReward() && !chestOpeningPresentation_.IsActive()) {
+			return kRelicAcquisitionBgmPlaybackId;
+		}
+		return 0;
+	}
+	if (!inGameSession_->IsWaitingUpgradeSelection() || !weaponUpgradeSystem_) {
+		return 0;
+	}
+
+	// 未処理回数は選択確定時だけ減るため、リロールでは継続して次の選択で曲を再開
+	return weaponUpgradeSystem_->GetPendingUpgradeCount();
 }
 
 void GameScene::Finalize() {
