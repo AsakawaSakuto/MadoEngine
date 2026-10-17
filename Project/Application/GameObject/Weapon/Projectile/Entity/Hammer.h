@@ -39,7 +39,7 @@ namespace Projectile {
 		/// @brief 支点と振り下ろし角度をModelとColliderへ反映
 		void UpdatePose();
 
-		/// @brief 根元から先端までの八頂点をワールド空間のAABBへ変換
+		/// @brief Modelの回転とサイズを根元から先端までのOBBへ反映
 		void UpdateHitbox();
 
 		MadoEngine::ModelHandle model_{};
@@ -47,7 +47,7 @@ namespace Projectile {
 		Vector3 hitboxPosition_;
 		std::unordered_set<std::uint32_t> hitEnemyIds_;
 		State state_ = State::Windup;
-		float stateElapsedTime_ = 0.0f;
+		GameTimer stateTimer_;
 		float swingDuration_ = 0.0f;
 		float swingEndAngle_ = 0.0f;
 		float swingAngle_ = 0.0f;
