@@ -12,6 +12,7 @@ namespace Projectile {
 		std::uint64_t sourceWeaponId = 0; // 発射元Weaponインスタンスの識別番号
 		std::string projectileName;       // 投射物の名前
 		int projectileCount;              // 投射物の生成順序番号
+		int shotMaxCount = 1;             // 補正適用後の最大発射数、Swordでは連続回転数
 		Vector3 ownerPosition;            // 投射物の生成元の座標
 		Vector3 targetPosition;           // 投射物の目標座標
 
@@ -45,12 +46,14 @@ namespace Projectile {
 		ToxicBoots,
 		Thunder,
 		Hammer,
+		SnowCrystal,
+		Sword,
 
 		Explosion, // 爆発で使用される、武器ではない
 	};
 
 	// ゲームロジックで使用できる武器を一か所で管理
-	inline constexpr std::array<Type, 10> kPlayableWeaponTypes = {
+	inline constexpr std::array<Type, 12> kPlayableWeaponTypes = {
 		Type::Pistol,
 		Type::Bow,
 		Type::FireBall,
@@ -61,6 +64,8 @@ namespace Projectile {
 		Type::ToxicBoots,
 		Type::Thunder,
 		Type::Hammer,
+		Type::SnowCrystal,
+		Type::Sword,
 	};
 
 	/// @brief 武器種類をリソース名へ変換
@@ -79,6 +84,8 @@ namespace Projectile {
 		case Type::ToxicBoots: return "ToxicBoots";
 		case Type::Thunder:   return "Thunder";
 		case Type::Hammer:    return "Hammer";
+		case Type::SnowCrystal: return "SnowCrystal";
+		case Type::Sword:       return "Sword";
 		default:             return "Unknown";
 		}
 	}
@@ -130,6 +137,8 @@ namespace Projectile {
 		case Type::ToxicBoots: return "毒靴";
 		case Type::Thunder:   return "雷";
 		case Type::Hammer:    return "ハンマー";
+		case Type::SnowCrystal: return "雪の結晶";
+		case Type::Sword:       return "剣";
 		default:               return "不明";
 		}
 	}
@@ -139,17 +148,19 @@ namespace Projectile {
 	/// @return 武器種類に対応する固有説明
 	inline const char* ProjectileTypeToDescription(Type type) {
 		switch (type) {
-		case Type::Axe:        return "前方へ投擲して\nその場に滞留する";
-		case Type::FireBall:   return "着弾時に範囲攻撃\n稀に火傷を付与";
-		case Type::Pistol:     return "近くの敵に向かって\n弾丸を連射する";
-		case Type::Bow:        return "近くの敵に向かって\n貫通する矢を放つ";
-		case Type::Orb:        return "弧を描くオーブを放つ\n稀に凍結を付与";
-		case Type::Trump:      return "1～13のダメージ\n稀にJokerが即死させる";
-		case Type::Eye:        return "足元にエリアを展開\n触れた敵にダメージ";
-		case Type::ToxicBoots: return "足元に魔法陣を設置\n触れた敵に毒を付与";
-		case Type::Thunder:    return "敵の頭上に雷を生成\n跳弾して敵を攻撃する";
-		case Type::Hammer:     return "頭上にハンマーを構え\n敵へ向けて振り下ろす";
-		default:               return "武器の詳細情報なし";
+		case Type::Axe:         return "前方へ投擲して\nその場に滞留する";
+		case Type::FireBall:    return "着弾時に範囲攻撃\n稀に火傷を付与";
+		case Type::Pistol:      return "近くの敵に向かって\n弾丸を連射する";
+		case Type::Bow:         return "近くの敵に向かって\n貫通する矢を放つ";
+		case Type::Orb:         return "弧を描くオーブを放つ\n稀に凍結を付与";
+		case Type::Trump:       return "1～13のダメージ\n稀にJokerが即死させる";
+		case Type::Eye:         return "足元にエリアを展開\n触れた敵にダメージ";
+		case Type::ToxicBoots:  return "足元に魔法陣を設置\n触れた敵に毒を付与";
+		case Type::Thunder:     return "敵の頭上に雷を生成\n跳弾して敵を攻撃する";
+		case Type::Hammer:      return "頭上にハンマーを構え\n敵へ向けて振り下ろす";
+		case Type::SnowCrystal: return "前方へ結晶を投げ\n自分のもとへ戻ってくる";
+		case Type::Sword:       return "自分を中心に回転\n周囲の敵を薙ぎ払う";
+		default:                return "武器の詳細情報なし";
 		}
 	}
 }

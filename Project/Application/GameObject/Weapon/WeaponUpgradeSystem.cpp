@@ -100,7 +100,7 @@ namespace Weapon {
 			GenerateChoices(inventory);
 		}
 
-		Logger::Output("[Application] Chest開封による武器アップグレードを追加しました。", Logger::Level::Debug);
+		Logger::Output("[Application] 外部イベントによる武器アップグレードを追加しました。", Logger::Level::Debug);
 	}
 
 	bool UpgradeSystem::RerollChoices(const Inventory& inventory, Player::Base& player) {

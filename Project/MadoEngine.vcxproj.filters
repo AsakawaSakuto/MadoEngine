@@ -152,6 +152,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Karma\Karma.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\Anvil\Anvil.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Magnet\Magnet.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\AudioEditor.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\BeamEditor.cpp" />
@@ -206,6 +207,8 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Thunder.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Hammer.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\SnowCrystal.cpp" />
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Sword.cpp" />
     <ClCompile Include="Application\GameObject\Item\BaseItem.cpp" />
     <ClCompile Include="Application\GameObject\Item\ItemInventory.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
@@ -728,6 +731,7 @@
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Karma\Karma.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\Anvil\Anvil.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Magnet\Magnet.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\AudioEditor.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
@@ -855,6 +859,8 @@
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\ToxicBoots.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Thunder.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Hammer.h" />
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\SnowCrystal.h" />
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Sword.h" />
     <ClInclude Include="Application\GameObject\Weapon\Projectile\ProjectileStatus.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

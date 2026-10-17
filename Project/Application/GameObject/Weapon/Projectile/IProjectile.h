@@ -92,6 +92,13 @@ namespace Projectile {
 		/// @return Projectileのコライダー名
 		const std::string& GetColliderName() const { return colliderName_; }
 
+		/// @brief 当Frameの攻撃範囲とEnemyの接触を判定
+		/// @param enemyColliderName EnemyのCollider名
+		/// @return 接触している場合はtrue
+		virtual bool IsHitEnemy(const std::string& enemyColliderName) {
+			return MyCollider::IsHitName(enemyColliderName, colliderName_);
+		}
+
 		/// @brief Projectileの現在座標を取得
 		/// @return Projectileの現在座標
 		const Vector3& GetPosition() const { return transform_.translate; }

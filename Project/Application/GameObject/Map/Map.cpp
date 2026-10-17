@@ -1,5 +1,6 @@
 #include "Map.h"
 #include "Audio/MyAudio.h"
+#include "GameObject/Map/EventObject/Anvil/Anvil.h"
 #include "GameObject/Map/EventObject/BossSpawner/BossSpawner.h"
 #include "GameObject/Map/EventObject/Chest/Chest.h"
 #include "GameObject/Map/EventObject/Jar/Jar.h"
@@ -208,6 +209,8 @@ void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("Karma.Outline");
 	MyInstancedModel::Destroy("Magnet.Normal");
 	MyInstancedModel::Destroy("Magnet.Outline");
+	MyInstancedModel::Destroy("Anvil.Normal");
+	MyInstancedModel::Destroy("Anvil.Outline");
 	MyInstancedModel::Destroy("BossSpawner.Normal");
 	MyInstancedModel::Destroy("BossSpawner.Outline");
 }
@@ -260,6 +263,7 @@ void Map::Generate(const GenerationSettings& settings) {
 	freeChestSpawnCount_ = safeSettings.freeChestSpawnCount;
 	karmaSpawnCount_ = safeSettings.karmaSpawnCount;
 	magnetSpawnCount_ = safeSettings.magnetSpawnCount;
+	anvilSpawnCount_ = safeSettings.anvilSpawnCount;
 	bossSpawnerSpawnCount_ = safeSettings.bossSpawnerSpawnCount;
 	blockSize_ = safeSettings.blockSize;
 	minHeight_ = safeSettings.minHeight;
@@ -386,6 +390,7 @@ void Map::Generate(const GenerationSettings& settings) {
 	GenerateKarmas();
 	GenerateBossSpawner();
 	GenerateMagnets();
+	GenerateAnvils();
 }
 
 Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
@@ -597,6 +602,11 @@ void Map::DrawEventObjectStatusEditor() {
 	ImGui::DragInt("総数##Magnet", &editorSettings_.magnetSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::Unindent();
 
+	ImGui::TextUnformatted("Anvil");
+	ImGui::Indent();
+	ImGui::DragInt("総数##Anvil", &editorSettings_.anvilSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::Unindent();
+
 	ImGui::TextUnformatted("BossSpawner");
 	ImGui::Indent();
 	ImGui::DragInt("総数##BossSpawner", &editorSettings_.bossSpawnerSpawnCount, 1.0f, 0, kMaximumEventObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
@@ -619,6 +629,7 @@ void Map::DrawMapViewEditor(const Player::Base* player) const {
 	ImGui::Text("Jar: %d  Money: %d  Exp: %d", jarSpawnCount_, moneyJarSpawnCount_, expJarSpawnCount_);
 	ImGui::Text("Chest: %d  Normal: %d  Free: %d", chestSpawnCount_, normalChestSpawnCount_, freeChestSpawnCount_);
 	ImGui::Text("Karma: %d  Magnet: %d  BossSpawner: %d", karmaSpawnCount_, magnetSpawnCount_, bossSpawnerSpawnCount_);
+	ImGui::Text("Anvil: %d", anvilSpawnCount_);
 	if (player) {
 		const Vector3 playerPosition = player->GetPosition();
 		ImGui::Text("Player: X %.2f  Y %.2f  Z %.2f", playerPosition.x, playerPosition.y, playerPosition.z);
@@ -726,6 +737,7 @@ Map::GenerationSettings Map::CreateAppliedSettings() const {
 	settings.freeChestSpawnCount = freeChestSpawnCount_;
 	settings.karmaSpawnCount = karmaSpawnCount_;
 	settings.magnetSpawnCount = magnetSpawnCount_;
+	settings.anvilSpawnCount = anvilSpawnCount_;
 	settings.bossSpawnerSpawnCount = bossSpawnerSpawnCount_;
 	settings.blockSize = blockSize_;
 	settings.minHeight = minHeight_;
@@ -749,6 +761,7 @@ void Map::ClampGenerationSettings(GenerationSettings& settings) {
 	settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
 	settings.karmaSpawnCount = std::clamp(settings.karmaSpawnCount, 0, kMaximumEventObjectCount);
 	settings.magnetSpawnCount = std::clamp(settings.magnetSpawnCount, 0, kMaximumEventObjectCount);
+	settings.anvilSpawnCount = std::clamp(settings.anvilSpawnCount, 0, kMaximumEventObjectCount);
 	settings.bossSpawnerSpawnCount = std::clamp(settings.bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
 	settings.blockSize.x = std::clamp([&]() {
 		if (std::isfinite(settings.blockSize.x)) {
@@ -802,6 +815,7 @@ bool Map::AreGenerationSettingsEqual(const GenerationSettings& lhs, const Genera
 		lhs.freeChestSpawnCount == rhs.freeChestSpawnCount &&
 		lhs.karmaSpawnCount == rhs.karmaSpawnCount &&
 		lhs.magnetSpawnCount == rhs.magnetSpawnCount &&
+		lhs.anvilSpawnCount == rhs.anvilSpawnCount &&
 		lhs.bossSpawnerSpawnCount == rhs.bossSpawnerSpawnCount &&
 		lhs.blockSize.x == rhs.blockSize.x &&
 		lhs.blockSize.y == rhs.blockSize.y &&
@@ -824,6 +838,7 @@ nlohmann::json Map::GenerationSettingsToJson(const GenerationSettings& settings)
 		{ "chest", settings.chestSpawnCount },
 		{ "karma", settings.karmaSpawnCount },
 		{ "magnet", settings.magnetSpawnCount },
+		{ "anvil", settings.anvilSpawnCount },
 		{ "bossSpawner", settings.bossSpawnerSpawnCount },
 		{ "jarTypes", {
 			{ "money", settings.moneyJarSpawnCount },
@@ -866,6 +881,7 @@ bool Map::GenerationSettingsFromJson(const nlohmann::json& json, GenerationSetti
 			settings.chestSpawnCount = countIt->value("chest", settings.chestSpawnCount);
 			settings.karmaSpawnCount = countIt->value("karma", settings.karmaSpawnCount);
 			settings.magnetSpawnCount = countIt->value("magnet", settings.magnetSpawnCount);
+			settings.anvilSpawnCount = countIt->value("anvil", settings.anvilSpawnCount);
 			settings.bossSpawnerSpawnCount = countIt->value("bossSpawner", settings.bossSpawnerSpawnCount);
 
 			// 旧Jsonにタイプ別設定がない場合は総数を均等配分して互換性を維持
@@ -1416,6 +1432,67 @@ void Map::GenerateMagnets() {
 	}
 
 	Logger::Output("Map : Magnetを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+}
+
+void Map::GenerateAnvils() {
+	if (anvilSpawnCount_ <= 0) {
+		return;
+	}
+
+	eventObjects_.reserve(eventObjects_.size() + static_cast<std::size_t>(anvilSpawnCount_));
+	const AABB localCollider = Anvil::CreatePlacementCollider({});
+	const float halfSizeX = std::max(std::abs(localCollider.min.x), std::abs(localCollider.max.x));
+	const float halfSizeZ = std::max(std::abs(localCollider.min.z), std::abs(localCollider.max.z));
+	int createdCount = 0;
+	int retryCount = 0;
+	const int maxRetryCount = anvilSpawnCount_ * 20;
+
+	// 空き場所が不足するMapでも配置処理が終了するよう試行回数を制限
+	while (createdCount < anvilSpawnCount_ && retryCount < maxRetryCount) {
+		++retryCount;
+		const int x = eventObjectRandom_.Int(0, mapWidth_ - 1);
+		const int z = eventObjectRandom_.Int(0, mapHeight_ - 1);
+		const MapBlock& spawnBlock = mapBlocks_[z][x];
+		if (spawnBlock.GetType() == MapBlockType::Air) {
+			continue;
+		}
+
+		// 台座の占有幅を確保してBlock内へ配置し、Slope上でも地表へ接地
+		const float spawnRangeX = std::max(0.0f, blockSize_.x * 0.5f - halfSizeX);
+		const float spawnRangeZ = std::max(0.0f, blockSize_.z * 0.5f - halfSizeZ);
+		Vector3 position = {
+			static_cast<float>(x) * blockSize_.x + eventObjectRandom_.Float(-spawnRangeX, spawnRangeX),
+			0.0f,
+			static_cast<float>(z) * blockSize_.z + eventObjectRandom_.Float(-spawnRangeZ, spawnRangeZ)
+		};
+		const Vector3 blockCenter = {
+			static_cast<float>(x) * blockSize_.x,
+			0.0f,
+			static_cast<float>(z) * blockSize_.z
+		};
+		position.y = CalculateSpawnY(spawnBlock, blockCenter, blockSize_, position);
+		if (IsEventObjectColliderOverlapping(Anvil::CreatePlacementCollider(position))) {
+			continue;
+		}
+
+		// 既存イベントとの非重複を確認後にColliderと描画Instanceを登録
+		Anvil::InitializeDesc desc;
+		desc.position = position;
+		const float yaw = eventObjectRandom_.Float(0.0f, std::numbers::pi_v<float> * 2.0f);
+		desc.rotation = CalculateSpawnRotation(spawnBlock, blockSize_, yaw);
+		desc.colliderName = "AnvilAABB_" + std::to_string(createdCount);
+		auto anvil = std::make_unique<Anvil>();
+		anvil->Initialize(desc);
+		eventObjects_.push_back(std::move(anvil));
+		++createdCount;
+	}
+
+	Logger::Output("Map : Anvilを" + std::to_string(createdCount) + "個配置しました", Logger::Level::Application);
+	if (createdCount < anvilSpawnCount_) {
+
+		// 重複回避によって設定数を満たせない場合も生成済みの配置を維持
+		Logger::Output("Map : Anvilの配置可能数が設定数を下回りました", Logger::Level::Warning);
+	}
 }
 
 void Map::UpdateEventObjects(Player::Base& player, float deltaTime) {

@@ -188,6 +188,8 @@ namespace Projectile {
 		case Projectile::Type::ToxicBoots: projectile = std::make_unique<ToxicBoots>(); break;
 		case Projectile::Type::Thunder:    projectile = std::make_unique<Thunder>();    break;
 		case Projectile::Type::Hammer:     projectile = std::make_unique<Hammer>();     break;
+		case Projectile::Type::SnowCrystal: projectile = std::make_unique<SnowCrystal>(); break;
+		case Projectile::Type::Sword:       projectile = std::make_unique<Sword>();       break;
 		default:
 			return;
 		}
@@ -243,7 +245,7 @@ namespace Projectile {
 			projectile->BeginEnemyCollisionFrame();
 			for (const EnemyTargetInfo& enemyTarget : enemyTargets) {
 				if (enemyTarget.colliderName.empty() ||
-					!MyCollider::IsHitName(enemyTarget.colliderName, projectile->GetColliderName())) {
+					!projectile->IsHitEnemy(enemyTarget.colliderName)) {
 					continue;
 				}
 

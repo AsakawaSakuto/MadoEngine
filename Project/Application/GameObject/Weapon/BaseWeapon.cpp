@@ -301,23 +301,30 @@ namespace Weapon {
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 			wasFiredThisFrame_ = true;
 
+			// Swordの連射分は一つのProjectileの連続回転へ集約
+			if (type_ == Projectile::Type::Sword) {
+				shotNowCount_ = context.shotMaxCount;
+			}
+
 			// 最大射撃数へ到達したBurstを閉じてCooldownへ遷移
-			const int shotMaxCount = std::max(
-				1,
-				static_cast<int>(status_.shotMaxCount.value) + modifiers.additionalShotMaxCount);
-			if (shotNowCount_ >= shotMaxCount) {
+			if (shotNowCount_ >= context.shotMaxCount) {
 				shotNowCount_ = 0;
 				intervalTimer_.Reset();
 				const float modifiedCooldown =
 					(status_.shotCooldown.value + modifiers.shotCooldownFlat) *
 					(1.0f + modifiers.shotCooldownRate);
-				const float cooldown = [&]() {
+				float cooldown = [&]() {
 					if (std::isfinite(modifiedCooldown)) {
 						return (std::max(modifiedCooldown, 0.0f));
 					} else {
 						return (std::max(status_.shotCooldown.value, 0.0f));
 					}
 				}();
+
+				// 連続回転の途中で次のSwordが重ならないよう、回転終了後からCooldown時間を確保
+				if (type_ == Projectile::Type::Sword) {
+					cooldown += Projectile::Sword::CalculateSweepDuration(context.moveSpeed, context.shotMaxCount);
+				}
 				cooldownTimer_.Start(cooldown, false);
 			}
 		}
@@ -335,9 +342,11 @@ namespace Weapon {
 		context.sourceWeaponId = weaponId_;
 		context.projectileName = weaponName_;
 		context.projectileCount = projectileCount_;
+		context.shotMaxCount = std::max(
+			1, static_cast<int>(status_.shotMaxCount.value) + modifiers.additionalShotMaxCount);
 		context.ownerPosition = ownerPosition;
 		if (type_ != Projectile::Type::Eye && type_ != Projectile::Type::ToxicBoots &&
-			type_ != Projectile::Type::Hammer) {
+			type_ != Projectile::Type::Hammer && type_ != Projectile::Type::Sword) {
 
 			// 投射武器がPlayer中心より少し上から飛び始めるよう生成位置だけを補正
 			context.ownerPosition.y += kProjectileSpawnHeightOffset;

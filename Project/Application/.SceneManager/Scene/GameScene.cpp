@@ -222,6 +222,11 @@ SceneType GameScene::Update(float dt) {
 			case MapEventAction::AttractAllExp:
 				DropObject::Manager::GetInstance().AttractAllExp(player_->GetPosition());
 				break;
+			case MapEventAction::RequestWeaponUpgrade:
+
+				// Anvilの利用を既存の選択待機へ接続し、所持金を消費せず強化を一回追加
+				weaponUpgradeSystem_->RequestUpgrade(*weaponInventory_);
+				break;
 			case MapEventAction::None:
 				break;
 			}

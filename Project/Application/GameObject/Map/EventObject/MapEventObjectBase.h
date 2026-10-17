@@ -15,6 +15,7 @@ enum class MapEventAction {
 	SpawnBoss,
 	RequestRelicReward,
 	AttractAllExp,
+	RequestWeaponUpgrade,
 	Count,
 };
 

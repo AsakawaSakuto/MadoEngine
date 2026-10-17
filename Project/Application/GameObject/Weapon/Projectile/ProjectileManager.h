@@ -10,6 +10,8 @@
 #include "Entity/ToxicBoots.h"
 #include "Entity/Thunder.h"
 #include "Entity/Hammer.h"
+#include "Entity/SnowCrystal.h"
+#include "Entity/Sword.h"
 #include <cstdint>
 #include <memory>
 #include <string>
