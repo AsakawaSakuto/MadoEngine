@@ -183,6 +183,7 @@ namespace Projectile {
 		case Projectile::Type::FireBall:   projectile = std::make_unique<FireBall>();   break;
 		case Projectile::Type::Axe:        projectile = std::make_unique<Axe>();        break;
 		case Projectile::Type::ToxicBoots: projectile = std::make_unique<ToxicBoots>(); break;
+		case Projectile::Type::Thunder:    projectile = std::make_unique<Thunder>();    break;
 		default:
 			return;
 		}

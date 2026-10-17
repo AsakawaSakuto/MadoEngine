@@ -8,6 +8,7 @@
 #include "Entity/Axe.h"
 #include "Entity/FireBall.h"
 #include "Entity/ToxicBoots.h"
+#include "Entity/Thunder.h"
 #include <cstdint>
 #include <memory>
 #include <string>
