@@ -162,6 +162,10 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\Magnet\Magnet.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapEventObjectSpawner.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapInteractionController.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
     <ClCompile Include="Application\GameObject\Player\Player.cpp" />
     <ClCompile Include="Application\GameObject\Player\PlayerAnimationController.cpp" />
@@ -401,6 +405,10 @@
     <ClInclude Include="Application\GameObject\Map\EventObject\Magnet\Magnet.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Application\GameObject\Map\Map.h" />
+    <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h" />
+    <ClInclude Include="Application\GameObject\Map\MapEditor.h" />
+    <ClInclude Include="Application\GameObject\Map\MapEventObjectSpawner.h" />
+    <ClInclude Include="Application\GameObject\Map\MapInteractionController.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlock.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlockType.h" />
     <ClInclude Include="Application\GameObject\IGameObject.h" />

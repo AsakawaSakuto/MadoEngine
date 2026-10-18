@@ -1,21 +1,19 @@
 #pragma once
-#include "UtilityHeaders.h"
-#include "RenderHeaders.h"
 #include "MapBlock.h"
 #include "MapLimit.h"
-#include "EventObject/MapEventObjectBase.h"
-#include <array>
+#include "MapEditor.h"
+#include "MapGenerationSettings.h"
+#include "MapInteractionController.h"
+#include "Utility/Random.h"
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
-#include <nlohmann/json_fwd.hpp>
 
 namespace Player {
 	class Base;
 }
 
-/// @brief Map全体を管理するクラス
+/// @brief Mapの所有と生成と更新を取りまとめるクラス
 class Map {
 public:
 	/// @brief 指定シードでMapを初期化
@@ -62,7 +60,7 @@ public:
 
 	/// @brief 現在生成済みMapのシード値を取得
 	/// @return 現在生成済みMapのシード値
-	uint32_t GetCurrentSeed() const { return currentSeed_; }
+	uint32_t GetCurrentSeed() const { return appliedSettings_.seed; }
 
 	/// @brief 現在生成済みMapに対応する移動制限を取得
 	/// @return Map外周と高さを表す移動制限
@@ -82,132 +80,14 @@ public:
 	std::vector<MapInteractionEvent> ConsumeInteractionEvents();
 
 private:
-	/// @brief Map生成Editorで編集する生成条件
-	struct GenerationSettings {
-		uint32_t seed = 0;
-		int mapWidth = 20;
-		int mapHeight = 20;
-		int jarSpawnCount = 100;
-		int moneyJarSpawnCount = 50;
-		int expJarSpawnCount = 50;
-		int chestSpawnCount = 50;
-		int normalChestSpawnCount = 25;
-		int freeChestSpawnCount = 25;
-		int karmaSpawnCount = 50;
-		int magnetSpawnCount = 1;
-		int anvilSpawnCount = 5;
-		int bossSpawnerSpawnCount = 1;
-		Vector3 blockSize = { 15.0f, 7.5f, 15.0f };
-		int minHeight = 1;
-		int maxHeight = 10;
-		int minStartHeight = 1;
-		int maxStartHeight = 2;
-		int minRangeHeight = -1;
-		int maxRangeHeight = 1;
-		float slopeSpawnRate = 1.0f;
-	};
-
-	/// @brief 指定設定でMapを生成
+	/// @brief 指定設定で地形とイベントオブジェクトを生成
 	/// @param settings 生成に使用する設定
-	void Generate(const GenerationSettings& settings);
+	void Generate(const MapGenerationSettings& settings);
 
-	/// @brief 現在生成済みMapから生成設定を作成
-	/// @return 現在生成済みMapの生成設定
-	GenerationSettings CreateAppliedSettings() const;
-
-	/// @brief 生成設定を有効範囲に補正
-	/// @param settings 補正対象の生成設定
-	static void ClampGenerationSettings(GenerationSettings& settings);
-
-	/// @brief 二つの生成設定が一致するか判定
-	/// @param lhs 比較する左辺設定
-	/// @param rhs 比較する右辺設定
-	/// @return 全設定が一致する場合はtrue
-	static bool AreGenerationSettingsEqual(const GenerationSettings& lhs, const GenerationSettings& rhs);
-
-	/// @brief 生成設定をJsonへ変換
-	/// @param settings 変換する生成設定
-	/// @return 生成設定を格納したJson
-	static nlohmann::json GenerationSettingsToJson(const GenerationSettings& settings);
-
-	/// @brief Jsonから生成設定を復元
-	/// @param json 読み込み元Json
-	/// @param outSettings 復元結果を受け取る生成設定
-	/// @return 必須項目を読み込めた場合はtrue
-	static bool GenerationSettingsFromJson(const nlohmann::json& json, GenerationSettings& outSettings);
-
-	/// @brief 保存済みEditor設定を読み込み
-	/// @param outSettings 読み込み結果を受け取る生成設定
-	/// @param useSavedSeed 保存済みシード値も適用する場合はtrue
-	/// @return 読み込みに成功した場合はtrue
-	bool LoadEditorSettings(GenerationSettings& outSettings, bool useSavedSeed) const;
-
-	/// @brief MapStatusタブの生成条件と再生成操作を描画
-	void DrawMapStatusEditor();
-
-	/// @brief EventObjStatusタブのイベント配置数を描画
-	void DrawEventObjectStatusEditor();
-
-	/// @brief MapViewタブの生成結果と高さプレビューを描画
-	/// @param player プレビューへ表示するPlayer
-	void DrawMapViewEditor(const Player::Base* player) const;
-
-	/// @brief 生成済みMapの高さと主要Objectプレビューを描画
-	/// @param player プレビューへ表示するPlayer
-	void DrawHeightPreview(const Player::Base* player) const;
-
-	/// @brief 配置候補Colliderが既存イベントオブジェクトと重なるか判定
-	/// @param collider 配置候補のワールド座標反映済みCollider
-	/// @return 既存Colliderと重なる場合はtrue
-	bool IsEventObjectColliderOverlapping(const AABB& collider) const;
-
-	/// @brief Player初期配置Colliderが配置禁止Objectと重なるか判定
+	/// @brief Player初期配置Colliderと配置禁止Objectの重複を判定
 	/// @param collider Player初期配置時の移動Collider
 	/// @return 配置禁止Objectと重なる場合はtrue
 	bool IsPlayerSpawnBlocked(const Sphere& collider) const;
-
-	/// @brief Map上にJarをランダム配置
-	void GenerateJars();
-
-	/// @brief Map上にChestをランダム配置
-	void GenerateChests();
-
-	/// @brief Map上にKarmaをランダム配置
-	void GenerateKarmas();
-
-	/// @brief Map上に設定数のMagnetをランダム配置
-	void GenerateMagnets();
-
-	/// @brief Map上に設定数のAnvilをランダム配置
-	void GenerateAnvils();
-
-	/// @brief 通常ブロック上に設定数のBossSpawnerを配置
-	void GenerateBossSpawner();
-
-	/// @brief Map上のイベントオブジェクトを更新
-	/// @param player 相互作用するPlayer
-	/// @param deltaTime 前フレームからの経過時間
-	void UpdateEventObjects(Player::Base& player, float deltaTime);
-
-	/// @brief Playerとイベントオブジェクトの相互作用を処理
-	/// @param player 相互作用するPlayer
-	void HandleEventObjectInteraction(Player::Base& player);
-
-	/// @brief 操作案内Modelの表示と配置を現在の接触対象へ同期
-	/// @param deltaTime 前フレームからの経過時間
-	void UpdateInteractionMarker(float deltaTime);
-
-	/// @brief 操作案内Textの表示内容を現在の接触対象へ同期
-	/// @param player 相互作用するPlayer
-	void UpdateInteractionText(const Player::Base& player);
-
-	/// @brief 指定したMapイベント要求を現在受け付けられるか確認
-	/// @param action 確認対象のイベント要求
-	/// @return 受付可能な場合はtrue
-	bool IsEventActionEnabled(MapEventAction action) const;
-
-	/// @brief 地形生成用の高さ設定を有効範囲に補正
-	void ClampHeightSettings();
 
 	/// @brief 指定座標のブロック高さを取得
 	/// @param x Map上のX座標
@@ -217,50 +97,9 @@ private:
 
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
-	std::vector<MapEventRequest> pendingEventRequests_;
-	std::vector<MapInteractionEvent> pendingInteractionEvents_;
-	std::array<bool, static_cast<std::size_t>(MapEventAction::Count)> eventActionEnabled_{};
-	MapEventObjectBase* currentHitEventObject_ = nullptr;
-
-	MadoEngine::ModelHandle interactionMarkerModel_{};
-	MadoEngine::TextHandle interactionText_{};
-	MadoEngine::SpriteHandle interactionIcon_{};
-	Vector3 interactionMarkerStartScale_ = { 0.35f, 0.35f, 0.35f };
-	Vector3 interactionMarkerEndScale_ = { 0.5f, 0.5f, 0.5f };
-	GameTimer interactionMarkerScaleTimer_;
-	bool isInteractionTextVisible_ = true;
-
+	MapGenerationSettings appliedSettings_;
+	MapEditor editor_;
+	MapInteractionController interactionController_;
 	Random terrainRandom_;
-	Random eventObjectRandom_;
-	GenerationSettings editorSettings_;
-	std::optional<GenerationSettings> pendingGenerationSettings_;
-	uint32_t currentSeed_ = 0;
-	
-	int mapWidth_ = 20;
-	int mapHeight_ = 20;
-	int jarSpawnCount_ = 100;
-	int moneyJarSpawnCount_ = 50;
-	int expJarSpawnCount_ = 50;
-	int chestSpawnCount_ = 50;
-	int normalChestSpawnCount_ = 25;
-	int freeChestSpawnCount_ = 25;
-	int karmaSpawnCount_ = 50;
-	int magnetSpawnCount_ = 1;
-	int anvilSpawnCount_ = 5;
-	int bossSpawnerSpawnCount_ = 1;
-
 	bool isModelDraw_ = true;
-
-	Vector3 blockSize_ = { 15.0f, 7.5f, 15.0f };
-
-	int minHeight_ = 1;
-	int maxHeight_ = 10;
-
-	int minStartHeight_ = 1;
-	int maxStartHeight_ = 2;
-
-	int minRangeHeight_ = -1;
-	int maxRangeHeight_ = 1;
-
-	float slopeSpawnRate_ = 1.0f;
 };

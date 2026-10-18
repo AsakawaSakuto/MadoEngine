@@ -146,6 +146,10 @@
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapEventObjectSpawner.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapInteractionController.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
@@ -713,6 +717,10 @@
     <ClInclude Include="Engine\Utility\Json\Core\JsonSerializer.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h" />
+    <ClInclude Include="Application\GameObject\Map\MapEditor.h" />
+    <ClInclude Include="Application\GameObject\Map\MapEventObjectSpawner.h" />
+    <ClInclude Include="Application\GameObject\Map\MapInteractionController.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlock.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
