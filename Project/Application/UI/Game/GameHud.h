@@ -1,0 +1,123 @@
+#pragma once
+#include "GameObject/Player/PlayerStatus.h"
+#include "GamePlayView/EnemyDamageView/EnemyDamageView.h"
+#include "GamePlayView/EnemyStatusEffectIconView/EnemyStatusEffectIconView.h"
+#include "GamePlayView/FpsMeasurementView/FpsMeasurementView.h"
+#include "GamePlayView/GamePlayTimerView/GamePlayTimerView.h"
+#include "GamePlayView/PlayerResourceGainView/PlayerResourceGainView.h"
+#include "MiniMap/MiniMapUI.h"
+#include "Player/PlayerExpGauge.h"
+#include "Player/PlayerHealthGauge.h"
+#include "Player/PlayerIconUI.h"
+#include "Player/PlayerStaminaGauge.h"
+#include "Relic/RelicInventoryUI.h"
+#include "Weapon/WeaponIconUI.h"
+#include <cstddef>
+#include <cstdint>
+
+class Map;
+
+namespace UI::Game {
+
+	/// @brief ゲーム本体からHUDへ渡すフレーム単位の表示情報
+	struct GameHudState {
+		Player::Status playerStatus;
+		Vector3 playerPosition{};
+		float wallClimbRemainingTime = 0.0f;
+		float wallClimbMaxDuration = 0.0f;
+		float remainingTime = 0.0f;
+		std::uint64_t killCount = 0;
+		std::size_t enemyCount = 0;
+		bool isWallClimbGaugeVisible = false;
+		bool isWaitingUpgradeSelection = false;
+	};
+
+	/// @brief ゲーム中の常設HUDとイベント通知表示の所有と更新
+	class GameHud final {
+	public:
+		/// @brief 報酬選択UIより先に常設HUDを初期化
+		/// @param weaponSlotCount 表示する武器スロット数
+		/// @param relicSystem 所持レリックの初期表示元
+		/// @param miniMapData 生成済みMapの表示情報
+		/// @param gameSeed 表示するゲームSeed
+		void Initialize(int weaponSlotCount, const Relic::System& relicSystem,
+			const MapMiniMapData& miniMapData, std::uint32_t gameSeed);
+
+		/// @brief HUDの参照と所有する表示リソースを解放
+		void Finalize();
+
+		/// @brief 確定済みのゲーム状態をゲージと文字表示へ同期
+		/// @param deltaTime 停止中も進行する実時間
+		/// @param gameDeltaTime 停止状態を反映したゲーム経過時間
+		/// @param state 現在フレームの表示情報
+		/// @param inventory 武器表示の読み取り元
+		/// @param camera HP表示の投影に使用するCamera
+		void Update(float deltaTime, float gameDeltaTime, const GameHudState& state,
+			const Weapon::Inventory& inventory, const Camera& camera);
+
+		/// @brief Camera切り替え後の姿勢でワールド追従表示を更新
+		/// @param gameDeltaTime 停止状態を反映したゲーム経過時間
+		/// @param isPlaying 通常プレイ中の場合はtrue
+		/// @param enemyManager 状態異常表示の読み取り元
+		/// @param camera ワールド座標の投影に使用するCamera
+		void UpdateWorldViews(float gameDeltaTime, bool isPlaying,
+			const Enemy::Manager& enemyManager, const Camera& camera);
+
+		/// @brief 所持レリック表示を確定済みの所持品へ同期
+		/// @param relicSystem 所持レリックの読み取り元
+		void UpdateRelicInventory(const Relic::System& relicSystem);
+
+		/// @brief GPU待機済みの時点でミニマップの地形表示を再構築
+		/// @param data 生成済みMapの表示情報
+		void RebuildMiniMap(const MapMiniMapData& data);
+
+		/// @brief 残存イベントObjectとPlayerの現在地をミニマップへ同期
+		/// @param map イベントObject座標の読み取り元
+		/// @param playerPosition Playerのワールド座標
+		/// @param playerFacingYaw Playerの水平Yaw角度
+		void UpdateMiniMap(const Map& map, const Vector3& playerPosition, float playerFacingYaw);
+
+		/// @brief Seed文字列を現在のMapへ同期
+		/// @param gameSeed 表示するゲームSeed
+		void SetSeed(std::uint32_t gameSeed);
+
+		/// @brief Enemyダメージの通知表示を開始
+		/// @param event 表示するダメージ通知
+		void ShowDamage(const Combat::DamageEvent& event);
+
+		/// @brief Playerのリソース獲得通知を表示
+		/// @param event 表示するリソース獲得通知
+		void ShowResourceGain(const Player::ResourceGainEvent& event);
+
+		/// @brief 攻撃した武器スロットの表示演出を開始
+		/// @param slotIndex 攻撃した武器のスロット番号
+		void PlayWeaponAttackAnimation(std::size_t slotIndex);
+
+		/// @brief HUDの調整用ImGuiを描画
+		void DrawImGui();
+
+	private:
+		/// @brief 所持金と撃破数とEnemy数の文字表示を更新
+		/// @param state 現在フレームの表示情報
+		void UpdateTexts(const GameHudState& state);
+
+		PlayerExpGauge expGauge_;
+		PlayerHealthGauge healthGauge_;
+		PlayerStaminaGauge staminaGauge_;
+		PlayerIconUI playerIconUI_;
+		WeaponIconUI weaponIconUI_;
+		RelicInventoryUI relicInventoryUI_;
+		FpsMeasurementView fpsMeasurementView_;
+		GamePlayTimerView gamePlayTimerView_;
+		MiniMapUI miniMapUI_;
+		MapMiniMapObjectPositions miniMapObjectPositions_;
+		PlayerResourceGainView playerResourceGainView_;
+		EnemyDamageView enemyDamageView_;
+		EnemyStatusEffectIconView enemyStatusEffectIconView_;
+		MadoEngine::TextHandle enemyCountText_{};
+		MadoEngine::TextHandle moneyText_{};
+		MadoEngine::TextHandle killCountText_{};
+		int displayedMoney_ = -1;
+	};
+
+}

@@ -180,6 +180,9 @@
     <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
+    <ClCompile Include="Application\UI\Game\GameHud.cpp" />
+    <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
+    <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\GameScene.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\ResultScene.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\TestScene.cpp" />
@@ -423,6 +426,9 @@
     <ClInclude Include="Application\.SceneManager\SceneManager.h" />
     <ClInclude Include="Application\.SceneManager\SceneBgmController.h" />
     <ClInclude Include="Application\.SceneManager\SceneTransitionController.h" />
+    <ClInclude Include="Application\UI\Game\GameHud.h" />
+    <ClInclude Include="Application\System\GameCamera\GameCameraController.h" />
+    <ClInclude Include="Application\System\RewardSelection\RewardSelectionController.h" />
     <ClInclude Include="Application\.SceneManager\Scene\GameScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\TestScene.h" />

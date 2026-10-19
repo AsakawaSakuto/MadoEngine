@@ -2,31 +2,24 @@
 #include "Audio/MyAudio.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
-#include "Render/Object/2d/Text/MyText.h"
 #include "Render/PostEffectManager.h"
 #include "Utility/Logger/Logger.h"
 #include "System/PlayLog/PlayLogJsonWriter.h"
 #include "imguiHeaders.h"
 #include <algorithm>
 #include <cmath>
-#include <format>
 #include <limits>
 
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f; // ゲームシーンの制限時間（秒）
 
-	constexpr float kTpsCameraGamePadZoomSpeed = 15.0f;  // ゲームパッドの右スティックY軸でのズーム速度
-	constexpr float kTpsCameraMouseWheelZoomStep = 2.0f; // マウスホイール1回転でのズーム距離変化量
-	constexpr float kTpsCameraMinDistance = 5.0f;        // TPS_Cameraの最短距離
-	constexpr float kTpsCameraMaxDistance = 30.0f;       // TPS_Cameraの最長距離
 	constexpr float kPlayerPointLightHeight = 32.0f;
 	constexpr const char* kPlayerPointLightName = "PlayerPointLight";
-	
+
 	constexpr int kEnemyDamageSoundFirstIndex = 1;
 	constexpr int kEnemyDamageSoundLastIndex = 5;
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
 	constexpr const char* kPlayerOutlinePassName = "PlayerOutline";
-	constexpr int kRelicAcquisitionBgmPlaybackId = -1;
 }
 
 GameScene::GameScene(CommonData& commonData)
@@ -41,32 +34,11 @@ void GameScene::Initialize() {
 	MyRand::SetSeed(gameSeed_);
 	playLogRecorder_.Initialize(gameSeed_);
 	playLogSaveAttempted_ = false;
-	
+
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 	Enemy::Settings::GetInstance().LoadOrCreate();
 
-	debugCameraHandle_ = cameraManager_.CreateCamera<DebugCamera>("GameDebugCamera");
-	tpsCameraHandle_ = cameraManager_.CreateCamera<TPS_Camera>("GamePlayerCamera");
-	if (DebugCamera* debugCamera = cameraManager_.TryGetCamera<DebugCamera>(debugCameraHandle_)) {
-		debugCamera->SetPosition({ 0.0f, 10.0f, -20.0f });
-	}
-	cameraManager_.CutTo(tpsCameraHandle_);
-
-	expGauge_ = std::make_unique<UI::Game::PlayerExpGauge>();
-	expGauge_->Initialize();
-
-	healthGauge_ = std::make_unique<UI::Game::PlayerHealthGauge>();
-	healthGauge_->Initialize();
-
-	staminaGauge_ = std::make_unique<UI::Game::PlayerStaminaGauge>();
-	staminaGauge_->Initialize();
-
-	enemyCountText_ = MyText::Create("EnemyCountText", "Enemy : 0", SceneType::Game, MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
-	fpsMeasurementView_.Initialize();
-	gamePlayTimerView_.Initialize();
-	playerResourceGainView_.Initialize();
-	enemyDamageView_.Initialize();
-	enemyStatusEffectIconView_.Initialize();
+	gameCameraController_.Initialize(cameraManager_);
 
 	AABB mapLimitBox;
 	MapLimit mapLimit;
@@ -78,16 +50,15 @@ void GameScene::Initialize() {
 
 	// ProjectileやEnemyの生存範囲を共通の包含Colliderとして登録
 	MyCollider::RegisterCollider("MapLimitBox", CollisionTag::MapLimitBox, &mapLimitBox_, &mapLimitBoxPos_, 1.0f);
-	
+
 	map_ = std::make_unique<Map>();
 	map_->Initialize(gameSeed_);
 
 	// 地形確定後に通常Block上面の中心を取得してPlayerの初期配置へ使用
 	player_ = std::make_unique<Player::Base>();
 	player_->Initialize(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
-	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
+	player_->SetCamera(gameCameraController_.TryGetPlayerCamera(cameraManager_));
 	SynchronizePlayerPointLight();
-	miniMapUI_.Initialize(map_->CreateMiniMapData());
 
 	// 大量撃破時の生成負荷を読み込み時へ移してExp512枠とMoney128枠を事前確保
 	DropObject::Manager::GetInstance().Initialize();
@@ -99,9 +70,6 @@ void GameScene::Initialize() {
 	enemyEditor_ = std::make_unique<Enemy::Editor>();
 	enemyEditor_->Initialize(enemySpawner_.get(), enemyManager_.get());
 	SynchronizeMapDependentState();
-
-	playerIconUI_ = std::make_unique<UI::Game::PlayerIconUI>();
-	playerIconUI_->Initialize();
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
 	weaponInventory_->Initialize(Projectile::Type::FireBall, weaponSlotCount_);
@@ -117,32 +85,15 @@ void GameScene::Initialize() {
 	relicEditor_.Initialize(*relicSystem_);
 	appliedRelicRevision_ = relicSystem_->GetRevision();
 
-	// 武器Level表示をUpgrade Cardより先に登録してHUDをCardの背面へ配置
-	weaponIconUI_ = std::make_unique<UI::Game::WeaponIconUI>();
-	weaponIconUI_->Initialize(weaponSlotCount_);
-	weaponUpgradeUI_.Initialize();
-	relicInventoryUI_.Initialize(*relicSystem_);
-	relicAcquisitionUI_.Initialize();
-	chestOpeningPresentation_.Initialize();
+	// 常設HUDを先に生成し、報酬カードと暗幕を前面へ配置
+	hud_.Initialize(weaponSlotCount_, *relicSystem_, map_->CreateMiniMapData(), gameSeed_);
+	rewardSelectionController_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始
 	inGameSession_ = std::make_unique<System::InGameSession>();
 	inGameSession_->Initialize(kGameSceneTimeLimit);
 	ConsumePlayLogEvents();
 
-	auto textHandle = MyText::Find("Text");
-	if (MadoEngine::Text* text = MyText::TryGet(textHandle)) {
-		text->SetColor({ 1.0f,0.0f,0.0f,1.0f });
-	}
-
-	moneyText_ = MyText::Find("MoneyText");
-	killCountText_ = MyText::Find("KillCountText");
-	displayedMoney_ = -1;
-
-	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
-	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
-		seedValueText->SetText(std::format("Seed : {}", gameSeed_));
-	}
 	UpdateMiniMap();
 }
 
@@ -153,114 +104,16 @@ SceneType GameScene::Update(float dt) {
 	inGameSession_->Update(dt);
 
 	// Pauseと強化選択中はGameObjectへ渡す時間だけを停止
-	const float deltaTime = [&]() {
-		if (inGameSession_->IsPlaying()) {
-			return (dt);
-		} else {
-			return (0.0f);
-		}
-	}();
-
+	float deltaTime = 0.0f;
 	if (inGameSession_->IsPlaying()) {
-		playLogRecorder_.AdvancePlayTime(deltaTime);
-		player_->Update(deltaTime);
-		enemySpawner_->Update(deltaTime);
-		enemyManager_->Update(deltaTime);
-
-		// Targetが存在しないFrameも常時展開型ProjectileをPlayerへ追従
-		weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
-		Projectile::Manager::GetInstance().Update(deltaTime, player_->GetPosition());
-
-		// 全GameObjectの移動結果へ衝突解決を適用してから接地と壁登り状態を確定
-		MyCollider::Update();
-		player_->ResolveAfterCollision();
-		enemyManager_->ResolveAfterCollision();
-		for (const Combat::DamageEvent& event :
-			enemyManager_->ConsumeDamageEvents()) {
-
-			// Gameplay乱数へ影響しない専用乱数系列でDamage SEを選択
-			const std::string damageSoundKey =
-				std::string(kEnemyDamageSoundKeyPrefix) +
-				std::to_string(MyRand::GetInt(
-					kEnemyDamageSoundFirstIndex,
-					kEnemyDamageSoundLastIndex));
-			if (MyAudio::IsLoaded(damageSoundKey)) {
-				MyAudio::Play(damageSoundKey);
-			}
-			enemyDamageView_.Spawn(event);
-			playLogRecorder_.RecordDamage(event);
-
-			// 毒と火傷を武器戦績へ重複加算せず、直接攻撃だけを既存Weaponへ反映
-			if (event.sourceType == Combat::DamageSourceType::Weapon) {
-				weaponInventory_->RecordWeaponDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
-			}
-		}
-
-		// 全レリック上限時は支払い前に宝箱操作を拒否して一個獲得の契約を維持
-		map_->SetEventActionEnabled(
-			MapEventAction::RequestRelicReward,
-			relicSystem_->CanRequestReward());
-		if (!player_->IsDead()) {
-
-			// 致死Damageの成立後に新しいインタラクトを受け付けない順序保証
-			map_->Update(*player_, deltaTime);
-		}
-		for (const MapEventRequest& request : map_->ConsumeEventRequests()) {
-
-			// Mapを各Game Systemへ依存させずSceneでイベント要求を仲介
-			switch (request.action) {
-			case MapEventAction::SpawnBoss:
-				enemyManager_->SpawnBoss(request.position, SceneType::Game);
-				break;
-			case MapEventAction::RequestRelicReward:
-
-				// 報酬を保留して獲得UIの前に専用Modelの開封待ち表示を開始
-				if (relicSystem_->RequestReward()) {
-					if (const Relic::Definition* reward = relicSystem_->GetPendingReward()) {
-						chestOpeningPresentation_.Show(reward->rarity);
-					}
-				}
-				break;
-			case MapEventAction::AttractAllExp:
-				DropObject::Manager::GetInstance().AttractAllExp(player_->GetPosition());
-				break;
-			case MapEventAction::RequestWeaponUpgrade:
-
-				// Anvilの利用を既存の選択待機へ接続し、所持金を消費せず強化を一回追加
-				weaponUpgradeSystem_->RequestUpgrade(*weaponInventory_);
-				break;
-			case MapEventAction::None:
-				break;
-			}
-		}
-		if (!player_->IsDead()) {
-
-			// 死亡確定後の所持金や経験値の変化を防ぐためDrop回収を停止
-			DropObject::Manager::GetInstance().Update(deltaTime, *player_);
-		}
-
-		// Playerの状態変更を描画処理へ依存させずSceneで獲得通知へ変換
-		for (const Player::ResourceGainEvent& event :
-			player_->ConsumeResourceGainEvents()) {
-			playerResourceGainView_.Spawn(event.type, event.amount);
-			if (event.type == Player::ResourceGainType::Money) {
-				playLogRecorder_.RecordMoneyGain(event.amount);
-			}
-		}
-
-		// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新
-		if (!player_->IsDead() && MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
-			Vector3 nearestEnemyPosition;
-			if (enemyManager_->TryGetNearestEnemyPosition(nearestEnemyPosition)) {
-				weaponInventory_->Update(deltaTime, player_->GetPosition(), nearestEnemyPosition);
-			}
-		}
+		deltaTime = dt;
+		UpdateGameplay(deltaTime);
 	}
 
 	// HPが0になったFrameでGame進行を固定し、死亡Animationだけを描画System側で継続
 	if (player_->IsDead()) {
 		inGameSession_->SetGameOver();
-		chestOpeningPresentation_.Hide();
+		rewardSelectionController_.HideChest();
 		FinishPlayLog(System::PlayEndReason::Death);
 	}
 
@@ -268,72 +121,19 @@ SceneType GameScene::Update(float dt) {
 	enemyManager_->DrawDebugLine();
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
 
-	if (TPS_Camera* tpsCamera = cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_)) {
-		tpsCamera->SetTargetPosition(player_->GetPosition());
-		const bool isCameraInputEnabled = inGameSession_->GetCurrentPhase() != InGamePhase::Paused &&
-			!chestOpeningPresentation_.IsActive();
-		tpsCamera->SetInputEnabled(isCameraInputEnabled);
-
-		if (isCameraInputEnabled) {
-			float distanceDelta = 0.0f;
-
-			// 左右トリガーの差分で同時入力を相殺し、時間比例の距離変化へ変換
-			if (tpsCamera->GetUseGamePadInput()) {
-				MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
-				if (gamePad && gamePad->IsConnected()) {
-					const float zoomInput = gamePad->GetLeftTrigger() - gamePad->GetRightTrigger();
-					distanceDelta += zoomInput * kTpsCameraGamePadZoomSpeed * deltaTime;
-				}
-			}
-
-			// 前方ホイールで接近、後方ホイールで後退となる距離変化へ変換
-			if (MadoEngine::InputDevice::Mouse* mouse = MyInput::GetMouse()) {
-				distanceDelta -= mouse->GetWheelDelta() * kTpsCameraMouseWheelZoomStep;
-			}
-
-			if (distanceDelta != 0.0f) {
-				const float nextDistance = tpsCamera->GetDistance() + distanceDelta;
-				tpsCamera->SetDistance(std::clamp(
-					nextDistance,
-					kTpsCameraMinDistance,
-					kTpsCameraMaxDistance
-				));
-			}
-		}
-	}
-	cameraManager_.Update(deltaTime);
+	const bool isCameraInputEnabled = inGameSession_->GetCurrentPhase() != InGamePhase::Paused &&
+		!rewardSelectionController_.ShouldBlockCameraInput();
+	gameCameraController_.UpdateTracking(cameraManager_, player_->GetPosition(), deltaTime, isCameraInputEnabled);
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
 
-	// Editorの報酬解除時にも宝箱表示を残さず通常の待機解除へ追従
-	if (chestOpeningPresentation_.IsActive() && !relicSystem_->HasPendingReward()) {
-		chestOpeningPresentation_.Hide();
-	}
-
-	// 獲得待ち中も進む時間を使用し、獲得確定後も開封フラッシュの透明化を継続
-	const bool didFinishChestPresentation = chestOpeningPresentation_.Update(
-		dt, inGameSession_->IsWaitingItemAcquisition());
-
-	// Chestの表示開始Frameからフラッシュ終了までPlayerの輪郭が前面へ重なる描画を抑止
-	SetPlayerOutlineSuppressed(chestOpeningPresentation_.IsActive() || chestOpeningPresentation_.IsFlashActive());
-
-	// ImGuiのプレビュー経路も含め、宝箱の膨張演出が完了するまではカード表示を禁止
-	relicAcquisitionUI_.SetDisplayEnabled(!chestOpeningPresentation_.IsActive());
-
-	// 背景の暗転だけをフラッシュ終了まで待たせ、カードの表示開始時期を維持
-	relicAcquisitionUI_.SetBackgroundEnabled(!chestOpeningPresentation_.IsFlashActive());
-	if (inGameSession_->IsWaitingItemAcquisition()) {
-		if (!chestOpeningPresentation_.IsActive()) {
-
-			// 膨張終了FrameのGamePad Aで表示直後のカードまで閉じないよう決定入力を抑止
-			relicAcquisitionUI_.Update(*relicSystem_, !didFinishChestPresentation);
-		}
-	} else if (inGameSession_->GetCurrentPhase() == InGamePhase::WaitingUpgrade) {
-		weaponUpgradeUI_.Update(dt, *weaponUpgradeSystem_, *weaponInventory_, *player_);
-	}
+	// 選択中も実時間で演出を進行し、獲得結果の適用をPhase同期より先に確定
+	rewardSelectionController_.Update(dt, inGameSession_->GetCurrentPhase(),
+		*relicSystem_, *weaponUpgradeSystem_, *weaponInventory_, *player_);
+	SetPlayerOutlineSuppressed(rewardSelectionController_.ShouldSuppressPlayerOutline());
 	ApplyRelicModifiersIfChanged();
-	relicInventoryUI_.Update(*relicSystem_);
+	hud_.UpdateRelicInventory(*relicSystem_);
 	ConsumePlayLogEvents();
 
 	// レリック獲得を先に解決し、終了後に保留中のLevel Up選択へ遷移
@@ -343,64 +143,7 @@ SceneType GameScene::Update(float dt) {
 		inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 	}
 
-	// 当Frameの攻撃Eventを一度だけ消費して対応SlotのUI演出へ変換
-	for (const Weapon::WeaponAttackEvent& event :
-		weaponInventory_->ConsumeWeaponAttackEvents()) {
-		weaponIconUI_->PlayAttackAnimation(event.slotIndex);
-	}
-	weaponIconUI_->Update(deltaTime, *weaponInventory_);
-
-	auto status = player_->GetStatus();
-	expGauge_->Update(static_cast<float>(status.currentExp), static_cast<float>(status.expToNextLevel));
-	expGauge_->IsUpgrade(inGameSession_->IsWaitingUpgradeSelection(), dt);
-
-	healthGauge_->Update(
-		player_->GetPosition(),
-		static_cast<float>(status.currentHealth),
-		static_cast<float>(status.maxHealth),
-		cameraManager_.GetRenderCamera()
-	);
-	staminaGauge_->Update(
-		player_->GetWallClimbRemainingTime(),
-		player_->GetWallClimbMaxDuration(),
-		player_->IsWallClimbGaugeVisible()
-	);
-
-	const int currentMoney = static_cast<int>(status.currentMoney);
-	if (currentMoney != displayedMoney_) {
-
-		// 所持金が変化したFrameだけText Handleを再解決して表示を更新
-		MadoEngine::Text* moneyText = MyText::TryGet(moneyText_);
-		if (!moneyText) {
-			moneyText_ = MyText::Find("MoneyText");
-			moneyText = MyText::TryGet(moneyText_);
-		}
-		if (moneyText) {
-			moneyText->SetText(std::format("{}", currentMoney));
-			displayedMoney_ = currentMoney;
-		}
-	}
-
-	// 全Weaponの累計撃破数が変化したFrameだけText表示を更新
-	MadoEngine::Text* killCountText = MyText::TryGet(killCountText_);
-	if (!killCountText) {
-		killCountText_ = MyText::Find("KillCountText");
-		killCountText = MyText::TryGet(killCountText_);
-	}
-	if (killCountText) {
-		const std::string displayText = std::format("{}", playLogRecorder_.GetData().totalCombat.killCount);
-		if (killCountText->GetText() != displayText) {
-			killCountText->SetText(displayText);
-		}
-	}
-
-	auto enemyCountHandle = MyText::Find("EnemyCountText");
-	if (MadoEngine::Text* enemyCountText = MyText::TryGet(enemyCountHandle)) {
-		enemyCountText->SetText(std::format("Enemy : {}", enemyManager_->GetEnemyCount()));
-	}
-	fpsMeasurementView_.Update(dt);
-	gamePlayTimerView_.Update(inGameSession_->GetRemainingTime());
-	UpdateMiniMap();
+	UpdateHud(dt, deltaTime);
 
 	if (inGameSession_->IsPlaying() && MyInput::GetKeyboard()->IsTrigger(DIK_9)) {
 		if (!weaponInventory_->AddWeapon(Projectile::Type::Pistol)) {
@@ -408,35 +151,13 @@ SceneType GameScene::Update(float dt) {
 		}
 	}
 
-	const CameraHandle activeCameraHandle = cameraManager_.GetActiveCameraHandle();
-	if (activeCameraHandle == debugCameraHandle_) {
-		useDebugCamera_ = true;
-	} else if (activeCameraHandle == tpsCameraHandle_) {
-		useDebugCamera_ = false;
-	}
-
-	if (MyInput::GetKeyboard()->IsTrigger(DIK_F9)) {
-
-		// EditorやJson復元で変更されたActive Cameraと同期した上で二つの操作Cameraを交互に選択
-		useDebugCamera_ = !useDebugCamera_;
-		cameraManager_.CutTo([&]() {
-			if (useDebugCamera_) {
-				return (debugCameraHandle_);
-			} else {
-				return (tpsCameraHandle_);
-			}
-		}());
-	}
+	gameCameraController_.UpdateSwitchInput(cameraManager_);
 
 	// Camera切り替え後の描画姿勢へ追従し、表示開始Frameから宝箱を画面中央へ配置
-	chestOpeningPresentation_.FollowCamera(cameraManager_.GetRenderCamera());
+	rewardSelectionController_.FollowCamera(cameraManager_.GetRenderCamera());
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
-	enemyDamageView_.SetVisible(inGameSession_->IsPlaying());
-	enemyDamageView_.Update(deltaTime, cameraManager_.GetRenderCamera());
-	enemyStatusEffectIconView_.SetVisible(inGameSession_->IsPlaying());
-	enemyStatusEffectIconView_.Update(*enemyManager_, cameraManager_.GetRenderCamera());
-	playerResourceGainView_.SetVisible(inGameSession_->IsPlaying());
-	playerResourceGainView_.Update(deltaTime);
+	hud_.UpdateWorldViews(deltaTime, inGameSession_->IsPlaying(),
+		*enemyManager_, cameraManager_.GetRenderCamera());
 
 	// Playerの移動と衝突解決後の最終座標へライトを追従
 	SynchronizePlayerPointLight();
@@ -448,6 +169,125 @@ SceneType GameScene::Update(float dt) {
 	return SceneType::Game;
 }
 
+void GameScene::UpdateGameplay(float deltaTime) {
+	playLogRecorder_.AdvancePlayTime(deltaTime);
+	player_->Update(deltaTime);
+	enemySpawner_->Update(deltaTime);
+	enemyManager_->Update(deltaTime);
+
+	// Targetが存在しないFrameも常時展開型ProjectileをPlayerへ追従
+	weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
+	Projectile::Manager::GetInstance().Update(deltaTime, player_->GetPosition());
+
+	// 全GameObjectの移動結果へ衝突解決を適用してから接地と壁登り状態を確定
+	MyCollider::Update();
+	player_->ResolveAfterCollision();
+	enemyManager_->ResolveAfterCollision();
+	DispatchDamageEvents();
+
+	// 全レリック上限時は支払い前に宝箱操作を拒否して一個獲得の契約を維持
+	map_->SetEventActionEnabled(
+		MapEventAction::RequestRelicReward,
+		relicSystem_->CanRequestReward());
+	if (!player_->IsDead()) {
+
+		// 致死Damageの成立後に新しいインタラクトを受け付けない順序保証
+		map_->Update(*player_, deltaTime);
+	}
+	DispatchMapEventRequests();
+	if (!player_->IsDead()) {
+
+		// 死亡確定後の所持金や経験値の変化を防ぐためDrop回収を停止
+		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
+	}
+
+	// Playerの状態変更を描画処理へ依存させずSceneで獲得通知へ変換
+	for (const Player::ResourceGainEvent& event :
+		player_->ConsumeResourceGainEvents()) {
+		hud_.ShowResourceGain(event);
+		if (event.type == Player::ResourceGainType::Money) {
+			playLogRecorder_.RecordMoneyGain(event.amount);
+		}
+	}
+
+	// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新
+	if (!player_->IsDead() && MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
+		Vector3 nearestEnemyPosition;
+		if (enemyManager_->TryGetNearestEnemyPosition(nearestEnemyPosition)) {
+			weaponInventory_->Update(deltaTime, player_->GetPosition(), nearestEnemyPosition);
+		}
+	}
+}
+
+void GameScene::DispatchDamageEvents() {
+	for (const Combat::DamageEvent& event :
+		enemyManager_->ConsumeDamageEvents()) {
+
+		// Gameplay乱数へ影響しない専用乱数系列でDamage SEを選択
+		const std::string damageSoundKey =
+			std::string(kEnemyDamageSoundKeyPrefix) +
+			std::to_string(MyRand::GetInt(
+				kEnemyDamageSoundFirstIndex,
+				kEnemyDamageSoundLastIndex));
+		if (MyAudio::IsLoaded(damageSoundKey)) {
+			MyAudio::Play(damageSoundKey);
+		}
+		hud_.ShowDamage(event);
+		playLogRecorder_.RecordDamage(event);
+
+		// 毒と火傷を武器戦績へ重複加算せず、直接攻撃だけを既存Weaponへ反映
+		if (event.sourceType == Combat::DamageSourceType::Weapon) {
+			weaponInventory_->RecordWeaponDamage(event.sourceWeaponId, event.appliedDamage, event.wasKilled);
+		}
+	}
+}
+
+void GameScene::DispatchMapEventRequests() {
+	for (const MapEventRequest& request : map_->ConsumeEventRequests()) {
+
+		// Mapを各Game Systemへ依存させずSceneでイベント要求を仲介
+		switch (request.action) {
+		case MapEventAction::SpawnBoss:
+			enemyManager_->SpawnBoss(request.position, SceneType::Game);
+			break;
+		case MapEventAction::RequestRelicReward:
+			rewardSelectionController_.RequestRelicReward(*relicSystem_);
+			break;
+		case MapEventAction::AttractAllExp:
+			DropObject::Manager::GetInstance().AttractAllExp(player_->GetPosition());
+			break;
+		case MapEventAction::RequestWeaponUpgrade:
+
+			// Anvilの利用を既存の選択待機へ接続し、所持金を消費せず強化を一回追加
+			weaponUpgradeSystem_->RequestUpgrade(*weaponInventory_);
+			break;
+		case MapEventAction::None:
+			break;
+		}
+	}
+}
+
+void GameScene::UpdateHud(float dt, float deltaTime) {
+
+	// 通知はSceneで一度だけ消費し、ゲームSystemと表示の所有権を分離
+	for (const Weapon::WeaponAttackEvent& event : weaponInventory_->ConsumeWeaponAttackEvents()) {
+		hud_.PlayWeaponAttackAnimation(event.slotIndex);
+	}
+
+	UI::Game::GameHudState state;
+	state.playerStatus = player_->GetStatus();
+	state.playerPosition = player_->GetPosition();
+	state.wallClimbRemainingTime = player_->GetWallClimbRemainingTime();
+	state.wallClimbMaxDuration = player_->GetWallClimbMaxDuration();
+	state.remainingTime = inGameSession_->GetRemainingTime();
+	state.killCount = playLogRecorder_.GetData().totalCombat.killCount;
+	state.enemyCount = enemyManager_->GetEnemyCount();
+	state.isWallClimbGaugeVisible = player_->IsWallClimbGaugeVisible();
+	state.isWaitingUpgradeSelection = inGameSession_->IsWaitingUpgradeSelection();
+	hud_.Update(dt, deltaTime, state, *weaponInventory_, cameraManager_.GetRenderCamera());
+	UpdateMiniMap();
+}
+
 void GameScene::Draw() {
 
 }
@@ -457,16 +297,15 @@ void GameScene::DrawImGui() {
 
 	// Game固有Systemの調整WindowをScene ManagerのDockSpaceへ集約
 	player_->DrawImGui();
-	playerResourceGainView_.DrawImGui();
-	
+	hud_.DrawImGui();
+
 	weaponInventory_->DrawImGui();
 	weaponStatusEditor_->DrawImGui();
-	weaponUpgradeUI_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_);
 	relicEditor_.DrawImGui(*relicSystem_);
-	relicAcquisitionUI_.DrawImGui(*relicSystem_);
+	rewardSelectionController_.DrawImGui(*weaponUpgradeSystem_, *weaponInventory_, *relicSystem_);
 
 	enemyEditor_->DrawImGui();
-	
+
 	MyCollider::DrawImGui();
 
 #endif // USE_IMGUI
@@ -526,12 +365,9 @@ bool GameScene::ApplyPendingEditorOperations() {
 	}
 
 	// GPU待機済みのFrame末尾で地形タイルを再構築し、再配置したPlayer位置も即時同期
-	miniMapUI_.Initialize(map_->CreateMiniMapData());
+	hud_.RebuildMiniMap(map_->CreateMiniMapData());
 	UpdateMiniMap();
-	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
-	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
-		seedValueText->SetText(std::format("Seed : {}", gameSeed_));
-	}
+	hud_.SetSeed(gameSeed_);
 	return true;
 }
 
@@ -540,12 +376,8 @@ void GameScene::UpdateMiniMap() {
 		return;
 	}
 
-	// 地形セルの一覧を保持し、毎Frameは削除可能なObject座標だけを再利用Bufferへ収集
-	map_->CollectMiniMapObjectPositions(miniMapObjectPositions_);
-
-	// 強化選択や宝箱演出の間も現在地を確認できるようミニマップの表示を維持
-	miniMapUI_.Update(player_->GetPosition(), player_->GetFacingYaw(),
-		miniMapObjectPositions_, true);
+	// 強化選択や宝箱演出の間も現在地を確認できるよう表示を維持
+	hud_.UpdateMiniMap(*map_, player_->GetPosition(), player_->GetFacingYaw());
 }
 
 void GameScene::SynchronizeMapDependentState() {
@@ -668,35 +500,19 @@ bool GameScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 }
 
 bool GameScene::ShouldPauseBgm() const {
-
-	// レリックから武器選択へ連続遷移する場合も途中でBGMを再開しない条件
-	if (inGameSession_ &&
-		(inGameSession_->IsWaitingUpgradeSelection() || inGameSession_->IsWaitingItemAcquisition())) {
-		return true;
+	InGamePhase phase = InGamePhase::Starting;
+	if (inGameSession_) {
+		phase = inGameSession_->GetCurrentPhase();
 	}
-
-	// 獲得確定後に残る開封フラッシュの終了まで一時停止を継続
-	return chestOpeningPresentation_.IsActive() || chestOpeningPresentation_.IsFlashActive();
+	return rewardSelectionController_.ShouldPauseBgm(phase);
 }
 
 int GameScene::GetSelectionBgmPlaybackId() const {
-	if (!inGameSession_) {
+	if (!inGameSession_ || !relicSystem_ || !weaponUpgradeSystem_) {
 		return 0;
 	}
-	if (inGameSession_->IsWaitingItemAcquisition()) {
-
-		// 開封フラッシュ開始から獲得確定まで同じBGMを継続し、開封待ちと膨張中は無音を維持
-		if (relicSystem_ && relicSystem_->HasPendingReward() && !chestOpeningPresentation_.IsActive()) {
-			return kRelicAcquisitionBgmPlaybackId;
-		}
-		return 0;
-	}
-	if (!inGameSession_->IsWaitingUpgradeSelection() || !weaponUpgradeSystem_) {
-		return 0;
-	}
-
-	// 未処理回数は選択確定時だけ減るため、リロールでは継続して次の選択で曲を再開
-	return weaponUpgradeSystem_->GetPendingUpgradeCount();
+	return rewardSelectionController_.GetSelectionBgmPlaybackId(
+		inGameSession_->GetCurrentPhase(), *relicSystem_, *weaponUpgradeSystem_);
 }
 
 void GameScene::Finalize() {
@@ -715,16 +531,8 @@ void GameScene::Finalize() {
 
 	// 演出途中のScene遷移でもPlayerOutlineが無効のまま残らないよう有効化
 	SetPlayerOutlineSuppressed(false);
-	chestOpeningPresentation_.Finalize();
-	relicAcquisitionUI_.Finalize();
-	relicInventoryUI_.Finalize();
-	weaponUpgradeUI_.Finalize();
-	if (healthGauge_) {
-		healthGauge_->Finalize();
-	}
-	if (staminaGauge_) {
-		staminaGauge_->Finalize();
-	}
+	rewardSelectionController_.Finalize();
+	hud_.Finalize();
 
 	// Spawnerの参照先を破棄する前に生成予定とEnemy所有権を解放
 	if (enemySpawner_) {
@@ -737,25 +545,11 @@ void GameScene::Finalize() {
 	DropObject::Manager::GetInstance().Finalize();
 	Projectile::Manager::GetInstance().Clear();
 	MyCollider::RemoveColliderAll();
-	fpsMeasurementView_.Finalize();
-	gamePlayTimerView_.Finalize();
-	miniMapUI_.Finalize();
-	for (std::vector<Vector3>& positions : miniMapObjectPositions_) {
-		positions.clear();
-	}
-	playerResourceGainView_.Finalize();
-	enemyDamageView_.Finalize();
-	enemyStatusEffectIconView_.Finalize();
-	enemyCountText_ = {};
-	moneyText_ = {};
-	killCountText_ = {};
-	displayedMoney_ = -1;
 	if (player_) {
 		player_->SetCamera(nullptr);
 	}
 	cameraManager_.Clear();
-	debugCameraHandle_ = {};
-	tpsCameraHandle_ = {};
+	gameCameraController_.Finalize();
 	playerPointLightHandle_ = {};
 
 	Logger::Output("ゲームシーンの終了処理を実行しました", Logger::Level::Application);

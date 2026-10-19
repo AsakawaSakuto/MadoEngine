@@ -16,17 +16,16 @@
 #include "GameObject/Relic/RelicEditor.h"
 #include "Utility/Light/LightManager.h"
 #include "Utility/Random.h"
-#include "UI/UIHeaders.h"
-#include "UI/Game/Chest/ChestOpeningPresentation.h"
-#include "UI/Game/MiniMap/MiniMapUI.h"
+#include "UI/Game/GameHud.h"
+#include "System/GameCamera/GameCameraController.h"
 #include "System/InGameSession/InGameSession.h"
 #include "System/PlayLog/PlayLogRecorder.h"
+#include "System/RewardSelection/RewardSelectionController.h"
 #include <cstdint>
 
 /// @brief ゲームシーン
-/// @details ゲーム本編の進行、ゲームオブジェクト、HUDの管理
-class GameScene : public IScene
-{
+/// @details ゲーム本編の更新順序、システム間の通知、Scene遷移の管理
+class GameScene : public IScene {
 public:
 	/// @brief コンストラクタ
 	/// @param commonData Sceneをまたいで保持するApplication共通データ
@@ -100,6 +99,21 @@ public:
 	/// @return Player座標を取得できた場合はtrue
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 private:
+	/// @brief 移動と衝突解決からMap操作と攻撃までのゲーム進行を更新
+	/// @param deltaTime 停止状態を反映したゲーム経過時間
+	void UpdateGameplay(float deltaTime);
+
+	/// @brief Enemyダメージ通知を効果音とHUDとプレイ記録へ配送
+	void DispatchDamageEvents();
+
+	/// @brief Mapのイベント要求を対応するゲームSystemへ配送
+	void DispatchMapEventRequests();
+
+	/// @brief 確定済みのゲーム状態と武器攻撃通知をHUDへ同期
+	/// @param dt 停止中も進行する実時間
+	/// @param deltaTime 停止状態を反映したゲーム経過時間
+	void UpdateHud(float dt, float deltaTime);
+
 	/// @brief 成功したゲーム操作の通知をプレイ集計へ配送
 	void ConsumePlayLogEvents();
 
@@ -126,9 +140,8 @@ private:
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;
 	
-	CameraHandle debugCameraHandle_{};
-	CameraHandle tpsCameraHandle_{};
 	LightHandle playerPointLightHandle_{};
+	System::GameCameraController gameCameraController_;
 
 	ColliderShape mapLimitBox_;
 	Vector3 mapLimitBoxPos_;
@@ -147,28 +160,8 @@ private:
 	std::unique_ptr<Relic::System> relicSystem_;
 	Relic::Editor relicEditor_;
 	
-	std::unique_ptr<UI::Game::PlayerIconUI> playerIconUI_;
-	std::unique_ptr<UI::Game::PlayerExpGauge> expGauge_;
-	std::unique_ptr<UI::Game::PlayerHealthGauge> healthGauge_;
-	std::unique_ptr<UI::Game::PlayerStaminaGauge> staminaGauge_;
-	std::unique_ptr<UI::Game::WeaponIconUI> weaponIconUI_;
-	UI::Game::UpgradeUI weaponUpgradeUI_;
-	UI::Game::RelicAcquisitionUI relicAcquisitionUI_;
-	UI::Game::ChestOpeningPresentation chestOpeningPresentation_;
-	UI::Game::RelicInventoryUI relicInventoryUI_;
-
-	MadoEngine::TextHandle enemyCountText_{};
-	MadoEngine::TextHandle moneyText_{};
-	MadoEngine::TextHandle killCountText_{};
-	UI::Game::FpsMeasurementView fpsMeasurementView_;
-	UI::Game::GamePlayTimerView gamePlayTimerView_;
-	UI::Game::MiniMapUI miniMapUI_;
-	MapMiniMapObjectPositions miniMapObjectPositions_;
-	UI::Game::PlayerResourceGainView playerResourceGainView_;
-	UI::Game::EnemyDamageView enemyDamageView_;
-	UI::Game::EnemyStatusEffectIconView enemyStatusEffectIconView_;
-	int displayedMoney_ = -1;
-	bool useDebugCamera_ = false;
+	UI::Game::GameHud hud_;
+	System::RewardSelectionController rewardSelectionController_;
 	std::uint64_t appliedRelicRevision_ = 0;
 
 	const int weaponSlotCount_ = 6;
