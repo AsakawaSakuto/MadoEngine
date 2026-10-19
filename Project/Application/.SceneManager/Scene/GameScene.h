@@ -18,6 +18,7 @@
 #include "Utility/Random.h"
 #include "UI/UIHeaders.h"
 #include "UI/Game/Chest/ChestOpeningPresentation.h"
+#include "UI/Game/MiniMap/MiniMapUI.h"
 #include "System/InGameSession/InGameSession.h"
 #include "System/PlayLog/PlayLogRecorder.h"
 #include <cstdint>
@@ -109,6 +110,9 @@ private:
 	/// @brief 現在Mapに依存する移動制限を各Game Systemへ同期
 	void SynchronizeMapDependentState();
 
+	/// @brief Playerの位置と向きと残存イベントObjectをミニマップへ同期
+	void UpdateMiniMap();
+
 	/// @brief 所持レリックの変更をPlayerとWeaponへ反映
 	void ApplyRelicModifiersIfChanged();
 
@@ -158,6 +162,8 @@ private:
 	MadoEngine::TextHandle killCountText_{};
 	UI::Game::FpsMeasurementView fpsMeasurementView_;
 	UI::Game::GamePlayTimerView gamePlayTimerView_;
+	UI::Game::MiniMapUI miniMapUI_;
+	MapMiniMapObjectPositions miniMapObjectPositions_;
 	UI::Game::PlayerResourceGainView playerResourceGainView_;
 	UI::Game::EnemyDamageView enemyDamageView_;
 	UI::Game::EnemyStatusEffectIconView enemyStatusEffectIconView_;

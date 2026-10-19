@@ -1,6 +1,7 @@
 #pragma once
 #include "MapBlock.h"
 #include "MapLimit.h"
+#include "MapMiniMapData.h"
 #include "MapEditor.h"
 #include "MapGenerationSettings.h"
 #include "MapInteractionController.h"
@@ -65,6 +66,14 @@ public:
 	/// @brief 現在生成済みMapに対応する移動制限を取得
 	/// @return Map外周と高さを表す移動制限
 	MapLimit CreateMapLimit() const;
+
+	/// @brief 生成済み地形からミニマップ用の表示情報を作成
+	/// @return セル情報とMap範囲とイベントObject座標を格納したSnapshot
+	MapMiniMapData CreateMiniMapData() const;
+
+	/// @brief 現在残っているミニマップ対象Objectの座標を収集
+	/// @param objectPositions 既存内容を置き換える種別ごとのワールド座標の出力先
+	void CollectMiniMapObjectPositions(MapMiniMapObjectPositions& objectPositions) const;
 
 	/// @brief Playerを配置する通常Block上面の中心座標を生成
 	/// @param seed 配置Blockの選択に使用するシード値

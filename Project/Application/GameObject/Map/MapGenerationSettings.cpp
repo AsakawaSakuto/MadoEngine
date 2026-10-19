@@ -7,17 +7,17 @@
 void MapGenerationSettings::Clamp() {
 
 	// 配置数の内訳と有限な寸法を先に確定して生成時の不正な範囲を防止
-	mapWidth = std::clamp(mapWidth, kMinimumMapSize, kMaximumMapSize);
-	mapHeight = std::clamp(mapHeight, kMinimumMapSize, kMaximumMapSize);
-	jarSpawnCount = std::clamp(jarSpawnCount, 0, kMaximumEventObjectCount);
-	moneyJarSpawnCount = std::clamp(moneyJarSpawnCount, 0, jarSpawnCount);
-	expJarSpawnCount = jarSpawnCount - moneyJarSpawnCount;
-	chestSpawnCount = std::clamp(chestSpawnCount, 0, kMaximumEventObjectCount);
+	mapWidth              = std::clamp(mapWidth, kMinimumMapSize, kMaximumMapSize);
+	mapHeight             = std::clamp(mapHeight, kMinimumMapSize, kMaximumMapSize);
+	jarSpawnCount         = std::clamp(jarSpawnCount, 0, kMaximumEventObjectCount);
+	moneyJarSpawnCount    = std::clamp(moneyJarSpawnCount, 0, jarSpawnCount);
+	expJarSpawnCount      = jarSpawnCount - moneyJarSpawnCount;
+	chestSpawnCount       = std::clamp(chestSpawnCount, 0, kMaximumEventObjectCount);
 	normalChestSpawnCount = std::clamp(normalChestSpawnCount, 0, chestSpawnCount);
-	freeChestSpawnCount = chestSpawnCount - normalChestSpawnCount;
-	karmaSpawnCount = std::clamp(karmaSpawnCount, 0, kMaximumEventObjectCount);
-	magnetSpawnCount = std::clamp(magnetSpawnCount, 0, kMaximumEventObjectCount);
-	anvilSpawnCount = std::clamp(anvilSpawnCount, 0, kMaximumEventObjectCount);
+	freeChestSpawnCount   = chestSpawnCount - normalChestSpawnCount;
+	karmaSpawnCount       = std::clamp(karmaSpawnCount, 0, kMaximumEventObjectCount);
+	magnetSpawnCount      = std::clamp(magnetSpawnCount, 0, kMaximumEventObjectCount);
+	anvilSpawnCount       = std::clamp(anvilSpawnCount, 0, kMaximumEventObjectCount);
 	bossSpawnerSpawnCount = std::clamp(bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
 	blockSize.x = std::clamp([&]() {
 		if (std::isfinite(blockSize.x)) {
@@ -40,8 +40,8 @@ void MapGenerationSettings::Clamp() {
 			return (15.0f);
 		}
 	}(), 0.5f, 100.0f);
-	minHeight = std::clamp(minHeight, 1, 100);
-	maxHeight = std::clamp(maxHeight, minHeight, 100);
+	minHeight      = std::clamp(minHeight, 1, 100);
+	maxHeight      = std::clamp(maxHeight, minHeight, 100);
 	minStartHeight = std::clamp(minStartHeight, minHeight, maxHeight);
 	maxStartHeight = std::clamp(maxStartHeight, minStartHeight, maxHeight);
 	minRangeHeight = std::clamp(minRangeHeight, -10, 0);

@@ -43,6 +43,10 @@ namespace Player {
 		/// @brief Playerのワールド座標を取得
 		Vector3 GetPosition() const { return transform_.translate; }
 
+		/// @brief 斜面への傾きとModelの前方補正を含まない水平Yaw角度を取得
+		/// @return Z軸正方向を0とする水平Yaw角度（ラジアン）
+		float GetFacingYaw() const { return movement_.GetFacingYaw(); }
+
 		/// @brief Playerの描画Model座標を取得
 		/// @return PlayerのModelワールド座標
 		Vector3 GetModelPosition() const;

@@ -164,6 +164,7 @@
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
+    <ClCompile Include="Application\UI\Game\MiniMap\MiniMapUI.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEventObjectSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapInteractionController.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
@@ -411,6 +412,8 @@
     <ClInclude Include="Application\GameObject\Map\MapInteractionController.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlock.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlockType.h" />
+    <ClInclude Include="Application\GameObject\Map\MapMiniMapData.h" />
+    <ClInclude Include="Application\UI\Game\MiniMap\MiniMapUI.h" />
     <ClInclude Include="Application\GameObject\IGameObject.h" />
     <ClInclude Include="Application\GameObject\Map\MapLimit.h" />
     <ClInclude Include="Application\GameObject\Player\Player.h" />
@@ -665,6 +668,7 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Plane.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Segment.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Slope.h" />
+    <ClInclude Include="Engine\Utility\Collider\Shape\SlopeDirection.h" />
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h" />
     <ClInclude Include="Engine\Utility\Color\GamingColor.h" />
     <ClInclude Include="Engine\Utility\Json\JsonHeaders.h" />

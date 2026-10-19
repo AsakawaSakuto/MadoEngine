@@ -52,6 +52,10 @@ namespace Player {
 		/// @return 現在の動作状態
 		Player::Motion GetCurrentMotion() const { return currentMotion_; }
 
+		/// @brief Playerが向いている水平Yaw角度を取得
+		/// @return Z軸正方向を0とする水平Yaw角度（ラジアン）
+		float GetFacingYaw() const { return faceYaw_; }
+
 		/// @brief Y方向速度を取得
 		/// @return Y方向速度
 		float GetVelocityY() const { return velocityY_; }

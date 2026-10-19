@@ -87,6 +87,7 @@ void GameScene::Initialize() {
 	player_->Initialize(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
 	player_->SetCamera(cameraManager_.TryGetCamera<TPS_Camera>(tpsCameraHandle_));
 	SynchronizePlayerPointLight();
+	miniMapUI_.Initialize(map_->CreateMiniMapData());
 
 	// 大量撃破時の生成負荷を読み込み時へ移してExp512枠とMoney128枠を事前確保
 	DropObject::Manager::GetInstance().Initialize();
@@ -142,6 +143,7 @@ void GameScene::Initialize() {
 	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
 		seedValueText->SetText(std::format("Seed : {}", gameSeed_));
 	}
+	UpdateMiniMap();
 }
 
 SceneType GameScene::Update(float dt) {
@@ -398,6 +400,7 @@ SceneType GameScene::Update(float dt) {
 	}
 	fpsMeasurementView_.Update(dt);
 	gamePlayTimerView_.Update(inGameSession_->GetRemainingTime());
+	UpdateMiniMap();
 
 	if (inGameSession_->IsPlaying() && MyInput::GetKeyboard()->IsTrigger(DIK_9)) {
 		if (!weaponInventory_->AddWeapon(Projectile::Type::Pistol)) {
@@ -521,11 +524,28 @@ bool GameScene::ApplyPendingEditorOperations() {
 	if (player_) {
 		player_->TeleportToGroundPosition(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
 	}
+
+	// GPU待機済みのFrame末尾で地形タイルを再構築し、再配置したPlayer位置も即時同期
+	miniMapUI_.Initialize(map_->CreateMiniMapData());
+	UpdateMiniMap();
 	const MadoEngine::TextHandle seedValueTextHandle = MyText::Find("SeedValueText");
 	if (MadoEngine::Text* seedValueText = MyText::TryGet(seedValueTextHandle)) {
 		seedValueText->SetText(std::format("Seed : {}", gameSeed_));
 	}
 	return true;
+}
+
+void GameScene::UpdateMiniMap() {
+	if (!map_ || !player_) {
+		return;
+	}
+
+	// 地形セルの一覧を保持し、毎Frameは削除可能なObject座標だけを再利用Bufferへ収集
+	map_->CollectMiniMapObjectPositions(miniMapObjectPositions_);
+
+	// 強化選択や宝箱演出の間も現在地を確認できるようミニマップの表示を維持
+	miniMapUI_.Update(player_->GetPosition(), player_->GetFacingYaw(),
+		miniMapObjectPositions_, true);
 }
 
 void GameScene::SynchronizeMapDependentState() {
@@ -719,6 +739,10 @@ void GameScene::Finalize() {
 	MyCollider::RemoveColliderAll();
 	fpsMeasurementView_.Finalize();
 	gamePlayTimerView_.Finalize();
+	miniMapUI_.Finalize();
+	for (std::vector<Vector3>& positions : miniMapObjectPositions_) {
+		positions.clear();
+	}
 	playerResourceGainView_.Finalize();
 	enemyDamageView_.Finalize();
 	enemyStatusEffectIconView_.Finalize();

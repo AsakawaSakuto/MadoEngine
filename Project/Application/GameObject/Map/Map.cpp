@@ -1,5 +1,11 @@
 #include "Map.h"
 #include "MapEventObjectSpawner.h"
+#include "EventObject/BossSpawner/BossSpawner.h"
+#include "EventObject/Chest/Chest.h"
+#include "EventObject/Jar/Jar.h"
+#include "EventObject/Karma/Karma.h"
+#include "EventObject/Magnet/Magnet.h"
+#include "EventObject/Anvil/Anvil.h"
 #include "GameObject/Player/Player.h"
 #include <algorithm>
 #include <optional>
@@ -264,6 +270,68 @@ MapLimit Map::CreateMapLimit() const {
 		static_cast<float>(appliedSettings_.mapHeight - 1) * appliedSettings_.blockSize.z + appliedSettings_.blockSize.z * 0.5f
 	};
 	return mapLimit;
+}
+
+MapMiniMapData Map::CreateMiniMapData() const {
+	MapMiniMapData data;
+	data.limit = CreateMapLimit();
+	data.width = static_cast<std::uint32_t>(appliedSettings_.mapWidth);
+	data.depth = static_cast<std::uint32_t>(appliedSettings_.mapHeight);
+	data.cells.reserve(static_cast<std::size_t>(data.width) * data.depth);
+	bool hasTerrainHeight = false;
+
+	// 描画側へMapBlockの所有権や参照を渡さず、生成時だけ必要な値を複製
+	for (const std::vector<MapBlock>& row : mapBlocks_) {
+		for (const MapBlock& block : row) {
+			const MapMiniMapCell cell{ block.GetType(), block.GetSlopeDirection(), block.GetHeight() };
+			data.cells.push_back(cell);
+
+			// 空セルを高度範囲から除外し、実際に表示する地形の最低値と最高値を補間の基準に使用
+			if (cell.type == MapBlockType::Air) {
+				continue;
+			}
+			if (!hasTerrainHeight) {
+				data.minHeight = cell.height;
+				data.maxHeight = cell.height;
+				hasTerrainHeight = true;
+			} else {
+				data.minHeight = (std::min)(data.minHeight, cell.height);
+				data.maxHeight = (std::max)(data.maxHeight, cell.height);
+			}
+		}
+	}
+	CollectMiniMapObjectPositions(data.objectPositions);
+	return data;
+}
+
+void Map::CollectMiniMapObjectPositions(MapMiniMapObjectPositions& objectPositions) const {
+	for (std::vector<Vector3>& positions : objectPositions) {
+		positions.clear();
+	}
+
+	// 一度の走査で種別ごとに残存Objectだけを収集し、開封済みや使用済みの対象を表示から除外
+	for (const std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
+		if (!object) {
+			continue;
+		}
+		MapMiniMapObjectType type = MapMiniMapObjectType::Count;
+		if (dynamic_cast<const BossSpawner*>(object.get())) {
+			type = MapMiniMapObjectType::BossSpawner;
+		} else if (dynamic_cast<const Chest*>(object.get())) {
+			type = MapMiniMapObjectType::Chest;
+		} else if (dynamic_cast<const Jar*>(object.get())) {
+			type = MapMiniMapObjectType::Jar;
+		} else if (dynamic_cast<const Karma*>(object.get())) {
+			type = MapMiniMapObjectType::Karma;
+		} else if (dynamic_cast<const Magnet*>(object.get())) {
+			type = MapMiniMapObjectType::Magnet;
+		} else if (dynamic_cast<const Anvil*>(object.get())) {
+			type = MapMiniMapObjectType::Anvil;
+		} else {
+			continue;
+		}
+		objectPositions[static_cast<std::size_t>(type)].push_back(object->GetPosition());
+	}
 }
 
 bool Map::IsPlayerSpawnBlocked(const Sphere& collider) const {

@@ -1,13 +1,7 @@
 #pragma once
 #include "Math/Vector3.h"
+#include "SlopeDirection.h"
 #include "imguiHeaders.h"
-
-enum class SlopeDirection {
-	PulsX,
-	MinusX,
-	PulsZ,
-	MinusZ,
-};
 
 struct Slope {
 	Vector3 center = { 0.0f, 0.0f, 0.0f };

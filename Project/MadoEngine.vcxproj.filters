@@ -148,6 +148,7 @@
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
+    <ClCompile Include="Application\UI\Game\MiniMap\MiniMapUI.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEventObjectSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapInteractionController.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapBlock.cpp" />
@@ -317,6 +318,9 @@
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Slope.h">
+      <Filter>�w�b�_�[ �t�@�C��</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utility\Collider\Shape\SlopeDirection.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h">
@@ -719,6 +723,8 @@
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h" />
     <ClInclude Include="Application\GameObject\Map\MapEditor.h" />
+    <ClInclude Include="Application\GameObject\Map\MapMiniMapData.h" />
+    <ClInclude Include="Application\UI\Game\MiniMap\MiniMapUI.h" />
     <ClInclude Include="Application\GameObject\Map\MapEventObjectSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\MapInteractionController.h" />
     <ClInclude Include="Application\GameObject\Map\MapBlock.h">

@@ -55,6 +55,10 @@ public:
 	/// @param height スクリーン高さ
 	void SetScreenSize(float width, float height);
 
+	/// @brief Sprite描画の基準スクリーンサイズを取得
+	/// @return 正射影に使用するスクリーンの幅と高さ
+	Vector2 GetScreenSize() const { return { screenWidth_, screenHeight_ }; }
+
 	/// @brief Spriteを生成
 	/// @param name Sprite名
 	/// @param textureName テクスチャ名
