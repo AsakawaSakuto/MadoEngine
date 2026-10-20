@@ -1,6 +1,7 @@
 #pragma once
 #include "../IProjectile.h"
 #include <string>
+#include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
 
 namespace Projectile {
 
@@ -23,6 +24,7 @@ namespace Projectile {
 
 	private:
 		MadoEngine::ModelHandle model_{};
+		MadoEngine::Ribbon::RibbonEffectHandle trail_{};
 		std::string objectName_;
 		int initialBounceCount_ = 0;
 		bool hasHitEnemy_ = false;

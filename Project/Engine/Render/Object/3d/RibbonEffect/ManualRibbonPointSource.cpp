@@ -35,17 +35,10 @@ namespace MadoEngine::Ribbon {
 		}
 
 		// Finish停止後は既存形状だけを寿命に従って自然消滅
-		const float safeDeltaTime = std::clamp(
-			[&]() {
-				if (std::isfinite(deltaTime)) {
-					return (deltaTime);
-				} else {
-					return (0.0f);
-				}
-			}(),
-			0.0f,
-			0.1f
-		);
+		float safeDeltaTime = 0.0f;
+		if (std::isfinite(deltaTime)) {
+			safeDeltaTime = (std::max)(deltaTime, 0.0f);
+		}
 		for (RibbonPoint& point : sourcePoints_) {
 			point.age += safeDeltaTime;
 		}

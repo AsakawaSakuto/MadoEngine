@@ -218,7 +218,19 @@ namespace MadoEngine::Ribbon {
 			return;
 		}
 
-		const std::vector<SmoothedPoint> smoothedPoints = BuildSmoothedPoints(data);
+		std::vector<SmoothedPoint> smoothedPoints = BuildSmoothedPoints(data);
+
+		// 寿命とは別の長さ座標を全経路から計算し、Reveal中も色と端部Fadeの位置を維持
+		float pathLength = 0.0f;
+		for (std::size_t index = 1; index < smoothedPoints.size(); ++index) {
+			pathLength += (smoothedPoints[index].position - smoothedPoints[index - 1].position).Length();
+			smoothedPoints[index].normalizedLength = pathLength;
+		}
+		if (std::isfinite(pathLength) && pathLength > kRibbonGeometryEpsilon) {
+			for (SmoothedPoint& point : smoothedPoints) {
+				point.normalizedLength /= pathLength;
+			}
+		}
 
 		// 補間後のPathからPlayback Modeに応じた表示区間だけを切り出し
 		const std::vector<SmoothedPoint> points = BuildVisiblePoints(smoothedPoints, data);
@@ -281,7 +293,9 @@ namespace MadoEngine::Ribbon {
 			previousSide = side;
 
 			const float normalizedLifetime = std::clamp(points[index].normalizedLifetime, 0.0f, 1.0f);
-			float width = data.widthOverLifetime.Evaluate(normalizedLifetime);
+			const float normalizedLength = points[index].normalizedLength;
+			float width = data.widthOverLifetime.Evaluate(normalizedLifetime) *
+				data.widthOverLength.Evaluate(normalizedLength) * data.widthScale;
 			if (std::isfinite(width)) {
 				width = (std::max)(0.0f, width);
 			} else {
@@ -312,17 +326,21 @@ namespace MadoEngine::Ribbon {
 			);
 			float lengthAlpha = 1.0f;
 			if (startAlphaFade > 0.0f) {
-				lengthAlpha = (std::min)(lengthAlpha, normalizedLifetime / startAlphaFade);
+				lengthAlpha = (std::min)(lengthAlpha, normalizedLength / startAlphaFade);
 			}
 			if (endAlphaFade > 0.0f) {
 				lengthAlpha = (std::min)(
 					lengthAlpha,
-					(1.0f - normalizedLifetime) / endAlphaFade
+					(1.0f - normalizedLength) / endAlphaFade
 				);
 			}
 			Vector4 sourceColor =
 				data.colorOverLifetime.Evaluate(normalizedLifetime) * points[index].color;
-			sourceColor.w *= std::clamp(lengthAlpha, 0.0f, 1.0f);
+			const Vector4 lengthColor = data.colorOverLength.Evaluate(normalizedLength);
+			sourceColor.x *= lengthColor.x * data.colorMultiplier.x;
+			sourceColor.y *= lengthColor.y * data.colorMultiplier.y;
+			sourceColor.z *= lengthColor.z * data.colorMultiplier.z;
+			sourceColor.w *= lengthColor.w * data.colorMultiplier.w * std::clamp(lengthAlpha, 0.0f, 1.0f);
 			const Vector4 color = NormalizeColor(sourceColor, data.globalAlpha);
 
 			float ribbonU = [&]() {
@@ -600,6 +618,7 @@ namespace MadoEngine::Ribbon {
 				points[leftIndex].normalizedLifetime * (1.0f - rate) +
 					points[rightIndex].normalizedLifetime * rate,
 				points[leftIndex].color * (1.0f - rate) + points[rightIndex].color * rate,
+				points[leftIndex].normalizedLength * (1.0f - rate) + points[rightIndex].normalizedLength * rate,
 			};
 		};
 

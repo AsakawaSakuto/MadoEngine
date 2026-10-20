@@ -237,11 +237,6 @@ namespace MadoEngine
 			commandManager_->GetCommandList(),
 			psoRegistry_.get()
 		);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Initialize(
-			dxDevice_->GetDevice(),
-			commandManager_->GetCommandList(),
-			psoRegistry_.get()
-		);
 		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Initialize();
 
 		// SpriteとTextの座標系を実Windowサイズではなく基準解像度に固定
@@ -433,13 +428,6 @@ namespace MadoEngine
 			}
 		);
 		toolbar.RegisterDocumentHistory(
-			MadoEngine::Editor::EditorDocument::Beam,
-			[]() { return CaptureEffectAssets(MadoEngine::Beam::BeamEffectSystem3d::GetInstance()); },
-			[](const std::string& snapshot) {
-				RestoreEffectAssets(MadoEngine::Beam::BeamEffectSystem3d::GetInstance(), snapshot);
-			}
-		);
-		toolbar.RegisterDocumentHistory(
 			MadoEngine::Editor::EditorDocument::EffectSequence,
 			[]() { return CaptureEffectAssets(MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance()); },
 			[](const std::string& snapshot) {
@@ -507,9 +495,6 @@ namespace MadoEngine
 			commandManager_->GetCompletedFenceValue()
 		);
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().OnGpuFrameCompleted(
-			commandManager_->GetCompletedFenceValue()
-		);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().OnGpuFrameCompleted(
 			commandManager_->GetCompletedFenceValue()
 		);
 		swapChain_->Resize(width, height);
@@ -621,9 +606,6 @@ namespace MadoEngine
 			commandManager_->GetNextFenceValue()
 		);
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().BeginFrame(
-			commandManager_->GetNextFenceValue()
-		);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().BeginFrame(
 			commandManager_->GetNextFenceValue()
 		);
 
@@ -1086,11 +1068,7 @@ namespace MadoEngine
 			MadoEngine::Editor::DrawRibbonEffectEditorUI();
 			toolbar.EndDocumentCapture();
 		}
-		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Beam)) {
-			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Beam);
-			MadoEngine::Editor::DrawBeamEffectEditorUI();
-			toolbar.EndDocumentCapture();
-		}
+
 		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::EffectSequence)) {
 			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::EffectSequence);
 			MadoEngine::Editor::DrawEffectSequenceEditorUI();
@@ -1170,8 +1148,6 @@ namespace MadoEngine
 		succeeded = SaveAllEffectAssets(
 			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance()) && succeeded;
 		succeeded = SaveAllEffectAssets(
-			MadoEngine::Beam::BeamEffectSystem3d::GetInstance()) && succeeded;
-		succeeded = SaveAllEffectAssets(
 			MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance()) && succeeded;
 
 #ifdef USE_IMGUI
@@ -1200,8 +1176,6 @@ namespace MadoEngine
 			MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance()) && succeeded;
 		succeeded = ReloadAllEffectAssets(
 			MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance()) && succeeded;
-		succeeded = ReloadAllEffectAssets(
-			MadoEngine::Beam::BeamEffectSystem3d::GetInstance()) && succeeded;
 		succeeded = ReloadAllEffectAssets(
 			MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance()) && succeeded;
 
@@ -1423,9 +1397,6 @@ namespace MadoEngine
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().OnGpuFrameCompleted(
 			commandManager_->GetCompletedFenceValue()
 		);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().OnGpuFrameCompleted(
-			commandManager_->GetCompletedFenceValue()
-		);
 
 		// 描画で参照したResourceをGPU処理完了後に解放
 		MadoEngine::SpriteManager::GetInstance().FlushPendingDestroys();
@@ -1454,9 +1425,6 @@ namespace MadoEngine
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().OnGpuFrameCompleted(
 			commandManager_->GetCompletedFenceValue()
 		);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().OnGpuFrameCompleted(
-			commandManager_->GetCompletedFenceValue()
-		);
 
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance().Finalize();
@@ -1468,7 +1436,6 @@ namespace MadoEngine
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().Finalize();
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Finalize();
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Finalize();
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Finalize();
 		MadoEngine::Render::PostEffectManager::GetInstance().Finalize();
 		computePsoRegistry_->Finalize();
 		psoRegistry_->Finalize();

@@ -2,7 +2,6 @@
 #include ".SceneManager/SceneType.h"
 #include "Math/Transform.h"
 #include "Math/Vector3.h"
-#include "Render/Object/3d/BeamEffect/BeamEffectTypes.h"
 #include "Render/Object/3d/Particle/ParticleTypes.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectTypes.h"
 #include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
@@ -27,7 +26,6 @@ namespace MadoEngine::EffectSequence {
 		Particle,
 		PrimitiveEffect,
 		Ribbon,
-		Beam,
 		Count,
 	};
 
@@ -61,20 +59,16 @@ namespace MadoEngine::EffectSequence {
 	};
 
 	struct RibbonNodeSettings {
+		bool overrideEndpoints = false;
+		MadoEngine::Ribbon::RibbonEndpoints endpoints;
 		bool overrideManualControlPoints = false;
 		std::vector<Vector3> controlPoints;
-	};
-
-	struct BeamNodeSettings {
-		Vector3 startPosition{};
-		Vector3 endPosition = { 0.0f, 1.0f, 0.0f };
 	};
 
 	using EffectSequenceNodeSettings = std::variant<
 		ParticleNodeSettings,
 		PrimitiveEffectNodeSettings,
-		RibbonNodeSettings,
-		BeamNodeSettings
+		RibbonNodeSettings
 	>;
 
 	struct EffectSequenceNode {
@@ -117,8 +111,7 @@ namespace MadoEngine::EffectSequence {
 	using EffectSequenceChildHandle = std::variant<
 		MadoEngine::Particle::EffectHandle,
 		MadoEngine::Effect::PrimitiveEffectHandle,
-		MadoEngine::Ribbon::RibbonEffectHandle,
-		MadoEngine::Beam::BeamEffectHandle
+		MadoEngine::Ribbon::RibbonEffectHandle
 	>;
 
 	struct EffectSequencePlayDesc {

@@ -1,6 +1,5 @@
 #include "EffectSequenceNodeDispatcher.h"
 #include "Math/Function/MatrixFunction.h"
-#include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
 #include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
@@ -23,17 +22,17 @@ namespace {
 		return Matrix::MakeAffine(transform.scale, transform.rotate, transform.translate);
 	}
 
-	/// @brief BeamのLocal始終点をWorld座標へ変換
-	/// @param settings Beam固有設定
+	/// @brief RibbonのLocal始終点をWorld座標へ変換
+	/// @param settings Ribbon固有設定
 	/// @param transform Node World Transform
 	/// @return World座標の始点と終点
-	std::pair<Vector3, Vector3> BuildBeamEndpoints(
-		const BeamNodeSettings& settings,
+	std::pair<Vector3, Vector3> BuildRibbonEndpoints(
+		const RibbonNodeSettings& settings,
 		const Transform3D& transform) {
 		const Matrix4x4 world = MakeMatrix(transform);
 		return {
-			Matrix::Transform(settings.startPosition, world),
-			Matrix::Transform(settings.endPosition, world),
+			Matrix::Transform(settings.endpoints.startPosition, world),
+			Matrix::Transform(settings.endpoints.endPosition, world),
 		};
 	}
 
@@ -86,6 +85,12 @@ namespace MadoEngine::EffectSequence {
 		case EffectSequenceNodeType::Ribbon: {
 			MadoEngine::Ribbon::RibbonEffectPlayDesc desc;
 			desc.transform = worldTransform;
+			if (const auto* settings = std::get_if<RibbonNodeSettings>(&node.settings)) {
+				if (settings->overrideEndpoints) {
+					const auto [start, end] = BuildRibbonEndpoints(*settings, worldTransform);
+					desc.endpoints = MadoEngine::Ribbon::RibbonEndpoints{ start, end };
+				}
+			}
 			desc.sceneType = sceneType;
 			desc.renderLayer = renderLayer;
 			desc.loopOverride = false;
@@ -107,26 +112,7 @@ namespace MadoEngine::EffectSequence {
 			}
 			return EffectSequenceChildHandle{ handle };
 		}
-		case EffectSequenceNodeType::Beam: {
-			const auto* settings = std::get_if<BeamNodeSettings>(&node.settings);
-			if (!settings) {
-				return std::nullopt;
-			}
-			const auto [startPosition, endPosition] = BuildBeamEndpoints(*settings, worldTransform);
-			MadoEngine::Beam::BeamEffectPlayDesc desc;
-			desc.startPosition = startPosition;
-			desc.endPosition = endPosition;
-			desc.sceneType = sceneType;
-			desc.renderLayer = renderLayer;
-			desc.loopOverride = false;
-			const MadoEngine::Beam::BeamEffectHandle handle =
-				MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Play(node.effectAssetName, desc);
-			if (!handle.HasValue()) {
-				return std::nullopt;
-			}
-			MadoEngine::Beam::BeamEffectSystem3d::GetInstance().SetPlaybackSpeed(handle, playbackSpeed);
-			return EffectSequenceChildHandle{ handle };
-		}
+
 		case EffectSequenceNodeType::Count:
 		default:
 			return std::nullopt;
@@ -175,18 +161,6 @@ namespace MadoEngine::EffectSequence {
 					}()
 				);
 			},
-			[mode](MadoEngine::Beam::BeamEffectHandle child) {
-				MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Stop(
-					child,
-					[&]() {
-						if (mode == EffectSequenceStopMode::Immediate) {
-							return (MadoEngine::Beam::BeamStopMode::Immediate);
-						} else {
-							return (MadoEngine::Beam::BeamStopMode::Finish);
-						}
-					}()
-				);
-			},
 		}, handle);
 	}
 
@@ -195,7 +169,6 @@ namespace MadoEngine::EffectSequence {
 			[](MadoEngine::Particle::EffectHandle child) { MadoEngine::Particle::ParticleSystem3d::GetInstance().Pause(child); },
 			[](MadoEngine::Effect::PrimitiveEffectHandle child) { MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Pause(child); },
 			[](MadoEngine::Ribbon::RibbonEffectHandle child) { MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Pause(child); },
-			[](MadoEngine::Beam::BeamEffectHandle child) { MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Pause(child); },
 		}, handle);
 	}
 
@@ -204,7 +177,6 @@ namespace MadoEngine::EffectSequence {
 			[](MadoEngine::Particle::EffectHandle child) { MadoEngine::Particle::ParticleSystem3d::GetInstance().Resume(child); },
 			[](MadoEngine::Effect::PrimitiveEffectHandle child) { MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Resume(child); },
 			[](MadoEngine::Ribbon::RibbonEffectHandle child) { MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Resume(child); },
-			[](MadoEngine::Beam::BeamEffectHandle child) { MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Resume(child); },
 		}, handle);
 	}
 
@@ -224,22 +196,16 @@ namespace MadoEngine::EffectSequence {
 			[&node, &worldTransform](MadoEngine::Ribbon::RibbonEffectHandle child) {
 				MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetTransform(child, worldTransform);
 				if (const auto* settings = std::get_if<RibbonNodeSettings>(&node.settings)) {
+					if (settings->overrideEndpoints) {
+						const auto [start, end] = BuildRibbonEndpoints(*settings, worldTransform);
+						MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetEndpoints(child, { start, end });
+					}
 					if (settings->overrideManualControlPoints) {
 						MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetLocalControlPoints(
 							child,
 							settings->controlPoints
 						);
 					}
-				}
-			},
-			[&node, &worldTransform](MadoEngine::Beam::BeamEffectHandle child) {
-				if (const auto* settings = std::get_if<BeamNodeSettings>(&node.settings)) {
-					const auto [startPosition, endPosition] = BuildBeamEndpoints(*settings, worldTransform);
-					MadoEngine::Beam::BeamEffectSystem3d::GetInstance().SetEndpoints(
-						child,
-						startPosition,
-						endPosition
-					);
 				}
 			},
 		}, handle);
@@ -252,7 +218,6 @@ namespace MadoEngine::EffectSequence {
 			[isVisible](MadoEngine::Particle::EffectHandle child) { MadoEngine::Particle::ParticleSystem3d::GetInstance().SetVisible(child, isVisible); },
 			[isVisible](MadoEngine::Effect::PrimitiveEffectHandle child) { MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().SetVisible(child, isVisible); },
 			[isVisible](MadoEngine::Ribbon::RibbonEffectHandle child) { MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetVisible(child, isVisible); },
-			[isVisible](MadoEngine::Beam::BeamEffectHandle child) { MadoEngine::Beam::BeamEffectSystem3d::GetInstance().SetVisible(child, isVisible); },
 		}, handle);
 	}
 
@@ -270,7 +235,6 @@ namespace MadoEngine::EffectSequence {
 				);
 			},
 			[](MadoEngine::Ribbon::RibbonEffectHandle) {},
-			[](MadoEngine::Beam::BeamEffectHandle) {},
 		}, handle);
 	}
 
@@ -281,7 +245,6 @@ namespace MadoEngine::EffectSequence {
 			[playbackSpeed](MadoEngine::Particle::EffectHandle child) { MadoEngine::Particle::ParticleSystem3d::GetInstance().SetPlaybackSpeed(child, playbackSpeed); },
 			[playbackSpeed](MadoEngine::Effect::PrimitiveEffectHandle child) { MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().SetPlaybackSpeed(child, playbackSpeed); },
 			[playbackSpeed](MadoEngine::Ribbon::RibbonEffectHandle child) { MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetPlaybackSpeed(child, playbackSpeed); },
-			[playbackSpeed](MadoEngine::Beam::BeamEffectHandle child) { MadoEngine::Beam::BeamEffectSystem3d::GetInstance().SetPlaybackSpeed(child, playbackSpeed); },
 		}, handle);
 	}
 
@@ -290,7 +253,6 @@ namespace MadoEngine::EffectSequence {
 			[](MadoEngine::Particle::EffectHandle child) { return MadoEngine::Particle::ParticleSystem3d::GetInstance().IsAlive(child); },
 			[](MadoEngine::Effect::PrimitiveEffectHandle child) { return MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().IsAlive(child); },
 			[](MadoEngine::Ribbon::RibbonEffectHandle child) { return MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().IsAlive(child); },
-			[](MadoEngine::Beam::BeamEffectHandle child) { return MadoEngine::Beam::BeamEffectSystem3d::GetInstance().IsAlive(child); },
 		}, handle);
 	}
 

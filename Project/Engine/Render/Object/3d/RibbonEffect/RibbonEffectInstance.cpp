@@ -2,6 +2,7 @@
 #include "ManualRibbonPointSource.h"
 #include "RibbonEffectRenderer3d.h"
 #include "TrailPointSource.h"
+#include "EndpointRibbonPointSource.h"
 #include "Math/Function/MatrixFunction.h"
 #include <algorithm>
 #include <cmath>
@@ -56,6 +57,14 @@ namespace MadoEngine::Ribbon {
 			const Transform3D emitterTransform = CreateEmitterTransform(config, transform_);
 			if (config.trail.generationMode == RibbonPointGenerationMode::Manual) {
 				state.pointSource = std::make_unique<ManualRibbonPointSource>(config.trail, emitterTransform);
+			} else if (config.trail.generationMode == RibbonPointGenerationMode::Endpoints) {
+				state.pointSource = std::make_unique<EndpointRibbonPointSource>(config.endpoints, emitterTransform);
+				if (desc.endpoints.has_value()) {
+					RibbonEndpoints endpoints = desc.endpoints.value();
+					endpoints.startPosition += config.translateOffset;
+					endpoints.endPosition += config.translateOffset;
+					state.pointSource->SetEndpoints(endpoints);
+				}
 			} else {
 				state.pointSource = std::make_unique<TrailPointSource>(config.trail, emitterTransform);
 			}
@@ -113,8 +122,13 @@ namespace MadoEngine::Ribbon {
 			if (!emitter.pointSource || emitter.isImmediatelyFinished) {
 				continue;
 			}
-			emitter.isGenerating = false;
+
+			// 始終点方式のFinish停止は現在Cycleを完了し、履歴方式は既存点の寿命を消化
 			emitter.isLoop = false;
+			if (mode == RibbonStopMode::Finish && emitter.config.trail.generationMode == RibbonPointGenerationMode::Endpoints) {
+				continue;
+			}
+			emitter.isGenerating = false;
 			emitter.pointSource->Stop(mode);
 			if (mode == RibbonStopMode::Immediate) {
 				emitter.isImmediatelyFinished = true;
@@ -172,6 +186,16 @@ namespace MadoEngine::Ribbon {
 			const RibbonEmitterConfig& config = emitter.config;
 			RibbonRenderData data;
 			data.points = emitter.pointSource->GetPoints();
+
+			// 点の寿命Trackとは独立した全体時間Trackを評価し、共通の変形を適用
+			const float normalizedTime = std::clamp(emitter.playbackTime / config.playback.duration, 0.0f, 1.0f);
+			pointModifier_.ApplyNoise(data.points, config.noise, emitter.totalTime);
+			data.widthScale = config.geometry.widthOverTime.Evaluate(normalizedTime);
+			data.widthOverLength = config.geometry.widthOverLength;
+			data.colorMultiplier = config.material.colorOverTime.Evaluate(normalizedTime);
+			data.colorOverLength = config.material.colorOverLength;
+			data.startAlphaFade = config.geometry.startFade;
+			data.endAlphaFade = config.geometry.endFade;
 			data.widthOverLifetime = config.geometry.widthOverLifetime;
 			data.colorOverLifetime = config.material.colorOverLifetime;
 			data.interpolation = config.geometry.interpolation;
@@ -207,6 +231,11 @@ namespace MadoEngine::Ribbon {
 
 	void RibbonEffectInstance::SetTransform(const Transform3D& transform) {
 		transform_ = transform;
+
+		// Pause中にTransform更新から履歴だけが増加する状態を防止
+		if (isPaused_) {
+			return;
+		}
 		for (EmitterState& emitter : emitters_) {
 			if (emitter.pointSource) {
 				emitter.pointSource->SetTransform(
@@ -216,10 +245,26 @@ namespace MadoEngine::Ribbon {
 		}
 	}
 
+	bool RibbonEffectInstance::SetEndpoints(const RibbonEndpoints& endpoints) {
+		if (isPaused_) {
+			return false;
+		}
+
+		// 対応するPoint Sourceへ始終点を委譲し、Instanceから具象型への依存を排除
+		bool wasSet = false;
+		for (EmitterState& emitter : emitters_) {
+			RibbonEndpoints offsetEndpoints = endpoints;
+			offsetEndpoints.startPosition += emitter.config.translateOffset;
+			offsetEndpoints.endPosition += emitter.config.translateOffset;
+			wasSet = emitter.pointSource->SetEndpoints(offsetEndpoints) || wasSet;
+		}
+		return wasSet;
+	}
+
 	bool RibbonEffectInstance::SetControlPoints(const std::vector<Vector3>& controlPoints) {
 		bool wasSet = false;
 		for (EmitterState& emitter : emitters_) {
-			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
+			IRibbonPointSource* manualSource = emitter.pointSource.get();
 			if (manualSource) {
 				wasSet = manualSource->SetControlPoints(controlPoints) || wasSet;
 			}
@@ -230,8 +275,8 @@ namespace MadoEngine::Ribbon {
 	bool RibbonEffectInstance::SetLocalControlPoints(const std::vector<Vector3>& controlPoints) {
 		bool wasSet = false;
 		for (EmitterState& emitter : emitters_) {
-			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
-			if (!manualSource) {
+			IRibbonPointSource* manualSource = emitter.pointSource.get();
+			if (!manualSource || emitter.config.trail.generationMode != RibbonPointGenerationMode::Manual) {
 				continue;
 			}
 
@@ -258,8 +303,8 @@ namespace MadoEngine::Ribbon {
 	bool RibbonEffectInstance::ClearControlPoints() {
 		bool wasCleared = false;
 		for (EmitterState& emitter : emitters_) {
-			auto* manualSource = dynamic_cast<ManualRibbonPointSource*>(emitter.pointSource.get());
-			if (manualSource) {
+			IRibbonPointSource* manualSource = emitter.pointSource.get();
+			if (manualSource && emitter.config.trail.generationMode == RibbonPointGenerationMode::Manual) {
 				manualSource->Clear();
 				wasCleared = true;
 			}

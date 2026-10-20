@@ -263,7 +263,9 @@ namespace {
 	/// @param value 変換元文字列
 	/// @return 変換後Enum
 	RibbonPointGenerationMode ParseGenerationMode(const std::string& value) {
-		if (value == "manual") {
+		if (value == "endpoints") {
+			return RibbonPointGenerationMode::Endpoints;
+		} else if (value == "manual") {
 			return RibbonPointGenerationMode::Manual;
 		} else {
 			return RibbonPointGenerationMode::TransformHistory;
@@ -274,7 +276,9 @@ namespace {
 	/// @param value 変換対象Enum
 	/// @return 変換後文字列
 	const char* ToString(RibbonPointGenerationMode value) {
-		if (value == RibbonPointGenerationMode::Manual) {
+		if (value == RibbonPointGenerationMode::Endpoints) {
+			return "endpoints";
+		} else if (value == RibbonPointGenerationMode::Manual) {
 			return "manual";
 		} else {
 			return "transformHistory";
@@ -517,6 +521,48 @@ namespace {
 				);
 			}
 		}
+
+		// 寿命、全体時間、長さ方向のTrackをそれぞれ独立した設定として読み込み
+		const auto readFloatTrack = [](const JsonValue& module, const char* key, MadoEngine::Effect::EffectTrack<float>& track) {
+			if (const JsonValue* value = FindValue(module, key)) {
+				track = ReadTrack(*value, track.GetDefaultValue(), [](const JsonValue& item, float fallback) {
+					if (item.is_number()) {
+						return item.get<float>();
+					}
+					return fallback;
+				});
+			}
+		};
+		if (const JsonValue* geometry = FindValue(json, "geometry")) {
+			readFloatTrack(*geometry, "widthOverTime", config.geometry.widthOverTime);
+			readFloatTrack(*geometry, "widthOverLength", config.geometry.widthOverLength);
+			config.geometry.startFade = ReadFloat(*geometry, "startFade", config.geometry.startFade);
+			config.geometry.endFade = ReadFloat(*geometry, "endFade", config.geometry.endFade);
+		}
+		if (const JsonValue* material = FindValue(json, "material")) {
+			if (const JsonValue* value = FindValue(*material, "colorOverTime")) {
+				config.material.colorOverTime = ReadTrack(*value, config.material.colorOverTime.GetDefaultValue(), ReadVector4);
+			}
+			if (const JsonValue* value = FindValue(*material, "colorOverLength")) {
+				config.material.colorOverLength = ReadTrack(*value, config.material.colorOverLength.GetDefaultValue(), ReadVector4);
+			}
+		}
+		if (const JsonValue* endpoints = FindValue(json, "endpoints")) {
+			config.endpoints.segmentCount = ReadUInt(*endpoints, "segmentCount", config.endpoints.segmentCount);
+			if (const JsonValue* value = FindValue(*endpoints, "startPosition")) {
+				config.endpoints.positions.startPosition = ReadVector3(*value, config.endpoints.positions.startPosition);
+			}
+			if (const JsonValue* value = FindValue(*endpoints, "endPosition")) {
+				config.endpoints.positions.endPosition = ReadVector3(*value, config.endpoints.positions.endPosition);
+			}
+		}
+		if (const JsonValue* noise = FindValue(json, "noise")) {
+			config.noise.amplitude = ReadFloat(*noise, "amplitude", config.noise.amplitude);
+			config.noise.frequency = ReadFloat(*noise, "frequency", config.noise.frequency);
+			config.noise.scrollSpeed = ReadFloat(*noise, "scrollSpeed", config.noise.scrollSpeed);
+			config.noise.seed = ReadUInt(*noise, "seed", config.noise.seed);
+		}
+
 		return config;
 	}
 
@@ -535,6 +581,17 @@ namespace {
 				{ "progress", WriteTrack(config.playback.progress, [](float value) { return JsonValue(value); }) },
 				{ "sweepLength", config.playback.sweepLength },
 			} },
+			{ "endpoints", {
+				{ "startPosition", WriteVector3(config.endpoints.positions.startPosition) },
+				{ "endPosition", WriteVector3(config.endpoints.positions.endPosition) },
+				{ "segmentCount", config.endpoints.segmentCount },
+			} },
+			{ "noise", {
+				{ "amplitude", config.noise.amplitude },
+				{ "frequency", config.noise.frequency },
+				{ "scrollSpeed", config.noise.scrollSpeed },
+				{ "seed", config.noise.seed },
+			} },
 			{ "trail", {
 				{ "pointLifetime", config.trail.pointLifetime },
 				{ "minPointDistance", config.trail.minPointDistance },
@@ -545,6 +602,10 @@ namespace {
 			} },
 			{ "geometry", {
 				{ "widthOverLifetime", WriteTrack(config.geometry.widthOverLifetime, [](float value) { return JsonValue(value); }) },
+				{ "widthOverTime", WriteTrack(config.geometry.widthOverTime, [](float value) { return JsonValue(value); }) },
+				{ "widthOverLength", WriteTrack(config.geometry.widthOverLength, [](float value) { return JsonValue(value); }) },
+				{ "startFade", config.geometry.startFade },
+				{ "endFade", config.geometry.endFade },
 				{ "interpolation", ToString(config.geometry.interpolation) },
 				{ "smoothingSubdivision", config.geometry.smoothingSubdivision },
 				{ "cameraFacing", config.geometry.cameraFacing },
@@ -554,6 +615,8 @@ namespace {
 				{ "blendMode", ToString(config.material.blendMode) },
 				{ "cullMode", ToString(config.material.cullMode) },
 				{ "colorOverLifetime", WriteTrack(config.material.colorOverLifetime, WriteVector4) },
+				{ "colorOverTime", WriteTrack(config.material.colorOverTime, WriteVector4) },
+				{ "colorOverLength", WriteTrack(config.material.colorOverLength, WriteVector4) },
 				{ "globalAlpha", WriteTrack(config.material.globalAlpha, [](float value) { return JsonValue(value); }) },
 				{ "uvScale", WriteVector2(config.material.uvScale) },
 				{ "uvOffset", WriteVector2(config.material.uvOffset) },
@@ -567,6 +630,47 @@ namespace {
 	/// @brief Ribbon Emitter設定を安全な範囲へ補正
 	/// @param config 補正対象Emitter設定
 	void ValidateRibbonEmitter(RibbonEmitterConfig& config) {
+
+		// 新しい生成方式と追加Trackの不正値を補正し、既存Assetの既定表現を維持
+		const auto finiteClamp = [](float value, float fallback, float minimum, float maximum) {
+			if (!std::isfinite(value)) {
+				value = fallback;
+			}
+			return std::clamp(value, minimum, maximum);
+		};
+		const auto normalizeWidth = [&](float value) { return finiteClamp(value, 1.0f, 0.0f, 100000.0f); };
+		const auto normalizeColor = [&](const Vector4& value) {
+			return Vector4{
+				finiteClamp(value.x, 1.0f, 0.0f, 100.0f),
+				finiteClamp(value.y, 1.0f, 0.0f, 100.0f),
+				finiteClamp(value.z, 1.0f, 0.0f, 100.0f),
+				finiteClamp(value.w, 1.0f, 0.0f, 1.0f),
+			};
+		};
+		NormalizeTrack(config.geometry.widthOverTime, 1.0f, normalizeWidth);
+		NormalizeTrack(config.geometry.widthOverLength, 1.0f, normalizeWidth);
+		NormalizeTrack(config.material.colorOverTime, 1.0f, normalizeColor);
+		NormalizeTrack(config.material.colorOverLength, 1.0f, normalizeColor);
+		config.geometry.startFade = finiteClamp(config.geometry.startFade, 0.0f, 0.0f, 1.0f);
+		config.geometry.endFade = finiteClamp(config.geometry.endFade, 0.0f, 0.0f, 1.0f);
+		const float fadeSum = config.geometry.startFade + config.geometry.endFade;
+		if (fadeSum > 1.0f) {
+			config.geometry.startFade /= fadeSum;
+			config.geometry.endFade /= fadeSum;
+		}
+		config.noise.amplitude = finiteClamp(config.noise.amplitude, 0.0f, 0.0f, 100000.0f);
+		config.noise.frequency = finiteClamp(config.noise.frequency, 3.0f, 0.001f, 100000.0f);
+		config.noise.scrollSpeed = finiteClamp(config.noise.scrollSpeed, 1.0f, -100000.0f, 100000.0f);
+		config.endpoints.segmentCount = std::clamp(config.endpoints.segmentCount, 1u, kMaximumRibbonPointCount - 1);
+		for (Vector3* position : { &config.endpoints.positions.startPosition, &config.endpoints.positions.endPosition }) {
+			position->x = finiteClamp(position->x, 0.0f, -1000000.0f, 1000000.0f);
+			position->y = finiteClamp(position->y, 0.0f, -1000000.0f, 1000000.0f);
+			position->z = finiteClamp(position->z, 0.0f, -1000000.0f, 1000000.0f);
+		}
+		if (config.trail.generationMode > RibbonPointGenerationMode::Endpoints) {
+			config.trail.generationMode = RibbonPointGenerationMode::TransformHistory;
+		}
+
 		if (!std::isfinite(config.translateOffset.x)) {
 			config.translateOffset.x = 0.0f;
 		}

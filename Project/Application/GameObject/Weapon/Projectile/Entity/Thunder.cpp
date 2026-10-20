@@ -1,4 +1,5 @@
 #include "Thunder.h"
+#include "Render/Object/3d/RibbonEffect/MyRibbonEffect3d.h"
 #include <algorithm>
 #include <cmath>
 
@@ -11,6 +12,9 @@ namespace Projectile {
 	}
 
 	Thunder::~Thunder() {
+
+		// 本体破棄後も残った軌跡の寿命を消化し、古い部分から自然に消去
+		MyRibbonEffect3d::Stop(trail_, MadoEngine::Ribbon::RibbonStopMode::Finish);
 		if (!objectName_.empty()) {
 
 			// Colliderの座標参照を本体の破棄前に解除
@@ -33,17 +37,13 @@ namespace Projectile {
 		SetMoveDirectionTowards(targetPosition_);
 		lifeTimer_.Start(lifeTime_, false);
 
-		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
-		if (Model* model = MyModel::TryGet(model_)) {
-
-			// 周囲の照明に左右されない雷の表示色で落下位置を識別
-			model->SetTexture("white2x2");
-			model->SetColor({ 1.0f, 0.85f, 0.15f, 1.0f });
-			model->SetTransform(transform_);
-			model->SetCastShadow(false);
-			model->SetReceiveShadow(false);
-			model->SetLightingEnabled(false);
-		}
+		// 移動経路はWorld座標に蓄積し、ModelのScaleに依存しない幅で表示
+		MyRibbonEffect3d::Stop(trail_, MadoEngine::Ribbon::RibbonStopMode::Immediate);
+		MadoEngine::Ribbon::RibbonEffectPlayDesc trailDesc;
+		trailDesc.transform.translate = transform_.translate;
+		trailDesc.sceneType = SceneType::Game;
+		trailDesc.loopOverride = true;
+		trail_ = MyRibbonEffect3d::Play("ThunderTrail", trailDesc);
 
 		Sphere hitbox;
 		hitbox.radius = kBaseHitboxRadius * safeSizeRate;
@@ -73,14 +73,15 @@ namespace Projectile {
 			transform_.translate.y = targetPosition_.y;
 		}
 
+		// 跳弾を含む最新位置を履歴へ追加し、寿命とNoiseの更新はRibbon側へ委譲
+		Transform3D trailTransform;
+		trailTransform.translate = transform_.translate;
+		MyRibbonEffect3d::SetTransform(trail_, trailTransform);
+
 		// 外れた雷や跳弾後のProjectileをMap外で残存させない寿命管理
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox)) {
 			isDead_ = true;
 			return;
-		}
-
-		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTransform(transform_);
 		}
 
 		MyDebugLine::AddShape(std::get<Sphere>(hitbox_));

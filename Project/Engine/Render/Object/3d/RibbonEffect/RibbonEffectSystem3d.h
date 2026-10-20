@@ -109,6 +109,12 @@ namespace MadoEngine::Ribbon {
 		/// @param mode 停止方式
 		void Stop(RibbonEffectHandle handle, RibbonStopMode mode = RibbonStopMode::Finish);
 
+		/// @brief 始終点方式のWorld始終点を更新
+		/// @param handle 更新対象Handle
+		/// @param endpoints 新しいWorld始終点
+		/// @return 更新に成功した場合はtrue
+		bool SetEndpoints(RibbonEffectHandle handle, const RibbonEndpoints& endpoints);
+
 		/// @brief Ribbon追跡Transformを更新
 		/// @param handle 更新対象Handle
 		/// @param transform 最新Transform

@@ -18,6 +18,16 @@ namespace MadoEngine::Ribbon {
 		/// @param transform 最新Transform
 		virtual void SetTransform(const Transform3D& transform) = 0;
 
+		/// @brief 対応する生成方式のWorld始終点を設定
+		/// @param endpoints 新しいWorld始終点
+		/// @return 始終点を設定できた場合はtrue
+		virtual bool SetEndpoints(const RibbonEndpoints& endpoints) { (void)endpoints; return false; }
+
+		/// @brief 対応する生成方式の制御点を設定
+		/// @param controlPoints 新しい制御点列
+		/// @return 制御点を設定できた場合はtrue
+		virtual bool SetControlPoints(const std::vector<Vector3>& controlPoints) { (void)controlPoints; return false; }
+
 		/// @brief 新規Point生成を停止
 		/// @param mode 停止方式
 		virtual void Stop(RibbonStopMode mode) = 0;

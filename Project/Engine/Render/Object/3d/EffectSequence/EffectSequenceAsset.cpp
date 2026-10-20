@@ -111,7 +111,7 @@ namespace {
 		if (value == "particle") { return EffectSequenceNodeType::Particle; }
 		if (value == "primitiveEffect") { return EffectSequenceNodeType::PrimitiveEffect; }
 		if (value == "ribbon") { return EffectSequenceNodeType::Ribbon; }
-		if (value == "beam") { return EffectSequenceNodeType::Beam; }
+		if (value == "beam") { return EffectSequenceNodeType::Ribbon; }
 		return EffectSequenceNodeType::Count;
 	}
 
@@ -123,7 +123,6 @@ namespace {
 		case EffectSequenceNodeType::Particle: return "particle";
 		case EffectSequenceNodeType::PrimitiveEffect: return "primitiveEffect";
 		case EffectSequenceNodeType::Ribbon: return "ribbon";
-		case EffectSequenceNodeType::Beam: return "beam";
 		case EffectSequenceNodeType::Count:
 		default: return "invalid";
 		}
@@ -201,7 +200,6 @@ namespace {
 		switch (nodeType) {
 		case EffectSequenceNodeType::PrimitiveEffect: return PrimitiveEffectNodeSettings{};
 		case EffectSequenceNodeType::Ribbon: return RibbonNodeSettings{};
-		case EffectSequenceNodeType::Beam: return BeamNodeSettings{};
 		case EffectSequenceNodeType::Particle:
 		case EffectSequenceNodeType::Count:
 		default: return ParticleNodeSettings{};
@@ -219,8 +217,6 @@ namespace {
 			return std::holds_alternative<PrimitiveEffectNodeSettings>(node.settings);
 		case EffectSequenceNodeType::Ribbon:
 			return std::holds_alternative<RibbonNodeSettings>(node.settings);
-		case EffectSequenceNodeType::Beam:
-			return std::holds_alternative<BeamNodeSettings>(node.settings);
 		case EffectSequenceNodeType::Count:
 		default:
 			return false;
@@ -331,6 +327,15 @@ namespace MadoEngine::EffectSequence {
 				}
 				case EffectSequenceNodeType::Ribbon: {
 					RibbonNodeSettings ribbon;
+
+					// 旧始終点NodeはRibbonの始終点上書きとして読み込み、保存時は新形式へ統一
+					ribbon.overrideEndpoints = ReadBool(*settings, "overrideEndpoints", ReadString(nodeJson, "nodeType", "") == "beam");
+					if (const JsonValue* start = FindValue(*settings, "startPosition")) {
+						ribbon.endpoints.startPosition = MadoEngine::Json::JsonSerializer::ToVector3(*start, ribbon.endpoints.startPosition);
+					}
+					if (const JsonValue* end = FindValue(*settings, "endPosition")) {
+						ribbon.endpoints.endPosition = MadoEngine::Json::JsonSerializer::ToVector3(*end, ribbon.endpoints.endPosition);
+					}
 					ribbon.overrideManualControlPoints = ReadBool(
 						*settings,
 						"overrideManualControlPoints",
@@ -351,17 +356,7 @@ namespace MadoEngine::EffectSequence {
 					node.settings = std::move(ribbon);
 					break;
 				}
-				case EffectSequenceNodeType::Beam: {
-					BeamNodeSettings beam;
-					if (const JsonValue* start = FindValue(*settings, "startPosition")) {
-						beam.startPosition = MadoEngine::Json::JsonSerializer::ToVector3(*start, beam.startPosition);
-					}
-					if (const JsonValue* end = FindValue(*settings, "endPosition")) {
-						beam.endPosition = MadoEngine::Json::JsonSerializer::ToVector3(*end, beam.endPosition);
-					}
-					node.settings = beam;
-					break;
-				}
+
 				case EffectSequenceNodeType::Particle:
 				case EffectSequenceNodeType::Count:
 				default:
@@ -407,14 +402,14 @@ namespace MadoEngine::EffectSequence {
 			if (const auto* primitive = std::get_if<PrimitiveEffectNodeSettings>(&node.settings)) {
 				settings["primitiveType"] = ToString(primitive->kind);
 			} else if (const auto* ribbon = std::get_if<RibbonNodeSettings>(&node.settings)) {
+				settings["overrideEndpoints"] = ribbon->overrideEndpoints;
+				settings["startPosition"] = MadoEngine::Json::JsonSerializer::ToJson(ribbon->endpoints.startPosition);
+				settings["endPosition"] = MadoEngine::Json::JsonSerializer::ToJson(ribbon->endpoints.endPosition);
 				settings["overrideManualControlPoints"] = ribbon->overrideManualControlPoints;
 				settings["controlPoints"] = JsonValue::array();
 				for (const Vector3& point : ribbon->controlPoints) {
 					settings["controlPoints"].push_back(MadoEngine::Json::JsonSerializer::ToJson(point));
 				}
-			} else if (const auto* beam = std::get_if<BeamNodeSettings>(&node.settings)) {
-				settings["startPosition"] = MadoEngine::Json::JsonSerializer::ToJson(beam->startPosition);
-				settings["endPosition"] = MadoEngine::Json::JsonSerializer::ToJson(beam->endPosition);
 			}
 			nodeJson["settings"] = std::move(settings);
 			json["nodes"].push_back(std::move(nodeJson));
@@ -524,15 +519,14 @@ namespace MadoEngine::EffectSequence {
 					node.isEnabled = false;
 				}
 			} else if (auto* ribbon = std::get_if<RibbonNodeSettings>(&node.settings)) {
+				NormalizeVector3(ribbon->endpoints.startPosition, {}, -1000000.0f, 1000000.0f);
+				NormalizeVector3(ribbon->endpoints.endPosition, { 0.0f, 1.0f, 0.0f }, -1000000.0f, 1000000.0f);
 				if (ribbon->controlPoints.size() > MadoEngine::Ribbon::kMaximumRibbonPointCount) {
 					ribbon->controlPoints.resize(MadoEngine::Ribbon::kMaximumRibbonPointCount);
 				}
 				for (Vector3& point : ribbon->controlPoints) {
 					NormalizeVector3(point, {}, -1000000.0f, 1000000.0f);
 				}
-			} else if (auto* beam = std::get_if<BeamNodeSettings>(&node.settings)) {
-				NormalizeVector3(beam->startPosition, {}, -1000000.0f, 1000000.0f);
-				NormalizeVector3(beam->endPosition, { 0.0f, 1.0f, 0.0f }, -1000000.0f, 1000000.0f);
 			}
 		}
 

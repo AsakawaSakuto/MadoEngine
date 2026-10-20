@@ -2,7 +2,6 @@
 #include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "ImGuiHeaders.h"
-#include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
@@ -81,7 +80,6 @@ namespace {
 		case EffectSequenceNodeType::Particle: return "Particle";
 		case EffectSequenceNodeType::PrimitiveEffect: return "Cylinder";
 		case EffectSequenceNodeType::Ribbon: return "Ribbon";
-		case EffectSequenceNodeType::Beam: return "Beam";
 		case EffectSequenceNodeType::Count:
 		default: return "不明";
 		}
@@ -98,8 +96,6 @@ namespace {
 			return MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().GetAssetNames();
 		case EffectSequenceNodeType::Ribbon:
 			return MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().GetAssetNames();
-		case EffectSequenceNodeType::Beam:
-			return MadoEngine::Beam::BeamEffectSystem3d::GetInstance().GetAssetNames();
 		case EffectSequenceNodeType::Count:
 		default:
 			return {};
@@ -115,9 +111,6 @@ namespace {
 			break;
 		case EffectSequenceNodeType::Ribbon:
 			node.settings = RibbonNodeSettings{};
-			break;
-		case EffectSequenceNodeType::Beam:
-			node.settings = BeamNodeSettings{};
 			break;
 		case EffectSequenceNodeType::Particle:
 		case EffectSequenceNodeType::Count:
@@ -249,12 +242,13 @@ namespace {
 		bool changed = false;
 		ImGui::SeparatorText("ローカルトランスフォーム");
 		changed |= DrawTransformEditor(node.localTransform);
-		if (auto* beam = std::get_if<BeamNodeSettings>(&node.settings)) {
-			ImGui::SeparatorText("ビーム固有設定（ローカル空間）");
-			changed |= ImGui::DragFloat3("始点", &beam->startPosition.x, 0.05f);
-			changed |= ImGui::DragFloat3("終点", &beam->endPosition.x, 0.05f);
-		} else if (auto* ribbon = std::get_if<RibbonNodeSettings>(&node.settings)) {
+		if (auto* ribbon = std::get_if<RibbonNodeSettings>(&node.settings)) {
 			ImGui::SeparatorText("リボン固有設定");
+			changed |= ImGui::Checkbox("始点・終点を上書き", &ribbon->overrideEndpoints);
+			if (ribbon->overrideEndpoints) {
+				changed |= ImGui::DragFloat3("始点（ローカル）", &ribbon->endpoints.startPosition.x, 0.05f);
+				changed |= ImGui::DragFloat3("終点（ローカル）", &ribbon->endpoints.endPosition.x, 0.05f);
+			}
 			changed |= ImGui::Checkbox("手動制御点を上書き", &ribbon->overrideManualControlPoints);
 			if (ribbon->overrideManualControlPoints) {
 				int removePointIndex = -1;
@@ -550,7 +544,7 @@ namespace MadoEngine::Editor {
 		);
 
 		ImGui::SeparatorText("タイムライン");
-		const char* addNodeTypeNames[] = { "Particle", "Cylinder", "Ribbon", "Beam" };
+		const char* addNodeTypeNames[] = { "Particle", "Cylinder", "Ribbon" };
 		ImGui::SetNextItemWidth(160.0f);
 		ImGui::Combo("追加ノードタイプ", &addNodeTypeIndex, addNodeTypeNames, static_cast<int>(std::size(addNodeTypeNames)));
 		ImGui::SameLine();

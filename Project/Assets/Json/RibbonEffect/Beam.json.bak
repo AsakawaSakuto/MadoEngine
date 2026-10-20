@@ -4,10 +4,13 @@
             "geometry": {
                 "cameraFacing": true,
                 "endFade": 0.05000000074505806,
-                "segmentCount": 16,
                 "startFade": 0.05000000074505806,
                 "widthOverTime": {
                     "default": 0.25,
+                    "keys": []
+                },
+                "widthOverLifetime": {
+                    "default": 1.0,
                     "keys": []
                 }
             },
@@ -33,10 +36,6 @@
                     "keys": []
                 },
                 "cullMode": "none",
-                "globalAlphaOverTime": {
-                    "default": 1.0,
-                    "keys": []
-                },
                 "textureName": "white2x2",
                 "tileLength": 1.0,
                 "uvMode": "stretch",
@@ -51,7 +50,11 @@
                 "uvScroll": [
                     0.0,
                     0.0
-                ]
+                ],
+                "globalAlpha": {
+                    "default": 1.0,
+                    "keys": []
+                }
             },
             "name": "Emitter",
             "noise": {
@@ -62,18 +65,36 @@
             },
             "playback": {
                 "duration": 1.0,
-                "extensionOverTime": {
+                "isLoop": false,
+                "mode": "reveal",
+                "progress": {
                     "default": 1.0,
                     "keys": []
-                },
-                "isLoop": false
+                }
             },
             "translateOffset": [
                 0.0,
                 0.0,
                 0.0
-            ]
+            ],
+            "trail": {
+                "generationMode": "endpoints",
+                "simulationSpace": "local"
+            },
+            "endpoints": {
+                "startPosition": [
+                    0,
+                    0,
+                    0
+                ],
+                "endPosition": [
+                    0,
+                    1,
+                    0
+                ],
+                "segmentCount": 16
+            }
         }
     ],
-    "version": 5
+    "version": 7
 }

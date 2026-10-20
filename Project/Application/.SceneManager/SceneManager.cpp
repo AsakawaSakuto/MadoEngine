@@ -9,7 +9,6 @@
 #include "Render/Object/3d/Line/MyDebugLine.h"
 #include "Render/Object/3d/Particle/ParticleSystem3d.h"
 #include "Render/Object/3d/PrimitiveEffect/PrimitiveEffectSystem3d.h"
-#include "Render/Object/3d/BeamEffect/BeamEffectSystem3d.h"
 #include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include "EditorUIHeaders.h"
@@ -110,7 +109,6 @@ SceneManager::~SceneManager() {
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().ClearScene(previousSceneType);
-	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 }
 
 void SceneManager::RegisterScene(SceneType type, CreatorFunc creator) {
@@ -170,7 +168,6 @@ void SceneManager::Update(float dt) {
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Update(dt);
-	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().Update(dt);
 }
 
 void SceneManager::Draw() {
@@ -227,11 +224,6 @@ void SceneManager::DrawTransparentLayerMask(MadoEngine::Render::RenderLayerMask 
 		layerMask
 	);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().DrawLayerMask(
-		currentSceneType_,
-		camera,
-		layerMask
-	);
-	MadoEngine::Beam::BeamEffectSystem3d::GetInstance().DrawLayerMask(
 		currentSceneType_,
 		camera,
 		layerMask
@@ -521,7 +513,6 @@ void SceneManager::ChangeScene(SceneType type) {
 		MadoEngine::Particle::ParticleSystem3d::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 		MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().ClearScene(previousSceneType);
-		MadoEngine::Beam::BeamEffectSystem3d::GetInstance().ClearScene(previousSceneType);
 		Logger::Output("旧シーンの終了処理を実行しました: " + SceneTypeToString(currentSceneType_), Logger::Level::Application);
 	}
 

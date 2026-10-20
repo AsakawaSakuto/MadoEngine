@@ -1,0 +1,71 @@
+{
+    "version": 7,
+    "emitters": [
+        {
+            "name": "LightningTrail",
+            "isEnabled": true,
+            "playback": {
+                "duration": 1.0,
+                "isLoop": true,
+                "mode": "full"
+            },
+            "trail": {
+                "pointLifetime": 0.35,
+                "minPointDistance": 0.04,
+                "maxPointCount": 128,
+                "generationMode": "transformHistory",
+                "simulationSpace": "world"
+            },
+            "geometry": {
+                "widthOverLifetime": {
+                    "default": 0.14,
+                    "keys": []
+                },
+                "interpolation": "linear",
+                "smoothingSubdivision": 0,
+                "cameraFacing": true
+            },
+            "noise": {
+                "amplitude": 0.25,
+                "frequency": 10.0,
+                "scrollSpeed": 0.0,
+                "seed": 42
+            },
+            "material": {
+                "textureName": "white2x2",
+                "blendMode": "add",
+                "cullMode": "none",
+                "colorOverLifetime": {
+                    "default": [
+                        1.0,
+                        0.85,
+                        0.15,
+                        1.0
+                    ],
+                    "keys": [
+                        {
+                            "time": 0.0,
+                            "value": [
+                                1.0,
+                                0.85,
+                                0.15,
+                                1.0
+                            ],
+                            "easing": 0
+                        },
+                        {
+                            "time": 1.0,
+                            "value": [
+                                1.0,
+                                0.85,
+                                0.15,
+                                0.0
+                            ],
+                            "easing": 0
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

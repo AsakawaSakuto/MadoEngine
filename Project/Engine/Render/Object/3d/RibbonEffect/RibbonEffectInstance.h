@@ -1,6 +1,7 @@
 #pragma once
 #include "IRibbonPointSource.h"
 #include "RibbonEffectAsset.h"
+#include "RibbonPointModifier.h"
 #include <memory>
 #include <vector>
 
@@ -65,6 +66,11 @@ namespace MadoEngine::Ribbon {
 		/// @param transform 最新Transform
 		void SetTransform(const Transform3D& transform);
 
+		/// @brief 始終点方式のWorld始終点を更新
+		/// @param endpoints 新しいWorld始終点
+		/// @return 対応するEmitterを更新できた場合はtrue
+		bool SetEndpoints(const RibbonEndpoints& endpoints);
+
 		/// @brief Manual Ribbonの制御点を置換
 		/// @param controlPoints 設定順に並んだ制御点
 		/// @return Manual Sourceへ設定できた場合はtrue
@@ -99,6 +105,7 @@ namespace MadoEngine::Ribbon {
 
 		std::shared_ptr<const RibbonEffectAsset> asset_;
 		std::vector<EmitterState> emitters_;
+		RibbonPointModifier pointModifier_;
 		Transform3D transform_;
 		SceneType sceneType_ = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Effect;

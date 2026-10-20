@@ -32,6 +32,14 @@ namespace MyRibbonEffect3d {
 		return MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetTransform(handle, transform);
 	}
 
+	/// @brief 始終点方式のWorld始終点を更新
+	/// @param handle 更新対象Handle
+	/// @param endpoints 新しいWorld始終点
+	/// @return 更新に成功した場合はtrue
+	inline bool SetEndpoints(MadoEngine::Ribbon::RibbonEffectHandle handle, const MadoEngine::Ribbon::RibbonEndpoints& endpoints) {
+		return MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().SetEndpoints(handle, endpoints);
+	}
+
 	/// @brief Manual Ribbonの制御点を置換
 	/// @param handle 更新対象Handle
 	/// @param controlPoints 設定順の制御点

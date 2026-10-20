@@ -79,6 +79,7 @@ namespace MadoEngine::Ribbon {
 			Vector3 position{};
 			float normalizedLifetime = 0.0f;
 			Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			float normalizedLength = 0.0f;
 		};
 
 		struct DrawBatch {

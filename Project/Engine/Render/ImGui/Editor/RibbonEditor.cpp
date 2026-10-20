@@ -855,7 +855,7 @@ namespace {
 	/// @return 値を変更した場合はtrue
 	bool DrawTrailEditor(RibbonEffectConfig& config, int& selectedControlPointIndex) {
 		bool changed = false;
-		const char* generationModeNames[] = { "Transform履歴", "手動制御点" };
+		const char* generationModeNames[] = { "Transform履歴", "手動制御点", "始点・終点" };
 		int generationModeIndex = static_cast<int>(config.trail.generationMode);
 		if (ImGui::Combo(
 			"制御点の生成方式",
@@ -864,6 +864,21 @@ namespace {
 			static_cast<int>(std::size(generationModeNames)))) {
 			config.trail.generationMode = static_cast<RibbonPointGenerationMode>(generationModeIndex);
 			changed = true;
+		}
+
+		if (config.trail.generationMode == RibbonPointGenerationMode::Endpoints) {
+
+			// 始終点方式ではAssetのLocal始終点を基準Transformに追従
+			ImGui::SeparatorText("始点・終点（ローカル空間）");
+			changed |= ImGui::DragFloat3("始点", &config.endpoints.positions.startPosition.x, 0.01f);
+			changed |= ImGui::DragFloat3("終点", &config.endpoints.positions.endPosition.x, 0.01f);
+			int segmentCount = static_cast<int>(config.endpoints.segmentCount);
+			if (ImGui::DragInt("分割数", &segmentCount, 1.0f, 1, static_cast<int>(kMaximumRibbonPointCount - 1))) {
+				config.endpoints.segmentCount = static_cast<uint32_t>(std::clamp(segmentCount, 1, static_cast<int>(kMaximumRibbonPointCount - 1)));
+				changed = true;
+			}
+			ImGui::TextDisabled("固定形状は再生時間の終了時に消えます。Fadeは全体時間による色・透明度で設定します。");
+			return changed;
 		}
 
 		const char* simulationSpaceNames[] = { "ワールド", "ローカル" };
@@ -912,6 +927,12 @@ namespace {
 		bool changed = false;
 		changed |= DrawPathInterpolationEditor(config.geometry);
 		changed |= ImGui::Checkbox("カメラへ正対", &config.geometry.cameraFacing);
+		ImGui::SeparatorText("全体時間と長さ方向");
+		changed |= DrawFloatTrack("全体時間による幅倍率", config.geometry.widthOverTime, 1.0f, "%.3f", 0.01f, 0.0f, 100000.0f);
+		changed |= DrawFloatTrack("長さ方向による幅倍率", config.geometry.widthOverLength, 1.0f, "%.3f", 0.01f, 0.0f, 100000.0f);
+		changed |= ImGui::SliderFloat("始端フェード", &config.geometry.startFade, 0.0f, 1.0f, "%.3f");
+		changed |= ImGui::SliderFloat("終端フェード", &config.geometry.endFade, 0.0f, 1.0f, "%.3f");
+		ImGui::TextDisabled("長さ方向は始点が0、終点が1です。全体時間は再生開始が0、終了が1です。");
 		ImGui::SeparatorText("寿命トラック");
 		changed |= DrawFloatTrack(
 			"Ribbon幅",
@@ -958,6 +979,8 @@ namespace {
 
 		ImGui::SeparatorText("アニメーショントラック");
 		changed |= DrawColorTrack("寿命による色", config.material.colorOverLifetime, 1.0f);
+		changed |= DrawColorTrack("全体時間による色", config.material.colorOverTime, 1.0f);
+		changed |= DrawColorTrack("長さ方向による色", config.material.colorOverLength, 1.0f);
 		changed |= DrawFloatTrack(
 			"全体の不透明度",
 			config.material.globalAlpha,
@@ -967,6 +990,20 @@ namespace {
 			0.0f,
 			1.0f
 		);
+		return changed;
+	}
+
+	/// @brief 生成方式に依存しないNoise設定を編集
+	/// @param config 編集対象設定
+	/// @return 値を変更した場合はtrue
+	bool DrawNoiseEditor(RibbonEffectConfig& config) {
+		bool changed = false;
+		changed |= ImGui::DragFloat("振幅", &config.noise.amplitude, 0.01f, 0.0f, 100000.0f, "%.3f");
+		changed |= ImGui::DragFloat("周波数", &config.noise.frequency, 0.01f, 0.001f, 100000.0f, "%.3f");
+		changed |= ImGui::DragFloat("スクロール速度", &config.noise.scrollSpeed, 0.01f, -100000.0f, 100000.0f, "%.3f");
+		changed |= ImGui::InputScalar("シード", ImGuiDataType_U32, &config.noise.seed);
+		ImGui::TextDisabled("振幅0で無効です。移動履歴・手動制御点・始点と終点に共通して適用されます。");
+		ImGui::TextDisabled("始点と終点を固定し、点の寿命を維持したまま点列を変形します。");
 		return changed;
 	}
 
@@ -1389,9 +1426,9 @@ namespace MadoEngine::Editor {
 		ImGui::BeginChild("RibbonEmitterSettingPane", ImVec2(0.0f, 0.0f), true);
 		ImGui::Text("設定: %s", config.name.c_str());
 		ImGui::Separator();
-		const char* settingPageNames[] = { "基本", "トレイル", "形状", "マテリアル", "UV" };
+		const char* settingPageNames[] = { "基本", "点生成", "形状", "マテリアル", "UV", "Noise" };
 		const float settingPageButtonWidth =
-			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 4.0f) /
+			(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 5.0f) /
 			static_cast<float>(std::size(settingPageNames));
 		ImGui::PushID("RibbonSettingPageButtons");
 		for (int pageIndex = 0; pageIndex < static_cast<int>(std::size(settingPageNames)); ++pageIndex) {
@@ -1426,6 +1463,9 @@ namespace MadoEngine::Editor {
 			break;
 		case 4:
 			assetChanged |= DrawUvEditor(config);
+			break;
+		case 5:
+			assetChanged |= DrawNoiseEditor(config);
 			break;
 		case 0:
 		default:

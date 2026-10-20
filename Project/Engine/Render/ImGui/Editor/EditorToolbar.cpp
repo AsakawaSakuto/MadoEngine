@@ -33,7 +33,7 @@ struct EditorWindowMenuItem {
 	const char* label;
 };
 
-constexpr std::array<EditorWindowMenuItem, 21> kWindowMenuItems = {
+constexpr std::array<EditorWindowMenuItem, 20> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::GameView, "Game View" },
 	EditorWindowMenuItem{ EditorWindow::FixedGameView, "Game View 1280x720" },
 	EditorWindowMenuItem{ EditorWindow::EngineInfo, "Engine Info" },
@@ -51,13 +51,12 @@ constexpr std::array<EditorWindowMenuItem, 21> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::Particle, "Particle Editor" },
 	EditorWindowMenuItem{ EditorWindow::Cylinder, "Cylinder Editor" },
 	EditorWindowMenuItem{ EditorWindow::Ribbon, "Ribbon Editor" },
-	EditorWindowMenuItem{ EditorWindow::Beam, "Beam Editor" },
 	EditorWindowMenuItem{ EditorWindow::EffectSequence, "Effect Sequence Editor" },
 	EditorWindowMenuItem{ EditorWindow::StyleColor, "ImGui Style Color" },
 	EditorWindowMenuItem{ EditorWindow::Logger, "Logger" },
 };
 
-constexpr std::array<const char*, 15> kDocumentLabels = {
+constexpr std::array<const char*, 14> kDocumentLabels = {
 	"Camera",
 	"Scene",
 	"Map Generator",
@@ -70,7 +69,6 @@ constexpr std::array<const char*, 15> kDocumentLabels = {
 	"Particle",
 	"Cylinder",
 	"Ribbon",
-	"Beam",
 	"Effect Sequence",
 	"Style Color",
 };

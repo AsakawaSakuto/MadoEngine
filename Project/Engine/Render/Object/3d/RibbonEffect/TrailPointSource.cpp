@@ -32,17 +32,12 @@ namespace MadoEngine::Ribbon {
 	}
 
 	void TrailPointSource::Update(float deltaTime) {
-		const float safeDeltaTime = std::clamp(
-			[&]() {
-				if (std::isfinite(deltaTime)) {
-					return (deltaTime);
-				} else {
-					return (0.0f);
-				}
-			}(),
-			0.0f,
-			0.1f
-		);
+
+		// Frame時間の上限はInstance側で適用し、再生速度を掛けた時間は再制限せず反映
+		float safeDeltaTime = 0.0f;
+		if (std::isfinite(deltaTime)) {
+			safeDeltaTime = (std::max)(deltaTime, 0.0f);
+		}
 		for (RibbonPoint& point : sourcePoints_) {
 			point.age += safeDeltaTime;
 		}

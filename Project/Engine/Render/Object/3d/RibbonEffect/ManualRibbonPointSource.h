@@ -35,7 +35,7 @@ namespace MadoEngine::Ribbon {
 		/// @brief ゲーム側制御点を置換
 		/// @param controlPoints 設定順に並んだ制御点
 		/// @return 有効な制御点を設定できた場合はtrue
-		bool SetControlPoints(const std::vector<Vector3>& controlPoints);
+		bool SetControlPoints(const std::vector<Vector3>& controlPoints) override;
 
 	private:
 		/// @brief 制御点をWorld座標へ変換して描画Pointを再構築

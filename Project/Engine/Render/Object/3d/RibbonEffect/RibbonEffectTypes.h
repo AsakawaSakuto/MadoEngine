@@ -25,6 +25,7 @@ namespace MadoEngine::Ribbon {
 	enum class RibbonPointGenerationMode : uint32_t {
 		TransformHistory,
 		Manual,
+		Endpoints,
 	};
 
 	enum class RibbonSimulationSpace : uint32_t {
@@ -85,6 +86,10 @@ namespace MadoEngine::Ribbon {
 	};
 
 	struct RibbonGeometryModule {
+		MadoEngine::Effect::EffectTrack<float> widthOverTime{ 1.0f };
+		MadoEngine::Effect::EffectTrack<float> widthOverLength{ 1.0f };
+		float startFade = 0.0f;
+		float endFade = 0.0f;
 		MadoEngine::Effect::EffectTrack<float> widthOverLifetime =
 			MadoEngine::Effect::EffectTrack<float>{ 0.5f };
 		RibbonInterpolationMode interpolation = RibbonInterpolationMode::Linear;
@@ -93,6 +98,8 @@ namespace MadoEngine::Ribbon {
 	};
 
 	struct RibbonMaterialModule {
+		MadoEngine::Effect::EffectTrack<Vector4> colorOverTime{ Vector4{ 1.0f, 1.0f, 1.0f, 1.0f } };
+		MadoEngine::Effect::EffectTrack<Vector4> colorOverLength{ Vector4{ 1.0f, 1.0f, 1.0f, 1.0f } };
 		std::string textureName = "white2x2";
 		MadoEngine::Render::BlendMode blendMode = MadoEngine::Render::BlendMode::Add;
 		MadoEngine::Render::CullMode cullMode = MadoEngine::Render::CullMode::None;
@@ -107,12 +114,31 @@ namespace MadoEngine::Ribbon {
 		float tileLength = 1.0f;
 	};
 
+	struct RibbonEndpoints {
+		Vector3 startPosition{};
+		Vector3 endPosition{ 0.0f, 1.0f, 0.0f };
+	};
+
+	struct RibbonEndpointModule {
+		RibbonEndpoints positions;
+		uint32_t segmentCount = 16;
+	};
+
+	struct RibbonNoiseModule {
+		float amplitude = 0.0f;
+		float frequency = 3.0f;
+		float scrollSpeed = 1.0f;
+		uint32_t seed = 0;
+	};
+
 	struct RibbonEmitterConfig {
 		std::string name = "Emitter";
 		bool isEnabled = true;
 		Vector3 translateOffset{};
 		RibbonPlaybackModule playback;
 		RibbonTrailModule trail;
+		RibbonEndpointModule endpoints;
+		RibbonNoiseModule noise;
 		RibbonGeometryModule geometry;
 		RibbonMaterialModule material;
 	};
@@ -137,6 +163,7 @@ namespace MadoEngine::Ribbon {
 
 	struct RibbonEffectPlayDesc {
 		Transform3D transform;
+		std::optional<RibbonEndpoints> endpoints;
 		SceneType sceneType = SceneType::None;
 		MadoEngine::Render::RenderLayer renderLayer = MadoEngine::Render::RenderLayer::Effect;
 		std::optional<bool> loopOverride;
@@ -151,6 +178,10 @@ namespace MadoEngine::Ribbon {
 
 	struct RibbonRenderData {
 		std::vector<RibbonPoint> points;
+		float widthScale = 1.0f;
+		Vector4 colorMultiplier{ 1.0f, 1.0f, 1.0f, 1.0f };
+		MadoEngine::Effect::EffectTrack<float> widthOverLength{ 1.0f };
+		MadoEngine::Effect::EffectTrack<Vector4> colorOverLength{ Vector4{ 1.0f, 1.0f, 1.0f, 1.0f } };
 		MadoEngine::Effect::EffectTrack<float> widthOverLifetime;
 		MadoEngine::Effect::EffectTrack<Vector4> colorOverLifetime;
 		RibbonInterpolationMode interpolation = RibbonInterpolationMode::Linear;

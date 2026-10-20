@@ -104,7 +104,7 @@ namespace Weapon {
 	private:
 
 		int slotCount_ = 6; // 武器スロットの数
-		int attackTargetCandidateCount_ = 5; // 近い順で抽選候補とするEnemy数の上限
+		int attackTargetCandidateCount_ = 2; // 近い順で抽選候補とするEnemy数の上限
 		Projectile::Type selectedAddWeaponType_ = Projectile::Type::Pistol;
 		std::vector<std::unique_ptr<BaseWeapon>> weapons_;
 		std::vector<WeaponAttackEvent> weaponAttackEvents_;

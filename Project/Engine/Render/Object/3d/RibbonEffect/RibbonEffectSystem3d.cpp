@@ -393,6 +393,15 @@ namespace MadoEngine::Ribbon {
 		}
 	}
 
+	bool RibbonEffectSystem3d::SetEndpoints(RibbonEffectHandle handle, const RibbonEndpoints& endpoints) {
+		RibbonEffectInstance* instance = Resolve(handle);
+		if (!instance || !instance->SetEndpoints(endpoints)) {
+			return false;
+		}
+		isRenderDataPrepared_ = false;
+		return true;
+	}
+
 	bool RibbonEffectSystem3d::SetTransform(
 		RibbonEffectHandle handle,
 		const Transform3D& transform) {
