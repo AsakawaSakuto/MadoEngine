@@ -35,6 +35,14 @@ namespace Projectile {
 			(void)ownerPosition;
 		}
 
+		/// @brief 衝突解決後の武器所有者の座標と姿勢を追従型Projectileへ同期
+		/// @param ownerPosition 武器所有者の現在座標
+		/// @param ownerUpDirection 武器所有者の正規化済み上方向
+		virtual void SynchronizeOwnerPose(const Vector3& ownerPosition, const Vector3& ownerUpDirection) {
+			(void)ownerUpDirection;
+			SynchronizeOwnerPosition(ownerPosition);
+		}
+
 		/// @brief 常時展開中に所有者の状態を同期
 		/// @param context 同期するProjectile情報
 		virtual void SynchronizePersistentState(const InitializeDesc& context) {

@@ -56,6 +56,10 @@ namespace Player {
 		/// @return Z軸正方向を0とする水平Yaw角度（ラジアン）
 		float GetFacingYaw() const { return faceYaw_; }
 
+		/// @brief Playerの描画姿勢に適用している補間済み上方向を取得
+		/// @return 正規化済みの上方向
+		Vector3 GetUpDirection() const { return currentGroundNormal_; }
+
 		/// @brief Y方向速度を取得
 		/// @return Y方向速度
 		float GetVelocityY() const { return velocityY_; }

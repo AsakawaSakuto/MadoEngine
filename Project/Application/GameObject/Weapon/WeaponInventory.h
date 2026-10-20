@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <vector>
 
 namespace Weapon {
@@ -19,7 +20,17 @@ namespace Weapon {
 	public:
 		void Initialize(Projectile::Type type, int slotCount);
 
-		void Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition);
+		/// @brief 武器所有者の座標と姿勢を使用して装備中の射撃処理を更新
+		/// @param deltaTime 前フレームからの経過時間
+		/// @param ownerPosition 武器所有者の座標
+		/// @param targetPositions 発射ごとに抽選する射撃対象の候補座標
+		/// @param ownerUpDirection 武器所有者の正規化済み上方向
+		void Update(float deltaTime, const Vector3& ownerPosition, std::span<const Vector3> targetPositions,
+			const Vector3& ownerUpDirection = { 0.0f, 1.0f, 0.0f });
+
+		/// @brief Playerに近い順で抽選候補とするEnemy数の上限を取得
+		/// @return 抽選候補数の上限
+		int GetAttackTargetCandidateCount() const { return attackTargetCandidateCount_; }
 
 		/// @brief 全武器へ適用する実行時補正を設定
 		/// @param modifiers 全武器共通の補正値
@@ -92,7 +103,8 @@ namespace Weapon {
 		void DrawImGui();
 	private:
 
-		int slotCount_ = 4; // 武器スロットの数
+		int slotCount_ = 6; // 武器スロットの数
+		int attackTargetCandidateCount_ = 5; // 近い順で抽選候補とするEnemy数の上限
 		Projectile::Type selectedAddWeaponType_ = Projectile::Type::Pistol;
 		std::vector<std::unique_ptr<BaseWeapon>> weapons_;
 		std::vector<WeaponAttackEvent> weaponAttackEvents_;

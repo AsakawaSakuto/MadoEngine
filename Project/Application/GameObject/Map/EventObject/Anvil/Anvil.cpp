@@ -68,7 +68,7 @@ bool Anvil::Interact(Player::Base& player) {
 }
 
 std::string_view Anvil::GetInteractionText() const {
-	return "武器を強化する（無料）";
+	return "武器を強化する";
 }
 
 MapEventRequest Anvil::GetInteractionRequest() const {

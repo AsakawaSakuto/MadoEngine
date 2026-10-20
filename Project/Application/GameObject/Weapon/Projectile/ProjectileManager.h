@@ -50,6 +50,11 @@ namespace Projectile {
 		/// @param ownerPosition 武器所有者の現在座標
 		void Update(float deltaTime, const Vector3& ownerPosition);
 
+		/// @brief 衝突解決後の武器所有者の座標と姿勢を追従型Projectileへ同期
+		/// @param ownerPosition 武器所有者の現在座標
+		/// @param ownerUpDirection 武器所有者の正規化済み上方向
+		void SynchronizeOwnerPose(const Vector3& ownerPosition, const Vector3& ownerUpDirection);
+
 		/// @brief Projectileを追加
 		/// @param type 追加するProjectileの種類
 		/// @param context Projectileの初期化情報

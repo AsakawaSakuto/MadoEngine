@@ -1,0 +1,90 @@
+{
+    "emitters": [
+        {
+            "geometry": {
+                "cameraFacing": true,
+                "endFade": 0.05000000074505806,
+                "segmentCount": 16,
+                "startFade": 0.05000000074505806,
+                "widthOverTime": {
+                    "default": 0.25,
+                    "keys": []
+                }
+            },
+            "isEnabled": true,
+            "material": {
+                "blendMode": "add",
+                "colorOverLength": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "colorOverTime": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "cullMode": "none",
+                "globalAlphaOverTime": {
+                    "default": 1.0,
+                    "keys": []
+                },
+                "textureName": "white2x2",
+                "tileLength": 1.0,
+                "uvMode": "stretch",
+                "uvOffset": [
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0
+                ],
+                "uvScroll": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "noise": {
+                "amplitude": 0.0,
+                "frequency": 3.0,
+                "scrollSpeed": 1.0,
+                "seed": 0
+            },
+            "playback": {
+                "duration": 1.0,
+                "extensionOverTime": {
+                    "default": 0.0,
+                    "keys": [
+                        {
+                            "easing": 0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "easing": 0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "isLoop": false
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "version": 5
+}

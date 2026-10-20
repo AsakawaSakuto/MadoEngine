@@ -7,11 +7,43 @@
 #include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <unordered_map>
 
 namespace Enemy {
 	namespace {
 		constexpr float kGuaranteedStatusEffectChance = 100.0f;
+		constexpr float kAttackTargetCellSize = 16.0f;
+
+		/// @brief ワールド座標をXZ平面上の攻撃対象区画へ変換
+		/// @param position 変換対象のワールド座標
+		/// @param outCellX X方向の区画座標の格納先
+		/// @param outCellZ Z方向の区画座標の格納先
+		/// @return 区画座標へ変換できた場合はtrue
+		bool TryGetAttackTargetCellCoordinates(const Vector3& position, int& outCellX, int& outCellZ) {
+			const double cellX = std::floor(static_cast<double>(position.x) / kAttackTargetCellSize);
+			const double cellZ = std::floor(static_cast<double>(position.z) / kAttackTargetCellSize);
+
+			// 非有限値や整数範囲外の座標を索引化せず、変換時の未定義動作を回避
+			if (!std::isfinite(cellX) || !std::isfinite(cellZ) ||
+				cellX < std::numeric_limits<int>::min() || cellX > std::numeric_limits<int>::max() ||
+				cellZ < std::numeric_limits<int>::min() || cellZ > std::numeric_limits<int>::max()) {
+				return false;
+			}
+
+			outCellX = static_cast<int>(cellX);
+			outCellZ = static_cast<int>(cellZ);
+			return true;
+		}
+
+		/// @brief 符号付きのXZ区画座標を一意な索引キーへ変換
+		/// @param cellX X方向の区画座標
+		/// @param cellZ Z方向の区画座標
+		/// @return 両座標の32ビット表現を結合した区画キー
+		std::uint64_t CreateAttackTargetCellKey(int cellX, int cellZ) {
+			return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(cellX)) << 32) |
+				static_cast<std::uint32_t>(cellZ);
+		}
 
 		/// @brief 状態異常種別をダメージ発生源種別へ変換
 		/// @param type 変換する状態異常種別
@@ -130,6 +162,7 @@ namespace Enemy {
 		enemy->Initialize(nextEnemyId_++, effectiveDesc);
 		enemy->SetTargetPlayer(player_);
 		enemy->SetMapLimit(mapLimit_);
+		SynchronizeAttackTargetCell(*enemy);
 		enemies_.push_back(std::move(enemy));
 	}
 
@@ -183,6 +216,9 @@ namespace Enemy {
 		for (std::unique_ptr<Base>& enemy : enemies_) {
 			if (enemy) {
 				enemy->ResolveAfterCollision();
+
+				// 地形押し戻し後の確定座標を既存の更新走査中に索引へ反映
+				SynchronizeAttackTargetCell(*enemy);
 			}
 		}
 
@@ -201,6 +237,11 @@ namespace Enemy {
 	}
 
 	void Manager::Clear() {
+
+		// Enemyの所有権を解放する前に索引内の非所有参照を破棄
+		attackTargetCells_.clear();
+		attackTargetCellKeys_.clear();
+		maxAttackTargetHorizontalExtent_ = 0.0f;
 		enemies_.clear();
 		damageEvents_.clear();
 		nextEnemyId_ = 0;
@@ -237,6 +278,120 @@ namespace Enemy {
 		Vector3 nearestEnemyPosition = { 0.0f, 0.0f, 0.0f };
 		TryGetNearestEnemyPosition(nearestEnemyPosition);
 		return nearestEnemyPosition;
+	}
+
+	void Manager::CollectNearestAttackTargetPositions(int maxCount, std::vector<Vector3>& outPositions) const {
+		outPositions.clear();
+
+		// Player未設定や空の索引では前回の候補を残さず探索を抑止
+		if (!player_ || maxCount <= 0 || attackTargetCells_.empty()) {
+			return;
+		}
+
+		const Vector3 playerPosition = player_->GetPosition();
+		const Sphere attackRange = player_->GetAttackRangeSphere();
+		const float queryRadius = attackRange.radius + maxAttackTargetHorizontalExtent_;
+		int minCellX = 0;
+		int minCellZ = 0;
+		int maxCellX = 0;
+		int maxCellZ = 0;
+
+		// 中心が射程外でも大きいEnemyのAABBが射程に触れる区画まで検索範囲を拡張
+		if (!std::isfinite(queryRadius) || queryRadius < 0.0f ||
+			!TryGetAttackTargetCellCoordinates(attackRange.center - Vector3{ queryRadius, 0.0f, queryRadius }, minCellX, minCellZ) ||
+			!TryGetAttackTargetCellCoordinates(attackRange.center + Vector3{ queryRadius, 0.0f, queryRadius }, maxCellX, maxCellZ)) {
+			return;
+		}
+
+		const std::size_t candidateCount = std::min(static_cast<std::size_t>(maxCount), enemies_.size());
+		outPositions.reserve(candidateCount);
+		for (std::int64_t cellZ = minCellZ; cellZ <= maxCellZ; ++cellZ) {
+			for (std::int64_t cellX = minCellX; cellX <= maxCellX; ++cellX) {
+
+				// Player周辺の区画だけを参照し、遠方Enemyへの距離計算と衝突問い合わせを省略
+				const std::uint64_t cellKey = CreateAttackTargetCellKey(static_cast<int>(cellX), static_cast<int>(cellZ));
+				const auto cell = attackTargetCells_.find(cellKey);
+				if (cell == attackTargetCells_.end()) {
+					continue;
+				}
+
+				for (const Base* enemy : cell->second) {
+
+					// 区画はXZ平面で絞り込み、高低差を含む実際の射程は球とAABBで最終判定
+					if (!enemy->IsActive() || enemy->IsEmerging() ||
+						!Collision::IsHit(attackRange, enemy->GetHitAABB())) {
+						continue;
+					}
+
+					const Vector3 enemyPosition = enemy->GetPosition();
+					const float distanceSq = (enemyPosition - playerPosition).LengthSq();
+					if (!std::isfinite(distanceSq)) {
+						continue;
+					}
+
+					// 周辺Enemyから距離順の上位件数だけを保持し、従来の抽選候補を維持
+					const auto insertionPosition = std::upper_bound(outPositions.begin(), outPositions.end(), distanceSq,
+						[&playerPosition](float candidateDistanceSq, const Vector3& position) {
+							return candidateDistanceSq < (position - playerPosition).LengthSq();
+						});
+					if (outPositions.size() == candidateCount && insertionPosition == outPositions.end()) {
+						continue;
+					}
+
+					outPositions.insert(insertionPosition, enemyPosition);
+					if (outPositions.size() > candidateCount) {
+						outPositions.pop_back();
+					}
+				}
+			}
+		}
+	}
+
+	void Manager::SynchronizeAttackTargetCell(Base& enemy) {
+		int cellX = 0;
+		int cellZ = 0;
+
+		// 出現完了前や無効化済みのEnemyを索引に残さず、無効な座標の登録も抑止
+		if (!enemy.IsActive() || enemy.IsEmerging() ||
+			!TryGetAttackTargetCellCoordinates(enemy.GetPosition(), cellX, cellZ)) {
+			RemoveAttackTargetCell(enemy);
+			return;
+		}
+
+		const AABB hitBounds = enemy.GetHitAABB();
+		const float horizontalExtent = std::max({
+			std::abs(hitBounds.min.x), std::abs(hitBounds.max.x),
+			std::abs(hitBounds.min.z), std::abs(hitBounds.max.z) });
+
+		// 最大幅はClearまで保持し、最大個体の削除ごとの全Enemy再走査を回避
+		maxAttackTargetHorizontalExtent_ = std::max(maxAttackTargetHorizontalExtent_, horizontalExtent);
+		const std::uint64_t cellKey = CreateAttackTargetCellKey(cellX, cellZ);
+		const auto currentCell = attackTargetCellKeys_.find(enemy.GetEnemyId());
+		if (currentCell != attackTargetCellKeys_.end() && currentCell->second == cellKey) {
+			return;
+		}
+
+		// 区画を越えた場合だけ所属を差し替え、同一区画内の移動ではContainer変更を省略
+		RemoveAttackTargetCell(enemy);
+		attackTargetCells_[cellKey].push_back(&enemy);
+		attackTargetCellKeys_.emplace(enemy.GetEnemyId(), cellKey);
+	}
+
+	void Manager::RemoveAttackTargetCell(const Base& enemy) {
+		const auto currentCell = attackTargetCellKeys_.find(enemy.GetEnemyId());
+		if (currentCell == attackTargetCellKeys_.end()) {
+			return;
+		}
+
+		// Enemy破棄前に非所有参照を除外し、空区画も解放して遠方の履歴蓄積を防止
+		const auto cell = attackTargetCells_.find(currentCell->second);
+		if (cell != attackTargetCells_.end()) {
+			std::erase(cell->second, &enemy);
+			if (cell->second.empty()) {
+				attackTargetCells_.erase(cell);
+			}
+		}
+		attackTargetCellKeys_.erase(currentCell);
 	}
 
 	std::vector<Combat::DamageEvent> Manager::ConsumeDamageEvents() {
@@ -405,8 +560,19 @@ namespace Enemy {
 
 		// 判定中のContainer無効化を避けるため全相互作用の完了後にまとめて削除
 		enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
-									  [](const std::unique_ptr<Base>& enemy) { return !enemy || !enemy->IsActive(); }),
-					   enemies_.end());
+			[this](const std::unique_ptr<Base>& enemy) {
+				if (!enemy) {
+					return true;
+				}
+				if (enemy->IsActive()) {
+					return false;
+				}
+
+				// 所有Containerの圧縮でEnemyが破棄される前に区画側の参照を解除
+				RemoveAttackTargetCell(*enemy);
+				return true;
+			}),
+			enemies_.end());
 	}
 
 } // namespace Enemy

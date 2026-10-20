@@ -14,6 +14,7 @@ namespace Projectile {
 	void Bow::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
+
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTexture("BowModelTexture");

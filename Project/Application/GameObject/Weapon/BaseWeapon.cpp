@@ -2,6 +2,7 @@
 #include "WeaponStatusJson.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -252,14 +253,17 @@ namespace Weapon {
 	void BaseWeapon::Update(
 		float deltaTime,
 		const Vector3& ownerPosition,
-		const Vector3& targetPosition,
-		const RuntimeModifiers& modifiers) {
+		std::span<const Vector3> targetPositions,
+		const RuntimeModifiers& modifiers,
+		const Vector3& ownerUpDirection) {
 		wasFiredThisFrame_ = false;
-		if (Projectile::IsPersistentWeaponType(type_)) {
+
+		// 常時展開型は専用の同期経路へ任せ、候補不在時は従来どおり射撃Timerを停止
+		if (Projectile::IsPersistentWeaponType(type_) || targetPositions.empty()) {
 			return;
 		}
 
-		CreateProjectile(deltaTime, ownerPosition, targetPosition, modifiers);
+		CreateProjectile(deltaTime, ownerPosition, targetPositions, modifiers, ownerUpDirection);
 	}
 
 	bool BaseWeapon::SynchronizePersistentProjectile(
@@ -280,8 +284,9 @@ namespace Weapon {
 	void BaseWeapon::CreateProjectile(
 		float deltaTime,
 		const Vector3& ownerPosition,
-		const Vector3& targetPosition,
-		const RuntimeModifiers& modifiers) {
+		std::span<const Vector3> targetPositions,
+		const RuntimeModifiers& modifiers,
+		const Vector3& ownerUpDirection) {
 
 		// Burst間のCooldown終了後に次の射撃間隔Timerを再開
 		if (cooldownTimer_.IsFinished()) {
@@ -296,7 +301,13 @@ namespace Weapon {
 			shotNowCount_++;
 			projectileCount_++;
 
-			Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, targetPosition, modifiers);
+			// 発射時だけ抽選し、同時装備の武器やBurst中の各弾にも独立した対象を割り当て
+			std::size_t targetIndex = 0;
+			if (targetPositions.size() > 1) {
+				targetIndex = static_cast<std::size_t>(MyRand::GetInt(0, static_cast<int>(targetPositions.size() - 1)));
+			}
+			const Vector3& targetPosition = targetPositions[targetIndex];
+			Projectile::InitializeDesc context = CreateProjectileInitializeDesc(ownerPosition, targetPosition, modifiers, ownerUpDirection);
 
 			Projectile::Manager::GetInstance().AddProjectile(type_, context);
 			wasFiredThisFrame_ = true;
@@ -337,7 +348,8 @@ namespace Weapon {
 	Projectile::InitializeDesc BaseWeapon::CreateProjectileInitializeDesc(
 		const Vector3& ownerPosition,
 		const Vector3& targetPosition,
-		const RuntimeModifiers& modifiers) const {
+		const RuntimeModifiers& modifiers,
+		const Vector3& ownerUpDirection) const {
 		Projectile::InitializeDesc context;
 		context.sourceWeaponId = weaponId_;
 		context.projectileName = weaponName_;
@@ -345,6 +357,7 @@ namespace Weapon {
 		context.shotMaxCount = std::max(
 			1, static_cast<int>(status_.shotMaxCount.value) + modifiers.additionalShotMaxCount);
 		context.ownerPosition = ownerPosition;
+		context.ownerUpDirection = ownerUpDirection;
 		if (type_ != Projectile::Type::Eye && type_ != Projectile::Type::ToxicBoots &&
 			type_ != Projectile::Type::Hammer && type_ != Projectile::Type::Sword) {
 

@@ -12,6 +12,7 @@ namespace Projectile {
 		constexpr float kMinSizeRate = 0.1f;
 		constexpr float kMinSweepSpeed = 0.1f;
 		constexpr float kMinDirectionLengthSq = 0.000001f;
+		constexpr float kRotationEpsilon = 0.00001f;
 		constexpr float kBladeCenterOffset = -3.0f;
 		constexpr Vector3 kBladeHalfSize = { 0.5f, 0.5f, 2.0f };
 	}
@@ -28,6 +29,7 @@ namespace Projectile {
 	void Sword::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
+		ownerUpDirection_ = context.ownerUpDirection;
 		lastHitSweepIndices_.clear();
 		sweepCount_ = std::max(context.shotMaxCount, 1);
 		disappearsUponCollision_ = false;
@@ -43,14 +45,17 @@ namespace Projectile {
 		const float modelScale = kBaseModelScale * sizeRate_;
 		transform_.scale = { modelScale, modelScale, modelScale };
 
-		// Assimpの左手系変換で剣先が-Zへ向くため、Target方向へ開始角度を180度補正
+		// 周回面内のTarget方向へ変換し、剣先が-Zへ向く読み込み後のModel軸を180度補正
 		Vector3 toTarget = targetPosition_ - ownerPosition_;
 		toTarget.y = 0.0f;
 		Vector3 forward = { 0.0f, 0.0f, 1.0f };
 		if (toTarget.LengthSq() > kMinDirectionLengthSq) {
 			forward = toTarget.Normalized();
 		}
-		startYaw_ = std::atan2(forward.x, forward.z) + std::numbers::pi_v<float>;
+		const Matrix4x4 sweepPlaneRotation = Matrix::MakeAffine(
+			{ 1.0f, 1.0f, 1.0f }, CreateGroundAlignedRotation(0.0f, ownerUpDirection_), {});
+		const Vector3 localForward = Matrix::Transform(forward, Matrix::Transpose(sweepPlaneRotation));
+		startYaw_ = std::atan2(localForward.x, localForward.z) + std::numbers::pi_v<float>;
 
 		// 寿命設定による途中消滅を防ぐため、指定回数の連続回転を終了条件へ統一
 		sweepTimer_.Start(CalculateSweepDuration(moveSpeed_, sweepCount_), false);
@@ -62,8 +67,9 @@ namespace Projectile {
 
 		hitbox_ = OBB{};
 		UpdatePose();
-		previousYaw_ = transform_.rotate.y;
+		previousSweepYaw_ = sweepYaw_;
 		previousPivotPosition_ = transform_.translate;
+		previousUpDirection_ = ownerUpDirection_;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &hitboxPosition_);
 	}
 
@@ -80,11 +86,11 @@ namespace Projectile {
 			return;
 		}
 
-		previousYaw_ = transform_.rotate.y;
+		previousSweepYaw_ = sweepYaw_;
 		previousPivotPosition_ = transform_.translate;
+		previousUpDirection_ = ownerUpDirection_;
 		sweepTimer_.Update(deltaTime);
 		UpdatePose();
-		MyDebugLine::AddShape(hitbox_);
 	}
 
 	float Sword::CalculateSweepDuration(float sweepSpeed, int sweepCount) {
@@ -101,26 +107,38 @@ namespace Projectile {
 		ownerPosition_ = ownerPosition;
 	}
 
+	void Sword::SynchronizeOwnerPose(const Vector3& ownerPosition, const Vector3& ownerUpDirection) {
+		ownerPosition_ = ownerPosition;
+		ownerUpDirection_ = ownerUpDirection;
+
+		// 接地解決後の傾きと支点を描画と命中判定へ揃え、Timerの二重進行を回避
+		UpdatePose();
+		MyDebugLine::AddShape(hitbox_);
+	}
+
 	bool Sword::IsHitEnemy(const std::string& enemyColliderName) {
 		if (isDead_) {
 			return false;
 		}
 		if (MyCollider::IsHitName(enemyColliderName, colliderName_)) {
-			collisionSweepIndex_ = GetSweepIndex(transform_.rotate.y);
+			collisionSweepIndex_ = GetSweepIndex(sweepYaw_);
 			return true;
 		}
 
 		// 回転中に通過した角度もOBBで判定し、低FPSでも周囲のEnemyを取りこぼさない補間
-		const float currentYaw = transform_.rotate.y;
-		const float angleDifference = currentYaw - previousYaw_;
+		const float angleDifference = sweepYaw_ - previousSweepYaw_;
+		const float tiltDifference = std::acos(std::clamp(Math::Dot(previousUpDirection_, ownerUpDirection_), -1.0f, 1.0f));
 		const int segmentCount = std::max(
-			1, static_cast<int>(std::ceil(std::abs(angleDifference) / kMaxCollisionAngleStep)));
+			1, static_cast<int>(std::ceil((std::abs(angleDifference) + tiltDifference) / kMaxCollisionAngleStep)));
 		bool isHit = false;
 		for (int segment = segmentCount - 1; segment >= 0; --segment) {
 			const float progress = static_cast<float>(segment) / static_cast<float>(segmentCount);
-			const float yaw = previousYaw_ + angleDifference * progress;
+			const float yaw = previousSweepYaw_ + angleDifference * progress;
 			const Vector3 pivotPosition = Math::Lerp(previousPivotPosition_, transform_.translate, progress);
-			UpdateHitbox(yaw, pivotPosition);
+
+			// 坂への出入りで周回面が変化したFrameも、傾きの途中にある剣の軌道を補間
+			const Vector3 upDirection = Math::Lerp(previousUpDirection_, ownerUpDirection_, progress).Normalized();
+			UpdateHitbox(yaw, pivotPosition, upDirection);
 			if (MyCollider::IsHitName(enemyColliderName, colliderName_)) {
 
 				// 周回境界をまたぐFrameでも実際に接触した最新の周回へ命中を所属
@@ -131,7 +149,7 @@ namespace Projectile {
 		}
 
 		// 一時的な補間Colliderを描画姿勢へ復元し、後続のEnemy判定へ途中の姿勢を残さない処理
-		UpdateHitbox(currentYaw, transform_.translate);
+		UpdateHitbox(sweepYaw_, transform_.translate, ownerUpDirection_);
 		return isHit;
 	}
 
@@ -152,16 +170,39 @@ namespace Projectile {
 
 	void Sword::UpdatePose() {
 
-		// XZ平面に回転を固定し、Playerの移動に対して支点と高さを維持
-		transform_.translate = ownerPosition_ + Vector3{ 0.0f, kSweepHeightOffset, 0.0f };
+		// Playerと共通の上方向へ支点を持ち上げ、斜面上でも周回面からの高さを維持
+		transform_.translate = ownerPosition_ + ownerUpDirection_ * kSweepHeightOffset;
 		const float sweepAngle = kFullRotation * static_cast<float>(sweepCount_) * sweepTimer_.GetProgress();
-		transform_.rotate = { 0.0f, startYaw_ + sweepAngle, 0.0f };
-		collisionSweepIndex_ = GetSweepIndex(transform_.rotate.y);
-		UpdateHitbox(transform_.rotate.y, transform_.translate);
+
+		// Euler角の折り返しから独立した連続角度で、補間軌道と周回ごとの命中制限を管理
+		sweepYaw_ = startYaw_ + sweepAngle;
+		collisionSweepIndex_ = GetSweepIndex(sweepYaw_);
+		UpdateHitbox(sweepYaw_, transform_.translate, ownerUpDirection_);
+		transform_.rotate = std::get<OBB>(hitbox_).rotate;
 		moveDirection_ = -std::get<OBB>(hitbox_).orientation[2];
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTransform(transform_);
 		}
+	}
+
+	Vector3 Sword::CreateSweepRotation(float yaw, const Vector3& upDirection) const {
+
+		// 描画とOBBに共通の回転順で周回面を構築し、ローカルY軸周りの等角速度を維持
+		const Matrix4x4 rotation = Matrix::MakeRotateY(yaw) *
+			Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, CreateGroundAlignedRotation(0.0f, upDirection), {});
+		Vector3 euler = {};
+		const float sinY = std::clamp(-rotation.m[0][2], -1.0f, 1.0f);
+		euler.y = std::asin(sinY);
+		if (std::abs(std::cos(euler.y)) > kRotationEpsilon) {
+			euler.x = std::atan2(rotation.m[1][2], rotation.m[2][2]);
+			euler.z = std::atan2(rotation.m[0][1], rotation.m[0][0]);
+			return euler;
+		}
+
+		// ジンバルロック付近ではZ回転を固定してModelとOBBに同じ姿勢を再現
+		euler.x = std::atan2(rotation.m[1][0] * sinY, rotation.m[1][1]);
+		euler.z = 0.0f;
+		return euler;
 	}
 
 	int Sword::GetSweepIndex(float yaw) const {
@@ -171,9 +212,9 @@ namespace Projectile {
 		return std::min(static_cast<int>(sweepProgress), sweepCount_ - 1);
 	}
 
-	void Sword::UpdateHitbox(float yaw, const Vector3& pivotPosition) {
+	void Sword::UpdateHitbox(float yaw, const Vector3& pivotPosition, const Vector3& upDirection) {
 		OBB& hitbox = std::get<OBB>(hitbox_);
-		hitbox.rotate = { 0.0f, yaw, 0.0f };
+		hitbox.rotate = CreateSweepRotation(yaw, upDirection);
 		hitbox.UpdateOrientation();
 		const Vector3 halfSize = kBladeHalfSize * transform_.scale;
 

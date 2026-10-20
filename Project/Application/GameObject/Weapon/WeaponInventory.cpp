@@ -4,6 +4,7 @@
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
+#include <algorithm>
 #include <cstddef>
 #include <cmath>
 #include <string>
@@ -24,7 +25,8 @@ namespace Weapon {
 		}
 	}
 
-	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, const Vector3& targetPosition) {
+	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, std::span<const Vector3> targetPositions,
+		const Vector3& ownerUpDirection) {
 
 		// 各武器の射撃結果をUIと演出向けの一時イベント列へ集約
 		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
@@ -33,7 +35,7 @@ namespace Weapon {
 				continue;
 			}
 
-			weapon->Update(deltaTime, ownerPosition, targetPosition, runtimeModifiers_);
+			weapon->Update(deltaTime, ownerPosition, targetPositions, runtimeModifiers_, ownerUpDirection);
 			if (weapon->WasFiredThisFrame()) {
 				weaponAttackEvents_.push_back({
 					slotIndex,
@@ -251,7 +253,6 @@ namespace Weapon {
 		ImGui::Begin("武器インベントリ");
 
 		ImGui::Text("武器スロット: %d / %d", weaponCount, slotCount_);
-		ImGui::Separator();
 
 		// 未装備かつ追加可能な武器だけをDebug操作の追加対象として有効化
 		const std::string selectedWeaponName = ProjectileTypeToString(selectedAddWeaponType_);

@@ -3,6 +3,7 @@
 #include "Projectile/ProjectileManager.h"
 #include "Projectile/ProjectileStatus.h"
 #include <cstdint>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -22,12 +23,15 @@ namespace Weapon {
 		/// @brief 武器の射撃処理を更新
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param ownerPosition 武器所有者の座標
-		/// @param targetPosition 射撃対象の座標
+		/// @param targetPositions 射撃対象の候補座標、空の場合は射撃更新を停止
+		/// @param modifiers 射撃へ適用する実行時補正
+		/// @param ownerUpDirection 武器所有者の正規化済み上方向
 		void Update(
 			float deltaTime,
 			const Vector3& ownerPosition,
-			const Vector3& targetPosition,
-			const RuntimeModifiers& modifiers);
+			std::span<const Vector3> targetPositions,
+			const RuntimeModifiers& modifiers,
+			const Vector3& ownerUpDirection = { 0.0f, 1.0f, 0.0f });
 
 		/// @brief 常時展開型Projectileを武器所有者の最新状態へ同期
 		/// @param ownerPosition 武器所有者の座標
@@ -105,21 +109,27 @@ namespace Weapon {
 		/// @brief 射撃間隔とクールダウンに応じてProjectileを射出
 		/// @param deltaTime 前フレームからの経過時間
 		/// @param ownerPosition 武器所有者の座標
-		/// @param targetPosition 射撃対象の座標
+		/// @param targetPositions 発射ごとに等確率で抽選する候補座標
+		/// @param modifiers 射撃へ適用する実行時補正
+		/// @param ownerUpDirection 武器所有者の正規化済み上方向
 		void CreateProjectile(
 			float deltaTime,
 			const Vector3& ownerPosition,
-			const Vector3& targetPosition,
-			const RuntimeModifiers& modifiers);
+			std::span<const Vector3> targetPositions,
+			const RuntimeModifiers& modifiers,
+			const Vector3& ownerUpDirection);
 
 		/// @brief 現在の武器状態からProjectile初期化情報を生成
 		/// @param ownerPosition 武器所有者の座標
 		/// @param targetPosition 射撃対象の座標
+		/// @param modifiers 射撃へ適用する実行時補正
+		/// @param ownerUpDirection 武器所有者の正規化済み上方向
 		/// @return Projectileの初期化情報
 		Projectile::InitializeDesc CreateProjectileInitializeDesc(
 			const Vector3& ownerPosition,
 			const Vector3& targetPosition,
-			const RuntimeModifiers& modifiers) const;
+			const RuntimeModifiers& modifiers,
+			const Vector3& ownerUpDirection = { 0.0f, 1.0f, 0.0f }) const;
 		
 		// 武器のステータス
 		UpgradeStatus status_;

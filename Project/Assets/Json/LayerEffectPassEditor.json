@@ -1,6 +1,27 @@
 {
     "layerPasses": [
         {
+            "effectShaderKey": "PostEffect/Bloom.PS",
+            "effectType": "Bloom",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_8",
+            "layerEffectStage": "Scene",
+            "name": "MapBlockBloom",
+            "parameters": {
+                "BloomColorA": 1.0,
+                "BloomColorB": 1.0,
+                "BloomColorG": 1.0,
+                "BloomColorR": 1.0,
+                "Intensity": 5.0,
+                "Radius": 4.5,
+                "SoftKnee": 1.0,
+                "Threshold": 1.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 1024
+        },
+        {
             "effectShaderKey": "PostEffect/DepthOutline.PS",
             "effectType": "DepthOutline",
             "enabled": true,
@@ -10,9 +31,9 @@
             "name": "PlayerOutline",
             "parameters": {
                 "ColorA": 1.0,
-                "ColorB": 0.0,
-                "ColorG": 0.0,
-                "ColorR": 0.0,
+                "ColorB": 1.0,
+                "ColorG": 1.0,
+                "ColorR": 1.0,
                 "DepthSensitivity": 80.0,
                 "EdgeThreshold": 0.004999999888241291,
                 "Intensity": 1.0,
@@ -134,27 +155,6 @@
             },
             "scope": "Layer",
             "targetLayerMask": 128
-        },
-        {
-            "effectShaderKey": "PostEffect/Bloom.PS",
-            "effectType": "Bloom",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_8",
-            "layerEffectStage": "Scene",
-            "name": "MapBlockBloom",
-            "parameters": {
-                "BloomColorA": 1.0,
-                "BloomColorB": 1.0,
-                "BloomColorG": 1.0,
-                "BloomColorR": 1.0,
-                "Intensity": 5.0,
-                "Radius": 4.5,
-                "SoftKnee": 1.0,
-                "Threshold": 1.0
-            },
-            "scope": "Layer",
-            "targetLayerMask": 1024
         }
     ],
     "screenPasses": [

@@ -43,9 +43,21 @@ namespace Player {
 		/// @brief Playerのワールド座標を取得
 		Vector3 GetPosition() const { return transform_.translate; }
 
+		/// @brief 現在座標へ同期した攻撃範囲の球を取得
+		/// @return ワールド座標の攻撃範囲
+		Sphere GetAttackRangeSphere() const {
+			Sphere range = std::get<Sphere>(attackRangeSphere_);
+			range.center = transform_.translate;
+			return range;
+		}
+
 		/// @brief 斜面への傾きとModelの前方補正を含まない水平Yaw角度を取得
 		/// @return Z軸正方向を0とする水平Yaw角度（ラジアン）
 		float GetFacingYaw() const { return movement_.GetFacingYaw(); }
+
+		/// @brief 斜面への傾きを反映したPlayerの上方向を取得
+		/// @return 描画姿勢と共通の正規化済み上方向
+		Vector3 GetUpDirection() const { return movement_.GetUpDirection(); }
 
 		/// @brief Playerの描画Model座標を取得
 		/// @return PlayerのModelワールド座標

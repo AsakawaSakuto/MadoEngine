@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace Player {
@@ -65,6 +66,11 @@ namespace Enemy {
 		/// @return 最も近いEnemyの座標、Enemyが存在しない場合はゼロ座標
 		Vector3 GetNearestEnemyPosition() const;
 
+		/// @brief Player周辺の区画から攻撃範囲内のEnemy座標を距離順で上限件数まで収集
+		/// @param maxCount 収集するEnemy数の上限、0以下の場合は空配列
+		/// @param outPositions 距離順のEnemy座標の格納先
+		void CollectNearestAttackTargetPositions(int maxCount, std::vector<Vector3>& outPositions) const;
+
 		/// @brief 未処理のEnemyダメージイベントを取得してキューをクリア
 		/// @return 発生順に格納されたEnemyダメージイベント
 		std::vector<Combat::DamageEvent> ConsumeDamageEvents();
@@ -75,6 +81,14 @@ namespace Enemy {
 			std::vector<StatusEffectDisplayData>& outDisplayData) const;
 
 	private:
+		/// @brief Enemyの現在座標と有効状態を攻撃対象の区画索引へ同期
+		/// @param enemy 同期対象のEnemy
+		void SynchronizeAttackTargetCell(Base& enemy);
+
+		/// @brief Enemyを攻撃対象の区画索引から除外
+		/// @param enemy 除外対象のEnemy
+		void RemoveAttackTargetCell(const Base& enemy);
+
 		/// @brief ProjectileとEnemyの衝突結果を処理
 		void ProcessProjectileHits();
 
@@ -89,6 +103,9 @@ namespace Enemy {
 
 		Player::Base* player_ = nullptr;
 		std::vector<std::unique_ptr<Base>> enemies_;
+		std::unordered_map<std::uint64_t, std::vector<Base*>> attackTargetCells_;
+		std::unordered_map<std::uint32_t, std::uint64_t> attackTargetCellKeys_;
+		float maxAttackTargetHorizontalExtent_ = 0.0f;
 		std::vector<Combat::DamageEvent> damageEvents_;
 		MapLimit mapLimit_;
 		std::uint32_t nextEnemyId_ = 0;

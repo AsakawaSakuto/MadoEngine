@@ -158,9 +158,9 @@ bool Jar::Interact(Player::Base& player) {
 
 std::string_view Jar::GetInteractionText() const {
 	if (type_ == JarType::Exp) {
-		return "壺を壊す";
+		return "経験値を得る";
 	} else {
-		return "壺を壊す";
+		return "お金を得る";
 	}
 }
 

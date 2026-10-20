@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <vector>
 
 namespace {
 	constexpr float kGameSceneTimeLimit = 5.0f * 60.0f; // ゲームシーンの制限時間（秒）
@@ -194,6 +195,9 @@ void GameScene::UpdateGameplay(float deltaTime) {
 	// 全GameObjectの移動結果へ衝突解決を適用してから接地と壁登り状態を確定
 	MyCollider::Update();
 	player_->ResolveAfterCollision();
+
+	// Playerの補間済み傾きを同じFrameのSword描画と命中判定へ反映
+	Projectile::Manager::GetInstance().SynchronizeOwnerPose(player_->GetPosition(), player_->GetUpDirection());
 	enemyManager_->ResolveAfterCollision();
 	DispatchDamageEvents();
 
@@ -222,11 +226,12 @@ void GameScene::UpdateGameplay(float deltaTime) {
 		}
 	}
 
-	// 攻撃範囲内にEnemyが存在するFrameだけ最近傍を射撃Targetとして更新
-	if (!player_->IsDead() && MyCollider::IsHitWithTag("PlayerAttackRangeSphere", CollisionTag::EnemyHitBox)) {
-		Vector3 nearestEnemyPosition;
-		if (enemyManager_->TryGetNearestEnemyPosition(nearestEnemyPosition)) {
-			weaponInventory_->Update(deltaTime, player_->GetPosition(), nearestEnemyPosition);
+	// 周辺区画から攻撃候補を収集し、各武器の発射時に対象を抽選
+	if (!player_->IsDead()) {
+		std::vector<Vector3> targetPositions;
+		enemyManager_->CollectNearestAttackTargetPositions(weaponInventory_->GetAttackTargetCandidateCount(), targetPositions);
+		if (!targetPositions.empty()) {
+			weaponInventory_->Update(deltaTime, player_->GetPosition(), targetPositions, player_->GetUpDirection());
 		}
 	}
 }

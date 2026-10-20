@@ -264,7 +264,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 4",
+            "text": "Enemy : 42",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:54",
+            "text": "03:30",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -364,7 +364,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 100 / 100",
+            "text": "HP : 23 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -414,7 +414,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.9",
+            "text": "FPS : 60.2",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -464,7 +464,7 @@
                 0.0,
                 0.0
             ],
-            "text": "3",
+            "text": "214",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -522,6 +522,56 @@
         },
         {
             "anchorPoint": [
+                1.0,
+                0.0
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "SeedValueText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
+            "position": [
+                1265.0,
+                280.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": false,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "Seed : 1362865671",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
                 0.0,
                 0.0
             ],
@@ -568,56 +618,6 @@
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                1.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "SeedValueText",
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 0.0,
-            "position": [
-                1265.0,
-                280.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": false,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "Seed : 2941958978",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
             "wordWrap": true
         },
         {
@@ -714,7 +714,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10001",
+            "text": "10222",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -764,7 +764,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10で開ける",
+            "text": "壺を壊す",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,

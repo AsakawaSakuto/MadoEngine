@@ -20,9 +20,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                19.540271759033203,
-                18.83226203918457,
-                27.16452407836914
+                231.1635284423828,
+                46.0,
+                34.24420928955078
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,

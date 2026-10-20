@@ -119,6 +119,16 @@ namespace Projectile {
 		FlushPendingProjectiles();
 	}
 
+	void Manager::SynchronizeOwnerPose(const Vector3& ownerPosition, const Vector3& ownerUpDirection) {
+
+		// Enemyの命中判定より先に衝突解決後のPlayer姿勢を描画とColliderへ反映
+		for (const std::unique_ptr<IProjectile>& projectile : projectiles_) {
+			if (projectile && !projectile->IsDead()) {
+				projectile->SynchronizeOwnerPose(ownerPosition, ownerUpDirection);
+			}
+		}
+	}
+
 	void Manager::AddProjectile(Projectile::Type type, InitializeDesc context) {
 		if (isTraversingProjectiles_) {
 

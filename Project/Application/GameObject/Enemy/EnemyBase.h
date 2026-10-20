@@ -155,6 +155,14 @@ namespace Enemy {
 		/// @return Enemyの現在座標
 		Vector3 GetPosition() const { return transform_.translate; }
 
+		/// @brief 現在座標へ同期した被弾判定のAABBを取得
+		/// @return ワールド座標の被弾判定
+		AABB GetHitAABB() const {
+			AABB bounds = std::get<AABB>(hitAABB_);
+			bounds.center = transform_.translate;
+			return bounds;
+		}
+
 		/// @brief 状態異常アイコンを配置する頭上座標を取得
 		/// @return 被弾判定上端を基準とした頭上座標
 		Vector3 GetStatusEffectAnchorPosition() const;

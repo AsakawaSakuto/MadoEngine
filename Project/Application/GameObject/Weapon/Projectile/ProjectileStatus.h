@@ -14,6 +14,7 @@ namespace Projectile {
 		int projectileCount;              // 投射物の生成順序番号
 		int shotMaxCount = 1;             // 補正適用後の最大発射数、Swordでは連続回転数
 		Vector3 ownerPosition;            // 投射物の生成元の座標
+		Vector3 ownerUpDirection = { 0.0f, 1.0f, 0.0f }; // 武器所有者の正規化済み上方向
 		Vector3 targetPosition;           // 投射物の目標座標
 
 		float damage = 10.0f;        // 投射物のダメージ量

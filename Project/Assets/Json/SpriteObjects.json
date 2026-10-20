@@ -996,7 +996,7 @@
             "rotation": 0.0,
             "scale": [
                 80.0,
-                3.484760284423828
+                0.0
             ],
             "scene": "Game",
             "texture": "white16x16",
@@ -1035,7 +1035,7 @@
             "rotation": 0.0,
             "scale": [
                 80.0,
-                3.484760284423828
+                0.0
             ],
             "scene": "Game",
             "texture": "white16x16",
