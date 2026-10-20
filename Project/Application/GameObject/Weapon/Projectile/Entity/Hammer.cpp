@@ -66,9 +66,7 @@ namespace Projectile {
 		lifeTimer_.Start(lifeTime_, false);
 
 		model_ = MyModel::Create(objectName_, "Hammer", SceneType::Game);
-		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("white2x2");
-		}
+		
 		hitbox_ = OBB{};
 		UpdatePose();
 

@@ -18,6 +18,10 @@ namespace UI::Game {
 		/// @param slotCount 表示する武器スロットの数
 		void Initialize(int slotCount);
 
+		/// @brief 装備状態を維持したまま武器スロット全体の表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief 指定した武器アイコンの攻撃アニメーションを開始
 		/// @param slotIndex 攻撃した武器のスロット番号
 		void PlayAttackAnimation(std::size_t slotIndex);
@@ -54,5 +58,7 @@ namespace UI::Game {
 		std::vector<MadoEngine::SpriteHandle> weaponIconFrames_;
 		std::vector<MadoEngine::TextHandle> weaponLevelTexts_;
 		std::vector<IconAnimationState> animationStates_;
+		std::vector<bool> equippedSlots_;
+		bool isVisible_ = true;
 	};
 }

@@ -414,9 +414,9 @@ void SceneManager::DrawSceneManagerImGui() {
 #endif // USE_IMGUI
 }
 
-void SceneManager::ApplyPendingSceneChange() {
+bool SceneManager::ApplyPendingSceneChange() {
 	if (!hasPendingSceneChange_) {
-		return;
+		return false;
 	}
 
 	const SceneType nextSceneType = pendingSceneType_;
@@ -427,6 +427,7 @@ void SceneManager::ApplyPendingSceneChange() {
 
 	ChangeScene(nextSceneType);
 	commonData_.GetSceneTransitionController().NotifySceneChanged(currentSceneType_);
+	return true;
 }
 
 void SceneManager::ApplyPendingEditorOperations() {

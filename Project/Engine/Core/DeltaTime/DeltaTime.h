@@ -11,6 +11,9 @@ namespace MadoEngine
 
         void Update();
 
+        /// @brief 経過時間の計測基準を現在時刻へリセット
+        void Reset();
+
 		/// @brief 目標FPSを設定
         /// @param targetFPS 目標FPS
         void SetTargetFPS(double targetFPS = 60.0);

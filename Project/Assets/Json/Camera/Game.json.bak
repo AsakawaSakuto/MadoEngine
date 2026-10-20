@@ -60,11 +60,11 @@
                 2.0,
                 -10.0
             ],
-            "pitch": 0.5942204594612122,
+            "pitch": 0.4774671792984009,
             "type": "TPS",
             "useGamePadInput": true,
             "useMouseInput": true,
-            "yaw": -93.16236877441406
+            "yaw": -90.4617919921875
         }
     ],
     "version": 3

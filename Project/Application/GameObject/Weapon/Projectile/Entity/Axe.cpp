@@ -17,6 +17,10 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTexture("AxeModelTexture");
+		}
+
 		transform_.translate = ownerPosition_;
 		transform_.scale = { 0.5f * sizeRate_, 0.5f * sizeRate_, 0.5f * sizeRate_ };
 

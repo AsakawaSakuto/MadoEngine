@@ -57,8 +57,9 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("white2x2");
+			model->SetTexture("SwordModelTexture");
 		}
+
 		hitbox_ = OBB{};
 		UpdatePose();
 		previousYaw_ = transform_.rotate.y;

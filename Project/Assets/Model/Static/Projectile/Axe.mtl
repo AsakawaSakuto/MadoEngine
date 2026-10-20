@@ -1,12 +1,14 @@
-# Blender 5.2.0 LTS MTL File: 'None'
+# Blender 5.2.2 LTS MTL File: 'None'
 # www.blender.org
 
-newmtl palette.001
-Ns 0.000000
+newmtl Hatchet
+Ns 10.000005
 Ka 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd AxeTexture.png
+map_Kd C:/Users/k024g/Downloads/Hatchet/HatchetAlbedo.png
+map_Ks C:/Users/k024g/Downloads/Hatchet/HatchetRough.png
+map_refl C:/Users/k024g/Downloads/Hatchet/HatchetMetal.png
+map_Bump -bm 0.300000 C:/Users/k024g/Downloads/Hatchet/Map__10_Normal_Bump.tga

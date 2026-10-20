@@ -105,7 +105,8 @@ public:
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const;
 
 	/// @brief 保留中のシーン遷移を適用
-	void ApplyPendingSceneChange();
+	/// @return シーンの切り替えを適用した場合はtrue
+	bool ApplyPendingSceneChange();
 
 	/// @brief Frame末尾に現在Sceneの保留中Editor操作を適用
 	void ApplyPendingEditorOperations();

@@ -12,6 +12,15 @@ namespace UI::Game {
 		healthGauge3d_->Initialize("PlayerHealthGauge3d", SceneType::Game, MadoEngine::Render::RenderLayer::World);
 	}
 
+	void PlayerHealthGauge::SetVisible(bool isVisible) {
+		if (healthGauge2d_) {
+			healthGauge2d_->SetVisible(isVisible);
+		}
+		if (healthGauge3d_) {
+			healthGauge3d_->SetVisible(isVisible);
+		}
+	}
+
 	void PlayerHealthGauge::Update(
 		const Vector3& playerPosition,
 		float currentHealth,

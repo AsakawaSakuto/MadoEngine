@@ -87,6 +87,7 @@ void GameScene::Initialize() {
 
 	// 常設HUDを先に生成し、報酬カードと暗幕を前面へ配置
 	hud_.Initialize(weaponSlotCount_, *relicSystem_, map_->CreateMiniMapData(), gameSeed_);
+	hud_.SetVisible(false);
 	rewardSelectionController_.Initialize();
 
 	// Game進行Phaseと制限時間を全Object初期化後に開始
@@ -101,12 +102,19 @@ SceneType GameScene::Update(float dt) {
 
 	// 前FrameのEditor変更を時間加算前に配送して取得時刻と削除時刻を維持
 	ConsumePlayLogEvents();
-	inGameSession_->Update(dt);
 
-	// Pauseと強化選択中はGameObjectへ渡す時間だけを停止
-	float deltaTime = 0.0f;
+	// シーン遷移の完了条件を渡し、開始待機と停止状態を反映したゲーム時間を取得
+	const bool isSceneTransitioning = commonData_.GetSceneTransitionController().IsTransitioning();
+	const bool wasStarting = inGameSession_->GetCurrentPhase() == InGamePhase::Starting;
+	const float deltaTime = inGameSession_->Update(dt, !isSceneTransitioning);
+	if (wasStarting && inGameSession_->GetCurrentPhase() != InGamePhase::Starting) {
+
+		// 開始待機が完了したFrameで常設HUDを再表示
+		hud_.SetVisible(true);
+	}
+
+	// Sessionの状態に従い、開始待機と停止中のGameObject更新を抑止
 	if (inGameSession_->IsPlaying()) {
-		deltaTime = dt;
 		UpdateGameplay(deltaTime);
 	}
 
@@ -121,7 +129,9 @@ SceneType GameScene::Update(float dt) {
 	enemyManager_->DrawDebugLine();
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
 
-	const bool isCameraInputEnabled = inGameSession_->GetCurrentPhase() != InGamePhase::Paused &&
+	const bool isCameraInputEnabled = !isSceneTransitioning &&
+		inGameSession_->GetCurrentPhase() != InGamePhase::Starting &&
+		inGameSession_->GetCurrentPhase() != InGamePhase::Paused &&
 		!rewardSelectionController_.ShouldBlockCameraInput();
 	gameCameraController_.UpdateTracking(cameraManager_, player_->GetPosition(), deltaTime, isCameraInputEnabled);
 
@@ -151,7 +161,9 @@ SceneType GameScene::Update(float dt) {
 		}
 	}
 
-	gameCameraController_.UpdateSwitchInput(cameraManager_);
+	if (inGameSession_->GetCurrentPhase() != InGamePhase::Starting) {
+		gameCameraController_.UpdateSwitchInput(cameraManager_);
+	}
 
 	// Camera切り替え後の描画姿勢へ追従し、表示開始Frameから宝箱を画面中央へ配置
 	rewardSelectionController_.FollowCamera(cameraManager_.GetRenderCamera());
@@ -280,6 +292,7 @@ void GameScene::UpdateHud(float dt, float deltaTime) {
 	state.wallClimbRemainingTime = player_->GetWallClimbRemainingTime();
 	state.wallClimbMaxDuration = player_->GetWallClimbMaxDuration();
 	state.remainingTime = inGameSession_->GetRemainingTime();
+	state.gameStartProgress = inGameSession_->GetStartDelayProgress();
 	state.killCount = playLogRecorder_.GetData().totalCombat.killCount;
 	state.enemyCount = enemyManager_->GetEnemyCount();
 	state.isWallClimbGaugeVisible = player_->IsWallClimbGaugeVisible();

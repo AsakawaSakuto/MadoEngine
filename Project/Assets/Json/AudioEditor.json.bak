@@ -190,6 +190,11 @@
             "type": "SE",
             "volume": 1.0
         },
+        "upgradebgm": {
+            "pitchSemitones": 0.0,
+            "type": "BGM",
+            "volume": 1.0
+        },
         "upgradecarddecision": {
             "pitchSemitones": 0.0,
             "type": "SE",

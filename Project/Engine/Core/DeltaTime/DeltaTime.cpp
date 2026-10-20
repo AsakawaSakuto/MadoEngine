@@ -10,8 +10,7 @@ namespace MadoEngine
         , targetFrameTime_(1.0 / 60.0)
         , enableFPSLimit_(false)
     {
-        lastTime_ = std::chrono::high_resolution_clock::now();
-        currentTime_ = lastTime_;
+        Reset();
     }
 
     void DeltaTime::Update()
@@ -41,6 +40,13 @@ namespace MadoEngine
         }
 
         lastTime_ = currentTime_;
+    }
+
+    void DeltaTime::Reset() {
+        lastTime_ = std::chrono::high_resolution_clock::now();
+        currentTime_ = lastTime_;
+        deltaTime_ = 0.0;
+        fps_ = 0.0;
     }
 
     void DeltaTime::SetTargetFPS(double targetFPS)

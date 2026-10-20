@@ -79,6 +79,14 @@ public:
 	/// @return true:表示、false:非表示
 	bool IsVisible() const { return isVisible_; }
 
+	/// @brief 保存対象の表示設定を維持した実行時の表示許可を設定
+	/// @param visible 実行時の表示を許可する場合はtrue
+	void SetRuntimeVisible(bool visible) { isRuntimeVisible_ = visible; }
+
+	/// @brief 描画に使用する最終表示状態を取得
+	/// @return 個別設定と実行時の表示許可がともに有効な場合はtrue
+	bool IsVisibleForRendering() const { return isVisible_ && isRuntimeVisible_; }
+
 	/// @brief 描画レイヤーを設定
 	/// @param layer 設定する描画レイヤー
 	void SetRenderLayer(MadoEngine::Render::RenderLayer layer) { renderLayer_ = layer; }
@@ -118,6 +126,7 @@ protected:
 	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
 	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f}; // 色（RGBA）
 	bool isVisible_ = true;                 // 表示フラグ
+	bool isRuntimeVisible_ = true;          // 保存対象へ含めない実行時の表示許可
 	MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Default;
 
 	uint32_t textureIndex_ = 0;

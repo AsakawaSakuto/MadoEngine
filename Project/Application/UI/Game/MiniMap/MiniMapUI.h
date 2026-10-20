@@ -14,6 +14,10 @@ namespace UI::Game {
 		/// @param data 生成済みMapから取得した表示情報
 		void Initialize(const MapMiniMapData& data);
 
+		/// @brief ミニマップ全体の表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief 現在位置とスクリーンサイズを表示へ反映
 		/// @param playerPosition Playerのワールド座標
 		/// @param playerFacingYaw Playerが向いている水平Yaw角度（ラジアン）

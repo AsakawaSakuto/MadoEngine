@@ -16,7 +16,7 @@ namespace Projectile {
 		InitializeCommonProperties(context, objectName_);
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetColor({ 0.5f, 0.5f, 0.5f, 1.0f });
+			model->SetTexture("BowModelTexture");
 		}
 
 		transform_.translate = ownerPosition_;

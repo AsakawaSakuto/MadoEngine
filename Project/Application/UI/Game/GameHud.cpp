@@ -1,12 +1,41 @@
 #include "GameHud.h"
 #include "GameObject/Map/Map.h"
+#include "Render/Object/2d/Sprite/MySprite.h"
 #include "Render/Object/2d/Text/MyText.h"
+#include "Utility/Easing/Easing.h"
 #include <format>
+
+namespace {
+	constexpr const char* kGameStartBandNames[] = { "Band_Up", "Band_Bottom" };
+	constexpr float kGameStartBandInitialScaleY = 8.0f;
+	constexpr const char* kStaticHudSpriteNames[] = {
+		"MoneyUI", "KillUI",
+		"InputUI1_Pad", "InputUI2_Pad", "InputUI3_Pad", "InputUI4_Pad",
+		"InputUI1_Key", "InputUI2_Key", "InputUI3_Key", "InputUI4_Key",
+	};
+	constexpr const char* kStaticHudTextNames[] = {
+		"EnemyCountText", "GamePlayTimerText", "PlayerHealthText", "FpsText",
+		"KillCountText", "SeedValueText", "MoneyText", "Text", "Text1", "Text2", "Text3", "Text4",
+	};
+}
 
 namespace UI::Game {
 
 	void GameHud::Initialize(int weaponSlotCount, const Relic::System& relicSystem,
 		const MapMiniMapData& miniMapData, std::uint32_t gameSeed) {
+		isVisible_ = true;
+		isWorldViewsVisible_ = false;
+		staticSprites_.clear();
+		staticTexts_.clear();
+
+		// Editor配置の常設表示だけを管理対象へ登録し、開始演出の帯とMap操作Textを分離
+		for (const char* name : kStaticHudSpriteNames) {
+			staticSprites_.push_back(name);
+		}
+		for (const char* name : kStaticHudTextNames) {
+			staticTexts_.push_back(name);
+		}
+
 		expGauge_.Initialize();
 		healthGauge_.Initialize();
 		staminaGauge_.Initialize();
@@ -14,6 +43,7 @@ namespace UI::Game {
 			MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 		fpsMeasurementView_.Initialize();
 		gamePlayTimerView_.Initialize();
+		UpdateGameStartBands(0.0f);
 		playerResourceGainView_.Initialize();
 		enemyDamageView_.Initialize();
 		enemyStatusEffectIconView_.Initialize();
@@ -55,6 +85,28 @@ namespace UI::Game {
 		displayedMoney_ = -1;
 	}
 
+	void GameHud::SetVisible(bool isVisible) {
+		ApplyStaticVisibility(isVisible);
+		if (isVisible_ == isVisible) {
+			return;
+		}
+		isVisible_ = isVisible;
+
+		// 各部品の所有Objectを通して切り替え、装備や壁登りなどの個別表示条件を維持
+		expGauge_.SetVisible(isVisible_);
+		healthGauge_.SetVisible(isVisible_);
+		staminaGauge_.SetVisible(isVisible_);
+		playerIconUI_.SetVisible(isVisible_);
+		weaponIconUI_.SetVisible(isVisible_);
+		relicInventoryUI_.SetVisible(isVisible_);
+		miniMapUI_.SetVisible(isVisible_);
+
+		const bool areNotificationsVisible = isVisible_ && isWorldViewsVisible_;
+		enemyDamageView_.SetVisible(areNotificationsVisible);
+		enemyStatusEffectIconView_.SetVisible(areNotificationsVisible);
+		playerResourceGainView_.SetVisible(areNotificationsVisible);
+	}
+
 	void GameHud::Update(float deltaTime, float gameDeltaTime, const GameHudState& state,
 		const Weapon::Inventory& inventory, const Camera& camera) {
 
@@ -69,17 +121,21 @@ namespace UI::Game {
 		UpdateTexts(state);
 		fpsMeasurementView_.Update(deltaTime);
 		gamePlayTimerView_.Update(state.remainingTime);
+		UpdateGameStartBands(state.gameStartProgress);
+		ApplyStaticVisibility(isVisible_);
 	}
 
 	void GameHud::UpdateWorldViews(float gameDeltaTime, bool isPlaying,
 		const Enemy::Manager& enemyManager, const Camera& camera) {
 
 		// 選択待機中の通知表示を隠し、再開時まで表示寿命の進行を停止
-		enemyDamageView_.SetVisible(isPlaying);
+		isWorldViewsVisible_ = isPlaying;
+		const bool areNotificationsVisible = isVisible_ && isWorldViewsVisible_;
+		enemyDamageView_.SetVisible(areNotificationsVisible);
 		enemyDamageView_.Update(gameDeltaTime, camera);
-		enemyStatusEffectIconView_.SetVisible(isPlaying);
+		enemyStatusEffectIconView_.SetVisible(areNotificationsVisible);
 		enemyStatusEffectIconView_.Update(enemyManager, camera);
-		playerResourceGainView_.SetVisible(isPlaying);
+		playerResourceGainView_.SetVisible(areNotificationsVisible);
 		playerResourceGainView_.Update(gameDeltaTime);
 	}
 
@@ -95,7 +151,7 @@ namespace UI::Game {
 
 		// 地形は再構築時だけ更新し、毎Frameは再利用Bufferへ残存Objectの座標だけを収集
 		map.CollectMiniMapObjectPositions(miniMapObjectPositions_);
-		miniMapUI_.Update(playerPosition, playerFacingYaw, miniMapObjectPositions_, true);
+		miniMapUI_.Update(playerPosition, playerFacingYaw, miniMapObjectPositions_, isVisible_);
 	}
 
 	void GameHud::SetSeed(std::uint32_t gameSeed) {
@@ -121,6 +177,44 @@ namespace UI::Game {
 #ifdef USE_IMGUI
 		playerResourceGainView_.DrawImGui();
 #endif
+	}
+
+	void GameHud::ApplyStaticVisibility(bool isVisible) {
+
+		// 保存用のVisibleを変更せず、一時的なHUD非表示だけを描画判定へ反映
+		for (const char* name : staticSprites_) {
+			Sprite* sprite = MySprite::TryGet(MySprite::Find(name));
+			if (!sprite || sprite->GetSceneType() != SceneType::Game) {
+				continue;
+			}
+			sprite->SetRuntimeVisible(isVisible);
+		}
+
+		// 非表示中も名前から再取得し、Json再読込で復元された常設Textの表示漏れを防止
+		for (const char* name : staticTexts_) {
+			MadoEngine::Text* text = MyText::TryGet(MyText::Find(name));
+			if (!text || text->GetSceneType() != SceneType::Game) {
+				continue;
+			}
+			text->SetRuntimeVisible(isVisible);
+		}
+	}
+
+	void GameHud::UpdateGameStartBands(float progress) {
+		const float scaleY = Easing::Lerp(kGameStartBandInitialScaleY, 0.0f, progress, EaseType::EaseInCirc);
+
+		// Json再読込やEditor削除に対応するため現在のHandleを名前から毎Frame取得
+		for (const char* name : kGameStartBandNames) {
+			Sprite* band = MySprite::TryGet(MySprite::Find(name));
+			if (!band || band->GetSceneType() != SceneType::Game) {
+				continue;
+			}
+
+			// 横幅と上下端のAnchorを維持し、高さだけを同じ進行率で縮小
+			Vector2 scale = band->GetScale();
+			scale.y = scaleY;
+			band->SetScale(scale);
+		}
 	}
 
 	void GameHud::UpdateTexts(const GameHudState& state) {

@@ -474,6 +474,123 @@
                 0.0
             ],
             "color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "TitleSprite",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Title",
+            "texture": "wallPaper",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Pad",
+            "position": [
+                435.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Title",
+            "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Key",
+            "position": [
+                435.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Title",
+            "texture": "Decision_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
                 1.0,
                 1.0,
                 1.0,
@@ -583,7 +700,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -622,7 +739,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -661,7 +778,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -700,7 +817,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -739,7 +856,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -778,7 +895,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -817,7 +934,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -856,7 +973,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -870,19 +987,19 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Default",
-            "name": "TitleSprite",
+            "layer": "UI",
+            "name": "Band_Up",
             "position": [
                 0.0,
                 0.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                80.0,
+                0.0
             ],
-            "scene": "Title",
-            "texture": "wallPaper",
+            "scene": "Game",
+            "texture": "white16x16",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -899,68 +1016,29 @@
         },
         {
             "anchorPoint": [
-                0.5,
-                0.5
+                0.0,
+                1.0
             ],
             "color": [
-                1.0,
-                1.0,
-                1.0,
+                0.0,
+                0.0,
+                0.0,
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "Default",
-            "name": "InputUI1_Pad",
+            "layer": "UI",
+            "name": "Band_Bottom",
             "position": [
-                435.0,
-                410.0
+                0.0,
+                720.0
             ],
             "rotation": 0.0,
             "scale": [
-                0.75,
-                0.75
+                80.0,
+                0.0
             ],
-            "scene": "Title",
-            "texture": "Decision_Pad",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "InputUI1_Key",
-            "position": [
-                435.0,
-                410.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "texture": "Decision_Key",
+            "scene": "Game",
+            "texture": "white16x16",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

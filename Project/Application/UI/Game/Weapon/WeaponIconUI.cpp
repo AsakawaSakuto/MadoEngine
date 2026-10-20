@@ -21,6 +21,7 @@ namespace UI::Game {
 		weaponIconsShotGauge_.resize(slotCount);
 		weaponLevelTexts_.resize(slotCount);
 		animationStates_.resize(slotCount);
+		equippedSlots_.assign(slotCount, false);
 
 		// 各Slotを背景、Cooldown Gauge、Frame、武器Iconの固定構成で生成
 		for (int i = 0; i < slotCount; i++) {
@@ -76,6 +77,29 @@ namespace UI::Game {
 	
 	}
 
+	void WeaponIconUI::SetVisible(bool isVisible) {
+		isVisible_ = isVisible;
+
+		// 空SlotのIconとLevel表示を再表示時に有効化しない装備状態の維持
+		for (std::size_t slotIndex = 0; slotIndex < weaponIcons_.size(); ++slotIndex) {
+			for (MadoEngine::SpriteHandle handle : { weaponIconsBG_[slotIndex], weaponIconFrames_[slotIndex] }) {
+				if (Sprite* sprite = MySprite::TryGet(handle)) {
+					sprite->SetVisible(isVisible_);
+				}
+			}
+			const bool isEquippedVisible = isVisible_ && equippedSlots_[slotIndex];
+			for (MadoEngine::SpriteHandle handle : { weaponIcons_[slotIndex], weaponIconsShotGauge_[slotIndex] }) {
+				if (Sprite* sprite = MySprite::TryGet(handle)) {
+					sprite->SetVisible(isEquippedVisible);
+				}
+			}
+			if (MadoEngine::Text* text = MyText::TryGet(weaponLevelTexts_[slotIndex])) {
+				text->SetRuntimeVisible(isVisible_);
+				text->SetVisible(equippedSlots_[slotIndex]);
+			}
+		}
+	}
+
 	void WeaponIconUI::PlayAttackAnimation(std::size_t slotIndex) {
 		if (slotIndex >= animationStates_.size()) {
 			return;
@@ -91,6 +115,7 @@ namespace UI::Game {
 		// Slot位置を固定したまま装備の有無と武器状態を表示へ同期
 		for (std::size_t slotIndex = 0; slotIndex < weaponIcons_.size(); ++slotIndex) {
 			const Weapon::BaseWeapon* weapon = inventory.GetWeaponAtSlot(slotIndex);
+			equippedSlots_[slotIndex] = weapon != nullptr;
 			UpdateWeaponLevelText(slotIndex, weapon);
 
 			Sprite* weaponIcon = MySprite::TryGet(weaponIcons_[slotIndex]);
@@ -101,9 +126,9 @@ namespace UI::Game {
 			}
 
 			const bool isEquipped = weapon != nullptr;
-			weaponIcon->SetVisible(isEquipped);
-			shotGauge->SetVisible(isEquipped);
-			iconBackground->SetVisible(true);
+			weaponIcon->SetVisible(isVisible_ && isEquipped);
+			shotGauge->SetVisible(isVisible_ && isEquipped);
+			iconBackground->SetVisible(isVisible_);
 
 			if (!weapon) {
 
@@ -147,6 +172,7 @@ namespace UI::Game {
 		}
 
 		levelText->SetVisible(weapon != nullptr);
+		levelText->SetRuntimeVisible(isVisible_);
 		const std::string displayText =
 			[&]() -> std::string {
 				if (weapon) {

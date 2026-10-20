@@ -21,6 +21,10 @@ namespace UI::Game {
 		/// @brief 描画オブジェクトの参照を解放
 		void Finalize();
 
+		/// @brief 所持中のレリックだけを対象に表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief 所持レリックの変更を表示へ同期
 		/// @param relicSystem 表示対象のレリックシステム
 		void Update(const Relic::System& relicSystem);
@@ -55,6 +59,7 @@ namespace UI::Game {
 		std::size_t activeSlotCount_ = 0;
 		std::uint64_t displayedRevision_ = 0;
 		bool isInitialized_ = false;
+		bool isVisible_ = true;
 	};
 
 }

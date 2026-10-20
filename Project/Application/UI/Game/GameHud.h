@@ -14,6 +14,7 @@
 #include "Weapon/WeaponIconUI.h"
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 class Map;
 
@@ -26,6 +27,7 @@ namespace UI::Game {
 		float wallClimbRemainingTime = 0.0f;
 		float wallClimbMaxDuration = 0.0f;
 		float remainingTime = 0.0f;
+		float gameStartProgress = 0.0f;
 		std::uint64_t killCount = 0;
 		std::size_t enemyCount = 0;
 		bool isWallClimbGaugeVisible = false;
@@ -45,6 +47,14 @@ namespace UI::Game {
 
 		/// @brief HUDの参照と所有する表示リソースを解放
 		void Finalize();
+
+		/// @brief 開始演出の帯を除くHUD全体の表示状態を設定
+		/// @param isVisible HUDを表示する場合はtrue
+		void SetVisible(bool isVisible);
+
+		/// @brief HUD全体の表示状態を取得
+		/// @return HUDを表示する場合はtrue
+		bool IsVisible() const { return isVisible_; }
 
 		/// @brief 確定済みのゲーム状態をゲージと文字表示へ同期
 		/// @param deltaTime 停止中も進行する実時間
@@ -97,6 +107,14 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
+		/// @brief 常設SpriteとTextへ個別表示状態を維持したHUD表示切り替えを反映
+		/// @param isVisible HUDを表示する場合はtrue
+		void ApplyStaticVisibility(bool isVisible);
+
+		/// @brief 開始待機の進行率に合わせて上下の帯の高さを縮小
+		/// @param progress 開始待機の進行率、0.0fから1.0f
+		void UpdateGameStartBands(float progress);
+
 		/// @brief 所持金と撃破数とEnemy数の文字表示を更新
 		/// @param state 現在フレームの表示情報
 		void UpdateTexts(const GameHudState& state);
@@ -118,6 +136,10 @@ namespace UI::Game {
 		MadoEngine::TextHandle moneyText_{};
 		MadoEngine::TextHandle killCountText_{};
 		int displayedMoney_ = -1;
+		std::vector<const char*> staticSprites_;
+		std::vector<const char*> staticTexts_;
+		bool isVisible_ = true;
+		bool isWorldViewsVisible_ = false;
 	};
 
 }

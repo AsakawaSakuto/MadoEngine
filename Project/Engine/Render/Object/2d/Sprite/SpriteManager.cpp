@@ -324,7 +324,7 @@ void SpriteManager::UpdateAll(SceneType currentSceneType) {
 			continue;
 		}
 		const SceneType spriteScene = sprite->GetSceneType();
-		if (!sprite->IsVisible()) {
+		if (!sprite->IsVisibleForRendering()) {
 			continue;
 		}
 		if (spriteScene != SceneType::None && spriteScene != currentSceneType) {
@@ -352,7 +352,7 @@ void SpriteManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLaye
 			continue;
 		}
 		const SceneType spriteScene = sprite->GetSceneType();
-		if (!sprite->IsVisible()) {
+		if (!sprite->IsVisibleForRendering()) {
 			continue;
 		}
 		if (spriteScene != SceneType::None && spriteScene != currentSceneType) {
@@ -387,7 +387,7 @@ void SpriteManager::DrawInOrder(
 			continue;
 		}
 		const SceneType spriteScene = sprite->GetSceneType();
-		if (!sprite->IsVisible()) {
+		if (!sprite->IsVisibleForRendering()) {
 			continue;
 		}
 		if (spriteScene != SceneType::None && spriteScene != currentSceneType) {

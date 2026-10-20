@@ -31,6 +31,15 @@ namespace UI::Game {
 		isInitialized_ = false;
 	}
 
+	void RelicInventoryUI::SetVisible(bool isVisible) {
+		isVisible_ = isVisible;
+
+		// 再利用のため保持している未使用Slotを表示へ戻さない有効数の確認
+		for (std::size_t slotIndex = 0; slotIndex < slots_.size(); ++slotIndex) {
+			SetSlotVisible(slotIndex, slotIndex < activeSlotCount_);
+		}
+	}
+
 	void RelicInventoryUI::Update(const Relic::System& relicSystem) {
 		if (!isInitialized_ || displayedRevision_ == relicSystem.GetRevision()) {
 			return;
@@ -142,10 +151,11 @@ namespace UI::Game {
 
 		const Slot& slot = slots_[slotIndex];
 		if (Sprite* icon = MySprite::TryGet(slot.icon)) {
-			icon->SetVisible(isVisible);
+			icon->SetVisible(isVisible_ && isVisible);
 		}
 		if (MadoEngine::Text* countText = MyText::TryGet(slot.countText)) {
 			countText->SetVisible(isVisible);
+			countText->SetRuntimeVisible(isVisible_);
 		}
 	}
 

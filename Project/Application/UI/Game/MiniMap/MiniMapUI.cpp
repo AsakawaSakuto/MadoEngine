@@ -270,6 +270,11 @@ namespace UI::Game {
 		Update({}, 0.0f, data.objectPositions, false);
 	}
 
+	void MiniMapUI::SetVisible(bool isVisible) {
+		isVisible_ = isVisible;
+		UpdateView();
+	}
+
 	void MiniMapUI::Update(
 		const Vector3& playerPosition,
 		float playerFacingYaw,

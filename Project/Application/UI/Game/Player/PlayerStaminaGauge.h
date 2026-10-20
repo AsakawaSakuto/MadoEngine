@@ -9,6 +9,10 @@ namespace UI::Game {
 		/// @brief 壁登り可能時間ゲージを初期化
 		void Initialize();
 
+		/// @brief 壁登りゲージ全体の表示許可を設定
+		/// @param isVisible 表示を許可する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief 残り壁登り時間をゲージへ反映
 		/// @param remainingTime 壁登り可能な残り時間
 		/// @param maxDuration 壁登り可能な最大時間
@@ -23,6 +27,8 @@ namespace UI::Game {
 
 	private:
 		std::unique_ptr<Gauge2d> staminaGauge_;
+		bool isVisible_ = true;
+		bool isClimbing_ = false;
 	};
 
 } // namespace UI::Game

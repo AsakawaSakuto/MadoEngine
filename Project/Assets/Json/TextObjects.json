@@ -264,7 +264,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:53",
+            "text": "05:00",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 6",
+            "text": "Enemy : 0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -389,56 +389,6 @@
             "horizontalAlign": "Left",
             "layer": "Default",
             "lineSpacing": 1.0,
-            "name": "KillCountText",
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 0.0,
-            "position": [
-                840.0,
-                50.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": false,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "4",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 40.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
             "name": "Text3",
             "outlineColor": [
                 0.0,
@@ -465,6 +415,56 @@
                 0.0
             ],
             "text": "壁登り",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": false,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 40.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "KillCountText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
+            "position": [
+                840.0,
+                50.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": false,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -514,7 +514,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.8",
+            "text": "FPS : 59.9",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -567,7 +567,7 @@
             "text": "一時停止",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -614,7 +614,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 663057954",
+            "text": "Seed : 3400788099",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -667,7 +667,7 @@
             "text": "5分間敵を倒し続けよう",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -714,7 +714,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10002",
+            "text": "9999",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -817,7 +817,7 @@
             "text": "しゃがみ",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -867,7 +867,7 @@
             "text": "ジャンプ",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         }
     ]

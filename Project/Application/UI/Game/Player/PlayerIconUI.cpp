@@ -2,6 +2,16 @@
 
 namespace UI::Game {
 
+	void PlayerIconUI::SetVisible(bool isVisible) {
+
+		// Icon本体と装飾を同時に切り替え、背景や枠だけが残る表示を防止
+		for (MadoEngine::SpriteHandle handle : { playerIcon_, playerIconBG_, playerIconFrame_ }) {
+			if (Sprite* sprite = MySprite::TryGet(handle)) {
+				sprite->SetVisible(isVisible);
+			}
+		}
+	}
+
 	void PlayerIconUI::Initialize(Player::Type type) {
 		
 		playerIconBG_ = MySprite::Create("PlayerIconBG", "white2x2", SceneType::Game);

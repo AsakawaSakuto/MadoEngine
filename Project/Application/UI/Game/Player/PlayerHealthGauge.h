@@ -11,6 +11,10 @@ namespace UI::Game {
 		/// @brief Playerの2Dと3DのHP表示を初期化
 		void Initialize();
 
+		/// @brief 画面固定と頭上のHPゲージの表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief Playerの座標とHPを2Dと3DのHP表示へ反映
 		/// @param playerPosition Playerのワールド座標
 		/// @param currentHealth 現在HP

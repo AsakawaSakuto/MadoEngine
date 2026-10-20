@@ -487,6 +487,10 @@ namespace MadoEngine
 		windowsAPI_->ProcessInput();
 	}
 
+	void EngineExecution::ResetDeltaTime() {
+		deltaTime_->Reset();
+	}
+
 	void EngineExecution::HandleResize() {
 		uint32_t width = 0;
 		uint32_t height = 0;

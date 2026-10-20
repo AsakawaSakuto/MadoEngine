@@ -12,6 +12,16 @@ namespace UI::Game {
 		}
 	}
 
+	void PlayerExpGauge::SetVisible(bool isVisible) {
+		isVisible_ = isVisible;
+		if (expGauge_) {
+			expGauge_->SetVisible(isVisible_);
+		}
+		if (Sprite* sprite = MySprite::TryGet(dopaGauge_)) {
+			sprite->SetVisible(isVisible_ && isUpgrading_);
+		}
+	}
+
 	void PlayerExpGauge::Update(float currentExp, float maxExp) {
 		if (expGauge_) {
 			expGauge_->SetCurrentValue(currentExp);
@@ -26,11 +36,12 @@ namespace UI::Game {
 	}
 
 	void PlayerExpGauge::IsUpgrade(bool isUpgrade, float deltaTime) {
+		isUpgrading_ = isUpgrade;
 		if (Sprite* dopaGauge = MySprite::TryGet(dopaGauge_)) {
 			if (isUpgrade) {
 
 				// 強化選択中はUVを横へ流して待機状態を視覚化
-				dopaGauge->SetVisible(true);
+				dopaGauge->SetVisible(isVisible_);
 
 				uvOffsetX_ += uvSpeed_ * deltaTime;
 				dopaGauge->SetUVTranslate(Vector2{ uvOffsetX_, 0.0f });

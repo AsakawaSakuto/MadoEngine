@@ -26,6 +26,9 @@ Terminal::Terminal(HINSTANCE hInstance) {
 	sceneManager_->RegisterScene(SceneType::Game,   [](CommonData& commonData) { return std::make_unique<GameScene>(commonData); });
 	sceneManager_->RegisterScene(SceneType::Result, [](CommonData& commonData) { return std::make_unique<ResultScene>(commonData); });
 	sceneManager_->Initialize(SceneType::Title);
+
+	// 初期Sceneの読み込み時間を最初の更新へ持ち込まない計測基準の再設定
+	execution_->ResetDeltaTime();
 }
 
 bool Terminal::SaveAllEditorDocuments() {
@@ -304,7 +307,11 @@ void Terminal::Run() {
 
 		// 描画中のResource破棄を避けるためEditor再生成とScene遷移をFrame末尾で適用
 		sceneManager_->ApplyPendingEditorOperations();
-		sceneManager_->ApplyPendingSceneChange();
+		if (sceneManager_->ApplyPendingSceneChange()) {
+
+			// 新Sceneの初期化時間を登場演出とゲーム進行の経過時間から除外
+			execution_->ResetDeltaTime();
+		}
 	}
 
 }

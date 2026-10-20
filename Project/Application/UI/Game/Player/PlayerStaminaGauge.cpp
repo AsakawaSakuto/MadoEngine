@@ -8,12 +8,20 @@ namespace UI::Game {
 		staminaGauge_->SetVisible(false);
 	}
 
+	void PlayerStaminaGauge::SetVisible(bool isVisible) {
+		isVisible_ = isVisible;
+		if (staminaGauge_) {
+			staminaGauge_->SetVisible(isVisible_ && isClimbing_);
+		}
+	}
+
 	void PlayerStaminaGauge::Update(float remainingTime, float maxDuration, bool isVisible) {
+		isClimbing_ = isVisible;
 		if (!staminaGauge_) {
 			return;
 		}
 
-		staminaGauge_->SetVisible(isVisible);
+		staminaGauge_->SetVisible(isVisible_ && isClimbing_);
 		staminaGauge_->Update(remainingTime, maxDuration);
 	}
 

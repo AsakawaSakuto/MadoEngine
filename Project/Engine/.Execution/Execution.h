@@ -31,6 +31,9 @@ namespace MadoEngine
 		/// @brief 更新処理
 		void Update();
 
+		/// @brief 初期化や読み込み後のフレーム時間計測を再開
+		void ResetDeltaTime();
+
 		/// @brief 描画前処理
 		/// @param currentSceneType 現在のシーン種別
 		/// @param shadowFocusPosition シャドウマップの中心へ置くワールド座標

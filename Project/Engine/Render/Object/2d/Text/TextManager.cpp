@@ -351,7 +351,7 @@ void TextManager::UpdateAll(SceneType currentSceneType) {
 			continue;
 		}
 		const SceneType textScene = text->GetSceneType();
-		if (!text->IsVisible()) {
+		if (!text->IsVisibleForRendering()) {
 			continue;
 		}
 		if (textScene != SceneType::None && textScene != currentSceneType) {
@@ -380,7 +380,7 @@ void TextManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayerM
 			continue;
 		}
 		const SceneType textScene = text->GetSceneType();
-		if (!text->IsVisible()) {
+		if (!text->IsVisibleForRendering()) {
 			continue;
 		}
 		if (textScene != SceneType::None && textScene != currentSceneType) {
@@ -420,7 +420,7 @@ void TextManager::DrawInOrder(
 			continue;
 		}
 		const SceneType textScene = text->GetSceneType();
-		if (!text->IsVisible()) {
+		if (!text->IsVisibleForRendering()) {
 			continue;
 		}
 		if (textScene != SceneType::None && textScene != currentSceneType) {
