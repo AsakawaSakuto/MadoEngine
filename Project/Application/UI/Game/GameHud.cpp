@@ -8,6 +8,7 @@
 namespace {
 	constexpr const char* kGameStartBandNames[] = { "Band_Up", "Band_Bottom" };
 	constexpr float kGameStartBandInitialScaleY = 8.0f;
+	constexpr const char* kGameStartTextName = "StartText";
 	constexpr const char* kStaticHudSpriteNames[] = {
 		"MoneyUI", "KillUI",
 		"InputUI1_Pad", "InputUI2_Pad", "InputUI3_Pad", "InputUI4_Pad",
@@ -28,7 +29,7 @@ namespace UI::Game {
 		staticSprites_.clear();
 		staticTexts_.clear();
 
-		// Editor配置の常設表示だけを管理対象へ登録し、開始演出の帯とMap操作Textを分離
+		// Editor配置の常設表示だけを管理対象へ登録し、開始演出とMap操作Textを分離
 		for (const char* name : kStaticHudSpriteNames) {
 			staticSprites_.push_back(name);
 		}
@@ -43,7 +44,7 @@ namespace UI::Game {
 			MadoEngine::EditorManagementMode::EditorManaged, MadoEngine::Render::RenderLayer::UI);
 		fpsMeasurementView_.Initialize();
 		gamePlayTimerView_.Initialize();
-		UpdateGameStartBands(0.0f);
+		UpdateGameStartPresentation(0.0f);
 		playerResourceGainView_.Initialize();
 		enemyDamageView_.Initialize();
 		enemyStatusEffectIconView_.Initialize();
@@ -121,7 +122,7 @@ namespace UI::Game {
 		UpdateTexts(state);
 		fpsMeasurementView_.Update(deltaTime);
 		gamePlayTimerView_.Update(state.remainingTime);
-		UpdateGameStartBands(state.gameStartProgress);
+		UpdateGameStartPresentation(state.gameStartProgress);
 		ApplyStaticVisibility(isVisible_);
 	}
 
@@ -200,7 +201,7 @@ namespace UI::Game {
 		}
 	}
 
-	void GameHud::UpdateGameStartBands(float progress) {
+	void GameHud::UpdateGameStartPresentation(float progress) {
 		const float scaleY = Easing::Lerp(kGameStartBandInitialScaleY, 0.0f, progress, EaseType::EaseInCirc);
 
 		// Json再読込やEditor削除に対応するため現在のHandleを名前から毎Frame取得
@@ -215,6 +216,15 @@ namespace UI::Game {
 			scale.y = scaleY;
 			band->SetScale(scale);
 		}
+
+		// 帯と同じ開始待機の進行率でAlphaだけを補間し、Editor設定の文字色を維持
+		MadoEngine::Text* startText = MyText::TryGet(MyText::Find(kGameStartTextName));
+		if (!startText || startText->GetSceneType() != SceneType::Game) {
+			return;
+		}
+		Vector4 color = startText->GetColor();
+		color.w = Easing::Lerp(0.0f, 1.0f, progress, EaseType::Linear);
+		startText->SetColor(color);
 	}
 
 	void GameHud::UpdateTexts(const GameHudState& state) {

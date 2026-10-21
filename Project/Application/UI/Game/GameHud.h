@@ -48,7 +48,7 @@ namespace UI::Game {
 		/// @brief HUDの参照と所有する表示リソースを解放
 		void Finalize();
 
-		/// @brief 開始演出の帯を除くHUD全体の表示状態を設定
+		/// @brief 開始演出を除くHUD全体の表示状態を設定
 		/// @param isVisible HUDを表示する場合はtrue
 		void SetVisible(bool isVisible);
 
@@ -111,9 +111,9 @@ namespace UI::Game {
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 
-		/// @brief 開始待機の進行率に合わせて上下の帯の高さを縮小
+		/// @brief 開始待機の進行率に合わせて上下の帯の縮小と開始Textのフェードを更新
 		/// @param progress 開始待機の進行率、0.0fから1.0f
-		void UpdateGameStartBands(float progress);
+		void UpdateGameStartPresentation(float progress);
 
 		/// @brief 所持金と撃破数とEnemy数の文字表示を更新
 		/// @param state 現在フレームの表示情報

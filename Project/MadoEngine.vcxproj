@@ -57,6 +57,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <!-- VSからの起動時は編集結果をProject内のAssetsへ保存 -->
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\Generated\Outputs\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\Generated\Obj\$(Configuration)\</IntDir>
@@ -705,4 +709,14 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- VSのプロジェクト編集との互換性を保つため、ワイルドカード展開をビルド時に限定 -->
+  <Target Name="CollectAssetCopyFiles" BeforeTargets="PrepareForBuild">
+    <ItemGroup>
+      <!-- 標準のコピー追跡へ登録し、Assetsだけの変更も対象とした相対階層の差分コピー -->
+      <_AssetCopyFile Include="Assets\**\*" />
+      <CopyFileToFolders Include="@(_AssetCopyFile)">
+        <DestinationFolders>$(OutDir)Assets\%(_AssetCopyFile.RecursiveDir)</DestinationFolders>
+      </CopyFileToFolders>
+    </ItemGroup>
+  </Target>
 </Project>

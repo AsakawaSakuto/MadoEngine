@@ -1,19 +1,60 @@
 {
     "emitters": [
         {
+            "endpoints": {
+                "endPosition": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "segmentCount": 16,
+                "startPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
             "geometry": {
                 "cameraFacing": true,
+                "endFade": 0.0,
                 "interpolation": "linear",
                 "smoothingSubdivision": 0,
+                "startFade": 0.0,
+                "widthOverLength": {
+                    "default": 1.0,
+                    "keys": []
+                },
                 "widthOverLifetime": {
                     "default": 0.5,
+                    "keys": []
+                },
+                "widthOverTime": {
+                    "default": 1.0,
                     "keys": []
                 }
             },
             "isEnabled": true,
             "material": {
                 "blendMode": "add",
+                "colorOverLength": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
                 "colorOverLifetime": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "colorOverTime": {
                     "default": [
                         1.0,
                         1.0,
@@ -44,6 +85,12 @@
                 ]
             },
             "name": "Emitter",
+            "noise": {
+                "amplitude": 0.0,
+                "frequency": 3.0,
+                "scrollSpeed": 1.0,
+                "seed": 0
+            },
             "playback": {
                 "duration": 1.0,
                 "isLoop": false,
@@ -101,5 +148,5 @@
             ]
         }
     ],
-    "version": 6
+    "version": 7
 }

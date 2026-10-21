@@ -264,7 +264,7 @@
                 0.0,
                 0.0
             ],
-            "text": "03:58",
+            "text": "04:43",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -314,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 95",
+            "text": "Enemy : 8",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -364,7 +364,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 56 / 100",
+            "text": "HP : 5 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -464,7 +464,7 @@
                 0.0,
                 0.0
             ],
-            "text": "81",
+            "text": "13",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -514,7 +514,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.4",
+            "text": "FPS : 59.9",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -664,7 +664,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Seed : 4132767211",
+            "text": "Seed : 2519641911",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -714,7 +714,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10079",
+            "text": "10011",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -868,6 +868,56 @@
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 90.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "StartText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 5.0,
+            "position": [
+                640.0,
+                256.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "敵を沢山撃破しよう",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
             "wordWrap": true
         }
     ]

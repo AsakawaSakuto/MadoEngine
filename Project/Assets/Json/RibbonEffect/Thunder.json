@@ -1,16 +1,35 @@
 {
     "emitters": [
         {
+            "endpoints": {
+                "endPosition": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "segmentCount": 16,
+                "startPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
             "geometry": {
                 "cameraFacing": true,
                 "endFade": 0.05000000074505806,
+                "interpolation": "linear",
+                "smoothingSubdivision": 0,
                 "startFade": 0.05000000074505806,
-                "widthOverTime": {
-                    "default": 0.25,
+                "widthOverLength": {
+                    "default": 1.0,
                     "keys": []
                 },
                 "widthOverLifetime": {
                     "default": 1.0,
+                    "keys": []
+                },
+                "widthOverTime": {
+                    "default": 0.25,
                     "keys": []
                 }
             },
@@ -18,6 +37,15 @@
             "material": {
                 "blendMode": "add",
                 "colorOverLength": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "colorOverLifetime": {
                     "default": [
                         1.0,
                         1.0,
@@ -36,6 +64,10 @@
                     "keys": []
                 },
                 "cullMode": "none",
+                "globalAlpha": {
+                    "default": 1.0,
+                    "keys": []
+                },
                 "textureName": "white2x2",
                 "tileLength": 1.0,
                 "uvMode": "stretch",
@@ -50,11 +82,7 @@
                 "uvScroll": [
                     0.0,
                     0.0
-                ],
-                "globalAlpha": {
-                    "default": 1.0,
-                    "keys": []
-                }
+                ]
             },
             "name": "Emitter",
             "noise": {
@@ -81,30 +109,43 @@
                             "value": 1.0
                         }
                     ]
-                }
+                },
+                "sweepLength": 1.0
+            },
+            "trail": {
+                "defaultControlPoints": [
+                    [
+                        -3.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        -1.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        1.0,
+                        -0.5,
+                        0.0
+                    ],
+                    [
+                        3.0,
+                        0.5,
+                        0.0
+                    ]
+                ],
+                "generationMode": "endpoints",
+                "maxPointCount": 128,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.5,
+                "simulationSpace": "local"
             },
             "translateOffset": [
                 0.0,
                 0.0,
                 0.0
-            ],
-            "trail": {
-                "generationMode": "endpoints",
-                "simulationSpace": "local"
-            },
-            "endpoints": {
-                "startPosition": [
-                    0,
-                    0,
-                    0
-                ],
-                "endPosition": [
-                    0,
-                    1,
-                    0
-                ],
-                "segmentCount": 16
-            }
+            ]
         }
     ],
     "version": 7

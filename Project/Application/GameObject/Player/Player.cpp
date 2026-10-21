@@ -9,7 +9,7 @@ namespace Player {
 		constexpr float kMovementSphereRadius = 0.5f;                       // 移動解決用のSphereCollider半径
 		constexpr float kShadowGroundOffset = 0.01f;                        // 影の描画座標を地面より少し上にずらすことでZファイティングを回避
 		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>; // Modelの前方がZ軸負方向を向くため、Y軸回転を180度補正
-		constexpr float kHealthRegenerationInterval = 6.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
+		constexpr float kHealthRegenerationInterval = 3.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
 		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
 	}
 
