@@ -349,6 +349,10 @@
     <ClCompile Include="Engine\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
+    <ClCompile Include="Engine\Utility\Parameter\ParameterStore.cpp" />
+    <ClCompile Include="Engine\Utility\Parameter\DebugParameter.cpp" />
+    <ClCompile Include="Engine\Utility\Parameter\ParameterSerializer.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\ParameterInspector.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
@@ -682,6 +686,10 @@
     <ClInclude Include="Engine\Utility\Json\Data\ConfigManager.h" />
     <ClInclude Include="Engine\Utility\Json\Core\IJsonSerializable.h" />
     <ClInclude Include="Engine\Utility\Json\Core\JsonFile.h" />
+    <ClInclude Include="Engine\Utility\Parameter\ParameterStore.h" />
+    <ClInclude Include="Engine\Utility\Parameter\DebugParameter.h" />
+    <ClInclude Include="Engine\Utility\Parameter\ParameterSerializer.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\ParameterInspector.h" />
     <ClInclude Include="Engine\Utility\Json\Core\JsonSerializer.h" />
     <ClInclude Include="Engine\Utility\Logger\Logger.h" />
     <ClInclude Include="Engine\Utility\Material.h" />

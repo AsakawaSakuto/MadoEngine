@@ -21,7 +21,8 @@ public:
 	using CreatorFunc = std::function<std::unique_ptr<IScene>(CommonData&)>;
 
 	/// @brief コンストラクタ
-	SceneManager();
+	/// @param parameterStore Sceneより長く保持する設定値管理
+	explicit SceneManager(MadoEngine::ParameterStore& parameterStore);
 
 	/// @brief デストラクタ
 	~SceneManager();

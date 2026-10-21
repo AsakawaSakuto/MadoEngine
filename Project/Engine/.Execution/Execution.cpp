@@ -1,11 +1,13 @@
 #include "Execution.h"
 #include "EditorUIHeaders.h"
+#include "Utility/Parameter/ParameterSerializer.h"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <filesystem>
 
 namespace {
+	constexpr const char* kDebugParameterDirectory = "Assets/Json/DebugParameter";
 
 	// レンダーターゲットの識別用キー
 	const std::string kSceneColorTarget = "SceneColor";                             // 通常のシーン全体を最初に描く
@@ -124,6 +126,9 @@ namespace MadoEngine
 		CoInitializeEx(0, COINIT_MULTITHREADED);
 
 		Logger::Initialize();
+
+		// ImGuiの有無によらず、Scene生成前に保存済みの調整値を復元
+		ParameterSerializer::LoadAll(parameterStore_, kDebugParameterDirectory);
 
 		// ウィンドウの設定
 		winDesc_.title = "GigaSurvivor - with MadoEngine";
@@ -347,6 +352,11 @@ namespace MadoEngine
 		MadoEngine::Editor::EditorToolbar& toolbar =
 			MadoEngine::Editor::EditorToolbar::GetInstance();
 		toolbar.Initialize();
+		toolbar.RegisterDocumentHistory(
+			Editor::EditorDocument::DebugParameter,
+			[this]() { return ParameterSerializer::CaptureState(parameterStore_); },
+			[this](const std::string& snapshot) { ParameterSerializer::RestoreState(parameterStore_, snapshot); }
+		);
 
 		// Editor単位の状態全体をSnapshot化して追加、削除、直接編集を同じ履歴へ統合
 		toolbar.RegisterDocumentHistory(
@@ -1014,6 +1024,12 @@ namespace MadoEngine
 			toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::FixedGameView)
 		);
 
+		if (toolbar.IsWindowVisible(Editor::EditorWindow::DebugParameter)) {
+			toolbar.BeginDocumentCapture(Editor::EditorDocument::DebugParameter);
+			Editor::ParameterInspector::Draw(parameterStore_, kDebugParameterDirectory);
+			toolbar.EndDocumentCapture();
+		}
+
 		// エンジン情報ウィンドウ（FPS表示）
 		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::EngineInfo)) {
 			ImGui::Begin("Engine Info");
@@ -1127,6 +1143,7 @@ namespace MadoEngine
 
 	bool EngineExecution::SaveEditorDocuments() {
 		bool succeeded = true;
+		succeeded = ParameterSerializer::SaveAll(parameterStore_, kDebugParameterDirectory) && succeeded;
 		succeeded = MadoEngine::ModelManager::GetInstance().SaveToFile(
 			"Assets/Json/ModelObjects.json",
 			currentSceneType_) && succeeded;
@@ -1161,6 +1178,7 @@ namespace MadoEngine
 		MadoEngine::Editor::EditorToolbar::GetInstance().ClearHistory();
 #endif // USE_IMGUI
 		bool succeeded = true;
+		succeeded = ParameterSerializer::LoadAll(parameterStore_, kDebugParameterDirectory) && succeeded;
 		succeeded = MadoEngine::Editor::LoadModelEditorJson(currentSceneType_) && succeeded;
 		succeeded = MadoEngine::Editor::LoadSpriteEditorJson(currentSceneType_) && succeeded;
 		succeeded = MadoEngine::Editor::LoadTextEditorJson(currentSceneType_) && succeeded;

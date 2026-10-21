@@ -77,8 +77,9 @@ namespace {
 
 } // namespace
 
-SceneManager::SceneManager()
-	: currentScene_(nullptr)
+SceneManager::SceneManager(MadoEngine::ParameterStore& parameterStore)
+	: commonData_(parameterStore)
+	, currentScene_(nullptr)
 	, currentSceneType_(SceneType::Title)
 	, pendingSceneType_(SceneType::None)
 	, hasPendingSceneChange_(false) {}

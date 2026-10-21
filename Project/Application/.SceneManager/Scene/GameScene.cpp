@@ -57,7 +57,7 @@ void GameScene::Initialize() {
 
 	// 地形確定後に通常Block上面の中心を取得してPlayerの初期配置へ使用
 	player_ = std::make_unique<Player::Base>();
-	player_->Initialize(map_->CreatePlayerSpawnGroundPosition(gameSeed_));
+	player_->Initialize(commonData_.GetParameterStore(), map_->CreatePlayerSpawnGroundPosition(gameSeed_));
 	player_->SetCamera(gameCameraController_.TryGetPlayerCamera(cameraManager_));
 	SynchronizePlayerPointLight();
 
@@ -155,12 +155,6 @@ SceneType GameScene::Update(float dt) {
 	}
 
 	UpdateHud(dt, deltaTime);
-
-	if (inGameSession_->IsPlaying() && MyInput::GetKeyboard()->IsTrigger(DIK_9)) {
-		if (!weaponInventory_->AddWeapon(Projectile::Type::Pistol)) {
-			Logger::Output("[Debug] デバッグ操作による武器追加は拒否されました。", Logger::Level::Debug);
-		}
-	}
 
 	if (inGameSession_->GetCurrentPhase() != InGamePhase::Starting) {
 		gameCameraController_.UpdateSwitchInput(cameraManager_);
@@ -298,8 +292,10 @@ void GameScene::UpdateHud(float dt, float deltaTime) {
 	state.wallClimbMaxDuration = player_->GetWallClimbMaxDuration();
 	state.remainingTime = inGameSession_->GetRemainingTime();
 	state.gameStartProgress = inGameSession_->GetStartDelayProgress();
+	state.gamePlayElapsedTime = inGameSession_->GetExecutionTime();
 	state.killCount = playLogRecorder_.GetData().totalCombat.killCount;
 	state.enemyCount = enemyManager_->GetEnemyCount();
+	state.upgradeRerollCost = weaponUpgradeSystem_->GetRerollCost();
 	state.isWallClimbGaugeVisible = player_->IsWallClimbGaugeVisible();
 	state.isWaitingUpgradeSelection = inGameSession_->IsWaitingUpgradeSelection();
 	hud_.Update(dt, deltaTime, state, *weaponInventory_, cameraManager_.GetRenderCamera());

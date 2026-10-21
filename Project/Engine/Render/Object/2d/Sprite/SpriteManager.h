@@ -128,6 +128,12 @@ public:
 	/// @return 変更に成功した場合はtrue
 	bool Rename(const std::string& currentName, const std::string& newName);
 
+	/// @brief Spriteを基準Spriteの直後へ移動して描画順を設定
+	/// @param handle 描画順を変更するSpriteのHandle
+	/// @param referenceHandle 直前に描画する基準SpriteのHandle
+	/// @return 描画順を設定できた場合はtrue
+	bool MoveAfter(SpriteHandle handle, SpriteHandle referenceHandle);
+
 	/// @brief GPUが対象を使用していないことが保証された時点でSpriteを即時削除
 	/// @param handle 削除対象のHandle
 	/// @return 削除できた場合はtrue

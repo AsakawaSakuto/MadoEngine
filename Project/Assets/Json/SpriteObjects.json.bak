@@ -2,6 +2,123 @@
     "sprites": [
         {
             "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "TitleSprite",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Title",
+            "texture": "wallPaper",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Pad",
+            "position": [
+                435.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Title",
+            "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Key",
+            "position": [
+                435.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Title",
+            "texture": "Decision_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
                 0.5,
                 0.5
             ],
@@ -474,123 +591,6 @@
                 0.0
             ],
             "color": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "TitleSprite",
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "texture": "wallPaper",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "InputUI1_Pad",
-            "position": [
-                435.0,
-                410.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.75,
-                0.75
-            ],
-            "scene": "Title",
-            "texture": "Decision_Pad",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "InputUI1_Key",
-            "position": [
-                435.0,
-                410.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Title",
-            "texture": "Decision_Key",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
                 1.0,
                 1.0,
                 1.0,
@@ -1039,6 +1039,279 @@
             ],
             "scene": "Game",
             "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeDecisionBack1",
+            "position": [
+                520.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.0,
+                5.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeDecisionBack2",
+            "position": [
+                520.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollBack1",
+            "position": [
+                760.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.0,
+                5.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09150892496109009,
+                0.10751760751008987,
+                0.13953489065170288,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollBack2",
+            "position": [
+                760.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeDecisionBottom",
+            "position": [
+                472.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.44999998807907104,
+                0.44999998807907104
+            ],
+            "scene": "Game",
+            "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollBottom",
+            "position": [
+                712.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.44999998807907104,
+                0.44999998807907104
+            ],
+            "scene": "Game",
+            "texture": "xbox_button_color_y_outline",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollCoin",
+            "position": [
+                844.0,
+                604.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.5,
+                0.5
+            ],
+            "scene": "Game",
+            "texture": "Coin",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

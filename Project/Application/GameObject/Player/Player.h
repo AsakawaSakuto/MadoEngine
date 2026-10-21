@@ -16,9 +16,10 @@ namespace Player {
 	public:
 
 		/// @brief Playerを初期化
+		/// @param parameterStore Playerより長く保持する設定値管理
 		/// @param spawnGroundPosition Playerを配置する地表座標
 		/// @param sceneType Playerを所属させるScene
-		void Initialize(const Vector3& spawnGroundPosition, SceneType sceneType = SceneType::Game);
+		void Initialize(MadoEngine::ParameterStore& parameterStore, const Vector3& spawnGroundPosition, SceneType sceneType = SceneType::Game);
 
 		/// @brief 地表座標からPlayer初期配置時の移動Colliderを作成
 		/// @param spawnGroundPosition Playerを配置する地表座標

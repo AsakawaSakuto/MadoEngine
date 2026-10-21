@@ -60,6 +60,14 @@ inline Sprite* TryGet(MadoEngine::SpriteHandle handle) {
 	return MadoEngine::SpriteManager::GetInstance().TryGet(handle);
 }
 
+/// @brief Spriteを基準Spriteの直後へ移動して描画順を設定
+/// @param handle 描画順を変更するSpriteのHandle
+/// @param referenceHandle 直前に描画する基準SpriteのHandle
+/// @return 描画順を設定できた場合はtrue
+inline bool MoveAfter(MadoEngine::SpriteHandle handle, MadoEngine::SpriteHandle referenceHandle) {
+	return MadoEngine::SpriteManager::GetInstance().MoveAfter(handle, referenceHandle);
+}
+
 /// @brief Handleを指定してSpriteを即時削除
 /// @param handle 削除対象のHandle
 inline void Destroy(MadoEngine::SpriteHandle handle) {

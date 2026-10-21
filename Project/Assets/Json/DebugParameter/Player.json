@@ -1,0 +1,67 @@
+{
+    "groups": {
+        "Player/スライド": {
+            "スライド摩擦": {
+                "type": "float",
+                "value": 2.0
+            },
+            "スライド方向補正率": {
+                "type": "float",
+                "value": 5.0
+            },
+            "スライド開始速度": {
+                "type": "float",
+                "value": 7.5
+            },
+            "斜面スライド加速度": {
+                "type": "float",
+                "value": 30.0
+            },
+            "最大スライド速度": {
+                "type": "float",
+                "value": 25.0
+            }
+        },
+        "Player/壁上り": {
+            "壁上り最大時間": {
+                "type": "float",
+                "value": 3.0
+            },
+            "壁上り速度": {
+                "type": "float",
+                "value": 2.0
+            }
+        },
+        "Player/確認用": {
+            "イージング": {
+                "enumType": "EaseType",
+                "type": "enum",
+                "value": "Linear"
+            }
+        },
+        "Player/移動": {
+            "ジャンプ力": {
+                "type": "float",
+                "value": 10.0
+            },
+            "ジャンプ回数": {
+                "type": "float",
+                "value": 1.0
+            },
+            "ジャンプ横初速": {
+                "type": "float",
+                "value": 3.0
+            },
+            "移動速度": {
+                "type": "float",
+                "value": 5.0
+            },
+            "重力": {
+                "type": "float",
+                "value": 20.0
+            }
+        }
+    },
+    "root": "Player",
+    "version": 1
+}

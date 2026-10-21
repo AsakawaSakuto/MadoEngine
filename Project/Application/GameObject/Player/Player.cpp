@@ -13,7 +13,7 @@ namespace Player {
 		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
 	}
 
-	void Base::Initialize(const Vector3& spawnGroundPosition, SceneType sceneType) {
+	void Base::Initialize(MadoEngine::ParameterStore& parameterStore, const Vector3& spawnGroundPosition, SceneType sceneType) {
 		sceneType_ = sceneType;
 		resourceGainEvents_.clear();
 		statusMultiplier_ = {};
@@ -62,6 +62,7 @@ namespace Player {
 
 		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
 
+		movement_.RegisterDebugParameters(parameterStore);
 		movement_.Initialize();
 
 		// Loop再生を維持したまま空中時だけ描画する着地点Markerの初期化
@@ -510,18 +511,7 @@ namespace Player {
 			movementParams.wallClimbMaxDuration_
 		);
 		ImGui::Separator();
-		ImGui::DragFloat("移動速度", &movementParams.moveSpeed_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("ジャンプ力", &movementParams.jumpPower_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("重力", &movementParams.gravity_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("スライド開始速度", &movementParams.slideStartSpeed_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("スライド方向補正率", &movementParams.slideSteerRate_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("斜面スライド加速度", &movementParams.slopeSlideAcceleration_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("最大スライド速度", &movementParams.maxSlideSpeed_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("スライド摩擦", &movementParams.slideFriction_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("ジャンプ回数", &movementParams.jumpCount_, 1.0f, 0.0f, 1000.0f);
-		ImGui::DragFloat("ジャンプ横初速", &movementParams.jumpMoveBoostSpeed_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("壁上り速度", &movementParams.wallClimbSpeed_, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("壁上り最大時間", &movementParams.wallClimbMaxDuration_, 0.1f, 0.0f, 60.0f);
+		ImGui::TextDisabled("移動設定はDebug ParametersのPlayerから編集できます");
 		ImGui::End();
 
 		ImGui::Begin("プレイヤーステータス");

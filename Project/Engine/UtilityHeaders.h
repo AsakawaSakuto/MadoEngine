@@ -8,6 +8,7 @@
 #include "Utility/GameTimer/GameTimer.h"
 #include "Utility/Logger/Logger.h"
 #include "Utility/Json/JsonHeaders.h"
+#include "Utility/Parameter/DebugParameter.h"
 #include "Utility/Camera/Camera.h"
 #include "Utility/Camera/CameraManager.h"
 #include "Utility/Camera/DebugCamera.h"

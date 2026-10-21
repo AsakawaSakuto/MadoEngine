@@ -145,6 +145,10 @@
     <ClCompile Include="Engine\Render\Shadow\ShadowMap.cpp" />
     <ClCompile Include="Engine\Utility\Json\Data\ConfigManager.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonFile.cpp" />
+    <ClCompile Include="Engine\Utility\Parameter\ParameterStore.cpp" />
+    <ClCompile Include="Engine\Utility\Parameter\DebugParameter.cpp" />
+    <ClCompile Include="Engine\Utility\Parameter\ParameterSerializer.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\ParameterInspector.cpp" />
     <ClCompile Include="Engine\Utility\Json\Core\JsonSerializer.cpp" />
     <ClCompile Include="Engine\Utility\Light\LightManager.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
@@ -961,5 +965,11 @@
     <ClInclude Include="Application\UI\Game\Weapon\WeaponUpgradeCardUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Utility\Parameter\ParameterStore.h" />
+    <ClInclude Include="Engine\Utility\Parameter\DebugParameter.h" />
+    <ClInclude Include="Engine\Utility\Parameter\ParameterSerializer.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\ParameterInspector.h" />
   </ItemGroup>
 </Project>

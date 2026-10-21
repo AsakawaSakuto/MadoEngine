@@ -11,6 +11,7 @@
 #include "Render/PostEffectManager.h"
 #include "Render/PSO/ComputePSORegistry.h"
 #include "UtilityHeaders.h"
+#include "Utility/Parameter/ParameterStore.h"
 #include ".SceneManager/SceneType.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
@@ -24,6 +25,10 @@ namespace MadoEngine
 	{
 	public:
 		~EngineExecution();
+
+		/// @brief Sceneより長く保持する調整用設定値管理を取得
+		/// @return 設定値管理の参照
+		ParameterStore& GetParameterStore() { return parameterStore_; }
 
 		/// @brief 初期化処理
 		void Initialize(HINSTANCE hInstance);
@@ -237,6 +242,7 @@ namespace MadoEngine
 		const std::string& GetNextLayerEffectOutputName() const;
 
 		bool isInitialized_ = false;
+		ParameterStore parameterStore_;
 		uint32_t renderWidth_ = 0;
 		uint32_t renderHeight_ = 0;
 

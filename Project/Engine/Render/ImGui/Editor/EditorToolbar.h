@@ -32,6 +32,7 @@ enum class EditorWindow {
 	EffectSequence,
 	StyleColor,
 	Logger,
+	DebugParameter,
 	Count,
 };
 
@@ -51,6 +52,7 @@ enum class EditorDocument {
 	Ribbon,
 	EffectSequence,
 	StyleColor,
+	DebugParameter,
 	Count,
 };
 

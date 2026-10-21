@@ -234,6 +234,25 @@ bool SpriteManager::Rename(const std::string& currentName, const std::string& ne
 	return Rename(Find(currentName), newName);
 }
 
+bool SpriteManager::MoveAfter(SpriteHandle handle, SpriteHandle referenceHandle) {
+	if (handle == referenceHandle || !IsValid(handle) || !IsValid(referenceHandle)) {
+		return false;
+	}
+	const auto position = std::find(drawOrder_.begin(), drawOrder_.end(), handle);
+	const auto reference = std::find(drawOrder_.begin(), drawOrder_.end(), referenceHandle);
+	if (position == drawOrder_.end() || reference == drawOrder_.end()) {
+		return false;
+	}
+
+	// Handleの並びだけを回転し、GPU資源と他Sprite同士の描画順を維持
+	if (position < reference) {
+		std::rotate(position, position + 1, reference + 1);
+	} else if (position > reference + 1) {
+		std::rotate(reference + 1, position, position + 1);
+	}
+	return true;
+}
+
 bool SpriteManager::Destroy(SpriteHandle handle) {
 	Sprite* sprite = TryGet(handle);
 	if (!sprite) {

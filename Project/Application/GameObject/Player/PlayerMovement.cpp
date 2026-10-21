@@ -88,6 +88,38 @@ namespace {
 
 namespace Player {
 
+	void Movement::RegisterDebugParameters(MadoEngine::ParameterStore& parameterStore) {
+		debugParameter_ = std::make_unique<MadoEngine::DebugParameter>(parameterStore, "Player");
+		MadoEngine::ParameterAttributes attributes;
+		attributes.minimum = 0.0;
+		attributes.maximum = 100.0;
+
+		// 初期反映を移動状態の初期化より先に実施し、保存済みジャンプ上限を使用
+		debugParameter_->Register("移動速度", movementParams_.moveSpeed_, 0, "移動", attributes);
+		debugParameter_->Register("ジャンプ力", movementParams_.jumpPower_, 1, "移動", attributes);
+		debugParameter_->Register("重力", movementParams_.gravity_, 2, "移動", attributes);
+		debugParameter_->Register("スライド開始速度", movementParams_.slideStartSpeed_, 0, "スライド", attributes);
+		debugParameter_->Register("スライド方向補正率", movementParams_.slideSteerRate_, 1, "スライド", attributes);
+		debugParameter_->Register("斜面スライド加速度", movementParams_.slopeSlideAcceleration_, 2, "スライド", attributes);
+		debugParameter_->Register("最大スライド速度", movementParams_.maxSlideSpeed_, 3, "スライド", attributes);
+		debugParameter_->Register("スライド摩擦", movementParams_.slideFriction_, 4, "スライド", attributes);
+		debugParameter_->Register("ジャンプ横初速", movementParams_.jumpMoveBoostSpeed_, 3, "移動", attributes);
+		debugParameter_->Register("壁上り速度", movementParams_.wallClimbSpeed_, 0, "壁上り", attributes);
+		attributes.maximum = 60.0;
+		debugParameter_->Register("壁上り最大時間", movementParams_.wallClimbMaxDuration_, 1, "壁上り", attributes);
+		attributes.maximum = 1000.0;
+		attributes.dragSpeed = 1.0f;
+		debugParameter_->Register("ジャンプ回数", movementParams_.jumpCount_, 4, "移動", attributes);
+
+		// ゲーム挙動へ影響させず選択と永続化を確認するため専用値を登録
+		debugParameter_->RegisterEaseType("イージング", debugEaseType_, 0, "確認用");
+		parameterStore.SetGroupPriority("Player/移動", 0);
+		parameterStore.SetGroupPriority("Player/スライド", 1);
+		parameterStore.SetGroupPriority("Player/壁上り", 2);
+		parameterStore.SetGroupPriority("Player/確認用", 3);
+		debugParameter_->Apply();
+	}
+
 	void Movement::Initialize() {
 		currentMotion_ = Player::Motion::Idle;
 		currentGroundNormal_ = { 0.0f, 1.0f, 0.0f };
@@ -131,6 +163,11 @@ namespace Player {
 	}
 
 	void Movement::Update(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input) {
+		if (debugParameter_) {
+
+			// 編集された設定だけを反映し、速度などの実行状態は維持
+			debugParameter_->ApplyIfDirty();
+		}
 		jumpStartedThisFrame_ = false;
 		landedThisFrame_ = false;
 		lastMoveStartPosition_ = transform.translate;

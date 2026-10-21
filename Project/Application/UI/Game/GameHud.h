@@ -11,6 +11,8 @@
 #include "Player/PlayerIconUI.h"
 #include "Player/PlayerStaminaGauge.h"
 #include "Relic/RelicInventoryUI.h"
+#include "Utility/Color/GamingColor.h"
+#include "Utility/GameTimer/GameTimer.h"
 #include "Weapon/WeaponIconUI.h"
 #include <cstddef>
 #include <cstdint>
@@ -28,8 +30,10 @@ namespace UI::Game {
 		float wallClimbMaxDuration = 0.0f;
 		float remainingTime = 0.0f;
 		float gameStartProgress = 0.0f;
+		float gamePlayElapsedTime = 0.0f;
 		std::uint64_t killCount = 0;
 		std::size_t enemyCount = 0;
+		int upgradeRerollCost = 0;
 		bool isWallClimbGaugeVisible = false;
 		bool isWaitingUpgradeSelection = false;
 	};
@@ -111,11 +115,17 @@ namespace UI::Game {
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 
-		/// @brief 開始待機の進行率に合わせて上下の帯の縮小と開始Textのフェードを更新
-		/// @param progress 開始待機の進行率、0.0fから1.0f
-		void UpdateGameStartPresentation(float progress);
+		/// @brief 武器強化イベント用UIの表示状態と見出しTextの虹色と拡縮演出を更新
+		/// @param deltaTime 停止中も進行する実時間
+		/// @param isVisible 表示する場合はtrue
+		void UpdateUpgradePresentation(float deltaTime, bool isVisible);
 
-		/// @brief 所持金と撃破数とEnemy数の文字表示を更新
+		/// @brief 開始待機とPlayingの経過時間に合わせて帯と開始Textの演出を更新
+		/// @param progress 開始待機の進行率、0.0fから1.0f
+		/// @param gamePlayElapsedTime Playing開始後のゲーム経過時間、秒単位
+		void UpdateGameStartPresentation(float progress, float gamePlayElapsedTime);
+
+		/// @brief 所持金と撃破数とEnemy数と武器強化のリロール費用の文字表示を更新
 		/// @param state 現在フレームの表示情報
 		void UpdateTexts(const GameHudState& state);
 
@@ -135,6 +145,10 @@ namespace UI::Game {
 		MadoEngine::TextHandle enemyCountText_{};
 		MadoEngine::TextHandle moneyText_{};
 		MadoEngine::TextHandle killCountText_{};
+		MadoEngine::TextHandle upgradeText_{};
+		GamingColor upgradeTextColor_;
+		GameTimer upgradeTextPulseTimer_;
+		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };
 		int displayedMoney_ = -1;
 		std::vector<const char*> staticSprites_;
 		std::vector<const char*> staticTexts_;

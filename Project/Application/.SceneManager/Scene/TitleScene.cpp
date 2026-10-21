@@ -30,7 +30,7 @@ void TitleScene::Initialize() {
 	MyCollider::RegisterCollider("TitleGround", CollisionTag::MapBlock, &groundCollider_, &groundPosition_, 1.0f);
 
 	player_ = std::make_unique<Player::Base>();
-	player_->Initialize({}, SceneType::Title);
+	player_->Initialize(commonData_.GetParameterStore(), {}, SceneType::Title);
 
 	MapLimit titleMapLimit;
 	titleMapLimit.min.x = -kTitleMapHorizontalLimit;

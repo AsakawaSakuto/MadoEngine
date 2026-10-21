@@ -2,12 +2,23 @@
 #include "../IGameObject.h"
 #include "PlayerController.h"
 #include "PlayerStatus.h"
+#include "Utility/Parameter/DebugParameter.h"
 
 namespace Player {
 
 	/// @brief Playerの移動処理を担当するクラス
 	class Movement {
 	public:
+		/// @brief 移動状態と調整値の既定構築
+		Movement() = default;
+		Movement(const Movement&) = delete;
+		Movement& operator=(const Movement&) = delete;
+		Movement(Movement&&) = delete;
+		Movement& operator=(Movement&&) = delete;
+
+		/// @brief 共通Inspectorへ移動設定を登録して初期値を反映
+		/// @param parameterStore Movementより長く保持する設定値管理
+		void RegisterDebugParameters(MadoEngine::ParameterStore& parameterStore);
 
 		/// @brief 移動状態を初期化
 		void Initialize();
@@ -214,6 +225,8 @@ namespace Player {
 		Vector3 currentGroundNormal_ = { 0.0f, 1.0f, 0.0f }; // 補間中の接地法線
 
 		Player::Motion currentMotion_ = Player::Motion::Idle;
+		EaseType debugEaseType_ = EaseType::Linear; // 選択と保存の確認用、移動処理では未使用
+		std::unique_ptr<MadoEngine::DebugParameter> debugParameter_;
 	};
 
 }

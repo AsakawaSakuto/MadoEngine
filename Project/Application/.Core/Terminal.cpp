@@ -18,7 +18,7 @@ namespace {
 Terminal::Terminal(HINSTANCE hInstance) {
 	execution_ = std::make_unique<MadoEngine::EngineExecution>();
 	execution_->Initialize(hInstance);
-	sceneManager_ = std::make_unique<SceneManager>();
+	sceneManager_ = std::make_unique<SceneManager>(execution_->GetParameterStore());
 
 	// 初期Scene生成前に利用可能なSceneTypeとFactoryを登録
 	sceneManager_->RegisterScene(SceneType::Test,   [](CommonData&) { return std::make_unique<TestScene>(); });
