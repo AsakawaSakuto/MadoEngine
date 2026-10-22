@@ -53,6 +53,10 @@ namespace Projectile {
 		virtual void OnEnemyHit() {
 		}
 
+		/// @brief 通常更新での消滅確定時に固有処理を実行、全消去時は対象外
+		virtual void OnDestroy() {
+		}
+
 		/// @brief 削除対象かを取得
 		/// @return 削除対象の場合はtrue
 		bool IsDead() const { return isDead_; }

@@ -11,6 +11,7 @@ namespace Projectile {
 		std::uint64_t projectileId = 0;   // 投射物の一意なID
 		std::uint64_t sourceWeaponId = 0; // 発射元Weaponインスタンスの識別番号
 		std::string projectileName;       // 投射物の名前
+		std::string createSoundKey;       // 生成音のリソース名、空の場合は種類ごとの既定音
 		int projectileCount;              // 投射物の生成順序番号
 		int shotMaxCount = 1;             // 補正適用後の最大発射数、Swordでは連続回転数
 		Vector3 ownerPosition;            // 投射物の生成元の座標
@@ -41,7 +42,7 @@ namespace Projectile {
 		FireBall,
 		Pistol,
 		Bow,
-		Orb,
+		Bomb,
 		Trump,
 		Eye,
 		ToxicBoots,
@@ -59,7 +60,7 @@ namespace Projectile {
 		Type::Bow,
 		Type::FireBall,
 		Type::Axe,
-		Type::Orb,
+		Type::Bomb,
 		Type::Trump,
 		Type::Eye,
 		Type::ToxicBoots,
@@ -79,7 +80,7 @@ namespace Projectile {
 		case Type::FireBall: return "FireBall";
 		case Type::Pistol:   return "Pistol";
 		case Type::Bow:      return "Bow";
-		case Type::Orb:      return "Orb";
+		case Type::Bomb:     return "Bomb";
 		case Type::Trump:    return "Trump";
 		case Type::Eye:      return "Eye";
 		case Type::ToxicBoots: return "ToxicBoots";
@@ -132,7 +133,7 @@ namespace Projectile {
 		case Type::FireBall:   return "火球";
 		case Type::Pistol:     return "拳銃";
 		case Type::Bow:        return "弓";
-		case Type::Orb:        return "スピオーブ";
+		case Type::Bomb:       return "ボム";
 		case Type::Trump:      return "デストランプ";
 		case Type::Eye:        return "魔眼";
 		case Type::ToxicBoots: return "毒靴";
@@ -153,7 +154,7 @@ namespace Projectile {
 		case Type::FireBall:    return "着弾時に範囲攻撃\n稀に火傷を付与";
 		case Type::Pistol:      return "近くの敵に向かって\n弾丸を連射する";
 		case Type::Bow:         return "近くの敵に向かって\n貫通する矢を放つ";
-		case Type::Orb:         return "弧を描くオーブを放つ\n稀に凍結を付与";
+		case Type::Bomb:        return "弧を描くボムを放つ\n稀に凍結を付与";
 		case Type::Trump:       return "1～13のダメージ\n稀にJokerが即死させる";
 		case Type::Eye:         return "足元にエリアを展開\n触れた敵にダメージ";
 		case Type::ToxicBoots:  return "足元に魔法陣を設置\n触れた敵に毒を付与";

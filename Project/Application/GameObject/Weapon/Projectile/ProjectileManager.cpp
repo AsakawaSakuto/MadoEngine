@@ -13,10 +13,17 @@ namespace Projectile {
 		constexpr const char* kProjectileDeleteEffectName = "ProjectileDelete";
 		constexpr const char* kExplosionSoundKey = "Explosion";
 
-		/// @brief Projectileの種類と同名の生成音を再生
+		/// @brief 指定音またはProjectileの種類に対応する生成音を再生
 		/// @param type 生成したProjectileの種類
-		void PlayProjectileCreateSound(Projectile::Type type) {
+		/// @param createSoundKey 優先する生成音のリソース名、空の場合は種類ごとの既定音
+		void PlayProjectileCreateSound(Projectile::Type type, const std::string& createSoundKey) {
+
+			// 派生生成元の専用音を優先し、既定の生成音との二重再生を防止
 			const std::string soundKey = [&]() -> std::string {
+				if (!createSoundKey.empty()) {
+					return createSoundKey;
+				}
+
 				if (type == Projectile::Type::Explosion) {
 					return (kExplosionSoundKey);
 				} else {
@@ -101,20 +108,21 @@ namespace Projectile {
 				projectile->Update(deltaTime);
 			}
 		}
-		isTraversingProjectiles_ = false;
 
-		// 全Projectileの更新完了後に削除予約を確定し、実体の破棄前に終了Effectを発火
+		// 削除確定中も走査状態を保ち、消滅時に派生生成されるProjectileを保留
 		projectiles_.erase(
 			std::remove_if(projectiles_.begin(), projectiles_.end(), [this](const std::unique_ptr<IProjectile>& projectile) {
 				if (!projectile || !projectile->IsDead()) {
 					return false;
 				}
 
+				projectile->OnDestroy();
 				PlayProjectileDeleteEffect(*projectile);
 				return true;
 			}),
 			projectiles_.end()
 		);
+		isTraversingProjectiles_ = false;
 
 		FlushPendingProjectiles();
 	}
@@ -190,7 +198,7 @@ namespace Projectile {
 		case Projectile::Type::Explosion:  projectile = std::make_unique<Explosion>();  break;
 		case Projectile::Type::Pistol:     projectile = std::make_unique<Pistol>();     break;
 		case Projectile::Type::Bow:        projectile = std::make_unique<Bow>();        break;
-		case Projectile::Type::Orb:        projectile = std::make_unique<Orb>();        break;
+		case Projectile::Type::Bomb:       projectile = std::make_unique<Bomb>();       break;
 		case Projectile::Type::Trump:      projectile = std::make_unique<Trump>();      break;
 		case Projectile::Type::Eye:        projectile = std::make_unique<Eye>();        break;
 		case Projectile::Type::FireBall:   projectile = std::make_unique<FireBall>();   break;
@@ -207,7 +215,7 @@ namespace Projectile {
 		// 初期化が完了したProjectileだけを管理対象と生成音の再生対象へ登録
 		projectile->Initialize(context);
 		projectiles_.push_back(std::move(projectile));
-		PlayProjectileCreateSound(type);
+		PlayProjectileCreateSound(type, context.createSoundKey);
 	}
 
 	void Manager::FlushPendingProjectiles() {

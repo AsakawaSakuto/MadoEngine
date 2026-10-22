@@ -1,22 +1,26 @@
-#include "Orb.h"
+#include "Bomb.h"
+#include "../ProjectileManager.h"
+#include "Audio/MyAudio.h"
 #include <algorithm>
 #include <cmath>
 
 namespace Projectile {
 
-	Orb::~Orb() {
+	Bomb::~Bomb() {
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
 			MyModel::RequestDestroy(model_);
 		}
 	}
 
-	void Orb::Initialize(InitializeDesc context) {
+	void Bomb::Initialize(InitializeDesc context) {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
 		startPosition_ = ownerPosition_;
 		transform_.translate = startPosition_;
+
+		// 不正なサイズ倍率によるモデルと当たり判定の消失を防止
 		const float safeSizeRate = [&]() {
 			if (std::isfinite(sizeRate_)) {
 				return (std::max(sizeRate_, kMinSizeRate));
@@ -29,6 +33,8 @@ namespace Projectile {
 
 		const Vector3 toTarget = targetPosition_ - startPosition_;
 		const float distance = toTarget.Length();
+
+		// 不正な速度やゼロ除算を避け、飛行時間の計算に正の速度を使用
 		const float safeMoveSpeed = [&]() {
 			if (std::isfinite(moveSpeed_)) {
 				return (std::max(std::fabs(moveSpeed_), kMinMoveSpeed));
@@ -44,12 +50,11 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("white2x2");
-			model->SetColor({ 0.25f, 0.65f, 1.0f, 1.0f });
+			model->SetTexture("BombModelTexture");
 			model->SetTransform(transform_);
-			model->SetCastShadow(false);
+			model->SetCastShadow(true);
 			model->SetReceiveShadow(false);
-			model->SetLightingEnabled(false);
+			model->SetLightingEnabled(true);
 		}
 
 		Sphere hitbox;
@@ -62,7 +67,9 @@ namespace Projectile {
 		hasArrived_ = false;
 	}
 
-	void Orb::Update(float deltaTime) {
+	void Bomb::Update(float deltaTime) {
+
+		// 不正な経過時間による放物線の破綻や到着状態の逆行を防止
 		const float safeDeltaTime = [&]() {
 			if (std::isfinite(deltaTime)) {
 				return (std::max(deltaTime, 0.0f));
@@ -76,7 +83,7 @@ namespace Projectile {
 			const float progress = std::clamp(
 				flightElapsedTime_ / flightDuration_, 0.0f, 1.0f);
 
-			// 直線補間へ4t(1-t)の高さを加え、両端を固定した上向きの放物線を作る
+			// 直線補間へ4t(1-t)の高さを加え、両端を固定した上向きの放物線を形成
 			transform_.translate = Math::Lerp(startPosition_, targetPosition_, progress);
 			transform_.translate.y += 4.0f * arcHeight_ * progress * (1.0f - progress);
 			transform_.rotate.y += kRotationSpeed * safeDeltaTime;
@@ -104,5 +111,35 @@ namespace Projectile {
 		}
 
 		MyDebugLine::AddShape(std::get<Sphere>(hitbox_));
+	}
+
+	void Bomb::OnDestroy() {
+
+		// 爆発音と重ならないよう、爆発生成前にBombの再生を停止
+		if (MyAudio::IsLoaded("Bomb")) {
+			MyAudio::Stop("Bomb");
+		}
+
+		// 消滅確定時だけ生成し、敵命中と更新終了が重なっても爆発を一回に限定
+		Projectile::InitializeDesc context{};
+		context.sourceWeaponId = sourceWeaponId_;
+		context.projectileName = objectName_;
+		context.createSoundKey = "BombExplosion";
+		context.ownerPosition = transform_.translate;
+		context.damage = damage_;
+		context.criticalChance = criticalChance_;
+		context.criticalDamage = criticalDamage_;
+		context.knockbackPower = knockbackPower_;
+		context.statusEffects = statusEffects_;
+		context.explosionDamageDecreaseRate = 0.75f;
+		context.explosionRadius = sizeRate_;
+		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
+
+		// FireBallと同じ爆発表現を消滅地点に一回だけ再生
+		MadoEngine::Particle::PlayDesc desc;
+		desc.transform.translate = transform_.translate;
+		desc.sceneType = SceneType::Game;
+		desc.loopOverride = false;
+		MyParticle3d::Play("DefaultExplosion", desc);
 	}
 }

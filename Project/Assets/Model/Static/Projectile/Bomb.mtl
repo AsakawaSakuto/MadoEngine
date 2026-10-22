@@ -1,0 +1,14 @@
+# Blender 5.2.2 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl Bomb
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/k024g/Downloads/Bomb/BombAlbedo.png
+map_Ks C:/Users/k024g/Downloads/Bomb/BombRough.png
+map_refl C:/Users/k024g/Downloads/Bomb/BombMetal.png
+map_Bump -bm 0.300000 C:/Users/k024g/Downloads/Bomb/Map__109_Normal_Bump.tga

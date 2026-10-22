@@ -5,18 +5,21 @@
 namespace Projectile {
 
 	/// @brief 上向きの放物線を描いて目標地点へ飛ぶProjectile
-	class Orb : public IProjectile {
+	class Bomb : public IProjectile {
 	public:
-		/// @brief Orbのデストラクタ
-		~Orb() override;
+		/// @brief Bombのデストラクタ
+		~Bomb() override;
 
-		/// @brief Orbを初期化
+		/// @brief Bombを初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
-		/// @brief Orbを更新
+		/// @brief Bombを更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
+
+		/// @brief 消滅確定時に現在座標へ爆発を生成
+		void OnDestroy() override;
 
 	private:
 		static constexpr float kBaseModelScale = 0.5f;

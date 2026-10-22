@@ -1,24 +1,24 @@
 {
-    "name": "Orb",
+    "name": "Bomb",
     "statusEffects": {
         "frozen": {
             "applyChance": {
                 "fixedAddValue": 5.0,
-                "isSelected": true,
+                "isSelected": false,
                 "rarityAddValue": 2.0,
-                "value": 15.0
+                "value": 25.0
             },
             "duration": {
                 "fixedAddValue": 1.0,
-                "isSelected": true,
+                "isSelected": false,
                 "rarityAddValue": 0.5,
-                "value": 4.0
+                "value": 2.5
             },
             "slowRate": {
                 "fixedAddValue": 5.0,
-                "isSelected": true,
+                "isSelected": false,
                 "rarityAddValue": 2.0,
-                "value": 40.0
+                "value": 50.0
             }
         }
     },
@@ -30,22 +30,22 @@
             "value": 0.0
         },
         "criticalChance": {
-            "fixedAddValue": 0.0,
-            "isSelected": false,
-            "rarityAddValue": 0.0,
-            "value": 1.0
+            "fixedAddValue": 5.0,
+            "isSelected": true,
+            "rarityAddValue": 5.0,
+            "value": 50.0
         },
         "criticalDamage": {
-            "fixedAddValue": 0.0,
-            "isSelected": false,
-            "rarityAddValue": 0.0,
-            "value": 1.0
+            "fixedAddValue": 0.10000000149011612,
+            "isSelected": true,
+            "rarityAddValue": 0.05000000074505806,
+            "value": 2.0
         },
         "damage": {
-            "fixedAddValue": 2.0,
+            "fixedAddValue": 1.5,
             "isSelected": true,
             "rarityAddValue": 0.5,
-            "value": 8.0
+            "value": 2.5
         },
         "knockbackPower": {
             "fixedAddValue": 0.0,
@@ -69,18 +69,18 @@
             "fixedAddValue": 0.5,
             "isSelected": true,
             "rarityAddValue": 0.05000000074505806,
-            "value": 0.10000000149011612
+            "value": 0.5
         },
         "shotIntervalTime": {
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 0.5
+            "value": 0.25
         },
         "shotMaxCount": {
             "fixedAddValue": 1.0,
             "isSelected": true,
-            "rarityAddValue": 0.0,
+            "rarityAddValue": 0.5,
             "value": 1.0
         },
         "size": {

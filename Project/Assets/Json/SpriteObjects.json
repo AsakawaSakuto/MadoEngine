@@ -492,7 +492,7 @@
                 1.0
             ],
             "scene": "Result",
-            "texture": "Orb",
+            "texture": "Bomb",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
