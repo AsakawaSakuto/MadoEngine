@@ -20,9 +20,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                79.97349548339844,
-                15.236747741699219,
-                205.48927307128906
+                215.380126953125,
+                8.5,
+                170.25759887695313
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -32,9 +32,9 @@
                 0.0
             ],
             "scale": [
-                0.3499999940395355,
-                0.3499999940395355,
-                0.3499999940395355
+                0.5,
+                0.5,
+                0.5
             ],
             "scene": "Game",
             "texture": "Interact_Pad",

@@ -35,6 +35,16 @@
             "type": "BGM",
             "volume": 0.10000000149011612
         },
+        "bomb": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "bombexplosion": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
         "bossspawner": {
             "pitchSemitones": 0.0,
             "type": "SE",
@@ -51,7 +61,7 @@
             "volume": 1.0
         },
         "chestnextrarity": {
-            "pitchSemitones": 4.0,
+            "pitchSemitones": 2.0,
             "type": "SE",
             "volume": 1.0
         },
@@ -96,7 +106,7 @@
             "volume": 1.0
         },
         "exp": {
-            "pitchSemitones": 1.8000000715255737,
+            "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
@@ -111,6 +121,11 @@
             "volume": 1.0
         },
         "fireball": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "hammer": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -175,7 +190,22 @@
             "type": "SE",
             "volume": 1.0
         },
+        "snowcrystal": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
         "startup": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "sword": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "thunder": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -186,6 +216,11 @@
             "volume": 0.10000000149011612
         },
         "toxicboots": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "trump": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0

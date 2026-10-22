@@ -28,7 +28,7 @@ inline constexpr std::array<RarityDefinition, 5> kRarityDefinitions = {
 	RarityDefinition{ Rarity::Uncommon,  "Uncommon",  "アンコモン",    { 0.20f, 0.85f, 0.30f, 1.0f }, 60 },
 	RarityDefinition{ Rarity::Rare,      "Rare",      "レア",         { 0.20f, 0.55f, 1.00f, 1.0f }, 25 },
 	RarityDefinition{ Rarity::Epic,      "Epic",      "エピック",      { 0.70f, 0.30f, 1.00f, 1.0f }, 10 },
-	RarityDefinition{ Rarity::Legendary, "Legendary", "レジェンダリー", { 1.00f, 0.85f, 0.15f, 1.0f }, 50 },
+	RarityDefinition{ Rarity::Legendary, "Legendary", "レジェンダリー", { 1.00f, 0.85f, 0.15f, 1.0f }, 5 },
 	RarityDefinition{ Rarity::Unique,    "Unique",    "ユニーク",      { 1.00f, 0.30f, 0.30f, 1.0f }, 0 },
 };
 

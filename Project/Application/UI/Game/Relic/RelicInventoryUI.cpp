@@ -83,7 +83,9 @@ namespace UI::Game {
 	}
 
 	void RelicInventoryUI::EnsureSlotCount(std::size_t requiredCount) {
-		const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
+
+		// 獲得後に追加されるIconと個数Textも暗幕より先に描画するため、常設武器HUDと同じLayerへ配置
+		const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::Default;
 		while (slots_.size() < requiredCount) {
 			const std::size_t slotIndex = slots_.size();
 			const std::string suffix = std::to_string(slotIndex);
