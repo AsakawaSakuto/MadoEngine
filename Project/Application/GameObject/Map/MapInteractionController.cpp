@@ -177,10 +177,10 @@ void MapInteractionController::UpdateInteractionMarker(float deltaTime) {
 
 	// 接触開始から一周期を繰り返すGameTimerで拡縮の位相を管理
 	if (!interactionMarkerScaleTimer_.IsActive()) {
-		interactionMarkerScaleTimer_.Start(1.0f, true);
+		interactionMarkerScaleTimer_.Start(0.5f, true);
 	}
 	interactionMarkerScaleTimer_.Update(deltaTime);
-	interactionMarkerModel->SetScale(Easing::Lerp(interactionMarkerStartScale_, interactionMarkerEndScale_, interactionMarkerScaleTimer_.GetProgress()));
+	interactionMarkerModel->SetScale(Easing::Lerp(interactionMarkerStartScale_, interactionMarkerEndScale_, interactionMarkerScaleTimer_.GetProgress(), EaseType::EaseOutQuint));
 }
 
 void MapInteractionController::UpdateInteractionText(const Player::Base& player) {

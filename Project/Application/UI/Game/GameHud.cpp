@@ -1,5 +1,6 @@
 #include "GameHud.h"
 #include "GameObject/Map/Map.h"
+#include "Input/MyInput.h"
 #include "Render/Object/2d/Sprite/MySprite.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include "Utility/Easing/Easing.h"
@@ -7,6 +8,19 @@
 #include <format>
 
 namespace {
+	/// @brief 武器強化操作と押下演出を適用するObjectの対応情報
+	struct UpgradeControlDefinition {
+		const char* actionName;
+		std::array<const char*, 3> spriteNames;
+		const char* textName;
+	};
+
+	constexpr UpgradeControlDefinition kUpgradeControlDefinitions[] = {
+		{ "Decision", { "UpgradeDecisionBottom", "UpgradeDecisionBack1", "UpgradeDecisionBack2" }, "UpgradeDecisionText" },
+		{ "Reroll", { "UpgradeRerollBottom", "UpgradeRerollBack1", "UpgradeRerollBack2" }, "UpgradeRerollText" },
+	};
+	constexpr float kUpgradeControlPressedScale = 0.8f;
+	constexpr float kUpgradeControlReleaseDuration = 0.15f;
 	constexpr const char* kGameStartBandNames[] = { "Band_Up", "Band_Bottom" };
 	constexpr float kGameStartBandInitialScaleY = 8.0f;
 	constexpr const char* kGameStartTextName = "StartText";
@@ -258,6 +272,7 @@ namespace UI::Game {
 			}
 			text->SetVisible(isVisible);
 		}
+		UpdateUpgradeControlFeedback(deltaTime, isVisible);
 		if (!isVisible) {
 
 			// 次の武器強化イベントで赤色から循環を開始するため非表示中は時刻を初期化
@@ -302,6 +317,66 @@ namespace UI::Game {
 		Vector4 color = upgradeTextColor_.Update(deltaTime, kUpgradeTextColorChangeTime);
 		color.w = upgradeText->GetColor().w;
 		upgradeText->SetColor(color);
+	}
+
+	void GameHud::UpdateUpgradeControlFeedback(float deltaTime, bool isVisible) {
+		if (!isVisible) {
+
+			// 非表示へ切り替わる時点で変更したScaleを戻し、次回の基準値への倍率の累積を防止
+			for (UpgradeControlFeedbackState& state : upgradeControlFeedback_) {
+				for (std::size_t spriteIndex = 0; spriteIndex < state.sprites.size(); ++spriteIndex) {
+					Sprite* sprite = MySprite::TryGet(state.sprites[spriteIndex]);
+					if (sprite && sprite->GetSceneType() == SceneType::Game) {
+						sprite->SetScale(state.spriteBaseScales[spriteIndex]);
+					}
+				}
+				MadoEngine::Text* text = MyText::TryGet(state.text);
+				if (text && text->GetSceneType() == SceneType::Game) {
+					text->SetScale(state.textBaseScale);
+				}
+				state = {};
+			}
+			return;
+		}
+
+		// 押下は即時に反映し、短い入力でも離した後の補間で反応を視認可能な時間を確保
+		const float releaseProgress = (std::max)(deltaTime, 0.0f) / kUpgradeControlReleaseDuration;
+		for (std::size_t index = 0; index < upgradeControlFeedback_.size(); ++index) {
+			UpgradeControlFeedbackState& state = upgradeControlFeedback_[index];
+			const UpgradeControlDefinition& definition = kUpgradeControlDefinitions[index];
+			if (MyInput::Press(definition.actionName)) {
+				state.pressAmount = 1.0f;
+			} else {
+				state.pressAmount = (std::max)(0.0f, state.pressAmount - releaseProgress);
+			}
+			const float pressedScale = Easing::Lerp(1.0f, kUpgradeControlPressedScale,
+				state.pressAmount, EaseType::EaseOutQuad);
+
+			// Bottomと二枚のBackに同じ倍率を適用し、各SpriteのEditor配置の基準Scaleを維持
+			for (std::size_t spriteIndex = 0; spriteIndex < state.sprites.size(); ++spriteIndex) {
+				const MadoEngine::SpriteHandle spriteHandle = MySprite::Find(definition.spriteNames[spriteIndex]);
+				Sprite* sprite = MySprite::TryGet(spriteHandle);
+				if (!sprite || sprite->GetSceneType() != SceneType::Game) {
+					continue;
+				}
+				if (state.sprites[spriteIndex] != spriteHandle) {
+					state.sprites[spriteIndex] = spriteHandle;
+					state.spriteBaseScales[spriteIndex] = sprite->GetScale();
+				}
+				sprite->SetScale(state.spriteBaseScales[spriteIndex] * pressedScale);
+			}
+
+			// 対応Textも同じ倍率で縮小し、料金表示と反対側の案内は元のサイズを維持
+			const MadoEngine::TextHandle textHandle = MyText::Find(definition.textName);
+			MadoEngine::Text* text = MyText::TryGet(textHandle);
+			if (text && text->GetSceneType() == SceneType::Game) {
+				if (state.text != textHandle) {
+					state.text = textHandle;
+					state.textBaseScale = text->GetScale();
+				}
+				text->SetScale(state.textBaseScale * pressedScale);
+			}
+		}
 	}
 
 	void GameHud::UpdateGameStartPresentation(float progress, float gamePlayElapsedTime) {

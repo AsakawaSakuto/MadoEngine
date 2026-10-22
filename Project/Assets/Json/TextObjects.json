@@ -252,56 +252,6 @@
         },
         {
             "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 55.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "GamePlayTimerText",
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 0.0,
-            "position": [
-                640.0,
-                80.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": false,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "04:59",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
                 1.0,
                 0.0
             ],
@@ -344,10 +294,60 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 0",
+            "text": "Enemy : 3",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 55.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "GamePlayTimerText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
+            "position": [
+                640.0,
+                80.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": false,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "04:38",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -415,21 +415,21 @@
             ],
             "fontFamily": "游ゴシック",
             "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 40.0,
+            "fontSize": 16.0,
             "horizontalAlign": "Left",
             "layer": "Default",
             "lineSpacing": 1.0,
-            "name": "Text3",
+            "name": "FpsText",
             "outlineColor": [
                 0.0,
                 0.0,
                 0.0,
                 1.0
             ],
-            "outlineWidth": 0.0,
+            "outlineWidth": 2.0,
             "position": [
-                1070.0,
-                622.0
+                13.0,
+                670.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,
@@ -439,15 +439,15 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
-            "sdfEnabled": false,
+            "sdfEnabled": true,
             "size": [
                 0.0,
                 0.0
             ],
-            "text": "壁登り",
+            "text": "FPS : 59.5",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": false,
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -494,7 +494,7 @@
                 0.0,
                 0.0
             ],
-            "text": "0",
+            "text": "25",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -511,56 +511,6 @@
                 1.0,
                 1.0,
                 1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 16.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "FpsText",
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 2.0,
-            "position": [
-                13.0,
-                670.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "FPS : 59.9",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                0.0,
-                0.0,
                 1.0
             ],
             "fontFamily": "游ゴシック",
@@ -569,7 +519,7 @@
             "horizontalAlign": "Left",
             "layer": "Default",
             "lineSpacing": 1.0,
-            "name": "Text",
+            "name": "Text3",
             "outlineColor": [
                 0.0,
                 0.0,
@@ -579,7 +529,7 @@
             "outlineWidth": 0.0,
             "position": [
                 1070.0,
-                434.0
+                622.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,
@@ -594,7 +544,7 @@
                 0.0,
                 0.0
             ],
-            "text": "一時停止",
+            "text": "壁登り",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -694,10 +644,60 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 2433119199",
+            "text": "SEED : 1841963596",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 40.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "Text",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
+            "position": [
+                1070.0,
+                434.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": false,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "一時停止",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -744,7 +744,7 @@
                 0.0,
                 0.0
             ],
-            "text": "8099",
+            "text": "2223",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -978,7 +978,7 @@
             ],
             "outlineWidth": 3.0,
             "position": [
-                -200.0,
+                232.0,
                 235.0
             ],
             "renderMode": "Rasterized",
@@ -1008,9 +1008,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.2786937952041626,
                 1.0,
                 0.0,
+                0.09923315048217773,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -1034,8 +1034,8 @@
             "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
-                1.0688858032226563,
-                1.0688858032226563
+                1.0670583248138428,
+                1.0670583248138428
             ],
             "scene": "Game",
             "screen": "BackBuffer",
@@ -1094,7 +1094,7 @@
                 0.0,
                 0.0
             ],
-            "text": "1000",
+            "text": "400",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1152,8 +1152,8 @@
         },
         {
             "anchorPoint": [
-                0.0,
-                0.0
+                0.5,
+                0.5
             ],
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
@@ -1178,8 +1178,8 @@
             ],
             "outlineWidth": 2.0,
             "position": [
-                741.0,
-                618.0
+                783.0,
+                639.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,

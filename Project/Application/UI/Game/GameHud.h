@@ -14,6 +14,7 @@
 #include "Utility/Color/GamingColor.h"
 #include "Utility/GameTimer/GameTimer.h"
 #include "Weapon/WeaponIconUI.h"
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -111,14 +112,28 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
+		/// @brief 武器強化の操作案内ごとの基準Scaleと押下状態
+		struct UpgradeControlFeedbackState {
+			std::array<MadoEngine::SpriteHandle, 3> sprites{};
+			MadoEngine::TextHandle text{};
+			std::array<Vector2, 3> spriteBaseScales{};
+			Vector2 textBaseScale{ 1.0f, 1.0f };
+			float pressAmount = 0.0f;
+		};
+
 		/// @brief 常設SpriteとTextへ個別表示状態を維持したHUD表示切り替えを反映
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 
-		/// @brief 武器強化イベント用UIの表示状態と見出しTextの虹色と拡縮演出を更新
+		/// @brief 武器強化UIの表示状態と操作案内および見出しの演出を更新
 		/// @param deltaTime 停止中も進行する実時間
 		/// @param isVisible 表示する場合はtrue
 		void UpdateUpgradePresentation(float deltaTime, bool isVisible);
+
+		/// @brief 決定とリロールの押下状態に合わせて操作案内の拡縮演出を更新
+		/// @param deltaTime 停止中も進行する実時間
+		/// @param isVisible 操作案内を表示する場合はtrue
+		void UpdateUpgradeControlFeedback(float deltaTime, bool isVisible);
 
 		/// @brief 開始待機とPlayingの経過時間に合わせて帯と開始Textの演出を更新
 		/// @param progress 開始待機の進行率、0.0fから1.0f
@@ -149,6 +164,7 @@ namespace UI::Game {
 		GamingColor upgradeTextColor_;
 		GameTimer upgradeTextPulseTimer_;
 		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };
+		std::array<UpgradeControlFeedbackState, 2> upgradeControlFeedback_{};
 		int displayedMoney_ = -1;
 		std::vector<const char*> staticSprites_;
 		std::vector<const char*> staticTexts_;
