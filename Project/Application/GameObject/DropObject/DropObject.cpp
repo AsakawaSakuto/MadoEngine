@@ -2,6 +2,7 @@
 #include "Audio/MyAudio.h"
 #include "GameObject/Player/Player.h"
 #include <algorithm>
+#include <cmath>
 
 namespace DropObject {
 
@@ -11,12 +12,15 @@ namespace DropObject {
 		constexpr float kBackDuration = 0.2f;    // DropObjectがPlayerから後退する予備動作の継続時間
 
 		constexpr int kExpAmount = 10;           // DropObjectのExpがPlayerに加算する経験値量
-		constexpr int kExpAnimationFrameCount = 4;
-		constexpr float kExpAnimationFrameDuration = 0.15f; // Expシートの1コマの表示時間（秒）
+		constexpr int kSheetAnimationFrameCount = 4;
+		constexpr float kSheetAnimationFrameDuration = 0.15f; // 各Dropシートの1コマの表示時間（秒）
 
 		constexpr float kMoneyRiseSpeed = 8.0f;  // DropObjectのMoneyが後退中に上昇する速度
 		constexpr int kMoneyAmount = 1;          // DropObjectのMoneyがPlayerに加算する所持金量
-		constexpr float kHealAmount = 10.0f;     // DropObjectのHealがPlayerに加算するHP量
+		constexpr float kHealAmount = 50.0f;     // DropObjectのHealがPlayerに加算するHP量
+		constexpr float kSpecialSpawnJumpHeight = 2.0f;    // 特殊Dropの生成位置からの跳ね上がり高さ
+		constexpr float kSpecialSpawnRiseDuration = 0.3f;  // 特殊Dropの上昇時間（秒）
+		constexpr float kSpecialSpawnFallDuration = 0.7f;  // 特殊Dropの落下時間（秒）
 	}
 
 	Base::~Base() {
@@ -24,34 +28,20 @@ namespace DropObject {
 	}
 
 	void Base::Initialize(Type type, const Vector3& position, int index) {
-		type_ = type;
 		isReleased_ = false;
 		colliderName_ = "DropObject" + std::to_string(index);
 		modelName_ = "DropObject" + std::to_string(index);
 
-		model_ = MyModel::Create(modelName_, "Plane", SceneType::Game);
+		model_ = MyModel::Create(modelName_, "DropObjectPlane", SceneType::Game);
 
 		AABB aabb;
 		aabb.center = position;
 		aabb.min = { -0.125f, 0.0f, -0.125f };
 		aabb.max = { 0.125f, 0.25f, 0.125f };
 
-		std::string textureName;
-		switch (type_) {
-		case Type::Exp:
-			textureName = "ExpSheet";
-			break;
-		case Type::Money:
-			textureName = "Coin";
-			break;
-		case Type::Heal:
-			textureName = "Heal";
-			break;
-		}
-
 		colliderShape_ = aabb;
 
-		// 生存状態を参照して未使用Pool枠を除外し、配置ごとのCollider再登録を回避
+		// 取得可否を参照して未使用枠と出現演出中を衝突対象から除外し、Collider再登録を回避
 		MyCollider::RegisterCollider(
 			colliderName_,
 			CollisionTag::DropObjectHitBox,
@@ -59,21 +49,10 @@ namespace DropObject {
 			&transform_.translate,
 			0.0f,
 			nullptr,
-			&isAlive_
+			&isCollectible_
 		);
 
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture(textureName);
-
-			// 再生設定だけを渡し、コマ送りとUV範囲の管理はModelへ委譲
-			if (type_ == Type::Exp) {
-				MadoEngine::SpriteSheetAnimationSettings settings;
-				settings.columns = kExpAnimationFrameCount;
-				settings.rows = 1;
-				settings.frameDuration = kExpAnimationFrameDuration;
-				settings.loop = true;
-				model->SetSpriteSheetAnimation(settings);
-			}
 
 			// Cameraの俯仰角とRollを含む回転で画面への正対を維持
 			model->SetUseBillboard(true);
@@ -81,6 +60,53 @@ namespace DropObject {
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);
 			model->SetLightingEnabled(false);
+		}
+		Activate(type, position);
+	}
+
+	void Base::Activate(Type type, const Vector3& position) {
+		std::string textureName;
+
+		// 共用枠の再配置で以前の種類の画像を持ち越さないよう表示を種類から再設定
+		switch (type) {
+		case Type::Exp:
+			textureName = "ExpSheet";
+			break;
+		case Type::Money:
+			textureName = "Coin";
+			break;
+		case Type::Heal:
+			textureName = "HealSheet";
+			break;
+		case Type::AttackUpper:
+			textureName = "DamageUpperSheet";
+			break;
+		case Type::SpeedUpper:
+			textureName = "SpeedUpperSheet";
+			break;
+		case Type::DefuseUpper:
+			textureName = "DefenseUpperSheet";
+			break;
+		default:
+			return;
+		}
+		type_ = type;
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTexture(textureName);
+			if (type_ == Type::Money) {
+
+				// 静止画像へ切り替える際に前の種類のシートUVを解除
+				model->ClearSpriteSheetAnimation();
+			} else {
+
+				// Expと特殊4種類は同じ横4コマ構成を使用し、コマ送りをModelへ委譲
+				MadoEngine::SpriteSheetAnimationSettings settings;
+				settings.columns = kSheetAnimationFrameCount;
+				settings.rows = 1;
+				settings.frameDuration = kSheetAnimationFrameDuration;
+				settings.loop = true;
+				model->SetSpriteSheetAnimation(settings);
+			}
 		}
 		Activate(position);
 	}
@@ -92,15 +118,25 @@ namespace DropObject {
 		transform_.rotate = {};
 		transform_.scale = { 0.2f, 0.2f, 0.2f };
 		targetPosition_ = position;
+		spawnPosition_ = position;
 		backTimer_.Reset();
+		spawnMotionTimer_.Reset();
 		collectedRewardAmount_ = 0;
 		isMoving_ = type_ == Type::Money;
 		isAlive_ = true;
+		isCollectible_ = true;
 		if (type_ == Type::Money) {
 
 			// Moneyだけは配置直後から上昇付きの吸着予備動作を開始
 			transform_.scale = { 0.1f, 0.1f, 0.1f };
 			backTimer_.Start(kBackDuration);
+		} else if (type_ != Type::Exp) {
+
+			// 特殊4種類は生成位置を着地点として固定し、出現演出の完了まで回収を禁止
+			transform_.scale = { 0.75f, 0.75f, 0.75f };
+
+			isCollectible_ = false;
+			spawnMotionTimer_.Start(kSpecialSpawnRiseDuration + kSpecialSpawnFallDuration);
 		}
 
 		std::get<AABB>(colliderShape_).center = position;
@@ -109,7 +145,7 @@ namespace DropObject {
 
 			// Poolの再利用直後にUV範囲と先頭コマを復元し、前のDropの再生位相の持ち越しを防止
 			model->SetUVTransform({});
-			if (type_ == Type::Exp) {
+			if (type_ != Type::Money) {
 				model->PlaySpriteSheetAnimation();
 			}
 			model->SetVisible(true);
@@ -118,10 +154,12 @@ namespace DropObject {
 
 	void Base::Deactivate() {
 
-		// Colliderが参照する生存状態とModel表示を同時に停止し、リソースは次の配置まで保持
+		// 回収可否と生存状態、Model表示を同時に停止し、リソースは次の配置まで保持
 		isAlive_ = false;
+		isCollectible_ = false;
 		isMoving_ = false;
 		backTimer_.Reset();
+		spawnMotionTimer_.Reset();
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->StopSpriteSheetAnimation();
 			model->SetVisible(false);
@@ -129,7 +167,9 @@ namespace DropObject {
 	}
 
 	void Base::AttractTo(const Vector3& targetPosition) {
-		if (!isAlive_) {
+
+		// 外部からの吸着要求でも出現演出中の取得禁止を維持
+		if (!isAlive_ || !isCollectible_) {
 			return;
 		}
 
@@ -167,6 +207,12 @@ namespace DropObject {
 
 		// 回収済みPool枠を再配置まで更新対象外に設定
 		if (!isAlive_) {
+			return;
+		}
+
+		// 着地したFrameもここで終了し、生成位置での停止を確定してから次回に回収を開始
+		if (!isCollectible_) {
+			UpdateSpawnMotion(deltaTime);
 			return;
 		}
 
@@ -233,8 +279,41 @@ namespace DropObject {
 		backTimer_.Update(deltaTime);
 	}
 
+	void Base::UpdateSpawnMotion(float deltaTime) {
+
+		// 不正な経過時間では進行を止め、補間計算への非有限値の混入を防止
+		if (std::isfinite(deltaTime) && deltaTime > 0.0f) {
+			spawnMotionTimer_.Update(deltaTime);
+		}
+		const float elapsedTime = spawnMotionTimer_.GetElapsedTime();
+		transform_.translate = spawnPosition_;
+		if (spawnMotionTimer_.IsFinished()) {
+
+			// 補間誤差を残さず元の生成位置で停止し、出現演出から取得可能状態へ遷移
+			isCollectible_ = true;
+		} else if (elapsedTime < kSpecialSpawnRiseDuration) {
+
+			// 上昇は終端で減速する二次補間で短く跳ね上がり、頂点で速度をゼロへ収束
+			const float progress = elapsedTime / kSpecialSpawnRiseDuration;
+			const float remaining = 1.0f - progress;
+			transform_.translate.y += kSpecialSpawnJumpHeight * (1.0f - remaining * remaining);
+		} else {
+
+			// 落下時間を上昇より長く確保し、頂点から緩やかに加速して着地点へ復帰
+			const float progress = std::clamp(
+				(elapsedTime - kSpecialSpawnRiseDuration) / kSpecialSpawnFallDuration, 0.0f, 1.0f);
+			transform_.translate.y += kSpecialSpawnJumpHeight * (1.0f - progress * progress);
+		}
+
+		// 演出中も描画と衝突形状の座標を同期し、着地時の古い空中座標の参照を防止
+		std::get<AABB>(colliderShape_).center = transform_.translate;
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetPosition(transform_.translate);
+		}
+	}
+
 	void Base::Collect(Player::Base& player) {
-		if (!isAlive_) {
+		if (!isAlive_ || !isCollectible_) {
 			return;
 		}
 
@@ -249,8 +328,8 @@ namespace DropObject {
 			break;
 		}
 
-		// ExpのSEはManagerで同Frameの回収を集約し、個数分の同時再生を回避
-		if (type_ != Type::Exp) {
+		// 個別SEは音源のあるMoneyとHealに限定し、ExpのSEはManagerで同Frameの回収を集約
+		if (type_ == Type::Money || type_ == Type::Heal) {
 			MyAudio::Play(DropObjectTypeToString(type_));
 		}
 

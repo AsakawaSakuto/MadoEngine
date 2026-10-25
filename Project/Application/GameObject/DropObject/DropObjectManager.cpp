@@ -1,6 +1,7 @@
 #include "DropObjectManager.h"
 #include "Audio/MyAudio.h"
 #include "GameObject/Player/Player.h"
+#include "Utility/Random.h"
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -9,6 +10,11 @@ namespace DropObject {
 
 	namespace {
 		constexpr std::array<const char*, 5> kExpSoundKeys = { "Exp1", "Exp2", "Exp3", "Exp4", "Exp5" };
+		constexpr std::array<Type, 4> kSpecialTypes = {
+			Type::Heal, Type::AttackUpper, Type::SpeedUpper, Type::DefuseUpper
+		};
+		constexpr int kJarSpecialDropChancePercent = 50;
+		constexpr int kEliteSpecialDropChancePercent = 25;
 	}
 
 	Manager& Manager::GetInstance() {
@@ -20,6 +26,24 @@ namespace DropObject {
 		Clear();
 		InitializePool(expPool_, Type::Exp, 0);
 		InitializePool(moneyPool_, Type::Money, static_cast<int>(kExpPoolCapacity));
+
+		// 特殊4種類は共通の16枠を再利用し、ExpとMoneyの枠や上書き報酬から分離
+		for (std::size_t index = 0; index < specialDropObjects_.size(); ++index) {
+			auto& object = specialDropObjects_[index];
+			if (!object) {
+				object = std::make_unique<Base>();
+				object->Initialize(Type::Heal, {}, static_cast<int>(kExpPoolCapacity + kMoneyPoolCapacity + index));
+			}
+			object->Deactivate();
+		}
+	}
+
+	void Manager::EnsureInitialized() {
+
+		// Scene外の単独利用でも全枠を先に確保し、後続の初期化による配置消失を防止
+		if (!expPool_.entries[0].object || !moneyPool_.entries[0].object || !specialDropObjects_[0]) {
+			Initialize();
+		}
 	}
 
 	template<std::size_t Capacity>
@@ -38,7 +62,6 @@ namespace DropObject {
 	}
 
 	void Manager::Update(float deltaTime, Player::Base& player) {
-		const Vector3 targetPosition = player.GetPosition();
 		expCollectionSoundCooldown_ = (std::max)(0.0f, expCollectionSoundCooldown_ - (std::max)(0.0f, deltaTime));
 
 		// 種類ごとに回収を完結させ、ExpとMoneyの蓄積報酬の混在を防止
@@ -50,20 +73,13 @@ namespace DropObject {
 			PlayExpCollectionSound(player);
 		}
 
-		for (auto& dropObject : dropObjects_) {
-			dropObject->SetTargetPosition(targetPosition);
+		// 回収済みの特殊Dropも保持し、次回の出現時にModelとColliderを再利用
+		for (auto& dropObject : specialDropObjects_) {
+			if (!dropObject || !dropObject->IsAlive()) {
+				continue;
+			}
 			dropObject->Update(deltaTime, player);
 		}
-
-		// Update中に回収済みとなったObjectを全更新完了後にまとめて破棄
-		dropObjects_.erase(
-			std::remove_if(
-				dropObjects_.begin(),
-				dropObjects_.end(),
-				[](const std::unique_ptr<Base>& dropObject) {
-					return !dropObject || !dropObject->IsAlive();
-				}),
-			dropObjects_.end());
 	}
 
 	template<std::size_t Capacity>
@@ -103,13 +119,9 @@ namespace DropObject {
 	}
 
 	void Manager::Spawn(Type type, const Vector3& position) {
+		EnsureInitialized();
 
-		// Scene外からの単独利用でも他種Dropの生成前に確保し、後続の初期化による消失を防止
-		if (!expPool_.entries[0].object || !moneyPool_.entries[0].object) {
-			Initialize();
-		}
-
-		// ExpとMoneyは独立した固定容量へ振り分け、Healだけを都度生成
+		// 通常報酬と特殊Dropで容量と満杯時の扱いを分離
 		if (type == Type::Exp) {
 			SpawnPooled(expPool_, position);
 			return;
@@ -119,10 +131,51 @@ namespace DropObject {
 			return;
 		}
 
-		auto newDropObject = std::make_unique<Base>();
-		newDropObject->Initialize(type, position, spawnCount_);
-		dropObjects_.push_back(std::move(newDropObject));
-		spawnCount_++;
+		switch (type) {
+		case Type::Heal:
+		case Type::AttackUpper:
+		case Type::SpeedUpper:
+		case Type::DefuseUpper:
+			SpawnSpecial(type, position);
+			break;
+		default:
+			break;
+		}
+	}
+
+	bool Manager::TrySpawnSpecial(SpecialDropSource source, const Vector3& position) {
+		int chancePercent = 0;
+
+		// 発生元ごとに一度だけ抽選し、種類ごとの独立抽選による複数出現を防止
+		switch (source) {
+		case SpecialDropSource::Jar:
+			chancePercent = kJarSpecialDropChancePercent;
+			break;
+		case SpecialDropSource::EliteEnemy:
+			chancePercent = kEliteSpecialDropChancePercent;
+			break;
+		default:
+			return false;
+		}
+		if (MyRand::GetInt(1, 100) > chancePercent) {
+			return false;
+		}
+
+		EnsureInitialized();
+		const std::size_t typeIndex = static_cast<std::size_t>(MyRand::GetInt(0, static_cast<int>(kSpecialTypes.size()) - 1));
+		return SpawnSpecial(kSpecialTypes[typeIndex], position);
+	}
+
+	bool Manager::SpawnSpecial(Type type, const Vector3& position) {
+
+		// 使用中の特殊Dropは上書きせず、回収で空いた枠だけを再利用
+		for (auto& dropObject : specialDropObjects_) {
+			if (!dropObject->IsAlive()) {
+				dropObject->Activate(type, position);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void Manager::AttractAllExp(const Vector3& targetPosition) {
@@ -189,7 +242,13 @@ namespace DropObject {
 	}
 
 	void Manager::Clear() {
-		dropObjects_.clear();
+
+		// 配置のリセット時も特殊Dropの確保枠を保持して再生成負荷を抑制
+		for (auto& dropObject : specialDropObjects_) {
+			if (dropObject) {
+				dropObject->Deactivate();
+			}
+		}
 		ClearPool(expPool_);
 		ClearPool(moneyPool_);
 		expCollectionSoundCooldown_ = 0.0f;
@@ -216,6 +275,8 @@ namespace DropObject {
 		// Scene一括削除より先に所有Objectを解放し、Collider参照の寿命を維持
 		expPool_ = {};
 		moneyPool_ = {};
-		spawnCount_ = static_cast<int>(kExpPoolCapacity + kMoneyPoolCapacity);
+		for (auto& dropObject : specialDropObjects_) {
+			dropObject.reset();
+		}
 	}
 }

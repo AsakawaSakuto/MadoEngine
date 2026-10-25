@@ -430,6 +430,11 @@ namespace Enemy {
 
 		DropObject::Manager::GetInstance().Spawn(DropObject::Type::Exp, transform_.translate);
 		DropObject::Manager::GetInstance().Spawn(DropObject::Type::Money, transform_.translate);
+
+		// Elite属性の撃破時だけ追加報酬を一度抽選し、通常敵や範囲外削除からの出現を防止
+		if (bonusType_ == Data::BonusType::Elite) {
+			DropObject::Manager::GetInstance().TrySpawnSpecial(DropObject::SpecialDropSource::EliteEnemy, transform_.translate);
+		}
 		isDeathRewardSpawned_ = true;
 	}
 

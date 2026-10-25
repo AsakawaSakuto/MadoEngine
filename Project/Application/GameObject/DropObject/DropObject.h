@@ -25,10 +25,15 @@ namespace DropObject {
 		/// @param position 配置先のワールド座標
 		void Activate(const Vector3& position);
 
+		/// @brief 確保済みのModelとColliderを再利用して種類と表示を切り替えて配置
+		/// @param type 配置するDropObjectの種類
+		/// @param position 配置先のワールド座標
+		void Activate(Type type, const Vector3& position);
+
 		/// @brief ModelとColliderを保持したまま回収と表示を停止
 		void Deactivate();
 
-		/// @brief 配置中のDropの予備動作を終了して指定座標への吸着を開始
+		/// @brief 取得可能なDropの予備動作を終了して指定座標への吸着を開始
 		/// @param targetPosition 吸着先のワールド座標
 		void AttractTo(const Vector3& targetPosition);
 
@@ -49,9 +54,9 @@ namespace DropObject {
 		/// @param player 報酬の受取先Player
 		void Update(float deltaTime, Player::Base& player);
 
-		/// @brief 移動状態を設定
+		/// @brief 取得可能なDropの移動状態を設定
 		/// @param isMoving TargetPositionへ移動する場合はtrue
-		void SetMoving(bool isMoving) { isMoving_ = isMoving; }
+		void SetMoving(bool isMoving) { isMoving_ = isMoving && isCollectible_; }
 
 		/// @brief 移動先座標を設定
 		/// @param targetPosition 移動先座標
@@ -71,6 +76,10 @@ namespace DropObject {
 		/// @param player 報酬の受取先Player、nullptrの場合は報酬加算なし
 		void UpdateInternal(float deltaTime, Player::Base* player);
 
+		/// @brief 特殊Dropの跳ね上がりと緩やかな落下を更新し、生成位置への着地で取得を許可
+		/// @param deltaTime 1フレームの経過時間
+		void UpdateSpawnMotion(float deltaTime);
+
 		/// @brief Pool報酬の回収通知またはPlayerの回復を確定して取得済み状態へ変更
 		/// @param player 報酬の受取先Player
 		void Collect(Player::Base& player);
@@ -78,13 +87,16 @@ namespace DropObject {
 		Type type_ = Type::Exp;
 		bool isMoving_ = false;
 		bool isAlive_ = false;
+		bool isCollectible_ = false;
 		bool isReleased_ = false;
 		int collectedRewardAmount_ = 0;
 
 		Vector3 targetPosition_ = { 0.0f, 0.0f, 0.0f };
+		Vector3 spawnPosition_ = { 0.0f, 0.0f, 0.0f };
 		std::string colliderName_;
 		std::string modelName_;
 
 		GameTimer backTimer_;
+		GameTimer spawnMotionTimer_;
 	};
 }

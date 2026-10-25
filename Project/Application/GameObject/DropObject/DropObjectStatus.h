@@ -12,6 +12,12 @@ namespace DropObject {
 		DefuseUpper,
 	};
 
+	/// @brief 特殊Dropの出現確率を決定する発生元
+	enum class SpecialDropSource {
+		Jar,
+		EliteEnemy,
+	};
+
 	/// @brief DropObjectの種類を名前へ変換
 	/// @param type 変換するDropObjectの種類
 	/// @return DropObjectの名前

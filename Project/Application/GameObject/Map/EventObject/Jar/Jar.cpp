@@ -1,4 +1,5 @@
 #include "Jar.h"
+#include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
 
 namespace {
@@ -144,6 +145,9 @@ bool Jar::Interact(Player::Base& player) {
 		player.AddMoney(rewardAmount);
 		Logger::Output("Jarを取得しました。所持金を" + std::to_string(rewardAmount) + "加算しました。", Logger::Level::Application);
 	}
+
+	// 通常報酬の確定後、Jarの種別やサイズにかかわらず破壊位置への特殊Dropを一度抽選
+	DropObject::Manager::GetInstance().TrySpawnSpecial(DropObject::SpecialDropSource::Jar, transform_.translate);
 
 	// Jar削除後も破壊位置で演出を完走できるよう独立したSequenceとして再生
 	MadoEngine::EffectSequence::EffectSequencePlayDesc effectDesc;

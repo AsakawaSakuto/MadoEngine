@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <vector>
 
 namespace Player {
 	class Base;
@@ -19,7 +18,7 @@ namespace DropObject {
 		/// @return DropObjectの管理Instance
 		static Manager& GetInstance();
 
-		/// @brief Exp用の512枠とMoney用の128枠のModel、Colliderを事前確保
+		/// @brief Exp用512枠、Money用128枠、特殊4種類共用16枠のModelとColliderを事前確保
 		void Initialize();
 
 		/// @brief DropObjectを更新
@@ -31,6 +30,12 @@ namespace DropObject {
 		/// @param type DropObjectの種類
 		/// @param position 生成位置
 		void Spawn(Type type, const Vector3& position);
+
+		/// @brief 発生元の確率で特殊4種類から等確率の一個を生成
+		/// @param source 出現確率を決定する発生元、Jarは5%、EliteEnemyは25%
+		/// @param position 生成位置のワールド座標
+		/// @return 抽選に当選し、特殊Dropの空き枠へ生成できた場合はtrue
+		bool TrySpawnSpecial(SpecialDropSource source, const Vector3& position);
 
 		/// @brief 配置中のExpすべてを指定座標へ吸着開始
 		/// @param targetPosition Playerの現在ワールド座標
@@ -45,6 +50,7 @@ namespace DropObject {
 	private:
 		static constexpr std::size_t kExpPoolCapacity = 512;
 		static constexpr std::size_t kMoneyPoolCapacity = 128;
+		static constexpr std::size_t kSpecialPoolCapacity = 16;
 		static constexpr float kExpCollectionSoundInterval = 0.05f;
 
 		struct PoolEntry {
@@ -61,6 +67,9 @@ namespace DropObject {
 			std::uint64_t spawnOrder = 0;
 			std::uint64_t pendingAmount = 0;
 		};
+
+		/// @brief 単独利用時に各Poolを初回のみ事前確保
+		void EnsureInitialized();
 
 		/// @brief 指定したPoolのModelとColliderを事前確保
 		/// @param pool 事前確保するPool
@@ -87,6 +96,12 @@ namespace DropObject {
 		template<std::size_t Capacity>
 		void SpawnPooled(Pool<Capacity>& pool, const Vector3& position);
 
+		/// @brief 特殊4種類の共用枠へ配置し、満杯時は追加生成を中止
+		/// @param type 配置する特殊Dropの種類
+		/// @param position 配置先のワールド座標
+		/// @return 空き枠へ配置できた場合はtrue
+		bool SpawnSpecial(Type type, const Vector3& position);
+
 		/// @brief Poolの確保枠を保持して配置と蓄積報酬をリセット
 		/// @param pool リセットするPool
 		template<std::size_t Capacity>
@@ -101,9 +116,7 @@ namespace DropObject {
 
 		Pool<kExpPoolCapacity> expPool_;
 		Pool<kMoneyPoolCapacity> moneyPool_;
-		std::vector<std::unique_ptr<Base>> dropObjects_;
+		std::array<std::unique_ptr<Base>, kSpecialPoolCapacity> specialDropObjects_;
 		float expCollectionSoundCooldown_ = 0.0f;
-
-		int spawnCount_ = static_cast<int>(kExpPoolCapacity + kMoneyPoolCapacity);
 	};
 }
