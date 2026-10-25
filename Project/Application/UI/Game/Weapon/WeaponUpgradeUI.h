@@ -1,5 +1,6 @@
 #pragma once
 #include "WeaponUpgradeCardUI.h"
+#include "Utility/GameTimer/GameTimer.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -76,6 +77,7 @@ namespace UI::Game {
 		std::uint64_t selectedGeneration_ = 0;
 		std::size_t decisionChoiceIndex_ = 0;
 		std::uint64_t decisionGeneration_ = 0;
+		GameTimer decisionInputDelayTimer_;
 		bool isDecisionAnimationPlaying_ = false;
 	};
 }

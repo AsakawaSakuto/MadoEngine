@@ -5,6 +5,32 @@
 /// InputManagerへの簡潔なアクセスを提供
 namespace MyInput {
 
+	/// @brief 中立復帰で再入力可能なスティックの横方向入力を登録
+	/// @param actionName 入力の登録名
+	/// @param stick 参照するスティック
+	inline void RegisterStickHorizontalInput(const std::string& actionName, MadoEngine::GamePadStick stick = MadoEngine::GamePadStick::Left) {
+		MadoEngine::InputManager::GetInstance().SetStickHorizontalInput(actionName, stick);
+	}
+
+	/// @brief 登録済みのスティック横方向入力を解除
+	/// @param actionName 入力の登録名
+	inline void RemoveStickHorizontalInput(const std::string& actionName) {
+		MadoEngine::InputManager::GetInstance().RemoveStickHorizontalInput(actionName);
+	}
+
+	/// @brief 現在Frameのスティック横方向の単発入力を取得
+	/// @param actionName 入力の登録名
+	/// @return 左の場合は-1、右の場合は1、入力なしの場合は0
+	inline int GetStickHorizontalTrigger(const std::string& actionName) {
+		return MadoEngine::InputManager::GetInstance().GetStickHorizontalTrigger(actionName);
+	}
+
+	/// @brief 登録済み入力の検出結果を破棄して中立復帰を待機
+	/// @param actionName 入力の登録名
+	inline void ResetStickHorizontalInput(const std::string& actionName) {
+		MadoEngine::InputManager::GetInstance().ResetStickHorizontalInput(actionName);
+	}
+
 	/// @brief 入力アクションに複数のキー/ボタンを登録
 	/// @param actionName アクション名（例: "Jump"）
 	/// @param keyboardKeys キーボードのキーコード配列（例: {DIK_SPACE, DIK_Z}）

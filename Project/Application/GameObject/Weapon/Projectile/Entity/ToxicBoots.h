@@ -1,5 +1,6 @@
 #pragma once
 #include "../IProjectile.h"
+#include "Render/Object/3d/Particle/ParticleTypes.h"
 #include <string>
 
 namespace Projectile {
@@ -32,6 +33,7 @@ namespace Projectile {
 		static constexpr Vector4 kColorEnd = { 0.0f, 1.0f, 0.0f, 0.95f };
 
 		MadoEngine::ModelHandle model_{};
+		MadoEngine::Particle::EffectHandle particle_{};
 		std::string objectName_;
 		GameTimer reductionTimer_;
 		GameTimer colorAnimationTimer_;

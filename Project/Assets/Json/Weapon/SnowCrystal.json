@@ -1,17 +1,77 @@
 {
     "name": "SnowCrystal",
     "upgradeStatus": {
-        "damage": { "value": 8.0, "fixedAddValue": 2.0, "rarityAddValue": 1.0, "isSelected": true },
-        "shotMaxCount": { "value": 1.0, "fixedAddValue": 1.0, "rarityAddValue": 0.5, "isSelected": true },
-        "shotIntervalTime": { "value": 0.25, "fixedAddValue": 0.0, "rarityAddValue": 0.0, "isSelected": false },
-        "shotCooldown": { "value": 1.5, "fixedAddValue": 2.5, "rarityAddValue": 2.5, "isSelected": true },
-        "criticalChance": { "value": 10.0, "fixedAddValue": 5.0, "rarityAddValue": 5.0, "isSelected": true },
-        "criticalDamage": { "value": 2.0, "fixedAddValue": 0.0, "rarityAddValue": 0.0, "isSelected": false },
-        "size": { "value": 1.0, "fixedAddValue": 0.25, "rarityAddValue": 0.25, "isSelected": true },
-        "bounceCount": { "value": 0.0, "fixedAddValue": 0.0, "rarityAddValue": 0.0, "isSelected": false },
-        "penetrationCount": { "value": 0.0, "fixedAddValue": 0.0, "rarityAddValue": 0.0, "isSelected": false },
-        "knockbackPower": { "value": 1.0, "fixedAddValue": 0.0, "rarityAddValue": 0.0, "isSelected": false },
-        "lifeTime": { "value": 5.0, "fixedAddValue": 0.0, "rarityAddValue": 0.0, "isSelected": false },
-        "speed": { "value": 18.0, "fixedAddValue": 1.0, "rarityAddValue": 0.5, "isSelected": true }
+        "bounceCount": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 0.0
+        },
+        "criticalChance": {
+            "fixedAddValue": 5.0,
+            "isSelected": true,
+            "rarityAddValue": 5.0,
+            "value": 10.0
+        },
+        "criticalDamage": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 2.0
+        },
+        "damage": {
+            "fixedAddValue": 2.0,
+            "isSelected": true,
+            "rarityAddValue": 1.0,
+            "value": 5.0
+        },
+        "knockbackPower": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 1.0
+        },
+        "lifeTime": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 5.0
+        },
+        "penetrationCount": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 0.0
+        },
+        "shotCooldown": {
+            "fixedAddValue": 2.5,
+            "isSelected": true,
+            "rarityAddValue": 2.5,
+            "value": 1.5
+        },
+        "shotIntervalTime": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 0.25
+        },
+        "shotMaxCount": {
+            "fixedAddValue": 1.0,
+            "isSelected": true,
+            "rarityAddValue": 0.5,
+            "value": 1.0
+        },
+        "size": {
+            "fixedAddValue": 0.25,
+            "isSelected": true,
+            "rarityAddValue": 0.25,
+            "value": 1.0
+        },
+        "speed": {
+            "fixedAddValue": 1.0,
+            "isSelected": true,
+            "rarityAddValue": 0.5,
+            "value": 18.0
+        }
     }
 }

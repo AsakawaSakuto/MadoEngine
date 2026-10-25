@@ -13,6 +13,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace MadoEngine {
@@ -329,6 +330,11 @@ public:
 	/// @param deltaTime 前フレームからの経過時間
 	void UpdateAll(SceneType currentSceneType, float deltaTime);
 
+	/// @brief 指定Sceneのスプライトシート再生の時間進行を制御
+	/// @param sceneType 対象のScene
+	/// @param paused 時間進行を停止する場合はtrue
+	void SetSpriteSheetAnimationsPaused(SceneType sceneType, bool paused);
+
 	/// @brief 現在SceneのModelを描画
 	/// @param currentSceneType 現在のScene
 	void DrawAll(SceneType currentSceneType);
@@ -461,6 +467,7 @@ private:
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
 	Render::PSORegistry* psoRegistry_ = nullptr;
 	Camera activeCamera_;
+	std::unordered_set<SceneType> spriteSheetAnimationPausedScenes_;
 	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>> sharedData_;
 	std::unordered_map<std::string, std::string> aliases_;
 	std::vector<ModelSlot> modelSlots_;

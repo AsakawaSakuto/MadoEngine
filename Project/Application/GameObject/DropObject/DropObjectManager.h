@@ -45,6 +45,7 @@ namespace DropObject {
 	private:
 		static constexpr std::size_t kExpPoolCapacity = 512;
 		static constexpr std::size_t kMoneyPoolCapacity = 128;
+		static constexpr float kExpCollectionSoundInterval = 0.05f;
 
 		struct PoolEntry {
 			std::unique_ptr<Base> object;
@@ -68,12 +69,17 @@ namespace DropObject {
 		template<std::size_t Capacity>
 		void InitializePool(Pool<Capacity>& pool, Type type, int firstIndex);
 
-		/// @brief 使用中のPool枠を更新して同種の蓄積報酬を回収分へ加算
+		/// @brief 使用中のPool枠を更新して同種の蓄積報酬を回収分へ加算し、回収成立を通知
 		/// @param pool 更新するPool
 		/// @param deltaTime 1フレームの経過時間
 		/// @param player 報酬を受け取るPlayer
+		/// @return 一個以上の報酬回収が成立した場合はtrue
 		template<std::size_t Capacity>
-		void UpdatePool(Pool<Capacity>& pool, float deltaTime, Player::Base& player);
+		bool UpdatePool(Pool<Capacity>& pool, float deltaTime, Player::Base& player);
+
+		/// @brief 経験値進行度に応じた五段階の取得SEを間隔制限付きで再生
+		/// @param player 経験値加算後の状態を参照するPlayer
+		void PlayExpCollectionSound(const Player::Base& player);
 
 		/// @brief 指定したPoolの空き枠または最も古い枠へ配置
 		/// @param pool 配置先のPool
@@ -96,6 +102,7 @@ namespace DropObject {
 		Pool<kExpPoolCapacity> expPool_;
 		Pool<kMoneyPoolCapacity> moneyPool_;
 		std::vector<std::unique_ptr<Base>> dropObjects_;
+		float expCollectionSoundCooldown_ = 0.0f;
 
 		int spawnCount_ = static_cast<int>(kExpPoolCapacity + kMoneyPoolCapacity);
 	};

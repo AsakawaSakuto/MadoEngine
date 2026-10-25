@@ -11,17 +11,46 @@
 
 namespace MadoEngine
 {
+	/// @brief スティック入力の参照先
+	enum class GamePadStick {
+		Left,
+		Right,
+	};
+
 	class InputManager
 	{
 	public:
 		static InputManager& GetInstance();
 
+		/// @brief 入力Deviceとスティック入力状態を初期化
 		void Initialize();
+		/// @brief 入力Deviceと登録済み入力を解放
 		void Finalize();
 
 		~InputManager() = default;
 
+		/// @brief 入力Deviceとスティック横方向の検出結果を更新
+		/// @param hwnd 入力対象のWindow
+		/// @param deltaTime 前フレームからの経過時間
 		void Update(HWND hwnd, float deltaTime = 1.0f / 60.0f);
+
+		/// @brief 中立復帰で再入力可能なスティックの横方向入力を登録
+		/// @param actionName 入力の登録名
+		/// @param stick 参照するスティック
+		void SetStickHorizontalInput(const std::string& actionName, GamePadStick stick = GamePadStick::Left);
+
+		/// @brief 登録済みのスティック横方向入力を解除
+		/// @param actionName 入力の登録名
+		void RemoveStickHorizontalInput(const std::string& actionName);
+
+		/// @brief 現在Frameのスティック横方向の単発入力を取得
+		/// @param actionName 入力の登録名
+		/// @return 左の場合は-1、右の場合は1、入力なしの場合は0
+		int GetStickHorizontalTrigger(const std::string& actionName) const;
+
+		/// @brief 登録済み入力の検出結果を破棄して中立復帰を待機
+		/// @param actionName 入力の登録名
+		void ResetStickHorizontalInput(const std::string& actionName);
 
 		// 入力アクションに複数のキー/ボタンを登録
 		// 例: SetInput("Jump", {DIK_SPACE, DIK_Z}, {GAMEPAD_A}, {MOUSE_LEFT});
@@ -62,16 +91,26 @@ namespace MadoEngine
 			std::vector<int> mouseButtons;
 		};
 
+		struct StickHorizontalInput {
+			GamePadStick stick = GamePadStick::Left;
+			int triggeredDirection = 0;
+			bool isReady = false;
+		};
+
 		std::unique_ptr<MadoEngine::InputDevice::Keyboard> keyboard_;
 		std::unique_ptr<MadoEngine::InputDevice::Mouse> mouse_;
 		std::unique_ptr<MadoEngine::InputDevice::GamePad> gamePad_;
 
 		std::unordered_map<std::string, InputAction> inputActions_;
+		std::unordered_map<std::string, StickHorizontalInput> stickHorizontalInputs_;
 		mutable std::unordered_map<std::string, bool> pressLoggedFlags_; // Pressログ出力済みフラグ
 
 		bool CheckAnyPress(const InputAction& action) const;
 		bool CheckAnyTrigger(const InputAction& action) const;
 		bool CheckAnyRelease(const InputAction& action) const;
+
+		/// @brief 登録済みのスティック横方向入力をFrameごとに更新
+		void UpdateStickHorizontalInputs();
 
 		// 文字列を小文字に変換するヘルパー関数
 		std::string ToLower(const std::string& str) const;

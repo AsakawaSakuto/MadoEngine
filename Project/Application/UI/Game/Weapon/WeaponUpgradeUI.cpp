@@ -10,12 +10,15 @@ namespace UI::Game {
 	namespace {
 		constexpr const char* kUpgradeCardSelectSoundKey = "UpgradeCardSelect";
 		constexpr const char* kUpgradeCardDecisionSoundKey = "UpgradeCardDecision";
+		constexpr float kDecisionInputDelayDuration = 0.25f;
+		constexpr const char* kUpgradeStickInputName = "WeaponUpgradeSelection";
 		constexpr Vector2 kOverlayPosition = { 640.0f, 388.0f };
 		constexpr Vector2 kOverlayScale = { 80.0f, 44.5f };
 		constexpr Vector4 kOverlayColor = { 0.0f, 0.0f, 0.0f, 184.0f / 255.0f };
 	}
 
 	void UpgradeUI::Initialize() {
+		MyInput::RegisterStickHorizontalInput(kUpgradeStickInputName);
 		const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
 		overlaySprite_ = MySprite::Create("WeaponUpgradeOverlay","white16x16",SceneType::Game,layer);
 		if (Sprite* overlay = MySprite::TryGet(overlaySprite_)) {
@@ -35,6 +38,7 @@ namespace UI::Game {
 
 	void UpgradeUI::Finalize() {
 		ResetSelection();
+		MyInput::RemoveStickHorizontalInput(kUpgradeStickInputName);
 		for (WeaponUpgradeCardUI& card : upgradeCards_) {
 			card.Finalize();
 		}
@@ -46,12 +50,16 @@ namespace UI::Game {
 		Weapon::UpgradeSystem& upgradeSystem,
 		Weapon::Inventory& inventory,
 		Player::Base& player) {
+
+		// 表示開始Frameの経過時間を含めず、Game進行の停止中も実時間で決定待機を進行
+		decisionInputDelayTimer_.Update(deltaTime);
 		SynchronizeSelection(upgradeSystem);
 
 		const std::vector<Weapon::UpgradeChoice>& choices = upgradeSystem.GetChoices();
 		if (visibleChoiceCount_ == 0 || choices.empty()) {
 			return;
 		}
+
 		if (isDecisionAnimationPlaying_) {
 
 			// 演出中に候補世代が変化した場合は古い選択の適用を中止
@@ -95,7 +103,8 @@ namespace UI::Game {
 			return;
 		}
 
-		if (MyInput::Trigger("Left")) {
+		const int stickSelectionInput = MyInput::GetStickHorizontalTrigger(kUpgradeStickInputName);
+		if (MyInput::Trigger("Left") || stickSelectionInput < 0) {
 
 			// 端から反対側へ循環する候補選択
 			selectedChoiceIndex_ =
@@ -103,7 +112,7 @@ namespace UI::Game {
 
 			MyAudio::Play(kUpgradeCardSelectSoundKey);
 
-		} else if (MyInput::Trigger("Right")) {
+		} else if (MyInput::Trigger("Right") || stickSelectionInput > 0) {
 			selectedChoiceIndex_ =
 				(selectedChoiceIndex_ + 1) % visibleChoiceCount_;
 
@@ -112,7 +121,8 @@ namespace UI::Game {
 
 		UpdateCards(deltaTime);
 
-		if (!MyInput::Trigger("Decision")) {
+		// 表示直後の決定入力を持ち越さず、待機完了後の新しい入力だけを受付
+		if (!decisionInputDelayTimer_.IsFinished() || !MyInput::Trigger("Decision")) {
 			return;
 		} else {
 			MyAudio::Play(kUpgradeCardDecisionSoundKey);
@@ -131,7 +141,7 @@ namespace UI::Game {
 		ImGui::Begin("武器アップグレード");
 		ImGui::Text("未処理アップグレード: %d", upgradeSystem.GetPendingUpgradeCount());
 		ImGui::Text("次回リロール料金: %d", upgradeSystem.GetRerollCost());
-		ImGui::TextDisabled("← / A・→ / D: 選択　Space / A: 決定　R / X: リロール　F5: 無料リロール(Debug)");
+		ImGui::TextDisabled("← / A・→ / D・Lスティック左右: 選択　Space / A: 決定　R / X: リロール　F5: 無料リロール(Debug)");
 		if (isDecisionAnimationPlaying_) {
 			ImGui::TextDisabled("選択決定演出中");
 		}
@@ -197,11 +207,13 @@ namespace UI::Game {
 				ImGui::TextDisabled("強化ステータス・レアリティなし");
 			}
 
-			if (ImGui::Button("この候補を選択") && !isDecisionAnimationPlaying_) {
+			ImGui::BeginDisabled(!decisionInputDelayTimer_.IsFinished() || isDecisionAnimationPlaying_);
+			if (ImGui::Button("この候補を選択")) {
 				selectedChoiceIndex_ = choiceIndex;
 				UpdateCards(0.0f);
 				BeginDecisionAnimation(choiceIndex, choice.generation);
 			}
+			ImGui::EndDisabled();
 
 			ImGui::Separator();
 			ImGui::PopID();
@@ -230,11 +242,13 @@ namespace UI::Game {
 		const std::uint64_t currentGeneration = choices.front().generation;
 		if (selectedGeneration_ != currentGeneration) {
 
-			// 新世代の候補へ切り替わった場合だけCard内容と選択位置を再構築
+			// 新世代の候補では左右へ一操作で移れる中央から選べるようCard内容と選択位置を再構築
 			ResetDecisionAnimationState();
-			selectedChoiceIndex_ = 0;
+			decisionInputDelayTimer_.Start(kDecisionInputDelayDuration);
+			MyInput::ResetStickHorizontalInput(kUpgradeStickInputName);
 			selectedGeneration_ = currentGeneration;
 			visibleChoiceCount_ = (std::min)(choices.size(), upgradeCards_.size());
+			selectedChoiceIndex_ = visibleChoiceCount_ / 2;
 
 			for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
 				if (cardIndex < visibleChoiceCount_) {
@@ -247,7 +261,7 @@ namespace UI::Game {
 
 		visibleChoiceCount_ = (std::min)(choices.size(), upgradeCards_.size());
 		if (selectedChoiceIndex_ >= visibleChoiceCount_) {
-			selectedChoiceIndex_ = 0;
+			selectedChoiceIndex_ = visibleChoiceCount_ / 2;
 		}
 	}
 
@@ -260,7 +274,9 @@ namespace UI::Game {
 	}
 
 	void UpgradeUI::BeginDecisionAnimation(std::size_t choiceIndex, std::uint64_t generation) {
-		if (isDecisionAnimationPlaying_ || choiceIndex >= visibleChoiceCount_ ||
+
+		// RuntimeとDebugの両経路で表示直後の決定演出開始を抑止
+		if (!decisionInputDelayTimer_.IsFinished() || isDecisionAnimationPlaying_ || choiceIndex >= visibleChoiceCount_ ||
 			choiceIndex >= upgradeCards_.size()) {
 			return;
 		}
@@ -285,6 +301,8 @@ namespace UI::Game {
 
 	void UpgradeUI::ResetSelection() {
 		ResetDecisionAnimationState();
+		decisionInputDelayTimer_.Reset();
+		MyInput::ResetStickHorizontalInput(kUpgradeStickInputName);
 		SetOverlayVisible(false);
 		selectedChoiceIndex_ = 0;
 		visibleChoiceCount_ = 0;

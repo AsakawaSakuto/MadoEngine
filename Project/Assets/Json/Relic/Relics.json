@@ -145,7 +145,7 @@
       "textureName": "Accelerator"
     },
     {
-      "description": "ジャンプ可能回数 +1",
+      "description": "ジャンプ回数 +1",
       "displayName": "うちわ",
       "effects": [
         {
@@ -157,7 +157,7 @@
       ],
       "id": "jump_count_boost",
       "maxStack": 10,
-      "rarity": "Rare",
+      "rarity": "Epic",
       "textureName": "Uchiwa"
     },
     {

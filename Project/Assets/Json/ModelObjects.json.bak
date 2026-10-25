@@ -2,6 +2,7 @@
     "models": [
         {
             "billboard": true,
+            "billboardYAxisOnly": false,
             "cameraTranslateOffset": [
                 0.0,
                 0.0,
@@ -20,9 +21,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                215.380126953125,
-                8.5,
-                170.25759887695313
+                182.96304321289063,
+                16.0,
+                61.06753158569336
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,

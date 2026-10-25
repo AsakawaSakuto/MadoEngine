@@ -11,7 +11,8 @@ namespace DropObject {
 		constexpr float kBackDuration = 0.2f;    // DropObjectがPlayerから後退する予備動作の継続時間
 
 		constexpr int kExpAmount = 10;           // DropObjectのExpがPlayerに加算する経験値量
-		constexpr float kMaxExpSoundPitchSemitones = 6.0f;
+		constexpr int kExpAnimationFrameCount = 4;
+		constexpr float kExpAnimationFrameDuration = 0.15f; // Expシートの1コマの表示時間（秒）
 
 		constexpr float kMoneyRiseSpeed = 8.0f;  // DropObjectのMoneyが後退中に上昇する速度
 		constexpr int kMoneyAmount = 1;          // DropObjectのMoneyがPlayerに加算する所持金量
@@ -38,7 +39,7 @@ namespace DropObject {
 		std::string textureName;
 		switch (type_) {
 		case Type::Exp:
-			textureName = "Exp";
+			textureName = "ExpSheet";
 			break;
 		case Type::Money:
 			textureName = "Coin";
@@ -63,7 +64,20 @@ namespace DropObject {
 
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTexture(textureName);
+
+			// 再生設定だけを渡し、コマ送りとUV範囲の管理はModelへ委譲
+			if (type_ == Type::Exp) {
+				MadoEngine::SpriteSheetAnimationSettings settings;
+				settings.columns = kExpAnimationFrameCount;
+				settings.rows = 1;
+				settings.frameDuration = kExpAnimationFrameDuration;
+				settings.loop = true;
+				model->SetSpriteSheetAnimation(settings);
+			}
+
+			// Cameraの俯仰角とRollを含む回転で画面への正対を維持
 			model->SetUseBillboard(true);
+			model->SetBillboardYAxisOnly(false);
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);
 			model->SetLightingEnabled(false);
@@ -92,6 +106,12 @@ namespace DropObject {
 		std::get<AABB>(colliderShape_).center = position;
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTransform(transform_);
+
+			// Poolの再利用直後にUV範囲と先頭コマを復元し、前のDropの再生位相の持ち越しを防止
+			model->SetUVTransform({});
+			if (type_ == Type::Exp) {
+				model->PlaySpriteSheetAnimation();
+			}
 			model->SetVisible(true);
 		}
 	}
@@ -103,6 +123,7 @@ namespace DropObject {
 		isMoving_ = false;
 		backTimer_.Reset();
 		if (Model* model = MyModel::TryGet(model_)) {
+			model->StopSpriteSheetAnimation();
 			model->SetVisible(false);
 		}
 	}
@@ -228,23 +249,10 @@ namespace DropObject {
 			break;
 		}
 
-		// 報酬の取得成立後にDropObject名と同じSEを一度再生
-		const std::string soundKey = DropObjectTypeToString(type_);
-
-		if (type_ == Type::Exp) {
-
-			const Player::Status status = player.GetStatus();
-			float levelProgress = 0.0f;
-
-			// 次のレベルまでの進行度を計算
-			if (status.expToNextLevel > 0.0f) {
-				levelProgress = std::clamp(status.currentExp / status.expToNextLevel, 0.0f, 1.0f);
-			}
-
-			// 進行度に応じてSEのピッチを変化させる
-			MyAudio::SetPitch(soundKey, levelProgress * kMaxExpSoundPitchSemitones);
+		// ExpのSEはManagerで同Frameの回収を集約し、個数分の同時再生を回避
+		if (type_ != Type::Exp) {
+			MyAudio::Play(DropObjectTypeToString(type_));
 		}
-		MyAudio::Play(soundKey);
 
 		Deactivate();
 	}

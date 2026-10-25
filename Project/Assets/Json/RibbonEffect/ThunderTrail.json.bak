@@ -159,7 +159,7 @@
                 "generationMode": "transformHistory",
                 "maxPointCount": 128,
                 "minPointDistance": 0.03999999910593033,
-                "pointLifetime": 0.3499999940395355,
+                "pointLifetime": 0.5,
                 "simulationSpace": "world"
             },
             "translateOffset": [

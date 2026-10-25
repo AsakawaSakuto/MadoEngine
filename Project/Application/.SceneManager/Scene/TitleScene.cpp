@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include "Audio/MyAudio.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
@@ -46,6 +47,7 @@ void TitleScene::Initialize() {
 		tpsCamera->SetOffset({ 0.0f, 2.0f, 0.0f });
 	}
 	cameraManager_.CutTo(tpsCameraHandle_);
+	InitializeWeaponSelection();
 }
 
 SceneType TitleScene::Update(float dt) {
@@ -61,7 +63,12 @@ SceneType TitleScene::Update(float dt) {
 		tpsCamera->SetTargetPosition(player_->GetPosition());
 	}
 
-	// 遷移中の連続入力でSeed要求と遷移先を上書きしないため決定操作を制限
+	// 遷移開始後の選択変更を止め、表示とGameへ渡す武器の一致を維持
+	if (!transitionController.IsTransitioning()) {
+		UpdateWeaponSelection();
+	}
+
+	// 遷移中の連続入力で初期武器とSeed要求を上書きしないため決定操作を制限
 	if (!transitionController.IsTransitioning() && MyInput::Trigger("Decision")) {
 		const std::vector<System::GameSeedSystem::HistoryEntry>& history =
 			commonData_.GetGameSeedSystem().GetHistory();
@@ -70,10 +77,11 @@ SceneType TitleScene::Update(float dt) {
 			requestedSeed = history[selectedSeedIndex_.value()].seed;
 		}
 
-		// 遷移演出中の選択変更に影響されないよう受付時のSeed要求を固定
+		// 遷移演出中の選択変更に影響されないよう受付時の武器とSeed要求を固定
+		commonData_.SetInitialWeaponType(Projectile::kPlayableWeaponTypes[selectedWeaponIndex_]);
 		commonData_.GetGameSeedSystem().RequestSeed(requestedSeed);
+		MyAudio::Play("UpgradeCardDecision");
 		nextSceneType = SceneType::Game;
-		Logger::Output("Decisionが押されました - ゲームシーンへの遷移を要求しました", Logger::Level::Application);
 	}
 
 	MyDebugLine::AddShape(groundCollider_, Vector4({ 1.0f, 0.0f, 0.0f, 1.0f }));
@@ -81,6 +89,102 @@ SceneType TitleScene::Update(float dt) {
 	cameraManager_.Update(dt);
 
 	return nextSceneType;
+}
+
+void TitleScene::InitializeWeaponSelection() {
+	const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
+	weaponSelectionBackground_ = MySprite::Create(
+		"TitleWeaponSelectionBackground", "white16x16", SceneType::Title, layer);
+	if (Sprite* background = MySprite::TryGet(weaponSelectionBackground_)) {
+		background->SetFitToScreen(true);
+		background->SetColor({ 0.025f, 0.035f, 0.06f, 0.97f });
+	}
+
+	selectedWeaponIndex_ = 0;
+
+	// 使用可能武器の共通一覧を行優先で配置し、再訪時は前回決定した武器を復元
+	for (std::size_t index = 0; index < weaponIcons_.size(); ++index) {
+		const Vector2 position = {
+			330.0f + static_cast<float>(index % kWeaponColumnCount) * 124.0f,
+			250.0f + static_cast<float>(index / kWeaponColumnCount) * 140.0f,
+		};
+		const Projectile::Type weaponType = Projectile::kPlayableWeaponTypes[index];
+		weaponIcons_[index].Initialize(weaponType, position);
+		if (weaponType == commonData_.GetInitialWeaponType()) {
+			selectedWeaponIndex_ = index;
+		}
+	}
+
+	weaponSelectionHeading_ = MyText::Create(
+		"TitleWeaponSelectionHeading", "初期武器を選択", SceneType::Title, layer);
+	selectedWeaponName_ = MyText::Create(
+		"TitleSelectedWeaponName", "", SceneType::Title, layer);
+	selectedWeaponDescription_ = MyText::Create(
+		"TitleSelectedWeaponDescription", "", SceneType::Title, layer);
+	weaponSelectionGuide_ = MyText::Create("TitleWeaponSelectionGuide",
+		"矢印キー / WASD / 十字キー：選択　　Space / Aボタン：決定してゲーム開始",
+		SceneType::Title, layer);
+
+	// 説明文の行数に左右されない固定領域で選択中武器と操作案内を整列
+	const std::array<MadoEngine::TextHandle, 4> textHandles = {
+		weaponSelectionHeading_, selectedWeaponName_, selectedWeaponDescription_, weaponSelectionGuide_,
+	};
+	const std::array<float, 4> positionsY = { 120.0f, 520.0f, 578.0f, 665.0f };
+	const std::array<float, 4> fontSizes = { 40.0f, 28.0f, 22.0f, 20.0f };
+	for (std::size_t index = 0; index < textHandles.size(); ++index) {
+		if (MadoEngine::Text* text = MyText::TryGet(textHandles[index])) {
+			text->SetFontAsset("Assets/Font/YuGothB.ttc", "游ゴシック");
+			text->SetFontSize(fontSizes[index]);
+			text->SetAreaSize({ 1120.0f, 72.0f });
+			text->SetAnchorPoint({ 0.5f, 0.5f });
+			text->SetPosition({ 640.0f, positionsY[index] });
+			text->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
+			text->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
+		}
+	}
+	if (MadoEngine::Text* name = MyText::TryGet(selectedWeaponName_)) {
+		name->SetColor({ 1.0f, 0.82f, 0.18f, 1.0f });
+	}
+	RefreshWeaponSelection();
+}
+
+void TitleScene::UpdateWeaponSelection() {
+	std::size_t column = selectedWeaponIndex_ % kWeaponColumnCount;
+	std::size_t row = selectedWeaponIndex_ / kWeaponColumnCount;
+
+	// 横移動は同じ行、縦移動は同じ列を保った循環選択
+	if (MyInput::Trigger("Left")) {
+		column = (column + kWeaponColumnCount - 1) % kWeaponColumnCount;
+	} else if (MyInput::Trigger("Right")) {
+		column = (column + 1) % kWeaponColumnCount;
+	} else if (MyInput::Trigger("Up")) {
+		row = (row + kWeaponRowCount - 1) % kWeaponRowCount;
+	} else if (MyInput::Trigger("Down")) {
+		row = (row + 1) % kWeaponRowCount;
+	}
+	const std::size_t selectedIndex = row * kWeaponColumnCount + column;
+	if (selectedIndex == selectedWeaponIndex_) {
+		return;
+	}
+
+	selectedWeaponIndex_ = selectedIndex;
+	RefreshWeaponSelection();
+	MyAudio::Play("UpgradeCardSelect");
+}
+
+void TitleScene::RefreshWeaponSelection() {
+
+	// 選択変更時だけTextを差し替えて毎Frameの文字画像再生成を回避
+	for (std::size_t index = 0; index < weaponIcons_.size(); ++index) {
+		weaponIcons_[index].SetSelected(index == selectedWeaponIndex_);
+	}
+	const Projectile::Type weaponType = Projectile::kPlayableWeaponTypes[selectedWeaponIndex_];
+	if (MadoEngine::Text* name = MyText::TryGet(selectedWeaponName_)) {
+		name->SetText(Projectile::ProjectileTypeToDisplayName(weaponType));
+	}
+	if (MadoEngine::Text* description = MyText::TryGet(selectedWeaponDescription_)) {
+		description->SetText(Projectile::ProjectileTypeToDescription(weaponType));
+	}
 }
 
 void TitleScene::Draw() {
@@ -167,6 +271,17 @@ bool TitleScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 }
 
 void TitleScene::Finalize() {
+
+	// SceneManagerによる描画リソース破棄の前にUI側の参照を解放
+	for (UI::Title::WeaponSelectIcon& icon : weaponIcons_) {
+		icon.Finalize();
+	}
+	weaponSelectionBackground_ = {};
+	weaponSelectionHeading_ = {};
+	selectedWeaponName_ = {};
+	selectedWeaponDescription_ = {};
+	weaponSelectionGuide_ = {};
+
 	if (player_) {
 		player_->SetCamera(nullptr);
 	}

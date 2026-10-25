@@ -1,10 +1,16 @@
 #include "Axe.h"
+#include "Render/Object/3d/RibbonEffect/MyRibbonEffect3d.h"
 #include "../../../Map/MapLimit.h"
 #include <cmath>
 
 namespace Projectile {
 
 	Axe::~Axe() {
+
+		// 本体の破棄後は新しい軌跡の生成を停止し、残った部分だけを寿命に従って消去
+		for (const auto& trail : trails_) {
+			MyRibbonEffect3d::Stop(trail, MadoEngine::Ribbon::RibbonStopMode::Finish);
+		}
 		if (!objectName_.empty()) {
 			MyCollider::RemoveCollider(objectName_);
 			MyModel::RequestDestroy(model_);
@@ -12,6 +18,12 @@ namespace Projectile {
 	}
 
 	void Axe::Initialize(InitializeDesc context) {
+
+		// 再初期化時に前の軌跡へ新しい発射位置を接続しないよう既存Trailを破棄
+		for (auto& trail : trails_) {
+			MyRibbonEffect3d::Stop(trail, MadoEngine::Ribbon::RibbonStopMode::Immediate);
+			trail = {};
+		}
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
@@ -39,6 +51,19 @@ namespace Projectile {
 		// 一秒間の直進後に滞留寿命へ移行する二段階Timer
 		reductionTimer_.Reset();
 		startTimer_.Start(1.0f, false);
+
+		// 各頂点から独立した履歴を開始し、二つの発生点を一本の軌跡で接続しない構成
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetTransform(transform_);
+			for (std::size_t trailIndex = 0; trailIndex < trails_.size(); ++trailIndex) {
+				MadoEngine::Ribbon::RibbonEffectPlayDesc trailDesc;
+				if (model->TryGetVertexWorldPosition(kTrailVertexIndices[trailIndex], trailDesc.transform.translate)) {
+					trailDesc.sceneType = SceneType::Game;
+					trailDesc.loopOverride = true;
+					trails_[trailIndex] = MyRibbonEffect3d::Play("AxeTrail", trailDesc);
+				}
+			}
+		}
 	}
 
 	void Axe::Update(float deltaTime) {
@@ -84,6 +109,17 @@ namespace Projectile {
 			const float scaleValue = 0.5f * sizeRate_ * (1.0f - reductionProgress);
 			transform_.scale = Easing::Lerp(Vector3{ scaleValue,scaleValue,scaleValue }, Vector3{ 0.0f,0.0f,0.0f }, reductionProgress, EaseType::Linear);
 			model->SetTransform(transform_);
+
+			// 移動と回転、消滅前の縮小を反映した頂点のWorld座標へTrailを追従
+			for (std::size_t trailIndex = 0; trailIndex < trails_.size(); ++trailIndex) {
+				if (!trails_[trailIndex].HasValue()) {
+					continue;
+				}
+				Transform3D trailTransform;
+				if (model->TryGetVertexWorldPosition(kTrailVertexIndices[trailIndex], trailTransform.translate)) {
+					MyRibbonEffect3d::SetTransform(trails_[trailIndex], trailTransform);
+				}
+			}
 		}
 
 		lifeTimer_.Update(deltaTime);

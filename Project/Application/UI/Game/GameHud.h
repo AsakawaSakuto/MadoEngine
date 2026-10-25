@@ -5,6 +5,7 @@
 #include "GamePlayView/FpsMeasurementView/FpsMeasurementView.h"
 #include "GamePlayView/GamePlayTimerView/GamePlayTimerView.h"
 #include "GamePlayView/PlayerResourceGainView/PlayerResourceGainView.h"
+#include "GamePlayView/PlayerDamageView/PlayerDamageView.h"
 #include "MiniMap/MiniMapUI.h"
 #include "Player/PlayerExpGauge.h"
 #include "Player/PlayerHealthGauge.h"
@@ -100,6 +101,10 @@ namespace UI::Game {
 		/// @param event 表示するダメージ通知
 		void ShowDamage(const Combat::DamageEvent& event);
 
+		/// @brief Playerの被ダメージ量をマイナス記号付きで表示
+		/// @param damage 実際に減少したHP量
+		void ShowPlayerDamage(float damage);
+
 		/// @brief Playerのリソース獲得通知を表示
 		/// @param event 表示するリソース獲得通知
 		void ShowResourceGain(const Player::ResourceGainEvent& event);
@@ -155,6 +160,7 @@ namespace UI::Game {
 		MiniMapUI miniMapUI_;
 		MapMiniMapObjectPositions miniMapObjectPositions_;
 		PlayerResourceGainView playerResourceGainView_;
+		PlayerDamageView playerDamageView_;
 		EnemyDamageView enemyDamageView_;
 		EnemyStatusEffectIconView enemyStatusEffectIconView_;
 		MadoEngine::TextHandle enemyCountText_{};

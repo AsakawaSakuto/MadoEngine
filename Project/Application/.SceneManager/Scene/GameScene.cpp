@@ -20,7 +20,11 @@ namespace {
 	constexpr int kEnemyDamageSoundFirstIndex = 1;
 	constexpr int kEnemyDamageSoundLastIndex = 5;
 	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
+	constexpr const char* kPlayerDamageSoundKey = "PlayerDamage";
 	constexpr const char* kPlayerOutlinePassName = "PlayerOutline";
+	constexpr const char* kLowHealthVignettePassName = "LowHealthVignette";
+	constexpr float kLowHealthVignetteStartHealthRatio = 0.5f;
+	constexpr float kLowHealthVignetteFullHealthRatio = 0.1f;
 }
 
 GameScene::GameScene(CommonData& commonData)
@@ -73,7 +77,9 @@ void GameScene::Initialize() {
 	SynchronizeMapDependentState();
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
-	weaponInventory_->Initialize(Projectile::Type::FireBall, weaponSlotCount_);
+
+	// Titleで決定した武器を先頭Slotへ装備してゲームを開始
+	weaponInventory_->Initialize(commonData_.GetInitialWeaponType(), weaponSlotCount_);
 
 	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 
@@ -97,6 +103,7 @@ void GameScene::Initialize() {
 	ConsumePlayLogEvents();
 
 	UpdateMiniMap();
+	UpdateLowHealthVignette();
 }
 
 SceneType GameScene::Update(float dt) {
@@ -119,6 +126,9 @@ SceneType GameScene::Update(float dt) {
 		UpdateGameplay(deltaTime);
 	}
 
+	// 死亡や選択待機でGameObject更新が停止しても被ダメージ色を実時間で通常色へ復帰
+	player_->UpdateAppearance(dt);
+
 	// HPが0になったFrameでGame進行を固定し、死亡Animationだけを描画System側で継続
 	if (player_->IsDead()) {
 		inGameSession_->SetGameOver();
@@ -129,6 +139,9 @@ SceneType GameScene::Update(float dt) {
 	// Pause中も現在の判定形状を確認できるようEnemy Colliderを毎Frame登録
 	enemyManager_->DrawDebugLine();
 	MyDebugLine::AddShape(std::get<AABB>(mapLimitBox_), { 1.0f,1.0f,0.0f,1.0f });
+
+	// Camera更新前に被ダメージ演出を開始し、同じFrameの描画へ反映
+	HandlePlayerDamage();
 
 	const bool isCameraInputEnabled = !isSceneTransitioning &&
 		inGameSession_->GetCurrentPhase() != InGamePhase::Starting &&
@@ -144,6 +157,7 @@ SceneType GameScene::Update(float dt) {
 		*relicSystem_, *weaponUpgradeSystem_, *weaponInventory_, *player_);
 	SetPlayerOutlineSuppressed(rewardSelectionController_.ShouldSuppressPlayerOutline());
 	ApplyRelicModifiersIfChanged();
+	UpdateLowHealthVignette();
 	hud_.UpdateRelicInventory(*relicSystem_);
 	ConsumePlayLogEvents();
 
@@ -153,6 +167,9 @@ SceneType GameScene::Update(float dt) {
 	if (!isRelicRewardPending) {
 		inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 	}
+
+	// 選択画面やPause中はDropの移動と同じ条件でシート再生の時間進行も停止
+	MadoEngine::ModelManager::GetInstance().SetSpriteSheetAnimationsPaused(SceneType::Game, !inGameSession_->IsPlaying());
 
 	UpdateHud(dt, deltaTime);
 
@@ -228,6 +245,22 @@ void GameScene::UpdateGameplay(float deltaTime) {
 			weaponInventory_->Update(deltaTime, player_->GetPosition(), targetPositions, player_->GetUpDirection());
 		}
 	}
+}
+
+void GameScene::HandlePlayerDamage() {
+
+	// 同じFrameの複数被弾を合算した通知を一度だけ取得し、演出の重複開始を防止
+	const float playerDamageAmount = player_->ConsumeDamageAmount();
+	if (playerDamageAmount <= 0.0f) {
+		return;
+	}
+
+	// 音声の未読み込み時もCameraとHUDの演出を継続
+	if (MyAudio::IsLoaded(kPlayerDamageSoundKey)) {
+		MyAudio::Play(kPlayerDamageSoundKey);
+	}
+	cameraManager_.ExecuteShake(cameraManager_.GetActiveCameraHandle());
+	hud_.ShowPlayerDamage(playerDamageAmount);
 }
 
 void GameScene::DispatchDamageEvents() {
@@ -495,6 +528,39 @@ void GameScene::SetPlayerOutlineSuppressed(bool isSuppressed) {
 	}
 }
 
+void GameScene::UpdateLowHealthVignette() {
+	float intensity = 0.0f;
+	if (player_) {
+		const Player::Status status = player_->GetStatus();
+
+		// 不正なHP値と最大HPが0以下の場合は除算を避けて演出を解除
+		if (std::isfinite(status.currentHealth) && std::isfinite(status.maxHealth) && status.maxHealth > 0.0f) {
+			const float healthRatio = status.currentHealth / status.maxHealth;
+
+			// HP50%から10%までを強度0から1へ線形変換し、範囲外は両端の強度へ固定
+			intensity = std::clamp(
+				(kLowHealthVignetteStartHealthRatio - healthRatio) /
+				(kLowHealthVignetteStartHealthRatio - kLowHealthVignetteFullHealthRatio),
+				0.0f, 1.0f);
+		}
+	}
+	SetLowHealthVignetteIntensity(intensity);
+}
+
+void GameScene::SetLowHealthVignetteIntensity(float intensity) {
+	MadoEngine::Render::PostEffectManager& postEffectManager =
+		MadoEngine::Render::PostEffectManager::GetInstance();
+
+	// Editorの再生成や内部キーの変更へ追従し、対象Passの強度だけを上書き
+	for (MadoEngine::Render::PostEffectPassHandle handle : postEffectManager.GetScreenPassHandles()) {
+		const MadoEngine::Render::PostEffectPass* pass = postEffectManager.TryGet(handle);
+		if (pass && pass->GetName() == kLowHealthVignettePassName) {
+			postEffectManager.SetFloatParameter(handle, "Intensity", intensity);
+			return;
+		}
+	}
+}
+
 Vector3 GameScene::GetShadowFocusPosition() const {
 	if (!player_) {
 		return GetCamera().GetPosition();
@@ -545,6 +611,9 @@ void GameScene::Finalize() {
 
 	// 演出途中のScene遷移でもPlayerOutlineが無効のまま残らないよう有効化
 	SetPlayerOutlineSuppressed(false);
+
+	// 共通のフルスクリーンPassへ低体力時の強度が残らないようScene終了時に解除
+	SetLowHealthVignetteIntensity(0.0f);
 	rewardSelectionController_.Finalize();
 	hud_.Finalize();
 

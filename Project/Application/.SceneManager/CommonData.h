@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneTransitionController.h"
+#include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "System/GameSeed/GameSeedSystem.h"
 #include "Utility/Parameter/ParameterStore.h"
 
@@ -18,7 +19,22 @@ public:
 	void Initialize() {
 		gameSeedSystem_.Initialize();
 		sceneTransitionController_.Reset();
+		initialWeaponType_ = Projectile::Type::FireBall;
 	}
+
+	/// @brief Titleで決定した初期武器の設定
+	/// @param weaponType 使用可能な初期武器の種類
+	void SetInitialWeaponType(Projectile::Type weaponType) {
+
+		// 非武器のProjectileをGame開始時の装備から除外
+		if (Projectile::IsPlayableWeaponType(weaponType)) {
+			initialWeaponType_ = weaponType;
+		}
+	}
+
+	/// @brief Titleで決定した初期武器の取得
+	/// @return Game開始時に装備する武器種類
+	Projectile::Type GetInitialWeaponType() const { return initialWeaponType_; }
 
 	/// @brief GameSeed管理システムを取得
 	/// @return GameSeed管理システム
@@ -48,4 +64,5 @@ private:
 	MadoEngine::ParameterStore& parameterStore_;
 	System::GameSeedSystem gameSeedSystem_;
 	SceneTransitionController sceneTransitionController_;
+	Projectile::Type initialWeaponType_ = Projectile::Type::FireBall;
 };

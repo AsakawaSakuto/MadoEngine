@@ -5,31 +5,30 @@
 #include <numbers>
 
 namespace Player {
+
 	namespace {
-		constexpr float kMovementSphereRadius = 0.5f;                       // 移動解決用のSphereCollider半径
-		constexpr float kShadowGroundOffset = 0.01f;                        // 影の描画座標を地面より少し上にずらすことでZファイティングを回避
-		constexpr float kModelForwardYawOffset = std::numbers::pi_v<float>; // Modelの前方がZ軸負方向を向くため、Y軸回転を180度補正
-		constexpr float kHealthRegenerationInterval = 3.0f;                 // 被弾後にHP回復が開始されるまでの待機時間
-		constexpr float kHealthRegenerationAmount = 1.0f;                   // HP回復量
+		const constexpr float kMovementSphereRadius = 0.5f; // 移動解決用のSphereCollider半径
 	}
 
 	void Base::Initialize(MadoEngine::ParameterStore& parameterStore, const Vector3& spawnGroundPosition, SceneType sceneType) {
 		sceneType_ = sceneType;
 		resourceGainEvents_.clear();
+		pendingDamageAmount_ = 0.0f;
 		statusMultiplier_ = {};
 		isDead_ = false;
 		isDeathAnimationPlaying_ = false;
+		damageFlashRemainingTime_ = 0.0f;
 		baseMaxHealth_ = status_.maxHealth;
+
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
+		colliderShape_ = movementCollider;
 
 		AABB aabb;
 		aabb.min = { -0.5f, 0.0f, -0.5f };
 		aabb.max = { 0.5f, 2.0f, 0.5f };
 		hitAABB_ = aabb;
-
-		colliderShape_ = movementCollider;
 
 		Sphere s2;
 		s2.radius = 2.5f;
@@ -54,13 +53,13 @@ namespace Player {
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
 			model->SetTexture("white2x2");
-			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+			model->SetColor(Color::Red);
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);
 			animationController_.Initialize(*model);
 		}
 
-		shadowTransform_.scale = { 0.5f, 0.1f, 0.5f };
+		landingMarkerTransform_.scale = { 0.5f, 0.1f, 0.5f };
 
 		movement_.RegisterDebugParameters(parameterStore);
 		movement_.Initialize();
@@ -215,11 +214,18 @@ namespace Player {
 	}
 
 	void Base::TakeDamage(float damage) {
-		if (damage <= 0 || isDead_) {
+		if (!std::isfinite(damage) || damage <= 0.0f || isDead_) {
 			return;
 		}
 
+		const float previousHealth = status_.currentHealth;
 		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
+
+		// HPが実際に減った時だけ外部へ通知し、連続被弾では最新の被弾時点から表示時間を再計測
+		if (status_.currentHealth < previousHealth) {
+			damageFlashRemainingTime_ = damageFlashDuration_;
+			pendingDamageAmount_ += previousHealth - status_.currentHealth;
+		}
 		if (status_.currentHealth <= 0.0f) {
 			regenerationTimer_.Stop();
 			BeginDeath();
@@ -228,6 +234,12 @@ namespace Player {
 
 		// 被弾時点を起点に回復待機時間を再計測
 		regenerationTimer_.Start(GetHealthRegenerationInterval(), true);
+	}
+
+	float Base::ConsumeDamageAmount() {
+		const float damageAmount = pendingDamageAmount_;
+		pendingDamageAmount_ = 0.0f;
+		return damageAmount;
 	}
 
 	void Base::BeginDeath() {
@@ -330,7 +342,7 @@ namespace Player {
 			return;
 		}
 
-		RecoverHealth(kHealthRegenerationAmount);
+		RecoverHealth(healthRegenerationAmount_);
 
 		if (status_.currentHealth >= status_.maxHealth) {
 			regenerationTimer_.Stop();
@@ -338,7 +350,7 @@ namespace Player {
 	}
 
 	float Base::GetHealthRegenerationInterval() const {
-		return kHealthRegenerationInterval /
+		return healthRegenerationInterval_ /
 			std::max(statusMultiplier_.healthRegenerationSpeed, 0.01f);
 	}
 
@@ -366,11 +378,27 @@ namespace Player {
 		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F3)) {
-			transform_.translate = { 0.0f, 100.0f, 0.0f };
+			transform_.translate.y = 100.0f;
 		}
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F4)) {
 			AddExp(static_cast<int>(status_.expToNextLevel));
+		}
+	}
+
+	void Base::UpdateAppearance(float deltaTime) {
+		Vector4 color = Color::White;
+		if (damageFlashRemainingTime_ > 0.0f) {
+
+			// 長い被弾Frameでも赤色を一度表示し、次のFrameで通常色への復帰を判定
+			color = Color::Red;
+			if (std::isfinite(deltaTime) && deltaTime > 0.0f) {
+				damageFlashRemainingTime_ = std::max(0.0f, damageFlashRemainingTime_ - deltaTime);
+			}
+		}
+
+		if (Model* model = MyModel::TryGet(model_)) {
+			model->SetColor(color);
 		}
 	}
 
@@ -390,14 +418,12 @@ namespace Player {
 		}
 
 		Model* model = MyModel::TryGet(model_);
-		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model, isSlopeGroundContact, kModelForwardYawOffset);
+		movement_.UpdateModelTransform(lastDeltaTime_, transform_, model, isSlopeGroundContact, std::numbers::pi_v<float>);
 
 		if (model) {
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);
 
-			// 動作や生死に関係なくPlayerのModel色を白色へ固定
-			model->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 			if (!isDead_) {
 				const Vector3 slideVelocity = movement_.GetSlideVelocity();
 				const bool isCrouchingMoving =
@@ -447,7 +473,7 @@ namespace Player {
 			return;
 		}
 
-		shadowTransform_.translate = {
+		landingMarkerTransform_.translate = {
 			transform_.translate.x,
 			groundY,
 			transform_.translate.z
@@ -455,7 +481,7 @@ namespace Player {
 		
 		// ShadowModelの拡縮に影響されないよう着地点Markerには地表座標だけを同期
 		Transform3D landingMarkerTransform;
-		landingMarkerTransform.translate = shadowTransform_.translate;
+		landingMarkerTransform.translate = landingMarkerTransform_.translate;
 		landingMarker_.SetTransform(landingMarkerTransform);
 	}
 

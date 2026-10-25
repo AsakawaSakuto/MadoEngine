@@ -38,7 +38,7 @@ namespace System {
 		void FollowCamera(const Camera& camera);
 
 		/// @brief 宝箱演出に伴うTPS入力抑止の要否を取得
-		/// @return 開封待ちまたは膨張演出中の場合はtrue
+		/// @return 膨張演出中の場合はtrue
 		bool ShouldBlockCameraInput() const;
 
 		/// @brief Player輪郭の描画抑止の要否を取得

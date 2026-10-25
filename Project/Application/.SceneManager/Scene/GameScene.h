@@ -103,6 +103,9 @@ private:
 	/// @param deltaTime 停止状態を反映したゲーム経過時間
 	void UpdateGameplay(float deltaTime);
 
+	/// @brief Playerの被ダメージ通知を取得して効果音とCameraとHUDへ反映
+	void HandlePlayerDamage();
+
 	/// @brief Enemyダメージ通知を効果音とHUDとプレイ記録へ配送
 	void DispatchDamageEvents();
 
@@ -136,6 +139,13 @@ private:
 	/// @brief Chest演出に応じたPlayerOutlineの有効状態の切り替え
 	/// @param isSuppressed PlayerOutlineを無効化する場合はtrue
 	void SetPlayerOutlineSuppressed(bool isSuppressed);
+
+	/// @brief PlayerのHP割合に応じて低体力Vignetteの強度を更新
+	void UpdateLowHealthVignette();
+
+	/// @brief 名前で特定したフルスクリーンVignetteの強度を反映
+	/// @param intensity 低体力Vignetteの強度（0から1）
+	void SetLowHealthVignetteIntensity(float intensity);
 
 	CommonData& commonData_;
 	std::uint32_t gameSeed_ = 0;

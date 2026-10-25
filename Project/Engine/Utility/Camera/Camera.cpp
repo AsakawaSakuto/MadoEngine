@@ -44,6 +44,11 @@ void Camera::UpdateShake(float deltaTime) {
 		return;
 	}
 
+	// ゲーム停止中にOffsetの再抽選だけ継続しないよう現在の振動状態を維持
+	if (deltaTime <= 0.0f) {
+		return;
+	}
+
 	shakeElapsedTime_ += deltaTime;
 	if (shakeElapsedTime_ >= shakeDuration_) {
 		shakePower_ = 0.0f;

@@ -1,0 +1,184 @@
+{
+    "emitters": [
+        {
+            "endpoints": {
+                "endPosition": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "segmentCount": 16,
+                "startPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "geometry": {
+                "cameraFacing": true,
+                "endFade": 0.0,
+                "interpolation": "linear",
+                "smoothingSubdivision": 0,
+                "startFade": 0.0,
+                "widthOverLength": {
+                    "default": 1.0,
+                    "keys": []
+                },
+                "widthOverLifetime": {
+                    "default": 0.15000000596046448,
+                    "keys": [
+                        {
+                            "easing": 0,
+                            "time": 0.0,
+                            "value": 0.15000000596046448
+                        },
+                        {
+                            "easing": 0,
+                            "time": 0.3499999940395355,
+                            "value": 0.0
+                        }
+                    ]
+                },
+                "widthOverTime": {
+                    "default": 1.0,
+                    "keys": []
+                }
+            },
+            "isEnabled": true,
+            "material": {
+                "blendMode": "add",
+                "colorOverLength": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "colorOverLifetime": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": [
+                        {
+                            "easing": 0,
+                            "time": 0.0,
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "easing": 0,
+                            "time": 1.0,
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                },
+                "colorOverTime": {
+                    "default": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "keys": []
+                },
+                "cullMode": "none",
+                "globalAlpha": {
+                    "default": 1.0,
+                    "keys": []
+                },
+                "textureName": "white16x16",
+                "tileLength": 1.0,
+                "uvMode": "stretch",
+                "uvOffset": [
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0
+                ],
+                "uvScroll": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "LightningTrail",
+            "noise": {
+                "amplitude": 0.0,
+                "frequency": 0.0010000000474974513,
+                "scrollSpeed": 0.0,
+                "seed": 42
+            },
+            "playback": {
+                "duration": 1.0,
+                "isLoop": true,
+                "mode": "full",
+                "progress": {
+                    "default": 0.0,
+                    "keys": [
+                        {
+                            "easing": 0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "easing": 0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "sweepLength": 1.0
+            },
+            "trail": {
+                "defaultControlPoints": [
+                    [
+                        -3.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        -1.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        1.0,
+                        -0.5,
+                        0.0
+                    ],
+                    [
+                        3.0,
+                        0.5,
+                        0.0
+                    ]
+                ],
+                "generationMode": "transformHistory",
+                "maxPointCount": 128,
+                "minPointDistance": 0.03999999910593033,
+                "pointLifetime": 0.3499999940395355,
+                "simulationSpace": "world"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "version": 7
+}

@@ -34,18 +34,18 @@
     "typeSettings": [
         {
             "camera": "TestDebugCamera",
-            "distance": 24.759357452392578,
+            "distance": 14.248114585876465,
             "dollySensitivity": 10.0,
             "panSensitivity": 0.25,
-            "pitch": 0.36705029010772705,
+            "pitch": 0.43376460671424866,
             "rotateSensitivity": 0.25,
             "target": [
-                -2.1928980350494385,
-                -2.349186658859253,
-                4.521639823913574
+                2.2405638694763184,
+                0.1763589084148407,
+                1.4752612113952637
             ],
             "type": "Debug",
-            "yaw": 2.55936861038208
+            "yaw": 3.883805274963379
         },
         {
             "camera": "TestTpsCamera",

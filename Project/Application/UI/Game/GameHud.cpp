@@ -86,6 +86,7 @@ namespace UI::Game {
 		gamePlayTimerView_.Initialize();
 		UpdateGameStartPresentation(0.0f, 0.0f);
 		playerResourceGainView_.Initialize();
+		playerDamageView_.Initialize();
 		enemyDamageView_.Initialize();
 		enemyStatusEffectIconView_.Initialize();
 		miniMapUI_.Initialize(miniMapData);
@@ -119,6 +120,7 @@ namespace UI::Game {
 			positions.clear();
 		}
 		playerResourceGainView_.Finalize();
+		playerDamageView_.Finalize();
 		enemyDamageView_.Finalize();
 		enemyStatusEffectIconView_.Finalize();
 		enemyCountText_ = {};
@@ -136,6 +138,7 @@ namespace UI::Game {
 			return;
 		}
 		isVisible_ = isVisible;
+		playerDamageView_.SetVisible(isVisible_);
 
 		// 各部品の所有Objectを通して切り替え、装備や壁登りなどの個別表示条件を維持
 		expGauge_.SetVisible(isVisible_);
@@ -164,6 +167,9 @@ namespace UI::Game {
 		staminaGauge_.Update(state.wallClimbRemainingTime, state.wallClimbMaxDuration,
 			state.isWallClimbGaugeVisible);
 		UpdateTexts(state);
+
+		// 致死被弾後もゲーム進行から独立して被ダメージTextを最後まで再生
+		playerDamageView_.Update(deltaTime);
 		fpsMeasurementView_.Update(deltaTime);
 		gamePlayTimerView_.Update(state.remainingTime);
 		UpdateGameStartPresentation(state.gameStartProgress, state.gamePlayElapsedTime);
@@ -213,6 +219,10 @@ namespace UI::Game {
 
 	void GameHud::ShowResourceGain(const Player::ResourceGainEvent& event) {
 		playerResourceGainView_.Spawn(event.type, event.amount);
+	}
+
+	void GameHud::ShowPlayerDamage(float damage) {
+		playerDamageView_.Spawn(damage);
 	}
 
 	void GameHud::PlayWeaponAttackAnimation(std::size_t slotIndex) {

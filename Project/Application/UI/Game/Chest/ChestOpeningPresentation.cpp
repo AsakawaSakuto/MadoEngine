@@ -1,6 +1,5 @@
 #include "ChestOpeningPresentation.h"
 #include "Audio/MyAudio.h"
-#include "Input/MyInput.h"
 #include "Math/Function/MathFunction.h"
 #include <algorithm>
 #include <array>
@@ -17,7 +16,7 @@ namespace {
 
 	// 各膨張段階までの待ち時間（秒）
 	constexpr std::array<float, 4> kOpeningStepDelays = {
-		0.25f, // A入力 → Uncommon
+		0.25f, // 演出開始 → Uncommon
 		0.50f, // Uncommon → Rare
 		1.00f, // Rare → Epic
 		1.50f, // Epic → Legendary
@@ -116,7 +115,7 @@ namespace UI::Game {
 			openingRarity_ = Rarity::Legendary;
 		}
 		openingPulseCount_ = GetOpeningPulseCount(rarity);
-		state_ = State::WaitingForOpen;
+		state_ = State::Opening;
 		model->SetVisible(true);
 	}
 
@@ -139,26 +138,15 @@ namespace UI::Game {
 		}
 	}
 
-	bool ChestOpeningPresentation::Update(float deltaTime, bool acceptOpenInput) {
+	bool ChestOpeningPresentation::Update(float deltaTime, bool canAdvanceOpening) {
 		UpdateFlash(deltaTime);
 
-		// 開封待ちと膨張中はカードを閉じたまま維持し、獲得待機中だけ演出を進行
-		if (!acceptOpenInput || !IsActive()) {
+		// 膨張中はカードを閉じたまま維持し、獲得待機中だけ入力なしで演出を進行
+		if (!canAdvanceOpening || !IsActive()) {
 			return false;
 		}
 
-		// 開封開始後の追加入力による再開や演出の省略を防止
-		if (state_ == State::Opening) {
-			return UpdateOpening(deltaTime);
-		}
-		if (!MyInput::Trigger("OpenChest")) {
-			return false;
-		}
-
-		// A入力を待ち時間の起点とし、遅延0の設定だけ入力Frameから膨張を反映
-		state_ = State::Opening;
-		openingElapsedTime_ = 0.0f;
-		return UpdateOpening(0.0f);
+		return UpdateOpening(deltaTime);
 	}
 
 	bool ChestOpeningPresentation::UpdateOpening(float deltaTime) {

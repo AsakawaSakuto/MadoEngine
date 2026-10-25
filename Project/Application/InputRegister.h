@@ -11,7 +11,6 @@ void RegisterInput() {
 
 	MyInput::RegisterInput("Interact", { DIK_E }, { GAMEPAD_X });
 	MyInput::RegisterInput("Decision", { DIK_SPACE }, { GAMEPAD_A });
-	MyInput::RegisterInput("OpenChest", { DIK_A }, { GAMEPAD_A });
 	MyInput::RegisterInput("Cancel", { DIK_ESCAPE }, { GAMEPAD_B });
 	MyInput::RegisterInput("Reroll", { DIK_R }, { GAMEPAD_Y });
 

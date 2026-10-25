@@ -2,14 +2,15 @@
 #include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
+#include "UI/Title/WeaponSelectIcon/WeaponSelectIcon.h"
+#include <array>
 #include <cstddef>
 #include <memory>
 #include <optional>
 
 /// @brief タイトルシーン
-/// @details ゲームのタイトル画面を表示し、スペースキーでゲームシーンに遷移
-class TitleScene : public IScene
-{
+/// @details 2行6列のアイコンから初期武器を選択してゲームシーンへ遷移
+class TitleScene : public IScene {
 public:
 	/// @brief コンストラクタ
 	/// @param commonData Sceneをまたいで保持するApplication共通データ
@@ -45,10 +46,28 @@ public:
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 
 private:
+	/// @brief 2行6列の武器アイコンと操作案内の初期化
+	void InitializeWeaponSelection();
+
+	/// @brief 行と列を維持した方向入力による武器選択の更新
+	void UpdateWeaponSelection();
+
+	/// @brief 選択位置に対応するアイコン強調と武器説明の反映
+	void RefreshWeaponSelection();
+
 	CommonData& commonData_;
 	std::optional<std::size_t> selectedSeedIndex_;
 
-	MadoEngine::SpriteHandle wallPaperSprite_{};
+	static constexpr std::size_t kWeaponColumnCount = 6;
+	static constexpr std::size_t kWeaponRowCount = 2;
+	static_assert(Projectile::kPlayableWeaponTypes.size() == kWeaponColumnCount * kWeaponRowCount);
+	std::array<UI::Title::WeaponSelectIcon, Projectile::kPlayableWeaponTypes.size()> weaponIcons_{};
+	std::size_t selectedWeaponIndex_ = 0;
+	MadoEngine::SpriteHandle weaponSelectionBackground_{};
+	MadoEngine::TextHandle weaponSelectionHeading_{};
+	MadoEngine::TextHandle selectedWeaponName_{};
+	MadoEngine::TextHandle selectedWeaponDescription_{};
+	MadoEngine::TextHandle weaponSelectionGuide_{};
 
 	CameraHandle debugCameraHandle_{};
 	CameraHandle tpsCameraHandle_{};

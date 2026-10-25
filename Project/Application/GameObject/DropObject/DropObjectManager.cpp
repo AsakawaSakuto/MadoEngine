@@ -1,9 +1,15 @@
 #include "DropObjectManager.h"
+#include "Audio/MyAudio.h"
 #include "GameObject/Player/Player.h"
 #include <algorithm>
+#include <array>
 #include <limits>
 
 namespace DropObject {
+
+	namespace {
+		constexpr std::array<const char*, 5> kExpSoundKeys = { "Exp1", "Exp2", "Exp3", "Exp4", "Exp5" };
+	}
 
 	Manager& Manager::GetInstance() {
 		static Manager instance;
@@ -33,10 +39,16 @@ namespace DropObject {
 
 	void Manager::Update(float deltaTime, Player::Base& player) {
 		const Vector3 targetPosition = player.GetPosition();
+		expCollectionSoundCooldown_ = (std::max)(0.0f, expCollectionSoundCooldown_ - (std::max)(0.0f, deltaTime));
 
 		// 種類ごとに回収を完結させ、ExpとMoneyの蓄積報酬の混在を防止
-		UpdatePool(expPool_, deltaTime, player);
+		const bool hasCollectedExp = UpdatePool(expPool_, deltaTime, player);
 		UpdatePool(moneyPool_, deltaTime, player);
+
+		// 経験値は全件加算したうえでSEだけをまとめ、同時回収時の音声生成を抑制
+		if (hasCollectedExp) {
+			PlayExpCollectionSound(player);
+		}
 
 		for (auto& dropObject : dropObjects_) {
 			dropObject->SetTargetPosition(targetPosition);
@@ -55,7 +67,8 @@ namespace DropObject {
 	}
 
 	template<std::size_t Capacity>
-	void Manager::UpdatePool(Pool<Capacity>& pool, float deltaTime, Player::Base& player) {
+	bool Manager::UpdatePool(Pool<Capacity>& pool, float deltaTime, Player::Base& player) {
+		bool hasCollectedReward = false;
 
 		// 回収済みDropは破棄せず保持し、次の配置で同じModelとColliderを再利用
 		for (PoolEntry& entry : pool.entries) {
@@ -63,8 +76,30 @@ namespace DropObject {
 				continue;
 			}
 			entry.object->Update(deltaTime, player);
-			GrantCollectedReward(pool.type, player, entry.object->ConsumeCollectedRewardAmount(), pool.pendingAmount);
+			const int collectedAmount = entry.object->ConsumeCollectedRewardAmount();
+			if (collectedAmount > 0) {
+				hasCollectedReward = true;
+			}
+			GrantCollectedReward(pool.type, player, collectedAmount, pool.pendingAmount);
 		}
+		return hasCollectedReward;
+	}
+
+	void Manager::PlayExpCollectionSound(const Player::Base& player) {
+		if (expCollectionSoundCooldown_ > 0.0f) {
+			return;
+		}
+
+		// レベルアップ後の残り経験値を基準に20%刻みの音源を選択し、実行時の音程変換を回避
+		const Player::Status status = player.GetStatus();
+		float levelProgress = 0.0f;
+		if (status.expToNextLevel > 0.0f) {
+			levelProgress = std::clamp(status.currentExp / status.expToNextLevel, 0.0f, 1.0f);
+		}
+		std::size_t soundIndex = static_cast<std::size_t>(levelProgress * static_cast<float>(kExpSoundKeys.size()));
+		soundIndex = (std::min)(soundIndex, kExpSoundKeys.size() - 1);
+		MyAudio::Play(kExpSoundKeys[soundIndex]);
+		expCollectionSoundCooldown_ = kExpCollectionSoundInterval;
 	}
 
 	void Manager::Spawn(Type type, const Vector3& position) {
@@ -157,6 +192,7 @@ namespace DropObject {
 		dropObjects_.clear();
 		ClearPool(expPool_);
 		ClearPool(moneyPool_);
+		expCollectionSoundCooldown_ = 0.0f;
 	}
 
 	template<std::size_t Capacity>

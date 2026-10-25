@@ -1,7 +1,7 @@
 {
     "categoryVolumes": {
         "BGM": 1.0,
-        "SE": 1.0,
+        "SE": 0.699999988079071,
         "Voice": 1.0
     },
     "individualVolumes": {
@@ -106,7 +106,32 @@
             "volume": 1.0
         },
         "exp": {
-            "pitchSemitones": 0.0,
+            "pitchSemitones": 2.4000000953674316,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "exp1": {
+            "pitchSemitones": 1.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "exp2": {
+            "pitchSemitones": 2.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "exp3": {
+            "pitchSemitones": 3.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "exp4": {
+            "pitchSemitones": 4.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "exp5": {
+            "pitchSemitones": 5.0,
             "type": "SE",
             "volume": 1.0
         },
@@ -171,6 +196,11 @@
             "volume": 1.0
         },
         "pistol": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 0.3499999940395355
+        },
+        "playerdamage": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -246,5 +276,5 @@
             "volume": 1.0
         }
     },
-    "masterVolume": 0.20000000298023224
+    "masterVolume": 1.0
 }

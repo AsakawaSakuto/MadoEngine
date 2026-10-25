@@ -87,7 +87,7 @@ namespace System {
 		const Relic::System& relicSystem, const Weapon::UpgradeSystem& upgradeSystem) const {
 		if (phase == InGamePhase::WaitingGetItem) {
 
-			// 開封待ちと膨張中は無音とし、開封完了から獲得確定まで同じBGMを継続
+			// 膨張中は無音とし、開封完了から獲得確定まで同じBGMを継続
 			if (relicSystem.HasPendingReward() && !chestOpeningPresentation_.IsActive()) {
 				return kRelicAcquisitionBgmPlaybackId;
 			}

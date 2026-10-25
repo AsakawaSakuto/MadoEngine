@@ -30,6 +30,10 @@ namespace Player {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
+		/// @brief 被ダメージ時の赤色表示と通常色への復帰を更新
+		/// @param deltaTime ゲーム停止中も進行する実時間（秒）
+		void UpdateAppearance(float deltaTime);
+
 		/// @brief Collider更新後に接地状態と描画状態を解決
 		void ResolveAfterCollision();
 
@@ -95,6 +99,10 @@ namespace Player {
 		/// @brief PlayerのHPを減少
 		/// @param damage 減らすHP量
 		void TakeDamage(float damage);
+
+		/// @brief 前回取得後の被ダメージ量を合計して取得し、通知を解除
+		/// @return 前回の取得後に実際に減少したHPの合計
+		float ConsumeDamageAmount();
 
 		/// @brief Playerが死亡状態か判定
 		/// @return 死亡状態の場合はtrue
@@ -173,23 +181,31 @@ namespace Player {
 		Camera* camera_ = nullptr;
 		SceneType sceneType_ = SceneType::Game;
 
-		Transform3D shadowTransform_;  // 影Transform
+		Transform3D landingMarkerTransform_;                           // 影Transform
 		MadoEngine::EffectSequence::MyEffectSequence3d landingMarker_; // 着地点Marker
 
-		Status status_;                     // ステータス
-		StatusMultiplier statusMultiplier_; // ステータスの倍率
+		Status status_;                           // ステータス
+		StatusMultiplier statusMultiplier_;       // ステータスの倍率
 
-		float baseMaxHealth_ = 100.0f;       // 外部補正を含まない最大HP
-		Controller controller_;             // 入力制御
+		float baseMaxHealth_ = 100.0f;            // 外部補正を含まない最大HP
+		Controller controller_;                   // 入力制御
 		AnimationController animationController_; // 描画Animation制御
-		Movement movement_;                 // 移動処理
-		MoveInput lastMoveInput_;           // Collider解決時に使用する直近の移動入力
-		float lastDeltaTime_ = 0.0f;        // Collider解決時に使用する直近の経過時間
+		Movement movement_;                       // 移動処理
+		MoveInput lastMoveInput_;                 // Collider解決時に使用する直近の移動入力
+		float lastDeltaTime_ = 0.0f;              // Collider解決時に使用する直近の経過時間
+
+		float damageFlashDuration_ = 0.5f;        // 被ダメージ時の赤色表示の継続時間（秒）
+		float damageFlashRemainingTime_ = 0.0f;   // 被ダメージ時の赤色表示の残り時間（秒）
+
+		GameTimer regenerationTimer_;             // HPの自動回復タイマー
+		float healthRegenerationInterval_ = 3.0f; // 被弾後にHP回復が開始されるまでの待機時間
+		float healthRegenerationAmount_ = 1.0f;   // HP回復量
 
 		MapLimit mapLimit_; // Mapの制限範囲
 
-		GameTimer regenerationTimer_; // HPの自動回復タイマー
 		std::vector<ResourceGainEvent> resourceGainEvents_; // 未処理のリソース獲得イベント
+		float pendingDamageAmount_ = 0.0f; // 前回の通知取得後に実際に減少したHPの合計
+
 		bool isDead_ = false; // 死亡状態の場合はtrue
 		bool isDeathAnimationPlaying_ = false; // 死亡Animationの再生開始に成功した場合はtrue
 	};

@@ -1,5 +1,6 @@
 #pragma once
 #include "../IProjectile.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
 #include <string>
 #include <unordered_map>
 
@@ -67,6 +68,7 @@ namespace Projectile {
 		void UpdateHitbox(float yaw, const Vector3& pivotPosition, const Vector3& upDirection);
 
 		MadoEngine::ModelHandle model_{};
+		MadoEngine::Ribbon::RibbonEffectHandle trail_{};
 		std::string objectName_;
 		GameTimer sweepTimer_;
 		std::unordered_map<std::uint32_t, int> lastHitSweepIndices_;

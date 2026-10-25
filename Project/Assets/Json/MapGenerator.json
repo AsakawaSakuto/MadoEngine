@@ -7,7 +7,7 @@
             15.0
         ],
         "eventObjectCounts": {
-            "anvil": 5,
+            "anvil": 10,
             "bossSpawner": 0,
             "chest": 50,
             "chestTypes": {
@@ -20,7 +20,7 @@
                 "money": 50
             },
             "karma": 10,
-            "magnet": 5
+            "magnet": 3
         },
         "height": {
             "max": 9,
@@ -34,7 +34,7 @@
             16,
             16
         ],
-        "seed": 3930580347,
+        "seed": 2089839398,
         "slopeSpawnRate": 1.0
     }
 }

@@ -160,6 +160,7 @@ void ModelManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* c
 	device_ = device;
 	commandList_ = commandList;
 	psoRegistry_ = psoRegistry;
+	spriteSheetAnimationPausedScenes_.clear();
 	LoadAllModels();
 	Logger::Output(std::to_string(sharedData_.size()) + "件のModelアセットを読み込みました", Logger::Level::Engine);
 }
@@ -201,6 +202,7 @@ void ModelManager::Finalize() {
 	}
 	sharedData_.clear();
 	aliases_.clear();
+	spriteSheetAnimationPausedScenes_.clear();
 	activeCamera_ = {};
 	device_ = nullptr;
 	commandList_ = nullptr;
@@ -669,6 +671,9 @@ void ModelManager::DestroyByScene(SceneType sceneType) {
 		return;
 	}
 
+	// 同じSceneへの再入場へ一時停止状態を持ち越さないよう時間制御も破棄
+	spriteSheetAnimationPausedScenes_.erase(sceneType);
+
 	std::vector<ModelHandle> modelHandles;
 	for (const auto& [name, handle] : modelNameToHandle_) {
 		(void)name;
@@ -978,7 +983,23 @@ std::string ModelManager::ResolveModelPath(const std::string& modelName) const {
 	}
 }
 
+void ModelManager::SetSpriteSheetAnimationsPaused(SceneType sceneType, bool paused) {
+
+	// ゲーム側の停止条件を保持し、各Modelの個別の再生状態を維持したまま時間進行を制御
+	if (paused) {
+		spriteSheetAnimationPausedScenes_.insert(sceneType);
+	} else {
+		spriteSheetAnimationPausedScenes_.erase(sceneType);
+	}
+}
+
 void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime) {
+	float spriteSheetDeltaTime = deltaTime;
+
+	// 死亡演出などの骨格アニメーションを進めながら、ゲーム停止中のシート再生だけを停止
+	if (spriteSheetAnimationPausedScenes_.contains(currentSceneType)) {
+		spriteSheetDeltaTime = 0.0f;
+	}
 	for (const auto& [name, handle] : modelNameToHandle_) {
 		(void)name;
 		Model* model = TryGet(handle);
@@ -989,7 +1010,7 @@ void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime) {
 		if (modelScene != SceneType::None && modelScene != currentSceneType) {
 			continue;
 		}
-		model->Update(deltaTime);
+		model->Update(deltaTime, spriteSheetDeltaTime);
 	}
 	for (const auto& [name, handle] : instancedModelNameToHandle_) {
 		(void)name;

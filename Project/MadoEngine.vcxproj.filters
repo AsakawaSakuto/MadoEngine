@@ -111,6 +111,7 @@
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationFunction.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\AnimationSet.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Animation\Animator.cpp" />
+    <ClCompile Include="Engine\Render\Animation\SpriteSheetAnimator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
@@ -228,6 +229,7 @@
     <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\System\PlayLog\PlayLogRecorder.cpp" />
@@ -330,6 +332,7 @@
     <ClInclude Include="Engine\Utility\Collider\Shape\Sphere.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Utility\Color\Color.h" />
     <ClInclude Include="Engine\Utility\Color\GamingColor.h" />
     <ClInclude Include="Engine\Utility\Random.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
@@ -741,6 +744,7 @@
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Animation\AnimationSet.h" />
     <ClInclude Include="Engine\Render\Object\3d\Animation\Animator.h" />
+    <ClInclude Include="Engine\Render\Animation\SpriteSheetAnimator.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerAnimationController.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h">
@@ -937,6 +941,7 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
+    <ClInclude Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

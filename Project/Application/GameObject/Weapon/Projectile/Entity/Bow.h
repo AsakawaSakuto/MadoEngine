@@ -1,5 +1,6 @@
 #pragma once
 #include "../IProjectile.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
 #include <string>
 
 namespace Projectile {
@@ -22,6 +23,7 @@ namespace Projectile {
 	private:
 		
 		MadoEngine::ModelHandle model_{};
+		MadoEngine::Ribbon::RibbonEffectHandle trail_{};
 		std::string objectName_;
 	};
 }

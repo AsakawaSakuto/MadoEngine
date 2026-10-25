@@ -180,6 +180,24 @@
             "screenEffectStage": "Scene"
         },
         {
+            "effectShaderKey": "PostEffect/Vignette.PS",
+            "effectType": "Vignette",
+            "enabled": true,
+            "key": "ScreenEffectPass_5",
+            "name": "LowHealthVignette",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 0.0,
+                "ColorG": 0.0,
+                "ColorR": 0.669767439365387,
+                "InnerRadius": 0.5,
+                "Intensity": 0.0,
+                "OuterScale": 2.0
+            },
+            "scope": "Screen",
+            "screenEffectStage": "Final"
+        },
+        {
             "effectShaderKey": "PostEffect/PixelArt.PS",
             "effectType": "PixelArt",
             "enabled": false,
@@ -190,39 +208,6 @@
                 "Contrast": 1.149999976158142,
                 "Intensity": 1.0,
                 "PixelSize": 1.0
-            },
-            "scope": "Screen",
-            "screenEffectStage": "Final"
-        },
-        {
-            "effectShaderKey": "PostEffect/Vignette.PS",
-            "effectType": "Vignette",
-            "enabled": false,
-            "key": "ScreenEffectPass_3",
-            "name": "LowHealthVignette",
-            "parameters": {
-                "ColorA": 1.0,
-                "ColorB": 0.0,
-                "ColorG": 0.0,
-                "ColorR": 1.0,
-                "InnerRadius": 0.699999988079071,
-                "Intensity": 1.0,
-                "OuterScale": 4.0
-            },
-            "scope": "Screen",
-            "screenEffectStage": "Final"
-        },
-        {
-            "effectShaderKey": "PostEffect/ToneMapping.PS",
-            "effectType": "ToneMapping",
-            "enabled": false,
-            "key": "ScreenEffectPass_4",
-            "name": "ToneMapping",
-            "parameters": {
-                "ACESBlend": 1.0,
-                "ExposureEV": 0.0,
-                "ReinhardWhitePoint": 4.0,
-                "ToneMapperMode": 1.0
             },
             "scope": "Screen",
             "screenEffectStage": "Final"

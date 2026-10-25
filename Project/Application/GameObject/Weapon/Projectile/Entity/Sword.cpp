@@ -1,4 +1,5 @@
 #include "Sword.h"
+#include "Render/Object/3d/RibbonEffect/MyRibbonEffect3d.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -15,9 +16,13 @@ namespace Projectile {
 		constexpr float kRotationEpsilon = 0.00001f;
 		constexpr float kBladeCenterOffset = -3.0f;
 		constexpr Vector3 kBladeHalfSize = { 0.5f, 0.5f, 2.0f };
+		constexpr std::uint32_t kTrailVertexIndex = 2725;
 	}
 
 	Sword::~Sword() {
+
+		// 本体消滅後は頂点の追跡を終了し、残った軌跡だけを寿命に従って消去
+		MyRibbonEffect3d::Stop(trail_, MadoEngine::Ribbon::RibbonStopMode::Finish);
 		if (!objectName_.empty()) {
 
 			// Colliderの座標参照を本体の破棄前に解除
@@ -27,6 +32,10 @@ namespace Projectile {
 	}
 
 	void Sword::Initialize(InitializeDesc context) {
+
+		// 再初期化時に前の軌跡へ新しい剣の位置を接続しないよう既存Trailを破棄
+		MyRibbonEffect3d::Stop(trail_, MadoEngine::Ribbon::RibbonStopMode::Immediate);
+		trail_ = {};
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 		ownerUpDirection_ = context.ownerUpDirection;
@@ -67,6 +76,17 @@ namespace Projectile {
 
 		hitbox_ = OBB{};
 		UpdatePose();
+
+		// 初期姿勢を反映した頂点から履歴を開始し、原点から剣先までの不要な軌跡を防止
+		if (const Model* model = MyModel::TryGet(model_)) {
+			MadoEngine::Ribbon::RibbonEffectPlayDesc trailDesc;
+			if (model->TryGetVertexWorldPosition(kTrailVertexIndex, trailDesc.transform.translate)) {
+				trailDesc.sceneType = SceneType::Game;
+				trailDesc.loopOverride = true;
+				trail_ = MyRibbonEffect3d::Play("SwordTrail", trailDesc);
+			}
+		}
+
 		previousSweepYaw_ = sweepYaw_;
 		previousPivotPosition_ = transform_.translate;
 		previousUpDirection_ = ownerUpDirection_;
@@ -182,6 +202,14 @@ namespace Projectile {
 		moveDirection_ = -std::get<OBB>(hitbox_).orientation[2];
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTransform(transform_);
+
+			// Model更新を待たず現在姿勢の頂点をWorld座標へ変換し、剣の拡縮の二重適用を回避
+			if (trail_.HasValue()) {
+				Transform3D trailTransform;
+				if (model->TryGetVertexWorldPosition(kTrailVertexIndex, trailTransform.translate)) {
+					MyRibbonEffect3d::SetTransform(trail_, trailTransform);
+				}
+			}
 		}
 	}
 

@@ -1,5 +1,8 @@
 #pragma once
 #include "../IProjectile.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
+#include <array>
+#include <cstdint>
 #include <string>
 
 namespace Projectile {
@@ -19,7 +22,10 @@ namespace Projectile {
 
 	private:
 
+		static constexpr std::array<std::uint32_t, 2> kTrailVertexIndices = { 1897, 903 };
+
 		MadoEngine::ModelHandle model_{};
+		std::array<MadoEngine::Ribbon::RibbonEffectHandle, kTrailVertexIndices.size()> trails_{};
 		std::string objectName_;
 
 		GameTimer startTimer_;

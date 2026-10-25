@@ -2,6 +2,7 @@
 #include "ModelSharedData.h"
 #include "ModelMaterialBuffer.h"
 #include "../Animation/Animator.h"
+#include "Render/Animation/SpriteSheetAnimator.h"
 #include "Render/Object/IRenderObject3d.h"
 #include "Utility/Light/LightManager.h"
 #include "Utility/Json/Core/IJsonSerializable.h"
@@ -25,6 +26,11 @@ public:
 	/// @brief Model状態とAnimation Poseを更新
 	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;
+
+	/// @brief Model更新とシート再生に異なる経過時間を適用
+	/// @param deltaTime Model状態と骨格Animationの経過時間
+	/// @param spriteSheetDeltaTime スプライトシートAnimationの経過時間
+	void Update(float deltaTime, float spriteSheetDeltaTime);
 
 	void Draw(Camera& useCamera) override;
 
@@ -52,6 +58,14 @@ public:
 	/// @brief ビルボード行列を使用するかを取得
 	/// @return 使用する場合はtrue
 	bool IsUseBillboard() const { return usebillbord_; }
+
+	/// @brief ビルボード回転をY軸だけへ制限
+	/// @param enabled Y軸回転だけを適用する場合はtrue
+	void SetBillboardYAxisOnly(bool enabled) { billboardYAxisOnly_ = enabled; }
+
+	/// @brief ビルボード回転のY軸制限を取得
+	/// @return Y軸回転だけを適用する場合はtrue
+	bool IsBillboardYAxisOnly() const { return billboardYAxisOnly_; }
 
 	/// @brief ビルボードCamera基底で加算する移動量を設定
 	/// @param offset XがCamera右方向、YがCamera上方向、ZがCamera前方向の移動量
@@ -165,6 +179,45 @@ public:
 	/// @return 上書きされている場合はtrue
 	bool HasTextureOverride() const { return !textureOverrideName_.empty(); }
 
+	/// @brief UV変換全体を設定
+	/// @param transform UVの拡縮、回転、移動
+	void SetUVTransform(const Transform2D& transform) { uvTransform_ = transform; }
+
+	/// @brief UV変換全体を取得
+	/// @return 現在のUV変換
+	const Transform2D& GetUVTransform() const { return uvTransform_; }
+
+	/// @brief スプライトシートの分割と再生条件を設定して先頭コマで停止
+	/// @param settings 横と縦のコマ数、表示間隔、ループ設定
+	/// @return 設定が有効な場合はtrue
+	bool SetSpriteSheetAnimation(const MadoEngine::SpriteSheetAnimationSettings& settings);
+
+	/// @brief スプライトシートを再生または再開
+	/// @param restart 先頭コマから再生し直す場合はtrue
+	/// @return 再生を開始できた場合はtrue
+	bool PlaySpriteSheetAnimation(bool restart = true);
+
+	/// @brief 現在コマを保持してスプライトシートを一時停止
+	void PauseSpriteSheetAnimation() { spriteSheetAnimator_.Pause(); }
+
+	/// @brief スプライトシートを先頭コマへ戻して停止
+	void StopSpriteSheetAnimation();
+
+	/// @brief スプライトシートの設定を解除して通常のUV変換へ復元
+	void ClearSpriteSheetAnimation();
+
+	/// @brief スプライトシートが再生中か判定
+	/// @return 再生中の場合はtrue
+	bool IsSpriteSheetAnimationPlaying() const { return spriteSheetAnimator_.IsPlaying(); }
+
+	/// @brief スプライトシートの非ループ再生が終了したか判定
+	/// @return 最終コマの表示時間まで完了した場合はtrue
+	bool IsSpriteSheetAnimationFinished() const { return spriteSheetAnimator_.IsFinished(); }
+
+	/// @brief スプライトシートの現在コマを取得
+	/// @return 0から始まるコマ番号
+	std::uint32_t GetSpriteSheetAnimationFrame() const { return spriteSheetAnimator_.GetCurrentFrame(); }
+
 	/// @brief 指定した頂点のローカル座標を取得
 	/// @param vertexIndex 取得する頂点配列のインデックス
 	/// @return 頂点のローカル座標、未初期化または範囲外の場合はゼロベクトル
@@ -215,6 +268,9 @@ private:
 
 	void InitializeInstanceResources();
 
+	/// @brief 現在コマのUV範囲をシート用行列へ反映
+	void UpdateSpriteSheetUVMatrix();
+
 	/// @brief 現在のTransformからワールド行列を作成
 	/// @param billboardCamera ビルボードの向きに使用するカメラ、nullptrの場合は通常の回転を使用
 	/// @return 作成したワールド行列
@@ -256,6 +312,8 @@ private:
 
 	Matrix4x4 worldMatrix_;
 	Transform2D uvTransform_;
+	MadoEngine::SpriteSheetAnimator spriteSheetAnimator_;
+	Matrix4x4 spriteSheetUVMatrix_ = Matrix::MakeIdentity();
 
 	std::string environmentMapName_;
 	uint32_t environmentMapIndex_ = 0;
@@ -282,6 +340,7 @@ private:
 	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);
 	bool enableFrustumCulling_ = true;
 	bool usebillbord_ = false;
+	bool billboardYAxisOnly_ = false;
 	Vector3 cameraTranslateOffset_ = { 0.0f, 0.0f, 0.0f };
 	bool castShadow_ = true;
 	bool receiveShadow_ = true;

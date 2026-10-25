@@ -230,6 +230,7 @@ void Model::FromJson(const nlohmann::json& json) {
 		json.value("layer", MadoEngine::Render::RenderLayerToString(GetRenderLayer()))));
 	SetVisible(json.value("visible", IsVisible()));
 	SetUseBillboard(json.value("billboard", IsUseBillboard()));
+	SetBillboardYAxisOnly(json.value("billboardYAxisOnly", IsBillboardYAxisOnly()));
 	SetCameraTranslateOffset(ReadVector3(
 		json.value("cameraTranslateOffset", nlohmann::json::array()),
 		GetCameraTranslateOffset()
@@ -259,6 +260,7 @@ nlohmann::json Model::ToJson() const {
 		{ "layer", MadoEngine::Render::RenderLayerToString(GetRenderLayer()) },
 		{ "visible", IsVisible() },
 		{ "billboard", IsUseBillboard() },
+		{ "billboardYAxisOnly", IsBillboardYAxisOnly() },
 		{ "cameraTranslateOffset", {
 			cameraTranslateOffset_.x,
 			cameraTranslateOffset_.y,
@@ -298,6 +300,45 @@ bool Model::ResetTexture() {
 	textureIndex_ = textureIndices_.front();
 	textureOverrideName_.clear();
 	return true;
+}
+
+bool Model::SetSpriteSheetAnimation(const MadoEngine::SpriteSheetAnimationSettings& settings) {
+	if (!spriteSheetAnimator_.SetAnimation(settings)) {
+		return false;
+	}
+
+	// 設定直後から先頭コマを参照し、再生開始までシート全体が表示される状態を回避
+	UpdateSpriteSheetUVMatrix();
+	return true;
+}
+
+bool Model::PlaySpriteSheetAnimation(bool restart) {
+	if (!spriteSheetAnimator_.Play(restart)) {
+		return false;
+	}
+
+	// 再生し直した先頭コマを次回の時間更新より先にUVへ反映
+	UpdateSpriteSheetUVMatrix();
+	return true;
+}
+
+void Model::StopSpriteSheetAnimation() {
+	spriteSheetAnimator_.Stop();
+	UpdateSpriteSheetUVMatrix();
+}
+
+void Model::ClearSpriteSheetAnimation() {
+	spriteSheetAnimator_.Clear();
+	UpdateSpriteSheetUVMatrix();
+}
+
+void Model::UpdateSpriteSheetUVMatrix() {
+	const Transform2D frameUV = spriteSheetAnimator_.GetUVTransform();
+	spriteSheetUVMatrix_ = Matrix::MakeIdentity();
+	spriteSheetUVMatrix_.m[0][0] = frameUV.scale.x;
+	spriteSheetUVMatrix_.m[1][1] = frameUV.scale.y;
+	spriteSheetUVMatrix_.m[3][0] = frameUV.translate.x;
+	spriteSheetUVMatrix_.m[3][1] = frameUV.translate.y;
 }
 
 void Model::SetLightingEnabled(bool enabled) {
@@ -432,11 +473,20 @@ Matrix4x4 Model::MakeWorldMatrix(const Camera* billboardCamera) const {
 	Matrix4x4 scaleMatrix = Matrix::MakeScale(transform_.scale);
 	Matrix4x4 rotateMatrix = Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, transform_.rotate, { 0.0f, 0.0f, 0.0f });
 	Matrix4x4 cameraTranslateMatrix = Matrix::MakeTranslate(cameraTranslateOffset_);
-	Matrix4x4 billboardMatrix = Matrix::Inverse(billboardCamera->GetViewMatrix());
-	billboardMatrix.m[3][0] = 0.0f;
-	billboardMatrix.m[3][1] = 0.0f;
-	billboardMatrix.m[3][2] = 0.0f;
-	billboardMatrix.m[3][3] = 1.0f;
+	Matrix4x4 billboardMatrix;
+	if (billboardYAxisOnly_) {
+
+		// Cameraの俯仰角とRollを除外し、YawだけでワールドY軸に直立した向きを維持
+		billboardMatrix = Matrix::MakeRotateY(billboardCamera->GetRotation().y);
+	} else {
+
+		// 全軸ビルボードではCameraの回転全体を使い、平行移動成分だけを除去
+		billboardMatrix = Matrix::Inverse(billboardCamera->GetViewMatrix());
+		billboardMatrix.m[3][0] = 0.0f;
+		billboardMatrix.m[3][1] = 0.0f;
+		billboardMatrix.m[3][2] = 0.0f;
+		billboardMatrix.m[3][3] = 1.0f;
+	}
 
 	Matrix4x4 translateMatrix = Matrix::MakeTranslate(transform_.translate);
 
@@ -462,8 +512,17 @@ void Model::UpdateLightGpuData() {
 }
 
 void Model::Update(float deltaTime) {
+	Update(deltaTime, deltaTime);
+}
+
+void Model::Update(float deltaTime, float spriteSheetDeltaTime) {
 	if (!sharedData_ || !transformationData_ || !cameraData_) {
 		return;
+	}
+
+	// 描画対象を選ばない専用Animatorでコマを進め、変更があった時だけシート用行列を更新
+	if (spriteSheetAnimator_.Update(spriteSheetDeltaTime)) {
+		UpdateSpriteSheetUVMatrix();
 	}
 
 	if (type_ != ModelType::Static && !skeletonData_.joints.empty()) {
@@ -509,6 +568,11 @@ void Model::Update(float deltaTime) {
 		materialData_.enableLighting = 0;
 	}
 	materialData_.uvTransformMatrix = scale * rot * trans;
+	if (spriteSheetAnimator_.IsConfigured()) {
+
+		// 手動UVの回転と拡縮を各コマ内へ適用し、シート解除後も元のUV設定を維持
+		materialData_.uvTransformMatrix = Matrix::Multiply(materialData_.uvTransformMatrix, spriteSheetUVMatrix_);
+	}
 	if (useEnvironmentMap_) {
 		materialData_.useEnvironmentMap = 1;
 	} else {

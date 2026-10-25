@@ -4,6 +4,7 @@
 #include "Utility/Random.h"
 #include "Utility/EditorManagementMode.h"
 #include "Utility/Color/GamingColor.h"
+#include "Utility/Color/Color.h"
 #include "Utility/Easing/Easing.h"
 #include "Utility/GameTimer/GameTimer.h"
 #include "Utility/Logger/Logger.h"
