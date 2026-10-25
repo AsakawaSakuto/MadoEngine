@@ -8,24 +8,16 @@
 #include <format>
 
 namespace {
-	/// @brief 武器強化操作と押下演出を適用するObjectの対応情報
-	struct UpgradeControlDefinition {
-		const char* actionName;
-		std::array<const char*, 3> spriteNames;
-		const char* textName;
-	};
-
-	constexpr UpgradeControlDefinition kUpgradeControlDefinitions[] = {
+	constexpr UI::Game::InputControlFeedbackDefinition kUpgradeControlDefinitions[] = {
 		{ "Decision", { "UpgradeDecisionBottom", "UpgradeDecisionBack1", "UpgradeDecisionBack2" }, "UpgradeDecisionText" },
 		{ "Reroll", { "UpgradeRerollBottom", "UpgradeRerollBack1", "UpgradeRerollBack2" }, "UpgradeRerollText" },
 	};
-	constexpr float kUpgradeControlPressedScale = 0.8f;
-	constexpr float kUpgradeControlReleaseDuration = 0.15f;
 	constexpr const char* kGameStartBandNames[] = { "Band_Up", "Band_Bottom" };
 	constexpr float kGameStartBandInitialScaleY = 8.0f;
 	constexpr const char* kGameStartTextName = "StartText";
 	constexpr const char* kUpgradeTextName = "UpgradeText";
 	constexpr const char* kWeaponUpgradeOverlayName = "WeaponUpgradeOverlay";
+	constexpr const char* kPauseSheetName = "PauseSheet";
 	constexpr const char* kUpgradeRerollCoinTextName = "UpgradeRerollCoinText";
 	constexpr const char* kUpgradeSpriteNames[] = {
 		"UpgradeDecisionBack1", "UpgradeDecisionBack2",
@@ -68,6 +60,7 @@ namespace UI::Game {
 		staticSprites_.clear();
 		staticTexts_.clear();
 		UpdateUpgradePresentation(0.0f, false);
+		UpdatePauseSheet(false);
 
 		// Editor配置の常設表示だけを管理対象へ登録し、開始演出とMap操作Textを分離
 		for (const char* name : kStaticHudSpriteNames) {
@@ -108,6 +101,7 @@ namespace UI::Game {
 
 	void GameHud::Finalize() {
 		UpdateUpgradePresentation(0.0f, false);
+		UpdatePauseSheet(false);
 		relicInventoryUI_.Finalize();
 		healthGauge_.Finalize();
 		staminaGauge_.Finalize();
@@ -133,6 +127,7 @@ namespace UI::Game {
 		ApplyStaticVisibility(isVisible);
 		if (!isVisible) {
 			UpdateUpgradePresentation(0.0f, false);
+			UpdatePauseSheet(false);
 		}
 		if (isVisible_ == isVisible) {
 			return;
@@ -175,6 +170,7 @@ namespace UI::Game {
 		UpdateGameStartPresentation(state.gameStartProgress, state.gamePlayElapsedTime);
 		ApplyStaticVisibility(isVisible_);
 		UpdateUpgradePresentation(deltaTime, isVisible_ && state.isWaitingUpgradeSelection);
+		UpdatePauseSheet(state.isPaused);
 	}
 
 	void GameHud::UpdateWorldViews(float gameDeltaTime, bool isPlaying,
@@ -233,6 +229,16 @@ namespace UI::Game {
 #ifdef USE_IMGUI
 		playerResourceGainView_.DrawImGui();
 #endif
+	}
+
+	void GameHud::UpdatePauseSheet(bool isPaused) {
+		Sprite* pauseSheet = MySprite::TryGet(MySprite::Find(kPauseSheetName));
+		if (!pauseSheet || pauseSheet->GetSceneType() != SceneType::Game) {
+			return;
+		}
+
+		// 武器強化や報酬選択による停止と区別し、通常のPause状態だけでEditor配置の暗幕を表示
+		pauseSheet->SetVisible(isVisible_ && isPaused);
 	}
 
 	void GameHud::ApplyStaticVisibility(bool isVisible) {
@@ -330,62 +336,8 @@ namespace UI::Game {
 	}
 
 	void GameHud::UpdateUpgradeControlFeedback(float deltaTime, bool isVisible) {
-		if (!isVisible) {
-
-			// 非表示へ切り替わる時点で変更したScaleを戻し、次回の基準値への倍率の累積を防止
-			for (UpgradeControlFeedbackState& state : upgradeControlFeedback_) {
-				for (std::size_t spriteIndex = 0; spriteIndex < state.sprites.size(); ++spriteIndex) {
-					Sprite* sprite = MySprite::TryGet(state.sprites[spriteIndex]);
-					if (sprite && sprite->GetSceneType() == SceneType::Game) {
-						sprite->SetScale(state.spriteBaseScales[spriteIndex]);
-					}
-				}
-				MadoEngine::Text* text = MyText::TryGet(state.text);
-				if (text && text->GetSceneType() == SceneType::Game) {
-					text->SetScale(state.textBaseScale);
-				}
-				state = {};
-			}
-			return;
-		}
-
-		// 押下は即時に反映し、短い入力でも離した後の補間で反応を視認可能な時間を確保
-		const float releaseProgress = (std::max)(deltaTime, 0.0f) / kUpgradeControlReleaseDuration;
 		for (std::size_t index = 0; index < upgradeControlFeedback_.size(); ++index) {
-			UpgradeControlFeedbackState& state = upgradeControlFeedback_[index];
-			const UpgradeControlDefinition& definition = kUpgradeControlDefinitions[index];
-			if (MyInput::Press(definition.actionName)) {
-				state.pressAmount = 1.0f;
-			} else {
-				state.pressAmount = (std::max)(0.0f, state.pressAmount - releaseProgress);
-			}
-			const float pressedScale = Easing::Lerp(1.0f, kUpgradeControlPressedScale,
-				state.pressAmount, EaseType::EaseOutQuad);
-
-			// Bottomと二枚のBackに同じ倍率を適用し、各SpriteのEditor配置の基準Scaleを維持
-			for (std::size_t spriteIndex = 0; spriteIndex < state.sprites.size(); ++spriteIndex) {
-				const MadoEngine::SpriteHandle spriteHandle = MySprite::Find(definition.spriteNames[spriteIndex]);
-				Sprite* sprite = MySprite::TryGet(spriteHandle);
-				if (!sprite || sprite->GetSceneType() != SceneType::Game) {
-					continue;
-				}
-				if (state.sprites[spriteIndex] != spriteHandle) {
-					state.sprites[spriteIndex] = spriteHandle;
-					state.spriteBaseScales[spriteIndex] = sprite->GetScale();
-				}
-				sprite->SetScale(state.spriteBaseScales[spriteIndex] * pressedScale);
-			}
-
-			// 対応Textも同じ倍率で縮小し、料金表示と反対側の案内は元のサイズを維持
-			const MadoEngine::TextHandle textHandle = MyText::Find(definition.textName);
-			MadoEngine::Text* text = MyText::TryGet(textHandle);
-			if (text && text->GetSceneType() == SceneType::Game) {
-				if (state.text != textHandle) {
-					state.text = textHandle;
-					state.textBaseScale = text->GetScale();
-				}
-				text->SetScale(state.textBaseScale * pressedScale);
-			}
+			upgradeControlFeedback_[index].Update(deltaTime, isVisible, kUpgradeControlDefinitions[index]);
 		}
 	}
 

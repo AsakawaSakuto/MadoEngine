@@ -9,6 +9,14 @@
 
 namespace {
 
+constexpr float kDecisionDelayDuration = 0.2f;
+constexpr UI::Game::InputControlFeedbackDefinition kDecisionControlDefinition = {
+	"Decision", { "RelicDecisionBottom", "RelicDecisionBack1", "RelicDecisionBack2" }, "RelicDecisionText"
+};
+constexpr std::array<const char*, 3> kDecisionSpriteNames = {
+	"RelicDecisionBack1", "RelicDecisionBack2", "RelicDecisionBottom"
+};
+
 /// @brief SpriteHandleを一時参照へ解決
 /// @param handle SpriteHandle
 /// @return 有効な場合はSprite、無効な場合はnullptr
@@ -62,6 +70,7 @@ namespace UI::Game {
 	}
 
 	void RelicAcquisitionUI::Finalize() {
+		SetVisible(false);
 		panelSprites_.fill({});
 		textHandles_.fill({});
 		iconSprite_ = {};
@@ -89,7 +98,7 @@ namespace UI::Game {
 		}
 	}
 
-	void RelicAcquisitionUI::Update(Relic::System& relicSystem, bool acceptDecisionInput) {
+	void RelicAcquisitionUI::Update(float deltaTime, Relic::System& relicSystem, bool acceptDecisionInput) {
 
 		// 開封待ち中は非表示のカードに対する獲得確定入力も禁止
 		if (!isDisplayEnabled_) {
@@ -105,16 +114,40 @@ namespace UI::Game {
 
 		if (!isVisible_ || displayedRelicId_ != definition->id ||
 			displayedRevision_ != relicSystem.GetRevision()) {
+			ResetDecisionDelay();
 			SetDefinition(*definition);
 			displayedRevision_ = relicSystem.GetRevision();
 			SetVisible(true);
 		}
 
+		UpdateDecisionControl(deltaTime);
+
+		// 保留報酬を維持してWaitingGetItemを継続し、押下Frameの時間を含めず決定後の演出時間を確保
+		if (decisionDelayTimer_.IsActive() || decisionDelayTimer_.IsFinished()) {
+
+			// 待機中にEditorで報酬や所持品が変更された場合は古い決定の自動適用を中止
+			if (decisionRelicId_ != definition->id || decisionRevision_ != relicSystem.GetRevision()) {
+				ResetDecisionDelay();
+				return;
+			}
+			decisionDelayTimer_.Update(deltaTime);
+			if (!decisionDelayTimer_.IsFinished()) {
+				return;
+			}
+			ResetDecisionDelay();
+			if (relicSystem.ConfirmPendingReward()) {
+				SetVisible(false);
+				displayedRelicId_.clear();
+				displayedRevision_ = 0;
+			}
+			return;
+		}
+
 		// 前段の開封入力で獲得表示まで閉じないよう表示開始と決定受付を分離
-		if (acceptDecisionInput && MyInput::Trigger("Decision") && relicSystem.ConfirmPendingReward()) {
-			SetVisible(false);
-			displayedRelicId_.clear();
-			displayedRevision_ = 0;
+		if (acceptDecisionInput && MyInput::Trigger("Decision")) {
+			decisionRelicId_ = definition->id;
+			decisionRevision_ = relicSystem.GetRevision();
+			decisionDelayTimer_.Start(kDecisionDelayDuration);
 		}
 	}
 
@@ -316,6 +349,9 @@ namespace UI::Game {
 
 		// 表示要求の発生元にかかわらず開封待ち中の描画を抑止
 		isVisible = isVisible && isDisplayEnabled_;
+		if (!isVisible) {
+			ResetDecisionDelay();
+		}
 		isVisible_ = isVisible;
 
 		// フラッシュ中の背景暗転だけを抑止し、ImGui経由の表示要求にも同じ条件を適用
@@ -336,6 +372,37 @@ namespace UI::Game {
 				text->SetVisible(isVisible);
 			}
 		}
+		UpdateDecisionControl(0.0f);
+	}
+
+	void RelicAcquisitionUI::UpdateDecisionControl(float deltaTime) {
+
+		// 動的生成した暗幕の直後へ案内を配置し、Editor配置のSpriteが暗幕の背後へ隠れる状態を防止
+		MadoEngine::SpriteHandle previousSprite = panelSprites_[0];
+		for (const char* name : kDecisionSpriteNames) {
+			const MadoEngine::SpriteHandle handle = MySprite::Find(name);
+			Sprite* sprite = ResolveSprite(handle);
+			if (!sprite || sprite->GetSceneType() != SceneType::Game) {
+				continue;
+			}
+			sprite->SetVisible(isVisible_);
+			if (isVisible_ && MySprite::MoveAfter(handle, previousSprite)) {
+				previousSprite = handle;
+			}
+		}
+
+		// Text再生成やカード非表示にも追従し、Upgradeと共通の基準Scale復元を適用
+		MadoEngine::Text* text = ResolveText(MyText::Find(kDecisionControlDefinition.textName));
+		if (text && text->GetSceneType() == SceneType::Game) {
+			text->SetVisible(isVisible_);
+		}
+		decisionControlFeedback_.Update(deltaTime, isVisible_, kDecisionControlDefinition);
+	}
+
+	void RelicAcquisitionUI::ResetDecisionDelay() {
+		decisionDelayTimer_.Reset();
+		decisionRelicId_.clear();
+		decisionRevision_ = 0;
 	}
 
 }

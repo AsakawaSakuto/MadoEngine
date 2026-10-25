@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject/Player/PlayerStatus.h"
+#include "Control/InputControlFeedback.h"
 #include "GamePlayView/EnemyDamageView/EnemyDamageView.h"
 #include "GamePlayView/EnemyStatusEffectIconView/EnemyStatusEffectIconView.h"
 #include "GamePlayView/FpsMeasurementView/FpsMeasurementView.h"
@@ -38,6 +39,7 @@ namespace UI::Game {
 		int upgradeRerollCost = 0;
 		bool isWallClimbGaugeVisible = false;
 		bool isWaitingUpgradeSelection = false;
+		bool isPaused = false;
 	};
 
 	/// @brief ゲーム中の常設HUDとイベント通知表示の所有と更新
@@ -117,14 +119,9 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
-		/// @brief 武器強化の操作案内ごとの基準Scaleと押下状態
-		struct UpgradeControlFeedbackState {
-			std::array<MadoEngine::SpriteHandle, 3> sprites{};
-			MadoEngine::TextHandle text{};
-			std::array<Vector2, 3> spriteBaseScales{};
-			Vector2 textBaseScale{ 1.0f, 1.0f };
-			float pressAmount = 0.0f;
-		};
+		/// @brief Pause中だけPauseSheetの表示を同期
+		/// @param isPaused ゲームが一時停止中の場合はtrue
+		void UpdatePauseSheet(bool isPaused);
 
 		/// @brief 常設SpriteとTextへ個別表示状態を維持したHUD表示切り替えを反映
 		/// @param isVisible HUDを表示する場合はtrue
@@ -170,7 +167,7 @@ namespace UI::Game {
 		GamingColor upgradeTextColor_;
 		GameTimer upgradeTextPulseTimer_;
 		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };
-		std::array<UpgradeControlFeedbackState, 2> upgradeControlFeedback_{};
+		std::array<InputControlFeedback, 2> upgradeControlFeedback_{};
 		int displayedMoney_ = -1;
 		std::vector<const char*> staticSprites_;
 		std::vector<const char*> staticTexts_;

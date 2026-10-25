@@ -317,8 +317,13 @@ void Map::CollectMiniMapObjectPositions(MapMiniMapObjectPositions& objectPositio
 		MapMiniMapObjectType type = MapMiniMapObjectType::Count;
 		if (dynamic_cast<const BossSpawner*>(object.get())) {
 			type = MapMiniMapObjectType::BossSpawner;
-		} else if (dynamic_cast<const Chest*>(object.get())) {
+		} else if (const Chest* chest = dynamic_cast<const Chest*>(object.get())) {
 			type = MapMiniMapObjectType::Chest;
+
+			// 無料Chestを専用アイコンで識別できるよう通常Chestと座標一覧を分離
+			if (chest->GetType() == ChestType::Free) {
+				type = MapMiniMapObjectType::FreeChest;
+			}
 		} else if (dynamic_cast<const Jar*>(object.get())) {
 			type = MapMiniMapObjectType::Jar;
 		} else if (dynamic_cast<const Karma*>(object.get())) {

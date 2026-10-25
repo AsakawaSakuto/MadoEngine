@@ -6,7 +6,7 @@ namespace UI::Game {
 
 	void PlayerHealthGauge::Initialize() {
 		healthGauge2d_ = std::make_unique<Gauge2d>();
-		healthGauge2d_->Initialize("PlayerHealthGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
+		healthGauge2d_->Initialize("PlayerHealthGauge", SceneType::Game, MadoEngine::Render::RenderLayer::Default);
 
 		healthGauge3d_ = std::make_unique<Gauge3d>();
 		healthGauge3d_->Initialize("PlayerHealthGauge3d", SceneType::Game, MadoEngine::Render::RenderLayer::World);

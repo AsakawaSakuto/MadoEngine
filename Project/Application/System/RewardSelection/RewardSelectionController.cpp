@@ -49,7 +49,7 @@ namespace System {
 			if (!chestOpeningPresentation_.IsActive()) {
 
 				// 開封完了Frameの決定入力が表示直後の獲得カードへ伝わることを抑止
-				relicAcquisitionUI_.Update(relicSystem, !didFinishChestPresentation);
+				relicAcquisitionUI_.Update(deltaTime, relicSystem, !didFinishChestPresentation);
 			}
 		} else if (phase == InGamePhase::WaitingUpgrade) {
 			weaponUpgradeUI_.Update(deltaTime, upgradeSystem, inventory, player);

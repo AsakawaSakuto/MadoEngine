@@ -45,14 +45,19 @@ void Chest::Initialize(const InitializeDesc& desc) {
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
+	// 無料Chestの形状を通常Chestと共有しないよう、使用Modelごとに描画Batchを分離
+	std::string modelAssetName = "Chest";
+	if (type_ == ChestType::Free) {
+		modelAssetName = "FreeChest";
+	}
 	const MadoEngine::InstancedModelHandle normalBatchHandle = MyInstancedModel::GetOrCreate(
-		"Chest.Normal",
-		"Chest",
+		modelAssetName + ".Normal",
+		modelAssetName,
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObject);
 	const MadoEngine::InstancedModelHandle outlineBatchHandle = MyInstancedModel::GetOrCreate(
-		"Chest.Outline",
-		"Chest",
+		modelAssetName + ".Outline",
+		modelAssetName,
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
@@ -68,12 +73,7 @@ void Chest::Initialize(const InitializeDesc& desc) {
 		normalInstance.transform = transform_;
 		normalInstance.transform.scale = { 0.75f, 0.75f, 0.75f };
 
-		// 無料Chestを外見だけで識別できるよう黄色で着色
-		if (type_ == ChestType::Free) {
-			normalInstance.color = Vector4{ 1.0f, 0.0f, 0.0f, 1.0f };
-		} else {
-			normalInstance.color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
-		}
+		normalInstance.color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
 		normalInstance.isVisible = true;
 
 		InstancedModel::InstanceDesc outlineInstance = normalInstance;

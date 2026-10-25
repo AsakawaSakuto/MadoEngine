@@ -1094,6 +1094,45 @@
         },
         {
             "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "color": [
+                0.0,
+                0.0,
+                0.0,
+                0.501960813999176
+            ],
+            "fitToScreen": true,
+            "layer": "UI",
+            "name": "PauseSheet",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "texture": "white2x2",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
+        },
+        {
+            "anchorPoint": [
                 0.5,
                 0.5
             ],
@@ -1364,6 +1403,123 @@
                 ]
             },
             "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "RelicDecisionBack1",
+            "position": [
+                640.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.0,
+                5.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "RelicDecisionBack2",
+            "position": [
+                640.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "RelicDecisionBottom",
+            "position": [
+                592.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.44999998807907104,
+                0.44999998807907104
+            ],
+            "scene": "Game",
+            "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
         }
     ]
 }

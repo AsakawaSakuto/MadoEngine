@@ -34,6 +34,7 @@
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\UI\Game\GameHud.cpp" />
+    <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp" />
     <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
     <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
     <ClCompile Include="Application\.SceneManager\Scene\GameScene.cpp" />
@@ -452,6 +453,7 @@
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GameHud.h" />
+    <ClInclude Include="Application\UI\Game\Control\InputControlFeedback.h" />
     <ClInclude Include="Application\System\GameCamera\GameCameraController.h" />
     <ClInclude Include="Application\System\RewardSelection\RewardSelectionController.h" />
     <ClInclude Include="Application\.SceneManager\Scene\GameScene.h">

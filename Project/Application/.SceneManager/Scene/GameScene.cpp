@@ -331,6 +331,7 @@ void GameScene::UpdateHud(float dt, float deltaTime) {
 	state.upgradeRerollCost = weaponUpgradeSystem_->GetRerollCost();
 	state.isWallClimbGaugeVisible = player_->IsWallClimbGaugeVisible();
 	state.isWaitingUpgradeSelection = inGameSession_->IsWaitingUpgradeSelection();
+	state.isPaused = inGameSession_->GetCurrentPhase() == InGamePhase::Paused;
 	hud_.Update(dt, deltaTime, state, *weaponInventory_, cameraManager_.GetRenderCamera());
 	UpdateMiniMap();
 }

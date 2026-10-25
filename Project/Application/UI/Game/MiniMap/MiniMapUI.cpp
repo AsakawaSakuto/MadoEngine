@@ -36,6 +36,7 @@ namespace {
 		ObjectMarkerStyle{ "Karma", "KarmaMinMap", kObjectMarkerSize, { 1.0f, 1.0f, 1.0f, 1.0f } },
 		ObjectMarkerStyle{ "Magnet", "MagnetMinMap", kObjectMarkerSize, { 1.0f, 1.0f, 1.0f, 1.0f } },
 		ObjectMarkerStyle{ "Anvil", "AnvilMinMap", kObjectMarkerSize, { 1.0f, 1.0f, 1.0f, 1.0f } },
+		ObjectMarkerStyle{ "FreeChest", "FreeChestMinMap", kObjectMarkerSize, { 1.0f, 1.0f, 1.0f, 1.0f } },
 	};
 	static_assert(kObjectMarkerStyles.size() == static_cast<std::size_t>(MapMiniMapObjectType::Count));
 
@@ -57,13 +58,13 @@ namespace {
 		return minimumHeightColor + (maximumHeightColor - minimumHeightColor) * rate;
 	}
 
-	/// @brief UI Layerへ単色Spriteを生成
+	/// @brief Default Layerへ単色Spriteを生成
 	/// @param name Spriteの識別名
 	/// @param color Spriteの表示色
 	/// @return 生成したSpriteのHandle
 	MadoEngine::SpriteHandle CreateSolidSprite(const std::string& name, const Vector4& color) {
 		const MadoEngine::SpriteHandle handle = MySprite::Create(
-			name, "white2x2", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
+			name, "white2x2", SceneType::Game, MadoEngine::Render::RenderLayer::Default);
 		if (Sprite* sprite = MySprite::TryGet(handle)) {
 			sprite->SetColor(color);
 			sprite->SetVisible(false);
@@ -166,7 +167,7 @@ namespace {
 		const std::string& textureName,
 		float pixelSize) {
 		const MadoEngine::SpriteHandle handle = MySprite::Create(
-			name, textureName, SceneType::Game, MadoEngine::Render::RenderLayer::UI);
+			name, textureName, SceneType::Game, MadoEngine::Render::RenderLayer::Default);
 		if (Sprite* sprite = MySprite::TryGet(handle)) {
 			sprite->SetAnchorPoint({ 0.5f, 0.5f });
 			sprite->SetVisible(false);
@@ -358,7 +359,7 @@ namespace UI::Game {
 		for (std::size_t index = 0; index < requiredCount; ++index) {
 			const MadoEngine::SpriteHandle tile = MySprite::Create(
 				"MiniMap.TerrainTile." + std::to_string(index), kBlockTextureName,
-				SceneType::Game, MadoEngine::Render::RenderLayer::UI);
+				SceneType::Game, MadoEngine::Render::RenderLayer::Default);
 			if (Sprite* sprite = MySprite::TryGet(tile)) {
 				sprite->SetVisible(false);
 				sprite->SetColor(minimumHeightColor_);

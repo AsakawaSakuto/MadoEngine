@@ -23,7 +23,7 @@ private:
 	/// @return アプリケーションを終了する場合はtrue
 	bool ProcessEditorProtectedAction();
 
-	/// @brief シーン遷移進行度を画面用とUI用PixelArtのピクセルサイズへ反映
+	/// @brief シーン遷移進行度を画面用とレイヤー用PixelArtのピクセルサイズへ反映
 	void UpdateSceneTransitionPixelArt();
 
 	/// @brief 指定段階のレイヤーポストエフェクトPassを実行

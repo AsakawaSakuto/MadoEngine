@@ -30,7 +30,6 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("Trump");
 			model->SetTransform(transform_);
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);

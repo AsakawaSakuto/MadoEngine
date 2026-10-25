@@ -1,5 +1,7 @@
 #pragma once
 #include "GameObject/Rarity.h"
+#include "UI/Game/Control/InputControlFeedback.h"
+#include "Utility/GameTimer/GameTimer.h"
 #include <RenderHeaders.h>
 #include <array>
 #include <cstddef>
@@ -31,9 +33,10 @@ namespace UI::Game {
 		void SetBackgroundEnabled(bool isBackgroundEnabled);
 
 		/// @brief 獲得待ちレリックの表示と決定入力を更新
+		/// @param deltaTime 停止中も進行する実時間
 		/// @param relicSystem 更新対象のレリックシステム
 		/// @param acceptDecisionInput 決定入力を受け付ける場合はtrue
-		void Update(Relic::System& relicSystem, bool acceptDecisionInput = true);
+		void Update(float deltaTime, Relic::System& relicSystem, bool acceptDecisionInput = true);
 
 		/// @brief レリック獲得UIの見た目を調整するImGuiを描画
 		/// @param relicSystem プレビューに使用するレリックシステム
@@ -93,13 +96,24 @@ namespace UI::Game {
 		/// @param isVisible 表示する場合はtrue
 		void SetVisible(bool isVisible);
 
+		/// @brief カードの表示状態へ決定案内の描画順と押下演出を同期
+		/// @param deltaTime 停止中も進行する実時間
+		void UpdateDecisionControl(float deltaTime);
+
+		/// @brief 決定後の待機時間と獲得対象の保持状態を初期化
+		void ResetDecisionDelay();
+
 		std::array<MadoEngine::SpriteHandle, 3> panelSprites_{};
 		MadoEngine::SpriteHandle iconSprite_{};
 		std::array<MadoEngine::TextHandle, 3> textHandles_{};
+		InputControlFeedback decisionControlFeedback_;
+		GameTimer decisionDelayTimer_;
 		AppearanceSettings appearanceSettings_;
 		std::string displayedRelicId_;
+		std::string decisionRelicId_;
 		std::size_t previewRelicIndex_ = 0;
 		std::uint64_t displayedRevision_ = 0;
+		std::uint64_t decisionRevision_ = 0;
 		bool isPreviewEnabled_ = false;
 		bool isDisplayEnabled_ = true;
 		bool isBackgroundEnabled_ = true;

@@ -145,7 +145,7 @@
       "textureName": "Accelerator"
     },
     {
-      "description": "ジャンプ可能回数 +1",
+      "description": "ジャンプ回数 +1",
       "displayName": "うちわ",
       "effects": [
         {

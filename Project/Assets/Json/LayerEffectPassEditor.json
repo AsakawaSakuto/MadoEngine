@@ -155,6 +155,23 @@
             },
             "scope": "Layer",
             "targetLayerMask": 128
+        },
+        {
+            "effectShaderKey": "PostEffect/PixelArt.PS",
+            "effectType": "PixelArt",
+            "enabled": false,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_9",
+            "layerEffectStage": "Overlay",
+            "name": "Default_PixelArt",
+            "parameters": {
+                "ColorSteps": 8.0,
+                "Contrast": 1.149999976158142,
+                "Intensity": 1.0,
+                "PixelSize": 1.0
+            },
+            "scope": "Layer",
+            "targetLayerMask": 1
         }
     ],
     "screenPasses": [
@@ -191,7 +208,7 @@
                 "ColorG": 0.0,
                 "ColorR": 0.669767439365387,
                 "InnerRadius": 0.5,
-                "Intensity": 0.7749999761581421,
+                "Intensity": 0.0,
                 "OuterScale": 2.0
             },
             "scope": "Screen",

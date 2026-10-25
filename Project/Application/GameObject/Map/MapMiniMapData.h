@@ -22,6 +22,7 @@ enum class MapMiniMapObjectType : std::size_t {
 	Karma,
 	Magnet,
 	Anvil,
+	FreeChest,
 	Count,
 };
 

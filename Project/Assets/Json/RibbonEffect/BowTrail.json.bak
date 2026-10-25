@@ -25,7 +25,7 @@
                     "keys": []
                 },
                 "widthOverLifetime": {
-                    "default": 0.10000000149011612,
+                    "default": 0.15000000596046448,
                     "keys": [
                         {
                             "easing": 0,
@@ -34,7 +34,7 @@
                         },
                         {
                             "easing": 0,
-                            "time": 1.0,
+                            "time": 0.3499999940395355,
                             "value": 0.0
                         }
                     ]
@@ -170,7 +170,7 @@
                 "generationMode": "transformHistory",
                 "maxPointCount": 128,
                 "minPointDistance": 0.03999999910593033,
-                "pointLifetime": 0.5,
+                "pointLifetime": 0.3499999940395355,
                 "simulationSpace": "world"
             },
             "translateOffset": [

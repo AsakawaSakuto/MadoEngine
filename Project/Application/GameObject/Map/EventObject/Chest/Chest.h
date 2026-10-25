@@ -62,6 +62,10 @@ public:
 	/// @return 開封可能な場合はtrue
 	bool CanInteract(const Player::Base& player) const override;
 
+	/// @brief Chestの種別を取得
+	/// @return 通常または無料のChest種別
+	ChestType GetType() const { return type_; }
+
 	/// @brief Chestの操作案内文を取得
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
