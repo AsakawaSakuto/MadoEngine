@@ -30,6 +30,10 @@ public:
 	/// @param isVisible 表示する場合はtrue
 	void SetVisible(bool isVisible);
 
+	/// @brief CameraとPlayerを結ぶ視線に応じた遮蔽表示を更新
+	/// @param sightLine CameraからPlayerへのワールド座標の線分
+	void UpdateCameraOcclusion(const Segment& sightLine);
+
 	/// @brief デバッグラインを描画
 	void DrawDebugLine() const;
 
@@ -50,6 +54,9 @@ public:
 	SlopeDirection GetSlopeDirection() const;
 
 private:
+	/// @brief 表示設定とCamera遮蔽に応じて不透明表示と半透明表示を切り替え
+	void ApplyVisibility();
+
 	/// @brief 通常ブロック用のCollider形状を作成
 	/// @param blockSize ブロック共通サイズ
 	void CreateGroundShape(const Vector3& blockSize);
@@ -85,9 +92,14 @@ private:
 	MapBlockType type_ = MapBlockType::Ground;
 	SlopeDirection slopeDirection_ = SlopeDirection::PulsX;
 	bool isModelDraw_ = true;
+	bool isCameraOccluded_ = false;
 	bool isColliderRegistered_ = false;
 	MadoEngine::InstancedModelHandle groundInstancedModel_{};
 	MadoEngine::InstancedModelHandle slopeInstancedModel_{};
+	MadoEngine::InstancedModelHandle groundOccludedInstancedModel_{};
+	MadoEngine::InstancedModelHandle slopeOccludedInstancedModel_{};
 	uint32_t groundInstanceHandle_ = UINT32_MAX;
 	uint32_t slopeInstanceHandle_ = UINT32_MAX;
+	uint32_t groundOccludedInstanceHandle_ = UINT32_MAX;
+	uint32_t slopeOccludedInstanceHandle_ = UINT32_MAX;
 };

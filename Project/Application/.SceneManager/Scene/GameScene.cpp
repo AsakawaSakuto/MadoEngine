@@ -177,6 +177,9 @@ SceneType GameScene::Update(float dt) {
 		gameCameraController_.UpdateSwitchInput(cameraManager_);
 	}
 
+	// 衝突解決とCamera切り替え後の最終座標で、Pause中も地形の遮蔽表示を更新
+	map_->UpdateCameraOcclusion(cameraManager_.GetRenderCamera().GetPosition(), player_->GetPosition());
+
 	// Camera切り替え後の描画姿勢へ追従し、表示開始Frameから宝箱を画面中央へ配置
 	rewardSelectionController_.FollowCamera(cameraManager_.GetRenderCamera());
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());

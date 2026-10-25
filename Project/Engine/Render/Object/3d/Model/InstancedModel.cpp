@@ -401,11 +401,7 @@ size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatri
 	}
 
 	size_t drawCount = 0;
-	for (const InstanceDesc& instance : instances_) {
-		if (!instance.isVisible) {
-			continue;
-		}
-
+	const auto appendInstanceData = [&](const InstanceDesc& instance) {
 		Matrix4x4 worldMatrix = MakeWorldMatrix(instance.transform, billboardCamera);
 		Matrix4x4 worldViewProjectionMatrix = Matrix::Multiply(worldMatrix, viewProjectionMatrix);
 		Matrix4x4 worldInverseTransposeMatrix = Matrix::Transpose(Matrix::Inverse(worldMatrix));
@@ -416,6 +412,33 @@ size_t InstancedModel::BuildInstanceGpuData(const Matrix4x4& viewProjectionMatri
 		gpuData.WorldInverseTranspose = worldInverseTransposeMatrix;
 		gpuData.color = instance.color;
 		++drawCount;
+	};
+
+	// GPU用Upload領域の読み戻しとHandle順序の変更を避け、透明Instanceの参照だけをCPU側で整列
+	if (outputData == instanceGpuData_ && billboardCamera && RequiresTransparentPass()) {
+		std::vector<const InstanceDesc*> sortedInstances;
+		sortedInstances.reserve(instances_.size());
+		for (const InstanceDesc& instance : instances_) {
+			if (instance.isVisible) {
+				sortedInstances.push_back(&instance);
+			}
+		}
+		const Vector3 cameraPosition = billboardCamera->GetPosition();
+		std::sort(sortedInstances.begin(), sortedInstances.end(), [&cameraPosition](const InstanceDesc* lhs, const InstanceDesc* rhs) {
+			return (lhs->transform.translate - cameraPosition).LengthSq() > (rhs->transform.translate - cameraPosition).LengthSq();
+		});
+		for (const InstanceDesc* instance : sortedInstances) {
+			appendInstanceData(*instance);
+		}
+		return drawCount;
+	}
+
+	// 不透明描画とShadow描画ではソートを省略し、表示中Instanceだけを順に転送
+	for (const InstanceDesc& instance : instances_) {
+		if (!instance.isVisible) {
+			continue;
+		}
+		appendInstanceData(instance);
 	}
 	return drawCount;
 }

@@ -26,6 +26,11 @@ public:
 	/// @param deltaTime 前フレームからの経過時間
 	void Update(Player::Base& player, float deltaTime);
 
+	/// @brief CameraとPlayerの間を遮る地形の表示状態を更新
+	/// @param cameraPosition 描画Cameraのワールド座標
+	/// @param playerPosition Playerのワールド座標
+	void UpdateCameraOcclusion(const Vector3& cameraPosition, const Vector3& playerPosition);
+
 	/// @brief 操作案内Textの表示可否を設定
 	/// @param isVisible 表示する場合はtrue
 	void SetInteractionTextVisible(bool isVisible);

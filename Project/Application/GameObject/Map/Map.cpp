@@ -39,6 +39,8 @@ bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDir
 void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("MapBlock.Ground");
 	MyInstancedModel::Destroy("MapBlock.Slope");
+	MyInstancedModel::Destroy("MapBlock.Ground.Occluded");
+	MyInstancedModel::Destroy("MapBlock.Slope.Occluded");
 	MyInstancedModel::Destroy("Jar.Small.Normal");
 	MyInstancedModel::Destroy("Jar.Small.Outline");
 	MyInstancedModel::Destroy("Jar.Big.Normal");
@@ -259,6 +261,17 @@ void Map::Update(Player::Base& player, float deltaTime) {
 	}
 
 	interactionController_.Update(player, deltaTime, eventObjects_);
+}
+
+void Map::UpdateCameraOcclusion(const Vector3& cameraPosition, const Vector3& playerPosition) {
+	const Segment sightLine{ cameraPosition, playerPosition - cameraPosition };
+
+	// 最初の遮蔽物より奥も判定し、前方の地形を消した後の再遮蔽を防止
+	for (std::vector<MapBlock>& row : mapBlocks_) {
+		for (MapBlock& block : row) {
+			block.UpdateCameraOcclusion(sightLine);
+		}
+	}
 }
 
 MapLimit Map::CreateMapLimit() const {

@@ -4,6 +4,7 @@
 namespace {
 
 	const char* kMaxBlockTextureName = "blockTexture2";
+	constexpr float kCameraOcclusionAlpha = 0.3f;
 
 /// @brief 坂の向きに対応するY軸回転角を取得
 /// @param direction 坂の向き
@@ -42,6 +43,7 @@ void MapBlock::Initialize(const InitializeDesc& desc) {
 	type_ = desc.type;
 	slopeDirection_ = desc.slopeDirection;
 	isModelDraw_ = desc.isModelDraw;
+	isCameraOccluded_ = false;
 	transform_.translate = Vector3(
 		static_cast<float>(x_) * desc.blockSize.x,
 		0.0f,
@@ -71,16 +73,51 @@ void MapBlock::Update(float deltaTime) {
 }
 
 void MapBlock::SetVisible(bool isVisible) {
-
 	isModelDraw_ = isVisible;
+	ApplyVisibility();
+}
 
-	// GroundとSlopeの共有Batchへ同じ表示状態を反映
+void MapBlock::UpdateCameraOcclusion(const Segment& sightLine) {
+	bool isOccluded = false;
+
+	// ColliderManagerの同期前でも正しい位置で判定できるようShapeのコピーへ座標を反映
+	if (type_ == MapBlockType::Ground) {
+		AABB bounds = std::get<AABB>(colliderShape_);
+		bounds.center = transform_.translate;
+		isOccluded = Collision::IsHit(sightLine, bounds);
+	} else if (type_ == MapBlockType::Slope) {
+		Slope slope = std::get<Slope>(colliderShape_);
+		slope.center = transform_.translate;
+		isOccluded = Collision::IsHit(sightLine, slope);
+	}
+
+	// 遮蔽状態が変化したインスタンスだけを同期して毎Frameの描画設定更新を抑制
+	if (isCameraOccluded_ == isOccluded) {
+		return;
+	}
+	isCameraOccluded_ = isOccluded;
+	ApplyVisibility();
+}
+
+void MapBlock::ApplyVisibility() {
+	const bool isVisible = isModelDraw_ && !isCameraOccluded_;
+	const bool isOccludedVisible = isModelDraw_ && isCameraOccluded_;
+
+	// 不透明Batchの深度書き込みを維持するため、遮蔽時だけ専用の半透明Batchへ切り替え
 	if (InstancedModel* model = MyInstancedModel::TryGet(groundInstancedModel_)) {
-		model->SetInstanceVisible(groundInstanceHandle_, isModelDraw_);
+		model->SetInstanceVisible(groundInstanceHandle_, isVisible);
 	}
 
 	if (InstancedModel* model = MyInstancedModel::TryGet(slopeInstancedModel_)) {
-		model->SetInstanceVisible(slopeInstanceHandle_, isModelDraw_);
+		model->SetInstanceVisible(slopeInstanceHandle_, isVisible);
+	}
+
+	// F1の非表示設定を優先し、Slopeと土台へ同じ透過状態を反映
+	if (InstancedModel* model = MyInstancedModel::TryGet(groundOccludedInstancedModel_)) {
+		model->SetInstanceVisible(groundOccludedInstanceHandle_, isOccludedVisible);
+	}
+	if (InstancedModel* model = MyInstancedModel::TryGet(slopeOccludedInstancedModel_)) {
+		model->SetInstanceVisible(slopeOccludedInstanceHandle_, isOccludedVisible);
 	}
 }
 
@@ -160,6 +197,20 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 	instanceDesc.transform.rotate = { 0.0f, 0.0f, 0.0f };
 	instanceDesc.isVisible = isModelDraw_;
 	groundInstanceHandle_ = groundModel->AddInstance(instanceDesc);
+
+	// 通常地形を透明Passへ巻き込まないよう同じTransformを半透明専用Batchへ登録
+	groundOccludedInstancedModel_ = MyInstancedModel::GetOrCreate(
+		CreateGroundModelName() + ".Occluded",
+		"block",
+		SceneType::Game,
+		MadoEngine::Render::RenderLayer::MapBlock);
+	if (InstancedModel* occludedModel = MyInstancedModel::TryGet(groundOccludedInstancedModel_)) {
+		occludedModel->SetTexture(kMaxBlockTextureName);
+		occludedModel->SetColor({ 1.0f, 1.0f, 1.0f, kCameraOcclusionAlpha });
+		occludedModel->SetCastShadow(false);
+		instanceDesc.isVisible = false;
+		groundOccludedInstanceHandle_ = occludedModel->AddInstance(instanceDesc);
+	}
 }
 
 void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
@@ -183,6 +234,20 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 	instanceDesc.transform.rotate = { 0.0f, GetSlopeRotationY(slopeDirection_), 0.0f };
 	instanceDesc.isVisible = isModelDraw_;
 	slopeInstanceHandle_ = slopeModel->AddInstance(instanceDesc);
+
+	// 坂の土台と同じ不透明度で専用Batchへ登録し、非遮蔽時の重複描画を抑止
+	slopeOccludedInstancedModel_ = MyInstancedModel::GetOrCreate(
+		CreateSlopeModelName() + ".Occluded",
+		"Slope",
+		SceneType::Game,
+		MadoEngine::Render::RenderLayer::MapBlock);
+	if (InstancedModel* occludedModel = MyInstancedModel::TryGet(slopeOccludedInstancedModel_)) {
+		occludedModel->SetTexture(kMaxBlockTextureName);
+		occludedModel->SetColor({ 1.0f, 1.0f, 1.0f, kCameraOcclusionAlpha });
+		occludedModel->SetCastShadow(false);
+		instanceDesc.isVisible = false;
+		slopeOccludedInstanceHandle_ = occludedModel->AddInstance(instanceDesc);
+	}
 }
 
 std::string MapBlock::CreateColliderName() const {

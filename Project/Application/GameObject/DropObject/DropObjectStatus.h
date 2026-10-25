@@ -7,6 +7,9 @@ namespace DropObject {
 		Money,
 
 		Heal,
+		AttackUpper,
+		SpeedUpper,
+		DefuseUpper,
 	};
 
 	/// @brief DropObjectの種類を名前へ変換
@@ -14,10 +17,13 @@ namespace DropObject {
 	/// @return DropObjectの名前
 	inline const char* DropObjectTypeToString(Type type) {
 		switch (type) {
-		case Type::Exp:   return "Exp";
-		case Type::Money: return "Money";
-		case Type::Heal:  return "Heal";
-		default:          return "Unknown";
+		case Type::Exp:         return "Exp";
+		case Type::Money:       return "Money";
+		case Type::Heal:        return "Heal";
+		case Type::AttackUpper: return "AttackUpper";
+		case Type::SpeedUpper:  return "SpeedUpper";
+		case Type::DefuseUpper: return "DefuseUpper";
+		default:                return "Unknown";
 		}
 	}
 }

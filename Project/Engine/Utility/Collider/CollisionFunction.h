@@ -1123,6 +1123,52 @@ namespace Collision
         return IsHit(segment, aabb);
     }
 
+    /// @brief 線分と底面延長を含むSlopeの交差を判定
+    /// @param segment 判定対象の線分
+    /// @param slope 判定対象のSlope
+    /// @return 線分がSlopeと交差する場合はtrue
+    inline bool IsHit(const Segment& segment, const Slope& slope) {
+        AABB bounds;
+        bounds.min = slope.GetMinWorld();
+        bounds.max = slope.GetMaxWorld();
+
+        // 外接箱で除外してから斜面上の空間を切り落とし、坂上方の視線による誤判定を防止
+        if (!IsHit(segment, bounds)) {
+            return false;
+        }
+
+        const Vector3 normal = Detail::GetSlopeTopNormal(slope);
+        Vector3 planePoint = slope.GetSurfaceMinWorld();
+        planePoint.y = Detail::GetSlopeSurfaceY(slope, planePoint);
+        const float startDistance = Math::Dot(segment.origin - planePoint, normal);
+        const float endDistance = Math::Dot(segment.origin + segment.diff - planePoint, normal);
+        if (startDistance > 0.0f && endDistance > 0.0f) {
+            return false;
+        }
+
+        Segment clippedSegment = segment;
+
+        // 線分が斜面平面を横切る場合は実体側の区間だけを外接箱と再判定
+        if (startDistance > 0.0f) {
+            const float ratio = startDistance / (startDistance - endDistance);
+            clippedSegment.origin = segment.origin + segment.diff * ratio;
+            clippedSegment.diff = segment.diff * (1.0f - ratio);
+        } else if (endDistance > 0.0f) {
+            const float ratio = startDistance / (startDistance - endDistance);
+            clippedSegment.diff = segment.diff * ratio;
+        }
+
+        return IsHit(clippedSegment, bounds);
+    }
+
+    /// @brief Slopeと線分の交差を判定
+    /// @param slope 判定対象のSlope
+    /// @param segment 判定対象の線分
+    /// @return 線分がSlopeと交差する場合はtrue
+    inline bool IsHit(const Slope& slope, const Segment& segment) {
+        return IsHit(segment, slope);
+    }
+
     /// <summary>
     /// Segment × Plane 判定
     /// 線分が平面と交差するかチェック
