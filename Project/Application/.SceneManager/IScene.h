@@ -16,6 +16,10 @@ public:
 	virtual void DrawImGui() = 0;
 	virtual void Finalize() = 0;
 
+	/// @brief 現在と同じSceneの再生成要求を取得
+	/// @return 現在Sceneを最初から開始する場合はtrue
+	virtual bool IsSceneRestartRequested() const { return false; }
+
 	/// @brief Sceneの進行状態に応じたBGM一時停止の要否を取得
 	/// @return BGMを一時停止する場合はtrue
 	virtual bool ShouldPauseBgm() const { return false; }

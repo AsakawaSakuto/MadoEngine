@@ -48,6 +48,16 @@ public:
     /// @return 進行率
     float GetProgress() const;
 
+    /// @brief 指定した進行率から終了までの区間進行率を取得
+    /// @param startProgress 区間の開始進行率、0.0から1.0へ制限
+    /// @return 開始前は0、区間内は0.0から1.0、終了時は1、非有限の開始値の場合は0
+    float GetProgressAfter(float startProgress) const;
+
+    /// @brief 開始から指定した進行率までの区間進行率を取得
+    /// @param endProgress 区間の終了進行率、0.0から1.0へ制限
+    /// @return 区間内は0.0から1.0、終了値以降または終了値が0の場合は1、非有限の終了値の場合は0
+    float GetProgressUntil(float endProgress) const;
+
 	/// @brief タイマーの逆進行率を1.0fから0.0fの範囲で取得
     /// @return 逆進行率
     float GetReverseProgress() const;

@@ -1,8 +1,16 @@
 #pragma once
 #include "InGamePhase.h"
 #include "Utility/GameTimer/GameTimer.h"
+#include <optional>
 
 namespace System {
+
+	/// @brief Pauseメニューの選択項目
+	enum class PauseMenuItem {
+		Continue,
+		Restart,
+		Quit,
+	};
 
 	class InGameSession {
 	public:
@@ -12,9 +20,17 @@ namespace System {
 
 		/// @brief ゲーム内セッションの状態を更新
 		/// @param deltaTime 前フレームからの経過時間
-		/// @param canStart シーン遷移などの開始前条件を満たす場合はtrue
+		/// @param canStart 開始待機とゲーム操作を進行できる場合はtrue
 		/// @return ゲーム進行用の経過時間、開始待機と停止中は0秒
 		float Update(float deltaTime, bool canStart = true);
+
+		/// @brief Pauseメニューの現在の選択項目を取得
+		/// @return 現在の選択項目
+		PauseMenuItem GetSelectedPauseMenuItem() const { return selectedPauseMenuItem_; }
+
+		/// @brief Pauseメニューの決定操作を一回だけ取得
+		/// @return 決定した項目、未決定の場合は空
+		std::optional<PauseMenuItem> ConsumePauseMenuDecision();
 
 		/// @brief 武器アップグレード選択の待機状態を同期
 		/// @param isActive 武器アップグレード選択中の場合はtrue
@@ -60,11 +76,21 @@ namespace System {
 		bool IsTimeUp() const { return isTimeUp_; }
 
 	private:
+		/// @brief Pause解除とメニューの循環選択および決定を更新
+		void UpdatePauseMenu();
+
+		/// @brief 中立復帰後の左スティックによる上下の単発入力を取得
+		/// @return 上の場合は-1、下の場合は1、入力なしの場合は0
+		int GetPauseMenuStickTrigger();
+
 		InGamePhase currentPhase_ = InGamePhase::Starting;
+		PauseMenuItem selectedPauseMenuItem_ = PauseMenuItem::Continue;
+		std::optional<PauseMenuItem> pauseMenuDecision_;
 		GameTimer gameStartDelayTimer_;
 		float timeLimit_ = 0.0f;
 		float executionTime_ = 0.0f;
 		bool isTimeUp_ = false;
+		bool isPauseMenuStickReady_ = false;
 	};
 
 }

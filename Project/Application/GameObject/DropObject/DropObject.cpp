@@ -317,7 +317,7 @@ namespace DropObject {
 			return;
 		}
 
-		// ExpとMoneyは各Poolの上書き分とManagerで合算し、Healだけをその場で適用
+		// 通常報酬はManagerで合算し、回復と一時効果はPlayerへ取得時点で適用
 		switch (type_) {
 		case Type::Exp:
 		case Type::Money:
@@ -325,6 +325,15 @@ namespace DropObject {
 			break;
 		case Type::Heal:
 			player.RecoverHealth(kHealAmount);
+			break;
+		case Type::AttackUpper:
+			player.ApplyTemporaryEffect(Player::TemporaryEffectType::AttackBoost);
+			break;
+		case Type::SpeedUpper:
+			player.ApplyTemporaryEffect(Player::TemporaryEffectType::SpeedBoost);
+			break;
+		case Type::DefuseUpper:
+			player.ApplyTemporaryEffect(Player::TemporaryEffectType::Invincibility);
 			break;
 		}
 

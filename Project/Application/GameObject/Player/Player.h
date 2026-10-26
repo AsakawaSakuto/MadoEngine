@@ -5,6 +5,7 @@
 #include "PlayerAnimationController.h"
 #include "PlayerMovement.h"
 #include "PlayerStatus.h"
+#include "PlayerTemporaryEffects.h"
 #include "../Map/MapLimit.h"
 #include "Render/Object/3d/EffectSequence/MyEffectSequence3d.h"
 #include <vector>
@@ -30,7 +31,7 @@ namespace Player {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
-		/// @brief 被ダメージ時の赤色表示と通常色への復帰を更新
+		/// @brief 被ダメージ表示の復帰と防御Modelの表示、追従状態を更新
 		/// @param deltaTime ゲーム停止中も進行する実時間（秒）
 		void UpdateAppearance(float deltaTime);
 
@@ -136,6 +137,14 @@ namespace Player {
 		/// @param modifiers Playerへ適用する補正値
 		void SetRuntimeModifiers(const RuntimeModifiers& modifiers);
 
+		/// @brief 特殊Dropの一時効果を開始し、同種の残り時間を10秒へ更新
+		/// @param type 適用する一時効果の種類
+		void ApplyTemporaryEffect(TemporaryEffectType type);
+
+		/// @brief 武器へ渡す一時的な攻撃力倍率を取得
+		/// @return AttackBoost継続中の場合は2.0、それ以外の場合は1.0
+		float GetTemporaryAttackMultiplier() const { return temporaryEffects_.GetAttackMultiplier(); }
+
 		/// @brief 壁登り可能な残り時間を取得
 		/// @return 壁登り可能な残り時間
 		float GetWallClimbRemainingTime() const { return movement_.GetWallClimbRemainingTime(); }
@@ -173,6 +182,18 @@ namespace Player {
 		/// @brief Playerの死亡状態と死亡Animationを開始
 		void BeginDeath();
 
+		/// @brief 外部補正と一時効果を合成して移動速度へ反映
+		void RefreshMovementSpeedMultiplier();
+
+		/// @brief 無敵効果中のEditor管理Modelの姿勢追従、自転、終了直前の縮小を更新
+		/// @param deltaTime 回転へ適用するゲーム進行中の経過時間（秒）
+		void UpdateDefenseModel(float deltaTime);
+
+		/// @brief PlayerのModel姿勢とEditorの初期回転、自転角度を合成
+		/// @param playerRotation PlayerのModel回転角度（ラジアン）
+		/// @return 描画と同じXYZ順序の合成済みEuler角
+		Vector3 CreateDefenseModelRotation(const Vector3& playerRotation) const;
+
 		ColliderShape hitAABB_;
 		ColliderShape expGetSphere_;
 		ColliderShape attackRangeSphere_;
@@ -183,9 +204,16 @@ namespace Player {
 
 		Transform3D landingMarkerTransform_;                           // 影Transform
 		MadoEngine::EffectSequence::MyEffectSequence3d landingMarker_; // 着地点Marker
+		MadoEngine::ModelHandle defenseModel_{}; // Editor管理の防御Modelへの借用参照
+		Vector3 defenseModelBaseScale_ = { 1.0f, 1.0f, 1.0f }; // Editor設定の基準Scale
+		Vector3 defenseModelLastScale_ = { 1.0f, 1.0f, 1.0f }; // Editor変更の検出に使用する前回適用Scale
+		Vector3 defenseModelBaseRotation_{}; // Editor設定の初期回転
+		Vector3 defenseModelLastRotation_{}; // Editor変更の検出に使用する前回適用回転
+		float defenseModelSpinAngle_ = 0.0f; // PlayerのローカルY軸周りの自転角度
 
 		Status status_;                           // ステータス
 		StatusMultiplier statusMultiplier_;       // ステータスの倍率
+		TemporaryEffects temporaryEffects_;       // 特殊Drop由来の一時効果
 
 		float baseMaxHealth_ = 100.0f;            // 外部補正を含まない最大HP
 		Controller controller_;                   // 入力制御

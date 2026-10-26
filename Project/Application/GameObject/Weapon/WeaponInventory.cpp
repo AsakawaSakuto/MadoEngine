@@ -26,7 +26,8 @@ namespace Weapon {
 	}
 
 	void Inventory::Update(float deltaTime, const Vector3& ownerPosition, std::span<const Vector3> targetPositions,
-		const Vector3& ownerUpDirection) {
+		const Vector3& ownerUpDirection, float temporaryDamageMultiplier) {
+		const RuntimeModifiers modifiers = ResolveRuntimeModifiers(temporaryDamageMultiplier);
 
 		// 各武器の射撃結果をUIと演出向けの一時イベント列へ集約
 		for (std::size_t slotIndex = 0; slotIndex < weapons_.size(); ++slotIndex) {
@@ -35,7 +36,7 @@ namespace Weapon {
 				continue;
 			}
 
-			weapon->Update(deltaTime, ownerPosition, targetPositions, runtimeModifiers_, ownerUpDirection);
+			weapon->Update(deltaTime, ownerPosition, targetPositions, modifiers, ownerUpDirection);
 			if (weapon->WasFiredThisFrame()) {
 				weaponAttackEvents_.push_back({
 					slotIndex,
@@ -45,14 +46,25 @@ namespace Weapon {
 		}
 	}
 
-	void Inventory::SynchronizePersistentProjectiles(const Vector3& ownerPosition) {
+	void Inventory::SynchronizePersistentProjectiles(const Vector3& ownerPosition, float temporaryDamageMultiplier) {
+		const RuntimeModifiers modifiers = ResolveRuntimeModifiers(temporaryDamageMultiplier);
 
 		// 通常射撃のTarget有無と分離して常時展開型をPlayerへ追従
 		for (const std::unique_ptr<BaseWeapon>& weapon : weapons_) {
 			if (weapon) {
-				weapon->SynchronizePersistentProjectile(ownerPosition, runtimeModifiers_);
+				weapon->SynchronizePersistentProjectile(ownerPosition, modifiers);
 			}
 		}
+	}
+
+	RuntimeModifiers Inventory::ResolveRuntimeModifiers(float temporaryDamageMultiplier) const {
+		RuntimeModifiers modifiers = runtimeModifiers_;
+
+		// 保存済みのレリック補正を書き換えず、呼び出し時点の一時倍率だけを上乗せ
+		if (std::isfinite(temporaryDamageMultiplier) && temporaryDamageMultiplier >= 0.0f) {
+			modifiers.damageMultiplier *= temporaryDamageMultiplier;
+		}
+		return modifiers;
 	}
 
 	bool Inventory::AddWeapon(Projectile::Type type) {

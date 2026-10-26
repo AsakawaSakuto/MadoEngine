@@ -443,6 +443,7 @@
     <ClInclude Include="Application\.SceneManager\Scene\TestScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerStatus.h" />
+    <ClInclude Include="Application\GameObject\Player\PlayerTemporaryEffects.h" />
     <ClInclude Include="Application\GameObject\Relic\RelicCatalog.h" />
     <ClInclude Include="Application\GameObject\Relic\RelicDefinition.h" />
     <ClInclude Include="Application\GameObject\Relic\RelicEditor.h" />

@@ -17,7 +17,21 @@ namespace {
 	constexpr const char* kGameStartTextName = "StartText";
 	constexpr const char* kUpgradeTextName = "UpgradeText";
 	constexpr const char* kWeaponUpgradeOverlayName = "WeaponUpgradeOverlay";
-	constexpr const char* kPauseSheetName = "PauseSheet";
+	constexpr const char* kPauseSpriteNames[] = {
+		"PauseSheet",
+		"PauseContinueBack1", "PauseContinueBack2",
+		"PauseReStartBack1", "PauseReStartBack2",
+		"PauseQuitBack1", "PauseQuitBack2",
+	};
+	constexpr const char* kPauseTextNames[] = {
+		"PauseText", "PauseContinueText", "PauseReStartText", "PauseQuitText",
+	};
+	constexpr Vector2 kPauseMenuSpriteBaseScales[] = {
+		{ 10.75f, 4.5f },
+		{ 9.75f, 3.5f },
+	};
+	constexpr Vector2 kPauseMenuTextBaseScale = { 1.0f, 1.0f };
+	constexpr float kPauseMenuSelectedScale = 1.1f;
 	constexpr const char* kUpgradeRerollCoinTextName = "UpgradeRerollCoinText";
 	constexpr const char* kUpgradeSpriteNames[] = {
 		"UpgradeDecisionBack1", "UpgradeDecisionBack2",
@@ -60,7 +74,7 @@ namespace UI::Game {
 		staticSprites_.clear();
 		staticTexts_.clear();
 		UpdateUpgradePresentation(0.0f, false);
-		UpdatePauseSheet(false);
+		UpdatePausePresentation(false);
 
 		// Editor配置の常設表示だけを管理対象へ登録し、開始演出とMap操作Textを分離
 		for (const char* name : kStaticHudSpriteNames) {
@@ -101,7 +115,7 @@ namespace UI::Game {
 
 	void GameHud::Finalize() {
 		UpdateUpgradePresentation(0.0f, false);
-		UpdatePauseSheet(false);
+		UpdatePausePresentation(false);
 		relicInventoryUI_.Finalize();
 		healthGauge_.Finalize();
 		staminaGauge_.Finalize();
@@ -127,7 +141,7 @@ namespace UI::Game {
 		ApplyStaticVisibility(isVisible);
 		if (!isVisible) {
 			UpdateUpgradePresentation(0.0f, false);
-			UpdatePauseSheet(false);
+			UpdatePausePresentation(false);
 		}
 		if (isVisible_ == isVisible) {
 			return;
@@ -170,7 +184,7 @@ namespace UI::Game {
 		UpdateGameStartPresentation(state.gameStartProgress, state.gamePlayElapsedTime);
 		ApplyStaticVisibility(isVisible_);
 		UpdateUpgradePresentation(deltaTime, isVisible_ && state.isWaitingUpgradeSelection);
-		UpdatePauseSheet(state.isPaused);
+		UpdatePausePresentation(state.isPaused, state.pauseMenuSelectedIndex);
 	}
 
 	void GameHud::UpdateWorldViews(float gameDeltaTime, bool isPlaying,
@@ -231,14 +245,50 @@ namespace UI::Game {
 #endif
 	}
 
-	void GameHud::UpdatePauseSheet(bool isPaused) {
-		Sprite* pauseSheet = MySprite::TryGet(MySprite::Find(kPauseSheetName));
-		if (!pauseSheet || pauseSheet->GetSceneType() != SceneType::Game) {
-			return;
+	void GameHud::UpdatePausePresentation(bool isPaused, std::size_t selectedIndex) {
+		const bool isVisible = isVisible_ && isPaused;
+
+		// 武器強化や報酬選択による停止と区別し、暗幕とメニュー背景を通常のPause中だけ表示
+		for (const char* name : kPauseSpriteNames) {
+			Sprite* sprite = MySprite::TryGet(MySprite::Find(name));
+			if (!sprite || sprite->GetSceneType() != SceneType::Game) {
+				continue;
+			}
+			sprite->SetVisible(isVisible);
 		}
 
-		// 武器強化や報酬選択による停止と区別し、通常のPause状態だけでEditor配置の暗幕を表示
-		pauseSheet->SetVisible(isVisible_ && isPaused);
+		// Json再読込やEditor削除後も存在するTextだけへ背景と同じ表示条件を反映
+		for (const char* name : kPauseTextNames) {
+			MadoEngine::Text* text = MyText::TryGet(MyText::Find(name));
+			if (!text || text->GetSceneType() != SceneType::Game) {
+				continue;
+			}
+			text->SetVisible(isVisible);
+		}
+
+		// 色と配置を維持し、選択項目の背景2枚と文字を基準Scaleから同じ倍率で拡大
+		for (std::size_t index = 0; index < std::size(kPauseTextNames) - 1; ++index) {
+			float scaleMultiplier = 1.0f;
+			if (isVisible && index == selectedIndex) {
+				scaleMultiplier = kPauseMenuSelectedScale;
+			}
+
+			// 拡大中の保存値を次回の基準へ持ち込まないようBack1とBack2の固定寸法から毎回計算
+			for (std::size_t spriteIndex = 0; spriteIndex < std::size(kPauseMenuSpriteBaseScales); ++spriteIndex) {
+				const std::size_t nameIndex = 1 + index * std::size(kPauseMenuSpriteBaseScales) + spriteIndex;
+				Sprite* sprite = MySprite::TryGet(MySprite::Find(kPauseSpriteNames[nameIndex]));
+				if (!sprite || sprite->GetSceneType() != SceneType::Game) {
+					continue;
+				}
+				sprite->SetScale(kPauseMenuSpriteBaseScales[spriteIndex] * scaleMultiplier);
+			}
+
+			// Textも保存済みScaleを基準にせず、非選択時とPause解除時は通常寸法へ復元
+			MadoEngine::Text* text = MyText::TryGet(MyText::Find(kPauseTextNames[index + 1]));
+			if (text && text->GetSceneType() == SceneType::Game) {
+				text->SetScale(kPauseMenuTextBaseScale * scaleMultiplier);
+			}
+		}
 	}
 
 	void GameHud::ApplyStaticVisibility(bool isVisible) {

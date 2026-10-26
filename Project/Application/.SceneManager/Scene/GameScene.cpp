@@ -39,6 +39,7 @@ void GameScene::Initialize() {
 	MyRand::SetSeed(gameSeed_);
 	playLogRecorder_.Initialize(gameSeed_);
 	playLogSaveAttempted_ = false;
+	isSceneRestartRequested_ = false;
 
 	Logger::Output("ゲームシーンを初期化しました", Logger::Level::Application);
 	Enemy::Settings::GetInstance().LoadOrCreate();
@@ -114,7 +115,31 @@ SceneType GameScene::Update(float dt) {
 	// シーン遷移の完了条件を渡し、開始待機と停止状態を反映したゲーム時間を取得
 	const bool isSceneTransitioning = commonData_.GetSceneTransitionController().IsTransitioning();
 	const bool wasStarting = inGameSession_->GetCurrentPhase() == InGamePhase::Starting;
+	const bool wasPaused = inGameSession_->GetCurrentPhase() == InGamePhase::Paused;
+	const System::PauseMenuItem previousPauseMenuItem = inGameSession_->GetSelectedPauseMenuItem();
 	const float deltaTime = inGameSession_->Update(dt, !isSceneTransitioning);
+
+	// 既存のメニュー効果音を選択変更と決定のFrameだけで再生
+	if (wasPaused && previousPauseMenuItem != inGameSession_->GetSelectedPauseMenuItem() &&
+		MyAudio::IsLoaded("UpgradeCardSelect")) {
+		MyAudio::Play("UpgradeCardSelect");
+	}
+	const std::optional<System::PauseMenuItem> pauseMenuDecision = inGameSession_->ConsumePauseMenuDecision();
+	if (pauseMenuDecision.has_value()) {
+		if (MyAudio::IsLoaded("UpgradeCardDecision")) {
+			MyAudio::Play("UpgradeCardDecision");
+		}
+
+		// 初期武器を維持し、新規Seedの抽選と進行状態の初期化をScene再生成時に実行
+		if (pauseMenuDecision.value() == System::PauseMenuItem::Restart) {
+			commonData_.GetGameSeedSystem().RequestSeed(std::nullopt);
+			isSceneRestartRequested_ = true;
+			return SceneType::Game;
+		}
+		if (pauseMenuDecision.value() == System::PauseMenuItem::Quit) {
+			return SceneType::Title;
+		}
+	}
 	if (wasStarting && inGameSession_->GetCurrentPhase() != InGamePhase::Starting) {
 
 		// 開始待機が完了したFrameで常設HUDを再表示
@@ -122,7 +147,7 @@ SceneType GameScene::Update(float dt) {
 	}
 
 	// Sessionの状態に従い、開始待機と停止中のGameObject更新を抑止
-	if (inGameSession_->IsPlaying()) {
+	if (inGameSession_->IsPlaying() && !wasPaused) {
 		UpdateGameplay(deltaTime);
 	}
 
@@ -203,7 +228,7 @@ void GameScene::UpdateGameplay(float deltaTime) {
 	enemyManager_->Update(deltaTime);
 
 	// Targetが存在しないFrameも常時展開型ProjectileをPlayerへ追従
-	weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition());
+	weaponInventory_->SynchronizePersistentProjectiles(player_->GetPosition(), player_->GetTemporaryAttackMultiplier());
 	Projectile::Manager::GetInstance().Update(deltaTime, player_->GetPosition());
 
 	// 全GameObjectの移動結果へ衝突解決を適用してから接地と壁登り状態を確定
@@ -245,7 +270,8 @@ void GameScene::UpdateGameplay(float deltaTime) {
 		std::vector<Vector3> targetPositions;
 		enemyManager_->CollectNearestAttackTargetPositions(weaponInventory_->GetAttackTargetCandidateCount(), targetPositions);
 		if (!targetPositions.empty()) {
-			weaponInventory_->Update(deltaTime, player_->GetPosition(), targetPositions, player_->GetUpDirection());
+			weaponInventory_->Update(deltaTime, player_->GetPosition(), targetPositions, player_->GetUpDirection(),
+				player_->GetTemporaryAttackMultiplier());
 		}
 	}
 }
@@ -335,6 +361,7 @@ void GameScene::UpdateHud(float dt, float deltaTime) {
 	state.isWallClimbGaugeVisible = player_->IsWallClimbGaugeVisible();
 	state.isWaitingUpgradeSelection = inGameSession_->IsWaitingUpgradeSelection();
 	state.isPaused = inGameSession_->GetCurrentPhase() == InGamePhase::Paused;
+	state.pauseMenuSelectedIndex = static_cast<std::size_t>(inGameSession_->GetSelectedPauseMenuItem());
 	hud_.Update(dt, deltaTime, state, *weaponInventory_, cameraManager_.GetRenderCamera());
 	UpdateMiniMap();
 }

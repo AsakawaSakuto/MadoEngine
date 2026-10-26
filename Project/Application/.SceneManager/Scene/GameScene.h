@@ -42,6 +42,10 @@ public:
 	/// @return 次に遷移するシーンの種類
 	SceneType Update(float dt) override;
 
+	/// @brief PauseメニューによるGameSceneの再生成要求を取得
+	/// @return GameSceneを最初から開始する場合はtrue
+	bool IsSceneRestartRequested() const override { return isSceneRestartRequested_; }
+
 	/// @brief 武器選択とレリック獲得演出に応じたBGM一時停止の要否を取得
 	/// @return 武器選択またはレリック獲得演出中の場合はtrue
 	bool ShouldPauseBgm() const override;
@@ -180,4 +184,5 @@ private:
 	std::unique_ptr<System::InGameSession> inGameSession_;
 	System::PlayLogRecorder playLogRecorder_;
 	bool playLogSaveAttempted_ = false;
+	bool isSceneRestartRequested_ = false;
 };

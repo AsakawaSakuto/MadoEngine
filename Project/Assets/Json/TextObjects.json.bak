@@ -294,10 +294,60 @@
                 0.0,
                 0.0
             ],
-            "text": "02:29",
+            "text": "04:53",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "RelicDecisionText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 2.0,
+            "position": [
+                660.0,
+                639.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "決定",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -344,7 +394,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 131",
+            "text": "Enemy : 2",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -394,7 +444,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 84 / 100",
+            "text": "HP : 100 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -494,7 +544,7 @@
                 0.0,
                 0.0
             ],
-            "text": "431",
+            "text": "4",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -544,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.0",
+            "text": "FPS : 59.0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -644,7 +694,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 3938031860",
+            "text": "SEED : 1397968684",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -744,7 +794,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10436",
+            "text": "10001",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -794,7 +844,7 @@
                 0.0,
                 0.0
             ],
-            "text": "30で開ける",
+            "text": "経験値を得る",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -1008,9 +1058,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                1.0,
-                0.9664420485496521,
                 0.0,
+                1.0,
+                0.026244163513183594,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -1294,7 +1344,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-5",
+            "text": "-4",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1319,17 +1369,17 @@
             "horizontalAlign": "Left",
             "layer": "UI",
             "lineSpacing": 1.0,
-            "name": "RelicDecisionText",
+            "name": "PauseContinueText",
             "outlineColor": [
                 0.0,
                 0.0,
                 0.0,
                 1.0
             ],
-            "outlineWidth": 2.0,
+            "outlineWidth": 4.0,
             "position": [
-                660.0,
-                639.0
+                640.0,
+                320.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,
@@ -1344,7 +1394,157 @@
                 0.0,
                 0.0
             ],
-            "text": "決定",
+            "text": "続ける",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "PauseQuitText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 4.0,
+            "position": [
+                640.0,
+                560.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "タイトル",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 120.0,
+            "horizontalAlign": "Center",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "PauseText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 8.0,
+            "position": [
+                640.0,
+                128.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "一時停止",
+            "type": "Text2D",
+            "verticalAlign": "Center",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "PauseReStartText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 4.0,
+            "position": [
+                640.0,
+                440.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.100000023841858,
+                1.100000023841858
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "再スタート",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,

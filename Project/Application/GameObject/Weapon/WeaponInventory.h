@@ -25,8 +25,9 @@ namespace Weapon {
 		/// @param ownerPosition 武器所有者の座標
 		/// @param targetPositions 発射ごとに抽選する射撃対象の候補座標
 		/// @param ownerUpDirection 武器所有者の正規化済み上方向
+		/// @param temporaryDamageMultiplier 一時効果による攻撃力倍率、通常時は1.0
 		void Update(float deltaTime, const Vector3& ownerPosition, std::span<const Vector3> targetPositions,
-			const Vector3& ownerUpDirection = { 0.0f, 1.0f, 0.0f });
+			const Vector3& ownerUpDirection = { 0.0f, 1.0f, 0.0f }, float temporaryDamageMultiplier = 1.0f);
 
 		/// @brief Playerに近い順で抽選候補とするEnemy数の上限を取得
 		/// @return 抽選候補数の上限
@@ -38,7 +39,8 @@ namespace Weapon {
 
 		/// @brief 装備中の常時展開型Projectileを武器所有者へ同期
 		/// @param ownerPosition 武器所有者の座標
-		void SynchronizePersistentProjectiles(const Vector3& ownerPosition);
+		/// @param temporaryDamageMultiplier 一時効果による攻撃力倍率、通常時は1.0
+		void SynchronizePersistentProjectiles(const Vector3& ownerPosition, float temporaryDamageMultiplier = 1.0f);
 
 		/// @brief 指定した種類の武器を一番左の空きスロットへ追加
 		/// @param type 追加する武器の種類
@@ -102,6 +104,11 @@ namespace Weapon {
 		/// @brief 武器インベントリ編集用のImGuiを描画
 		void DrawImGui();
 	private:
+
+		/// @brief 外部補正を保持したまま一時的な攻撃力倍率を合成
+		/// @param temporaryDamageMultiplier 一時効果による攻撃力倍率
+		/// @return 通常射撃と常時展開型Projectileへ渡す合成済み補正
+		RuntimeModifiers ResolveRuntimeModifiers(float temporaryDamageMultiplier) const;
 
 		int slotCount_ = 6; // 武器スロットの数
 		int attackTargetCandidateCount_ = 2; // 近い順で抽選候補とするEnemy数の上限

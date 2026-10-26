@@ -143,9 +143,9 @@ void SceneManager::Update(float dt) {
 			transitionController.GetEffectProgress(),
 			currentScene_->ShouldPauseBgm(),
 			currentScene_->GetSelectionBgmPlaybackId());
-		if (next != currentSceneType_) {
+		if (next != currentSceneType_ || currentScene_->IsSceneRestartRequested()) {
 
-			// Scene側は遷移先だけを通知し、Effect進行と実際の切替時期はManager側で管理
+			// 同一Sceneの再生成も通常の遷移経路へ流し、終了通知とFrame末尾での破棄順序を共通化
 			RequestSceneChange(next);
 		}
 	}

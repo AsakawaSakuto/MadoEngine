@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Math/Function/MatrixFunction.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
@@ -8,6 +9,10 @@ namespace Player {
 
 	namespace {
 		const constexpr float kMovementSphereRadius = 0.5f; // 移動解決用のSphereCollider半径
+		constexpr const char* kDefenseModelName = "PlayerDefense";
+		constexpr float kDefenseModelRotationSpeed = std::numbers::pi_v<float>; // 防御ModelのY軸回転速度（ラジアン毎秒）
+		constexpr float kDefenseModelShrinkStartProgress = 0.9f; // 防御Modelの縮小を開始する効果進行率
+		constexpr float kDefenseModelRotationEpsilon = 1e-5f;
 	}
 
 	void Base::Initialize(MadoEngine::ParameterStore& parameterStore, const Vector3& spawnGroundPosition, SceneType sceneType) {
@@ -15,15 +20,19 @@ namespace Player {
 		resourceGainEvents_.clear();
 		pendingDamageAmount_ = 0.0f;
 		statusMultiplier_ = {};
+		temporaryEffects_.Clear();
 		isDead_ = false;
 		isDeathAnimationPlaying_ = false;
 		damageFlashRemainingTime_ = 0.0f;
 		baseMaxHealth_ = status_.maxHealth;
+		defenseModel_ = {};
+		defenseModelSpinAngle_ = 0.0f;
 
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
 		transform_.SetAllScale(0.5f);
 		colliderShape_ = movementCollider;
+		UpdateDefenseModel(0.0f);
 
 		AABB aabb;
 		aabb.min = { -0.5f, 0.0f, -0.5f };
@@ -63,6 +72,7 @@ namespace Player {
 
 		movement_.RegisterDebugParameters(parameterStore);
 		movement_.Initialize();
+		RefreshMovementSpeedMultiplier();
 
 		// Loop再生を維持したまま空中時だけ描画する着地点Markerの初期化
 		MadoEngine::EffectSequence::EffectSequencePlayDesc landingMarkerDesc;
@@ -93,7 +103,7 @@ namespace Player {
 		statusMultiplier_.healthRegenerationSpeed = modifiers.healthRegenerationSpeedMultiplier;
 
 		// Movementへ移動速度とジャンプ上限の外部補正を集約して反映
-		movement_.SetMoveSpeedMultiplier(statusMultiplier_.movementSpeed);
+		RefreshMovementSpeedMultiplier();
 		movement_.SetAdditionalJumpCount(modifiers.additionalJumpCount);
 
 		// 効果変更前の進捗率を保ちつつ実行中のリジェネ周期を新しい速度へ同期
@@ -102,6 +112,101 @@ namespace Player {
 			regenerationTimer_.Start(interval, true);
 			regenerationTimer_.Update(interval * regenerationTimer_.GetProgress());
 		}
+	}
+
+	void Base::ApplyTemporaryEffect(TemporaryEffectType type) {
+		if (isDead_) {
+			return;
+		}
+
+		// 取得時点で速度倍率も再計算し、外部補正の再適用を待たずに一時効果を反映
+		temporaryEffects_.Apply(type);
+		RefreshMovementSpeedMultiplier();
+		UpdateDefenseModel(0.0f);
+	}
+
+	void Base::RefreshMovementSpeedMultiplier() {
+		movement_.SetMoveSpeedMultiplier(
+			statusMultiplier_.movementSpeed * temporaryEffects_.GetMovementSpeedMultiplier());
+	}
+
+	void Base::UpdateDefenseModel(float deltaTime) {
+		Model* defenseModel = MyModel::TryGet(defenseModel_);
+		if (!defenseModel) {
+
+			// Editorでの削除やAsset差し替えに追従し、参照と基準の姿勢、Scaleを再取得
+			defenseModel_ = MyModel::Find(kDefenseModelName);
+			defenseModel = MyModel::TryGet(defenseModel_);
+			if (defenseModel) {
+				defenseModelBaseScale_ = defenseModel->GetScale();
+				defenseModelLastScale_ = defenseModelBaseScale_;
+				defenseModelBaseRotation_ = defenseModel->GetRotation();
+				defenseModelLastRotation_ = defenseModelBaseRotation_;
+			}
+		}
+		if (!defenseModel) {
+			return;
+		}
+
+		// 前回適用値との差分からEditorによるScaleと姿勢の変更だけを基準へ反映
+		const Vector3 currentScale = defenseModel->GetScale();
+		if (currentScale != defenseModelLastScale_) {
+			defenseModelBaseScale_ = currentScale;
+		}
+		const Vector3 currentRotation = defenseModel->GetRotation();
+		if (currentRotation != defenseModelLastRotation_) {
+			defenseModelBaseRotation_ = currentRotation;
+		}
+
+		// 効果進行率0.9以降の残り0.1を1から0へ線形補間し、再取得時は元の大きさへ復元
+		const float scaleMultiplier = 1.0f - temporaryEffects_.GetProgressAfter(
+			TemporaryEffectType::Invincibility, kDefenseModelShrinkStartProgress);
+		defenseModelLastScale_ = defenseModelBaseScale_ * scaleMultiplier;
+		defenseModel->SetScale(defenseModelLastScale_);
+
+		// Editor側の初期表示設定にかかわらず無敵効果の継続中だけ表示
+		const bool isVisible = !isDead_ && temporaryEffects_.IsInvincible();
+		defenseModel->SetVisible(isVisible);
+		if (!isVisible) {
+			return;
+		}
+
+		// 自転角度を最終的なModel回転と分離し、親の傾きが毎Frame加算される状態を防止
+		defenseModel->SetPosition(transform_.translate);
+		if (std::isfinite(deltaTime) && deltaTime > 0.0f) {
+			defenseModelSpinAngle_ = std::fmod(
+				defenseModelSpinAngle_ + kDefenseModelRotationSpeed * deltaTime, 2.0f * std::numbers::pi_v<float>);
+		}
+
+		// 衝突解決後のPlayer描画姿勢を使用し、Pause中も傾きと自転位相を維持
+		Vector3 playerRotation = transform_.rotate;
+		if (const Model* playerModel = MyModel::TryGet(model_)) {
+			playerRotation = playerModel->GetRotation();
+		}
+		defenseModelLastRotation_ = CreateDefenseModelRotation(playerRotation);
+		defenseModel->SetRotation(defenseModelLastRotation_);
+	}
+
+	Vector3 Base::CreateDefenseModelRotation(const Vector3& playerRotation) const {
+
+		// 描画と同じMakeAffineのXYZ順序で、初期姿勢、自転、Player姿勢の順にローカル軸から合成
+		const Matrix4x4 rotation =
+			Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, defenseModelBaseRotation_, {}) *
+			Matrix::MakeRotateY(defenseModelSpinAngle_) *
+			Matrix::MakeAffine({ 1.0f, 1.0f, 1.0f }, playerRotation, {});
+		Vector3 euler = {};
+		const float sinY = std::clamp(-rotation.m[0][2], -1.0f, 1.0f);
+		euler.y = std::asin(sinY);
+		if (std::abs(std::cos(euler.y)) > kDefenseModelRotationEpsilon) {
+			euler.x = std::atan2(rotation.m[1][2], rotation.m[2][2]);
+			euler.z = std::atan2(rotation.m[0][1], rotation.m[0][0]);
+			return euler;
+		}
+
+		// ジンバルロック付近では不定なZ回転をゼロへ固定し、等価な姿勢を維持
+		euler.x = std::atan2(rotation.m[1][0] * sinY, rotation.m[1][1]);
+		euler.z = 0.0f;
+		return euler;
 	}
 
 	Sphere Base::CreateSpawnMovementCollider(const Vector3& spawnGroundPosition) {
@@ -128,6 +233,7 @@ namespace Player {
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 		}
 		UpdateShadowTransform();
+		UpdateDefenseModel(0.0f);
 	}
 
 	void Base::AddMoney(int amount) {
@@ -218,6 +324,11 @@ namespace Player {
 			return;
 		}
 
+		// 無敵中はHPだけでなく被弾通知、点滅、リジェネ待機時間の更新も抑止
+		if (temporaryEffects_.IsInvincible()) {
+			return;
+		}
+
 		const float previousHealth = status_.currentHealth;
 		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
 
@@ -248,6 +359,9 @@ namespace Player {
 		}
 
 		isDead_ = true;
+		temporaryEffects_.Clear();
+		RefreshMovementSpeedMultiplier();
+		UpdateDefenseModel(0.0f);
 		lastMoveInput_ = {};
 		landingMarker_.SetVisible(false);
 
@@ -360,6 +474,10 @@ namespace Player {
 		movement_.CaptureCollisionResult(transform_.translate);
 
 		lastDeltaTime_ = std::max(0.0f, deltaTime);
+
+		// 入力移動と被弾判定より先に期限切れを反映し、効果終了後の倍率の残留を防止
+		temporaryEffects_.Update(lastDeltaTime_);
+		RefreshMovementSpeedMultiplier();
 		UpdateHealthRegeneration(lastDeltaTime_);
 		if (isDead_) {
 
@@ -400,6 +518,9 @@ namespace Player {
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetColor(color);
 		}
+
+		// Pause中のEditor再読み込みでも表示と座標を同期し、回転はゲーム進行側だけで更新
+		UpdateDefenseModel(0.0f);
 	}
 
 	void Base::ResolveAfterCollision() {
@@ -439,6 +560,7 @@ namespace Player {
 		}
 
 		UpdateShadowTransform();
+		UpdateDefenseModel(lastDeltaTime_);
 
 		// 描画結果とColliderのずれを検証できるよう判定形状を可視化
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };

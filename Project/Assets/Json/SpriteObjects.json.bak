@@ -1101,7 +1101,7 @@
                 0.0,
                 0.0,
                 0.0,
-                0.501960813999176
+                0.8627451062202454
             ],
             "fitToScreen": true,
             "layer": "UI",
@@ -1129,7 +1129,7 @@
                     0.0
                 ]
             },
-            "visible": false
+            "visible": true
         },
         {
             "anchorPoint": [
@@ -1441,7 +1441,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -1480,7 +1480,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -1507,6 +1507,240 @@
             ],
             "scene": "Game",
             "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PauseContinueBack1",
+            "position": [
+                640.0,
+                320.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.75,
+                4.5
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PauseContinueBack2",
+            "position": [
+                640.0,
+                320.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                9.75,
+                3.5
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PauseReStartBack1",
+            "position": [
+                640.0,
+                440.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.824999809265137,
+                4.950000286102295
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PauseReStartBack2",
+            "position": [
+                640.0,
+                440.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.725000381469727,
+                3.8500001430511475
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PauseQuitBack1",
+            "position": [
+                640.0,
+                560.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.75,
+                4.5
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "PauseQuitBack2",
+            "position": [
+                640.0,
+                560.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                9.75,
+                3.5
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

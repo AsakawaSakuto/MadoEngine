@@ -40,6 +40,7 @@ namespace UI::Game {
 		bool isWallClimbGaugeVisible = false;
 		bool isWaitingUpgradeSelection = false;
 		bool isPaused = false;
+		std::size_t pauseMenuSelectedIndex = 0;
 	};
 
 	/// @brief ゲーム中の常設HUDとイベント通知表示の所有と更新
@@ -119,9 +120,10 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
-		/// @brief Pause中だけPauseSheetの表示を同期
+		/// @brief Pause中だけ暗幕とメニューの表示および選択Scaleを同期
 		/// @param isPaused ゲームが一時停止中の場合はtrue
-		void UpdatePauseSheet(bool isPaused);
+		/// @param selectedIndex 選択中の項目番号、Continueから順に0から2
+		void UpdatePausePresentation(bool isPaused, std::size_t selectedIndex = 0);
 
 		/// @brief 常設SpriteとTextへ個別表示状態を維持したHUD表示切り替えを反映
 		/// @param isVisible HUDを表示する場合はtrue

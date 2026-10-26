@@ -95,6 +95,40 @@ float GameTimer::GetProgress() const {
     return progress;
 }
 
+float GameTimer::GetProgressAfter(float startProgress) const {
+    if (!std::isfinite(startProgress)) {
+        return 0.0f;
+    }
+
+    // 開始値1では区間幅がゼロになるため、終了した瞬間だけ完了として処理
+    const float start = std::clamp(startProgress, 0.0f, 1.0f);
+    const float progress = GetProgress();
+    if (start >= 1.0f) {
+        if (progress >= 1.0f) {
+            return 1.0f;
+        }
+        return 0.0f;
+    }
+
+    // 開始前を0へ制限し、開始以降の残り区間だけを0から1へ正規化
+    return std::clamp((progress - start) / (1.0f - start), 0.0f, 1.0f);
+}
+
+float GameTimer::GetProgressUntil(float endProgress) const {
+    if (!std::isfinite(endProgress)) {
+        return 0.0f;
+    }
+
+    // 終了値0の空区間は開始時点で完了とし、ゼロ除算を回避
+    const float end = std::clamp(endProgress, 0.0f, 1.0f);
+    if (end <= 0.0f) {
+        return 1.0f;
+    }
+
+    // 指定値へ到達後は1を維持し、登場演出の完了状態を後続区間でも保持
+    return std::clamp(GetProgress() / end, 0.0f, 1.0f);
+}
+
 float GameTimer::GetReverseProgress() const {
     return 1.0f - GetProgress();
 }
