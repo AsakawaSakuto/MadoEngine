@@ -294,7 +294,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:01",
+            "text": "04:45",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -394,7 +394,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 13",
+            "text": "Enemy : 6",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -444,7 +444,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 23 / 100",
+            "text": "HP : 100 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -544,7 +544,7 @@
                 0.0,
                 0.0
             ],
-            "text": "108",
+            "text": "8",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.1",
+            "text": "FPS : 60.0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -694,7 +694,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 2534667537",
+            "text": "SEED : 3909283665",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -794,7 +794,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10107",
+            "text": "10007",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -844,7 +844,7 @@
                 0.0,
                 0.0
             ],
-            "text": "お金を得る",
+            "text": "10で開ける",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -1058,9 +1058,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.0,
+                0.1611318588256836,
                 1.0,
-                0.45525169372558594,
+                0.0,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",

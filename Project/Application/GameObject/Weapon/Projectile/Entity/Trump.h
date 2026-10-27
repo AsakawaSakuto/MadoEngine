@@ -1,5 +1,6 @@
 #pragma once
 #include "../IProjectile.h"
+#include "Render/Object/3d/RibbonEffect/RibbonEffectTypes.h"
 #include <string>
 
 namespace Projectile {
@@ -32,6 +33,7 @@ namespace Projectile {
 		static constexpr int kInstantKillRollSuccess = 5; // 1%の確率で即死
 
 		MadoEngine::ModelHandle model_{};
+		MadoEngine::Ribbon::RibbonEffectHandle trail_{};
 		std::string objectName_;
 		float baseDamage_ = 0.0f;
 	};

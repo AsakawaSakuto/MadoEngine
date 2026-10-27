@@ -34,10 +34,10 @@
     "typeSettings": [
         {
             "camera": "TestDebugCamera",
-            "distance": 14.248114585876465,
+            "distance": 14.284369468688965,
             "dollySensitivity": 10.0,
             "panSensitivity": 0.25,
-            "pitch": 0.43376460671424866,
+            "pitch": 0.3007350265979767,
             "rotateSensitivity": 0.25,
             "target": [
                 2.2405638694763184,
@@ -45,7 +45,7 @@
                 1.4752612113952637
             ],
             "type": "Debug",
-            "yaw": 3.883805274963379
+            "yaw": 4.235773086547852
         },
         {
             "camera": "TestTpsCamera",
@@ -60,11 +60,11 @@
                 2.0,
                 -10.0
             ],
-            "pitch": 0.46795809268951416,
+            "pitch": 1.4999994039535522,
             "type": "TPS",
             "useGamePadInput": true,
             "useMouseInput": false,
-            "yaw": 0.22307203710079193
+            "yaw": -3.1319997310638428
         }
     ],
     "version": 3
