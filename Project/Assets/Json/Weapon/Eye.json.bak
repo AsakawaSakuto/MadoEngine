@@ -10,8 +10,8 @@
         "criticalChance": {
             "fixedAddValue": 5.0,
             "isSelected": true,
-            "rarityAddValue": 2.5,
-            "value": 0.0
+            "rarityAddValue": 5.0,
+            "value": 5.0
         },
         "criticalDamage": {
             "fixedAddValue": 0.0,
@@ -29,7 +29,7 @@
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 5.0
+            "value": 0.0
         },
         "lifeTime": {
             "fixedAddValue": 0.0,

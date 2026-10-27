@@ -22,11 +22,6 @@ namespace Projectile {
 		void OnDestroy() override;
 
 	private:
-		static constexpr float kBaseModelScale = 0.5f;
-		static constexpr float kBaseHitboxRadius = 0.5f;
-		static constexpr float kMinSizeRate = 0.1f;
-		static constexpr float kMinMoveSpeed = 0.01f;
-		static constexpr float kMinFlightDuration = 0.1f;
 		static constexpr float kArcHeightDistanceRate = 0.25f;
 		static constexpr float kMinArcHeight = 2.0f;
 		static constexpr float kMaxArcHeight = 8.0f;
@@ -36,10 +31,11 @@ namespace Projectile {
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
 		Vector3 startPosition_ = {};
-		float flightDuration_ = kMinFlightDuration;
+		float flightDuration_ = 0.0f;
 		float flightElapsedTime_ = 0.0f;
 		float arcHeight_ = kMinArcHeight;
 		float arrivalElapsedTime_ = 0.0f;
+		float explosionDamage_ = 0.0f;
 		bool hasArrived_ = false;
 	};
 }

@@ -4,21 +4,21 @@
         "poison": {
             "applyChance": {
                 "fixedAddValue": 5.0,
-                "isSelected": true,
+                "isSelected": false,
                 "rarityAddValue": 2.5,
-                "value": 50.0
+                "value": 100.0
             },
             "damagePerTick": {
                 "fixedAddValue": 1.0,
                 "isSelected": true,
-                "rarityAddValue": 1.0,
+                "rarityAddValue": 0.3499999940395355,
                 "value": 1.0
             },
             "duration": {
                 "fixedAddValue": 1.0,
                 "isSelected": true,
                 "rarityAddValue": 0.5,
-                "value": 5.0
+                "value": 2.5
             }
         }
     },
@@ -57,7 +57,7 @@
             "fixedAddValue": 0.5,
             "isSelected": true,
             "rarityAddValue": 0.25,
-            "value": 1.0
+            "value": 1.5
         },
         "penetrationCount": {
             "fixedAddValue": 0.0,
@@ -66,16 +66,16 @@
             "value": 0.0
         },
         "shotCooldown": {
-            "fixedAddValue": 2.0,
+            "fixedAddValue": 10.0,
             "isSelected": true,
-            "rarityAddValue": 1.0,
+            "rarityAddValue": 5.0,
             "value": 2.0
         },
         "shotIntervalTime": {
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 0.25
+            "value": 0.20000000298023224
         },
         "shotMaxCount": {
             "fixedAddValue": 1.0,
@@ -85,7 +85,7 @@
         },
         "size": {
             "fixedAddValue": 0.10000000149011612,
-            "isSelected": true,
+            "isSelected": false,
             "rarityAddValue": 0.05000000074505806,
             "value": 1.0
         },

@@ -1,0 +1,77 @@
+{
+    "name": "Hammer",
+    "upgradeStatus": {
+        "bounceCount": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 0.0
+        },
+        "criticalChance": {
+            "fixedAddValue": 5.0,
+            "isSelected": true,
+            "rarityAddValue": 5.0,
+            "value": 10.0
+        },
+        "criticalDamage": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 3.0
+        },
+        "damage": {
+            "fixedAddValue": 2.5,
+            "isSelected": true,
+            "rarityAddValue": 1.5,
+            "value": 15.0
+        },
+        "knockbackPower": {
+            "fixedAddValue": 1.0,
+            "isSelected": false,
+            "rarityAddValue": 0.5,
+            "value": 10.0
+        },
+        "lifeTime": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 2.0
+        },
+        "penetrationCount": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 0.0
+        },
+        "shotCooldown": {
+            "fixedAddValue": 10.0,
+            "isSelected": true,
+            "rarityAddValue": 5.0,
+            "value": 2.0
+        },
+        "shotIntervalTime": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 0.3499999940395355
+        },
+        "shotMaxCount": {
+            "fixedAddValue": 1.0,
+            "isSelected": true,
+            "rarityAddValue": 0.5,
+            "value": 1.0
+        },
+        "size": {
+            "fixedAddValue": 0.10000000149011612,
+            "isSelected": true,
+            "rarityAddValue": 0.05000000074505806,
+            "value": 1.0
+        },
+        "speed": {
+            "fixedAddValue": 0.0,
+            "isSelected": false,
+            "rarityAddValue": 0.0,
+            "value": 7.0
+        }
+    }
+}

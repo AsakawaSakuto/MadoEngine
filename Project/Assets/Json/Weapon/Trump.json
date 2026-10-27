@@ -2,16 +2,16 @@
     "name": "Trump",
     "upgradeStatus": {
         "bounceCount": {
-            "fixedAddValue": 0.0,
-            "isSelected": false,
-            "rarityAddValue": 0.0,
-            "value": 0.0
+            "fixedAddValue": 1.0,
+            "isSelected": true,
+            "rarityAddValue": 0.5,
+            "value": 1.0
         },
         "criticalChance": {
             "fixedAddValue": 5.0,
             "isSelected": true,
-            "rarityAddValue": 2.5,
-            "value": 5.0
+            "rarityAddValue": 5.0,
+            "value": 20.0
         },
         "criticalDamage": {
             "fixedAddValue": 0.0,
@@ -21,7 +21,7 @@
         },
         "damage": {
             "fixedAddValue": 2.0,
-            "isSelected": true,
+            "isSelected": false,
             "rarityAddValue": 1.0,
             "value": 0.0
         },
@@ -39,14 +39,14 @@
         },
         "penetrationCount": {
             "fixedAddValue": 1.0,
-            "isSelected": true,
+            "isSelected": false,
             "rarityAddValue": 0.5,
             "value": 0.0
         },
         "shotCooldown": {
-            "fixedAddValue": 2.5,
+            "fixedAddValue": 10.0,
             "isSelected": true,
-            "rarityAddValue": 2.5,
+            "rarityAddValue": 5.0,
             "value": 1.0
         },
         "shotIntervalTime": {

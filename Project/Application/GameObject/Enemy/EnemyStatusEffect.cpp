@@ -4,8 +4,8 @@
 
 namespace Enemy::StatusEffect {
 	namespace {
-		constexpr float kBurnDamageTickInterval = 1.0f;
-		constexpr float kPoisonDamageTickInterval = 1.0f;
+		constexpr float kBurnDamageTickInterval   = 1.0f;
+		constexpr float kPoisonDamageTickInterval = 0.5f;
 	}
 
 	void Controller::Clear() {

@@ -5,12 +5,12 @@
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 0.0
+            "value": 1.0
         },
         "criticalChance": {
             "fixedAddValue": 5.0,
             "isSelected": true,
-            "rarityAddValue": 5.0,
+            "rarityAddValue": 2.5,
             "value": 5.0
         },
         "criticalDamage": {
@@ -41,7 +41,7 @@
             "fixedAddValue": 1.0,
             "isSelected": true,
             "rarityAddValue": 0.5,
-            "value": 0.0
+            "value": 1.0
         },
         "shotCooldown": {
             "fixedAddValue": 2.5,

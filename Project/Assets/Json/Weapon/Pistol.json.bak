@@ -8,15 +8,15 @@
             "value": 0.0
         },
         "criticalChance": {
-            "fixedAddValue": 5.0,
+            "fixedAddValue": 1.0199999809265137,
             "isSelected": true,
             "rarityAddValue": 5.0,
-            "value": 10.0
+            "value": 15.0
         },
         "criticalDamage": {
-            "fixedAddValue": 0.0,
+            "fixedAddValue": 1.0,
             "isSelected": false,
-            "rarityAddValue": 0.0,
+            "rarityAddValue": 0.10000000149011612,
             "value": 2.0
         },
         "damage": {
@@ -35,18 +35,18 @@
             "fixedAddValue": 1.0,
             "isSelected": false,
             "rarityAddValue": 0.10000000149011612,
-            "value": 99.0
+            "value": 15.0
         },
         "penetrationCount": {
             "fixedAddValue": 1.0,
             "isSelected": false,
             "rarityAddValue": 0.10000000149011612,
-            "value": 0.0
+            "value": 1.0
         },
         "shotCooldown": {
-            "fixedAddValue": 2.5,
+            "fixedAddValue": 10.0,
             "isSelected": true,
-            "rarityAddValue": 2.5,
+            "rarityAddValue": 5.0,
             "value": 1.0
         },
         "shotIntervalTime": {

@@ -294,7 +294,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:53",
+            "text": "04:01",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -394,7 +394,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 2",
+            "text": "Enemy : 13",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -444,7 +444,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 100 / 100",
+            "text": "HP : 23 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -544,7 +544,7 @@
                 0.0,
                 0.0
             ],
-            "text": "4",
+            "text": "108",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.0",
+            "text": "FPS : 60.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -694,7 +694,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 1397968684",
+            "text": "SEED : 2534667537",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -794,7 +794,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10001",
+            "text": "10107",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -844,7 +844,7 @@
                 0.0,
                 0.0
             ],
-            "text": "経験値を得る",
+            "text": "お金を得る",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -1060,7 +1060,7 @@
             "color": [
                 0.0,
                 1.0,
-                0.026244163513183594,
+                0.45525169372558594,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -1344,7 +1344,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-4",
+            "text": "-3.5",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1384,8 +1384,8 @@
             "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                1.100000023841858,
+                1.100000023841858
             ],
             "scene": "Game",
             "screen": "BackBuffer",
@@ -1534,8 +1534,8 @@
             "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
-                1.100000023841858,
-                1.100000023841858
+                1.0,
+                1.0
             ],
             "scene": "Game",
             "screen": "BackBuffer",

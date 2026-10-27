@@ -17,33 +17,17 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
+		explosionDamage_ = context.damage;
+		damage_ = 0.0f; // 爆発でダメージを与えるため、Bomb自体のダメージは0に設定
+
 		startPosition_ = ownerPosition_;
 		transform_.translate = startPosition_;
-
-		// 不正なサイズ倍率によるモデルと当たり判定の消失を防止
-		const float safeSizeRate = [&]() {
-			if (std::isfinite(sizeRate_)) {
-				return (std::max(sizeRate_, kMinSizeRate));
-			} else {
-				return (kMinSizeRate);
-			}
-		}();
-		const float modelScale = kBaseModelScale * safeSizeRate;
-		transform_.scale = { modelScale, modelScale, modelScale };
+		transform_.scale = Vector3{ 0.5f, 0.5f, 0.5f };
 
 		const Vector3 toTarget = targetPosition_ - startPosition_;
 		const float distance = toTarget.Length();
 
-		// 不正な速度やゼロ除算を避け、飛行時間の計算に正の速度を使用
-		const float safeMoveSpeed = [&]() {
-			if (std::isfinite(moveSpeed_)) {
-				return (std::max(std::fabs(moveSpeed_), kMinMoveSpeed));
-			} else {
-				return (kMinMoveSpeed);
-			}
-		}();
-
-		flightDuration_ = std::max(distance / safeMoveSpeed, kMinFlightDuration);
+		flightDuration_ = distance / moveSpeed_;
 
 		const float horizontalDistance = std::sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z);
 		arcHeight_ = std::clamp(horizontalDistance * kArcHeightDistanceRate, kMinArcHeight, kMaxArcHeight);
@@ -58,7 +42,7 @@ namespace Projectile {
 		}
 
 		Sphere hitbox;
-		hitbox.radius = kBaseHitboxRadius * safeSizeRate;
+		hitbox.radius = 1.0f;
 		hitbox_ = hitbox;
 		MyCollider::RegisterCollider(objectName_, CollisionTag::PlayerProjectileHitBox, &hitbox_, &transform_.translate);
 
@@ -69,24 +53,15 @@ namespace Projectile {
 
 	void Bomb::Update(float deltaTime) {
 
-		// 不正な経過時間による放物線の破綻や到着状態の逆行を防止
-		const float safeDeltaTime = [&]() {
-			if (std::isfinite(deltaTime)) {
-				return (std::max(deltaTime, 0.0f));
-			} else {
-				return (0.0f);
-			}
-		}();
-
 		if (!hasArrived_) {
-			flightElapsedTime_ += safeDeltaTime;
+			flightElapsedTime_ += deltaTime;
 			const float progress = std::clamp(
 				flightElapsedTime_ / flightDuration_, 0.0f, 1.0f);
 
 			// 直線補間へ4t(1-t)の高さを加え、両端を固定した上向きの放物線を形成
 			transform_.translate = Math::Lerp(startPosition_, targetPosition_, progress);
 			transform_.translate.y += 4.0f * arcHeight_ * progress * (1.0f - progress);
-			transform_.rotate.y += kRotationSpeed * safeDeltaTime;
+			transform_.rotate.y += kRotationSpeed * deltaTime;
 
 			if (progress >= 1.0f) {
 				hasArrived_ = true;
@@ -94,7 +69,7 @@ namespace Projectile {
 		} else {
 
 			// Projectile更新より前に行われるEnemy衝突判定へ着地点を一時的に公開
-			arrivalElapsedTime_ += safeDeltaTime;
+			arrivalElapsedTime_ += deltaTime;
 			if (arrivalElapsedTime_ >= kArrivalHoldDuration) {
 				isDead_ = true;
 				return;
@@ -126,12 +101,12 @@ namespace Projectile {
 		context.projectileName = objectName_;
 		context.createSoundKey = "BombExplosion";
 		context.ownerPosition = transform_.translate;
-		context.damage = damage_;
+		context.damage = explosionDamage_;
 		context.criticalChance = criticalChance_;
 		context.criticalDamage = criticalDamage_;
 		context.knockbackPower = knockbackPower_;
 		context.statusEffects = statusEffects_;
-		context.explosionDamageDecreaseRate = 0.75f;
+		context.explosionDamageDecreaseRate = 1.0f;
 		context.explosionRadius = sizeRate_;
 		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
 

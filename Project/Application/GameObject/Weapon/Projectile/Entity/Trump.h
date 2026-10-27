@@ -29,7 +29,7 @@ namespace Projectile {
 		static constexpr int kMaxRandomDamageBonus = 13;
 		static constexpr int kInstantKillRollMin = 1;
 		static constexpr int kInstantKillRollMax = 100;
-		static constexpr int kInstantKillRollSuccess = 1;
+		static constexpr int kInstantKillRollSuccess = 5; // 1%の確率で即死
 
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;

@@ -11,30 +11,30 @@
             "fixedAddValue": 1.0,
             "isSelected": false,
             "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "value": 20.0
         },
         "criticalDamage": {
             "fixedAddValue": 1.0,
             "isSelected": false,
             "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "value": 2.0
         },
         "damage": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 2.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
-            "value": 10.0
+            "rarityAddValue": 1.0,
+            "value": 5.0
         },
         "knockbackPower": {
             "fixedAddValue": 1.0,
-            "isSelected": true,
+            "isSelected": false,
             "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "value": 3.0
         },
         "lifeTime": {
-            "fixedAddValue": 5.0,
+            "fixedAddValue": 0.5,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
+            "rarityAddValue": 0.25,
             "value": 1.0
         },
         "penetrationCount": {
@@ -44,27 +44,27 @@
             "value": 0.0
         },
         "shotCooldown": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 10.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
-            "value": 1.0
+            "rarityAddValue": 5.0,
+            "value": 1.25
         },
         "shotIntervalTime": {
             "fixedAddValue": 0.0,
             "isSelected": false,
             "rarityAddValue": 0.0,
-            "value": 0.25
+            "value": 0.3499999940395355
         },
         "shotMaxCount": {
             "fixedAddValue": 1.0,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
+            "rarityAddValue": 0.5,
             "value": 1.0
         },
         "size": {
-            "fixedAddValue": 1.0,
+            "fixedAddValue": 0.10000000149011612,
             "isSelected": true,
-            "rarityAddValue": 0.10000000149011612,
+            "rarityAddValue": 0.05000000074505806,
             "value": 1.0
         },
         "speed": {
