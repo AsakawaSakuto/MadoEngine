@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace Player {
 	class Base;
@@ -25,6 +26,10 @@ namespace DropObject {
 		/// @param deltaTime 1フレームの経過時間
 		/// @param player 報酬を受け取るPlayer
 		void Update(float deltaTime, Player::Base& player);
+
+		/// @brief 未処理の特殊Drop取得通知を取得して管理側の蓄積を消去
+		/// @return 取得順の特殊Dropの種類
+		std::vector<Type> ConsumeSpecialCollectionEvents();
 
 		/// @brief DropObjectを生成
 		/// @param type DropObjectの種類
@@ -117,6 +122,7 @@ namespace DropObject {
 		Pool<kExpPoolCapacity> expPool_;
 		Pool<kMoneyPoolCapacity> moneyPool_;
 		std::array<std::unique_ptr<Base>, kSpecialPoolCapacity> specialDropObjects_;
+		std::vector<Type> specialCollectionEvents_;
 		float expCollectionSoundCooldown_ = 0.0f;
 	};
 }

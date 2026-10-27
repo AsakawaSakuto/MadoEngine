@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Math/Function/MatrixFunction.h"
+#include "Render/Object/3d/Particle/MyParticle3d.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
@@ -10,12 +11,27 @@ namespace Player {
 	namespace {
 		const constexpr float kMovementSphereRadius = 0.5f; // 移動解決用のSphereCollider半径
 		constexpr const char* kDefenseModelName = "PlayerDefense";
+		constexpr const char* kSpeedUpperParticleName = "SpeedUpper";
+		constexpr const char* kAttackUpperParticleName = "AttackUpper";
 		constexpr float kDefenseModelRotationSpeed = std::numbers::pi_v<float>; // 防御ModelのY軸回転速度（ラジアン毎秒）
 		constexpr float kDefenseModelShrinkStartProgress = 0.9f; // 防御Modelの縮小を開始する効果進行率
 		constexpr float kDefenseModelRotationEpsilon = 1e-5f;
 	}
 
+	Base::~Base() {
+
+		// Scene遷移やPlayer破棄後にLoop再生の粒子を残さないため即時解放
+		MyParticle3d::Stop(speedUpperParticle_, MadoEngine::Particle::StopMode::Immediate);
+		MyParticle3d::Stop(attackUpperParticle_, MadoEngine::Particle::StopMode::Immediate);
+	}
+
 	void Base::Initialize(MadoEngine::ParameterStore& parameterStore, const Vector3& spawnGroundPosition, SceneType sceneType) {
+
+		// 再初期化時に前回の一時効果演出を持ち越さないよう既存の再生を破棄
+		MyParticle3d::Stop(speedUpperParticle_, MadoEngine::Particle::StopMode::Immediate);
+		speedUpperParticle_ = {};
+		MyParticle3d::Stop(attackUpperParticle_, MadoEngine::Particle::StopMode::Immediate);
+		attackUpperParticle_ = {};
 		sceneType_ = sceneType;
 		resourceGainEvents_.clear();
 		pendingDamageAmount_ = 0.0f;
@@ -80,13 +96,6 @@ namespace Player {
 		landingMarkerDesc.loopOverride = true;
 		landingMarker_.Play("LandingMarker", landingMarkerDesc);
 		landingMarker_.SetVisible(false);
-
-		MadoEngine::Particle::PlayDesc desc;
-		if (Model* model = MyModel::TryGet(model_)) {
-			desc.transform.translate = model->GetVertexPosition(218);
-		}
-		desc.sceneType = sceneType_;
-		desc.loopOverride = true;
 	}
 
 	void Base::SetRuntimeModifiers(const RuntimeModifiers& modifiers) {
@@ -123,6 +132,22 @@ namespace Player {
 		temporaryEffects_.Apply(type);
 		RefreshMovementSpeedMultiplier();
 		UpdateDefenseModel(0.0f);
+
+		// 再取得時は既存のLoop再生を維持し、効果時間の更新による粒子の重複発生を防止
+		if (type == TemporaryEffectType::SpeedBoost && !speedUpperParticle_.HasValue()) {
+			MadoEngine::Particle::PlayDesc particleDesc;
+			particleDesc.transform.translate = transform_.translate;
+			particleDesc.sceneType = sceneType_;
+			particleDesc.loopOverride = true;
+			speedUpperParticle_ = MyParticle3d::Play(kSpeedUpperParticleName, particleDesc);
+		}
+		if (type == TemporaryEffectType::AttackBoost && !attackUpperParticle_.HasValue()) {
+			MadoEngine::Particle::PlayDesc particleDesc;
+			particleDesc.transform.translate = transform_.translate;
+			particleDesc.sceneType = sceneType_;
+			particleDesc.loopOverride = true;
+			attackUpperParticle_ = MyParticle3d::Play(kAttackUpperParticleName, particleDesc);
+		}
 	}
 
 	void Base::RefreshMovementSpeedMultiplier() {
@@ -130,16 +155,32 @@ namespace Player {
 			statusMultiplier_.movementSpeed * temporaryEffects_.GetMovementSpeedMultiplier());
 	}
 
+	void Base::UpdateTemporaryEffectParticle(TemporaryEffectType type, MadoEngine::Particle::EffectHandle& particle) {
+		if (!particle.HasValue()) {
+			return;
+		}
+
+		// 効果終了と死亡時は新規発生だけを止め、既存の粒子は各寿命に従って消去
+		if (isDead_ || !temporaryEffects_.IsActive(type)) {
+			MyParticle3d::Stop(particle, MadoEngine::Particle::StopMode::Finish);
+			particle = {};
+			return;
+		}
+
+		// Playerの回転と拡縮は適用せず、発生位置だけを現在座標へ同期
+		Transform3D particleTransform;
+		particleTransform.translate = transform_.translate;
+		MyParticle3d::SetTransform(particle, particleTransform);
+	}
+
 	void Base::UpdateDefenseModel(float deltaTime) {
 		Model* defenseModel = MyModel::TryGet(defenseModel_);
 		if (!defenseModel) {
 
-			// Editorでの削除やAsset差し替えに追従し、参照と基準の姿勢、Scaleを再取得
+			// Editorでの削除やAsset差し替えに追従し、参照と基準の姿勢を再取得
 			defenseModel_ = MyModel::Find(kDefenseModelName);
 			defenseModel = MyModel::TryGet(defenseModel_);
 			if (defenseModel) {
-				defenseModelBaseScale_ = defenseModel->GetScale();
-				defenseModelLastScale_ = defenseModelBaseScale_;
 				defenseModelBaseRotation_ = defenseModel->GetRotation();
 				defenseModelLastRotation_ = defenseModelBaseRotation_;
 			}
@@ -148,21 +189,16 @@ namespace Player {
 			return;
 		}
 
-		// 前回適用値との差分からEditorによるScaleと姿勢の変更だけを基準へ反映
-		const Vector3 currentScale = defenseModel->GetScale();
-		if (currentScale != defenseModelLastScale_) {
-			defenseModelBaseScale_ = currentScale;
-		}
+		// 前回適用値との差分からEditorによる姿勢の変更だけを基準へ反映
 		const Vector3 currentRotation = defenseModel->GetRotation();
 		if (currentRotation != defenseModelLastRotation_) {
 			defenseModelBaseRotation_ = currentRotation;
 		}
 
-		// 効果進行率0.9以降の残り0.1を1から0へ線形補間し、再取得時は元の大きさへ復元
-		const float scaleMultiplier = 1.0f - temporaryEffects_.GetProgressAfter(
+		// 保存済みScaleに依存せず取得時は1から開始し、効果進行率0.9以降だけ0へ縮小
+		const float scale = 1.0f - temporaryEffects_.GetProgressAfter(
 			TemporaryEffectType::Invincibility, kDefenseModelShrinkStartProgress);
-		defenseModelLastScale_ = defenseModelBaseScale_ * scaleMultiplier;
-		defenseModel->SetScale(defenseModelLastScale_);
+		defenseModel->SetScale({ scale, scale, scale });
 
 		// Editor側の初期表示設定にかかわらず無敵効果の継続中だけ表示
 		const bool isVisible = !isDead_ && temporaryEffects_.IsInvincible();
@@ -234,6 +270,8 @@ namespace Player {
 		}
 		UpdateShadowTransform();
 		UpdateDefenseModel(0.0f);
+		UpdateTemporaryEffectParticle(TemporaryEffectType::SpeedBoost, speedUpperParticle_);
+		UpdateTemporaryEffectParticle(TemporaryEffectType::AttackBoost, attackUpperParticle_);
 	}
 
 	void Base::AddMoney(int amount) {
@@ -362,6 +400,8 @@ namespace Player {
 		temporaryEffects_.Clear();
 		RefreshMovementSpeedMultiplier();
 		UpdateDefenseModel(0.0f);
+		UpdateTemporaryEffectParticle(TemporaryEffectType::SpeedBoost, speedUpperParticle_);
+		UpdateTemporaryEffectParticle(TemporaryEffectType::AttackBoost, attackUpperParticle_);
 		lastMoveInput_ = {};
 		landingMarker_.SetVisible(false);
 
@@ -561,6 +601,8 @@ namespace Player {
 
 		UpdateShadowTransform();
 		UpdateDefenseModel(lastDeltaTime_);
+		UpdateTemporaryEffectParticle(TemporaryEffectType::SpeedBoost, speedUpperParticle_);
+		UpdateTemporaryEffectParticle(TemporaryEffectType::AttackBoost, attackUpperParticle_);
 
 		// 描画結果とColliderのずれを検証できるよう判定形状を可視化
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };

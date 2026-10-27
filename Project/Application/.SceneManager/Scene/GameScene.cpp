@@ -256,6 +256,11 @@ void GameScene::UpdateGameplay(float deltaTime) {
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
 	}
 
+	// HP満タン時のHeal取得も表示できるよう、回復量と独立した取得通知をHUDへ転送
+	for (DropObject::Type type : DropObject::Manager::GetInstance().ConsumeSpecialCollectionEvents()) {
+		hud_.ShowDropObjectGet(type);
+	}
+
 	// Playerの状態変更を描画処理へ依存させずSceneで獲得通知へ変換
 	for (const Player::ResourceGainEvent& event :
 		player_->ConsumeResourceGainEvents()) {

@@ -66,6 +66,10 @@ namespace DropObject {
 		/// @return 生存中であればtrue
 		bool IsAlive() const { return isAlive_; }
 
+		/// @brief 現在のDropObjectの種類を取得
+		/// @return 配置中または回収済みのDropObjectの種類
+		Type GetType() const { return type_; }
+
 	private:
 
 		/// @brief ColliderとModelを破棄

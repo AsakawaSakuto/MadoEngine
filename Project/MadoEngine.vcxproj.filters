@@ -231,6 +231,7 @@
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\DropObjectGetView\DropObjectGetView.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
     <ClCompile Include="Application\System\PlayLog\PlayLogRecorder.cpp" />
@@ -947,6 +948,7 @@
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.h" />
+    <ClInclude Include="Application\UI\Game\GamePlayView\DropObjectGetView\DropObjectGetView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>

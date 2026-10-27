@@ -13,7 +13,7 @@ namespace DropObject {
 		constexpr std::array<Type, 4> kSpecialTypes = {
 			Type::Heal, Type::AttackUpper, Type::SpeedUpper, Type::DefuseUpper
 		};
-		constexpr int kJarSpecialDropChancePercent = 50;
+		constexpr int kJarSpecialDropChancePercent = 100;
 		constexpr int kEliteSpecialDropChancePercent = 25;
 	}
 
@@ -79,7 +79,20 @@ namespace DropObject {
 				continue;
 			}
 			dropObject->Update(deltaTime, player);
+
+			// Playerへ効果を適用して回収済みへ遷移した特殊Dropだけを通知
+			if (!dropObject->IsAlive()) {
+				specialCollectionEvents_.push_back(dropObject->GetType());
+			}
 		}
+	}
+
+	std::vector<Type> Manager::ConsumeSpecialCollectionEvents() {
+		std::vector<Type> events;
+
+		// 同じ取得を複数Frameで表示しないよう未処理通知の所有権を呼び出し側へ移動
+		events.swap(specialCollectionEvents_);
+		return events;
 	}
 
 	template<std::size_t Capacity>
@@ -251,6 +264,7 @@ namespace DropObject {
 		}
 		ClearPool(expPool_);
 		ClearPool(moneyPool_);
+		specialCollectionEvents_.clear();
 		expCollectionSoundCooldown_ = 0.0f;
 	}
 

@@ -8,6 +8,7 @@
 #include "PlayerTemporaryEffects.h"
 #include "../Map/MapLimit.h"
 #include "Render/Object/3d/EffectSequence/MyEffectSequence3d.h"
+#include "Render/Object/3d/Particle/ParticleTypes.h"
 #include <vector>
 
 namespace Player {
@@ -15,6 +16,9 @@ namespace Player {
 	/// @brief Playerの基底クラス
 	class Base : public IGameObject {
 	public:
+
+		/// @brief Playerの破棄と一時効果Particleの解放
+		~Base() override;
 
 		/// @brief Playerを初期化
 		/// @param parameterStore Playerより長く保持する設定値管理
@@ -185,7 +189,12 @@ namespace Player {
 		/// @brief 外部補正と一時効果を合成して移動速度へ反映
 		void RefreshMovementSpeedMultiplier();
 
-		/// @brief 無敵効果中のEditor管理Modelの姿勢追従、自転、終了直前の縮小を更新
+		/// @brief 一時効果Particleの発生位置と効果終了時の停止を同期
+		/// @param type Particleに対応する一時効果の種類
+		/// @param particle 同期対象のParticle Handle
+		void UpdateTemporaryEffectParticle(TemporaryEffectType type, MadoEngine::Particle::EffectHandle& particle);
+
+		/// @brief 無敵効果中のEditor管理Modelの姿勢追従、自転、Scale1からの終了直前の縮小を更新
 		/// @param deltaTime 回転へ適用するゲーム進行中の経過時間（秒）
 		void UpdateDefenseModel(float deltaTime);
 
@@ -204,9 +213,9 @@ namespace Player {
 
 		Transform3D landingMarkerTransform_;                           // 影Transform
 		MadoEngine::EffectSequence::MyEffectSequence3d landingMarker_; // 着地点Marker
+		MadoEngine::Particle::EffectHandle speedUpperParticle_{}; // 速度上昇中のParticle
+		MadoEngine::Particle::EffectHandle attackUpperParticle_{}; // 攻撃力上昇中のParticle
 		MadoEngine::ModelHandle defenseModel_{}; // Editor管理の防御Modelへの借用参照
-		Vector3 defenseModelBaseScale_ = { 1.0f, 1.0f, 1.0f }; // Editor設定の基準Scale
-		Vector3 defenseModelLastScale_ = { 1.0f, 1.0f, 1.0f }; // Editor変更の検出に使用する前回適用Scale
 		Vector3 defenseModelBaseRotation_{}; // Editor設定の初期回転
 		Vector3 defenseModelLastRotation_{}; // Editor変更の検出に使用する前回適用回転
 		float defenseModelSpinAngle_ = 0.0f; // PlayerのローカルY軸周りの自転角度

@@ -219,6 +219,7 @@
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.cpp" />
+    <ClCompile Include="Application\UI\Game\GamePlayView\DropObjectGetView\DropObjectGetView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.cpp" />
     <ClCompile Include="Application\UI\Game\Relic\RelicAcquisitionUI.cpp" />
@@ -488,6 +489,7 @@
     <ClInclude Include="Application\UI\Game\Player\PlayerIconUI.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.h" />
+    <ClInclude Include="Application\UI\Game\GamePlayView\DropObjectGetView\DropObjectGetView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.h" />
     <ClInclude Include="Application\UI\Game\GamePlayView\EnemyStatusEffectIconView\EnemyStatusEffectIconView.h" />
     <ClInclude Include="Application\UI\Game\Relic\RelicAcquisitionUI.h" />

@@ -94,6 +94,7 @@ namespace UI::Game {
 		UpdateGameStartPresentation(0.0f, 0.0f);
 		playerResourceGainView_.Initialize();
 		playerDamageView_.Initialize();
+		dropObjectGetView_.Initialize();
 		enemyDamageView_.Initialize();
 		enemyStatusEffectIconView_.Initialize();
 		miniMapUI_.Initialize(miniMapData);
@@ -129,6 +130,7 @@ namespace UI::Game {
 		}
 		playerResourceGainView_.Finalize();
 		playerDamageView_.Finalize();
+		dropObjectGetView_.Finalize();
 		enemyDamageView_.Finalize();
 		enemyStatusEffectIconView_.Finalize();
 		enemyCountText_ = {};
@@ -162,6 +164,7 @@ namespace UI::Game {
 		enemyDamageView_.SetVisible(areNotificationsVisible);
 		enemyStatusEffectIconView_.SetVisible(areNotificationsVisible);
 		playerResourceGainView_.SetVisible(areNotificationsVisible);
+		dropObjectGetView_.SetVisible(areNotificationsVisible);
 	}
 
 	void GameHud::Update(float deltaTime, float gameDeltaTime, const GameHudState& state,
@@ -199,6 +202,8 @@ namespace UI::Game {
 		enemyStatusEffectIconView_.Update(enemyManager, camera);
 		playerResourceGainView_.SetVisible(areNotificationsVisible);
 		playerResourceGainView_.Update(gameDeltaTime);
+		dropObjectGetView_.SetVisible(areNotificationsVisible);
+		dropObjectGetView_.Update(gameDeltaTime);
 	}
 
 	void GameHud::UpdateRelicInventory(const Relic::System& relicSystem) {
@@ -233,6 +238,10 @@ namespace UI::Game {
 
 	void GameHud::ShowPlayerDamage(float damage) {
 		playerDamageView_.Spawn(damage);
+	}
+
+	void GameHud::ShowDropObjectGet(DropObject::Type type) {
+		dropObjectGetView_.Spawn(type);
 	}
 
 	void GameHud::PlayWeaponAttackAnimation(std::size_t slotIndex) {

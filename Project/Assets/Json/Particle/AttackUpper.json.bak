@@ -1,0 +1,163 @@
+{
+    "emitters": [
+        {
+            "backend": "auto",
+            "colorOverLifetime": {
+                "end": {
+                    "max": [
+                        1.0,
+                        0.0784313753247261,
+                        0.1411764770746231,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        0.0784313753247261,
+                        0.1411764770746231,
+                        1.0
+                    ]
+                },
+                "start": {
+                    "max": [
+                        1.0,
+                        0.0784313753247261,
+                        0.1411764770746231,
+                        1.0
+                    ],
+                    "min": [
+                        1.0,
+                        0.0784313753247261,
+                        0.13725490868091583,
+                        1.0
+                    ]
+                }
+            },
+            "emission": {
+                "bursts": [],
+                "duration": 1.0,
+                "isLoop": true,
+                "maxParticles": 64,
+                "ratePerSecond": 8.0,
+                "startDelay": 0.0
+            },
+            "initial": {
+                "angularVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "direction": {
+                    "max": [
+                        0.0,
+                        4.0,
+                        0.0
+                    ],
+                    "min": [
+                        0.0,
+                        1.0,
+                        0.0
+                    ]
+                },
+                "directionMode": "configured",
+                "lifeTime": {
+                    "max": 1.0,
+                    "min": 1.0
+                },
+                "rotation": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "speed": {
+                    "max": 4.0,
+                    "min": 2.0
+                }
+            },
+            "isEnabled": true,
+            "motion": {
+                "acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "drag": 0.0,
+                "gravity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "name": "Emitter",
+            "renderer": {
+                "blendMode": "normal",
+                "sortMode": "none",
+                "texture": "pattern"
+            },
+            "shape": {
+                "emitFromEdge": true,
+                "innerRadius": 0.0,
+                "normal": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "outerRadius": 1.0,
+                "type": "ring"
+            },
+            "simulationSpace": "local",
+            "sizeOverLifetime": {
+                "end": {
+                    "max": [
+                        0.20000000298023224,
+                        0.20000000298023224
+                    ],
+                    "min": [
+                        0.20000000298023224,
+                        0.20000000298023224
+                    ]
+                },
+                "start": {
+                    "max": [
+                        0.75,
+                        0.75
+                    ],
+                    "min": [
+                        0.75,
+                        0.75
+                    ]
+                }
+            },
+            "trail": {
+                "blendMode": "add",
+                "cameraFacing": true,
+                "endColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0
+                ],
+                "endWidth": 0.0,
+                "interpolation": "linear",
+                "isEnabled": false,
+                "maxPointCount": 32,
+                "minPointDistance": 0.05000000074505806,
+                "pointLifetime": 0.5,
+                "smoothingSubdivision": 0,
+                "startColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "startWidth": 0.25,
+                "syncParticleColor": false,
+                "texture": "white2x2"
+            },
+            "translateOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "name": "AttackUpper",
+    "version": 5
+}

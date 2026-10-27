@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject/Player/PlayerStatus.h"
 #include "Control/InputControlFeedback.h"
+#include "GamePlayView/DropObjectGetView/DropObjectGetView.h"
 #include "GamePlayView/EnemyDamageView/EnemyDamageView.h"
 #include "GamePlayView/EnemyStatusEffectIconView/EnemyStatusEffectIconView.h"
 #include "GamePlayView/FpsMeasurementView/FpsMeasurementView.h"
@@ -112,6 +113,10 @@ namespace UI::Game {
 		/// @param event 表示するリソース獲得通知
 		void ShowResourceGain(const Player::ResourceGainEvent& event);
 
+		/// @brief 特殊Dropの取得内容を表示
+		/// @param type 取得した特殊Dropの種類
+		void ShowDropObjectGet(DropObject::Type type);
+
 		/// @brief 攻撃した武器スロットの表示演出を開始
 		/// @param slotIndex 攻撃した武器のスロット番号
 		void PlayWeaponAttackAnimation(std::size_t slotIndex);
@@ -160,6 +165,7 @@ namespace UI::Game {
 		MapMiniMapObjectPositions miniMapObjectPositions_;
 		PlayerResourceGainView playerResourceGainView_;
 		PlayerDamageView playerDamageView_;
+		DropObjectGetView dropObjectGetView_;
 		EnemyDamageView enemyDamageView_;
 		EnemyStatusEffectIconView enemyStatusEffectIconView_;
 		MadoEngine::TextHandle enemyCountText_{};

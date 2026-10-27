@@ -15,9 +15,11 @@ namespace DropObject {
 		constexpr int kSheetAnimationFrameCount = 4;
 		constexpr float kSheetAnimationFrameDuration = 0.15f; // 各Dropシートの1コマの表示時間（秒）
 
-		constexpr float kMoneyRiseSpeed = 8.0f;  // DropObjectのMoneyが後退中に上昇する速度
-		constexpr int kMoneyAmount = 1;          // DropObjectのMoneyがPlayerに加算する所持金量
-		constexpr float kHealAmount = 50.0f;     // DropObjectのHealがPlayerに加算するHP量
+		constexpr float kMoneyRiseSpeed = 8.0f;            // DropObjectのMoneyが後退中に上昇する速度
+		constexpr int kMoneyAmount = 1;                    // DropObjectのMoneyがPlayerに加算する所持金量
+
+		constexpr float kHealAmount = 50.0f;               // DropObjectのHealがPlayerに加算するHP量
+
 		constexpr float kSpecialSpawnJumpHeight = 2.0f;    // 特殊Dropの生成位置からの跳ね上がり高さ
 		constexpr float kSpecialSpawnRiseDuration = 0.3f;  // 特殊Dropの上昇時間（秒）
 		constexpr float kSpecialSpawnFallDuration = 0.7f;  // 特殊Dropの落下時間（秒）

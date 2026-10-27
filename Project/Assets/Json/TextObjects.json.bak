@@ -294,7 +294,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:45",
+            "text": "03:24",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -394,7 +394,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 6",
+            "text": "Enemy : 85",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -444,7 +444,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 100 / 100",
+            "text": "HP : 71 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -544,7 +544,7 @@
                 0.0,
                 0.0
             ],
-            "text": "8",
+            "text": "109",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.0",
+            "text": "FPS : 60.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -694,7 +694,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 3909283665",
+            "text": "SEED : 2889499541",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -794,7 +794,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10007",
+            "text": "10248",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -844,7 +844,7 @@
                 0.0,
                 0.0
             ],
-            "text": "10で開ける",
+            "text": "お金を得る",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -1058,7 +1058,7 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.1611318588256836,
+                0.04033195972442627,
                 1.0,
                 0.0,
                 1.0
@@ -1344,7 +1344,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-3.5",
+            "text": "-5",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1545,6 +1545,56 @@
                 0.0
             ],
             "text": "再スタート",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "DropObjectGetText",
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 2.0,
+            "position": [
+                640.0,
+                384.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "無敵",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
