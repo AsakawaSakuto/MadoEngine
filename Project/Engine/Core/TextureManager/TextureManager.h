@@ -32,7 +32,7 @@ namespace MadoEngine {
         TextureManager(TextureManager&&) = delete;
         TextureManager& operator=(TextureManager&&) = delete;
 
-        /// @brief 初期化、"Assets/Texture" 内の全 .png を自動ロード
+        /// @brief Assets/Texture内のPNGと非圧縮DDSを自動ロード、更新済みDDSを優先
         /// @param device Direct3D 12 デバイスポインタ
         /// @param srvManager SRVManagerのポインタ
         void Initialize(ID3D12Device* device, MadoEngine::Core::SRVManager* srvManager);
@@ -99,7 +99,7 @@ namespace MadoEngine {
         TextureManager() = default;
         ~TextureManager() = default;
 
-        /// @brief WICファイルを読み込み、画像サイズに応じたMipを用意
+        /// @brief 非圧縮DDSの既存Mipを読み込み、PNGでは画像サイズに応じたMipを生成
         /// @param filePath 読み込む画像ファイルのパス（ワイド文字列）
         /// @param mipImage 出力先 ScratchImage
         /// @return 成功した場合はtrue

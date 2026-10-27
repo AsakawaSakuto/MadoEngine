@@ -139,6 +139,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Tools\TextureConverter\TextureConverter.cpp" />
+    <None Include="Tools\TextureConverter\TextureConverter.vcxproj" />
     <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
@@ -519,6 +521,7 @@
     <ClInclude Include="Engine\Core\DxDevice\DxDevice.h" />
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Core\TextureManager\TextureManager.h" />
+    <ClInclude Include="Engine\Core\TextureManager\TextureCache.h" />
     <ClInclude Include="Engine\Core\View\DSVManager.h" />
     <ClInclude Include="Engine\Core\View\RTVManager.h" />
     <ClInclude Include="Engine\Core\View\SRVManager.h" />
@@ -727,6 +730,17 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- 変換ツールのビルドと更新PNGのDDS生成を、Assetsのコピー対象収集より先に実行 -->
+  <Target Name="BuildTextureCache" BeforeTargets="CollectAssetCopyFiles" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_TextureConverterRoot>$([System.IO.Path]::Combine('$(ProjectDir)', '$(IntDir)', 'TextureConverter\'))</_TextureConverterRoot>
+      <_TextureConverterRoot>$([System.IO.Path]::GetFullPath('$(_TextureConverterRoot)'))</_TextureConverterRoot>
+    </PropertyGroup>
+    <MSBuild Projects="$(ProjectDir)Tools\TextureConverter\TextureConverter.vcxproj" Targets="Build"
+             Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_TextureConverterRoot)Bin\;IntDir=$(_TextureConverterRoot)Obj\" />
+    <Exec Command="&quot;$(_TextureConverterRoot)Bin\TextureConverter.exe&quot; &quot;$(ProjectDir)Assets\Texture&quot;"
+          UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
+  </Target>
   <!-- VSのプロジェクト編集との互換性を保つため、ワイルドカード展開をビルド時に限定 -->
   <Target Name="CollectAssetCopyFiles" BeforeTargets="PrepareForBuild">
     <ItemGroup>

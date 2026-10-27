@@ -207,7 +207,7 @@ namespace MadoEngine
 		// AudioManagerの初期化（Assets/Audio内の全ファイルを自動ロード）
 		MadoEngine::AudioManager::GetInstance().Initialize();
 
-		// TextureManagerの初期化（Assets/Texture内の全.pngを自動ロード）
+		// 事前生成済みDDSを優先し、未変換または更新済みのPNGだけ実行時に画像処理
 		MadoEngine::TextureManager::GetInstance().Initialize(dxDevice_.get()->GetDevice(), srvManager_);
 
 		// DepthStencilBuffer の生成

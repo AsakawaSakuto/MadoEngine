@@ -1,4 +1,5 @@
 #include "TextureManager.h"
+#include "TextureCache.h"
 #include <filesystem>
 #include <cassert>
 #include <algorithm>
@@ -27,24 +28,66 @@ namespace MadoEngine {
             return;
         }
 
+        const TextureCache cache(textureDir);
         uint32_t loadCount = 0;
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(textureDir)) {
+        uint32_t ddsCount = 0;
+
+        // 生成キャッシュ自体の二重登録を避け、元画像ごとに読み込み経路を選択
+        for (auto it = std::filesystem::recursive_directory_iterator(textureDir);
+            it != std::filesystem::recursive_directory_iterator(); ++it) {
+            const auto& entry = *it;
+            if (entry.is_directory() && entry.path() == cache.GetDirectory()) {
+                it.disable_recursion_pending();
+                continue;
+            }
             if (!entry.is_regular_file()) {
                 continue;
             }
-            if (entry.path().extension() != ".png") {
+            const auto extension = entry.path().extension();
+            if (extension != ".png" && extension != ".dds") {
                 continue;
             }
+            std::filesystem::path sourcePath = entry.path();
+            if (extension == ".dds") {
 
-            const std::wstring widePath = entry.path().wstring();
+                // PNGと同じ階層のDDSはPNG側で選択し、同じキーでの二重登録を防止
+                auto pngPath = sourcePath;
+                pngPath.replace_extension(".png");
+                if (std::filesystem::is_regular_file(pngPath)) {
+                    continue;
+                }
+            } else {
+
+                // 元画像が更新された場合は古いDDSを使わずPNG経路へ切り替え
+                auto adjacentDdsPath = sourcePath;
+                adjacentDdsPath.replace_extension(".dds");
+                const auto cachedDdsPath = cache.GetPath(sourcePath);
+                if (cache.IsCurrent(sourcePath, adjacentDdsPath)) {
+                    sourcePath = adjacentDdsPath;
+                } else if (cache.IsCurrent(sourcePath, cachedDdsPath)) {
+                    sourcePath = cachedDdsPath;
+                }
+            }
+
             const std::string key = entry.path().stem().string();
 
-            Logger::Output("テクスチャを読み込みます : " + entry.path().string(), Logger::Level::Assets);
+            Logger::Output("テクスチャを読み込みます : " + sourcePath.string(), Logger::Level::Assets);
 
             DirectX::ScratchImage mipImage;
-            if (!LoadTexture(widePath, mipImage)) {
+            bool loaded = LoadTexture(sourcePath.wstring(), mipImage);
+            if (!loaded && sourcePath != entry.path()) {
+
+                // DDSが破損していても編集用PNGから復旧し、画面の欠損を回避
+                Logger::Output("DDSを読み込めないためPNGへ切り替えます : " + sourcePath.string(), Logger::Level::Warning);
+                sourcePath = entry.path();
+                loaded = LoadTexture(sourcePath.wstring(), mipImage);
+            }
+            if (!loaded) {
                 Logger::Output("テクスチャの読み込みに失敗しました : " + entry.path().string(), Logger::Level::Error);
                 continue;
+            }
+            if (sourcePath.extension() == ".dds") {
+                ++ddsCount;
             }
 
             Microsoft::WRL::ComPtr<ID3D12Resource> resource =
@@ -60,19 +103,20 @@ namespace MadoEngine {
             uint32_t srvIndex = srvManager_->Allocate();
             srvManager_->CreateShaderResourceView(resource.Get(), srvIndex);
 
-            TextureEntry entry;
-            entry.resource = std::move(resource);
-            entry.index = srvIndex;
-            entry.width = static_cast<uint32_t>(mipImage.GetMetadata().width);
-            entry.height = static_cast<uint32_t>(mipImage.GetMetadata().height);
-            textures_[key] = std::move(entry);
+            TextureEntry textureEntry;
+            textureEntry.resource = std::move(resource);
+            textureEntry.index = srvIndex;
+            textureEntry.width = static_cast<uint32_t>(mipImage.GetMetadata().width);
+            textureEntry.height = static_cast<uint32_t>(mipImage.GetMetadata().height);
+            textures_[key] = std::move(textureEntry);
             loadCount++;
 
             Logger::Output("テクスチャの読み込み完了 : " + key, Logger::Level::Assets);
         }
 
         Logger::Output(
-            "TextureManager の初期化完了。ロード数 : " + std::to_string(loadCount) + " 枚",
+            "TextureManager の初期化完了。ロード数 : " + std::to_string(loadCount) +
+            " 枚、DDS : " + std::to_string(ddsCount) + " 枚、PNG : " + std::to_string(loadCount - ddsCount) + " 枚",
             Logger::Level::Engine);
     }
 
@@ -249,6 +293,18 @@ namespace MadoEngine {
     }
 
     bool TextureManager::LoadTexture(const std::wstring& filePath, DirectX::ScratchImage& mipImage) const {
+        if (std::filesystem::path(filePath).extension() == ".dds") {
+
+            // 事前生成済みのMipをそのまま使用し、起動時のPNG展開と縮小処理を省略
+            const HRESULT result = DirectX::LoadFromDDSFile(filePath.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, mipImage);
+            if (FAILED(result)) {
+                return false;
+            }
+            const auto& metadata = mipImage.GetMetadata();
+            return !DirectX::IsCompressed(metadata.format) &&
+                metadata.dimension == DirectX::TEX_DIMENSION_TEXTURE2D &&
+                metadata.arraySize == 1 && !metadata.IsCubemap();
+        }
         DirectX::ScratchImage image;
         HRESULT hr = DirectX::LoadFromWICFile(
             filePath.c_str(),
@@ -269,12 +325,19 @@ namespace MadoEngine {
             return true;
         }
 
+        // 1辺が1画素の画像でも同じ縮小結果になるようCPUの線形フィルターを明示
+        DirectX::TEX_FILTER_FLAGS filter = DirectX::TEX_FILTER_SRGB;
+        if (image.GetMetadata().width == 1 || image.GetMetadata().height == 1) {
+            filter = static_cast<DirectX::TEX_FILTER_FLAGS>(
+                DirectX::TEX_FILTER_SRGB | DirectX::TEX_FILTER_FORCE_NON_WIC | DirectX::TEX_FILTER_LINEAR);
+        }
+
         // 縮小可能な画像ではMipを生成し、遠距離のTexture参照を安定化
         hr = DirectX::GenerateMipMaps(
             image.GetImages(),
             image.GetImageCount(),
             image.GetMetadata(),
-            DirectX::TEX_FILTER_SRGB,
+            filter,
             0,
             mipImage);
 
