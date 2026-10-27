@@ -22,7 +22,7 @@ namespace {
 	const std::string kOverlayLayerEffectResultTarget = "OverlayLayerEffectResult"; // 表示色空間のレイヤー用ポストエフェクト結果
 	const std::string kOverlayLayerEffectWorkTarget = "OverlayLayerEffectWork";     // 表示色空間のレイヤー用作業バッファ
 
-	const std::filesystem::path kScreenshotOutputDirectory = "Assets/Screenshot"; // スクリーンショットの出力先ディレクトリ
+	const std::filesystem::path kScreenshotOutputDirectory = "SavedData/Screenshots"; // スクリーンショットの出力先ディレクトリ
 	constexpr int kGameViewCaptureKey = DIK_F11;                                  // スクリーンショットを撮るキー
 
 	/// @brief Effect Systemが保持する全Assetを保存

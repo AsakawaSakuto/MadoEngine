@@ -110,11 +110,11 @@ namespace {
             localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
             localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
 
-        std::string baseDir = "Assets/.Log/";
+        std::string baseDir = "SavedData/Logs/";
         std::string baseName = std::string(buf);
 
         // Fileが存在しない場合は連番を付けない基準Path
-        std::string testPath = baseDir + baseName + ".Log";
+        std::string testPath = baseDir + baseName + ".log";
         if (!std::filesystem::exists(Utf8ToWide(testPath))) {
             return testPath;
         }
@@ -122,7 +122,7 @@ namespace {
         // ファイルが存在する場合は(1)(2)...と番号を付ける
         int counter = 1;
         while (true) {
-            std::string numberedPath = baseDir + baseName + "(" + std::to_string(counter) + ").Log";
+            std::string numberedPath = baseDir + baseName + "(" + std::to_string(counter) + ").log";
             if (!std::filesystem::exists(Utf8ToWide(numberedPath))) {
                 return numberedPath;
             }

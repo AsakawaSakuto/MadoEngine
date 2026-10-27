@@ -14,9 +14,23 @@ namespace MadoEngine {
 		Logger::Output("AudioManager : 初期化を開始しました",Logger::Level::Engine);
 
 		// 再初期化時に以前の音声情報と遷移音量を持ち越さないため初期状態へ復帰
-		audioMap_.clear();
-		volumeMap_.clear();
+		ReleaseResources();
 		bgmTransitionGain_ = 1.0f;
+
+		// 音声ごとの再生環境生成を避け、すべてのSourceVoiceで一組の出力環境を共有
+		HRESULT hr = XAudio2Create(xAudio2_.ReleaseAndGetAddressOf());
+		if (FAILED(hr)) {
+			Logger::Output("AudioManager : 共通XAudio2の生成に失敗しました", Logger::Level::Error);
+			return;
+		}
+		IXAudio2MasteringVoice* masteringVoice = nullptr;
+		hr = xAudio2_->CreateMasteringVoice(&masteringVoice);
+		if (FAILED(hr)) {
+			Logger::Output("AudioManager : 共通MasteringVoiceの生成に失敗しました", Logger::Level::Error);
+			xAudio2_.Reset();
+			return;
+		}
+		mastering_.reset(masteringVoice);
 
 		// Assets/Audio ディレクトリ内の全音声ファイルを自動ロード
 		std::filesystem::path audioDir(kAudioDirectory);
@@ -58,13 +72,30 @@ namespace MadoEngine {
 
 	void AudioManager::Finalize() {
 		Logger::Output("AudioManager : 終了処理を開始しました", Logger::Level::Engine);
-		StopAll();
-		audioMap_.clear();
-		volumeMap_.clear();
+		ReleaseResources();
 		Logger::Output("AudioManager : 終了処理が完了しました", Logger::Level::Engine);
 	}
 
+	void AudioManager::ReleaseResources() {
+
+		// 音声の破棄で変換スレッドとSourceVoiceを停止し、共有エンジンへの参照を解消
+		audioMap_.clear();
+		typeMap_.clear();
+		volumeMap_.clear();
+
+		// SourceVoiceが残った状態で出力先を破棄しないよう、依存関係の逆順に解放
+		mastering_.reset();
+		xAudio2_.Reset();
+	}
+
 	void AudioManager::Load(const std::string& filePath, AudioType type, float volume) {
+
+		// 共有環境の初期化失敗後や終了後に再生できない音声を登録することを防止
+		if (!xAudio2_ || !mastering_) {
+			Logger::Output("AudioManager : 共通再生環境が未初期化のため音声を読み込めません: " + filePath, Logger::Level::Error);
+			return;
+		}
+
 		std::filesystem::path path(filePath);
 		std::string key = MakeKey(path);
 
@@ -75,7 +106,7 @@ namespace MadoEngine {
 		}
 
 		auto audio = std::make_unique<AudioX>();
-		audio->Initialize(filePath);
+		audio->Initialize(filePath, *xAudio2_.Get());
 		audioMap_[key] = std::move(audio);
 		volumeMap_[key] = volume;
 		typeMap_[key] = type;

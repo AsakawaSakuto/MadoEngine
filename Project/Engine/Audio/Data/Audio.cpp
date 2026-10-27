@@ -345,20 +345,10 @@ AudioX::~AudioX() {
     Reset();
 }
 
-void AudioX::Initialize(const std::string& filePath) {
+void AudioX::Initialize(const std::string& filePath, IXAudio2& engine) {
     Reset();
     filePath_ = filePath;
-    HRESULT hr = XAudio2Create(&xAudio2_);
-    if (FAILED(hr)) {
-        return;
-    }
-    IXAudio2MasteringVoice* mv = nullptr;
-    hr = xAudio2_->CreateMasteringVoice(&mv);
-    if (FAILED(hr)) {
-        xAudio2_.Reset();
-        return;
-    }
-    mastering_.reset(mv);
+    xAudio2_ = &engine;
 
     // 停止処理が完了するまで各再生インスタンスとの共有PCMの寿命を保証
     SoundData data = SoundLoadAudio(filePath);
@@ -367,14 +357,14 @@ void AudioX::Initialize(const std::string& filePath) {
 }
 
 void AudioX::PlayAudio(float volume, bool loop) {
-    if (!xAudio2_ || !mastering_ || !pcmShared_ || pcmShared_->empty() || wfex_.nBlockAlign == 0) {
+    if (!xAudio2_ || !pcmShared_ || pcmShared_->empty() || wfex_.nBlockAlign == 0) {
         return;
     }
 
     // 再生ごとに独立したVoiceと変換状態を保持して同一音源の同時再生を許容
     volume_ = volume;
     auto instance = std::make_unique<ClipInstance>(pcmShared_, wfex_, loop);
-    if (instance->Play(xAudio2_.Get(), volume_ * playbackGain_, pitchSemitones_, isPaused_)) {
+    if (instance->Play(xAudio2_, volume_ * playbackGain_, pitchSemitones_, isPaused_)) {
         actives_.push_back(std::move(instance));
     } else {
         Logger::Output("Audio : 音声の再生開始に失敗しました: " + filePath_, Logger::Level::Error);
@@ -401,11 +391,12 @@ void AudioX::Update() {
 
 void AudioX::Reset() {
 
-    // 変換スレッドとVoiceを先に停止してから共有PCMとXAudio2を解放
+    // 変換スレッドとVoiceを先に停止し、AudioManagerが所有する共有エンジンは参照だけ解除
     actives_.clear();
     pcmShared_.reset();
-    mastering_.reset();
-    xAudio2_.Reset();
+    xAudio2_ = nullptr;
+    wfex_ = {};
+    filePath_.clear();
     pitchSemitones_ = 0.0f;
     volume_ = 1.0f;
     playbackGain_ = 1.0f;

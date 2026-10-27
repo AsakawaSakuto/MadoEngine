@@ -3,7 +3,6 @@
 #include "AudioData.h"
 #include <memory>
 #include <vector>
-#include <wrl/client.h>
 
 #pragma comment(lib, "xaudio2.lib")
 
@@ -20,33 +19,22 @@ struct SourceVoiceDeleter {
     }
 };
 
-/// @brief MasteringVoiceを解放するデリーター
-struct MasteringVoiceDeleter {
-    /// @brief MasteringVoiceを解放
-    /// @param voice 解放対象のMasteringVoice
-    void operator()(IXAudio2MasteringVoice* voice) const noexcept {
-        if (voice) {
-            voice->DestroyVoice();
-        }
-    }
-};
-
 using UniqueSourceVoice = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>;
-using UniqueMasteringVoice = std::unique_ptr<IXAudio2MasteringVoice, MasteringVoiceDeleter>;
 
 class ClipInstance;
 
 /// @brief WAVとMP3の共有PCMおよび独立した再生インスタンスの管理
 class AudioX {
 public:
-    /// @brief 再生環境を生成
+    /// @brief 音声データ管理を生成
     AudioX();
     /// @brief 再生と変換処理を停止してリソースを解放
     ~AudioX();
 
-    /// @brief WAVまたはMP3を読み込んで再生環境を初期化
+    /// @brief 共有再生エンジンを参照してWAVまたはMP3を読み込み
     /// @param filePath 音声ファイルのパス
-    void Initialize(const std::string& filePath);
+    /// @param engine AudioManagerが所有する共有再生エンジン
+    void Initialize(const std::string& filePath, IXAudio2& engine);
 
     /// @brief 現在の音程設定で独立した再生インスタンスを開始
     /// @param volume 音量、0から1の範囲
@@ -60,7 +48,7 @@ public:
     /// @brief 再生終了したインスタンスを解放
     void Update();
 
-    /// @brief 再生と変換処理を停止してリソースを解放
+    /// @brief 再生と変換処理を停止して音声データと共有エンジン参照を解放
     void Reset();
 
     /// @brief 再生中の全インスタンスへ音量を適用
@@ -95,8 +83,7 @@ public:
 
 private:
     std::string filePath_;
-    Microsoft::WRL::ComPtr<IXAudio2> xAudio2_;
-    UniqueMasteringVoice mastering_;
+    IXAudio2* xAudio2_ = nullptr; // AudioManagerが寿命を管理する非所有参照
     std::shared_ptr<const std::vector<BYTE>> pcmShared_;
     WAVEFORMATEX wfex_{};
     float pitchSemitones_ = 0.0f;

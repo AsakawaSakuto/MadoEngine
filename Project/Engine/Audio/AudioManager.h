@@ -4,6 +4,7 @@
 #include <string>
 #include <filesystem>
 #include <vector>
+#include <wrl/client.h>
 #include "Data/Audio.h"
 #include "Data/AudioPitchStream.h"
 #include "AudioType.h"
@@ -145,6 +146,21 @@ namespace MadoEngine {
 		AudioManager(const AudioManager&) = delete;
 		AudioManager& operator=(const AudioManager&) = delete;
 
+		/// @brief 共通MasteringVoiceを解放するデリーター
+		struct MasteringVoiceDeleter {
+			/// @brief 共通MasteringVoiceを解放
+			/// @param voice 解放対象のMasteringVoice
+			void operator()(IXAudio2MasteringVoice* voice) const noexcept {
+				if (voice) {
+					voice->DestroyVoice();
+				}
+			}
+		};
+		using UniqueMasteringVoice = std::unique_ptr<IXAudio2MasteringVoice, MasteringVoiceDeleter>;
+
+		/// @brief 全音声と共有再生環境を依存関係の逆順に解放
+		void ReleaseResources();
+
 		/// @brief ディレクトリ内の音声ファイルを再帰的にロード
 		/// @param directory 読み込むディレクトリパス
 		void LoadDirectory(const std::filesystem::path& directory);
@@ -158,6 +174,10 @@ namespace MadoEngine {
 		/// @param filePath ファイルパス
 		/// @return 判定されたAudioType
 		AudioType DetermineTypeFromPath(const std::filesystem::path& filePath) const;
+
+		// 自動破棄時も全音声、MasteringVoice、XAudio2の順で解放するため共有環境を先に宣言
+		Microsoft::WRL::ComPtr<IXAudio2> xAudio2_;
+		UniqueMasteringVoice mastering_;
 
 		// 音声データ管理（キー → AudioX）
 		std::unordered_map<std::string, std::unique_ptr<AudioX>> audioMap_;
