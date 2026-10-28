@@ -75,20 +75,20 @@ namespace Projectile {
 	/// @return 武器のリソース名
 	inline std::string ProjectileTypeToString(Type type) {
 		switch (type) {
-		case Type::None:     return "None";
-		case Type::Axe:      return "Axe";
-		case Type::FireBall: return "FireBall";
-		case Type::Pistol:   return "Pistol";
-		case Type::Bow:      return "Bow";
-		case Type::Bomb:     return "Bomb";
-		case Type::Trump:    return "Trump";
-		case Type::Eye:      return "Eye";
-		case Type::ToxicBoots: return "ToxicBoots";
-		case Type::Thunder:   return "Thunder";
-		case Type::Hammer:    return "Hammer";
+		case Type::None:        return "None";
+		case Type::Axe:         return "Axe";
+		case Type::FireBall:    return "FireBall";
+		case Type::Pistol:      return "Pistol";
+		case Type::Bow:         return "Bow";
+		case Type::Bomb:        return "Bomb";
+		case Type::Trump:       return "Trump";
+		case Type::Eye:         return "Eye";
+		case Type::ToxicBoots:  return "ToxicBoots";
+		case Type::Thunder:     return "Thunder";
+		case Type::Hammer:      return "Hammer";
 		case Type::SnowCrystal: return "SnowCrystal";
 		case Type::Sword:       return "Sword";
-		default:             return "Unknown";
+		default:                return "Unknown";
 		}
 	}
 
@@ -128,20 +128,20 @@ namespace Projectile {
 	/// @return 武器種類の日本語表示名
 	inline const char* ProjectileTypeToDisplayName(Type type) {
 		switch (type) {
-		case Type::None:       return "なし";
-		case Type::Axe:        return "斧";
-		case Type::FireBall:   return "火球";
-		case Type::Pistol:     return "拳銃";
-		case Type::Bow:        return "弓";
-		case Type::Bomb:       return "ボム";
-		case Type::Trump:      return "デストランプ";
-		case Type::Eye:        return "魔眼";
-		case Type::ToxicBoots: return "毒靴";
-		case Type::Thunder:   return "雷";
-		case Type::Hammer:    return "ハンマー";
+		case Type::None:        return "なし";
+		case Type::Axe:         return "斧";
+		case Type::FireBall:    return "火球";
+		case Type::Pistol:      return "拳銃";
+		case Type::Bow:         return "弓";
+		case Type::Bomb:        return "ボム";
+		case Type::Trump:       return "デストランプ";
+		case Type::Eye:         return "魔眼";
+		case Type::ToxicBoots:  return "毒靴";
+		case Type::Thunder:     return "雷";
+		case Type::Hammer:      return "ハンマー";
 		case Type::SnowCrystal: return "雪の結晶";
 		case Type::Sword:       return "剣";
-		default:               return "不明";
+		default:                return "不明";
 		}
 	}
 
@@ -154,7 +154,7 @@ namespace Projectile {
 		case Type::FireBall:    return "着弾時に範囲攻撃\n稀に火傷を付与";
 		case Type::Pistol:      return "近くの敵に向かって\n弾丸を連射する";
 		case Type::Bow:         return "近くの敵に向かって\n貫通する矢を放つ";
-		case Type::Bomb:        return "弧を描くボムを放つ\n稀に凍結を付与";
+		case Type::Bomb:        return "弧を描くボムを放つ\n敵に火傷を付与";
 		case Type::Trump:       return "1～13のダメージ\n稀にJokerが即死させる";
 		case Type::Eye:         return "足元にエリアを展開\n触れた敵にダメージ";
 		case Type::ToxicBoots:  return "足元に魔法陣を設置\n触れた敵に毒を付与";

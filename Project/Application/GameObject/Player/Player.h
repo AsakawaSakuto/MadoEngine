@@ -101,8 +101,8 @@ namespace Player {
 		/// @return 現在のKarma取得数
 		int GetKarmaCount() const { return status_.karmaCount; }
 
-		/// @brief PlayerのHPを減少
-		/// @param damage 減らすHP量
+		/// @brief 被ダメージ補正と無敵効果を考慮してPlayerのHPを減少
+		/// @param damage 軽減前のダメージ量
 		void TakeDamage(float damage);
 
 		/// @brief 前回取得後の被ダメージ量を合計して取得し、通知を解除

@@ -53,6 +53,10 @@ bool TryParseStat(const std::string& text, Relic::Stat& outStat) {
 		outStat = Relic::Stat::JumpCount;
 		return true;
 	}
+	if (text == "IncomingDamage") {
+		outStat = Relic::Stat::IncomingDamage;
+		return true;
+	}
 	return false;
 }
 
@@ -97,6 +101,8 @@ const char* StatToJsonName(Relic::Stat stat) {
 		return "WeaponShotCooldown";
 	case Relic::Stat::JumpCount:
 		return "JumpCount";
+	case Relic::Stat::IncomingDamage:
+		return "IncomingDamage";
 	default:
 		return "";
 	}

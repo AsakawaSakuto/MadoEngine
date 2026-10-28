@@ -499,6 +499,7 @@ void GameScene::ApplyRelicModifiersIfChanged() {
 	playerModifiers.moneyGainMultiplier               = modifiers.Resolve(Relic::Stat::MoneyGain, 1.0f);
 	playerModifiers.expGainMultiplier                 = modifiers.Resolve(Relic::Stat::ExpGain, 1.0f);
 	playerModifiers.healthRegenerationSpeedMultiplier = modifiers.Resolve(Relic::Stat::HealthRegenerationSpeed, 1.0f);
+	playerModifiers.incomingDamageMultiplier          = modifiers.Resolve(Relic::Stat::IncomingDamage, 1.0f);
 
 	const float additionalJumpCount = modifiers.Resolve(Relic::Stat::JumpCount, 0.0f);
 	if (std::isfinite(additionalJumpCount)) {

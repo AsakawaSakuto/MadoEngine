@@ -46,6 +46,7 @@ namespace System {
 		std::uint32_t seed = 0;
 		PlayEndReason endReason = PlayEndReason::ApplicationExit;
 		double elapsedSeconds = 0.0;
+		std::uint64_t score = 0;
 		PlayCombatStats totalCombat;
 		double earnedMoney = 0.0;
 		double endingMoney = 0.0;

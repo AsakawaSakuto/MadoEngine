@@ -41,6 +41,7 @@ namespace Player {
 		float damage = 1.0f;        // ダメージの倍率
 		float movementSpeed = 1.0f; // 移動速度の倍率
 		float healthRegenerationSpeed = 1.0f; // HPリジェネ速度の倍率
+		float incomingDamage = 1.0f; // 敵からの被ダメージ倍率
 	};
 
 	/// @brief 外部システムからPlayerへ適用する実行時補正
@@ -50,6 +51,7 @@ namespace Player {
 		float moneyGainMultiplier = 1.0f;
 		float expGainMultiplier = 1.0f;
 		float healthRegenerationSpeedMultiplier = 1.0f;
+		float incomingDamageMultiplier = 1.0f;
 		int additionalJumpCount = 0;
 	};
 

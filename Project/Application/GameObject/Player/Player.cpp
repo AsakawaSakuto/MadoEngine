@@ -111,6 +111,12 @@ namespace Player {
 		statusMultiplier_.movementSpeed           = modifiers.movementSpeedMultiplier;
 		statusMultiplier_.healthRegenerationSpeed = modifiers.healthRegenerationSpeedMultiplier;
 
+		// 軽減率の過剰設定による負の被ダメージと、不正な倍率によるHPの破損を防止
+		statusMultiplier_.incomingDamage = 1.0f;
+		if (std::isfinite(modifiers.incomingDamageMultiplier)) {
+			statusMultiplier_.incomingDamage = std::max(0.0f, modifiers.incomingDamageMultiplier);
+		}
+
 		// Movementへ移動速度とジャンプ上限の外部補正を集約して反映
 		RefreshMovementSpeedMultiplier();
 		movement_.SetAdditionalJumpCount(modifiers.additionalJumpCount);
@@ -367,8 +373,14 @@ namespace Player {
 			return;
 		}
 
+		// 軽減後の値をHP減算と被弾通知へ共通適用し、完全軽減時はリジェネ待機も維持
+		const float resolvedDamage = damage * statusMultiplier_.incomingDamage;
+		if (resolvedDamage <= 0.0f) {
+			return;
+		}
+
 		const float previousHealth = status_.currentHealth;
-		status_.currentHealth = std::max(0.0f, status_.currentHealth - damage);
+		status_.currentHealth = std::max(0.0f, status_.currentHealth - resolvedDamage);
 
 		// HPが実際に減った時だけ外部へ通知し、連続被弾では最新の被弾時点から表示時間を再計測
 		if (status_.currentHealth < previousHealth) {

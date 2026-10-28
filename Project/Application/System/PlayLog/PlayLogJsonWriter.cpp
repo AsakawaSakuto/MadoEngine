@@ -72,6 +72,7 @@ namespace System {
 
 		// 集計精度を維持し、保存用の値へ変換する段階だけで丸めを適用
 		root["経過時間秒"] = RoundTimeSeconds(data.elapsedSeconds);
+		root["スコア"] = data.score;
 		root["撃破総数"] = data.totalCombat.killCount;
 		root["与ダメージ総量"] = TruncateDamage(data.totalCombat.damage);
 		root["獲得金額総量"] = data.earnedMoney;

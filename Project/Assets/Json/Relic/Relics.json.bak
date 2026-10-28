@@ -161,6 +161,22 @@
       "textureName": "Uchiwa"
     },
     {
+      "description": "敵から受けるダメージ -10%",
+      "displayName": "甲冑",
+      "effects": [
+        {
+          "operation": "AddPercent",
+          "stat": "IncomingDamage",
+          "type": "StatModifier",
+          "valuePerStack": -0.10000000149011612
+        }
+      ],
+      "id": "incoming_damage_reduction",
+      "maxStack": 9,
+      "rarity": "Rare",
+      "textureName": "HeadArmor"
+    },
+    {
       "description": "効果説明",
       "displayName": "epic",
       "effects": [

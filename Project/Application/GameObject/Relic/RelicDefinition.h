@@ -21,6 +21,7 @@ namespace Relic {
 		ProjectileCriticalChance,
 		WeaponShotCooldown,
 		JumpCount,
+		IncomingDamage,
 		Count,
 	};
 

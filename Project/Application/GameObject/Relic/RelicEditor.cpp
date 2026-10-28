@@ -11,7 +11,7 @@
 namespace {
 
 #ifdef USE_IMGUI
-constexpr std::array<const char*, 10> kStatNames = {
+constexpr std::array<const char*, static_cast<std::size_t>(Relic::Stat::Count)> kStatNames = {
 	"与ダメージ",
 	"最大HP",
 	"移動速度",
@@ -22,6 +22,7 @@ constexpr std::array<const char*, 10> kStatNames = {
 	"Projectileクリティカル率",
 	"発射クールタイム",
 	"ジャンプ可能回数",
+	"被ダメージ",
 };
 constexpr std::array<const char*, 2> kOperationNames = {
 	"固定加算",
@@ -53,6 +54,11 @@ bool DrawEffectEditor(Relic::StatModifierEffect& effect, std::size_t effectIndex
 	ImGui::DragFloat("1個あたりの値", &effect.valuePerStack, 0.01f, -999999.0f, 999999.0f, "%.3f");
 	if (effect.operation == Relic::ModifierOperation::AddPercent) {
 		ImGui::TextDisabled("0.10 = 10%%");
+		if (effect.stat == Relic::Stat::IncomingDamage) {
+
+			// 軽減は負の割合として設定し、他のステータスと共通の割合加算を維持
+			ImGui::TextDisabled("-0.10 = 被ダメージ10%%軽減（所持数に応じて加算）");
+		}
 	}
 
 	const bool shouldRemove = ImGui::Button("この効果を削除");

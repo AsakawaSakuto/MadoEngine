@@ -1,9 +1,17 @@
 #include "PlayLogRecorder.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <utility>
 
 namespace System {
+
+	namespace {
+		constexpr double kScorePerKill = 1.0;
+		constexpr double kScorePerJar = 5.0;
+		constexpr double kScorePerChest = 50.0;
+		constexpr double kScoreMultiplierDoubleSeconds = 300.0;
+	}
 
 	void PlayLogRecorder::Initialize(std::uint32_t seed) {
 		data_ = {};
@@ -145,6 +153,7 @@ namespace System {
 		}
 		data_.endingDifficulty = (std::max)(0, endingDifficulty);
 		data_.relics = std::move(relics);
+		data_.score = CalculateScore();
 		state_ = State::Finished;
 		return true;
 	}
@@ -156,6 +165,26 @@ namespace System {
 			}
 		}
 		return nullptr;
+	}
+
+	std::uint64_t PlayLogRecorder::CalculateScore() const {
+
+		// 報酬種別や支払いの有無によらず、探索に成功した回数を同じ配点で評価
+		const double jarCount = static_cast<double>(data_.expJarCount) + static_cast<double>(data_.moneyJarCount);
+		const double chestCount = static_cast<double>(data_.paidChestCount) + static_cast<double>(data_.freeChestCount);
+		const double baseScore = static_cast<double>(data_.totalCombat.killCount) * kScorePerKill +
+			jarCount * kScorePerJar + chestCount * kScorePerChest;
+
+		// 1 + 生存秒数 / 300の倍率を秒単位で適用し、分の境界での得点の急変を回避
+		const double survivalBonus = baseScore * data_.elapsedSeconds / kScoreMultiplierDoubleSeconds;
+		const double totalScore = baseScore + survivalBonus;
+
+		// 整数型の範囲外への変換を避け、保存可能なスコアの上限へ制限
+		const auto maxScore = (std::numeric_limits<std::uint64_t>::max)();
+		if (totalScore >= static_cast<double>(maxScore)) {
+			return maxScore;
+		}
+		return static_cast<std::uint64_t>(totalScore);
 	}
 
 }

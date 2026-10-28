@@ -42,7 +42,7 @@ namespace System {
 		/// @param event インタラクトの結果通知
 		void RecordInteraction(const MapInteractionEvent& event);
 
-		/// @brief 終了時の状態を固定して集計を終了
+		/// @brief 終了時の状態とスコアを固定して集計を終了
 		/// @param reason プレイの終了理由
 		/// @param endingMoney 終了時の所持金
 		/// @param endingDifficulty 終了時のKarma由来難易度
@@ -69,6 +69,10 @@ namespace System {
 		/// @param weaponId 武器インスタンスの識別番号
 		/// @return 対応する履歴、未登録の場合はnullptr
 		PlayWeaponRecord* FindWeapon(std::uint64_t weaponId);
+
+		/// @brief 撃破数と探索数と生存時間から最終スコアを計算
+		/// @return 生存倍率適用後の小数部を切り捨てたスコア
+		std::uint64_t CalculateScore() const;
 
 		PlayLogData data_;
 		State state_ = State::NotStarted;
