@@ -21,9 +21,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                152.0928192138672,
-                11.203590393066406,
-                41.99766540527344
+                132.48292541503906,
+                16.0,
+                137.8850860595703
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -75,9 +75,9 @@
                 -3.8020807835437154e-08
             ],
             "scale": [
-                0.0,
-                0.0,
-                0.0
+                1.0,
+                1.0,
+                1.0
             ],
             "scene": "Game",
             "texture": "white2x2",

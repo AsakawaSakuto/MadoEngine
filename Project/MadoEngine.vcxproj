@@ -156,6 +156,7 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffect.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyStatusEffectVisualSettings.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyNormal.cpp" />
+    <ClCompile Include="Application\GameObject\Enemy\Type\EnemyOverTime.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyRunner.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySettings.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
@@ -404,6 +405,7 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyMovement.h" />
     <ClInclude Include="Application\GameObject\Enemy\Type\EnemyNormal.h" />
+    <ClInclude Include="Application\GameObject\Enemy\Type\EnemyOverTime.h" />
     <ClInclude Include="Application\GameObject\Enemy\Type\EnemyRunner.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySettings.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />

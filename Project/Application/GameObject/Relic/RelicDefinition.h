@@ -38,6 +38,24 @@ namespace Relic {
 		float valuePerStack = 0.0f;
 	};
 
+	/// @brief 周期発動時に外部システムへ要求する効果種別
+	enum class PeriodicEffectType {
+		AttractAllExp,
+		Count,
+	};
+
+	/// @brief 一種類の周期発動効果の定義
+	struct PeriodicEffect {
+		static constexpr float kMinIntervalSeconds = 0.1f;
+		PeriodicEffectType type = PeriodicEffectType::AttractAllExp;
+		float intervalSeconds = 30.0f;
+
+		/// @brief 所持数による短縮を反映した発動間隔を取得
+		/// @param stackCount 同種レリックの所持数
+		/// @return 0.1秒以上の発動間隔
+		float GetIntervalSeconds(int stackCount) const;
+	};
+
 	/// @brief 一種類のレリック定義
 	struct Definition {
 		Id id;
@@ -47,6 +65,7 @@ namespace Relic {
 		Rarity rarity = Rarity::Uncommon;
 		int maxStack = 1;
 		std::vector<StatModifierEffect> effects;
+		std::vector<PeriodicEffect> periodicEffects;
 	};
 
 	/// @brief 全レリックから集約したステータス補正値

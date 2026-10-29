@@ -13,8 +13,8 @@ namespace DropObject {
 		constexpr std::array<Type, 4> kSpecialTypes = {
 			Type::Heal, Type::AttackUpper, Type::SpeedUpper, Type::DefuseUpper
 		};
-		constexpr int kJarSpecialDropChancePercent = 100;
-		constexpr int kEliteSpecialDropChancePercent = 25;
+		constexpr int kJarSpecialDropChancePercent = 10;
+		constexpr int kEliteSpecialDropChancePercent = 35;
 	}
 
 	Manager& Manager::GetInstance() {

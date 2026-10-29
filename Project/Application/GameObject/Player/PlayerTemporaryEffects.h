@@ -145,7 +145,7 @@ namespace Player {
 
 		static constexpr float kDuration = 10.0f;
 		static constexpr float kAttackMultiplier = 2.0f;
-		static constexpr float kMovementSpeedMultiplier = 1.5f;
+		static constexpr float kMovementSpeedMultiplier = 2.0f;
 		std::array<GameTimer, static_cast<std::size_t>(TemporaryEffectType::Count)> timers_{};
 	};
 }

@@ -8,7 +8,7 @@
             "value": 0.0
         },
         "criticalChance": {
-            "fixedAddValue": 1.0199999809265137,
+            "fixedAddValue": 5.0,
             "isSelected": true,
             "rarityAddValue": 5.0,
             "value": 15.0

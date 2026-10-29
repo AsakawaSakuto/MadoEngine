@@ -122,13 +122,38 @@ const char* OperationToJsonName(Relic::ModifierOperation operation) {
 	}
 }
 
+/// @brief 文字列から周期効果種別を取得
+/// @param text 変換対象文字列
+/// @param outType 変換結果の出力先
+/// @return 変換に成功した場合はtrue
+bool TryParsePeriodicEffectType(const std::string& text, Relic::PeriodicEffectType& outType) {
+	if (text == "AttractAllExp") {
+		outType = Relic::PeriodicEffectType::AttractAllExp;
+		return true;
+	}
+	return false;
+}
+
+/// @brief 周期効果種別をJSON用文字列へ変換
+/// @param type 変換対象の周期効果種別
+/// @return JSONへ保存する文字列、無効値の場合は空文字列
+const char* PeriodicEffectTypeToJsonName(Relic::PeriodicEffectType type) {
+	switch (type) {
+	case Relic::PeriodicEffectType::AttractAllExp:
+		return "AttractAllExp";
+	default:
+		return "";
+	}
+}
+
 /// @brief 一件のレリック定義が実行時に利用可能か確認
 /// @param definition 検証対象のレリック定義
 /// @return 全項目が有効な場合はtrue
 bool IsValidDefinition(const Relic::Definition& definition) {
 	if (definition.id.empty() || definition.displayName.empty() || definition.textureName.empty() ||
 		definition.maxStack <= 0 ||
-		GetRaritySerializedName(definition.rarity)[0] == '\0' || definition.effects.empty()) {
+		GetRaritySerializedName(definition.rarity)[0] == '\0' ||
+		(definition.effects.empty() && definition.periodicEffects.empty())) {
 		return false;
 	}
 
@@ -136,6 +161,14 @@ bool IsValidDefinition(const Relic::Definition& definition) {
 		if (!std::isfinite(effect.valuePerStack) ||
 			StatToJsonName(effect.stat)[0] == '\0' ||
 			OperationToJsonName(effect.operation)[0] == '\0') {
+			return false;
+		}
+	}
+
+	// 周期効果だけの定義も受け入れ、ゼロ秒や非有限のTimer設定を保存前に拒否
+	for (const Relic::PeriodicEffect& effect : definition.periodicEffects) {
+		if (PeriodicEffectTypeToJsonName(effect.type)[0] == '\0' ||
+			!std::isfinite(effect.intervalSeconds) || effect.intervalSeconds < Relic::PeriodicEffect::kMinIntervalSeconds) {
 			return false;
 		}
 	}
@@ -173,20 +206,36 @@ bool TryParseDefinition(const nlohmann::json& json, Relic::Definition& outDefini
 		}
 
 		for (const nlohmann::json& effectJson : json.at("effects")) {
-			if (!effectJson.is_object() || effectJson.value("type", std::string{}) != "StatModifier") {
+			if (!effectJson.is_object()) {
 				return false;
 			}
 
-			Relic::StatModifierEffect effect;
-			effect.valuePerStack = effectJson.at("valuePerStack").get<float>();
-			if (!std::isfinite(effect.valuePerStack) ||
-				!TryParseStat(effectJson.at("stat").get<std::string>(), effect.stat) ||
-				!TryParseOperation(effectJson.at("operation").get<std::string>(), effect.operation)) {
+			// 既存のStatModifier形式を保ち、周期効果は固有の秒数と種別として読み込み
+			const std::string effectType = effectJson.value("type", std::string{});
+			if (effectType == "StatModifier") {
+				Relic::StatModifierEffect effect;
+				effect.valuePerStack = effectJson.at("valuePerStack").get<float>();
+				if (!std::isfinite(effect.valuePerStack) ||
+					!TryParseStat(effectJson.at("stat").get<std::string>(), effect.stat) ||
+					!TryParseOperation(effectJson.at("operation").get<std::string>(), effect.operation)) {
+					return false;
+				}
+				parsed.effects.push_back(effect);
+			} else if (effectType == "Periodic") {
+				Relic::PeriodicEffect effect;
+				effect.intervalSeconds = effectJson.at("intervalSeconds").get<float>();
+				if (!TryParsePeriodicEffectType(effectJson.at("effect").get<std::string>(), effect.type)) {
+					return false;
+				}
+				parsed.periodicEffects.push_back(effect);
+			} else {
 				return false;
 			}
-			parsed.effects.push_back(effect);
 		}
 
+		if (!IsValidDefinition(parsed)) {
+			return false;
+		}
 		outDefinition = std::move(parsed);
 		return true;
 	} catch (const nlohmann::json::exception&) {
@@ -243,6 +292,13 @@ namespace Relic {
 					{ "stat", StatToJsonName(effect.stat) },
 					{ "operation", OperationToJsonName(effect.operation) },
 					{ "valuePerStack", effect.valuePerStack },
+				});
+			}
+			for (const PeriodicEffect& effect : definition.periodicEffects) {
+				definitionJson["effects"].push_back({
+					{ "type", "Periodic" },
+					{ "effect", PeriodicEffectTypeToJsonName(effect.type) },
+					{ "intervalSeconds", effect.intervalSeconds },
 				});
 			}
 			root["relics"].push_back(std::move(definitionJson));

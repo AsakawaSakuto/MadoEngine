@@ -8,7 +8,7 @@ namespace Enemy {
 	}
 
 	std::string Tank::GetModelAssetName() const {
-		return "enemy";
+		return "TankEnemy";
 	}
 
 	Vector3 Tank::GetModelScale() const {

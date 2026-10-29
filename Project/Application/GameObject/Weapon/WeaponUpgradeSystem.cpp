@@ -168,22 +168,24 @@ namespace Weapon {
 		hasGenerationAttempted_ = true;
 		lastGenerationAttemptRevision_ = inventory.GetRevision();
 
-		std::vector<Projectile::Type> candidateWeapons;
-		candidateWeapons.reserve(Projectile::kPlayableWeaponTypes.size());
+		std::vector<Projectile::Type> newWeaponCandidates;
+		std::vector<Projectile::Type> ownedWeaponCandidates;
+		newWeaponCandidates.reserve(Projectile::kPlayableWeaponTypes.size());
+		ownedWeaponCandidates.reserve(Projectile::kPlayableWeaponTypes.size());
 
-		// 所持武器は強化可能なもの、未所持武器は空きSlotがある場合だけ候補化
+		// 種類ごとの候補数が出現確率へ影響しないよう新規武器と所持武器強化を分離
 		for (const Projectile::Type weaponType : Projectile::kPlayableWeaponTypes) {
 			const BaseWeapon* weapon = inventory.GetWeapon(weaponType);
 			if (weapon) {
 				if (!weapon->GetSelectableUpgradeStatTypes().empty()) {
-					candidateWeapons.push_back(weaponType);
+					ownedWeaponCandidates.push_back(weaponType);
 				}
 			} else if (inventory.HasEmptySlot()) {
-				candidateWeapons.push_back(weaponType);
+				newWeaponCandidates.push_back(weaponType);
 			}
 		}
 
-		if (candidateWeapons.size() < kChoiceCount) {
+		if (newWeaponCandidates.size() + ownedWeaponCandidates.size() < kChoiceCount) {
 			if (!generationFailureLogged_) {
 				Logger::Output("[Application] 異なる武器を対象とした三つの強化候補を生成できません。", Logger::Level::Error);
 				generationFailureLogged_ = true;
@@ -195,11 +197,20 @@ namespace Weapon {
 		std::vector<UpgradeChoice> generatedChoices;
 		generatedChoices.reserve(kChoiceCount);
 
-		// 候補ごとに抽選済み武器を除外して三種類の武器を保証
 		for (std::size_t choiceIndex = 0; choiceIndex < kChoiceCount; ++choiceIndex) {
-			const int randomIndex = random_.Int(0, static_cast<int>(candidateWeapons.size()) - 1);
-			const Projectile::Type weaponType = candidateWeapons[static_cast<std::size_t>(randomIndex)];
-			candidateWeapons.erase(candidateWeapons.begin() + randomIndex);
+
+			// 両方に候補がある間は50%ずつで種類を決定し、片方が尽きた場合は残る側を選択
+			std::vector<Projectile::Type>* candidateWeapons = &ownedWeaponCandidates;
+			if (ownedWeaponCandidates.empty()) {
+				candidateWeapons = &newWeaponCandidates;
+			} else if (!newWeaponCandidates.empty() && random_.Int(0, 1) == 0) {
+				candidateWeapons = &newWeaponCandidates;
+			}
+
+			// 選択した種類の中では等確率で抽選し、抽選済み武器を除外して三種類の武器を保証
+			const int randomIndex = random_.Int(0, static_cast<int>(candidateWeapons->size()) - 1);
+			const Projectile::Type weaponType = (*candidateWeapons)[static_cast<std::size_t>(randomIndex)];
+			candidateWeapons->erase(candidateWeapons->begin() + randomIndex);
 
 			UpgradeChoice choice;
 			choice.weaponType = weaponType;

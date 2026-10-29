@@ -19,6 +19,10 @@ namespace System {
 		}
 		cameraManager.CutTo(tpsCameraHandle_);
 		useDebugCamera_ = false;
+
+		if (TPS_Camera* tpsCamera = TryGetPlayerCamera(cameraManager)) {
+			tpsCamera->SetDistance(kTpsCameraMinDistance);
+		}
 	}
 
 	void GameCameraController::Finalize() {

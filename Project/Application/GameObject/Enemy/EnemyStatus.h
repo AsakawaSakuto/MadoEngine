@@ -17,6 +17,7 @@ namespace Enemy {
 			Tank,   // 高耐久で低速な敵
 
 			Boss,	// ボス敵
+			OverTime, // 特殊行動を持たないOverTimeの敵
 		};
 
 		/// @brief Enemyへ付与する特殊属性の種類を表す列挙型

@@ -25,7 +25,7 @@ namespace Enemy {
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime);
 
-		/// @brief 生成時間と強化時間を初期化
+		/// @brief 生成時間と累計強化値を初期化
 		void Clear();
 
 		/// @brief Enemy生成位置のMap制限を設定
@@ -67,10 +67,15 @@ namespace Enemy {
 		std::uint32_t SpawnImmediately(std::uint32_t spawnCount);
 
 	private:
-		/// @brief 現在時刻に適用する通常WaveまたはBonus Waveを検索
+		/// @brief 指定時刻に適用する通常WaveまたはBonus Waveを検索
+		/// @param elapsedTime 検索対象のゲーム経過秒数
 		/// @param outIndex 見つかったWave位置
 		/// @return 適用する生成設定、存在しない場合はnullptr
-		const WaveSpawnSettings* FindActiveSpawnSettings(std::size_t& outIndex) const;
+		const WaveSpawnSettings* FindActiveSpawnSettings(float elapsedTime, std::size_t& outIndex) const;
+
+		/// @brief 通常Wave間で強化を累積し、Bonus Wave開始時に累計を初期化
+		/// @param previousElapsedTime 前回更新時のゲーム経過秒数
+		void UpdateStatIncreases(float previousElapsedTime);
 
 		/// @brief 処理対象Waveを切り替えて生成周期とElite周期を初期化
 		/// @param waveIndex 新しく処理するWave位置
@@ -102,19 +107,10 @@ namespace Enemy {
 			Vector3& outPosition,
 			float& outGroundSurfaceY) const;
 
-		/// @brief 現在処理中Waveの開始後経過時間を取得
-		/// @return 通常Wave開始またはBonus Wave開始からの経過秒数
-		float GetActiveWaveElapsedTime() const;
-
-		/// @brief Wave内経過時間に応じたEnemyステータスを計算
+		/// @brief 通常Wave群またはBonus Waveの累計強化値を反映したEnemyステータスを計算
 		/// @param type ステータスを計算するEnemyの種類
-		/// @param wave 適用するWave設定
-		/// @param waveElapsedTime Wave開始後の経過秒数
 		/// @return 新しく生成するEnemyのステータス
-		Data::Status CalculateSpawnStatus(
-			Data::Type type,
-			const WaveSpawnSettings& wave,
-			float waveElapsedTime) const;
+		Data::Status CalculateSpawnStatus(Data::Type type) const;
 
 		Player::Base* player_ = nullptr;
 		Manager* enemyManager_ = nullptr;
@@ -125,6 +121,9 @@ namespace Enemy {
 		float spawnTimer_ = 0.0f;
 		float elapsedTime_ = 0.0f;
 		float timeLimit_ = 0.0f;
+		double accumulatedHealthIncrease_ = 0.0;
+		double accumulatedPowerIncrease_ = 0.0;
+		double accumulatedMoveSpeedIncrease_ = 0.0;
 		bool isActive_ = true;
 	};
 } // namespace Enemy

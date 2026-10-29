@@ -2,6 +2,7 @@
 #include "RelicCatalog.h"
 #include "RelicInventory.h"
 #include "Utility/Random.h"
+#include "Utility/GameTimer/GameTimer.h"
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -25,6 +26,11 @@ namespace Relic {
 		/// @brief JSONからレリック定義を再読み込み
 		/// @return 再読み込みと適用に成功した場合はtrue
 		bool ReloadCatalog();
+
+		/// @brief 所持レリックの周期効果を進行し、当Frameの発動要求を取得
+		/// @param deltaTime 停止状態を反映したゲーム経過時間
+		/// @return 発動した周期効果の種別一覧、各効果につき一更新一件まで
+		std::vector<PeriodicEffectType> UpdatePeriodicEffects(float deltaTime);
 
 		/// @brief 宝箱一個分のレリック報酬を抽選
 		/// @return 獲得可能な報酬を抽選できた場合はtrue
@@ -78,8 +84,19 @@ namespace Relic {
 		std::uint64_t GetRevision() const { return revision_; }
 
 	private:
+		/// @brief レリックと効果番号に対応する周期発動の実行状態
+		struct PeriodicEffectState {
+			Id relicId;
+			std::size_t effectIndex = 0;
+			PeriodicEffectType type = PeriodicEffectType::AttractAllExp;
+			GameTimer timer;
+		};
+
 		/// @brief 所持中レリックから全補正値を再構築
 		void RebuildModifiers();
+
+		/// @brief 所持状態と定義変更へ周期効果を同期し、継続中の進行率を保持
+		void RebuildPeriodicEffects();
 
 		/// @brief 定義一覧が現在の所持状態と両立するか確認
 		/// @param catalog 確認対象のレリックカタログ
@@ -91,6 +108,7 @@ namespace Relic {
 		Random random_;
 		std::optional<Id> pendingRelicId_;
 		ModifierSnapshot modifiers_;
+		std::vector<PeriodicEffectState> periodicEffectStates_;
 		std::uint64_t revision_ = 0;
 		std::string catalogPath_;
 	};

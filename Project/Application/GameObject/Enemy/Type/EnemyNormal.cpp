@@ -8,7 +8,7 @@ namespace Enemy {
 	}
 
 	std::string Normal::GetModelAssetName() const {
-		return "enemy";
+		return "NormalEnemy";
 	}
 
 	Vector3 Normal::GetModelScale() const {

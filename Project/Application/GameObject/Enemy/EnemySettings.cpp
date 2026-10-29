@@ -145,6 +145,7 @@ namespace {
 			{ "normalSpawnRate", settings.normalSpawnRate },
 			{ "runnerSpawnRate", settings.runnerSpawnRate },
 			{ "tankSpawnRate", settings.tankSpawnRate },
+			{ "overTimeSpawnRate", settings.overTimeSpawnRate },
 			{ "healthIncreaseInterval", settings.healthIncrease.interval },
 			{ "healthIncreaseAmount", settings.healthIncrease.amount },
 			{ "powerIncreaseInterval", settings.powerIncrease.interval },
@@ -186,6 +187,8 @@ namespace {
 			json, "runnerSpawnRate", outSettings.runnerSpawnRate);
 		outSettings.tankSpawnRate = JsonSerializer::GetOrDefault<float>(
 			json, "tankSpawnRate", outSettings.tankSpawnRate);
+		outSettings.overTimeSpawnRate = JsonSerializer::GetOrDefault<float>(
+			json, "overTimeSpawnRate", outSettings.overTimeSpawnRate);
 
 		const bool hasHealthIncreaseSettings =
 			json.contains("healthIncreaseInterval") || json.contains("healthIncreaseAmount");
@@ -280,7 +283,8 @@ namespace {
 		settings.normalSpawnRate = std::max(0.0f, SanitizeFinite(settings.normalSpawnRate, 0.0f));
 		settings.runnerSpawnRate = std::max(0.0f, SanitizeFinite(settings.runnerSpawnRate, 0.0f));
 		settings.tankSpawnRate = std::max(0.0f, SanitizeFinite(settings.tankSpawnRate, 0.0f));
-		if (settings.normalSpawnRate + settings.runnerSpawnRate + settings.tankSpawnRate <= 0.0f) {
+		settings.overTimeSpawnRate = std::max(0.0f, SanitizeFinite(settings.overTimeSpawnRate, 0.0f));
+		if (settings.normalSpawnRate + settings.runnerSpawnRate + settings.tankSpawnRate + settings.overTimeSpawnRate <= 0.0f) {
 			settings.normalSpawnRate = 1.0f;
 		}
 		for (Enemy::TimedStatIncreaseSettings* increaseSettings : {
@@ -340,7 +344,8 @@ namespace Enemy {
 		// 欠落項目だけ既定値を維持できるよう存在する設定だけを部分反映
 		if (root.contains("enemyStatus") && root.at("enemyStatus").is_object()) {
 			const nlohmann::json& statusJson = root.at("enemyStatus");
-			for (const Data::Type type : { Data::Type::Normal, Data::Type::Runner, Data::Type::Tank, Data::Type::Boss }) {
+			for (const Data::Type type : {
+				Data::Type::Normal, Data::Type::Runner, Data::Type::Tank, Data::Type::Boss, Data::Type::OverTime }) {
 				const char* typeName = EnemyTypeToString(type);
 				if (statusJson.contains(typeName)) {
 					DeserializeTypeSettings(statusJson.at(typeName), EditTypeSettings(type));
@@ -398,7 +403,8 @@ namespace Enemy {
 
 		// 実行時設定と同じ階層構造で種類別設定を直列化
 		nlohmann::json statusJson = nlohmann::json::object();
-		for (const Data::Type type : { Data::Type::Normal, Data::Type::Runner, Data::Type::Tank, Data::Type::Boss }) {
+		for (const Data::Type type : {
+			Data::Type::Normal, Data::Type::Runner, Data::Type::Tank, Data::Type::Boss, Data::Type::OverTime }) {
 			statusJson[EnemyTypeToString(type)] = SerializeTypeSettings(GetTypeSettings(type));
 		}
 		statusJson["Elite"] = SerializeEliteSettings(eliteSettings_);
@@ -440,6 +446,7 @@ namespace Enemy {
 			{ 1000.0f, 20.0f, 1.5f }, 1.5f, 1.5f, { -1.5f, 0.0f, -1.5f }, { 1.5f, 4.0f, 1.5f },
 			{ 0.7f, 0.15f, 0.9f, 1.0f }, 0.0f
 		};
+		typeSettings_[ToTypeIndex(Data::Type::OverTime)] = typeSettings_[ToTypeIndex(Data::Type::Normal)];
 		eliteSettings_ = {};
 		maxAliveEnemies_ = 500;
 		waves_ = { WaveSettings{} };
@@ -513,21 +520,27 @@ namespace Enemy {
 	}
 
 	std::size_t Settings::ToTypeIndex(Data::Type type) {
+
+		// 既存種類の設定配列位置を維持し、追加種類へ専用の領域を割り当て
 		switch (type) {
 		case Data::Type::Normal: return 0;
 		case Data::Type::Runner: return 1;
 		case Data::Type::Tank:   return 2;
 		case Data::Type::Boss:   return 3;
+		case Data::Type::OverTime: return 4;
 		}
 		return 0;
 	}
 
 	const char* EnemyTypeToString(Data::Type type) {
+
+		// 保存済みJsonのキーと互換性のある種類名へ変換
 		switch (type) {
 		case Data::Type::Normal: return "Normal";
 		case Data::Type::Runner: return "Runner";
 		case Data::Type::Tank:   return "Tank";
 		case Data::Type::Boss:   return "Boss";
+		case Data::Type::OverTime: return "OverTime";
 		}
 		return "Normal";
 	}

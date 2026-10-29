@@ -46,6 +46,7 @@ namespace Enemy {
 		float normalSpawnRate = 0.6f;
 		float runnerSpawnRate = 0.25f;
 		float tankSpawnRate = 0.15f;
+		float overTimeSpawnRate = 0.0f;
 		TimedStatIncreaseSettings healthIncrease = { 60.0f, 1.0f };
 		TimedStatIncreaseSettings powerIncrease = { 60.0f, 0.5f };
 		TimedStatIncreaseSettings moveSpeedIncrease = { 60.0f, 0.06f };
@@ -147,7 +148,7 @@ namespace Enemy {
 		/// @return 設定配列の位置
 		static std::size_t ToTypeIndex(Data::Type type);
 
-		static constexpr std::size_t kTypeCount = 4;
+		static constexpr std::size_t kTypeCount = 5;
 		std::array<TypeSettings, kTypeCount> typeSettings_;
 		EliteSettings eliteSettings_;
 		std::size_t maxAliveEnemies_ = 999;

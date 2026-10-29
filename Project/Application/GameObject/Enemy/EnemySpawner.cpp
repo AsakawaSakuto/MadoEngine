@@ -14,24 +14,32 @@ namespace {
 	constexpr std::size_t kInvalidWaveIndex = static_cast<std::size_t>(-1);
 	constexpr std::size_t kBonusWaveIndex = kInvalidWaveIndex - 1;
 
-	/// @brief 基礎能力値へWave内の段階加算を適用
-	/// @param baseValue 加算前の基礎能力値
+	/// @brief 指定区間で完了したWave内強化周期の加算量を計算
+	/// @param previousWaveElapsedTime 区間開始時のWave開始後経過秒数
 	/// @param waveElapsedTime Wave開始後の経過秒数
 	/// @param increaseSettings 加算間隔と一回の加算量
-	/// @return 表現可能な範囲へ収めた加算後能力値
-	float CalculateIncreasedStat(
-		float baseValue,
+	/// @return 区間内で新たに完了した強化周期の加算量
+	double CalculateStatIncrease(
+		float previousWaveElapsedTime,
 		float waveElapsedTime,
 		const Enemy::TimedStatIncreaseSettings& increaseSettings) {
-		if (waveElapsedTime <= 0.0f || increaseSettings.amount <= 0.0f) {
-			return baseValue;
+		if (waveElapsedTime <= previousWaveElapsedTime || increaseSettings.amount <= 0.0f) {
+			return 0.0;
 		}
 
-		// Wave開始後に完了した強化周期だけを数えて段階的な加算量へ変換
+		// 完了周期数の差分だけを加算し、Frame分割による二重加算と端数蓄積を回避
 		const double interval = (std::max)(0.01, static_cast<double>(increaseSettings.interval));
+		const double previousCompletedIntervals = std::floor(static_cast<double>(previousWaveElapsedTime) / interval);
 		const double completedIntervals = std::floor(static_cast<double>(waveElapsedTime) / interval);
-		const double increasedValue = static_cast<double>(baseValue) +
-			completedIntervals * static_cast<double>(increaseSettings.amount);
+		return (completedIntervals - previousCompletedIntervals) * static_cast<double>(increaseSettings.amount);
+	}
+
+	/// @brief 基礎能力値へ現在の生成期間の累計強化値を適用
+	/// @param baseValue 加算前の基礎能力値
+	/// @param accumulatedIncrease 通常Wave群またはBonus Waveで累積した加算量
+	/// @return 表現可能な範囲へ収めた加算後能力値
+	float ApplyStatIncrease(float baseValue, double accumulatedIncrease) {
+		const double increasedValue = static_cast<double>(baseValue) + accumulatedIncrease;
 		return static_cast<float>((std::min)(
 			increasedValue,
 			static_cast<double>((std::numeric_limits<float>::max)())));
@@ -61,8 +69,9 @@ namespace Enemy {
 
 		const float previousElapsedTime = elapsedTime_;
 		elapsedTime_ += deltaTime;
+		UpdateStatIncreases(previousElapsedTime);
 		std::size_t waveIndex = kInvalidWaveIndex;
-		const WaveSpawnSettings* wave = FindActiveSpawnSettings(waveIndex);
+		const WaveSpawnSettings* wave = FindActiveSpawnSettings(elapsedTime_, waveIndex);
 		if (!wave) {
 
 			// Wave空白時間の周期残量を次のWaveへ持ち越さないよう生成状態を解除
@@ -101,11 +110,14 @@ namespace Enemy {
 		activeWaveEnemySpawnCount_ = 0;
 		spawnTimer_ = 0.0f;
 		elapsedTime_ = 0.0f;
+		accumulatedHealthIncrease_ = 0.0;
+		accumulatedPowerIncrease_ = 0.0;
+		accumulatedMoveSpeedIncrease_ = 0.0;
 	}
 
 	std::uint32_t Spawner::GetRemainingSpawnCountUntilElite() const {
 		std::size_t waveIndex = kInvalidWaveIndex;
-		const WaveSpawnSettings* wave = FindActiveSpawnSettings(waveIndex);
+		const WaveSpawnSettings* wave = FindActiveSpawnSettings(elapsedTime_, waveIndex);
 		if (!wave) {
 			return 0;
 		}
@@ -137,7 +149,7 @@ namespace Enemy {
 
 	std::uint32_t Spawner::SpawnImmediately(std::uint32_t spawnCount) {
 		std::size_t waveIndex = kInvalidWaveIndex;
-		const WaveSpawnSettings* wave = FindActiveSpawnSettings(waveIndex);
+		const WaveSpawnSettings* wave = FindActiveSpawnSettings(elapsedTime_, waveIndex);
 		if (!wave) {
 			return 0;
 		}
@@ -146,8 +158,8 @@ namespace Enemy {
 		return SpawnBatch(*wave, spawnCount);
 	}
 
-	const WaveSpawnSettings* Spawner::FindActiveSpawnSettings(std::size_t& outIndex) const {
-		if (elapsedTime_ >= timeLimit_) {
+	const WaveSpawnSettings* Spawner::FindActiveSpawnSettings(float elapsedTime, std::size_t& outIndex) const {
+		if (elapsedTime >= timeLimit_) {
 
 			// 制限時間到達後は通常Waveの時間帯に関係なくBonus Waveを最優先
 			outIndex = kBonusWaveIndex;
@@ -162,7 +174,7 @@ namespace Enemy {
 		// 時間帯が重複する場合は開始時間が遅いWaveを優先して結果を一意化
 		for (std::size_t index = 0; index < waves.size(); ++index) {
 			const WaveSettings& wave = waves[index];
-			if (elapsedTime_ < wave.startTime || elapsedTime_ >= wave.endTime) {
+			if (elapsedTime < wave.startTime || elapsedTime >= wave.endTime) {
 				continue;
 			}
 			if (!selectedWave || wave.startTime >= selectedStartTime) {
@@ -173,6 +185,54 @@ namespace Enemy {
 		}
 
 		return selectedWave;
+	}
+
+	void Spawner::UpdateStatIncreases(float previousElapsedTime) {
+		const std::vector<WaveSettings>& waves = Settings::GetInstance().GetWaves();
+		float segmentStartTime = previousElapsedTime;
+		if (previousElapsedTime < timeLimit_ && elapsedTime_ >= timeLimit_) {
+
+			// 時間切れ以降の強化を独立させ、境界をまたぐFrameではBonus開始後の時間だけを集計
+			accumulatedHealthIncrease_ = 0.0;
+			accumulatedPowerIncrease_ = 0.0;
+			accumulatedMoveSpeedIncrease_ = 0.0;
+			segmentStartTime = timeLimit_;
+		}
+		while (segmentStartTime < elapsedTime_) {
+			std::size_t waveIndex = kInvalidWaveIndex;
+			const WaveSpawnSettings* wave = FindActiveSpawnSettings(segmentStartTime, waveIndex);
+			float segmentEndTime = elapsedTime_;
+			float waveStartTime = timeLimit_;
+			if (segmentStartTime < timeLimit_) {
+
+				// 長いFrameでもWave境界と空白時間を順にたどり、各設定が有効な区間だけを強化対象化
+				segmentEndTime = (std::min)(segmentEndTime, timeLimit_);
+				for (const WaveSettings& scheduledWave : waves) {
+					if (scheduledWave.startTime > segmentStartTime) {
+						segmentEndTime = (std::min)(segmentEndTime, scheduledWave.startTime);
+					}
+					if (scheduledWave.endTime > segmentStartTime) {
+						segmentEndTime = (std::min)(segmentEndTime, scheduledWave.endTime);
+					}
+				}
+				if (wave) {
+					waveStartTime = waves[waveIndex].startTime;
+				}
+			}
+
+			// 次のWaveへは確定した加算量だけを継承し、未完了の強化周期はWaveごとに区切り
+			if (wave) {
+				const float previousWaveElapsedTime = (std::max)(0.0f, segmentStartTime - waveStartTime);
+				const float waveElapsedTime = (std::max)(0.0f, segmentEndTime - waveStartTime);
+				accumulatedHealthIncrease_ += CalculateStatIncrease(
+					previousWaveElapsedTime, waveElapsedTime, wave->healthIncrease);
+				accumulatedPowerIncrease_ += CalculateStatIncrease(
+					previousWaveElapsedTime, waveElapsedTime, wave->powerIncrease);
+				accumulatedMoveSpeedIncrease_ += CalculateStatIncrease(
+					previousWaveElapsedTime, waveElapsedTime, wave->moveSpeedIncrease);
+			}
+			segmentStartTime = segmentEndTime;
+		}
 	}
 
 	void Spawner::ChangeActiveWave(std::size_t waveIndex) {
@@ -207,14 +267,18 @@ namespace Enemy {
 	}
 
 	Data::Type Spawner::SelectSpawnType(const WaveSpawnSettings& wave) const {
+
+		// 生成率を相対的な重みとして扱い、負の値を抽選対象から除外
 		const float normalRate = std::max(0.0f, wave.normalSpawnRate);
 		const float runnerRate = std::max(0.0f, wave.runnerSpawnRate);
 		const float tankRate = std::max(0.0f, wave.tankSpawnRate);
-		const float totalRate = normalRate + runnerRate + tankRate;
+		const float overTimeRate = std::max(0.0f, wave.overTimeSpawnRate);
+		const float totalRate = normalRate + runnerRate + tankRate + overTimeRate;
 		if (totalRate <= 0.0f) {
 			return Data::Type::Normal;
 		}
 
+		// 各種類へ重ならない抽選区間を割り当て、最後の区間をOverTimeへ割り当て
 		const float randomValue = MyRand::GetFloat(0.0f, totalRate);
 		if (randomValue < normalRate) {
 			return Data::Type::Normal;
@@ -223,7 +287,11 @@ namespace Enemy {
 			return Data::Type::Runner;
 		}
 
-		return Data::Type::Tank;
+		if (randomValue < normalRate + runnerRate + tankRate) {
+			return Data::Type::Tank;
+		}
+
+		return Data::Type::OverTime;
 	}
 
 	bool Spawner::SpawnEnemy(const WaveSpawnSettings& wave) {
@@ -241,7 +309,7 @@ namespace Enemy {
 		const Data::Type spawnType = SelectSpawnType(wave);
 		desc.emergeFromGround = true;
 		desc.groundSurfaceY = groundSurfaceY;
-		desc.status = CalculateSpawnStatus(spawnType, wave, GetActiveWaveElapsedTime());
+		desc.status = CalculateSpawnStatus(spawnType);
 		desc.type = spawnType;
 		++activeWaveEnemySpawnCount_;
 		const std::uint64_t eliteSpawnInterval = std::max<std::uint64_t>(1, wave.eliteSpawnInterval);
@@ -308,29 +376,13 @@ namespace Enemy {
 		return false;
 	}
 
-	float Spawner::GetActiveWaveElapsedTime() const {
-		if (activeWaveIndex_ == kBonusWaveIndex) {
-			return (std::max)(0.0f, elapsedTime_ - timeLimit_);
-		}
-
-		const std::vector<WaveSettings>& waves = Settings::GetInstance().GetWaves();
-		if (activeWaveIndex_ >= waves.size()) {
-			return 0.0f;
-		}
-
-		return (std::max)(0.0f, elapsedTime_ - waves[activeWaveIndex_].startTime);
-	}
-
-	Data::Status Spawner::CalculateSpawnStatus(
-		Data::Type type,
-		const WaveSpawnSettings& wave,
-		float waveElapsedTime) const {
+	Data::Status Spawner::CalculateSpawnStatus(Data::Type type) const {
 		Data::Status status = Factory::CreateDefaultStatus(type);
 
-		// HP、攻撃力、移動速度で独立した周期と加算量を新規Enemyへ反映
-		status.currentHealth = CalculateIncreasedStat(status.currentHealth, waveElapsedTime, wave.healthIncrease);
-		status.power = CalculateIncreasedStat(status.power, waveElapsedTime, wave.powerIncrease);
-		status.moveSpeed = CalculateIncreasedStat(status.moveSpeed, waveElapsedTime, wave.moveSpeedIncrease);
+		// 通常Wave群またはBonus Waveで蓄積した加算分をEnemy種類ごとの基礎能力値へ新規生成時だけ適用
+		status.currentHealth = ApplyStatIncrease(status.currentHealth, accumulatedHealthIncrease_);
+		status.power = ApplyStatIncrease(status.power, accumulatedPowerIncrease_);
+		status.moveSpeed = ApplyStatIncrease(status.moveSpeed, accumulatedMoveSpeedIncrease_);
 		return status;
 	}
 

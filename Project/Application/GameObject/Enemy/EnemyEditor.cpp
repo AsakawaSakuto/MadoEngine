@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <cstring>
+#include <format>
 #include <limits>
 #include <string>
 
@@ -14,10 +15,11 @@ namespace Enemy {
 
 	namespace {
 #ifdef USE_IMGUI
-		constexpr std::array<Data::Type, 4> kEditableTypes = {
+		constexpr std::array<Data::Type, 5> kEditableTypes = {
 			Data::Type::Normal,
 			Data::Type::Runner,
 			Data::Type::Tank,
+			Data::Type::OverTime,
 			Data::Type::Boss,
 		};
 
@@ -277,6 +279,7 @@ namespace Enemy {
 		} else {
 			ImGui::TextDisabled("制限時間以降に継続適用");
 		}
+		ImGui::TextDisabled("通常Waveの累計強化値を引き継がず、基礎能力値から開始");
 		if (isBonusWaveActive) {
 			ImGui::TextColored(ImVec4(1.0f, 0.78f, 0.2f, 1.0f), "現在実行中");
 		}
@@ -297,8 +300,9 @@ namespace Enemy {
 		bool settingsChanged = false;
 		ImGui::PushID(static_cast<int>(index));
 		const std::uint64_t plannedEnemySpawnCount = CalculatePlannedEnemySpawnCount(wave);
-		const std::string headerLabel = wave.name + "  [予定出現数 " +
-			std::to_string(plannedEnemySpawnCount) + "体]##WaveHeader";
+		const std::string headerLabel = std::format(
+			"{}  [予定出現数 {}体]  {:.1f}秒～{:.1f}秒###WaveHeader",
+			wave.name, plannedEnemySpawnCount, wave.startTime, wave.endTime);
 		bool isExpanded = false;
 
 		// 展開状態に依存せず削除操作へアクセスできる見出し行を構築
@@ -359,9 +363,12 @@ namespace Enemy {
 			"最大生成半径", &waveSettings.maxSpawnRadius, 0.1f, 0.0f, 10000.0f, "%.1f");
 
 		ImGui::SeparatorText("種類別生成率");
+
+		// 設定値は相対比率として保持し、Editorの入出力だけを百分率へ換算
 		float normalPercent = waveSettings.normalSpawnRate * 100.0f;
 		float runnerPercent = waveSettings.runnerSpawnRate * 100.0f;
 		float tankPercent = waveSettings.tankSpawnRate * 100.0f;
+		float overTimePercent = waveSettings.overTimeSpawnRate * 100.0f;
 		if (ImGui::DragFloat("Normal", &normalPercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
 			waveSettings.normalSpawnRate = normalPercent / 100.0f;
 			settingsChanged = true;
@@ -374,19 +381,26 @@ namespace Enemy {
 			waveSettings.tankSpawnRate = tankPercent / 100.0f;
 			settingsChanged = true;
 		}
+		if (ImGui::DragFloat("OverTime", &overTimePercent, 1.0f, 0.0f, 10000.0f, "%.1f%%")) {
+			waveSettings.overTimeSpawnRate = overTimePercent / 100.0f;
+			settingsChanged = true;
+		}
 		const float totalRate =
-			waveSettings.normalSpawnRate + waveSettings.runnerSpawnRate + waveSettings.tankSpawnRate;
+			waveSettings.normalSpawnRate + waveSettings.runnerSpawnRate + waveSettings.tankSpawnRate + waveSettings.overTimeSpawnRate;
 		if (totalRate > 0.0f) {
 			ImGui::TextDisabled(
-				"実効生成率  Normal %.1f%% / Runner %.1f%% / Tank %.1f%%",
+				"実効生成率  Normal %.1f%% / Runner %.1f%% / Tank %.1f%% / OverTime %.1f%%",
 				waveSettings.normalSpawnRate / totalRate * 100.0f,
 				waveSettings.runnerSpawnRate / totalRate * 100.0f,
-				waveSettings.tankSpawnRate / totalRate * 100.0f);
+				waveSettings.tankSpawnRate / totalRate * 100.0f,
+				waveSettings.overTimeSpawnRate / totalRate * 100.0f);
 		}
 		ImGui::TextDisabled("入力値は比率として自動正規化");
 
-		ImGui::SeparatorText("時間経過強化（Wave内）");
+		ImGui::SeparatorText("時間経過強化");
 		ImGui::TextDisabled("Wave開始後、指定間隔を経過するたび新しく生成されるEnemyへ加算");
+		ImGui::TextDisabled("通常Wave間では加算分を継承、Bonus Waveの強化は独立");
+		ImGui::TextDisabled("強化間隔の端数はWaveごとにリセット");
 
 		ImGui::TextUnformatted("HP");
 		ImGui::Indent();

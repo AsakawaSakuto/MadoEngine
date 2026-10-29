@@ -8,7 +8,7 @@ namespace Enemy {
 	}
 
 	std::string Runner::GetModelAssetName() const {
-		return "enemy";
+		return "SpeedEnemy";
 	}
 
 	Vector3 Runner::GetModelScale() const {

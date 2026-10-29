@@ -68,7 +68,7 @@ namespace Enemy {
 	}
 
 	std::string Boss::GetModelAssetName() const {
-		return "Boss";
+		return "BossEnemy";
 	}
 
 	Vector3 Boss::GetModelScale() const {

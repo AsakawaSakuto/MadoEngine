@@ -28,6 +28,9 @@ constexpr std::array<const char*, 2> kOperationNames = {
 	"固定加算",
 	"割合加算",
 };
+constexpr std::array<const char*, static_cast<std::size_t>(Relic::PeriodicEffectType::Count)> kPeriodicEffectNames = {
+	"Map上の全EXPを引き寄せる",
+};
 constexpr float kBasicFieldWidth = 420.0f;
 
 /// @brief 一件のステータス補正を編集するImGuiを描画
@@ -62,6 +65,33 @@ bool DrawEffectEditor(Relic::StatModifierEffect& effect, std::size_t effectIndex
 	}
 
 	const bool shouldRemove = ImGui::Button("この効果を削除");
+	ImGui::PopID();
+	return shouldRemove;
+}
+
+/// @brief 一件の周期発動効果を編集するImGuiを描画
+/// @param effect 編集対象の効果
+/// @param effectIndex 周期効果内の効果番号
+/// @param ownedCount 現在の所持数
+/// @return 削除操作が選択された場合はtrue
+bool DrawPeriodicEffectEditor(Relic::PeriodicEffect& effect, std::size_t effectIndex, int ownedCount) {
+	ImGui::PushID(static_cast<int>(effectIndex));
+	ImGui::SeparatorText(std::format("周期効果 {}", effectIndex + 1).c_str());
+	int typeIndex = static_cast<int>(effect.type);
+	ImGui::SetNextItemWidth(260.0f);
+	if (ImGui::Combo("発動内容", &typeIndex, kPeriodicEffectNames.data(), static_cast<int>(kPeriodicEffectNames.size()))) {
+		effect.type = static_cast<Relic::PeriodicEffectType>(typeIndex);
+	}
+	ImGui::SetNextItemWidth(220.0f);
+	ImGui::DragFloat("発動間隔（秒）", &effect.intervalSeconds, 0.1f,
+		Relic::PeriodicEffect::kMinIntervalSeconds, 3600.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+
+	// 複数所持時の実効間隔を表示し、基礎秒数と短縮後の秒数の取り違えを防止
+	ImGui::TextDisabled("実効間隔 = 設定秒数 / 所持数（最短0.1秒、ポーズ中は停止）");
+	if (ownedCount > 0) {
+		ImGui::Text("%d個所持時: %.2f秒ごと", ownedCount, effect.GetIntervalSeconds(ownedCount));
+	}
+	const bool shouldRemove = ImGui::Button("この周期効果を削除");
 	ImGui::PopID();
 	return shouldRemove;
 }
@@ -231,7 +261,23 @@ namespace Relic {
 		if (ImGui::Button("効果を追加")) {
 			definition.effects.push_back({});
 		}
-		if (definition.effects.empty()) {
+
+		// ステータス補正を持たない周期発動専用レリックも同じEditorで作成可能
+		ImGui::SeparatorText("周期発動効果");
+		ImGui::PushID("PeriodicEffects");
+		const int ownedCount = relicSystem.GetInventory().GetCount(definition.id);
+		for (std::size_t effectIndex = 0; effectIndex < definition.periodicEffects.size();) {
+			if (DrawPeriodicEffectEditor(definition.periodicEffects[effectIndex], effectIndex, ownedCount)) {
+				definition.periodicEffects.erase(definition.periodicEffects.begin() + static_cast<std::ptrdiff_t>(effectIndex));
+				continue;
+			}
+			++effectIndex;
+		}
+		if (ImGui::Button("周期効果を追加")) {
+			definition.periodicEffects.push_back({});
+		}
+		ImGui::PopID();
+		if (definition.effects.empty() && definition.periodicEffects.empty()) {
 			ImGui::SameLine();
 			ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "効果を一件以上追加してください");
 		}

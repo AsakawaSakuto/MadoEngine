@@ -1,6 +1,8 @@
 #include "RelicSystem.h"
 #include "Utility/Logger/Logger.h"
 #include <array>
+#include <algorithm>
+#include <cmath>
 #include <utility>
 #include <vector>
 
@@ -16,6 +18,7 @@ namespace Relic {
 		pendingRelicId_.reset();
 		inventory_ = {};
 		modifiers_.Reset();
+		periodicEffectStates_.clear();
 		revision_ = 0;
 		random_.SetSeed(MyRand::MakeDerivedSeed(gameSeed, kRelicRandomStreamId));
 		catalogPath_ = catalogPath;
@@ -55,6 +58,24 @@ namespace Relic {
 		++revision_;
 		Logger::Output("[Relic] レリック定義を再読み込みして適用", Logger::Level::Assets);
 		return true;
+	}
+
+	std::vector<PeriodicEffectType> System::UpdatePeriodicEffects(float deltaTime) {
+		std::vector<PeriodicEffectType> events;
+
+		// 停止中や不正な経過時間での発動とTimerへの非有限値の混入を防止
+		if (!std::isfinite(deltaTime) || deltaTime <= 0.0f) {
+			return events;
+		}
+		for (PeriodicEffectState& state : periodicEffectStates_) {
+			state.timer.Update(deltaTime);
+			if (state.timer.WasLoopedThisFrame()) {
+
+				// 長いFrameでもMap全体への同一操作を連打せず、超過時間はTimer内で次周期へ保持
+				events.push_back(state.type);
+			}
+		}
+		return events;
 	}
 
 	bool System::RequestReward() {
@@ -184,6 +205,44 @@ namespace Relic {
 				modifiers_.Accumulate(effect, stackCount);
 			}
 		}
+		RebuildPeriodicEffects();
+	}
+
+	void System::RebuildPeriodicEffects() {
+		std::vector<PeriodicEffectState> nextStates;
+		for (const Definition& definition : catalog_.GetAll()) {
+			const int stackCount = inventory_.GetCount(definition.id);
+			if (stackCount <= 0) {
+				continue;
+			}
+			for (std::size_t index = 0; index < definition.periodicEffects.size(); ++index) {
+				const PeriodicEffect& effect = definition.periodicEffects[index];
+				PeriodicEffectState nextState;
+				nextState.relicId = definition.id;
+				nextState.effectIndex = index;
+				nextState.type = effect.type;
+				const float interval = effect.GetIntervalSeconds(stackCount);
+				nextState.timer.Start(interval, true);
+
+				// 別レリックの獲得で再始動せず、所持数や秒数の変更時も発動までの進行率を維持
+				const auto previous = std::find_if(periodicEffectStates_.begin(), periodicEffectStates_.end(),
+					[&nextState](const PeriodicEffectState& state) {
+						return state.relicId == nextState.relicId && state.effectIndex == nextState.effectIndex &&
+							state.type == nextState.type;
+					});
+				if (previous != periodicEffectStates_.end()) {
+					if (previous->timer.GetDuration() == interval) {
+						nextState.timer = previous->timer;
+					} else {
+						nextState.timer.Update(interval * previous->timer.GetProgress());
+					}
+				}
+				nextStates.push_back(std::move(nextState));
+			}
+		}
+
+		// 最後の一個の破棄や効果削除で不要になったTimerをまとめて解放
+		periodicEffectStates_ = std::move(nextStates);
 	}
 
 	bool System::IsCompatibleWithInventory(const Catalog& catalog) const {

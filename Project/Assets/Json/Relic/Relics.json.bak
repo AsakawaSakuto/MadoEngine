@@ -1,50 +1,50 @@
 {
   "relics": [
     {
-      "description": "ダメージ +10% ",
+      "description": "ダメージ +20% ",
       "displayName": "ただのハンドグリップ",
       "effects": [
         {
           "operation": "AddPercent",
           "stat": "OutgoingDamage",
           "type": "StatModifier",
-          "valuePerStack": 0.10000000149011612
+          "valuePerStack": 0.20000000298023224
         }
       ],
       "id": "damage_boost",
-      "maxStack": 5,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "HandGrip"
     },
     {
-      "description": "最大HP +15",
+      "description": "最大HP +25",
       "displayName": "生命のミルク",
       "effects": [
         {
           "operation": "AddFlat",
           "stat": "MaxHealth",
           "type": "StatModifier",
-          "valuePerStack": 15.0
+          "valuePerStack": 25.0
         }
       ],
       "id": "max_health_boost",
-      "maxStack": 5,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "Milk"
     },
     {
-      "description": "移動速度 +5%",
+      "description": "移動速度 +10%",
       "displayName": "俊敏なローブ",
       "effects": [
         {
           "operation": "AddFlat",
           "stat": "MovementSpeed",
           "type": "StatModifier",
-          "valuePerStack": 0.05000000074505806
+          "valuePerStack": 0.10000000149011612
         }
       ],
       "id": "movement_speed_boost",
-      "maxStack": 30,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "SpeedRobe"
     },
@@ -60,87 +60,87 @@
         }
       ],
       "id": "relic_1",
-      "maxStack": 10,
+      "maxStack": 9,
       "rarity": "Rare",
       "textureName": "Amplifier"
     },
     {
-      "description": "獲得コイン +10%",
+      "description": "獲得コイン +20%",
       "displayName": "金の王冠",
       "effects": [
         {
           "operation": "AddPercent",
           "stat": "MoneyGain",
           "type": "StatModifier",
-          "valuePerStack": 0.10000000149011612
+          "valuePerStack": 0.20000000298023224
         }
       ],
       "id": "money_gain_boost",
-      "maxStack": 10,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "Crown"
     },
     {
-      "description": "HPリジェネ速度 +10%",
+      "description": "HPリジェネ速度 +20%",
       "displayName": "再生のキャンディ",
       "effects": [
         {
           "operation": "AddPercent",
           "stat": "HealthRegenerationSpeed",
           "type": "StatModifier",
-          "valuePerStack": 0.10000000149011612
+          "valuePerStack": 0.20000000298023224
         }
       ],
       "id": "health_regeneration_speed_boost",
-      "maxStack": 100,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "Candy"
     },
     {
-      "description": "獲得EXP +10%",
+      "description": "獲得EXP +20%",
       "displayName": "知恵のフラスコ",
       "effects": [
         {
           "operation": "AddPercent",
           "stat": "ExpGain",
           "type": "StatModifier",
-          "valuePerStack": 0.10000000149011612
+          "valuePerStack": 0.20000000298023224
         }
       ],
       "id": "exp_gain_boost",
-      "maxStack": 49,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "Flask"
     },
     {
-      "description": "クリティカル発生 +5%",
+      "description": "クリティカル発生 +7.5%",
       "displayName": "幸運魚",
       "effects": [
         {
           "operation": "AddFlat",
           "stat": "ProjectileCriticalChance",
           "type": "StatModifier",
-          "valuePerStack": 5.0
+          "valuePerStack": 7.5
         }
       ],
       "id": "projectile_critical_chance_boost",
-      "maxStack": 10,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "CriticalFish"
     },
     {
-      "description": "射撃クールタイム -5%",
+      "description": "射撃クールタイム -7.5%",
       "displayName": "加速器",
       "effects": [
         {
           "operation": "AddPercent",
           "stat": "WeaponShotCooldown",
           "type": "StatModifier",
-          "valuePerStack": -0.05000000074505806
+          "valuePerStack": -0.07500000298023224
         }
       ],
       "id": "weapon_shot_cooldown_reduction",
-      "maxStack": 10,
+      "maxStack": 9,
       "rarity": "Uncommon",
       "textureName": "Accelerator"
     },
@@ -156,12 +156,12 @@
         }
       ],
       "id": "jump_count_boost",
-      "maxStack": 10,
+      "maxStack": 9,
       "rarity": "Epic",
       "textureName": "Uchiwa"
     },
     {
-      "description": "敵から受けるダメージ -10%",
+      "description": "受けるダメージ -10%",
       "displayName": "甲冑",
       "effects": [
         {
@@ -177,36 +177,19 @@
       "textureName": "HeadArmor"
     },
     {
-      "description": "効果説明",
-      "displayName": "epic",
+      "description": "稀に経験知を引き寄せる",
+      "displayName": "携帯マグネット",
       "effects": [
         {
-          "operation": "AddFlat",
-          "stat": "OutgoingDamage",
-          "type": "StatModifier",
-          "valuePerStack": 0.0
+          "effect": "AttractAllExp",
+          "intervalSeconds": 30.0,
+          "type": "Periodic"
         }
       ],
-      "id": "relic_2",
-      "maxStack": 9,
-      "rarity": "Epic",
-      "textureName": "None"
-    },
-    {
-      "description": "効果説明",
-      "displayName": "Legend",
-      "effects": [
-        {
-          "operation": "AddFlat",
-          "stat": "OutgoingDamage",
-          "type": "StatModifier",
-          "valuePerStack": 0.0
-        }
-      ],
-      "id": "relic_3",
-      "maxStack": 9,
+      "id": "periodic_exp_attraction",
+      "maxStack": 1,
       "rarity": "Legendary",
-      "textureName": "None"
+      "textureName": "Magnet"
     }
   ]
 }

@@ -26,7 +26,7 @@ namespace Player {
 		float currentExp = 0.0f;       // 現在の経験値
 		float expToNextLevel = 100.0f; // 次のレベルまでの経験値
 
-		float currentMoney = 9999.0f;  // 所持金
+		float currentMoney = 100.0f;   // 所持金
 
 		int karmaCount = 0;            // Karma取得数
 

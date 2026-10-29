@@ -1,6 +1,6 @@
 # Blender 5.1.2
 # www.blender.org
-mtllib enemy.mtl
+mtllib OverTimeEnemy.mtl
 o 立方体
 v -0.500000 0.000000 0.500000
 v -0.500000 2.000000 0.500000

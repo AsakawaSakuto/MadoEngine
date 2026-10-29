@@ -4,6 +4,10 @@
 
 namespace Relic {
 
+	float PeriodicEffect::GetIntervalSeconds(int stackCount) const {
+		return std::max(kMinIntervalSeconds, intervalSeconds / static_cast<float>(std::max(1, stackCount)));
+	}
+
 	ModifierSnapshot::ModifierSnapshot() {
 		Reset();
 	}

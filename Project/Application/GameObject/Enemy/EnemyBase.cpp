@@ -110,11 +110,11 @@ namespace Enemy {
 		std::string modelAssetName = GetModelAssetName();
 		if (!MadoEngine::ModelManager::GetInstance().GetSharedData(modelAssetName)) {
 
-			// 専用Modelが未配置でもEnemyの当たり判定と行動を検証できるよう共通Modelへ代替
+			// 専用Modelが未配置でもEnemyの当たり判定と行動を検証できるようNormalのModelへ代替
 			Logger::Output(
-				"Enemy用Modelアセットが見つからないためenemyへ切り替えます: " + modelAssetName,
+				"Enemy用Modelアセットが見つからないためNormalEnemyへ切り替えます: " + modelAssetName,
 				Logger::Level::Warning);
-			modelAssetName = "enemy";
+			modelAssetName = "NormalEnemy";
 		}
 
 		model_ = MyModel::Create(modelName_, modelAssetName, desc.sceneType);

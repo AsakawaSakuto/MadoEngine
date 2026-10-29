@@ -252,6 +252,17 @@ void GameScene::UpdateGameplay(float deltaTime) {
 	DispatchMapEventRequests();
 	if (!player_->IsDead()) {
 
+		// 周期発動の判定をRelic側へ集約し、Map操作だけをSceneから既存の吸着処理へ配送
+		for (Relic::PeriodicEffectType type : relicSystem_->UpdatePeriodicEffects(deltaTime)) {
+			switch (type) {
+			case Relic::PeriodicEffectType::AttractAllExp:
+				DropObject::Manager::GetInstance().AttractAllExp(player_->GetPosition());
+				break;
+			default:
+				break;
+			}
+		}
+
 		// 死亡確定後の所持金や経験値の変化を防ぐためDrop回収を停止
 		DropObject::Manager::GetInstance().Update(deltaTime, *player_);
 	}

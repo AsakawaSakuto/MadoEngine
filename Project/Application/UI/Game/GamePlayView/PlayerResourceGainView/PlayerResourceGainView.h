@@ -87,7 +87,7 @@ namespace UI::Game {
 		Vector2 healthBasePosition_ = { 600.0f, 440.0f };        // HP獲得通知の基準座標
 		Vector2 expBasePosition_ = { 600.0f, 440.0f };           // Exp獲得通知の基準座標
 		Vector2 moneyBasePosition_ = { 600.0f, 440.0f };         // Money獲得通知の基準座標
-		Vector4 healthTextColor_ = { 0.25f, 1.0f, 0.35f, 1.0f }; // HP獲得通知の文字色
+		Vector4 healthTextColor_ = { 1.0f, 0.25f, 0.85f, 1.0f }; // HP獲得通知の文字色
 		Vector4 expTextColor_ = { 0.2f, 0.9f, 1.0f, 1.0f };      // Exp獲得通知の文字色
 		Vector4 moneyTextColor_ = { 1.0f, 0.85f, 0.15f, 1.0f };  // Money獲得通知の文字色
 	};
