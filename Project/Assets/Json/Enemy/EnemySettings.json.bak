@@ -343,7 +343,7 @@
             "moveSpeed": 4.0,
             "movementColliderRadius": 0.5,
             "power": 5.0,
-            "scaleMultiplier": 75.0
+            "scaleMultiplier": 0.75
         },
         "Runner": {
             "color": [

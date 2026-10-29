@@ -101,9 +101,11 @@ namespace Player {
 	void Base::SetRuntimeModifiers(const RuntimeModifiers& modifiers) {
 		const float nextMaxHealth = baseMaxHealth_ + modifiers.maxHealthFlat;
 
-		// 最大HP増加分は現在HPにも加え、同じ補正の再適用では重複回復を防止
+		// 更新前の最大HPとの差分だけを回復し、同じ補正の再適用による重複回復を防止
+		const float maxHealthIncrease = std::max(0.0f, nextMaxHealth - status_.maxHealth);
 		status_.maxHealth = nextMaxHealth;
-		status_.currentHealth = std::clamp(status_.currentHealth + nextMaxHealth - status_.maxHealth,0.0f, nextMaxHealth);
+		status_.currentHealth = std::clamp(status_.currentHealth, 0.0f, nextMaxHealth);
+		RecoverHealth(maxHealthIncrease);
 
 		// 外部補正の倍率を反映
 		statusMultiplier_.money                   = modifiers.moneyGainMultiplier;
