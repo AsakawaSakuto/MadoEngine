@@ -155,6 +155,16 @@ namespace {
 		};
 	}
 
+	/// @brief Bonus Wave設定をJsonへ変換
+	/// @param settings 変換するBonus Wave設定
+	/// @return 変換済みJson
+	nlohmann::json SerializeBonusWaveSettings(const Enemy::BonusWaveSettings& settings) {
+		nlohmann::json json = SerializeWaveSpawnSettings(settings);
+		json["spawnCountIncreaseInterval"] = settings.spawnCountIncrease.interval;
+		json["spawnCountIncreaseAmount"] = settings.spawnCountIncrease.amount;
+		return json;
+	}
+
 	/// @brief Wave設定をJsonへ変換
 	/// @param settings 変換するWave設定
 	/// @return 変換済みJson
@@ -232,6 +242,18 @@ namespace {
 				legacyMoveSpeedRate * kLegacyNormalMoveSpeed,
 			};
 		}
+	}
+
+	/// @brief JsonからBonus Wave設定を部分更新
+	/// @param json 読み込み元Json
+	/// @param outSettings 更新先Bonus Wave設定
+	void DeserializeBonusWaveSettings(const nlohmann::json& json, Enemy::BonusWaveSettings& outSettings) {
+		using MadoEngine::Json::JsonSerializer;
+		DeserializeWaveSpawnSettings(json, outSettings);
+		outSettings.spawnCountIncrease.interval = JsonSerializer::GetOrDefault<float>(
+			json, "spawnCountIncreaseInterval", outSettings.spawnCountIncrease.interval);
+		outSettings.spawnCountIncrease.amount = JsonSerializer::GetOrDefault<std::uint32_t>(
+			json, "spawnCountIncreaseAmount", outSettings.spawnCountIncrease.amount);
 	}
 
 	/// @brief JsonからWave設定を部分更新
@@ -376,7 +398,7 @@ namespace Enemy {
 			maxAliveEnemies_ = static_cast<std::size_t>(std::min<std::uint64_t>(
 				maxAliveEnemies, (std::numeric_limits<std::size_t>::max)()));
 			if (hasBonusWaveSettings) {
-				DeserializeWaveSpawnSettings(spawnerJson.at("bonusWave"), bonusWaveSettings_);
+				DeserializeBonusWaveSettings(spawnerJson.at("bonusWave"), bonusWaveSettings_);
 			}
 			if (spawnerJson.contains("waves") && spawnerJson.at("waves").is_array()) {
 				waves_.clear();
@@ -390,7 +412,7 @@ namespace Enemy {
 
 			// 旧Jsonでは最終通常Waveの値を引き継いで時間切れ後の生成停止を回避
 			if (!hasBonusWaveSettings && !waves_.empty()) {
-				bonusWaveSettings_ = static_cast<const WaveSpawnSettings&>(waves_.back());
+				static_cast<WaveSpawnSettings&>(bonusWaveSettings_) = waves_.back();
 			}
 		}
 
@@ -418,7 +440,7 @@ namespace Enemy {
 		nlohmann::json root;
 		root["enemyStatus"] = std::move(statusJson);
 		root["enemySpawner"]["maxAliveEnemies"] = maxAliveEnemies_;
-		root["enemySpawner"]["bonusWave"] = SerializeWaveSpawnSettings(bonusWaveSettings_);
+		root["enemySpawner"]["bonusWave"] = SerializeBonusWaveSettings(bonusWaveSettings_);
 		root["enemySpawner"]["waves"] = std::move(waveJson);
 		const bool wasSaved = MadoEngine::Json::JsonFile::Save(kEnemySettingsJsonPath, root, 4, true);
 		if (wasSaved) {
@@ -487,6 +509,9 @@ namespace Enemy {
 			NormalizeWaveSettings(wave);
 		}
 		NormalizeWaveSpawnSettings(bonusWaveSettings_);
+		bonusWaveSettings_.spawnCountIncrease.interval = std::max(
+			kMinStatIncreaseInterval,
+			SanitizeFinite(bonusWaveSettings_.spawnCountIncrease.interval, kMinStatIncreaseInterval));
 	}
 
 	const TypeSettings& Settings::GetTypeSettings(Data::Type type) const {

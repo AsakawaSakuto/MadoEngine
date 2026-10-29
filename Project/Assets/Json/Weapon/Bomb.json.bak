@@ -11,7 +11,7 @@
             "damagePerTick": {
                 "fixedAddValue": 2.0,
                 "isSelected": true,
-                "rarityAddValue": 1.5,
+                "rarityAddValue": 0.9900000095367432,
                 "value": 5.0
             },
             "duration": {

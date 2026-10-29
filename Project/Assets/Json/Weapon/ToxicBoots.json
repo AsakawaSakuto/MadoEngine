@@ -84,10 +84,10 @@
             "value": 1.0
         },
         "size": {
-            "fixedAddValue": 0.10000000149011612,
-            "isSelected": false,
-            "rarityAddValue": 0.05000000074505806,
-            "value": 1.0
+            "fixedAddValue": 0.15000000596046448,
+            "isSelected": true,
+            "rarityAddValue": 0.10000000149011612,
+            "value": 1.5
         },
         "speed": {
             "fixedAddValue": 0.0,

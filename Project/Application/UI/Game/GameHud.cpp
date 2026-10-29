@@ -60,7 +60,7 @@ namespace {
 		"InputUI1_Key", "InputUI2_Key", "InputUI3_Key", "InputUI4_Key",
 	};
 	constexpr const char* kStaticHudTextNames[] = {
-		"EnemyCountText", "GamePlayTimerText", "PlayerHealthText", "FpsText",
+		"EnemyCountText", "GamePlayTimerText", "OverTimeText", "PlayerHealthText", "FpsText",
 		"KillCountText", "SeedValueText", "MoneyText", "TheGoalText", "Text", "Text1", "Text2", "Text3", "Text4",
 	};
 }
@@ -183,7 +183,7 @@ namespace UI::Game {
 		// 致死被弾後もゲーム進行から独立して被ダメージTextを最後まで再生
 		playerDamageView_.Update(deltaTime);
 		fpsMeasurementView_.Update(deltaTime);
-		gamePlayTimerView_.Update(state.remainingTime);
+		gamePlayTimerView_.Update(state.remainingTime, deltaTime);
 		UpdateGameStartPresentation(state.gameStartProgress, state.gamePlayElapsedTime);
 		ApplyStaticVisibility(isVisible_);
 		UpdateUpgradePresentation(deltaTime, isVisible_ && state.isWaitingUpgradeSelection);

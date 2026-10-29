@@ -90,10 +90,10 @@
             "value": 1.0
         },
         "speed": {
-            "fixedAddValue": 5.0,
+            "fixedAddValue": 7.5,
             "isSelected": true,
-            "rarityAddValue": 3.5,
-            "value": 12.0
+            "rarityAddValue": 2.5,
+            "value": 15.0
         }
     }
 }

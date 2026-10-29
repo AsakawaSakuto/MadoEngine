@@ -59,6 +59,17 @@ namespace Enemy {
 		float endTime = 300.0f;
 	};
 
+	/// @brief 一定間隔ごとに適用する生成数の加算設定
+	struct TimedSpawnCountIncreaseSettings {
+		float interval = 60.0f;
+		std::uint32_t amount = 0;
+	};
+
+	/// @brief 制限時間以降に独立して適用するEnemy生成設定
+	struct BonusWaveSettings : public WaveSpawnSettings {
+		TimedSpawnCountIncreaseSettings spawnCountIncrease;
+	};
+
 	/// @brief EnemyStatusとWave設定の保持とJson永続化を管理するクラス
 	class Settings final {
 	public:
@@ -117,11 +128,11 @@ namespace Enemy {
 
 		/// @brief 制限時間後に適用するBonus Wave設定を取得
 		/// @return Bonus Wave設定
-		const WaveSpawnSettings& GetBonusWaveSettings() const { return bonusWaveSettings_; }
+		const BonusWaveSettings& GetBonusWaveSettings() const { return bonusWaveSettings_; }
 
 		/// @brief 制限時間後に適用するBonus Waveの編集用設定を取得
 		/// @return Bonus Waveの編集用設定
-		WaveSpawnSettings& EditBonusWaveSettings() { return bonusWaveSettings_; }
+		BonusWaveSettings& EditBonusWaveSettings() { return bonusWaveSettings_; }
 
 		/// @brief 全Wave共通のEnemy最大生存数を取得
 		/// @return 全Wave共通のEnemy最大生存数
@@ -153,7 +164,7 @@ namespace Enemy {
 		EliteSettings eliteSettings_;
 		std::size_t maxAliveEnemies_ = 999;
 		std::vector<WaveSettings> waves_;
-		WaveSpawnSettings bonusWaveSettings_;
+		BonusWaveSettings bonusWaveSettings_;
 	};
 
 	/// @brief Enemy種類を設定名へ変換

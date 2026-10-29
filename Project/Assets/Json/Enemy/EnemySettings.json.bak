@@ -3,17 +3,19 @@
         "bonusWave": {
             "eliteSpawnInterval": 25,
             "healthIncreaseAmount": 1.0,
-            "healthIncreaseInterval": 1.0,
+            "healthIncreaseInterval": 2.0,
             "maxSpawnRadius": 24.0,
             "minSpawnRadius": 24.0,
-            "moveSpeedIncreaseAmount": 0.009999999776482582,
+            "moveSpeedIncreaseAmount": 0.019999999552965164,
             "moveSpeedIncreaseInterval": 1.0,
             "normalSpawnRate": 0.0,
             "overTimeSpawnRate": 1.0,
-            "powerIncreaseAmount": 0.10000000149011612,
+            "powerIncreaseAmount": 0.20000000298023224,
             "powerIncreaseInterval": 1.0,
             "runnerSpawnRate": 0.0,
             "spawnCount": 5,
+            "spawnCountIncreaseAmount": 0,
+            "spawnCountIncreaseInterval": 60.0,
             "spawnInterval": 1.0,
             "tankSpawnRate": 0.0
         },
@@ -364,7 +366,7 @@
                 -0.3499999940395355
             ],
             "knockbackResistance": 0.0,
-            "moveSpeed": 5.400000095367432,
+            "moveSpeed": 5.0,
             "movementColliderRadius": 0.3499999940395355,
             "power": 3.5,
             "scaleMultiplier": 0.44999998807907104

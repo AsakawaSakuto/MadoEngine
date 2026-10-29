@@ -285,7 +285,7 @@ namespace Enemy {
 		}
 		ImGui::PushID("BonusWave");
 		if (ImGui::CollapsingHeader("時間切れ以降の生成設定", ImGuiTreeNodeFlags_DefaultOpen)) {
-			settingsChanged |= DrawWaveSpawnSettings(settings.EditBonusWaveSettings());
+			settingsChanged |= DrawBonusWaveSpawnSettings(settings.EditBonusWaveSettings());
 		}
 		ImGui::PopID();
 		return settingsChanged;
@@ -460,6 +460,28 @@ namespace Enemy {
 		(void)waveSettings;
 		return false;
 #endif // USE_IMGUI
+	}
+
+	bool Editor::DrawBonusWaveSpawnSettings(BonusWaveSettings& waveSettings) {
+		bool settingsChanged = DrawWaveSpawnSettings(waveSettings);
+#ifdef USE_IMGUI
+
+		// 通常Waveの編集項目と分離し、Bonus開始後の一回あたり生成数だけを段階的に増加
+		ImGui::TextUnformatted("生成数");
+		ImGui::Indent();
+		settingsChanged |= ImGui::DragFloat(
+			"増加間隔##SpawnCount",
+			&waveSettings.spawnCountIncrease.interval,
+			0.1f,
+			0.01f,
+			86400.0f,
+			"%.1f秒");
+		settingsChanged |= ImGui::DragScalar(
+			"1回の増加量##SpawnCount", ImGuiDataType_U32, &waveSettings.spawnCountIncrease.amount, 1.0f);
+		ImGui::TextDisabled("Bonus Wave開始後、指定間隔ごとに1回の生成数へ加算（0体で無効）");
+		ImGui::Unindent();
+#endif // USE_IMGUI
+		return settingsChanged;
 	}
 
 } // namespace Enemy

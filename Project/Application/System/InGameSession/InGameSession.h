@@ -68,7 +68,7 @@ namespace System {
 		float GetExecutionTime() const { return executionTime_; }
 
 		/// @brief ゲームプレイの残り時間を取得
-		/// @return 0秒以上に補正された残り時間
+		/// @return 残り時間、制限時間超過後は超過秒数の負値
 		float GetRemainingTime() const;
 
 		/// @brief 制限時間に到達したか確認

@@ -94,13 +94,12 @@ namespace Enemy {
 		const float spawnInterval = std::max(0.01f, wave->spawnInterval);
 		const std::uint64_t karmaBonusSpawnCount = static_cast<std::uint64_t>(
 			std::max(0, player_->GetKarmaCount()));
-		const std::uint32_t adjustedSpawnCount = static_cast<std::uint32_t>((std::min)(
-			static_cast<std::uint64_t>(wave->spawnCount) + karmaBonusSpawnCount,
-			static_cast<std::uint64_t>((std::numeric_limits<std::uint32_t>::max)())));
 
-		// 長いFrameでも経過した生成周期を取りこぼさず、各周期へ現在のKarma取得数を加算
+		// 長いFrameでも生成周期ごとの時刻で増加数を計算し、過去の周期への過剰加算を回避
 		while (spawnTimer_ >= spawnInterval) {
 			spawnTimer_ -= spawnInterval;
+			const float spawnTime = elapsedTime_ - spawnTimer_;
+			const std::uint32_t adjustedSpawnCount = CalculateSpawnCount(*wave, spawnTime, karmaBonusSpawnCount);
 			SpawnBatch(*wave, adjustedSpawnCount);
 		}
 	}
@@ -244,6 +243,23 @@ namespace Enemy {
 		activeWaveIndex_ = waveIndex;
 		activeWaveEnemySpawnCount_ = 0;
 		spawnTimer_ = 0.0f;
+	}
+
+	std::uint32_t Spawner::CalculateSpawnCount(const WaveSpawnSettings& wave, float spawnTime, std::uint64_t karmaBonusSpawnCount) const {
+		double spawnCount = static_cast<double>(wave.spawnCount) + static_cast<double>(karmaBonusSpawnCount);
+		if (activeWaveIndex_ == kBonusWaveIndex) {
+
+			// 通常Waveの時間を含めず、Bonus Wave開始後に完了した周期だけを生成数へ加算
+			const TimedSpawnCountIncreaseSettings& increase = Settings::GetInstance().GetBonusWaveSettings().spawnCountIncrease;
+			const double interval = (std::max)(0.01, static_cast<double>(increase.interval));
+			const double bonusElapsedTime = (std::max)(0.0, static_cast<double>(spawnTime) - timeLimit_);
+			const double completedIntervals = std::floor(bonusElapsedTime / interval);
+			spawnCount += completedIntervals * static_cast<double>(increase.amount);
+		}
+
+		// 長時間の継続や大きな増加量でも整数への変換前に上限を保証
+		return static_cast<std::uint32_t>((std::min)(
+			spawnCount, static_cast<double>((std::numeric_limits<std::uint32_t>::max)())));
 	}
 
 	std::uint32_t Spawner::SpawnBatch(const WaveSpawnSettings& wave, std::uint32_t spawnCount) {

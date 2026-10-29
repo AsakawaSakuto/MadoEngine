@@ -81,6 +81,16 @@ namespace Enemy {
 		/// @param waveIndex 新しく処理するWave位置
 		void ChangeActiveWave(std::size_t waveIndex);
 
+		/// @brief Bonus Waveの時間経過とKarmaを反映した自動生成数を計算
+		/// @param wave 適用するWave設定
+		/// @param spawnTime 生成周期に対応するゲーム経過秒数
+		/// @param karmaBonusSpawnCount Karmaによる生成数の加算量
+		/// @return 表現可能な範囲へ収めた一回の生成数
+		std::uint32_t CalculateSpawnCount(
+			const WaveSpawnSettings& wave,
+			float spawnTime,
+			std::uint64_t karmaBonusSpawnCount) const;
+
 		/// @brief Wave設定に従ってEnemyをまとめて生成
 		/// @param wave 適用するWave設定
 		/// @param spawnCount 同時生成するEnemy数

@@ -77,7 +77,9 @@ namespace System {
 
 		// 制限時間とGameObjectへ同じ経過時間を適用して開始待機や停止との時間差を防止
 		const float gameDeltaTime = (std::max)(0.0f, deltaTime);
-		executionTime_ = (std::min)(timeLimit_, executionTime_ + gameDeltaTime);
+
+		// 制限時間後も累積し、HUDでの超過時間の表示に使用
+		executionTime_ += gameDeltaTime;
 
 		if (executionTime_ >= timeLimit_) {
 			isTimeUp_ = true;
@@ -162,7 +164,7 @@ namespace System {
 	}
 
 	float InGameSession::GetRemainingTime() const {
-		return (std::max)(0.0f, timeLimit_ - executionTime_);
+		return timeLimit_ - executionTime_;
 	}
 
 	void InGameSession::SetUpgradeSelectionActive(bool isActive) {

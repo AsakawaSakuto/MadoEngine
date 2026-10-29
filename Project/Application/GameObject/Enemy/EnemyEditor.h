@@ -39,6 +39,11 @@ namespace Enemy {
 		/// @return 設定が変更された場合はtrue
 		bool DrawWaveSpawnSettings(WaveSpawnSettings& waveSettings);
 
+		/// @brief Bonus Waveの生成設定と時間経過による生成数増加を描画
+		/// @param waveSettings 編集するBonus Wave設定
+		/// @return 設定が変更された場合はtrue
+		bool DrawBonusWaveSpawnSettings(BonusWaveSettings& waveSettings);
+
 		Spawner* spawner_ = nullptr;
 		Manager* manager_ = nullptr;
 		Data::Type selectedType_ = Data::Type::Normal;
