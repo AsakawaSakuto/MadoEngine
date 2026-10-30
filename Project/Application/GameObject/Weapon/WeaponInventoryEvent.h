@@ -1,4 +1,5 @@
 #pragma once
+#include "Projectile/ProjectileStatus.h"
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -18,6 +19,7 @@ namespace Weapon {
 		std::size_t slotIndex = 0;
 		std::string displayName;
 		int level = 1;
+		Projectile::Type weaponType = Projectile::Type::None;
 	};
 
 }

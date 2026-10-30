@@ -188,6 +188,7 @@
     <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\UI\Game\GameHud.cpp" />
+    <ClCompile Include="Application\UI\Result\ResultWeaponStatsUI.cpp" />
     <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp" />
     <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
     <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
@@ -445,6 +446,7 @@
     <ClInclude Include="Application\System\RewardSelection\RewardSelectionController.h" />
     <ClInclude Include="Application\.SceneManager\Scene\GameScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h" />
+    <ClInclude Include="Application\UI\Result\ResultWeaponStatsUI.h" />
     <ClInclude Include="Application\.SceneManager\Scene\TestScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerStatus.h" />

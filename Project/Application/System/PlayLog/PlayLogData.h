@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject/Rarity.h"
+#include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -32,6 +33,7 @@ namespace System {
 		double acquiredAtSeconds = 0.0;
 		double equippedSeconds = 0.0;
 		bool equippedAtEnd = true;
+		Projectile::Type weaponType = Projectile::Type::None;
 	};
 
 	/// @brief 終了確定時に所持していたレリック

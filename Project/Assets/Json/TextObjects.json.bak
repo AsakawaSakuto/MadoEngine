@@ -594,7 +594,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.9",
+            "text": "FPS : 60.2",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1334,8 +1334,8 @@
             "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
-                1.100000023841858,
-                1.100000023841858
+                1.0,
+                1.0
             ],
             "scene": "Game",
             "screen": "BackBuffer",
@@ -1484,8 +1484,8 @@
             "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                1.100000023841858,
+                1.100000023841858
             ],
             "scene": "Game",
             "screen": "BackBuffer",

@@ -49,6 +49,7 @@ namespace System {
 			record.slotIndex = event.slotIndex;
 			record.name = event.displayName;
 			record.level = event.level;
+			record.weaponType = event.weaponType;
 			record.acquiredAtSeconds = data_.elapsedSeconds;
 			data_.weapons.push_back(std::move(record));
 		} else if (event.type == Weapon::InventoryChangeType::Removed && weapon) {

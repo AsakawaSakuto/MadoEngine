@@ -2,6 +2,7 @@
 #include "SceneTransitionController.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "System/GameSeed/GameSeedSystem.h"
+#include "System/PlayLog/PlayLogData.h"
 #include "Utility/Parameter/ParameterStore.h"
 
 /// @brief Sceneをまたいで保持するApplication共通データ
@@ -20,7 +21,16 @@ public:
 		gameSeedSystem_.Initialize();
 		sceneTransitionController_.Reset();
 		initialWeaponType_ = Projectile::Type::FireBall;
+		lastPlayResult_ = {};
 	}
+
+	/// @brief 終了確定済みのプレイ結果をScene間で保持
+	/// @param result 終了時点の装備と戦績を含むプレイ結果
+	void SetLastPlayResult(const System::PlayLogData& result) { lastPlayResult_ = result; }
+
+	/// @brief 直前に終了したプレイ結果を読み取り専用で取得
+	/// @return 終了時点のプレイ結果、未終了の場合は初期値
+	const System::PlayLogData& GetLastPlayResult() const { return lastPlayResult_; }
 
 	/// @brief Titleで決定した初期武器の設定
 	/// @param weaponType 使用可能な初期武器の種類
@@ -64,5 +74,6 @@ private:
 	MadoEngine::ParameterStore& parameterStore_;
 	System::GameSeedSystem gameSeedSystem_;
 	SceneTransitionController sceneTransitionController_;
+	System::PlayLogData lastPlayResult_;
 	Projectile::Type initialWeaponType_ = Projectile::Type::FireBall;
 };

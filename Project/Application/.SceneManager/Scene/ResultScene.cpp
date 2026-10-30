@@ -8,6 +8,7 @@ ResultScene::ResultScene(CommonData& commonData)
 ResultScene::~ResultScene() {}
 
 void ResultScene::Initialize() {
+	weaponStatsUI_.Initialize(commonData_.GetLastPlayResult());
 	Logger::Output("リザルトシーンを初期化しました", Logger::Level::Application);
 }
 
@@ -46,5 +47,6 @@ void ResultScene::DrawImGui() {
 }
 
 void ResultScene::Finalize() {
+	weaponStatsUI_.Finalize();
 	Logger::Output("リザルトシーンの終了処理を実行しました", Logger::Level::Application);
 }

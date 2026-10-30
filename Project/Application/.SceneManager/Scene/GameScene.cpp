@@ -721,6 +721,9 @@ void GameScene::FinishPlayLog(System::PlayEndReason reason) {
 	}
 	playLogRecorder_.Finish(reason, player_->GetStatus().currentMoney, player_->GetKarmaCount(), std::move(relics));
 
+	// GameSceneの破棄後も終了時の装備と戦績を参照できる値の複製
+	commonData_.SetLastPlayResult(playLogRecorder_.GetData());
+
 	// 死亡以外の終了要求でも演出完了待ちの間にゲーム状態が変化しない停止状態へ移行
 	inGameSession_->SetGameOver();
 }

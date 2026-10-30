@@ -103,6 +103,7 @@ namespace Weapon {
 					slotIndex,
 					Projectile::ProjectileTypeToDisplayName(type),
 					weapons_[slotIndex]->GetUpgradeLevel(),
+					type,
 				});
 
 				// 強化候補など装備状態に依存する外部キャッシュを無効化
@@ -244,6 +245,7 @@ namespace Weapon {
 				weaponIndex,
 				Projectile::ProjectileTypeToDisplayName(weapons_[weaponIndex]->GetProjectileType()),
 				weapons_[weaponIndex]->GetUpgradeLevel(),
+				weapons_[weaponIndex]->GetProjectileType(),
 			});
 			weapons_[weaponIndex].reset();
 

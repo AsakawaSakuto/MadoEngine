@@ -1,11 +1,11 @@
 #pragma once
 #include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
+#include "UI/Result/ResultWeaponStatsUI.h"
 
 /// @brief リザルトシーン
 /// @details ゲームの結果を表示し、SpaceまたはGamePad AでTitle、QまたはGamePad XでGameへ遷移
-class ResultScene : public IScene
-{
+class ResultScene : public IScene {
 public:
 	/// @brief コンストラクタ
 	/// @param commonData Sceneをまたいで保持するApplication共通データ
@@ -33,4 +33,5 @@ public:
 
 private:
 	CommonData& commonData_;
+	UI::Result::WeaponStatsUI weaponStatsUI_;
 };
