@@ -63,7 +63,7 @@
         "bow": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 0.8399999737739563
+            "volume": 0.6600000262260437
         },
         "chest": {
             "pitchSemitones": 0.0,
@@ -103,7 +103,7 @@
         "enemydamageburn": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.0
         },
         "enemydamagecritical": {
             "pitchSemitones": 0.0,
@@ -123,7 +123,7 @@
         "enemydamagepoison": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.0
         },
         "exp": {
             "pitchSemitones": 2.4000000953674316,
@@ -168,12 +168,12 @@
         "fireball": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.3799999952316284
+            "volume": 1.100000023841858
         },
         "hammer": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 0.6800000071525574
+            "volume": 0.5199999809265137
         },
         "heal": {
             "pitchSemitones": 0.0,
@@ -183,12 +183,12 @@
         "jar": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 0.0
+            "volume": 2.0
         },
         "joker": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.2000000476837158
+            "volume": 1.4900000095367432
         },
         "jump": {
             "pitchSemitones": 0.0,
@@ -233,7 +233,7 @@
         "pistol": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 0.30000001192092896
+            "volume": 0.23000000417232513
         },
         "playerdamage": {
             "pitchSemitones": 0.0,
@@ -288,12 +288,12 @@
         "sword": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.2899999618530273
+            "volume": 1.090000033378601
         },
         "thunder": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 0.38999998569488525
+            "volume": 0.23999999463558197
         },
         "titlebgm": {
             "pitchSemitones": 0.0,
@@ -308,7 +308,7 @@
         "trump": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.100000023841858
+            "volume": 0.8299999833106995
         },
         "upgradebgm": {
             "pitchSemitones": 0.0,

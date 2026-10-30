@@ -55,7 +55,7 @@ namespace DropObject {
 	private:
 		static constexpr std::size_t kExpPoolCapacity = 512;
 		static constexpr std::size_t kMoneyPoolCapacity = 128;
-		static constexpr std::size_t kSpecialPoolCapacity = 16;
+		static constexpr std::size_t kSpecialPoolCapacity = 64;
 		static constexpr float kExpCollectionSoundInterval = 0.05f;
 
 		struct PoolEntry {

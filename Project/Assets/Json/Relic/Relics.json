@@ -190,6 +190,22 @@
       "maxStack": 1,
       "rarity": "Legendary",
       "textureName": "Magnet"
+    },
+    {
+      "description": "敵の移動速度 -5%",
+      "displayName": "足止めアイス",
+      "effects": [
+        {
+          "operation": "AddFlat",
+          "stat": "OutgoingDamage",
+          "type": "StatModifier",
+          "valuePerStack": 0.0
+        }
+      ],
+      "id": "relic_2",
+      "maxStack": 9,
+      "rarity": "Rare",
+      "textureName": "item558"
     }
   ]
 }

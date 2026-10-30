@@ -15,7 +15,7 @@
             "runnerSpawnRate": 0.0,
             "spawnCount": 3,
             "spawnCountIncreaseAmount": 1,
-            "spawnCountIncreaseInterval": 15.0,
+            "spawnCountIncreaseInterval": 20.0,
             "spawnInterval": 1.0,
             "tankSpawnRate": 0.0
         },
@@ -97,7 +97,7 @@
                 "powerIncreaseInterval": 60.0,
                 "runnerSpawnRate": 0.5,
                 "spawnCount": 2,
-                "spawnInterval": 0.3499999940395355,
+                "spawnInterval": 0.5,
                 "startTime": 61.0,
                 "tankSpawnRate": 0.0
             },
@@ -157,7 +157,7 @@
                 "powerIncreaseInterval": 3.0,
                 "runnerSpawnRate": 0.3499999940395355,
                 "spawnCount": 3,
-                "spawnInterval": 0.8500000238418579,
+                "spawnInterval": 1.0,
                 "startTime": 121.0,
                 "tankSpawnRate": 0.20000000298023224
             },
@@ -177,7 +177,7 @@
                 "powerIncreaseInterval": 90.0,
                 "runnerSpawnRate": 0.0,
                 "spawnCount": 3,
-                "spawnInterval": 0.3499999940395355,
+                "spawnInterval": 0.5,
                 "startTime": 151.0,
                 "tankSpawnRate": 0.0
             },
@@ -197,7 +197,7 @@
                 "powerIncreaseInterval": 90.0,
                 "runnerSpawnRate": 0.44999998807907104,
                 "spawnCount": 3,
-                "spawnInterval": 0.8500000238418579,
+                "spawnInterval": 1.0,
                 "startTime": 181.0,
                 "tankSpawnRate": 0.10000000149011612
             },
@@ -217,7 +217,7 @@
                 "powerIncreaseInterval": 3.0,
                 "runnerSpawnRate": 0.5,
                 "spawnCount": 5,
-                "spawnInterval": 1.0,
+                "spawnInterval": 1.149999976158142,
                 "startTime": 211.0,
                 "tankSpawnRate": 0.0
             },
@@ -237,7 +237,7 @@
                 "powerIncreaseInterval": 90.0,
                 "runnerSpawnRate": 0.0,
                 "spawnCount": 5,
-                "spawnInterval": 0.3499999940395355,
+                "spawnInterval": 0.5,
                 "startTime": 241.0,
                 "tankSpawnRate": 0.0
             },
@@ -257,7 +257,7 @@
                 "powerIncreaseInterval": 90.0,
                 "runnerSpawnRate": 0.375,
                 "spawnCount": 3,
-                "spawnInterval": 0.75,
+                "spawnInterval": 0.8500000238418579,
                 "startTime": 271.0,
                 "tankSpawnRate": 0.25
             }

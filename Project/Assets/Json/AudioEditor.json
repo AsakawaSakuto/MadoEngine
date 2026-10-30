@@ -103,27 +103,27 @@
         "enemydamageburn": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.0
         },
         "enemydamagecritical": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.5699999928474426
         },
         "enemydamagedie": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.8899999856948853
         },
         "enemydamagenormal": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.8199999928474426
         },
         "enemydamagepoison": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.0
         },
         "exp": {
             "pitchSemitones": 2.4000000953674316,

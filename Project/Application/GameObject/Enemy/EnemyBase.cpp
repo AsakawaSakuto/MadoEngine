@@ -392,11 +392,11 @@ namespace Enemy {
 	}
 
 	void Base::PlayDamageEffect() const {
-		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
+		/*MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
 		desc.rootTransform.translate = transform_.translate;
 		desc.sceneType = sceneType_;
 		desc.loopOverride = false;
-		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play("EnemyHitEffect", desc);
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play("EnemyHitEffect", desc);*/
 	}
 
 	void Base::UpdateAppearance(float deltaTime) {
