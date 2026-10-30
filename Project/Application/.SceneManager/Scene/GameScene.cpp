@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "Audio/MyAudio.h"
+#include "GameObject/Combat/DamageEvent.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "Input/MyInput.h"
 #include "Render/PostEffectManager.h"
@@ -17,14 +18,37 @@ namespace {
 	constexpr float kPlayerPointLightHeight = 32.0f;
 	constexpr const char* kPlayerPointLightName = "PlayerPointLight";
 
-	constexpr int kEnemyDamageSoundFirstIndex = 1;
-	constexpr int kEnemyDamageSoundLastIndex = 5;
-	constexpr const char* kEnemyDamageSoundKeyPrefix = "EnemyDamage";
 	constexpr const char* kPlayerDamageSoundKey = "PlayerDamage";
+	constexpr const char* kPauseSoundKey = "Pause";
+	constexpr const char* kMassiveEnemySpawnSoundKey = "MassiveEnemySpawn";
+	constexpr float kMassiveEnemySpawnTimes[] = { 60.0f, 150.0f, 240.0f };
 	constexpr const char* kPlayerOutlinePassName = "PlayerOutline";
 	constexpr const char* kLowHealthVignettePassName = "LowHealthVignette";
 	constexpr float kLowHealthVignetteStartHealthRatio = 0.5f;
 	constexpr float kLowHealthVignetteFullHealthRatio = 0.1f;
+
+	/// @brief Enemyダメージの結果と発生源に対応する効果音キーを取得
+	/// @param event 効果音の選択対象のダメージイベント
+	/// @return 再生する効果音のキー
+	const char* ResolveEnemyDamageSoundKey(const Combat::DamageEvent& event) {
+
+		// 致死ダメージでは発生源やクリティカル判定より死亡音を優先
+		if (event.wasKilled) {
+			return "EnemyDamageDie";
+		}
+
+		// 状態異常の付与時ではなく、継続ダメージの発生源に応じた音を選択
+		if (event.sourceType == Combat::DamageSourceType::Burn) {
+			return "EnemyDamageBurn";
+		}
+		if (event.sourceType == Combat::DamageSourceType::Poison) {
+			return "EnemyDamagePoison";
+		}
+		if (event.isCritical) {
+			return "EnemyDamageCritical";
+		}
+		return "EnemyDamageNormal";
+	}
 }
 
 GameScene::GameScene(CommonData& commonData)
@@ -117,7 +141,15 @@ SceneType GameScene::Update(float dt) {
 	const bool wasStarting = inGameSession_->GetCurrentPhase() == InGamePhase::Starting;
 	const bool wasPaused = inGameSession_->GetCurrentPhase() == InGamePhase::Paused;
 	const System::PauseMenuItem previousPauseMenuItem = inGameSession_->GetSelectedPauseMenuItem();
+	const float previousElapsedTime = inGameSession_->GetExecutionTime();
 	const float deltaTime = inGameSession_->Update(dt, !isSceneTransitioning);
+	UpdateMassiveEnemySpawnPresentation(previousElapsedTime, inGameSession_->GetExecutionTime());
+
+	// Pauseへの遷移が成立したFrameだけで効果音を再生
+	if (!wasPaused && inGameSession_->GetCurrentPhase() == InGamePhase::Paused &&
+		MyAudio::IsLoaded(kPauseSoundKey)) {
+		MyAudio::Play(kPauseSoundKey);
+	}
 
 	// 既存のメニュー効果音を選択変更と決定のFrameだけで再生
 	if (wasPaused && previousPauseMenuItem != inGameSession_->GetSelectedPauseMenuItem() &&
@@ -292,6 +324,20 @@ void GameScene::UpdateGameplay(float deltaTime) {
 	}
 }
 
+void GameScene::UpdateMassiveEnemySpawnPresentation(float previousElapsedTime, float elapsedTime) {
+
+	// 指定時刻を跨いだFrameだけ演出を開始し、停止中の重複と長いFrameでの取りこぼしを防止
+	for (const float spawnTime : kMassiveEnemySpawnTimes) {
+		if (previousElapsedTime >= spawnTime || elapsedTime < spawnTime) {
+			continue;
+		}
+		if (MyAudio::IsLoaded(kMassiveEnemySpawnSoundKey)) {
+			MyAudio::Play(kMassiveEnemySpawnSoundKey);
+		}
+		hud_.ShowMassiveEnemySpawn();
+	}
+}
+
 void GameScene::HandlePlayerDamage() {
 
 	// 同じFrameの複数被弾を合算した通知を一度だけ取得し、演出の重複開始を防止
@@ -312,12 +358,8 @@ void GameScene::DispatchDamageEvents() {
 	for (const Combat::DamageEvent& event :
 		enemyManager_->ConsumeDamageEvents()) {
 
-		// Gameplay乱数へ影響しない専用乱数系列でDamage SEを選択
-		const std::string damageSoundKey =
-			std::string(kEnemyDamageSoundKeyPrefix) +
-			std::to_string(MyRand::GetInt(
-				kEnemyDamageSoundFirstIndex,
-				kEnemyDamageSoundLastIndex));
+		// ダメージ確定後のイベントから死亡音を含む一種類の効果音を選択
+		const char* damageSoundKey = ResolveEnemyDamageSoundKey(event);
 		if (MyAudio::IsLoaded(damageSoundKey)) {
 			MyAudio::Play(damageSoundKey);
 		}
@@ -723,6 +765,11 @@ void GameScene::FinishPlayLog(System::PlayEndReason reason) {
 
 	// GameSceneの破棄後も終了時の装備と戦績を参照できる値の複製
 	commonData_.SetLastPlayResult(playLogRecorder_.GetData());
+
+	// 終了確定の一回だけ登録し、中断とリトライの途中スコアをランキングから除外
+	if (reason == System::PlayEndReason::Death) {
+		commonData_.GetScoreRanking().RecordScore(playLogRecorder_.GetData().score);
+	}
 
 	// 死亡以外の終了要求でも演出完了待ちの間にゲーム状態が変化しない停止状態へ移行
 	inGameSession_->SetGameOver();

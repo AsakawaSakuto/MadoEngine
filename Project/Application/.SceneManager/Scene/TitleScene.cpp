@@ -2,10 +2,13 @@
 #include "Audio/MyAudio.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
+#include <cmath>
 
 namespace {
 	constexpr float kTitleGroundHalfSize = 4.0f;
 	constexpr float kTitleMapHorizontalLimit = 16.0f;
+	constexpr float kWeaponSelectionStickInputThreshold = 0.5f;
+	constexpr float kWeaponSelectionStickNeutralThreshold = 0.2f;
 }
 
 TitleScene::TitleScene(CommonData& commonData)
@@ -101,6 +104,7 @@ void TitleScene::InitializeWeaponSelection() {
 	}
 
 	selectedWeaponIndex_ = 0;
+	isWeaponSelectionStickReady_ = false;
 
 	// 使用可能武器の共通一覧を行優先で配置し、再訪時は前回決定した武器を復元
 	for (std::size_t index = 0; index < weaponIcons_.size(); ++index) {
@@ -122,7 +126,7 @@ void TitleScene::InitializeWeaponSelection() {
 	selectedWeaponDescription_ = MyText::Create(
 		"TitleSelectedWeaponDescription", "", SceneType::Title, layer);
 	weaponSelectionGuide_ = MyText::Create("TitleWeaponSelectionGuide",
-		"矢印キー / WASD / 十字キー：選択　　Space / Aボタン：決定してゲーム開始",
+		"矢印キー / WASD / 十字キー / Lスティック：選択　　Space / Aボタン：ゲーム開始",
 		SceneType::Title, layer);
 
 	// 説明文の行数に左右されない固定領域で選択中武器と操作案内を整列
@@ -151,15 +155,16 @@ void TitleScene::InitializeWeaponSelection() {
 void TitleScene::UpdateWeaponSelection() {
 	std::size_t column = selectedWeaponIndex_ % kWeaponColumnCount;
 	std::size_t row = selectedWeaponIndex_ / kWeaponColumnCount;
+	const Vector2 stickInput = GetWeaponSelectionStickInput();
 
 	// 横移動は同じ行、縦移動は同じ列を保った循環選択
-	if (MyInput::Trigger("Left")) {
+	if (MyInput::Trigger("Left") || stickInput.x < 0.0f) {
 		column = (column + kWeaponColumnCount - 1) % kWeaponColumnCount;
-	} else if (MyInput::Trigger("Right")) {
+	} else if (MyInput::Trigger("Right") || stickInput.x > 0.0f) {
 		column = (column + 1) % kWeaponColumnCount;
-	} else if (MyInput::Trigger("Up")) {
+	} else if (MyInput::Trigger("Up") || stickInput.y > 0.0f) {
 		row = (row + kWeaponRowCount - 1) % kWeaponRowCount;
-	} else if (MyInput::Trigger("Down")) {
+	} else if (MyInput::Trigger("Down") || stickInput.y < 0.0f) {
 		row = (row + 1) % kWeaponRowCount;
 	}
 	const std::size_t selectedIndex = row * kWeaponColumnCount + column;
@@ -170,6 +175,35 @@ void TitleScene::UpdateWeaponSelection() {
 	selectedWeaponIndex_ = selectedIndex;
 	RefreshWeaponSelection();
 	MyAudio::Play("UpgradeCardSelect");
+}
+
+Vector2 TitleScene::GetWeaponSelectionStickInput() {
+	const MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
+	if (!gamePad) {
+		return {};
+	}
+	const Vector2 stick = gamePad->GetLeftStick();
+	const float horizontalAmount = std::abs(stick.x);
+	const float verticalAmount = std::abs(stick.y);
+
+	// 中立への復帰だけで再入力を許可し、倒し続けや反対方向への切り返しによる連続移動を防止
+	if (horizontalAmount <= kWeaponSelectionStickNeutralThreshold &&
+		verticalAmount <= kWeaponSelectionStickNeutralThreshold) {
+		isWeaponSelectionStickReady_ = true;
+		return {};
+	}
+	if (!isWeaponSelectionStickReady_ ||
+		(horizontalAmount < kWeaponSelectionStickInputThreshold &&
+			verticalAmount < kWeaponSelectionStickInputThreshold)) {
+		return {};
+	}
+	isWeaponSelectionStickReady_ = false;
+
+	// 斜め入力は傾きの大きい軸へ限定し、一度の入力で移動する行または列を一つに固定
+	if (horizontalAmount >= verticalAmount) {
+		return { stick.x, 0.0f };
+	}
+	return { 0.0f, stick.y };
 }
 
 void TitleScene::RefreshWeaponSelection() {

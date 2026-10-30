@@ -14,6 +14,10 @@ namespace UI::Result {
 		/// @param result 装備履歴と毒と火傷の戦績を含む確定済みプレイ結果
 		void Initialize(const System::PlayLogData& result);
 
+		/// @brief 見出しとアイコンと戦績と操作案内の表示状態を設定
+		/// @param isVisible 表示する場合はtrue
+		void SetVisible(bool isVisible);
+
 		/// @brief Scene単位で管理する描画リソースの参照を解放
 		void Finalize();
 

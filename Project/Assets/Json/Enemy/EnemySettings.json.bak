@@ -2,8 +2,8 @@
     "enemySpawner": {
         "bonusWave": {
             "eliteSpawnInterval": 25,
-            "healthIncreaseAmount": 1.0,
-            "healthIncreaseInterval": 2.0,
+            "healthIncreaseAmount": 0.5,
+            "healthIncreaseInterval": 1.0,
             "maxSpawnRadius": 24.0,
             "minSpawnRadius": 24.0,
             "moveSpeedIncreaseAmount": 0.019999999552965164,
@@ -14,8 +14,8 @@
             "powerIncreaseInterval": 1.0,
             "runnerSpawnRate": 0.0,
             "spawnCount": 5,
-            "spawnCountIncreaseAmount": 0,
-            "spawnCountIncreaseInterval": 60.0,
+            "spawnCountIncreaseAmount": 1,
+            "spawnCountIncreaseInterval": 15.0,
             "spawnInterval": 1.0,
             "tankSpawnRate": 0.0
         },
@@ -97,7 +97,7 @@
                 "powerIncreaseInterval": 60.0,
                 "runnerSpawnRate": 0.5,
                 "spawnCount": 2,
-                "spawnInterval": 0.5,
+                "spawnInterval": 0.3499999940395355,
                 "startTime": 61.0,
                 "tankSpawnRate": 0.0
             },

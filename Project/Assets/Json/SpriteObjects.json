@@ -13,9 +13,9 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "InputUI1_Pad",
+            "name": "InputUI1_Key",
             "position": [
-                435.0,
+                400.0,
                 410.0
             ],
             "rotation": 0.0,
@@ -23,8 +23,8 @@
                 0.75,
                 0.75
             ],
-            "scene": "Title",
-            "texture": "Decision_Pad",
+            "scene": "Result",
+            "texture": "Decision_Key",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -52,18 +52,18 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "InputUI1_Key",
+            "name": "InputUI2_Pad",
             "position": [
-                435.0,
-                410.0
+                400.0,
+                510.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                0.75,
+                0.75
             ],
-            "scene": "Title",
-            "texture": "Decision_Key",
+            "scene": "Result",
+            "texture": "Interact_Pad",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -84,25 +84,25 @@
                 0.0
             ],
             "color": [
-                1.0,
-                1.0,
-                1.0,
+                0.9767441749572754,
+                0.9767441749572754,
+                0.9767441749572754,
                 1.0
             ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "Sprite1",
+            "fitToScreen": true,
+            "layer": "UI",
+            "name": "Sprite",
             "position": [
                 0.0,
                 0.0
             ],
             "rotation": 0.0,
             "scale": [
-                80.0,
-                45.0
+                1.0,
+                1.0
             ],
-            "scene": "Title",
-            "texture": "white16x16",
+            "scene": "Result",
+            "texture": "resulFrame",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,
@@ -661,7 +661,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -700,7 +700,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -739,7 +739,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -761,8 +761,8 @@
             ],
             "rotation": 0.0,
             "scale": [
-                11.824999809265137,
-                4.950000286102295
+                10.75,
+                4.5
             ],
             "scene": "Game",
             "texture": "white16x16",
@@ -778,7 +778,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -800,8 +800,8 @@
             ],
             "rotation": 0.0,
             "scale": [
-                10.725000381469727,
-                3.8500001430511475
+                9.75,
+                3.5
             ],
             "scene": "Game",
             "texture": "white16x16",
@@ -817,7 +817,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -856,7 +856,7 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -895,7 +895,124 @@
                     0.0
                 ]
             },
-            "visible": true
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "RelicDecisionBack1",
+            "position": [
+                640.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.0,
+                5.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "RelicDecisionBack2",
+            "position": [
+                640.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "RelicDecisionBottom",
+            "position": [
+                592.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.44999998807907104,
+                0.44999998807907104
+            ],
+            "scene": "Game",
+            "texture": "Decision_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
         },
         {
             "anchorPoint": [
@@ -1182,96 +1299,18 @@
                 1.0
             ],
             "fitToScreen": false,
-            "layer": "UI",
-            "name": "RelicDecisionBack1",
+            "layer": "Default",
+            "name": "InputUI1_Pad",
             "position": [
-                640.0,
-                640.0
+                435.0,
+                410.0
             ],
             "rotation": 0.0,
             "scale": [
-                11.0,
-                5.0
+                0.75,
+                0.75
             ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.09019608050584793,
-                0.10588235408067703,
-                0.1411764770746231,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "RelicDecisionBack2",
-            "position": [
-                640.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                10.0,
-                4.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "RelicDecisionBottom",
-            "position": [
-                592.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.44999998807907104,
-                0.44999998807907104
-            ],
-            "scene": "Game",
+            "scene": "Title",
             "texture": "Decision_Pad",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1302,15 +1341,15 @@
             "layer": "Default",
             "name": "InputUI1_Key",
             "position": [
-                400.0,
+                435.0,
                 410.0
             ],
             "rotation": 0.0,
             "scale": [
-                0.75,
-                0.75
+                1.0,
+                1.0
             ],
-            "scene": "Result",
+            "scene": "Title",
             "texture": "Decision_Key",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1328,8 +1367,8 @@
         },
         {
             "anchorPoint": [
-                0.5,
-                0.5
+                0.0,
+                0.0
             ],
             "color": [
                 1.0,
@@ -1339,57 +1378,18 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "InputUI2_Pad",
-            "position": [
-                400.0,
-                510.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.75,
-                0.75
-            ],
-            "scene": "Result",
-            "texture": "Interact_Pad",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                0.9767441749572754,
-                0.9767441749572754,
-                0.9767441749572754,
-                1.0
-            ],
-            "fitToScreen": true,
-            "layer": "UI",
-            "name": "Sprite",
+            "name": "Sprite1",
             "position": [
                 0.0,
                 0.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.0,
-                1.0
+                80.0,
+                45.0
             ],
-            "scene": "Result",
-            "texture": "resulFrame",
+            "scene": "Title",
+            "texture": "white16x16",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

@@ -16,7 +16,7 @@ namespace UI::Result {
 	void WeaponStatsUI::Initialize(const System::PlayLogData& result) {
 		std::vector<const System::PlayWeaponRecord*> equippedWeapons;
 
-		// 取り外した武器の履歴を除き、取得順から終了時の装備スロット順へ整列
+		// 取り外した武器の履歴を除き、終了時に装備していた武器だけを表示対象に限定
 		for (const System::PlayWeaponRecord& weapon : result.weapons) {
 			if (weapon.equippedAtEnd) {
 				equippedWeapons.push_back(&weapon);
@@ -24,6 +24,11 @@ namespace UI::Result {
 		}
 		std::sort(equippedWeapons.begin(), equippedWeapons.end(),
 			[](const System::PlayWeaponRecord* left, const System::PlayWeaponRecord* right) {
+
+				// 撃破数が多い武器を優先し、同数の場合は装備スロット順に固定
+				if (left->combat.killCount != right->combat.killCount) {
+					return left->combat.killCount > right->combat.killCount;
+				}
 				return left->slotIndex < right->slotIndex;
 			});
 
@@ -69,6 +74,23 @@ namespace UI::Result {
 		if (rowCount == 0) {
 			CreateText("ResultEmptyWeapons", "戦績はありません",
 				{ 220.0f, kFirstRowY }, { 840.0f, kRowHeight }, 24.0f);
+		}
+		CreateText("ResultWeaponPageHint", "A / Space：スコアへ",
+			{ 220.0f, 620.0f }, { 840.0f, 32.0f }, 20.0f, MadoEngine::TextHorizontalAlign::Center);
+	}
+
+	void WeaponStatsUI::SetVisible(bool isVisible) {
+
+		// 表示対象の全Handleへ適用し、毒と火傷や空表示もページ切替時に残さない制御
+		for (MadoEngine::SpriteHandle handle : icons_) {
+			if (Sprite* icon = MySprite::TryGet(handle)) {
+				icon->SetRuntimeVisible(isVisible);
+			}
+		}
+		for (MadoEngine::TextHandle handle : texts_) {
+			if (MadoEngine::Text* text = MyText::TryGet(handle)) {
+				text->SetRuntimeVisible(isVisible);
+			}
 		}
 	}
 

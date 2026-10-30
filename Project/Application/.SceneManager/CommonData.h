@@ -3,6 +3,7 @@
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "System/GameSeed/GameSeedSystem.h"
 #include "System/PlayLog/PlayLogData.h"
+#include "System/ScoreRanking/ScoreRanking.h"
 #include "Utility/Parameter/ParameterStore.h"
 
 /// @brief Sceneをまたいで保持するApplication共通データ
@@ -19,8 +20,9 @@ public:
 	/// @brief Application共通データの初期化
 	void Initialize() {
 		gameSeedSystem_.Initialize();
+		scoreRanking_.Initialize();
 		sceneTransitionController_.Reset();
-		initialWeaponType_ = Projectile::Type::FireBall;
+		initialWeaponType_ = Projectile::Type::Pistol;
 		lastPlayResult_ = {};
 	}
 
@@ -31,6 +33,14 @@ public:
 	/// @brief 直前に終了したプレイ結果を読み取り専用で取得
 	/// @return 終了時点のプレイ結果、未終了の場合は初期値
 	const System::PlayLogData& GetLastPlayResult() const { return lastPlayResult_; }
+
+	/// @brief 総スコアランキングの管理を取得
+	/// @return ゲームオーバー時の総スコアを保持するランキング
+	System::ScoreRanking& GetScoreRanking() { return scoreRanking_; }
+
+	/// @brief 総スコアランキングを読み取り専用で取得
+	/// @return 総スコアの降順に並んだランキング
+	const System::ScoreRanking& GetScoreRanking() const { return scoreRanking_; }
 
 	/// @brief Titleで決定した初期武器の設定
 	/// @param weaponType 使用可能な初期武器の種類
@@ -73,7 +83,8 @@ public:
 private:
 	MadoEngine::ParameterStore& parameterStore_;
 	System::GameSeedSystem gameSeedSystem_;
+	System::ScoreRanking scoreRanking_;
 	SceneTransitionController sceneTransitionController_;
 	System::PlayLogData lastPlayResult_;
-	Projectile::Type initialWeaponType_ = Projectile::Type::FireBall;
+	Projectile::Type initialWeaponType_ = Projectile::Type::Pistol;
 };

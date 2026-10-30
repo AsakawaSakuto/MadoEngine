@@ -1,4 +1,5 @@
 #include "RelicAcquisitionUI.h"
+#include "Audio/MyAudio.h"
 #include "GameObject/Relic/RelicSystem.h"
 #include "Input/MyInput.h"
 #ifdef USE_IMGUI
@@ -10,6 +11,7 @@
 namespace {
 
 constexpr float kDecisionDelayDuration = 0.2f;
+constexpr const char* kDecisionSoundKey = "RelicDecision";
 constexpr UI::Game::InputControlFeedbackDefinition kDecisionControlDefinition = {
 	"Decision", { "RelicDecisionBottom", "RelicDecisionBack1", "RelicDecisionBack2" }, "RelicDecisionText"
 };
@@ -148,6 +150,7 @@ namespace UI::Game {
 			decisionRelicId_ = definition->id;
 			decisionRevision_ = relicSystem.GetRevision();
 			decisionDelayTimer_.Start(kDecisionDelayDuration);
+			MyAudio::Play(kDecisionSoundKey);
 		}
 	}
 

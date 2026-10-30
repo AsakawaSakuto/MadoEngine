@@ -44,6 +44,7 @@
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
+    <ClCompile Include="Engine\Audio\Data\AudioLoudnessAnalyzer.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioPitchStream.cpp" />
     <ClCompile Include="Engine\Core\Command\Command.cpp" />
     <ClCompile Include="Engine\Core\DeltaTime\DeltaTime.cpp" />
@@ -230,12 +231,16 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\FireBall.cpp" />
     <ClCompile Include="Application\UI\Game\Weapon\WeaponIconUI.cpp" />
     <ClCompile Include="Application\UI\Result\ResultWeaponStatsUI.cpp" />
+    <ClCompile Include="Application\UI\Result\ResultScoreUI.cpp" />
+    <ClCompile Include="Application\UI\Result\ScorePresentation.cpp" />
+    <ClCompile Include="Application\UI\Result\RankingPresentation.cpp" />
     <ClCompile Include="Application\UI\Game\Player\PlayerIconUI.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerResourceGainView\PlayerResourceGainView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\PlayerDamageView\PlayerDamageView.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\DropObjectGetView\DropObjectGetView.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
+    <ClCompile Include="Application\System\ScoreRanking\ScoreRanking.cpp" />
     <ClCompile Include="Application\System\PlayLog\PlayLogRecorder.cpp" />
     <ClCompile Include="Application\System\PlayLog\PlayLogJsonWriter.cpp" />
     <ClCompile Include="Application\UI\Game\GamePlayView\EnemyDamageView\EnemyDamageView.cpp" />
@@ -364,6 +369,7 @@
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\Data\AudioPitchStream.h" />
+    <ClInclude Include="Engine\Audio\Data\AudioLoudnessAnalyzer.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
@@ -926,6 +932,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Result\ResultWeaponStatsUI.h" />
+    <ClInclude Include="Application\UI\Result\ResultScoreUI.h" />
+    <ClInclude Include="Application\UI\Result\ScorePresentation.h" />
+    <ClInclude Include="Application\UI\Result\RankingPresentation.h" />
     <ClInclude Include="Application\UI\Game\Weapon\WeaponIconUI.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
@@ -936,7 +945,9 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\System\GameSeed\GameSeedSystem.h" />
+    <ClInclude Include="Application\System\ScoreRanking\ScoreRanking.h" />
     <ClInclude Include="Application\System\PlayLog\PlayLogData.h" />
+    <ClInclude Include="Application\System\PlayLog\PlayScoreCalculator.h" />
     <ClInclude Include="Application\System\PlayLog\PlayLogRecorder.h" />
     <ClInclude Include="Application\System\PlayLog\PlayLogJsonWriter.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponInventoryEvent.h" />

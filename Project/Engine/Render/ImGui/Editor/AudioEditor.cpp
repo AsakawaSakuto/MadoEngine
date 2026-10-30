@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
@@ -19,41 +20,45 @@ namespace MadoEngine::Editor {
 
         const std::filesystem::path kAudioEditorJsonPath = "Assets/Json/AudioEditor.json";
 
-        /// @brief 音量を0.0fから1.0fの範囲に丸め処理
+        /// @brief 音量を0から指定上限までの範囲に制限
         /// @param volume 丸める音量
+        /// @param maxVolume 許容する音量の上限
         /// @return 丸めた音量
-        float ClampVolume(float volume) {
-            return std::clamp(volume, 0.0f, 1.0f);
+        float ClampVolume(float volume, float maxVolume) {
+            return std::clamp(volume, 0.0f, maxVolume);
         }
 
         /// @brief Json値から音量を読み込み
         /// @param value 読み込むJson値
         /// @param fallback 読み込めない場合の値
+        /// @param maxVolume 許容する音量の上限
         /// @return 読み込んだ音量
-        float ReadVolumeValue(const nlohmann::json& value, float fallback) {
+        float ReadVolumeValue(const nlohmann::json& value, float fallback, float maxVolume = 1.0f) {
             if (!value.is_number()) {
                 return fallback;
             }
 
-            return ClampVolume(value.get<float>());
+            return ClampVolume(value.get<float>(), maxVolume);
         }
 
         /// @brief Jsonオブジェクトから音量を読み込み
         /// @param json 読み込むJsonオブジェクト
         /// @param key 読み込むキー
         /// @param fallback 読み込めない場合の値
+        /// @param maxVolume 許容する音量の上限
         /// @return 読み込んだ音量
-        float ReadVolumeMember(const nlohmann::json& json, const char* key, float fallback) {
+        float ReadVolumeMember(const nlohmann::json& json, const char* key, float fallback, float maxVolume = 1.0f) {
             if (!json.is_object()) {
                 return fallback;
             }
 
+            // 音量項目のない旧Jsonでは現在の設定値を維持
             const auto it = json.find(key);
             if (it == json.end()) {
                 return fallback;
             }
 
-            return ReadVolumeValue(*it, fallback);
+            return ReadVolumeValue(*it, fallback, maxVolume);
         }
 
         /// @brief Jsonから音程設定を読み込み
@@ -78,7 +83,27 @@ namespace MadoEngine::Editor {
                 static_cast<double>(AudioManager::kMaxPitchSemitones)));
         }
 
-        /// @brief AudioEditorの音量と音程設定をJsonへ変換
+        /// @brief Jsonオブジェクトから同時再生数上限を読み込み
+        /// @param json 読み込むJsonオブジェクト
+        /// @param key 読み込む音声種別のキー
+        /// @param fallback 読み込めない場合の値
+        /// @return 0以上に制限した同時再生数上限
+        int ReadInstanceLimitMember(const nlohmann::json& json, const char* key, int fallback) {
+            if (!json.is_object()) {
+                return fallback;
+            }
+
+            const auto it = json.find(key);
+            if (it == json.end() || !it->is_number_integer()) {
+                return fallback;
+            }
+
+            // 符号なしの巨大値でも整数変換があふれないよう変換前に許容範囲へ制限
+            return static_cast<int>(std::clamp(it->get<double>(), 0.0,
+                static_cast<double>((std::numeric_limits<int>::max)())));
+        }
+
+        /// @brief AudioEditorの音量と音程および同時再生数上限をJsonへ変換
         /// @return 音声設定Json
         nlohmann::json SerializeAudioEditorSettings() {
             AudioManager& audioManager = AudioManager::GetInstance();
@@ -89,6 +114,13 @@ namespace MadoEngine::Editor {
                 {"SE", audioManager.GetSEVolume()},
                 {"BGM", audioManager.GetBGMVolume()},
                 {"Voice", audioManager.GetVoiceVolume()}
+            };
+
+            // 起動時と履歴復元時の再生条件を一致させるため音声種別ごとの上限を保存
+            root["maxInstancesPerSound"] = {
+                {"SE", audioManager.GetMaxInstancesPerSound(AudioType::SE)},
+                {"BGM", audioManager.GetMaxInstancesPerSound(AudioType::BGM)},
+                {"Voice", audioManager.GetMaxInstancesPerSound(AudioType::Voice)}
             };
 
             nlohmann::json individualVolumes = nlohmann::json::object();
@@ -119,6 +151,20 @@ namespace MadoEngine::Editor {
             audioManager.SetVoiceVolume(ReadVolumeMember(categoryVolumes, "Voice", audioManager.GetVoiceVolume()));
         }
 
+        /// @brief Jsonから音声種別ごとの同時再生数上限を読み込み
+        /// @param limits 音声種別ごとの同時再生数上限Json
+        void ApplyInstanceLimits(const nlohmann::json& limits) {
+            AudioManager& audioManager = AudioManager::GetInstance();
+
+            // 上限設定を持たない旧Jsonでは現在の設定値を維持
+            constexpr AudioType types[] = { AudioType::SE, AudioType::BGM, AudioType::Voice };
+            for (AudioType type : types) {
+                const std::string key = AudioTypeToString(type);
+                audioManager.SetMaxInstancesPerSound(type,
+                    ReadInstanceLimitMember(limits, key.c_str(), audioManager.GetMaxInstancesPerSound(type)));
+            }
+        }
+
         /// @brief Jsonから個別音量と音程を読み込み
         /// @param individualVolumes 個別音声設定Json
         void ApplyIndividualSettings(const nlohmann::json& individualVolumes) {
@@ -134,9 +180,11 @@ namespace MadoEngine::Editor {
                 }
 
                 if (value.is_object()) {
-                    audioManager.SetVolume(key, ReadVolumeMember(value, "volume", audioManager.GetVolume(key)));
+                    audioManager.SetVolume(key, ReadVolumeMember(value, "volume", audioManager.GetVolume(key),
+                        AudioManager::kMaxIndividualVolume));
                 } else if (value.is_number()) {
-                    audioManager.SetVolume(key, ReadVolumeValue(value, audioManager.GetVolume(key)));
+                    audioManager.SetVolume(key, ReadVolumeValue(value, audioManager.GetVolume(key),
+                        AudioManager::kMaxIndividualVolume));
                 }
 
                 // 音量だけを持つ旧形式にも対応し、保存前の音程が読込後へ残る状態を防止
@@ -144,7 +192,7 @@ namespace MadoEngine::Editor {
             }
         }
 
-        /// @brief AudioEditorの音量と音程設定をJsonへ保存
+        /// @brief AudioEditorの音量と音程および同時再生数上限をJsonへ保存
         /// @return 保存に成功した場合はtrue
         bool SaveAudioEditorSettingsJson() {
             const bool succeeded = Json::JsonFile::Save(kAudioEditorJsonPath, SerializeAudioEditorSettings(), 4, true);
@@ -167,7 +215,7 @@ namespace MadoEngine::Editor {
             return succeeded;
         }
 
-        /// @brief AudioEditorの音量と音程設定をJsonから読み込み
+        /// @brief AudioEditorの音量と音程および同時再生数上限をJsonから読み込み
         /// @return 読み込みに成功した場合はtrue
         bool LoadAudioEditorSettingsJson() {
             nlohmann::json root;
@@ -184,6 +232,7 @@ namespace MadoEngine::Editor {
             AudioManager& audioManager = AudioManager::GetInstance();
             audioManager.SetMasterVolume(ReadVolumeMember(root, "masterVolume", audioManager.GetMasterVolume()));
             ApplyCategoryVolumes(root.value("categoryVolumes", nlohmann::json::object()));
+            ApplyInstanceLimits(root.value("maxInstancesPerSound", nlohmann::json::object()));
             ApplyIndividualSettings(root.value("individualVolumes", nlohmann::json::object()));
 
             Logger::Output("AudioEditor : 音声設定Jsonを読み込みました", Logger::Level::Assets);
@@ -205,6 +254,7 @@ namespace MadoEngine::Editor {
         AudioManager& audioManager = AudioManager::GetInstance();
         audioManager.SetMasterVolume(ReadVolumeMember(root, "masterVolume", audioManager.GetMasterVolume()));
         ApplyCategoryVolumes(root.value("categoryVolumes", nlohmann::json::object()));
+        ApplyInstanceLimits(root.value("maxInstancesPerSound", nlohmann::json::object()));
         ApplyIndividualSettings(root.value("individualVolumes", nlohmann::json::object()));
         return true;
     }
@@ -218,6 +268,55 @@ namespace MadoEngine::Editor {
     }
 
 #ifdef USE_IMGUI
+
+    namespace {
+
+        /// @brief 個別音量反映後のラウドネスまたはピークを表示
+        /// @param adjusted 個別音量反映後の推定値
+        /// @param isPeak サンプルピークを表示する場合はtrue
+        void DrawLoudnessCell(const AudioLoudnessMetrics& adjusted, bool isPeak) {
+            if (!adjusted.isValid) {
+                ImGui::TextDisabled("--");
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("解析可能な音声データなし\nモノラル／ステレオの整数PCMまたはFloat32に対応");
+                }
+                return;
+            }
+
+            double adjustedLevel = adjusted.integratedLufs;
+            const char* marker = "";
+            if (isPeak) {
+                adjustedLevel = adjusted.samplePeakDbfs;
+            } else if (adjusted.isShortClip) {
+                marker = "*";
+            }
+
+            // 個別音量反映後のピークがフルスケールを超えた場合だけ色で識別
+            if (isPeak && adjustedLevel > 0.0) {
+                ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.2f, 1.0f), "%.1f%s", adjustedLevel, marker);
+            } else {
+                ImGui::Text("%.1f%s", adjustedLevel, marker);
+            }
+
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted("個別Volume適用後の推定値");
+                ImGui::TextUnformatted("Master・カテゴリ音量・音程変更・複数音の重なりは未反映");
+                if (isPeak) {
+                    ImGui::TextUnformatted("Peakは波形サンプルの最大振幅（dBFS）");
+                } else {
+
+                    // 参考値と通常のIntegrated LUFSを区別し、非常に小さい信号の推定条件も明示
+                    ImGui::TextUnformatted("Integrated LUFS / 調整後はゲート再判定を含まない目安");
+                    ImGui::TextUnformatted("-inf: ゲートを通過する信号なし、または無音");
+                    if (adjusted.isShortClip) {
+                        ImGui::TextUnformatted("*: 400ms未満の音源へ無音を補完した参考LUFS");
+                    }
+                }
+                ImGui::EndTooltip();
+            }
+        }
+    }
 
     void DrawAudioManagerUI() {
 
@@ -237,10 +336,23 @@ namespace MadoEngine::Editor {
                 if (ImGui::BeginTabItem(tabNames[i])) {
                     static std::unordered_map<std::string, bool> loopStates;
 
-                    // 音量と速度を維持した音程変更を音源単位で操作できる五列構成
-                    if (ImGui::BeginTable("AudioTable", 5, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
-                        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+                    // 種別内の全音源へ共通の上限を適用し、再生中の音を維持したまま変更
+                    int maxInstances = AudioManager::GetInstance().GetMaxInstancesPerSound(tabTypes[i]);
+                    ImGui::SetNextItemWidth(120.0f);
+                    if (ImGui::DragInt("同じ音声の同時再生上限", &maxInstances, 1.0f, 0,
+                        (std::numeric_limits<int>::max)(), "%d", ImGuiSliderFlags_AlwaysClamp)) {
+                        AudioManager::GetInstance().SetMaxInstancesPerSound(tabTypes[i], maxInstances);
+                    }
+                    ImGui::TextDisabled("上限到達時は追加要求を無視 / 0: 新規再生を停止");
+                    ImGui::Separator();
+
+                    // 調整後の音量指標を個別音量の隣へ配置し、狭いWindowでは横スクロールで一覧を維持
+                    if (ImGui::BeginTable("AudioTable", 7, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH |
+                        ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable)) {
+                        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 240.0f);
                         ImGui::TableSetupColumn("Volume", ImGuiTableColumnFlags_WidthFixed, 90.0f); // 【追加】個別ボリューム列
+                        ImGui::TableSetupColumn("LUFS", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+                        ImGui::TableSetupColumn("Peak (dBFS)", ImGuiTableColumnFlags_WidthFixed, 110.0f);
                         ImGui::TableSetupColumn("Pitch (半音)", ImGuiTableColumnFlags_WidthFixed, 120.0f);
                         ImGui::TableSetupColumn("Loop", ImGuiTableColumnFlags_WidthFixed, 40.0f);
                         ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);
@@ -261,11 +373,20 @@ namespace MadoEngine::Editor {
 
                                 float vol = AudioManager::GetInstance().GetVolume(key); // 現在の音量を取得
                                 ImGui::PushItemWidth(-1);
-                                if (ImGui::DragFloat("##Volume", &vol, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
+                                if (ImGui::DragFloat("##Volume", &vol, 0.01f, 0.0f, AudioManager::kMaxIndividualVolume,
+                                    "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
                                     AudioManager::GetInstance().SetVolume(key, vol); // 変更されたら即座に反映
                                 }
                                 ImGui::PopItemWidth();
                                 ImGui::PopID();
+
+                                // 解析済みの元音源と音量倍率だけを参照し、毎フレームのPCM再解析を回避
+                                const AudioLoudnessMetrics sourceMetrics = AudioManager::GetInstance().GetLoudnessMetrics(key);
+                                const AudioLoudnessMetrics adjustedMetrics = AudioLoudnessAnalyzer::EstimateAfterGain(sourceMetrics, vol);
+                                ImGui::TableNextColumn();
+                                DrawLoudnessCell(adjustedMetrics, false);
+                                ImGui::TableNextColumn();
+                                DrawLoudnessCell(adjustedMetrics, true);
 
                                 // 半音数を保存対象へ直接反映して再生中と次回再生の設定を一致
                                 ImGui::TableNextColumn();
@@ -299,6 +420,7 @@ namespace MadoEngine::Editor {
                         }
                         ImGui::EndTable();
                     }
+                    ImGui::TextDisabled("個別Volume反映後の推定値 / *: 400ms未満の参考LUFS");
                     ImGui::EndTabItem();
                 }
             }
@@ -338,20 +460,20 @@ namespace MadoEngine::Editor {
                 ImGui::Separator();
                 ImGui::Spacing();
 
-                if (ImGui::Button("保存")) {
-                    SaveAudioEditorSettingsJson();
-                }
-
-                ImGui::SameLine();
-                if (ImGui::Button("読込")) {
-                    EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
-                    LoadAudioEditorSettingsJson();
-                }
-
                 ImGui::EndTabItem();
             }
 
             ImGui::EndTabBar();
+        }
+
+        // 音声種別のTabからも上限値を保存できる共通操作として配置
+        if (ImGui::Button("保存")) {
+            SaveAudioEditorSettingsJson();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("読込")) {
+            EditorToolbar::GetInstance().SuppressCurrentDocumentHistory();
+            LoadAudioEditorSettingsJson();
         }
 
         ImGui::Spacing();
@@ -365,17 +487,24 @@ namespace MadoEngine::Editor {
         bool anyPlaying = false;
         auto allKeys = AudioManager::GetInstance().GetAllKeys();
 
-        if (ImGui::BeginTable("PlayingTable", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
+        if (ImGui::BeginTable("PlayingTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
             ImGui::TableSetupColumn("Playing Name", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("再生数 / 上限", ImGuiTableColumnFlags_WidthFixed, 100.0f);
             ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+            ImGui::TableHeadersRow();
 
             for (const auto& key : allKeys) {
-                if (AudioManager::GetInstance().IsPlaying(key)) {
+                const std::size_t instanceCount = AudioManager::GetInstance().GetPlayingInstanceCount(key);
+                if (instanceCount > 0) {
                     anyPlaying = true;
                     ImGui::TableNextRow();
 
                     ImGui::TableNextColumn();
                     ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "▶ %s", key.c_str());
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%zu / %d", instanceCount, AudioManager::GetInstance().GetMaxInstancesPerSound(
+                        AudioManager::GetInstance().GetAudioType(key)));
 
                     ImGui::TableNextColumn();
                     ImGui::PushID((key + "_stop").c_str());

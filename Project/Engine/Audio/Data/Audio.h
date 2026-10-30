@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AudioData.h"
+#include "AudioLoudnessAnalyzer.h"
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -26,6 +28,8 @@ class ClipInstance;
 /// @brief WAVとMP3の共有PCMおよび独立した再生インスタンスの管理
 class AudioX {
 public:
+    static constexpr float kMaxVolume = 2.0f;
+
     /// @brief 音声データ管理を生成
     AudioX();
     /// @brief 再生と変換処理を停止してリソースを解放
@@ -37,7 +41,7 @@ public:
     void Initialize(const std::string& filePath, IXAudio2& engine);
 
     /// @brief 現在の音程設定で独立した再生インスタンスを開始
-    /// @param volume 音量、0から1の範囲
+    /// @param volume 音量、0から2の範囲
     /// @param loop ループ再生する場合はtrue
     void PlayAudio(float volume = 1.0f, bool loop = false);
 
@@ -52,7 +56,7 @@ public:
     void Reset();
 
     /// @brief 再生中の全インスタンスへ音量を適用
-    /// @param volume 音量、0から1の範囲
+    /// @param volume 音量、0から2の範囲
     void SetVolume(float volume);
 
     /// @brief 個別音量設定を保持したまま一時的な音量係数を適用
@@ -81,11 +85,20 @@ public:
     /// @return 再生中のインスタンスが存在する場合はtrue
     bool IsPlaying() const { return !actives_.empty(); }
 
+    /// @brief 一時停止中を含む未終了の再生インスタンス数を取得
+    /// @return 未終了の再生インスタンス数
+    std::size_t GetPlayingInstanceCount() const;
+
+    /// @brief 読み込み時に算出した元音源のLUFSとPeakを取得
+    /// @return 元音源の解析結果
+    const MadoEngine::AudioLoudnessMetrics& GetLoudnessMetrics() const { return loudnessMetrics_; }
+
 private:
     std::string filePath_;
     IXAudio2* xAudio2_ = nullptr; // AudioManagerが寿命を管理する非所有参照
     std::shared_ptr<const std::vector<BYTE>> pcmShared_;
     WAVEFORMATEX wfex_{};
+    MadoEngine::AudioLoudnessMetrics loudnessMetrics_;
     float pitchSemitones_ = 0.0f;
     float volume_ = 1.0f;
     float playbackGain_ = 1.0f;

@@ -6,6 +6,20 @@
 /// AudioManagerへの簡潔なアクセスを提供
 namespace MyAudio {
 
+	/// @brief 音声種別ごとに同じ音声の同時再生数上限を設定
+	/// @param type 上限を設定する音声種別
+	/// @param maxInstances 同じ音声の同時再生数上限、0の場合は新規再生を抑止
+	inline void SetMaxInstancesPerSound(AudioType type, int maxInstances) {
+		MadoEngine::AudioManager::GetInstance().SetMaxInstancesPerSound(type, maxInstances);
+	}
+
+	/// @brief 音声種別に対応する同じ音声の同時再生数上限を取得
+	/// @param type 上限を取得する音声種別
+	/// @return 同じ音声の同時再生数上限、未対応の種別の場合は0
+	inline int GetMaxInstancesPerSound(AudioType type) {
+		return MadoEngine::AudioManager::GetInstance().GetMaxInstancesPerSound(type);
+	}
+
 	/// @brief 音声を再生
 	/// @param key ファイル名（拡張子なし）、例: "fire", "titleBGM"
 	/// @param loop ループ再生するか（デフォルト: false）
@@ -26,7 +40,7 @@ namespace MyAudio {
 
 	/// @brief 個別の音声の音量を設定
 	/// @param key ファイル名（拡張子なし）
-	/// @param volume 音量（0.0f～1.0f）
+	/// @param volume 音量（0.0f～2.0f）
 	inline void SetVolume(const std::string& key, float volume) {
 		MadoEngine::AudioManager::GetInstance().SetVolume(key, volume);
 	}

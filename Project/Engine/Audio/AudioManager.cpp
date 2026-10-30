@@ -108,9 +108,56 @@ namespace MadoEngine {
 		auto audio = std::make_unique<AudioX>();
 		audio->Initialize(filePath, *xAudio2_.Get());
 		audioMap_[key] = std::move(audio);
-		volumeMap_[key] = volume;
+		volumeMap_[key] = std::clamp(volume, 0.0f, kMaxIndividualVolume);
 		typeMap_[key] = type;
 		Logger::Output("AudioManager : 音声を読み込みました - キー: " + key + ", タイプ: " + AudioTypeToString(type) + ", パス: " + filePath, Logger::Level::Assets);
+	}
+
+	void AudioManager::SetMaxInstancesPerSound(AudioType type, int maxInstances) {
+		const int safeMaxInstances = (std::max)(0, maxInstances);
+
+		// 上限を下げても既存の再生は中断せず、後続の再生要求だけを制限
+		switch (type) {
+		case AudioType::SE:
+			seMaxInstancesPerSound_ = safeMaxInstances;
+			break;
+		case AudioType::BGM:
+			bgmMaxInstancesPerSound_ = safeMaxInstances;
+			break;
+		case AudioType::Voice:
+			voiceMaxInstancesPerSound_ = safeMaxInstances;
+			break;
+		default:
+			break;
+		}
+	}
+
+	int AudioManager::GetMaxInstancesPerSound(AudioType type) const {
+
+		// 未対応の種別では新規再生を許可しない上限値を使用
+		switch (type) {
+		case AudioType::SE:
+			return seMaxInstancesPerSound_;
+		case AudioType::BGM:
+			return bgmMaxInstancesPerSound_;
+		case AudioType::Voice:
+			return voiceMaxInstancesPerSound_;
+		default:
+			return 0;
+		}
+	}
+
+	std::size_t AudioManager::GetPlayingInstanceCount(const std::string& key) const {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
+			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const auto it = audioMap_.find(lowerKey);
+
+		// 終了済みの再生を除外し、Update前の問い合わせでも空き枠を反映
+		if (it != audioMap_.end() && it->second) {
+			return it->second->GetPlayingInstanceCount();
+		}
+		return 0;
 	}
 
 	void AudioManager::Play(const std::string& key, bool loop) {
@@ -123,6 +170,12 @@ namespace MadoEngine {
 		if (it == audioMap_.end()) {
 			Logger::Output("AudioManager : 音声の再生に失敗しました - キーが見つかりません: " + key, Logger::Level::Error);
 			assert(false && "Audio not loaded");
+			return;
+		}
+
+		// 同じ音声の上限到達時はVoice生成と再生ログの出力より前に追加要求を破棄
+		const int maxInstances = GetMaxInstancesPerSound(GetAudioType(lowerKey));
+		if (it->second->GetPlayingInstanceCount() >= static_cast<std::size_t>(maxInstances)) {
 			return;
 		}
 
@@ -290,8 +343,11 @@ namespace MadoEngine {
 
 		auto it = volumeMap_.find(lowerKey);
 		if (it != volumeMap_.end()) {
-			Logger::Output("AudioManager : " + lowerKey + " の音量を " + std::to_string(volume) + " に設定しました", Logger::Level::Application);
-			it->second = volume;
+
+			// UIとJson以外からの設定にも同じ上限を適用し、保存値と実際の再生倍率を一致
+			const float clampedVolume = std::clamp(volume, 0.0f, kMaxIndividualVolume);
+			Logger::Output("AudioManager : " + lowerKey + " の音量を " + std::to_string(clampedVolume) + " に設定しました", Logger::Level::Application);
+			it->second = clampedVolume;
 
 			// 即座に反映
 			auto audioIt = audioMap_.find(lowerKey);
@@ -313,7 +369,7 @@ namespace MadoEngine {
 					}
 				}();
 
-				audioIt->second->SetVolume(volume * categoryVol * masterVolume_);
+				audioIt->second->SetVolume(clampedVolume * categoryVol * masterVolume_);
 			}
 		} else {
 			Logger::Output("AudioManager	: 音量の設定に失敗しました - キーが見つかりません: " + key, Logger::Level::Warning);
@@ -331,6 +387,19 @@ namespace MadoEngine {
 			return it->second;
 		}
 		return 1.0f;
+	}
+
+	AudioLoudnessMetrics AudioManager::GetLoudnessMetrics(const std::string& key) const {
+		std::string lowerKey = key;
+		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
+			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const auto it = audioMap_.find(lowerKey);
+
+		// 解析済みの測定値だけを返し、表示側へPCMや再生状態の所有権を渡さない構成
+		if (it != audioMap_.end() && it->second) {
+			return it->second->GetLoudnessMetrics();
+		}
+		return {};
 	}
 
 	bool AudioManager::SetPitch(const std::string& key, float semitones) {

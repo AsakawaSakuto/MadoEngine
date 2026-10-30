@@ -107,6 +107,11 @@ private:
 	/// @param deltaTime 停止状態を反映したゲーム経過時間
 	void UpdateGameplay(float deltaTime);
 
+	/// @brief 指定時刻への到達に応じたEnemy大量出現演出を更新
+	/// @param previousElapsedTime 前Frameまでのゲーム経過時間（秒）
+	/// @param elapsedTime 現在Frameまでのゲーム経過時間（秒）
+	void UpdateMassiveEnemySpawnPresentation(float previousElapsedTime, float elapsedTime);
+
 	/// @brief Playerの被ダメージ通知を取得して効果音とCameraとHUDへ反映
 	void HandlePlayerDamage();
 

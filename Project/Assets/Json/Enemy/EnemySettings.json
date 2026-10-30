@@ -13,7 +13,7 @@
             "powerIncreaseAmount": 0.20000000298023224,
             "powerIncreaseInterval": 1.0,
             "runnerSpawnRate": 0.0,
-            "spawnCount": 5,
+            "spawnCount": 3,
             "spawnCountIncreaseAmount": 1,
             "spawnCountIncreaseInterval": 15.0,
             "spawnInterval": 1.0,
@@ -97,7 +97,7 @@
                 "powerIncreaseInterval": 60.0,
                 "runnerSpawnRate": 0.5,
                 "spawnCount": 2,
-                "spawnInterval": 0.5,
+                "spawnInterval": 0.3499999940395355,
                 "startTime": 61.0,
                 "tankSpawnRate": 0.0
             },
@@ -251,15 +251,15 @@
                 "moveSpeedIncreaseAmount": 0.05999999865889549,
                 "moveSpeedIncreaseInterval": 90.0,
                 "name": "Wave 12",
-                "normalSpawnRate": 0.25,
+                "normalSpawnRate": 0.375,
                 "overTimeSpawnRate": 0.0,
                 "powerIncreaseAmount": 0.5,
                 "powerIncreaseInterval": 90.0,
-                "runnerSpawnRate": 0.25,
-                "spawnCount": 4,
+                "runnerSpawnRate": 0.375,
+                "spawnCount": 3,
                 "spawnInterval": 0.75,
                 "startTime": 271.0,
-                "tankSpawnRate": 0.5
+                "tankSpawnRate": 0.25
             }
         ]
     },

@@ -1,49 +1,59 @@
 {
     "categoryVolumes": {
-        "BGM": 1.0,
-        "SE": 0.699999988079071,
+        "BGM": 0.800000011920929,
+        "SE": 1.0,
         "Voice": 1.0
     },
     "individualVolumes": {
-        "axe": {
+        "anvil": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
+        },
+        "attackupper": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "axe": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0499999523162842
         },
         "bgm1": {
             "pitchSemitones": 0.0,
             "type": "BGM",
-            "volume": 0.10000000149011612
+            "volume": 1.2999999523162842
         },
         "bgm2": {
             "pitchSemitones": 0.0,
             "type": "BGM",
-            "volume": 0.10000000149011612
+            "volume": 0.5
         },
         "bgm3": {
             "pitchSemitones": 0.0,
             "type": "BGM",
-            "volume": 0.10000000149011612
+            "volume": 0.5
         },
         "bgm4": {
             "pitchSemitones": 0.0,
             "type": "BGM",
-            "volume": 0.10000000149011612
+            "volume": 0.5
         },
         "bgm5": {
             "pitchSemitones": 0.0,
             "type": "BGM",
-            "volume": 0.10000000149011612
+            "volume": 0.5
         },
         "bomb": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.550000011920929
         },
         "bombexplosion": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.6700000166893005
         },
         "bossspawner": {
             "pitchSemitones": 0.0,
@@ -53,7 +63,7 @@
         "bow": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.6600000262260437
         },
         "chest": {
             "pitchSemitones": 0.0,
@@ -68,7 +78,7 @@
         "chestopen": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 1.5
         },
         "confirm": {
             "pitchSemitones": 0.0,
@@ -80,27 +90,37 @@
             "type": "SE",
             "volume": 1.0
         },
-        "enemydamage1": {
+        "defuseupper": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
-        "enemydamage2": {
+        "drumroll": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
-        "enemydamage3": {
+        "enemydamageburn": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
-        "enemydamage4": {
+        "enemydamagecritical": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
-        "enemydamage5": {
+        "enemydamagedie": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "enemydamagenormal": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "enemydamagepoison": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -113,27 +133,27 @@
         "exp1": {
             "pitchSemitones": 1.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.699999988079071
         },
         "exp2": {
             "pitchSemitones": 2.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.699999988079071
         },
         "exp3": {
             "pitchSemitones": 3.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.699999988079071
         },
         "exp4": {
             "pitchSemitones": 4.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.699999988079071
         },
         "exp5": {
             "pitchSemitones": 5.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.699999988079071
         },
         "explosion": {
             "pitchSemitones": 0.0,
@@ -143,17 +163,17 @@
         "eye": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 1.690000057220459
         },
         "fireball": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 1.100000023841858
         },
         "hammer": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.5199999809265137
         },
         "heal": {
             "pitchSemitones": 0.0,
@@ -163,12 +183,12 @@
         "jar": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 2.0
         },
         "joker": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 1.4900000095367432
         },
         "jump": {
             "pitchSemitones": 0.0,
@@ -178,7 +198,7 @@
         "karma": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 2.0
         },
         "lockin": {
             "pitchSemitones": 0.0,
@@ -186,6 +206,11 @@
             "volume": 1.0
         },
         "magnet": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.100000023841858
+        },
+        "massiveenemyspawn": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -198,19 +223,29 @@
         "overtimestart": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 2.0
+        },
+        "pause": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 2.0
         },
         "pistol": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 0.3499999940395355
+            "volume": 0.23000000417232513
         },
         "playerdamage": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 1.5099999904632568
         },
         "playerdie": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "relicdecision": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -220,12 +255,27 @@
             "type": "BGM",
             "volume": 0.10000000149011612
         },
+        "resultscore": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
+        "score": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.0
+        },
         "select": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
         "snowcrystal": {
+            "pitchSemitones": 0.0,
+            "type": "SE",
+            "volume": 1.1699999570846558
+        },
+        "speedupper": {
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
@@ -238,12 +288,12 @@
         "sword": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 1.090000033378601
         },
         "thunder": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.23999999463558197
         },
         "titlebgm": {
             "pitchSemitones": 0.0,
@@ -253,17 +303,17 @@
         "toxicboots": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.8199999928474426
         },
         "trump": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 0.8299999833106995
         },
         "upgradebgm": {
             "pitchSemitones": 0.0,
             "type": "BGM",
-            "volume": 1.0
+            "volume": 2.0
         },
         "upgradecarddecision": {
             "pitchSemitones": 0.0,
@@ -278,8 +328,13 @@
         "upgradetiming": {
             "pitchSemitones": 0.0,
             "type": "SE",
-            "volume": 1.0
+            "volume": 2.0
         }
     },
-    "masterVolume": 1.0
+    "masterVolume": 1.0,
+    "maxInstancesPerSound": {
+        "BGM": 1,
+        "SE": 3,
+        "Voice": 1
+    }
 }

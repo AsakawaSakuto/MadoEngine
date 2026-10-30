@@ -189,6 +189,9 @@
     <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\UI\Game\GameHud.cpp" />
     <ClCompile Include="Application\UI\Result\ResultWeaponStatsUI.cpp" />
+    <ClCompile Include="Application\UI\Result\ResultScoreUI.cpp" />
+    <ClCompile Include="Application\UI\Result\ScorePresentation.cpp" />
+    <ClCompile Include="Application\UI\Result\RankingPresentation.cpp" />
     <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp" />
     <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
     <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
@@ -216,6 +219,7 @@
     <ClCompile Include="Application\GameObject\Weapon\WeaponStatusEditor.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\WeaponUpgradeSystem.cpp" />
     <ClCompile Include="Application\System\GameSeed\GameSeedSystem.cpp" />
+    <ClCompile Include="Application\System\ScoreRanking\ScoreRanking.cpp" />
     <ClCompile Include="Application\System\PlayLog\PlayLogRecorder.cpp" />
     <ClCompile Include="Application\System\PlayLog\PlayLogJsonWriter.cpp" />
     <ClCompile Include="Application\System\InGameSession\InGameSession.cpp" />
@@ -241,6 +245,10 @@
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
+    <ClCompile Include="Engine\Audio\Data\AudioLoudnessAnalyzer.cpp">
+      <Optimization>MaxSpeed</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+    </ClCompile>
     <ClCompile Include="Engine\Audio\Data\AudioPitchStream.cpp">
       <AdditionalIncludeDirectories>$(ProjectDir)Externals\SignalsmithLinear\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
@@ -447,6 +455,9 @@
     <ClInclude Include="Application\.SceneManager\Scene\GameScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h" />
     <ClInclude Include="Application\UI\Result\ResultWeaponStatsUI.h" />
+    <ClInclude Include="Application\UI\Result\ResultScoreUI.h" />
+    <ClInclude Include="Application\UI\Result\ScorePresentation.h" />
+    <ClInclude Include="Application\UI\Result\RankingPresentation.h" />
     <ClInclude Include="Application\.SceneManager\Scene\TestScene.h" />
     <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerStatus.h" />
@@ -484,7 +495,9 @@
     <ClInclude Include="Application\GameObject\Weapon\WeaponUpgradeSystem.h" />
     <ClInclude Include="Application\InputRegister.h" />
     <ClInclude Include="Application\System\GameSeed\GameSeedSystem.h" />
+    <ClInclude Include="Application\System\ScoreRanking\ScoreRanking.h" />
     <ClInclude Include="Application\System\PlayLog\PlayLogData.h" />
+    <ClInclude Include="Application\System\PlayLog\PlayScoreCalculator.h" />
     <ClInclude Include="Application\System\PlayLog\PlayLogRecorder.h" />
     <ClInclude Include="Application\System\PlayLog\PlayLogJsonWriter.h" />
     <ClInclude Include="Application\GameObject\Weapon\WeaponInventoryEvent.h" />
@@ -516,6 +529,7 @@
     <ClInclude Include="Engine\Audio\AudioType.h" />
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
     <ClInclude Include="Engine\Audio\Data\AudioData.h" />
+    <ClInclude Include="Engine\Audio\Data\AudioLoudnessAnalyzer.h" />
     <ClInclude Include="Engine\Audio\Data\AudioPitchStream.h" />
     <ClInclude Include="Engine\Audio\MyAudio.h" />
     <ClInclude Include="Engine\CoreHeaders.h" />

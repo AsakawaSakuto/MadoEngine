@@ -52,6 +52,10 @@ private:
 	/// @brief 行と列を維持した方向入力による武器選択の更新
 	void UpdateWeaponSelection();
 
+	/// @brief 中立復帰で再入力可能なLスティックの方向入力を取得
+	/// @return 強い方の軸の傾き、入力なしの場合はゼロベクトル
+	Vector2 GetWeaponSelectionStickInput();
+
 	/// @brief 選択位置に対応するアイコン強調と武器説明の反映
 	void RefreshWeaponSelection();
 
@@ -63,6 +67,7 @@ private:
 	static_assert(Projectile::kPlayableWeaponTypes.size() == kWeaponColumnCount * kWeaponRowCount);
 	std::array<UI::Title::WeaponSelectIcon, Projectile::kPlayableWeaponTypes.size()> weaponIcons_{};
 	std::size_t selectedWeaponIndex_ = 0;
+	bool isWeaponSelectionStickReady_ = false;
 	MadoEngine::SpriteHandle weaponSelectionBackground_{};
 	MadoEngine::TextHandle weaponSelectionHeading_{};
 	MadoEngine::TextHandle selectedWeaponName_{};

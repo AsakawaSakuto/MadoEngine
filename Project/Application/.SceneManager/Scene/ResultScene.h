@@ -2,9 +2,10 @@
 #include ".SceneManager/CommonData.h"
 #include ".SceneManager/IScene.h"
 #include "UI/Result/ResultWeaponStatsUI.h"
+#include "UI/Result/ResultScoreUI.h"
 
 /// @brief リザルトシーン
-/// @details ゲームの結果を表示し、SpaceまたはGamePad AでTitle、QまたはGamePad XでGameへ遷移
+/// @details AまたはSpaceでスコア画面の表示と演出完了とTitleへの移行、スコア画面のQまたはGamePad XでGameへ遷移
 class ResultScene : public IScene {
 public:
 	/// @brief コンストラクタ
@@ -32,6 +33,11 @@ public:
 	void DrawImGui() override;
 
 private:
+	/// @brief 戦績一覧を非表示にしてスコア画面へ切り替え
+	void ShowScore();
+
 	CommonData& commonData_;
 	UI::Result::WeaponStatsUI weaponStatsUI_;
+	UI::Result::ScoreUI scoreUI_;
+	bool isScoreVisible_ = false;
 };

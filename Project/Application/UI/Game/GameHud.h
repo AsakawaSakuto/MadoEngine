@@ -117,6 +117,9 @@ namespace UI::Game {
 		/// @param type 取得した特殊Dropの種類
 		void ShowDropObjectGet(DropObject::Type type);
 
+		/// @brief Enemy大量出現Textのフェードインと待機および退場演出を開始
+		void ShowMassiveEnemySpawn();
+
 		/// @brief 攻撃した武器スロットの表示演出を開始
 		/// @param slotIndex 攻撃した武器のスロット番号
 		void PlayWeaponAttackAnimation(std::size_t slotIndex);
@@ -149,6 +152,10 @@ namespace UI::Game {
 		/// @param gamePlayElapsedTime Playing開始後のゲーム経過時間、秒単位
 		void UpdateGameStartPresentation(float progress, float gamePlayElapsedTime);
 
+		/// @brief Enemy大量出現Textの透明度と退場位置を更新
+		/// @param deltaTime 停止中も進行する実時間（秒）
+		void UpdateMassiveEnemySpawnPresentation(float deltaTime);
+
 		/// @brief 所持金と撃破数とEnemy数と武器強化のリロール費用の文字表示を更新
 		/// @param state 現在フレームの表示情報
 		void UpdateTexts(const GameHudState& state);
@@ -174,6 +181,8 @@ namespace UI::Game {
 		MadoEngine::TextHandle upgradeText_{};
 		GamingColor upgradeTextColor_;
 		GameTimer upgradeTextPulseTimer_;
+		GameTimer massiveEnemySpawnTimer_;
+		bool isMassiveEnemySpawnJustStarted_ = false;
 		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };
 		std::array<InputControlFeedback, 2> upgradeControlFeedback_{};
 		int displayedMoney_ = -1;

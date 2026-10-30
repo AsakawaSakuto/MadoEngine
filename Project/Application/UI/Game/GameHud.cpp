@@ -54,6 +54,14 @@ namespace {
 	constexpr float kGoalTextEndX = 232.0f;
 	constexpr float kGoalTextMoveDelay = 2.0f;
 	constexpr float kGoalTextMoveDuration = 1.0f;
+	constexpr const char* kMassiveEnemySpawnTextName = "MassiveEnemySpawnText";
+	constexpr float kMassiveEnemySpawnTextInitialY = 170.0f;
+	constexpr float kMassiveEnemySpawnTextEndY = -100.0f;
+	constexpr float kMassiveEnemySpawnFadeDuration = 1.0f;
+	constexpr float kMassiveEnemySpawnHoldDuration = 1.0f;
+	constexpr float kMassiveEnemySpawnMoveDuration = 1.0f;
+	constexpr float kMassiveEnemySpawnTotalDuration = kMassiveEnemySpawnFadeDuration +
+		kMassiveEnemySpawnHoldDuration + kMassiveEnemySpawnMoveDuration;
 	constexpr const char* kStaticHudSpriteNames[] = {
 		"MoneyUI", "KillUI",
 		"InputUI1_Pad", "InputUI2_Pad", "InputUI3_Pad", "InputUI4_Pad",
@@ -61,7 +69,8 @@ namespace {
 	};
 	constexpr const char* kStaticHudTextNames[] = {
 		"EnemyCountText", "GamePlayTimerText", "OverTimeText", "PlayerHealthText", "FpsText",
-		"KillCountText", "SeedValueText", "MoneyText", "TheGoalText", "Text", "Text1", "Text2", "Text3", "Text4",
+		"KillCountText", "SeedValueText", "MoneyText", "TheGoalText", kMassiveEnemySpawnTextName,
+		"Text", "Text1", "Text2", "Text3", "Text4",
 	};
 }
 
@@ -73,6 +82,9 @@ namespace UI::Game {
 		isWorldViewsVisible_ = false;
 		staticSprites_.clear();
 		staticTexts_.clear();
+		massiveEnemySpawnTimer_.Reset();
+		isMassiveEnemySpawnJustStarted_ = false;
+		UpdateMassiveEnemySpawnPresentation(0.0f);
 		UpdateUpgradePresentation(0.0f, false);
 		UpdatePausePresentation(false);
 
@@ -115,6 +127,9 @@ namespace UI::Game {
 	}
 
 	void GameHud::Finalize() {
+		massiveEnemySpawnTimer_.Reset();
+		isMassiveEnemySpawnJustStarted_ = false;
+		UpdateMassiveEnemySpawnPresentation(0.0f);
 		UpdateUpgradePresentation(0.0f, false);
 		UpdatePausePresentation(false);
 		relicInventoryUI_.Finalize();
@@ -184,6 +199,7 @@ namespace UI::Game {
 		playerDamageView_.Update(deltaTime);
 		fpsMeasurementView_.Update(deltaTime);
 		gamePlayTimerView_.Update(state.remainingTime, deltaTime);
+		UpdateMassiveEnemySpawnPresentation(deltaTime);
 		UpdateGameStartPresentation(state.gameStartProgress, state.gamePlayElapsedTime);
 		ApplyStaticVisibility(isVisible_);
 		UpdateUpgradePresentation(deltaTime, isVisible_ && state.isWaitingUpgradeSelection);
@@ -242,6 +258,13 @@ namespace UI::Game {
 
 	void GameHud::ShowDropObjectGet(DropObject::Type type) {
 		dropObjectGetView_.Spawn(type);
+	}
+
+	void GameHud::ShowMassiveEnemySpawn() {
+
+		// 各通知で演出時間を初期化し、開始Frameの時間差分をフェードへ持ち込まない状態へ遷移
+		massiveEnemySpawnTimer_.Start(kMassiveEnemySpawnTotalDuration);
+		isMassiveEnemySpawnJustStarted_ = true;
 	}
 
 	void GameHud::PlayWeaponAttackAnimation(std::size_t slotIndex) {
@@ -440,6 +463,47 @@ namespace UI::Game {
 		position.x = Easing::Lerp(kGameStartTextInitialX, kGameStartTextEndX, moveProgress, EaseType::EaseInBack);
 		position.y = kGameStartTextY;
 		startText->SetPosition(position);
+	}
+
+	void GameHud::UpdateMassiveEnemySpawnPresentation(float deltaTime) {
+
+		// 通知成立FrameはAlphaを0に保ち、次Frameから実時間で演出を進行
+		if (isMassiveEnemySpawnJustStarted_) {
+			isMassiveEnemySpawnJustStarted_ = false;
+		} else {
+			massiveEnemySpawnTimer_.Update(deltaTime);
+		}
+
+		// Json再読込後も現在の演出時刻を最新Textへ反映し、X座標とRGBの編集値を維持
+		MadoEngine::Text* text = MyText::TryGet(MyText::Find(kMassiveEnemySpawnTextName));
+		if (!text || text->GetSceneType() != SceneType::Game) {
+			return;
+		}
+		const bool hasStarted = massiveEnemySpawnTimer_.IsActive() || massiveEnemySpawnTimer_.IsFinished();
+		Vector2 position = text->GetPosition();
+		position.y = kMassiveEnemySpawnTextInitialY;
+		Vector4 color = text->GetColor();
+		color.w = 0.0f;
+		if (hasStarted) {
+
+			// フェード完了後はAlpha1とY座標を1秒維持し、その後にEaseInBackで退場
+			const float fadeEndProgress = kMassiveEnemySpawnFadeDuration / kMassiveEnemySpawnTotalDuration;
+			const float moveStartProgress = (kMassiveEnemySpawnFadeDuration + kMassiveEnemySpawnHoldDuration) /
+				kMassiveEnemySpawnTotalDuration;
+			color.w = massiveEnemySpawnTimer_.GetProgressUntil(fadeEndProgress);
+			const float moveProgress = massiveEnemySpawnTimer_.GetProgressAfter(moveStartProgress);
+			if (moveProgress >= 1.0f) {
+
+				// 補間の丸め誤差を残さず、退場完了後は指定された終点へ固定
+				position.y = kMassiveEnemySpawnTextEndY;
+			} else {
+				position.y = Easing::Lerp(kMassiveEnemySpawnTextInitialY, kMassiveEnemySpawnTextEndY,
+					moveProgress, EaseType::EaseInBack);
+			}
+		}
+		text->SetPosition(position);
+		text->SetColor(color);
+		text->SetVisible(hasStarted);
 	}
 
 	void GameHud::UpdateTexts(const GameHudState& state) {

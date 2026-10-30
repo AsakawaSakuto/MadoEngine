@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <unordered_map>
 #include <memory>
 #include <string>
@@ -15,6 +16,7 @@ namespace MadoEngine {
 	/// Assets/Audio内の音声ファイルを自動管理し、文字列キーで再生可能
 	class AudioManager {
 	public:
+		static constexpr float kMaxIndividualVolume = AudioX::kMaxVolume;
 		static constexpr float kMinPitchSemitones = AudioPitchStream::kMinSemitones;
 		static constexpr float kMaxPitchSemitones = AudioPitchStream::kMaxSemitones;
 
@@ -31,7 +33,7 @@ namespace MadoEngine {
 		/// @brief 音声ファイルを手動で追加読み込み
 		/// @param filePath 音声ファイルのパス
 		/// @param type オーディオの種類（SE / BGM / Voice）
-		/// @param volume 個別音量（0.0f～1.0f、デフォルト: 1.0f）
+		/// @param volume 個別音量（0.0f～2.0f、デフォルト: 1.0f）
 		void Load(const std::string& filePath, AudioType type = AudioType::SE, float volume = 1.0f);
 
 		/// @brief キーに対応するAudioTypeを取得
@@ -49,13 +51,18 @@ namespace MadoEngine {
 
 		/// @brief 個別の音声の音量を設定
 		/// @param key ファイル名（拡張子なし）
-		/// @param volume 音量（0.0f～1.0f）
+		/// @param volume 音量（0.0f～2.0f）
 		void SetVolume(const std::string& key, float volume);
 
 		/// @brief 個別の音声の音量を取得
 		/// @param key ファイル名（拡張子なし）
 		/// @return 音量（見つからない場合は1.0f）
 		float GetVolume(const std::string& key) const;
+
+		/// @brief 元音源のIntegrated LUFSとサンプルピークを取得
+		/// @param key ファイル名、拡張子なし
+		/// @return 元音源の解析結果、未登録の場合は無効な結果
+		AudioLoudnessMetrics GetLoudnessMetrics(const std::string& key) const;
 
 		/// @brief 個別音量設定を保持したまま一時的な音量係数を適用
 		/// @param key ファイル名、拡張子なし
@@ -104,6 +111,21 @@ namespace MadoEngine {
 		/// @brief Voice音量を取得
 		/// @return 現在のVoice音量
 		float GetVoiceVolume() const { return voiceVolume_; }
+
+		/// @brief 音声種別ごとに同じ音声の同時再生数上限を設定
+		/// @param type 上限を設定する音声種別
+		/// @param maxInstances 同じ音声の同時再生数上限、0の場合は新規再生を抑止
+		void SetMaxInstancesPerSound(AudioType type, int maxInstances);
+
+		/// @brief 音声種別に対応する同じ音声の同時再生数上限を取得
+		/// @param type 上限を取得する音声種別
+		/// @return 同じ音声の同時再生数上限、未対応の種別の場合は0
+		int GetMaxInstancesPerSound(AudioType type) const;
+
+		/// @brief 指定音声の一時停止中を含む未終了の再生数を取得
+		/// @param key ファイル名、拡張子なし
+		/// @return 未終了の再生数、未登録の場合は0
+		std::size_t GetPlayingInstanceCount(const std::string& key) const;
 
 		/// @brief 音声を再生
 		/// @param key ファイル名（拡張子なし）、例: "fire.mp3" → "fire"
@@ -195,6 +217,9 @@ namespace MadoEngine {
 		float bgmTransitionGain_ = 1.0f;
 		float seVolume_ = 0.5f;
 		float voiceVolume_ = 0.5f;
+		int seMaxInstancesPerSound_ = 3;
+		int bgmMaxInstancesPerSound_ = 1;
+		int voiceMaxInstancesPerSound_ = 1;
 
 		// 音声ファイルの基準ディレクトリ
 		static constexpr const char* kAudioDirectory = "Assets/Audio";

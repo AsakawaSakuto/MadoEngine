@@ -339,8 +339,9 @@ namespace DropObject {
 			break;
 		}
 
-		// 個別SEは音源のあるMoneyとHealに限定し、ExpのSEはManagerで同Frameの回収を集約
-		if (type_ == Type::Money || type_ == Type::Heal) {
+		// ExpのSEはManagerで同Frameの回収を集約し、その他の取得音は種類名に対応した音源を使用
+		if (type_ == Type::Money || type_ == Type::Heal ||
+			type_ == Type::AttackUpper || type_ == Type::SpeedUpper || type_ == Type::DefuseUpper) {
 			MyAudio::Play(DropObjectTypeToString(type_));
 		}
 

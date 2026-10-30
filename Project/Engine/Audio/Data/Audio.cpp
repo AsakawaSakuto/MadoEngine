@@ -42,13 +42,13 @@ public:
 
     /// @brief 音量と音程を適用して再生を開始
     /// @param engine XAudio2の再生環境
-    /// @param volume 音量、0から1の範囲
+    /// @param volume 音量、0から2の範囲
     /// @param semitones 元の音程からの半音数
     /// @param isPaused 再生開始時から一時停止する場合はtrue
     /// @return 再生開始に成功した場合はtrue
     bool Play(IXAudio2* engine, float volume, float semitones, bool isPaused) {
         engine_ = engine;
-        volume_ = std::clamp(volume, 0.0f, 1.0f);
+        volume_ = std::clamp(volume, 0.0f, AudioX::kMaxVolume);
         isPaused_ = isPaused;
         if (semitones != 0.0f) {
             return StartPitchVoice(semitones, 0);
@@ -100,9 +100,9 @@ public:
     }
 
     /// @brief 再生中の音量を変更
-    /// @param volume 音量、0から1の範囲
+    /// @param volume 音量、0から2の範囲
     void SetVolume(float volume) {
-        volume_ = std::clamp(volume, 0.0f, 1.0f);
+        volume_ = std::clamp(volume, 0.0f, AudioX::kMaxVolume);
         if (voice_) {
             voice_->SetVolume(volume_);
         }
@@ -353,6 +353,9 @@ void AudioX::Initialize(const std::string& filePath, IXAudio2& engine) {
     // 停止処理が完了するまで各再生インスタンスとの共有PCMの寿命を保証
     SoundData data = SoundLoadAudio(filePath);
     wfex_ = data.wfex;
+
+    // 音源ごとの解析を読み込み時の一度に限定し、Editor描画や再生開始時の再走査を回避
+    loudnessMetrics_ = MadoEngine::AudioLoudnessAnalyzer::Analyze(data.pcm, wfex_);
     pcmShared_ = std::make_shared<std::vector<BYTE>>(std::move(data.pcm));
 }
 
@@ -389,6 +392,13 @@ void AudioX::Update() {
     std::erase_if(actives_, [](const auto& instance) { return instance->Finished(); });
 }
 
+std::size_t AudioX::GetPlayingInstanceCount() const {
+
+    // 同一フレーム内でも再生終了を反映し、一時停止中やループ中のインスタンスは枠を維持
+    return static_cast<std::size_t>(std::count_if(actives_.begin(), actives_.end(),
+        [](const auto& instance) { return !instance->Finished(); }));
+}
+
 void AudioX::Reset() {
 
     // 変換スレッドとVoiceを先に停止し、AudioManagerが所有する共有エンジンは参照だけ解除
@@ -396,6 +406,7 @@ void AudioX::Reset() {
     pcmShared_.reset();
     xAudio2_ = nullptr;
     wfex_ = {};
+    loudnessMetrics_ = {};
     filePath_.clear();
     pitchSemitones_ = 0.0f;
     volume_ = 1.0f;
