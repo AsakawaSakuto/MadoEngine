@@ -550,7 +550,7 @@ namespace Player {
 		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F3)) {
-			transform_.translate.y = 100.0f;
+			transform_.translate.y = 20.0f;
 		}
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F4)) {
