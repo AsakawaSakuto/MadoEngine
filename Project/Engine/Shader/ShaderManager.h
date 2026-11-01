@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/AssetKey.h"
 #include <d3d12.h>
 #include <dxcapi.h>
 #include <wrl/client.h>
@@ -59,7 +60,7 @@ namespace MadoEngine {
 		/// @return 読み込んだ IDxcBlob（失敗時はnullptr）
 		Microsoft::WRL::ComPtr<IDxcBlob> LoadCso(const std::wstring& csoPath);
 
-		/// @brief .hlsl ファイルをコンパイルし .cso を .cache/ に保存
+		/// @brief .hlsl ファイルをコンパイルし .cso を Cache/ に保存
 		/// @param hlslPath HLSLファイルのパス
 		/// @param csoPath  出力 CSOファイルのパス
 		/// @param profile  シェーダープロファイル（例: L"vs_6_0"）
@@ -86,7 +87,7 @@ namespace MadoEngine {
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 
 		// キー → バイトコード blob
-		std::unordered_map<std::string, Microsoft::WRL::ComPtr<IDxcBlob>> shaderMap_;
+		std::unordered_map<std::string, Microsoft::WRL::ComPtr<IDxcBlob>, AssetKey::Hash, AssetKey::Equal> shaderMap_;
 	};
 
 } // namespace MadoEngine

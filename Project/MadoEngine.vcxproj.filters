@@ -19,7 +19,7 @@
     <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application\.Core\Terminal.cpp" />
+    <ClCompile Include="Application\Core\Terminal.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyBase.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyBoss.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyEditor.cpp" />
@@ -31,16 +31,16 @@
     <ClCompile Include="Application\GameObject\Enemy\EnemySettings.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemySpawner.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\Type\EnemyTank.cpp" />
-    <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
-    <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneBgmController.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\UI\Game\GameHud.cpp" />
     <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp" />
     <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
     <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\GameScene.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\ResultScene.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\TitleScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\GameScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\ResultScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\TitleScene.cpp" />
     <ClCompile Include="Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Engine\Audio\Data\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Data\AudioData.cpp" />
@@ -55,7 +55,7 @@
     <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
-    <ClCompile Include="Engine\.Execution\Execution.cpp" />
+    <ClCompile Include="Engine\Execution\Execution.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -85,7 +85,7 @@
     <ClCompile Include="Engine\Utility\Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Utility\ResourceHelper\ResourceHelper.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\TestScene.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Externals\imgui\imgui.cpp" />
     <ClCompile Include="Externals\imgui\imgui_demo.cpp" />
@@ -456,34 +456,34 @@
     <ClInclude Include="Engine\Render\PostEffect\PostEffectPassHandle.h" />
     <ClInclude Include="Engine\Render\PostEffect\PostEffectType.h" />
     <ClInclude Include="Engine\Utility\Handle\GenerationalHandle.h" />
-    <ClInclude Include="Application\.SceneManager\SceneManager.h">
+    <ClInclude Include="Application\SceneManager\SceneManager.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h">
+    <ClInclude Include="Application\SceneManager\Scene\TitleScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\GameHud.h" />
     <ClInclude Include="Application\UI\Game\Control\InputControlFeedback.h" />
     <ClInclude Include="Application\System\GameCamera\GameCameraController.h" />
     <ClInclude Include="Application\System\RewardSelection\RewardSelectionController.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\GameScene.h">
+    <ClInclude Include="Application\SceneManager\Scene\GameScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h">
+    <ClInclude Include="Application\SceneManager\Scene\ResultScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\IScene.h">
+    <ClInclude Include="Application\SceneManager\IScene.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\SceneTransitionController.h" />
-    <ClInclude Include="Application\.SceneManager\SceneBgmController.h" />
-    <ClInclude Include="Application\.Core\Terminal.h">
+    <ClInclude Include="Application\SceneManager\SceneTransitionController.h" />
+    <ClInclude Include="Application\SceneManager\SceneBgmController.h" />
+    <ClInclude Include="Application\Core\Terminal.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\LeakChecker\D3DResourceLeakChecker.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\.Execution\Execution.h">
+    <ClInclude Include="Engine\Execution\Execution.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Material.h">
@@ -534,7 +534,7 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\Scene\TestScene.h">
+    <ClInclude Include="Application\SceneManager\Scene\TestScene.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\2d\Sprite\MySprite.h">
@@ -614,7 +614,7 @@
     <ClInclude Include="Application\GameObject\Player\PlayerMovement.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\CommonData.h">
+    <ClInclude Include="Application\SceneManager\CommonData.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\CollisionFunction.h">
@@ -626,7 +626,7 @@
     <ClInclude Include="Engine\Utility\Camera\TPS_Camera.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
-    <ClInclude Include="Application\.SceneManager\SceneType.h">
+    <ClInclude Include="Application\SceneManager\SceneType.h">
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Collider\CollisionTag.h">
@@ -995,6 +995,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Utility\Parameter\ParameterStore.h" />
+    <ClInclude Include="Engine\Utility\AssetKey.h" />
     <ClInclude Include="Engine\Utility\Parameter\DebugParameter.h" />
     <ClInclude Include="Engine\Utility\Parameter\ParameterSerializer.h" />
     <ClInclude Include="Engine\Render\ImGui\Editor\ParameterInspector.h" />

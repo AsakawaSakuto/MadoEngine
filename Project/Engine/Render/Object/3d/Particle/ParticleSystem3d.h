@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/AssetKey.h"
 #include "ParticleEffectInstance.h"
 #include "ParticleEmitterRuntimeFactory.h"
 #include "ParticleRenderer3d.h"
@@ -230,8 +231,8 @@ namespace MadoEngine::Particle {
 		MadoEngine::Ribbon::RibbonEffectRenderer3d trailRenderer_;
 		ParticleEmitterRuntimeFactory runtimeFactory_;
 		ID3D12GraphicsCommandList* commandList_ = nullptr;
-		std::unordered_map<std::string, std::shared_ptr<ParticleEffectAsset>> assets_;
-		std::unordered_map<std::string, std::filesystem::path> assetPaths_;
+		std::unordered_map<std::string, std::shared_ptr<ParticleEffectAsset>, AssetKey::Hash, AssetKey::Equal> assets_;
+		std::unordered_map<std::string, std::filesystem::path, AssetKey::Hash, AssetKey::Equal> assetPaths_;
 		std::filesystem::path assetDirectoryPath_ = "Assets/Json/Particle";
 		std::vector<EffectSlot> effectSlots_;
 		std::vector<RetiredEffectInstance> retiredEffectInstances_;

@@ -1,6 +1,6 @@
 #pragma once
 #include "../IGameObject.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "PlayerController.h"
 #include "PlayerAnimationController.h"
 #include "PlayerMovement.h"
@@ -203,7 +203,7 @@ namespace Player {
 		/// @return 描画と同じXYZ順序の合成済みEuler角
 		Vector3 CreateDefenseModelRotation(const Vector3& playerRotation) const;
 
-		ColliderShape hitAABB_;
+		ColliderShape hitBoxAABB_;
 		ColliderShape expGetSphere_;
 		ColliderShape attackRangeSphere_;
 		ColliderShape enemyDeleteRangeSphere_;

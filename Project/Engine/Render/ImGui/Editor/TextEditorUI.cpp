@@ -1,4 +1,5 @@
 #include "TextEditorUI.h"
+#include "Utility/AssetKey.h"
 #include "EditorToolbar.h"
 #include "Render/Object/2d/Text/TextManager.h"
 #include <algorithm>
@@ -168,7 +169,7 @@ namespace {
 		const std::vector<TextFontAsset>& fontAssets = TextTextureGenerator::GetInstance().GetFontAssets();
 		const TextFontAsset* currentAsset = nullptr;
 		for (const TextFontAsset& fontAsset : fontAssets) {
-			if (fontAsset.filePath == text.GetFontFilePath()) {
+			if (AssetKey::Equals(fontAsset.filePath, text.GetFontFilePath())) {
 				currentAsset = &fontAsset;
 				break;
 			}

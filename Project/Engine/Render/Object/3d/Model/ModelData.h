@@ -155,21 +155,21 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
 
                 // uvChecker.pngが設定されている場合、white1x1.pngに置き換え
                 if (textureFilePath.find("uvChecker.png") != std::string::npos) {
-                    modelData.materialPaths[matIndex] = "Assets/Texture/.Engine/white1x1.png";
+                    modelData.materialPaths[matIndex] = "Assets/Texture/Engine/white1x1.png";
                 } else {
                     modelData.materialPaths[matIndex] = textureFilePath;
                 }
             } else {
-                modelData.materialPaths[matIndex] = "Assets/Texture/.Engine/white1x1.png";
+                modelData.materialPaths[matIndex] = "Assets/Texture/Engine/white1x1.png";
             }
         } else {
-            modelData.materialPaths[matIndex] = "Assets/Texture/.Engine/white1x1.png";
+            modelData.materialPaths[matIndex] = "Assets/Texture/Engine/white1x1.png";
         }
     }
 
     // Materialを持たないAssetもSubMeshの先頭Indexで参照できるよう白色を補完
     if (modelData.materialPaths.empty()) {
-        modelData.materialPaths.push_back("Assets/Texture/.Engine/white1x1.png");
+        modelData.materialPaths.push_back("Assets/Texture/Engine/white1x1.png");
         modelData.materialColors.push_back({ 1.0f, 1.0f, 1.0f, 1.0f });
     }
 

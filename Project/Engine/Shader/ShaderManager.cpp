@@ -11,7 +11,7 @@
 namespace MadoEngine {
 
 	static constexpr const char* kShaderRoot = "Assets/Shader";
-	static constexpr const char* kCacheDir   = "Assets/Shader/.cache";
+	static constexpr const char* kCacheDir   = "Assets/Shader/Cache";
 
 	ShaderManager& ShaderManager::GetInstance() {
 		static ShaderManager instance;
@@ -23,7 +23,7 @@ namespace MadoEngine {
 
 		namespace fs = std::filesystem;
 
-		// .cache ディレクトリが存在しない場合は作成
+		// Cache ディレクトリが存在しない場合は作成
 		if (!fs::exists(kCacheDir)) {
 			fs::create_directories(kCacheDir);
 			Logger::Output(
@@ -35,7 +35,7 @@ namespace MadoEngine {
 		const fs::path shaderRoot(kShaderRoot);
 		const fs::path cacheRoot(kCacheDir);
 		const auto getLatestDependencyTime = [&shaderRoot](const fs::path& rootPath) {
-			std::unordered_set<std::string> visitedPaths;
+			std::unordered_set<std::string, AssetKey::Hash, AssetKey::Equal> visitedPaths;
 			fs::file_time_type latestTime = (fs::file_time_type::min)();
 			const auto visitDependency = [
 				&shaderRoot,
@@ -98,7 +98,7 @@ namespace MadoEngine {
 			const fs::path& hlslPath = entry.path();
 
 			// .hlsli はスキップ
-			if (hlslPath.extension() != ".hlsl") { continue; }
+			if (!AssetKey::Equals(hlslPath.extension().string(), ".hlsl")) { continue; }
 
 			const wchar_t* profile = ResolveProfile(hlslPath.filename());
 			if (!profile) {
@@ -196,9 +196,11 @@ namespace MadoEngine {
 
 	std::vector<std::string> ShaderManager::GetKeysByPrefix(const std::string& prefix) const {
 		std::vector<std::string> keys;
+
+		// 読み込み時の表記に依存せず同じShader階層の候補を抽出
 		for (const auto& shaderPair : shaderMap_) {
 			const std::string& key = shaderPair.first;
-			if (key.rfind(prefix, 0) != 0) {
+			if (key.size() < prefix.size() || !AssetKey::Equals(std::string_view(key).substr(0, prefix.size()), prefix)) {
 				continue;
 			}
 
@@ -253,13 +255,13 @@ namespace MadoEngine {
 	}
 
 	const wchar_t* ShaderManager::ResolveProfile(const std::filesystem::path& filename) {
-		const std::string name = filename.string();
+		const std::string name = AssetKey::Normalize(filename.string());
 
 		// Shader拡張子に応じてVertexまたはPixel用Profileを選択
-		if (name.find(".VS.") != std::string::npos) { return L"vs_6_0"; }
-		if (name.find(".PS.") != std::string::npos) { return L"ps_6_0"; }
-		if (name.find(".GS.") != std::string::npos) { return L"gs_6_0"; }
-		if (name.find(".CS.") != std::string::npos) { return L"cs_6_0"; }
+		if (name.find(".vs.") != std::string::npos) { return L"vs_6_0"; }
+		if (name.find(".ps.") != std::string::npos) { return L"ps_6_0"; }
+		if (name.find(".gs.") != std::string::npos) { return L"gs_6_0"; }
+		if (name.find(".cs.") != std::string::npos) { return L"cs_6_0"; }
 		return nullptr;
 	}
 

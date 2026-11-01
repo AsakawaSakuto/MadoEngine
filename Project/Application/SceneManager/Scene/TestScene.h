@@ -1,5 +1,5 @@
 #pragma once
-#include ".SceneManager/IScene.h"
+#include "SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
 #include "GameObject/Map/Map.h"
 #include "GameObject/Map/MapLimit.h"

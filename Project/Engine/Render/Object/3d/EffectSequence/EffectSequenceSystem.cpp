@@ -95,7 +95,11 @@ namespace {
 			return false;
 		}
 		const std::filesystem::path canonicalDirectory = std::filesystem::weakly_canonical(directoryPath, error);
-		return !error && canonicalFile.extension() == ".json" && canonicalFile.parent_path() == canonicalDirectory;
+
+		// 表記差を許容しつつ、編集操作の対象をAsset Directory直下へ制限
+		return !error &&
+			MadoEngine::AssetKey::Equals(PathToUtf8String(canonicalFile.extension()), ".json") &&
+			MadoEngine::AssetKey::Equals(PathToUtf8String(canonicalFile.parent_path()), PathToUtf8String(canonicalDirectory));
 	}
 
 	/// @brief Asset JSONをTrash Directoryへ退避
@@ -114,7 +118,7 @@ namespace {
 		if (!std::filesystem::exists(sourcePath, error) || error) {
 			return false;
 		}
-		const std::filesystem::path trashDirectory = assetDirectoryPath / ".trash";
+		const std::filesystem::path trashDirectory = assetDirectoryPath / "Trash";
 		std::filesystem::create_directories(trashDirectory, error);
 		if (error) {
 			return false;
@@ -184,7 +188,7 @@ namespace MadoEngine::EffectSequence {
 			if (error) {
 				break;
 			}
-			if (entry.is_regular_file() && entry.path().extension() == ".json") {
+			if (entry.is_regular_file() && AssetKey::Equals(PathToUtf8String(entry.path().extension()), ".json")) {
 				paths.push_back(entry.path());
 			}
 		}

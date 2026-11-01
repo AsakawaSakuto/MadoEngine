@@ -5,7 +5,7 @@
 #include "Render/Object/ObjectHandle.h"
 #include "Render/Object/RenderLayer.h"
 #include "Utility/EditorManagementMode.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include <cstddef>
 #include <d3d12.h>
 #include <filesystem>

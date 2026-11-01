@@ -12,7 +12,7 @@
 #include "Render/PSO/ComputePSORegistry.h"
 #include "UtilityHeaders.h"
 #include "Utility/Parameter/ParameterStore.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #include "Render/ImGui/ImGuiManager.h"

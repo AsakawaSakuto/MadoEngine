@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/AssetKey.h"
 #include "EffectSequenceInstance.h"
 #include <filesystem>
 #include <memory>
@@ -216,8 +217,8 @@ namespace MadoEngine::EffectSequence {
 		void ReleaseSlot(uint32_t index);
 
 		EffectSequenceNodeDispatcher dispatcher_;
-		std::unordered_map<std::string, std::shared_ptr<EffectSequenceAsset>> assets_;
-		std::unordered_map<std::string, std::filesystem::path> assetPaths_;
+		std::unordered_map<std::string, std::shared_ptr<EffectSequenceAsset>, AssetKey::Hash, AssetKey::Equal> assets_;
+		std::unordered_map<std::string, std::filesystem::path, AssetKey::Hash, AssetKey::Equal> assetPaths_;
 		std::filesystem::path assetDirectoryPath_ = "Assets/Json/EffectSequence";
 		std::vector<SequenceSlot> sequenceSlots_;
 		std::queue<uint32_t> freeSlotIndices_;

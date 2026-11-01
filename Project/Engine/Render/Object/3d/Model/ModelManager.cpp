@@ -3,7 +3,6 @@
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -16,10 +15,7 @@ namespace {
 /// @param value 変換する文字列
 /// @return 小文字へ変換した文字列
 std::string ToLower(std::string value) {
-	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char character) {
-		return static_cast<char>(std::tolower(character));
-	});
-	return value;
+	return MadoEngine::AssetKey::Normalize(value);
 }
 
 /// @brief ファイルパスを正規化
@@ -90,11 +86,11 @@ bool TryGetModelType(const std::filesystem::path& modelRoot, const std::filesyst
 /// @brief Animation専用として参照されるModelファイルを収集
 /// @param modelRoot Modelルート
 /// @return 通常Model読み込みから除外する正規化済みパス集合
-std::unordered_set<std::string> CollectAnimationOnlyPaths(const std::filesystem::path& modelRoot) {
-	std::unordered_set<std::string> animationOnlyPaths;
+std::unordered_set<std::string, MadoEngine::AssetKey::Hash, MadoEngine::AssetKey::Equal> CollectAnimationOnlyPaths(const std::filesystem::path& modelRoot) {
+	std::unordered_set<std::string, MadoEngine::AssetKey::Hash, MadoEngine::AssetKey::Equal> animationOnlyPaths;
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
 		if (!entry.is_regular_file() ||
-			!entry.path().filename().string().ends_with(".animations.json")) {
+			!ToLower(entry.path().filename().string()).ends_with(".animations.json")) {
 			continue;
 		}
 
@@ -129,7 +125,7 @@ std::unordered_set<std::string> CollectAnimationOnlyPaths(const std::filesystem:
 					continue;
 				}
 				const std::string sourcePath = NormalizePath(manifestDirectory / sourceFile);
-				if (sourcePath != baseModelPath) {
+				if (!MadoEngine::AssetKey::Equals(sourcePath, baseModelPath)) {
 					animationOnlyPaths.insert(sourcePath);
 				}
 			}
@@ -216,7 +212,7 @@ void ModelManager::LoadAllModels() {
 		Logger::Output("Assets/Modelフォルダが見つかりません", Logger::Level::Warning);
 		return;
 	}
-	const std::unordered_set<std::string> animationOnlyPaths = CollectAnimationOnlyPaths(modelRoot);
+	const auto animationOnlyPaths = CollectAnimationOnlyPaths(modelRoot);
 
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
 		if (!entry.is_regular_file() || !IsModelExtension(entry.path())) {

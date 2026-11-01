@@ -1,5 +1,5 @@
 #include "FpsMeasurementView.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include <format>
 

@@ -4,7 +4,7 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Utility/EditorManagementMode.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>

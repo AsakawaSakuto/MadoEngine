@@ -1,5 +1,5 @@
 #include "PlayerResourceGainView.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Math/Vector4.h"
 #include "Render/Object/2d/Text/MyText.h"
 #ifdef USE_IMGUI

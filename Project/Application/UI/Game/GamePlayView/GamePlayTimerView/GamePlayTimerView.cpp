@@ -1,5 +1,5 @@
 #include "GamePlayTimerView.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Audio/MyAudio.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include <cmath>

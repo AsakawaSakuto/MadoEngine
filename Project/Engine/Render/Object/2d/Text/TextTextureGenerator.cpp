@@ -1,5 +1,6 @@
 #include "TextTextureGenerator.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/AssetKey.h"
 #include <Windows.h>
 #include <algorithm>
 #include <cmath>
@@ -244,7 +245,7 @@ bool TextTextureGenerator::GenerateInternal(const TextTextureDesc& desc, TextTex
 	// Asset Font指定時はSystem FontではなくFile単位のCollectionを選択
 	if (!desc.fontFilePath.empty()) {
 		for (size_t index = 0; index < fontAssets_.size(); ++index) {
-			if (fontAssets_[index].filePath == desc.fontFilePath) {
+			if (AssetKey::Equals(fontAssets_[index].filePath, desc.fontFilePath)) {
 				fontCollection = fontAssetCollections_[index].Get();
 				fontFamily = fontAssetFamilyNames_[index].c_str();
 				break;

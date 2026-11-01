@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include "nlohmann/json.hpp"
+#include "Utility/AssetKey.h"
 
 namespace MadoEngine {
 
@@ -16,7 +17,7 @@ namespace MadoEngine {
         /// @param textureDirectory 元画像ディレクトリ
         explicit TextureCache(std::filesystem::path textureDirectory)
             : textureDirectory_(std::move(textureDirectory))
-            , cacheDirectory_(textureDirectory_ / ".cache") {
+            , cacheDirectory_(textureDirectory_ / "Cache") {
             std::ifstream input(cacheDirectory_ / "manifest.json");
             if (!input) {
                 return;
@@ -30,7 +31,11 @@ namespace MadoEngine {
                 return;
             }
             converterTime_ = manifest["converterTime"].get<std::int64_t>();
-            textures_ = std::move(manifest["textures"]);
+
+            // 配布先で元画像名の大小が変わっても既存ManifestのDDSを再利用
+            for (auto& [key, metadata] : manifest["textures"].items()) {
+                textures_[AssetKey::Normalize(key)] = std::move(metadata);
+            }
         }
 
         /// @brief キャッシュディレクトリを取得
@@ -67,7 +72,7 @@ namespace MadoEngine {
             if (error) {
                 return false;
             }
-            if (ddsPath != GetPath(sourcePath)) {
+            if (!AssetKey::Equals(ddsPath.generic_string(), GetPath(sourcePath).generic_string())) {
 
                 // 手動配置のDDSには管理情報がないため、同階層のPNGとの更新順だけを比較
                 return ddsTime >= sourceTime;
@@ -181,7 +186,7 @@ namespace MadoEngine {
         /// @return UTF-8の相対パス
         std::string GetKey(const std::filesystem::path& sourcePath) const {
             const auto key = std::filesystem::relative(sourcePath, textureDirectory_).generic_u8string();
-            return std::string(key.begin(), key.end());
+            return AssetKey::Normalize(std::string(key.begin(), key.end()));
         }
 
         static constexpr std::uint32_t kVersion = 1;

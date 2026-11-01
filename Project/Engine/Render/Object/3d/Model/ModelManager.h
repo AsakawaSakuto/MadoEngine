@@ -5,7 +5,8 @@
 #include "Render/Object/ObjectHandle.h"
 #include "Render/Object/RenderLayer.h"
 #include "Utility/EditorManagementMode.h"
-#include ".SceneManager/SceneType.h"
+#include "Utility/AssetKey.h"
+#include "SceneManager/SceneType.h"
 #include <cstddef>
 #include <d3d12.h>
 #include <filesystem>
@@ -468,8 +469,8 @@ private:
 	Render::PSORegistry* psoRegistry_ = nullptr;
 	Camera activeCamera_;
 	std::unordered_set<SceneType> spriteSheetAnimationPausedScenes_;
-	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>> sharedData_;
-	std::unordered_map<std::string, std::string> aliases_;
+	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>, AssetKey::Hash, AssetKey::Equal> sharedData_;
+	std::unordered_map<std::string, std::string, AssetKey::Hash, AssetKey::Equal> aliases_;
 	std::vector<ModelSlot> modelSlots_;
 	std::vector<uint32_t> freeModelSlots_;
 	std::unordered_map<std::string, ModelHandle> modelNameToHandle_;

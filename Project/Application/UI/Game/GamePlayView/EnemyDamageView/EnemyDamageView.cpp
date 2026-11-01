@@ -1,5 +1,5 @@
 #include "EnemyDamageView.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "GameObject/Combat/DamageEvent.h"
 #include "GameObject/Enemy/EnemyStatusEffectVisualSettings.h"
 #include "Math/Function/MatrixFunction.h"

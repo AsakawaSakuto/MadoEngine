@@ -1,6 +1,6 @@
 #pragma once
-#include ".SceneManager/CommonData.h"
-#include ".SceneManager/IScene.h"
+#include "SceneManager/CommonData.h"
+#include "SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
 #include "GameObject/Map/Map.h"
 #include "GameObject/Map/MapLimit.h"

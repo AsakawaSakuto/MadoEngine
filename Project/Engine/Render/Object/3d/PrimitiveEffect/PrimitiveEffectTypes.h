@@ -1,5 +1,5 @@
 #pragma once
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "EffectTrack.h"
 #include "Math/Transform.h"
 #include "Math/Vector2.h"

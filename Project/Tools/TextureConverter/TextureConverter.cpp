@@ -38,11 +38,11 @@ namespace {
             for (auto it = std::filesystem::recursive_directory_iterator(textureDirectory_);
                 it != std::filesystem::recursive_directory_iterator(); ++it) {
                 const auto& entry = *it;
-                if (entry.is_directory() && entry.path() == cache_.GetDirectory()) {
+                if (entry.is_directory() && MadoEngine::AssetKey::Equals(entry.path().generic_string(), cache_.GetDirectory().generic_string())) {
                     it.disable_recursion_pending();
                     continue;
                 }
-                if (!entry.is_regular_file() || entry.path().extension() != ".png") {
+                if (!entry.is_regular_file() || !MadoEngine::AssetKey::Equals(entry.path().extension().string(), ".png")) {
                     continue;
                 }
                 const auto ddsPath = cache_.GetPath(entry.path());

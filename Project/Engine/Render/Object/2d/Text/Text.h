@@ -4,7 +4,7 @@
 #include "Render/Object/2d/Sprite/SpriteSharedGeometry.h"
 #include "Render/Object/2d/Text/TextTextureGenerator.h"
 #include "Utility/Json/Core/IJsonSerializable.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "TextFont.h"
 #include "TextData.h"
 #include <span>

@@ -138,7 +138,7 @@ namespace MadoEngine::Editor::Detail {
 			nullptr,
 			ImGuiWindowFlags_AlwaysAutoResize)) {
 			ImGui::Text("「%s」を削除しますか？", assetNames[actions.selectedAssetIndex].c_str());
-			ImGui::TextDisabled("JSONファイルは.trashディレクトリへ退避されます。");
+			ImGui::TextDisabled("JSONファイルはTrashディレクトリへ退避されます。");
 			if (ImGui::Button("削除する")) {
 				actions.isDeleteRequested = true;
 				ImGui::CloseCurrentPopup();

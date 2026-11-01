@@ -1,6 +1,6 @@
 #pragma once
-#include ".SceneManager/CommonData.h"
-#include ".SceneManager/IScene.h"
+#include "SceneManager/CommonData.h"
+#include "SceneManager/IScene.h"
 #include "UI/Result/ResultWeaponStatsUI.h"
 #include "UI/Result/ResultScoreUI.h"
 

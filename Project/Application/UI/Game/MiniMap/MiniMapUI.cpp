@@ -1,5 +1,5 @@
 #include "MiniMapUI.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Core/TextureManager/TextureManager.h"
 #include "Render/Object/2d/Sprite/MySprite.h"
 #include <algorithm>

@@ -40,6 +40,7 @@
   <ItemGroup>
     <ClCompile Include="TextureConverter.cpp" />
     <ClInclude Include="..\..\Engine\Core\TextureManager\TextureCache.h" />
+    <ClInclude Include="..\..\Engine\Utility\AssetKey.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

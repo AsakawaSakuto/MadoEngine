@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/AssetKey.h"
 #include "RibbonEffectInstance.h"
 #include "RibbonEffectRenderer3d.h"
 #include <filesystem>
@@ -252,8 +253,8 @@ namespace MadoEngine::Ribbon {
 		void ReleaseSlot(uint32_t index);
 
 		RibbonEffectRenderer3d renderer_;
-		std::unordered_map<std::string, std::shared_ptr<RibbonEffectAsset>> assets_;
-		std::unordered_map<std::string, std::filesystem::path> assetPaths_;
+		std::unordered_map<std::string, std::shared_ptr<RibbonEffectAsset>, AssetKey::Hash, AssetKey::Equal> assets_;
+		std::unordered_map<std::string, std::filesystem::path, AssetKey::Hash, AssetKey::Equal> assetPaths_;
 		std::filesystem::path assetDirectoryPath_ = "Assets/Json/RibbonEffect";
 		std::vector<EffectSlot> effectSlots_;
 		std::queue<uint32_t> freeSlotIndices_;

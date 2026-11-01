@@ -1,5 +1,5 @@
 #include "EnemyStatusEffectIconView.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Math/Function/MatrixFunction.h"
 #include "Render/Object/2d/Sprite/MySprite.h"
 #include "Utility/Camera/Camera.h"

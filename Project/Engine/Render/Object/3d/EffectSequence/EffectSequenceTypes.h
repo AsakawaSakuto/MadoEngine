@@ -1,5 +1,5 @@
 #pragma once
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Math/Transform.h"
 #include "Math/Vector3.h"
 #include "Render/Object/3d/Particle/ParticleTypes.h"

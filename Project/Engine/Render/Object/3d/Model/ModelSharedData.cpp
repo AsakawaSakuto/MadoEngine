@@ -2,10 +2,10 @@
 #include "Core/TextureManager/TextureManager.h"
 #include "Utility/Logger/Logger.h"
 #include "Utility/ResourceHelper/ResourceHelper.h"
+#include "Utility/AssetKey.h"
 #include "../Animation/AnimationFunction.h"
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -20,10 +20,7 @@ namespace {
 /// @param value 変換対象
 /// @return 小文字へ変換した文字列
 std::string ToLower(std::string value) {
-	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
-		return static_cast<char>(std::tolower(c));
-	});
-	return value;
+	return MadoEngine::AssetKey::Normalize(value);
 }
 
 /// @brief 読み込んだDataから利用可能なModel種別を推定

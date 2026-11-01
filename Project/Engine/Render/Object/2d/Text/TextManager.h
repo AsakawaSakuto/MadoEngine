@@ -6,7 +6,7 @@
 #include "Render/Object/ObjectHandle.h"
 #include "Render/PSO/PSORegistry.h"
 #include "Utility/EditorManagementMode.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include <cstddef>
 #include <filesystem>
 #include <memory>

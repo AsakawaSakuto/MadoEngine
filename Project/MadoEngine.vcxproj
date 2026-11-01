@@ -144,7 +144,7 @@
     <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application\.Core\Terminal.cpp" />
+    <ClCompile Include="Application\Core\Terminal.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObject.cpp" />
     <ClCompile Include="Application\GameObject\DropObject\DropObjectManager.cpp" />
     <ClCompile Include="Application\GameObject\Enemy\EnemyBase.cpp" />
@@ -184,9 +184,9 @@
     <ClCompile Include="Application\GameObject\Relic\RelicEditor.cpp" />
     <ClCompile Include="Application\GameObject\Relic\RelicInventory.cpp" />
     <ClCompile Include="Application\GameObject\Relic\RelicSystem.cpp" />
-    <ClCompile Include="Application\.SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Application\.SceneManager\SceneBgmController.cpp" />
-    <ClCompile Include="Application\.SceneManager\SceneTransitionController.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneBgmController.cpp" />
+    <ClCompile Include="Application\SceneManager\SceneTransitionController.cpp" />
     <ClCompile Include="Application\UI\Game\GameHud.cpp" />
     <ClCompile Include="Application\UI\Result\ResultWeaponStatsUI.cpp" />
     <ClCompile Include="Application\UI\Result\ResultScoreUI.cpp" />
@@ -195,10 +195,10 @@
     <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp" />
     <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
     <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\GameScene.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\ResultScene.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\TestScene.cpp" />
-    <ClCompile Include="Application\.SceneManager\Scene\TitleScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\GameScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\ResultScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\SceneManager\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Axe.cpp" />
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.cpp" />
@@ -264,7 +264,7 @@
     <ClCompile Include="Engine\Core\View\RTVManager.cpp" />
     <ClCompile Include="Engine\Core\View\SRVManager.cpp" />
     <ClCompile Include="Engine\Core\View\ViewFunction.cpp" />
-    <ClCompile Include="Engine\.Execution\Execution.cpp" />
+    <ClCompile Include="Engine\Execution\Execution.cpp" />
     <ClCompile Include="Engine\Input\Device\GamePad.cpp" />
     <ClCompile Include="Engine\Input\Device\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Device\Mouse.cpp" />
@@ -400,9 +400,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\.Core\Terminal.h" />
-    <ClInclude Include="Application\.SceneManager\CommonData.h" />
-    <ClInclude Include="Application\.SceneManager\SceneType.h" />
+    <ClInclude Include="Application\Core\Terminal.h" />
+    <ClInclude Include="Application\SceneManager\CommonData.h" />
+    <ClInclude Include="Application\SceneManager\SceneType.h" />
     <ClInclude Include="Application\ColliderPairRegister.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObject.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObjectManager.h" />
@@ -444,22 +444,22 @@
     <ClInclude Include="Application\GameObject\Player\Player.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerController.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerMovement.h" />
-    <ClInclude Include="Application\.SceneManager\IScene.h" />
-    <ClInclude Include="Application\.SceneManager\SceneManager.h" />
-    <ClInclude Include="Application\.SceneManager\SceneBgmController.h" />
-    <ClInclude Include="Application\.SceneManager\SceneTransitionController.h" />
+    <ClInclude Include="Application\SceneManager\IScene.h" />
+    <ClInclude Include="Application\SceneManager\SceneManager.h" />
+    <ClInclude Include="Application\SceneManager\SceneBgmController.h" />
+    <ClInclude Include="Application\SceneManager\SceneTransitionController.h" />
     <ClInclude Include="Application\UI\Game\GameHud.h" />
     <ClInclude Include="Application\UI\Game\Control\InputControlFeedback.h" />
     <ClInclude Include="Application\System\GameCamera\GameCameraController.h" />
     <ClInclude Include="Application\System\RewardSelection\RewardSelectionController.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\GameScene.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\ResultScene.h" />
+    <ClInclude Include="Application\SceneManager\Scene\GameScene.h" />
+    <ClInclude Include="Application\SceneManager\Scene\ResultScene.h" />
     <ClInclude Include="Application\UI\Result\ResultWeaponStatsUI.h" />
     <ClInclude Include="Application\UI\Result\ResultScoreUI.h" />
     <ClInclude Include="Application\UI\Result\ScorePresentation.h" />
     <ClInclude Include="Application\UI\Result\RankingPresentation.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\TestScene.h" />
-    <ClInclude Include="Application\.SceneManager\Scene\TitleScene.h" />
+    <ClInclude Include="Application\SceneManager\Scene\TestScene.h" />
+    <ClInclude Include="Application\SceneManager\Scene\TitleScene.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerStatus.h" />
     <ClInclude Include="Application\GameObject\Player\PlayerTemporaryEffects.h" />
     <ClInclude Include="Application\GameObject\Relic\RelicCatalog.h" />
@@ -524,7 +524,7 @@
     <ClInclude Include="Application\UI\Game\Player\PlayerExpGauge.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerHealthGauge.h" />
     <ClInclude Include="Application\UI\Game\Player\PlayerStaminaGauge.h" />
-    <ClInclude Include="Engine\.Execution\Execution.h" />
+    <ClInclude Include="Engine\Execution\Execution.h" />
     <ClInclude Include="Engine\Audio\AudioManager.h" />
     <ClInclude Include="Engine\Audio\AudioType.h" />
     <ClInclude Include="Engine\Audio\Data\Audio.h" />
@@ -726,6 +726,7 @@
     <ClInclude Include="Engine\Utility\Material.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="Engine\Utility\ResourceHelper\ResourceHelper.h" />
+    <ClInclude Include="Engine\Utility\AssetKey.h" />
     <ClInclude Include="Engine\Math\Transform.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />

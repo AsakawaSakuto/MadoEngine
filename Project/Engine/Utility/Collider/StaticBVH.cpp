@@ -148,6 +148,8 @@ void StaticBVH::Query(const AABB& bounds, std::vector<const std::string*>& outCa
 
 	std::vector<uint32_t> stack;
 	stack.reserve(64);
+
+	// ルートNodeから探索開始
 	stack.push_back(0);
 
 	// 再帰を避けた明示Stackで交差Nodeだけを探索
@@ -156,6 +158,8 @@ void StaticBVH::Query(const AABB& bounds, std::vector<const std::string*>& outCa
 		stack.pop_back();
 
 		const Node& node = nodes_[nodeIndex];
+
+		// Node Boundsと検索AABBが交差していなければ探索をスキップ
 		if (!IsIntersectAABB(bounds, node.bounds)) {
 			continue;
 		}
@@ -166,6 +170,8 @@ void StaticBVH::Query(const AABB& bounds, std::vector<const std::string*>& outCa
 			for (uint32_t i = 0; i < node.count; ++i) {
 				const Entry& entry = entries_[node.first + i];
 				if (IsIntersectAABB(bounds, entry.bounds)) {
+
+					// 交差したEntryのCollider名を呼び出し側へ返却
 					outCandidates.push_back(&entry.colliderName);
 				}
 			}

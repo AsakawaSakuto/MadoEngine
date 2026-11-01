@@ -1,6 +1,6 @@
 #pragma once
 
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include "Utility/Camera/CameraManager.h"
 
 #ifdef USE_IMGUI

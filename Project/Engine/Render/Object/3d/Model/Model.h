@@ -6,7 +6,7 @@
 #include "Render/Object/IRenderObject3d.h"
 #include "Utility/Light/LightManager.h"
 #include "Utility/Json/Core/IJsonSerializable.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include <memory>
 #include <string>
 #include <string_view>

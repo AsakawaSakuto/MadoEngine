@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/AssetKey.h"
 #include "CylinderEffectInstance.h"
 #include "CylinderEffectRenderer3d.h"
 #include <filesystem>
@@ -206,8 +207,8 @@ namespace MadoEngine::Effect {
 		void ReleaseSlot(uint32_t index);
 
 		CylinderEffectRenderer3d renderer_;
-		std::unordered_map<std::string, std::shared_ptr<CylinderEffectAsset>> assets_;
-		std::unordered_map<std::string, std::filesystem::path> assetPaths_;
+		std::unordered_map<std::string, std::shared_ptr<CylinderEffectAsset>, AssetKey::Hash, AssetKey::Equal> assets_;
+		std::unordered_map<std::string, std::filesystem::path, AssetKey::Hash, AssetKey::Equal> assetPaths_;
 		std::filesystem::path assetDirectoryPath_ = "Assets/Json/PrimitiveEffect";
 		std::vector<EffectSlot> effectSlots_;
 		std::queue<uint32_t> freeSlotIndices_;

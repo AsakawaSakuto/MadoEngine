@@ -1,5 +1,6 @@
 #include "AudioManager.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/AssetKey.h"
 #include <cassert>
 #include <algorithm>
 
@@ -49,10 +50,8 @@ namespace MadoEngine {
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
 			if (!entry.is_regular_file()) continue;
 
-			auto ext = entry.path().extension().string();
-
-			// 小文字に変換して比較
-			std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+			// 配布先で拡張子の大小が変わっても同じ音声形式として分類
+			const std::string ext = AssetKey::Normalize(entry.path().extension().string());
 
 			if (ext == ".wav" || ext == ".mp3") {
 				AudioType type = DetermineTypeFromPath(entry.path());
@@ -65,9 +64,7 @@ namespace MadoEngine {
 	std::string AudioManager::MakeKey(const std::filesystem::path& filePath) const {
 
 		// 拡張子を除いたFile名の小文字表現を検索Keyとして使用
-		std::string key = filePath.stem().string();
-		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-		return key;
+		return AssetKey::Normalize(filePath.stem().string());
 	}
 
 	void AudioManager::Finalize() {
@@ -148,9 +145,7 @@ namespace MadoEngine {
 	}
 
 	std::size_t AudioManager::GetPlayingInstanceCount(const std::string& key) const {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
-			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const std::string lowerKey = AssetKey::Normalize(key);
 		const auto it = audioMap_.find(lowerKey);
 
 		// 終了済みの再生を除外し、Update前の問い合わせでも空き枠を反映
@@ -163,8 +158,7 @@ namespace MadoEngine {
 	void AudioManager::Play(const std::string& key, bool loop) {
 
 		// キーを小文字に変換して検索
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 
 		auto it = audioMap_.find(lowerKey);
 		if (it == audioMap_.end()) {
@@ -201,9 +195,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::SetPlaybackGain(const std::string& key, float gain) {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
-			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const std::string lowerKey = AssetKey::Normalize(key);
 		const auto it = audioMap_.find(lowerKey);
 		if (it == audioMap_.end() || !it->second) {
 			return;
@@ -214,9 +206,7 @@ namespace MadoEngine {
 	}
 
 	void AudioManager::SetPaused(const std::string& key, bool isPaused) {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
-			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const std::string lowerKey = AssetKey::Normalize(key);
 		const auto it = audioMap_.find(lowerKey);
 		if (it == audioMap_.end() || !it->second) {
 			return;
@@ -229,8 +219,7 @@ namespace MadoEngine {
 	void AudioManager::Stop(const std::string& key) {
 
 		// キーを小文字に変換して検索
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 
 		auto it = audioMap_.find(lowerKey);
 		if (it != audioMap_.end() && it->second) {
@@ -314,8 +303,7 @@ namespace MadoEngine {
 	}
 
 	AudioType AudioManager::GetAudioType(const std::string& key) const {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 		auto it = typeMap_.find(lowerKey);
 		if (it != typeMap_.end()) {
 			return it->second;
@@ -327,10 +315,16 @@ namespace MadoEngine {
 
 		// FilePath内で最初に一致するSE、BGM、VoiceのDirectory名を種別として採用
 		for (const auto& part : filePath) {
-			const std::string name = part.string();
-			if (name == "SE")    return AudioType::SE;
-			if (name == "BGM")   return AudioType::BGM;
-			if (name == "Voice") return AudioType::Voice;
+			const std::string name = AssetKey::Normalize(part.string());
+			if (name == "se") {
+				return AudioType::SE;
+			}
+			if (name == "bgm") {
+				return AudioType::BGM;
+			}
+			if (name == "voice") {
+				return AudioType::Voice;
+			}
 		}
 		return AudioType::SE;
 	}
@@ -338,8 +332,7 @@ namespace MadoEngine {
 	void AudioManager::SetVolume(const std::string& key, float volume) {
 
 		// キーを小文字に変換して検索
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 
 		auto it = volumeMap_.find(lowerKey);
 		if (it != volumeMap_.end()) {
@@ -379,8 +372,7 @@ namespace MadoEngine {
 	float AudioManager::GetVolume(const std::string& key) const {
 
 		// キーを小文字に変換して検索
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 
 		auto it = volumeMap_.find(lowerKey);
 		if (it != volumeMap_.end()) {
@@ -390,9 +382,7 @@ namespace MadoEngine {
 	}
 
 	AudioLoudnessMetrics AudioManager::GetLoudnessMetrics(const std::string& key) const {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
-			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const std::string lowerKey = AssetKey::Normalize(key);
 		const auto it = audioMap_.find(lowerKey);
 
 		// 解析済みの測定値だけを返し、表示側へPCMや再生状態の所有権を渡さない構成
@@ -403,9 +393,7 @@ namespace MadoEngine {
 	}
 
 	bool AudioManager::SetPitch(const std::string& key, float semitones) {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
-			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const std::string lowerKey = AssetKey::Normalize(key);
 		const auto it = audioMap_.find(lowerKey);
 		if (it == audioMap_.end() || !it->second) {
 			return false;
@@ -416,9 +404,7 @@ namespace MadoEngine {
 	}
 
 	float AudioManager::GetPitch(const std::string& key) const {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(),
-			[](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+		const std::string lowerKey = AssetKey::Normalize(key);
 		const auto it = audioMap_.find(lowerKey);
 		if (it != audioMap_.end() && it->second) {
 			return it->second->GetPitch();
@@ -429,8 +415,7 @@ namespace MadoEngine {
 	bool AudioManager::IsLoaded(const std::string& key) const {
 
 		// キーを小文字に変換して検索
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 		return audioMap_.find(lowerKey) != audioMap_.end();
 	}
 
@@ -444,8 +429,7 @@ namespace MadoEngine {
 	}
 
 	bool AudioManager::IsPlaying(const std::string& key) const {
-		std::string lowerKey = key;
-		std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+		const std::string lowerKey = AssetKey::Normalize(key);
 		auto it = audioMap_.find(lowerKey);
 
 		if (it != audioMap_.end() && it->second) {

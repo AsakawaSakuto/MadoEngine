@@ -3,7 +3,7 @@
 #include "Math/Vector4.h"
 #include "Render/Object/RenderLayer.h"
 #include "Render/Object/ObjectHandle.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 #include <string>
 
 class Sprite;

@@ -1,4 +1,5 @@
 #include "TextManager.h"
+#include "Utility/AssetKey.h"
 #include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Shader/RootSignatureManager.h"
 #include "Utility/Json/Core/JsonFile.h"
@@ -63,7 +64,7 @@ const TextAtlasResource* TextManager::AcquireNumericAtlas(const std::string& fon
 
 	// フォントと画像化サイズが同じ全Textで共有し、数字の変更ではTextureを生成しない構成
 	for (const auto& atlas : numericAtlases_) {
-		if (atlas->fontFamily == fontFamily && atlas->fontFilePath == fontFilePath && atlas->rasterSize == rasterSize && atlas->sdfEnabled == sdfEnabled) {
+		if (AssetKey::Equals(atlas->fontFamily, fontFamily) && AssetKey::Equals(atlas->fontFilePath, fontFilePath) && atlas->rasterSize == rasterSize && atlas->sdfEnabled == sdfEnabled) {
 			return atlas.get();
 		}
 	}

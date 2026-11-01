@@ -1,6 +1,6 @@
 #pragma once
 
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 
 #ifdef USE_IMGUI
 #include "../../../ImGuiHeaders.h"

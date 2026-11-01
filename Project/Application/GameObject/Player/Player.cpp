@@ -53,7 +53,10 @@ namespace Player {
 		AABB aabb;
 		aabb.min = { -0.5f, 0.0f, -0.5f };
 		aabb.max = { 0.5f, 2.0f, 0.5f };
-		hitAABB_ = aabb;
+		hitBoxAABB_ = aabb;
+		MyCollider::RegisterCollider("PlayerHitBox", 
+			CollisionTag::PlayerHitBox, &hitBoxAABB_, 
+			&transform_.translate, 0.0f);
 
 		Sphere s2;
 		s2.radius = 2.5f;
@@ -69,7 +72,6 @@ namespace Player {
 
 		// 移動解決、被弾、経験値回収、攻撃索引を独立させるため用途別Colliderを登録
 		MyCollider::RegisterCollider("PlayerMovementSphere", CollisionTag::PlayerMovementSphere, &colliderShape_, &transform_.translate, 0.0f);
-		MyCollider::RegisterCollider("PlayerHitBox", CollisionTag::PlayerHitBox, &hitAABB_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerExpGetSphere", CollisionTag::PlayerDropObjectGetSphere, &expGetSphere_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerAttackRangeSphere", CollisionTag::PlayerAttackRangeSphere, &attackRangeSphere_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerEnemyDeleteRangeSphere", CollisionTag::EnemyDeleteRangeSphere, &enemyDeleteRangeSphere_, &transform_.translate, 0.0f);
@@ -550,7 +552,7 @@ namespace Player {
 		transform_.translate.z = std::clamp(transform_.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F3)) {
-			transform_.translate.y = 20.0f;
+			transform_.translate.y = 100.0f;
 		}
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F4)) {
@@ -620,7 +622,7 @@ namespace Player {
 
 		// 描画結果とColliderのずれを検証できるよう判定形状を可視化
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		MyDebugLine::AddShape(std::get<AABB>(hitAABB_), color);
+		MyDebugLine::AddShape(std::get<AABB>(hitBoxAABB_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(colliderShape_), color);
 		MyDebugLine::AddShape(std::get<Sphere>(expGetSphere_), Vector4{ 0.0f,0.0f,1.0f,1.0f });
 		MyDebugLine::AddShape(std::get<Sphere>(attackRangeSphere_), Vector4{ 1.0f,0.0f,0.0f,1.0f });

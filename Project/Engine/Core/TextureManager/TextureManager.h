@@ -8,6 +8,7 @@
 #include "DirectXTex/DirectXTex.h"
 #include "Math/Vector2.h"
 #include "Core/View/SRVManager.h"
+#include "Utility/AssetKey.h"
 
 namespace MadoEngine {
 
@@ -144,9 +145,15 @@ namespace MadoEngine {
         /// @return 変換後のワイド文字列
         static std::wstring ConvertString(const std::string& str);
 
+        /// @brief ファイル由来のTexture名を登録済みの表記へ解決
+        /// @param key 検索するTexture名
+        /// @return 登録済みのTexture名、未登録の場合は指定された名前
+        const std::string& ResolveTextureKey(const std::string& key) const;
+
         ID3D12Device* device_ = nullptr;
         MadoEngine::Core::SRVManager* srvManager_ = nullptr;
         std::unordered_map<std::string, TextureEntry> textures_;
+        std::unordered_map<std::string, std::string, AssetKey::Hash, AssetKey::Equal> fileTextureAliases_;
         uint32_t nextIndex_ = 0; // 次に割り当てるインデックス
     };
 

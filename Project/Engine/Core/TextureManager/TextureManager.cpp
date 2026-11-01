@@ -36,14 +36,14 @@ namespace MadoEngine {
         for (auto it = std::filesystem::recursive_directory_iterator(textureDir);
             it != std::filesystem::recursive_directory_iterator(); ++it) {
             const auto& entry = *it;
-            if (entry.is_directory() && entry.path() == cache.GetDirectory()) {
+            if (entry.is_directory() && AssetKey::Equals(entry.path().generic_string(), cache.GetDirectory().generic_string())) {
                 it.disable_recursion_pending();
                 continue;
             }
             if (!entry.is_regular_file()) {
                 continue;
             }
-            const auto extension = entry.path().extension();
+            const std::string extension = AssetKey::Normalize(entry.path().extension().string());
             if (extension != ".png" && extension != ".dds") {
                 continue;
             }
@@ -86,7 +86,7 @@ namespace MadoEngine {
                 Logger::Output("テクスチャの読み込みに失敗しました : " + entry.path().string(), Logger::Level::Error);
                 continue;
             }
-            if (sourcePath.extension() == ".dds") {
+            if (AssetKey::Equals(sourcePath.extension().string(), ".dds")) {
                 ++ddsCount;
             }
 
@@ -108,7 +108,11 @@ namespace MadoEngine {
             textureEntry.index = srvIndex;
             textureEntry.width = static_cast<uint32_t>(mipImage.GetMetadata().width);
             textureEntry.height = static_cast<uint32_t>(mipImage.GetMetadata().height);
-            textures_[key] = std::move(textureEntry);
+
+            // 列挙されたFile名の大小が異なる場合も同じ登録先へ統合
+            const std::string registeredKey = ResolveTextureKey(key);
+            textures_[registeredKey] = std::move(textureEntry);
+            fileTextureAliases_[key] = registeredKey;
             loadCount++;
 
             Logger::Output("テクスチャの読み込み完了 : " + key, Logger::Level::Assets);
@@ -121,7 +125,7 @@ namespace MadoEngine {
     }
 
     Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::GetTexture(const std::string& fileName) const {
-        auto it = textures_.find(fileName);
+        auto it = textures_.find(ResolveTextureKey(fileName));
         if (it == textures_.end()) {
             Logger::Output("テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
             return nullptr;
@@ -130,7 +134,7 @@ namespace MadoEngine {
     }
 
     Vector2 TextureManager::GetPixelSize(const std::string& fileName) const {
-        auto it = textures_.find(fileName);
+        auto it = textures_.find(ResolveTextureKey(fileName));
         if (it == textures_.end()) {
             Logger::Output("PixelSize の取得に失敗しました。テクスチャが見つかりません: " + fileName, Logger::Level::Warning);
             return { 0.0f, 0.0f };
@@ -148,7 +152,7 @@ namespace MadoEngine {
     }
 
     bool TextureManager::TryGetTextureIndex(const std::string& fileName, uint32_t& outTextureIndex) const {
-        const auto it = textures_.find(fileName);
+        const auto it = textures_.find(ResolveTextureKey(fileName));
         if (it == textures_.end()) {
             outTextureIndex = UINT32_MAX;
             return false;
@@ -190,7 +194,7 @@ namespace MadoEngine {
             return UINT32_MAX;
         }
 
-        auto it = textures_.find(key);
+        auto it = textures_.find(ResolveTextureKey(key));
         if (it != textures_.end()) {
             TextureEntry& existing = it->second;
             if (existing.width != width || existing.height != height || !existing.resource) {
@@ -239,17 +243,25 @@ namespace MadoEngine {
             return false;
         }
         if (currentKey == newKey) {
-            return textures_.contains(currentKey);
+            return textures_.contains(ResolveTextureKey(currentKey));
         }
 
-        auto currentIt = textures_.find(currentKey);
+        auto currentIt = textures_.find(ResolveTextureKey(currentKey));
         if (currentIt == textures_.end()) {
             Logger::Output("[Engine] 名前変更対象のテクスチャが見つかりません: " + currentKey, Logger::Level::Warning);
             return false;
         }
-        if (textures_.contains(newKey)) {
+        const auto newIt = textures_.find(ResolveTextureKey(newKey));
+        if (newIt != textures_.end() && newIt != currentIt) {
             Logger::Output("[Engine] 変更先のテクスチャ管理キーが既に存在します: " + newKey, Logger::Level::Warning);
             return false;
+        }
+
+        // File由来の別名だけを追従し、Text Object名から生成した動的Keyの独立性を維持
+        const auto aliasIt = fileTextureAliases_.find(currentIt->first);
+        if (aliasIt != fileTextureAliases_.end() && aliasIt->second == currentIt->first) {
+            fileTextureAliases_.erase(aliasIt);
+            fileTextureAliases_[newKey] = newKey;
         }
 
         // ResourceとDescriptorを再生成せずMap NodeのKeyだけを置換
@@ -262,13 +274,19 @@ namespace MadoEngine {
     }
 
     bool TextureManager::DestroyTexture(const std::string& key) {
-        auto it = textures_.find(key);
+        auto it = textures_.find(ResolveTextureKey(key));
         if (it == textures_.end()) {
             Logger::Output("[Engine] 解放対象のテクスチャが見つかりません: " + key, Logger::Level::Warning);
             return false;
         }
 
         const uint32_t srvIndex = it->second.index;
+
+        // 解放後の別名が同名の動的Textureへ誤って接続される状態を防止
+        const auto aliasIt = fileTextureAliases_.find(it->first);
+        if (aliasIt != fileTextureAliases_.end() && aliasIt->second == it->first) {
+            fileTextureAliases_.erase(aliasIt);
+        }
 
         // Texture所有権を破棄してから対応するSRV領域をAllocatorへ返却
         textures_.erase(it);
@@ -287,13 +305,24 @@ namespace MadoEngine {
 
     void TextureManager::Finalize() {
         textures_.clear();
+        fileTextureAliases_.clear();
         nextIndex_ = 0;
         device_ = nullptr;
         Logger::Output("TextureManager を終了しました。", Logger::Level::Engine);
     }
 
+    const std::string& TextureManager::ResolveTextureKey(const std::string& key) const {
+
+        // 動的TextureはObject名と同じ区別を保ち、File由来の名前だけ大小を吸収
+        const auto aliasIt = fileTextureAliases_.find(key);
+        if (aliasIt != fileTextureAliases_.end()) {
+            return aliasIt->second;
+        }
+        return key;
+    }
+
     bool TextureManager::LoadTexture(const std::wstring& filePath, DirectX::ScratchImage& mipImage) const {
-        if (std::filesystem::path(filePath).extension() == ".dds") {
+        if (AssetKey::Equals(std::filesystem::path(filePath).extension().string(), ".dds")) {
 
             // 事前生成済みのMipをそのまま使用し、起動時のPNG展開と縮小処理を省略
             const HRESULT result = DirectX::LoadFromDDSFile(filePath.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, mipImage);

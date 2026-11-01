@@ -2,7 +2,7 @@
 #include "SpriteData.h"
 #include "SpriteSharedGeometry.h"
 #include "Render/Object/IRenderObject2d.h"
-#include ".SceneManager/SceneType.h"
+#include "SceneManager/SceneType.h"
 
 namespace MadoEngine {
 class SpriteManager;

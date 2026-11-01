@@ -113,9 +113,10 @@ namespace {
 			return false;
 		}
 
+		// 表記差を許容しつつ、編集操作の対象をAsset Directory直下へ制限
 		return
-			canonicalFilePath.extension() == ".json" &&
-			canonicalFilePath.parent_path() == canonicalDirectoryPath;
+			MadoEngine::AssetKey::Equals(PathToUtf8String(canonicalFilePath.extension()), ".json") &&
+			MadoEngine::AssetKey::Equals(PathToUtf8String(canonicalFilePath.parent_path()), PathToUtf8String(canonicalDirectoryPath));
 	}
 
 	/// @brief Cylinder AssetのJsonファイルをTrashディレクトリへ移動
@@ -136,7 +137,7 @@ namespace {
 			return false;
 		}
 
-		const std::filesystem::path trashDirectoryPath = assetDirectoryPath / ".trash";
+		const std::filesystem::path trashDirectoryPath = assetDirectoryPath / "Trash";
 		std::filesystem::create_directories(trashDirectoryPath, error);
 		if (error) {
 			return false;
@@ -210,7 +211,7 @@ namespace MadoEngine::Effect {
 			if (error) {
 				break;
 			}
-			if (entry.is_regular_file() && entry.path().extension() == ".json") {
+			if (entry.is_regular_file() && AssetKey::Equals(PathToUtf8String(entry.path().extension()), ".json")) {
 				filePaths.push_back(entry.path());
 			}
 		}

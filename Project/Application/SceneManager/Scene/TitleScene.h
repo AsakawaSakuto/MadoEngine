@@ -1,6 +1,6 @@
 #pragma once
-#include ".SceneManager/CommonData.h"
-#include ".SceneManager/IScene.h"
+#include "SceneManager/CommonData.h"
+#include "SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
 #include "UI/Title/WeaponSelectIcon/WeaponSelectIcon.h"
 #include <array>

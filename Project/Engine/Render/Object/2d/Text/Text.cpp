@@ -1,4 +1,5 @@
 #include "Text.h"
+#include "Utility/AssetKey.h"
 #include "TextManager.h"
 #include "TextSdfGenerator.h"
 #include "Math/Function/MatrixFunction.h"
@@ -78,7 +79,7 @@ const char* GetTextFontFamilyName(TextFontFamilyType type) {
 
 TextFontFamilyType GetTextFontFamilyTypeFromName(const std::string& fontFamily) {
 	for (const TextFontDefinition& definition : kTextFontDefinitions) {
-		if (fontFamily == definition.familyName) {
+		if (AssetKey::Equals(fontFamily, definition.familyName)) {
 			return definition.type;
 		}
 	}
@@ -310,7 +311,7 @@ void Text::SetText(const std::string& text) {
 }
 
 void Text::SetFontFamily(const std::string& fontFamily) {
-	if (fontFamily_ == fontFamily && fontFilePath_.empty()) {
+	if (AssetKey::Equals(fontFamily_, fontFamily) && fontFilePath_.empty()) {
 		return;
 	}
 	fontFamily_ = fontFamily;
@@ -319,7 +320,7 @@ void Text::SetFontFamily(const std::string& fontFamily) {
 }
 
 void Text::SetFontAsset(const std::string& fontFilePath, const std::string& fontFamily) {
-	if (fontFilePath_ == fontFilePath && fontFamily_ == fontFamily) {
+	if (AssetKey::Equals(fontFilePath_, fontFilePath) && AssetKey::Equals(fontFamily_, fontFamily)) {
 		return;
 	}
 	fontFilePath_ = fontFilePath;
@@ -541,7 +542,7 @@ void Text::RebuildTextureIfNeeded() {
 bool Text::RebuildAtlasGeometry() {
 
 	// 通常とCriticalの表示サイズが切り替わっても同じ基準サイズの画像を共有
-	if (!atlas_ || atlas_->fontFamily != fontFamily_ || atlas_->fontFilePath != fontFilePath_ || atlas_->rasterSize != atlasRasterSize_ || atlas_->sdfEnabled != sdfEnabled_) {
+	if (!atlas_ || !AssetKey::Equals(atlas_->fontFamily, fontFamily_) || !AssetKey::Equals(atlas_->fontFilePath, fontFilePath_) || atlas_->rasterSize != atlasRasterSize_ || atlas_->sdfEnabled != sdfEnabled_) {
 		atlas_ = TextManager::GetInstance().AcquireNumericAtlas(fontFamily_, fontFilePath_, atlasRasterSize_, sdfEnabled_);
 	}
 	if (!atlas_) {
