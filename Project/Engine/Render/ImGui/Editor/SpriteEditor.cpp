@@ -483,6 +483,10 @@ namespace {
 		}
 
 		DrawTexturePreview(sprite);
+		int textureFilter = static_cast<int>(sprite.GetTextureFilter());
+		if (ImGui::Combo("補間方式", &textureFilter, "Linear\0Point\0")) {
+			sprite.SetTextureFilter(static_cast<Sprite::TextureFilter>(textureFilter));
+		}
 		ImGui::Separator();
 
 		Vector2 position = sprite.GetPosition();

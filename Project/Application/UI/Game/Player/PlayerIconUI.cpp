@@ -24,6 +24,7 @@ namespace UI::Game {
 		playerIconFrame_ = MySprite::Create("PlayerIconFrame", "IconFrame", SceneType::Game);
 		if (Sprite* sprite = MySprite::TryGet(playerIconFrame_)) {
 			sprite->SetPosition(Vector2{ 32.0f, 200.0f - 64.0f });
+			sprite->SetScale(Vector2{ 4.0f, 4.0f });
 		}
 
 		playerIcon_ = MySprite::Create("PlayerIcon", ToTypeText(type), SceneType::Game);

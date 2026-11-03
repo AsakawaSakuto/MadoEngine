@@ -105,7 +105,8 @@ namespace MadoEngine {
 	void RootSignatureManager::Make() {
 
 		// RootSignatureの登録（未登録の場合のみ実行される）
-		// b0: SpriteMaterial (VS/PS共通), b1: SpriteTransformationMatrix (VS), t0: Texture (PS), s0: Sampler
+		// b0: SpriteMaterial (VS/PS共通), b1: SpriteTransformationMatrix (VS), b2: 補間方式 (PS)
+		// t0: Texture (PS), s0: Linear Sampler (PS), s1: Point Sampler (PS)
 		{
 			D3D12_DESCRIPTOR_RANGE srvRange{};
 			srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -114,7 +115,7 @@ namespace MadoEngine {
 			srvRange.RegisterSpace = 0;
 			srvRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-			D3D12_ROOT_PARAMETER rootParams[3]{};
+			D3D12_ROOT_PARAMETER rootParams[4]{};
 
 			// b0へSprite Materialを登録
 			rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -134,6 +135,13 @@ namespace MadoEngine {
 			rootParams[2].DescriptorTable.pDescriptorRanges = &srvRange;
 			rootParams[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+			// Textと共有するMaterial配置を維持し、Sprite専用の補間方式だけRoot Constantへ分離
+			rootParams[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+			rootParams[3].Constants.ShaderRegister = 2;
+			rootParams[3].Constants.RegisterSpace = 0;
+			rootParams[3].Constants.Num32BitValues = 1;
+			rootParams[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 			D3D12_STATIC_SAMPLER_DESC staticSampler{};
 			staticSampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 			staticSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -149,11 +157,16 @@ namespace MadoEngine {
 			staticSampler.RegisterSpace = 0;
 			staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+			// Textが使用するs0をLinearのまま保持し、Spriteだけs1のPointも選択可能な構成
+			D3D12_STATIC_SAMPLER_DESC staticSamplers[] = { staticSampler, staticSampler };
+			staticSamplers[1].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+			staticSamplers[1].ShaderRegister = 1;
+
 			D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
 			rootSigDesc.NumParameters = _countof(rootParams);
 			rootSigDesc.pParameters = rootParams;
-			rootSigDesc.NumStaticSamplers = 1;
-			rootSigDesc.pStaticSamplers = &staticSampler;
+			rootSigDesc.NumStaticSamplers = _countof(staticSamplers);
+			rootSigDesc.pStaticSamplers = staticSamplers;
 			rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 			MadoEngine::RootSignatureManager::GetInstance().Register("Sprite.RootSig", rootSigDesc);

@@ -45,6 +45,7 @@ namespace UI::Game {
 			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIconFrames_[i])) {
 				sprite->SetPosition(Vector2{ -68.0f + 100.0f + i * 68.0f, 200.0f - 64.0f });
+				sprite->SetScale(Vector2{ 4.0f, 4.0f });
 			}
 
 			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);

@@ -2,123 +2,6 @@
     "sprites": [
         {
             "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "InputUI1_Key",
-            "position": [
-                400.0,
-                410.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.75,
-                0.75
-            ],
-            "scene": "Result",
-            "texture": "Decision_Key",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "InputUI2_Pad",
-            "position": [
-                400.0,
-                510.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.75,
-                0.75
-            ],
-            "scene": "Result",
-            "texture": "Interact_Pad",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                0.9767441749572754,
-                0.9767441749572754,
-                0.9767441749572754,
-                1.0
-            ],
-            "fitToScreen": true,
-            "layer": "UI",
-            "name": "Sprite",
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Result",
-            "texture": "resulFrame",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
                 0.0,
                 0.0
             ],
@@ -1390,6 +1273,123 @@
             ],
             "scene": "Title",
             "texture": "white16x16",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI1_Key",
+            "position": [
+                400.0,
+                410.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Result",
+            "texture": "Decision_Key",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "Default",
+            "name": "InputUI2_Pad",
+            "position": [
+                400.0,
+                510.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.75,
+                0.75
+            ],
+            "scene": "Result",
+            "texture": "Interact_Pad",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": false
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.9767441749572754,
+                0.9767441749572754,
+                0.9767441749572754,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "Sprite",
+            "position": [
+                640.0,
+                360.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                5.300000190734863,
+                4.75
+            ],
+            "scene": "Result",
+            "texture": "resulFrame",
             "type": "Sprite2D",
             "uvTransform": {
                 "rotation": 0.0,

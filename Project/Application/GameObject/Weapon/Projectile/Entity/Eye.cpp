@@ -28,7 +28,7 @@ namespace Projectile {
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetTexture("EyeTexture");
+			model->SetTexture("EyeModelTexture");
 			model->SetTransform(transform_);
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);

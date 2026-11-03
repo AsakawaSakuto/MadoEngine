@@ -60,7 +60,7 @@ namespace UI::Game {
 			Vector4 overlayColor = { 0.0f, 0.0f, 0.0f, 184.0f / 255.0f };
 			Vector4 panelColor = { 11.0f / 255.0f, 15.0f / 255.0f, 26.0f / 255.0f, 250.0f / 255.0f };
 			Vector2 iconPosition = { 640.0f, 360.0f };
-			Vector2 iconScale = { 2.0f, 2.0f };
+			Vector2 iconScale = { 4.0f, 4.0f };
 			std::array<Vector2, 3> textPositions = {
 				Vector2{ 640.0f, 264.0f },
 				Vector2{ 640.0f, 216.0f },

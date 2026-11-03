@@ -7,6 +7,16 @@
 
 namespace {
 
+	/// @brief Spriteの補間方式を保存用文字列へ変換
+	/// @param filter 変換する補間方式
+	/// @return 保存用の補間方式名
+	const char* GetTextureFilterName(Sprite::TextureFilter filter) {
+		if (filter == Sprite::TextureFilter::Point) {
+			return "Point";
+		}
+		return "Linear";
+	}
+
 	/// @brief Json配列からVector2を読み込み
 	/// @param json 読み込むJson
 	/// @param fallback 読み込みに失敗した場合の値
@@ -200,6 +210,9 @@ void Sprite::Draw() {
 	commandList_->SetGraphicsRootConstantBufferView(1, transformationResource_->GetGPUVirtualAddress());
 	commandList_->SetGraphicsRootDescriptorTable(2, MadoEngine::TextureManager::GetInstance().GetSrvHandleGPU(textureIndex_));
 
+	// 共通PSOを維持したまま描画ごとに選択値を上書きし、直前のSpriteからの設定漏れを防止
+	commandList_->SetGraphicsRoot32BitConstant(3, static_cast<uint32_t>(textureFilter_), 0);
+
 	commandList_->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
@@ -220,6 +233,14 @@ void Sprite::FromJson(const nlohmann::json& json) {
 	isVisible_ = json.value("visible", isVisible_);
 	isFitToScreen_ = json.value("fitToScreen", isFitToScreen_);
 
+	// 未指定や未知の方式では現在値を維持し、既存Jsonと部分更新の互換性を確保
+	const std::string textureFilter = json.value("textureFilter", GetTextureFilterName(textureFilter_));
+	if (textureFilter == "Point") {
+		SetTextureFilter(TextureFilter::Point);
+	} else if (textureFilter == "Linear") {
+		SetTextureFilter(TextureFilter::Linear);
+	}
+
 	const nlohmann::json& uvTransformJson = json.value("uvTransform", nlohmann::json::object());
 	if (uvTransformJson.is_object()) {
 		uvTransform_.translate = ReadVector2(
@@ -237,6 +258,7 @@ nlohmann::json Sprite::ToJson() const {
 		{ "type", "Sprite2D" },
 		{ "name", objectName_ },
 		{ "texture", textureName_ },
+		{ "textureFilter", GetTextureFilterName(textureFilter_) },
 		{ "position", { transform_.translate.x, transform_.translate.y } },
 		{ "scale", { transform_.scale.x, transform_.scale.y } },
 		{ "rotation", transform_.rotate },

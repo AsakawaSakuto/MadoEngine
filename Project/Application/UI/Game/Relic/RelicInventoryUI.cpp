@@ -8,7 +8,7 @@ namespace {
 constexpr float kScreenCenterX = 640.0f;
 constexpr float kSlotCenterY = 670.0f;
 constexpr float kSlotSpacing = 64.0f;
-constexpr Vector2 kIconScale = { 0.75f, 0.75f };
+constexpr Vector2 kIconScale = { 1.5f, 1.5f };
 constexpr Vector2 kCountOffset = { 20.0f, 20.0f };
 constexpr Vector2 kCountAreaSize = { 30.0f, 22.0f };
 constexpr float kCountFontSize = 17.0f;

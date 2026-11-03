@@ -9,6 +9,9 @@ namespace UI::Game {
 		dopaGauge_ = MySprite::Create("PlayerExpDopaGauge", "DopaGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
 		if (Sprite* sprite = MySprite::TryGet(dopaGauge_)) {
 			sprite->SetScale({ 160.0f, 32.0f });
+
+			// UVスクロールのサブピクセル移動を滑らかに補間
+			sprite->SetTextureFilter(Sprite::TextureFilter::Linear);
 		}
 	}
 

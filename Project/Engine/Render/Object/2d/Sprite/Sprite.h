@@ -3,6 +3,7 @@
 #include "SpriteSharedGeometry.h"
 #include "Render/Object/IRenderObject2d.h"
 #include "SceneManager/SceneType.h"
+#include <cstdint>
 
 namespace MadoEngine {
 class SpriteManager;
@@ -10,6 +11,12 @@ class SpriteManager;
 
 class Sprite : public IRenderObject2d {
 public:
+
+	/// @brief Sprite専用Pixel Shaderのサンプラー選択値
+	enum class TextureFilter : uint32_t {
+		Linear = 0,
+		Point = 1,
+	};
 
 	Sprite(std::string objectName = "default");
 
@@ -41,6 +48,14 @@ public:
 	/// @brief テクスチャのピクセルサイズを取得
 	/// @return テクスチャのピクセルサイズ
 	const Vector2& GetTextureSize() const { return size_; }
+
+	/// @brief テクスチャの補間方式を設定
+	/// @param filter 使用する補間方式
+	void SetTextureFilter(TextureFilter filter) { textureFilter_ = filter; }
+
+	/// @brief テクスチャの補間方式を取得
+	/// @return 現在の補間方式
+	TextureFilter GetTextureFilter() const { return textureFilter_; }
 
 	/// @brief UV変換全体を設定
 	/// @param transform UVの拡縮・回転・移動
@@ -133,4 +148,7 @@ private:
 
 	// 画面全体へ引き伸ばして描画するかのフラグ
 	bool isFitToScreen_ = false;
+
+	// 既存のScene情報の配置を維持するため追加設定を末尾へ配置
+	TextureFilter textureFilter_ = TextureFilter::Point;
 };
