@@ -452,7 +452,9 @@ private:
 	/// @brief Modelファイルを共有データとして読み込み
 	/// @param path Modelファイルパス
 	/// @param type Model種別
-	void LoadModelFile(const std::string& path, ModelType type);
+	/// @param loadedFromCache キャッシュを使用した場合はtrueを格納する出力先
+	/// @return 読み込みに成功した場合はtrue
+	bool LoadModelFile(const std::string& path, ModelType type, bool& loadedFromCache);
 
 	/// @brief Modelアセット共有データを検索
 	/// @param modelName Modelアセット名またはパス

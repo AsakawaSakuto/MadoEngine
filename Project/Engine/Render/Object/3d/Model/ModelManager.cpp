@@ -1,8 +1,11 @@
 #include "ModelManager.h"
+#include "ModelAssetCatalog.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cassert>
+#include <chrono>
+#include <format>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -10,13 +13,6 @@
 #include <utility>
 
 namespace {
-
-/// @brief 文字列を小文字へ変換
-/// @param value 変換する文字列
-/// @return 小文字へ変換した文字列
-std::string ToLower(std::string value) {
-	return MadoEngine::AssetKey::Normalize(value);
-}
 
 /// @brief ファイルパスを正規化
 /// @param path 正規化するパス
@@ -45,99 +41,6 @@ bool IsDrawTarget(
 	}
 
 	return model.IsRenderLayerIncluded(layerMask);
-}
-
-/// @brief 対応しているModel拡張子か確認
-/// @param path 確認するパス
-/// @return 対応している場合はtrue
-bool IsModelExtension(const std::filesystem::path& path) {
-	const std::string extension = ToLower(path.extension().string());
-	return extension == ".obj" || extension == ".gltf" || extension == ".glb";
-}
-
-/// @brief Modelの親ディレクトリからModel種別を取得
-/// @param modelRoot Modelルート
-/// @param path Modelファイルパス
-/// @param outType 取得したModel種別
-/// @return 種別を取得できた場合はtrue
-bool TryGetModelType(const std::filesystem::path& modelRoot, const std::filesystem::path& path, ModelType& outType) {
-	std::error_code error;
-	const std::filesystem::path relative = std::filesystem::relative(path.parent_path(), modelRoot, error);
-	if (error || relative.empty()) {
-		return false;
-	}
-
-	const std::string firstDirectory = ToLower((*relative.begin()).string());
-	if (firstDirectory == "static") {
-		outType = ModelType::Static;
-		return true;
-	}
-	if (firstDirectory == "animation" || firstDirectory == "animated") {
-		outType = ModelType::Animated;
-		return true;
-	}
-	if (firstDirectory == "skinning") {
-		outType = ModelType::Skinning;
-		return true;
-	}
-	return false;
-}
-
-/// @brief Animation専用として参照されるModelファイルを収集
-/// @param modelRoot Modelルート
-/// @return 通常Model読み込みから除外する正規化済みパス集合
-std::unordered_set<std::string, MadoEngine::AssetKey::Hash, MadoEngine::AssetKey::Equal> CollectAnimationOnlyPaths(const std::filesystem::path& modelRoot) {
-	std::unordered_set<std::string, MadoEngine::AssetKey::Hash, MadoEngine::AssetKey::Equal> animationOnlyPaths;
-	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
-		if (!entry.is_regular_file() ||
-			!ToLower(entry.path().filename().string()).ends_with(".animations.json")) {
-			continue;
-		}
-
-		std::ifstream manifestFile(entry.path());
-		if (!manifestFile.is_open()) {
-			continue;
-		}
-
-		try {
-			nlohmann::json manifestJson;
-			manifestFile >> manifestJson;
-			const std::string modelFile = manifestJson.value("model", std::string{});
-			if (modelFile.empty()) {
-				continue;
-			}
-
-			const std::filesystem::path manifestDirectory = entry.path().parent_path();
-			const std::string baseModelPath = NormalizePath(manifestDirectory / modelFile);
-			const auto clipsIterator = manifestJson.find("clips");
-			if (clipsIterator == manifestJson.end() || !clipsIterator->is_object()) {
-				continue;
-			}
-
-			// 基準Modelと異なる参照先だけをAnimation専用Assetとして除外
-			for (const auto& [clipName, clipJson] : clipsIterator->items()) {
-				(void)clipName;
-				if (!clipJson.is_object()) {
-					continue;
-				}
-				const std::string sourceFile = clipJson.value("file", std::string{});
-				if (sourceFile.empty()) {
-					continue;
-				}
-				const std::string sourcePath = NormalizePath(manifestDirectory / sourceFile);
-				if (!MadoEngine::AssetKey::Equals(sourcePath, baseModelPath)) {
-					animationOnlyPaths.insert(sourcePath);
-				}
-			}
-		} catch (const nlohmann::json::exception& exception) {
-			Logger::Output(
-				"Animation設定の解析に失敗しました: " + entry.path().generic_string() + " / " + exception.what(),
-				Logger::Level::Error
-			);
-		}
-	}
-
-	return animationOnlyPaths;
 }
 
 } // namespace
@@ -207,36 +110,43 @@ void ModelManager::Finalize() {
 }
 
 void ModelManager::LoadAllModels() {
-	const std::filesystem::path modelRoot = "Assets/Model";
-	if (!std::filesystem::exists(modelRoot)) {
-		Logger::Output("Assets/Modelフォルダが見つかりません", Logger::Level::Warning);
-		return;
-	}
-	const auto animationOnlyPaths = CollectAnimationOnlyPaths(modelRoot);
+    const auto startTime = std::chrono::steady_clock::now();
+    std::size_t cacheCount = 0;
+    std::size_t sourceCount = 0;
+    const std::filesystem::path modelRoot = "Assets/Model";
+    if (!std::filesystem::exists(modelRoot)) {
+        Logger::Output("Assets/Modelフォルダが見つかりません", Logger::Level::Warning);
+        return;
+    }
 
-	for (const auto& entry : std::filesystem::recursive_directory_iterator(modelRoot)) {
-		if (!entry.is_regular_file() || !IsModelExtension(entry.path())) {
-			continue;
-		}
-		const std::string normalizedPath = NormalizePath(entry.path());
-		if (animationOnlyPaths.contains(normalizedPath)) {
-			continue;
-		}
-		ModelType type = ModelType::Static;
-		if (!TryGetModelType(modelRoot, entry.path(), type)) {
-			continue;
-		}
-		LoadModelFile(normalizedPath, type);
-	}
+    // 事前変換と同じ一覧を使用し、別ファイルのAnimationを通常Modelから除外
+    for (const auto& source : ModelAssetCatalog::Collect(modelRoot)) {
+        bool loadedFromCache = false;
+        if (!LoadModelFile(NormalizePath(source.path), source.type, loadedFromCache)) {
+            continue;
+        }
+        if (loadedFromCache) {
+            ++cacheCount;
+        } else {
+            ++sourceCount;
+        }
+    }
+    const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - startTime).count();
+    Logger::Output(std::format("Model読み込み完了: キャッシュ {} 件、元ファイル {} 件、所要時間 {:.3f} 秒",
+        cacheCount, sourceCount, elapsed), Logger::Level::Startup);
 }
 
-void ModelManager::LoadModelFile(const std::string& path, ModelType type) {
+bool ModelManager::LoadModelFile(const std::string& path, ModelType type, bool& loadedFromCache) {
 	if (sharedData_.contains(path)) {
-		return;
+		return false;
 	}
 
 	auto data = std::make_unique<ModelSharedData>();
-	ModelResource::Initialize(*data, device_, path, type);
+
+    // 変換失敗した空の共有データを登録せず、後段のGPU参照を防止
+    if (!ModelResource::Initialize(*data, device_, path, type, &loadedFromCache)) {
+        return false;
+    }
 	const std::string stem = std::filesystem::path(path).stem().string();
 	if (!aliases_.contains(stem)) {
 		aliases_.emplace(stem, path);
@@ -246,6 +156,7 @@ void ModelManager::LoadModelFile(const std::string& path, ModelType type) {
 	aliases_.emplace(path, path);
 	sharedData_.emplace(path, std::move(data));
 	Logger::Output("Modelアセットを読み込みました: " + path, Logger::Level::Assets);
+    return true;
 }
 
 ModelHandle ModelManager::Create(

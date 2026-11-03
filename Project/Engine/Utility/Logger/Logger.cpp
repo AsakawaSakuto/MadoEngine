@@ -28,6 +28,7 @@ namespace {
         case Logger::Level::Warning:     return " --- [WARNING] ------- ";
         case Logger::Level::Error:       return " --- [ERROR] --------- ";
         case Logger::Level::Debug:       return " --- [DEBUG] --------- ";
+        case Logger::Level::Startup:     return " --- [STARTUP] ------- ";
         default:                         return " --- [UNKNOWN] ------- ";
         }
     }
@@ -200,8 +201,8 @@ namespace Logger {
 
 #ifdef NDEBUG
 
-        // DevelopmentとReleaseでは実行時の大量出力を避け、問題調査に必要な警告とエラーだけを保持
-        if (level != Level::Warning && level != Level::Error) {
+        // DevelopmentとReleaseでは警告とエラーに加え、起動時に限定した計測結果だけを保持
+        if (level != Level::Warning && level != Level::Error && level != Level::Startup) {
             return;
         }
 #endif

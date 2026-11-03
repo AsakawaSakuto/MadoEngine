@@ -14,8 +14,10 @@ namespace MadoEngine::Core { class SRVManager; }
 /// @brief ファイルから指定IndexのAnimationClipを読み込み
 /// @param filename 読み込むAnimationファイルパス
 /// @param index 読み込むAnimation Index
+/// @param dependencies 依存ファイルの収集先、収集不要の場合はnullptr
 /// @return 読み込んだAnimationClip
-AnimationClip LoadAnimationFile(const std::string& filename, int index = 0);
+AnimationClip LoadAnimationFile(const std::string& filename, int index = 0,
+    std::vector<std::filesystem::path>* dependencies = nullptr);
 
 Skeleton CreateSkeleton(const ModelNode& rootNode);
 

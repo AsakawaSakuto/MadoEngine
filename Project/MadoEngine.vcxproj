@@ -141,6 +141,11 @@
     <None Include=".editorconfig" />
     <None Include="Tools\TextureConverter\TextureConverter.cpp" />
     <None Include="Tools\TextureConverter\TextureConverter.vcxproj" />
+    <None Include="Tools\ModelConverter\ModelConverter.cpp" />
+    <None Include="Tools\ModelConverter\ModelConverter.vcxproj" />
+    <None Include="Tools\ModelConverter\README.md" />
+    <None Include="Tools\ModelConverter\Tests\ModelCacheTests.cpp" />
+    <None Include="Tools\ModelConverter\Tests\ModelCacheTests.vcxproj" />
     <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
@@ -308,6 +313,9 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\Model.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelAssetCatalog.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelAssetImporter.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelCache.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
@@ -607,6 +615,10 @@
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelData.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelManager.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelAssetCatalog.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelAssetImporter.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelCache.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelImportIO.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />
@@ -759,6 +771,17 @@
              Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_TextureConverterRoot)Bin\;IntDir=$(_TextureConverterRoot)Obj\" />
     <Exec Command="&quot;$(_TextureConverterRoot)Bin\TextureConverter.exe&quot; &quot;$(ProjectDir)Assets\Texture&quot;"
           UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
+  </Target>
+  <!-- Modelの解析結果もAssetsのコピー対象収集より先に差分生成 -->
+  <Target Name="BuildModelCache" BeforeTargets="CollectAssetCopyFiles" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_ModelConverterRoot>$([System.IO.Path]::Combine('$(ProjectDir)', '$(IntDir)', 'ModelConverter\'))</_ModelConverterRoot>
+      <_ModelConverterRoot>$([System.IO.Path]::GetFullPath('$(_ModelConverterRoot)'))</_ModelConverterRoot>
+    </PropertyGroup>
+    <MSBuild Projects="$(ProjectDir)Tools\ModelConverter\ModelConverter.vcxproj" Targets="Build"
+             Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_ModelConverterRoot)Bin\;IntDir=$(_ModelConverterRoot)Obj\" />
+    <Exec Command="&quot;$(_ModelConverterRoot)Bin\ModelConverter.exe&quot; &quot;$(ProjectDir)Assets\Model&quot;"
+          WorkingDirectory="$(ProjectDir)" UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
   </Target>
   <!-- VSのプロジェクト編集との互換性を保つため、ワイルドカード展開をビルド時に限定 -->
   <Target Name="CollectAssetCopyFiles" BeforeTargets="PrepareForBuild">

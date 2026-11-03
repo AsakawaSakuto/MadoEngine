@@ -116,6 +116,9 @@
     <ClCompile Include="Engine\Render\Object\3d\Animation\Animator.cpp" />
     <ClCompile Include="Engine\Render\Animation\SpriteSheetAnimator.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelAssetCatalog.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelAssetImporter.cpp" />
+    <ClCompile Include="Engine\Render\Object\3d\Model\ModelCache.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp" />
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleSimulator.cpp" />
@@ -654,6 +657,10 @@
       <Filter>�w�b�_�[ �t�%40�C��</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelAssetCatalog.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelAssetImporter.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelCache.h" />
+    <ClInclude Include="Engine\Render\Object\3d\Model\ModelImportIO.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelMaterialBuffer.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\InstancedModel.h" />
     <ClInclude Include="Engine\Render\Object\3d\Model\MyModel.h" />

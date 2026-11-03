@@ -41,6 +41,10 @@ public:
 	/// @return 未登録の場合はtrue
 	bool IsEmpty() const { return clips_.empty(); }
 
+	/// @brief 保存対象の全AnimationClipを取得
+	/// @return 読み取り専用のAnimationClip集合
+	const std::unordered_map<std::string, AnimationClip>& GetClips() const { return clips_; }
+
 private:
 	std::unordered_map<std::string, AnimationClip> clips_;
 	std::string defaultClipName_;

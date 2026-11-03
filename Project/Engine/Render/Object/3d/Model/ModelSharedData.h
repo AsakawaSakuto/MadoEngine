@@ -30,7 +30,15 @@ struct ModelSharedData {
 
 namespace MadoEngine::ModelResource {
 
-void Initialize(ModelSharedData& outData, ID3D12Device* device, const std::string& modelPath, ModelType requestedType = ModelType::Auto);
+/// @brief キャッシュを優先してModelの共有リソースを初期化
+/// @param outData 初期化結果の出力先
+/// @param device GPUリソースの生成先
+/// @param modelPath 元Modelのパス
+/// @param requestedType 要求するModel種別
+/// @param loadedFromCache キャッシュを使用した場合はtrueを格納する出力先、不要の場合はnullptr
+/// @return 初期化に成功した場合はtrue
+bool Initialize(ModelSharedData& outData, ID3D12Device* device, const std::string& modelPath,
+    ModelType requestedType = ModelType::Auto, bool* loadedFromCache = nullptr);
 void Finalize(ModelSharedData& data);
 MadoEngine::Render::PSODesc CreatePSODesc(ModelType type);
 std::string ModelTypeToString(ModelType type);

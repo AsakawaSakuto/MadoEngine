@@ -15,6 +15,7 @@ namespace Logger {
 		Warning,     // 警告レベルのログ
 		Error,       // エラーレベルのログ
 		Debug,       // デバッグレベルのログ
+		Startup,     // Releaseでも保持する起動時の計測ログ
 	};
 
 	/// @brief ImGui表示用に保持するログ情報

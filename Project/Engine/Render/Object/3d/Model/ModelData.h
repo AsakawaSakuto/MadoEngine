@@ -17,6 +17,8 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <stdexcept>
+#include "ModelImportIO.h"
 
 namespace MadoEngine::ModelImportSettings {
 
@@ -121,18 +123,24 @@ struct ModelData {
 
 /// @brief ModelファイルからMeshとMaterialを読み込み
 /// @param filepath 読み込むModelファイルのパス
+/// @param dependencies 依存ファイルの収集先、収集不要の場合はnullptr
 /// @return MeshとMaterialを格納したModel Data
-inline ModelData LoadObject3dFile(const std::string& filepath) {
+inline ModelData LoadObject3dFile(const std::string& filepath, std::vector<std::filesystem::path>* dependencies = nullptr) {
     ModelData modelData;
     std::filesystem::path path(filepath);
     std::string directoryPath = path.parent_path().string();
 
     Assimp::Importer importer;
+    MadoEngine::ModelImportIO::Attach(importer, dependencies);
     const aiScene* scene = importer.ReadFile(
         filepath.c_str(),
         MadoEngine::ModelImportSettings::kMeshPostProcess);
 
-    assert(scene && scene->HasMeshes());
+    if (!scene || !scene->HasMeshes()) {
+
+        // Releaseでも不正なSceneを参照せず、変換失敗を呼び出し側へ通知
+        throw std::runtime_error("ModelのMeshを読み込めません: " + filepath);
+    }
 
     modelData.rootNode = modelData.rootNode.ReadNode(scene->mRootNode);
 
@@ -177,13 +185,15 @@ inline ModelData LoadObject3dFile(const std::string& filepath) {
     uint32_t indexOffset = 0;
     for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
         aiMesh* mesh = scene->mMeshes[meshIndex];
-        assert(mesh->HasNormals());
+        if (!mesh->HasNormals()) {
+            throw std::runtime_error("Modelに法線がありません: " + filepath);
+        }
 
         uint32_t vertexStart = static_cast<uint32_t>(modelData.vertices.size());
 
         // MeshごとのLocal Indexを後段で共有BufferのIndexへ補正するため開始位置を保持
         for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
-            ModelVertexData vertex;
+            ModelVertexData vertex{};
             aiVector3D& position = mesh->mVertices[vertexIndex];
             aiVector3D& normal = mesh->mNormals[vertexIndex];
 

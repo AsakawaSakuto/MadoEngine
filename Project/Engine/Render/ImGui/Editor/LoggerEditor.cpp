@@ -17,7 +17,8 @@ namespace MadoEngine::Editor {
 			Logger::Level::Assets,
 			Logger::Level::Warning,
 			Logger::Level::Error,
-			Logger::Level::Debug
+			Logger::Level::Debug,
+			Logger::Level::Startup
 		};
 		constexpr std::size_t kLogLevelCount = kLogLevels.size();
 
@@ -38,6 +39,8 @@ namespace MadoEngine::Editor {
 				return "Error";
 			case Logger::Level::Debug:
 				return "Debug";
+			case Logger::Level::Startup:
+				return "Startup";
 			default:
 				return "Unknown";
 			}
@@ -60,6 +63,8 @@ namespace MadoEngine::Editor {
 				return ImVec4(1.0f, 0.36f, 0.36f, 1.0f);
 			case Logger::Level::Debug:
 				return ImVec4(0.74f, 0.74f, 0.82f, 1.0f);
+			case Logger::Level::Startup:
+				return ImVec4(0.60f, 0.92f, 0.88f, 1.0f);
 			default:
 				return ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 			}
