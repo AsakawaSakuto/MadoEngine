@@ -137,12 +137,12 @@ namespace UI::Game {
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 
-		/// @brief 武器強化UIの表示状態と操作案内および見出しの演出を更新
+		/// @brief Upgrade Groupの表示状態と操作案内および見出しの演出を更新
 		/// @param deltaTime 停止中も進行する実時間
 		/// @param isVisible 表示する場合はtrue
 		void UpdateUpgradePresentation(float deltaTime, bool isVisible);
 
-		/// @brief 決定とリロールの押下状態に合わせて操作案内の拡縮演出を更新
+		/// @brief Upgrade内の決定とリロールの押下状態へ操作案内の拡縮演出を同期
 		/// @param deltaTime 停止中も進行する実時間
 		/// @param isVisible 操作案内を表示する場合はtrue
 		void UpdateUpgradeControlFeedback(float deltaTime, bool isVisible);

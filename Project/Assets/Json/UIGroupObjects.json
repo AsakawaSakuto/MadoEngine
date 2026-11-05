@@ -389,6 +389,98 @@
         {
             "children": [
                 {
+                    "name": "DecisionSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            520.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            11.0,
+                            5.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeDecisionBack1",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "DecisionSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            520.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeDecisionBack2",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "DecisionInput",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            472.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.44999998807907104,
+                            0.44999998807907104
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeDecisionBottom",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "DecisionText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            540.0,
+                            639.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeDecisionText",
+                    "type": "Text"
+                }
+            ],
+            "id": "54fda760-64b2-46ee-a4a2-01bfa3a64c1c",
+            "name": "Decision1",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
                     "name": "KillCountSprite",
                     "state": {
                         "opacity": 1.0,
@@ -932,6 +1024,164 @@
             ],
             "id": "6f84ae89-d44e-4026-bf99-81b8a6d9d8b4",
             "name": "Relic",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "RerollSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            760.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            11.0,
+                            5.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollBack1",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            760.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollBack2",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollInput",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            712.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.44999998807907104,
+                            0.44999998807907104
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollBottom",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollMoneyIcon",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            844.0,
+                            604.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollCoin",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            783.0,
+                            639.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollText",
+                    "type": "Text"
+                },
+                {
+                    "name": "RerollMoneyText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            864.0,
+                            578.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollCoinText",
+                    "type": "Text"
+                }
+            ],
+            "id": "1455aff3-c384-413a-bf6a-28af35ed9a68",
+            "name": "Reroll",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "Decision",
+                    "target": "54fda760-64b2-46ee-a4a2-01bfa3a64c1c",
+                    "type": "Group"
+                },
+                {
+                    "name": "Reroll",
+                    "target": "1455aff3-c384-413a-bf6a-28af35ed9a68",
+                    "type": "Group"
+                }
+            ],
+            "id": "4ee11fa7-1075-4a6f-89cd-4104b041975d",
+            "name": "Upgrade",
             "scene": "Game",
             "state": {
                 "opacity": 1.0,

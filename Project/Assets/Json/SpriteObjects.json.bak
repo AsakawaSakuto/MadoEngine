@@ -820,293 +820,6 @@
                 0.5
             ],
             "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeDecisionBack1",
-            "opacity": 1.0,
-            "position": [
-                520.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                11.0,
-                5.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.09019608050584793,
-                0.10588235408067703,
-                0.1411764770746231,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeDecisionBack2",
-            "opacity": 1.0,
-            "position": [
-                520.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                10.0,
-                4.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeRerollBack1",
-            "opacity": 1.0,
-            "position": [
-                760.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                11.0,
-                5.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.09150892496109009,
-                0.10751760751008987,
-                0.13953489065170288,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeRerollBack2",
-            "opacity": 1.0,
-            "position": [
-                760.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                10.0,
-                4.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeDecisionBottom",
-            "opacity": 1.0,
-            "position": [
-                472.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.44999998807907104,
-                0.44999998807907104
-            ],
-            "scene": "Game",
-            "texture": "Decision_Pad",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeRerollBottom",
-            "opacity": 1.0,
-            "position": [
-                712.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.44999998807907104,
-                0.44999998807907104
-            ],
-            "scene": "Game",
-            "texture": "xbox_button_color_y_outline",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UpgradeRerollCoin",
-            "opacity": 1.0,
-            "position": [
-                844.0,
-                604.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.5,
-                0.5
-            ],
-            "scene": "Game",
-            "texture": "Coin",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": false
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
                 0.0,
                 0.0,
                 0.0,
@@ -1148,9 +861,9 @@
                 0.5
             ],
             "color": [
-                0.20000000298023224,
+                1.0,
                 0.8500000238418579,
-                0.30000001192092896,
+                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -1249,7 +962,7 @@
                 4.0
             ],
             "scene": "Game",
-            "texture": "Flask",
+            "texture": "Magnet",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1373,6 +1086,293 @@
             ],
             "scene": "Game",
             "texture": "Decision_Pad",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeDecisionBack1",
+            "opacity": 1.0,
+            "position": [
+                520.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.0,
+                5.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09019608050584793,
+                0.10588235408067703,
+                0.1411764770746231,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeDecisionBack2",
+            "opacity": 1.0,
+            "position": [
+                520.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeDecisionBottom",
+            "opacity": 1.0,
+            "position": [
+                472.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.44999998807907104,
+                0.44999998807907104
+            ],
+            "scene": "Game",
+            "texture": "Decision_Pad",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollBack1",
+            "opacity": 1.0,
+            "position": [
+                760.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                11.0,
+                5.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.09150892496109009,
+                0.10751760751008987,
+                0.13953489065170288,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollBack2",
+            "opacity": 1.0,
+            "position": [
+                760.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollBottom",
+            "opacity": 1.0,
+            "position": [
+                712.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.44999998807907104,
+                0.44999998807907104
+            ],
+            "scene": "Game",
+            "texture": "xbox_button_color_y_outline",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UpgradeRerollCoin",
+            "opacity": 1.0,
+            "position": [
+                844.0,
+                604.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                2.0,
+                2.0
+            ],
+            "scene": "Game",
+            "texture": "Coin",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {

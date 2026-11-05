@@ -152,57 +152,6 @@
         },
         {
             "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 64.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "GamePlayTimerText",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                640.0,
-                76.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "04:51",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
                 0.0,
                 0.0
             ],
@@ -246,7 +195,58 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 59.9",
+            "text": "FPS : 60.3",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 64.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "GamePlayTimerText",
+            "opacity": 1.0,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 3.0,
+            "position": [
+                640.0,
+                76.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "04:35",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -297,7 +297,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 471116107",
+            "text": "SEED : 2725307748",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -348,7 +348,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 100 / 100",
+            "text": "HP : 81 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -399,10 +399,61 @@
                 0.0,
                 0.0
             ],
-            "text": "20で開ける",
+            "text": "武器を強化する",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "Yu Gothic UI",
+            "fontFile": "",
+            "fontSize": 80.0,
+            "horizontalAlign": "Left",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "StartText",
+            "opacity": 1.0,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 5.0,
+            "position": [
+                -360.0,
+                256.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "敵を沢山撃破しよう",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -471,57 +522,6 @@
             ],
             "fontFamily": "Yu Gothic UI",
             "fontFile": "",
-            "fontSize": 80.0,
-            "horizontalAlign": "Left",
-            "layer": "UI",
-            "lineSpacing": 1.0,
-            "name": "StartText",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 5.0,
-            "position": [
-                -360.0,
-                256.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "敵を沢山撃破しよう",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "Yu Gothic UI",
-            "fontFile": "",
             "fontSize": 36.0,
             "horizontalAlign": "Left",
             "layer": "Default",
@@ -567,8 +567,8 @@
             "characterSpacing": 0.0,
             "color": [
                 0.0,
-                0.7362518310546875,
                 1.0,
+                0.7903361320495605,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -593,8 +593,8 @@
             "renderMode": "Rasterized",
             "rotation": 0.0,
             "scale": [
-                0.7797814607620239,
-                0.7797814607620239
+                0.6892743110656738,
+                0.6892743110656738
             ],
             "scene": "Game",
             "screen": "BackBuffer",
@@ -606,7 +606,7 @@
             "text": "強化の時間だ！",
             "type": "Text2D",
             "verticalAlign": "Center",
-            "visible": false,
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -622,8 +622,8 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
-            "fontFile": "",
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 28.0,
             "horizontalAlign": "Left",
             "layer": "UI",
@@ -638,8 +638,8 @@
             ],
             "outlineWidth": 2.0,
             "position": [
-                860.0,
-                582.0
+                864.0,
+                578.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,
@@ -654,10 +654,10 @@
                 0.0,
                 0.0
             ],
-            "text": "10",
+            "text": "40",
             "type": "Text2D",
             "verticalAlign": "Center",
-            "visible": false,
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -673,8 +673,8 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
-            "fontFile": "",
+            "fontFamily": "x8y12pxDenkiChip",
+            "fontFile": "Assets/Font/dot.ttf",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
@@ -708,7 +708,7 @@
             "text": "リロール",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": false,
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -756,7 +756,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-7",
+            "text": "-10",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -807,7 +807,7 @@
                 0.0,
                 0.0
             ],
-            "text": "74",
+            "text": "59",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1172,6 +1172,57 @@
         },
         {
             "anchorPoint": [
+                0.0,
+                0.0
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 32.0,
+            "horizontalAlign": "Left",
+            "layer": "Default",
+            "lineSpacing": 1.0,
+            "name": "UIGroupText_d0a001a7-b096-4866-90e4-47e3bf61ba72",
+            "opacity": 1.0,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 3.0,
+            "position": [
+                1070.0,
+                630.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                0.0,
+                0.0
+            ],
+            "text": "壁登り",
+            "type": "Text2D",
+            "verticalAlign": "Top",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
                 0.5,
                 0.5
             ],
@@ -1236,57 +1287,6 @@
             ],
             "fontFamily": "游ゴシック",
             "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "UIGroupText_d0a001a7-b096-4866-90e4-47e3bf61ba72",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                1070.0,
-                630.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "壁登り",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 48.0,
             "horizontalAlign": "Left",
             "layer": "Default",
@@ -1317,7 +1317,7 @@
                 0.0,
                 0.0
             ],
-            "text": "5",
+            "text": "19",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1368,7 +1368,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 4",
+            "text": "Enemy : 8",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1540,8 +1540,8 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "Yu Gothic UI",
-            "fontFile": "",
+            "fontFamily": "x8y12pxDenkiChip",
+            "fontFile": "Assets/Font/dot.ttf",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
             "layer": "UI",
@@ -1575,7 +1575,7 @@
             "text": "決定",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": false,
+            "visible": true,
             "wordWrap": true
         },
         {
@@ -1623,7 +1623,7 @@
                 480.0,
                 48.0
             ],
-            "text": "知恵のフラスコ",
+            "text": "携帯マグネット",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1637,9 +1637,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.20000000298023224,
+                1.0,
                 0.8500000238418579,
-                0.30000001192092896,
+                0.15000000596046448,
                 1.0
             ],
             "fontFamily": "游ゴシック",
@@ -1674,7 +1674,7 @@
                 480.0,
                 48.0
             ],
-            "text": "アンコモン",
+            "text": "レジェンダリー",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1695,7 +1695,7 @@
             ],
             "fontFamily": "游ゴシック",
             "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 24.0,
+            "fontSize": 20.0,
             "horizontalAlign": "Center",
             "layer": "UI",
             "lineSpacing": 1.0,
@@ -1725,7 +1725,7 @@
                 480.0,
                 48.0
             ],
-            "text": "獲得EXP +20%",
+            "text": "稀に経験知を引き寄せる",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,

@@ -11,14 +11,17 @@
 
 namespace {
 	constexpr UI::Game::InputControlFeedbackDefinition kUpgradeControlDefinitions[] = {
-		{ "Decision", { "UpgradeDecisionBottom", "UpgradeDecisionBack1", "UpgradeDecisionBack2" }, "UpgradeDecisionText" },
-		{ "Reroll", { "UpgradeRerollBottom", "UpgradeRerollBack1", "UpgradeRerollBack2" }, "UpgradeRerollText" },
+		{ "Decision", { "DecisionSprite", "DecisionSprite1", "DecisionInput" }, "DecisionText" },
+		{ "Reroll", { "RerollSprite", "RerollSprite1", "RerollInput" }, "RerollText" },
 	};
+	constexpr const char* kUpgradeGroupName = "Upgrade";
+	constexpr const char* kUpgradeRerollGroupName = "Reroll";
+	constexpr const char* kUpgradeRerollCoinName = "RerollMoneyIcon";
+	constexpr const char* kUpgradeRerollCoinTextName = "RerollMoneyText";
 	constexpr const char* kGameStartBandNames[] = { "Band_Up", "Band_Bottom" };
 	constexpr float kGameStartBandInitialScaleY = 8.0f;
 	constexpr const char* kGameStartTextName = "StartText";
 	constexpr const char* kUpgradeTextName = "UpgradeText";
-	constexpr const char* kWeaponUpgradeOverlayName = "WeaponUpgradeOverlay";
 	/// @brief Pauseメニューの選択単位と拡大基準の参照名
 	struct PauseMenuDefinition {
 		const char* groupName;
@@ -31,15 +34,6 @@ namespace {
 		{ "Quit", "QuitSprite" },
 	};
 	constexpr float kPauseMenuSelectedScale = 1.1f;
-	constexpr const char* kUpgradeRerollCoinTextName = "UpgradeRerollCoinText";
-	constexpr const char* kUpgradeSpriteNames[] = {
-		"UpgradeDecisionBack1", "UpgradeDecisionBack2",
-		"UpgradeRerollBack1", "UpgradeRerollBack2",
-		"UpgradeDecisionBottom", "UpgradeRerollBottom", "UpgradeRerollCoin",
-	};
-	constexpr const char* kUpgradeControlTextNames[] = {
-		"UpgradeDecisionText", "UpgradeRerollText", kUpgradeRerollCoinTextName,
-	};
 	constexpr float kUpgradeTextColorChangeTime = 0.5f;
 	constexpr float kUpgradeTextPulseDuration = 0.6f;
 	constexpr float kUpgradeTextPulseStartSize = 45.0f;
@@ -75,6 +69,21 @@ namespace {
 	constexpr const char* kStaticHudGroupNames[] = {
 		"OperationMethodUI", kMoneyGroupName, kKillCountGroupName, kDebugGroupName,
 	};
+
+	/// @brief 親内の登録名から接続済みの子Groupを検索
+	/// @param parent 親Groupのハンドル
+	/// @param name 子Groupの登録名
+	/// @return 子Groupのハンドル、未接続の場合は無効ハンドル
+	MadoEngine::UIGroupHandle FindChildUIGroup(MadoEngine::UIGroupHandle parent, const char* name) {
+
+		// 別の親にも同じ登録名が存在するため、親の構成情報に限定した参照解決
+		for (const auto& element : MadoEngine::UIGroupManager::GetInstance().GetElements(parent)) {
+			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Group && element.name == name) {
+				return element.group;
+			}
+		}
+		return {};
+	}
 }
 
 namespace UI::Game {
@@ -321,29 +330,11 @@ namespace UI::Game {
 
 	void GameHud::UpdateUpgradePresentation(float deltaTime, bool isVisible) {
 
-		// Editor配置の操作案内Spriteを最新Handleから取得し、武器強化選択中だけ表示
-		MadoEngine::SpriteHandle previousSprite = MySprite::Find(kWeaponUpgradeOverlayName);
-		for (const char* name : kUpgradeSpriteNames) {
-			const MadoEngine::SpriteHandle spriteHandle = MySprite::Find(name);
-			Sprite* sprite = MySprite::TryGet(spriteHandle);
-			if (!sprite || sprite->GetSceneType() != SceneType::Game) {
-				continue;
-			}
-			sprite->SetVisible(isVisible);
-
-			// 暗幕の直後へ案内を順に配置し、再生成後も既存インスタンスを手前に描画
-			if (isVisible && MySprite::MoveAfter(spriteHandle, previousSprite)) {
-				previousSprite = spriteHandle;
-			}
-		}
-
-		// Json再読込やEditor削除後も存在する操作案内Textだけへ同じ表示条件を反映
-		for (const char* name : kUpgradeControlTextNames) {
-			MadoEngine::Text* text = MyText::TryGet(MyText::Find(name));
-			if (!text || text->GetSceneType() != SceneType::Game) {
-				continue;
-			}
-			text->SetVisible(isVisible);
+		// 親だけでUpgrade中の表示を切り替え、子の個別設定と保存用表示状態を維持
+		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
+		MadoEngine::UIGroup* upgradeGroup = groupManager.TryGet(groupManager.Find(kUpgradeGroupName, SceneType::Game));
+		if (upgradeGroup) {
+			upgradeGroup->SetVisible(isVisible && upgradeGroup->GetAuthoringState().visible);
 		}
 		UpdateUpgradeControlFeedback(deltaTime, isVisible);
 		if (!isVisible) {
@@ -393,8 +384,48 @@ namespace UI::Game {
 	}
 
 	void GameHud::UpdateUpgradeControlFeedback(float deltaTime, bool isVisible) {
+		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
+		const auto upgrade = groupManager.Find(kUpgradeGroupName, SceneType::Game);
 		for (std::size_t index = 0; index < upgradeControlFeedback_.size(); ++index) {
-			upgradeControlFeedback_[index].Update(deltaTime, isVisible, kUpgradeControlDefinitions[index]);
+			const auto& definition = kUpgradeControlDefinitions[index];
+			const auto controlHandle = FindChildUIGroup(upgrade, definition.actionName);
+			const MadoEngine::UIGroup* controlGroup = groupManager.TryGet(controlHandle);
+			bool isControlVisible = false;
+			if (controlGroup) {
+				isControlVisible = isVisible && controlGroup->IsVisibleInHierarchy();
+			}
+			InputControlFeedbackTargets targets;
+			MadoEngine::SpriteHandle moneyIcon{};
+
+			// 親内の登録名から実体を解決し、レリック側のDecisionとの取り違えを防止
+			for (const auto& element : groupManager.GetElements(controlHandle)) {
+				if (!element.resolved) {
+					continue;
+				}
+				if (element.type == MadoEngine::UIGroupElementType::Sprite) {
+					for (std::size_t spriteIndex = 0; spriteIndex < definition.spriteNames.size(); ++spriteIndex) {
+						if (element.name == definition.spriteNames[spriteIndex]) {
+							targets.sprites[spriteIndex] = element.sprite;
+							break;
+						}
+					}
+					if (element.name == kUpgradeRerollCoinName) {
+						moneyIcon = element.sprite;
+					}
+				} else if (element.type == MadoEngine::UIGroupElementType::Text && element.name == definition.textName) {
+					targets.text = element.text;
+				}
+			}
+
+			// 暗幕より手前へ背景・入力アイコン・費用アイコンを並べ、既存の押下演出を継続
+			if (isControlVisible) {
+				auto& sprites = MadoEngine::SpriteManager::GetInstance();
+				for (const auto handle : targets.sprites) {
+					sprites.MoveToFront(handle);
+				}
+				sprites.MoveToFront(moneyIcon);
+			}
+			upgradeControlFeedback_[index].Update(deltaTime, isControlVisible, definition.actionName, targets);
 		}
 	}
 
@@ -482,15 +513,18 @@ namespace UI::Game {
 	}
 
 	void GameHud::UpdateTexts(float deltaTime, const GameHudState& state) {
+		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
 
-		// リロール成立後の次回費用を数値だけで反映し、再生成されたTextにも追従
-		MadoEngine::Text* rerollCoinText = MyText::TryGet(MyText::Find(kUpgradeRerollCoinTextName));
-		if (rerollCoinText && rerollCoinText->GetSceneType() == SceneType::Game) {
-			rerollCoinText->SetText(std::format("{}", state.upgradeRerollCost));
+		// Upgrade内のRerollへ現在の費用を同期し、同額のままの再読込にも追従
+		const auto upgrade = groupManager.Find(kUpgradeGroupName, SceneType::Game);
+		MadoEngine::UIGroup* rerollGroup = groupManager.TryGet(FindChildUIGroup(upgrade, kUpgradeRerollGroupName));
+		if (rerollGroup) {
+			if (MadoEngine::Text* rerollCoinText = rerollGroup->TryGetText(kUpgradeRerollCoinTextName)) {
+				rerollCoinText->SetText(std::format("{}", state.upgradeRerollCost));
+			}
 		}
 
 		// 親Group内の登録名から毎回解決し、金額が同じでも再読込後のTextへ同期
-		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
 		MadoEngine::UIGroup* moneyGroup = groupManager.TryGet(groupManager.Find(kMoneyGroupName, SceneType::Game));
 		if (moneyGroup) {
 			if (MadoEngine::Text* moneyText = moneyGroup->TryGetText(kMoneyTextName)) {
