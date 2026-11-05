@@ -16,6 +16,17 @@ TextManager& TextManager::GetInstance() {
 	return instance;
 }
 
+std::string TextManager::GetName(TextHandle handle) const {
+	if (IsValid(handle)) {
+		return slots_[handle.index].name;
+	}
+	return {};
+}
+
+bool TextManager::IsEditorManaged(TextHandle handle) const {
+	return IsValid(handle) && slots_[handle.index].managementMode == EditorManagementMode::EditorManaged;
+}
+
 void TextManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Render::PSORegistry* psoRegistry) {
 	assert(device != nullptr);
 	assert(commandList != nullptr);

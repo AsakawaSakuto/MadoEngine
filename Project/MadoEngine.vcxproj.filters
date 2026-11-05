@@ -190,6 +190,11 @@
     <ClCompile Include="Engine\Render\ImGui\Editor\History\ModelTransformCommand.cpp" />
     <ClCompile Include="Engine\Render\ImGui\Editor\TextEditorUI.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
+    <ClCompile Include="Engine\Math\TransformNode2D.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\UIGroup\UIGroup.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\UIGroup\UIGroupManager.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\UIGroupEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\Transform2DEditor.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextGlyphAtlas.cpp" />
@@ -299,6 +304,11 @@
     <ClInclude Include="Engine\Math\Transform.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Math\TransformNode2D.h" />
+    <ClInclude Include="Engine\Render\Object\2d\UIGroup\UIGroup.h" />
+    <ClInclude Include="Engine\Render\Object\2d\UIGroup\UIGroupManager.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\UIGroupEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\Transform2DEditor.h" />
     <ClInclude Include="Engine\Utility\GameTimer\GameTimer.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>

@@ -33,7 +33,7 @@ struct EditorWindowMenuItem {
 	const char* label;
 };
 
-constexpr std::array<EditorWindowMenuItem, 21> kWindowMenuItems = {
+constexpr std::array<EditorWindowMenuItem, 22> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::GameView, "Game View" },
 	EditorWindowMenuItem{ EditorWindow::FixedGameView, "Game View 1280x720" },
 	EditorWindowMenuItem{ EditorWindow::EngineInfo, "Engine Info" },
@@ -48,6 +48,7 @@ constexpr std::array<EditorWindowMenuItem, 21> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::Model, "Model Editor" },
 	EditorWindowMenuItem{ EditorWindow::Sprite, "Sprite Editor" },
 	EditorWindowMenuItem{ EditorWindow::Text, "Text Editor" },
+	EditorWindowMenuItem{ EditorWindow::UIGroup, "UI Group Editor" },
 	EditorWindowMenuItem{ EditorWindow::Particle, "Particle Editor" },
 	EditorWindowMenuItem{ EditorWindow::Cylinder, "Cylinder Editor" },
 	EditorWindowMenuItem{ EditorWindow::Ribbon, "Ribbon Editor" },
@@ -57,7 +58,7 @@ constexpr std::array<EditorWindowMenuItem, 21> kWindowMenuItems = {
 	EditorWindowMenuItem{ EditorWindow::DebugParameter, "Debug Parameters" },
 };
 
-constexpr std::array<const char*, 15> kDocumentLabels = {
+constexpr std::array<const char*, 16> kDocumentLabels = {
 	"Camera",
 	"Scene",
 	"Map Generator",
@@ -73,6 +74,7 @@ constexpr std::array<const char*, 15> kDocumentLabels = {
 	"Effect Sequence",
 	"Style Color",
 	"Debug Parameters",
+	"UI Group",
 };
 
 /// @brief enum classを配列添字へ変換
@@ -104,6 +106,13 @@ float ReadFiniteFloat(const nlohmann::json& json, const char* key, float fallbac
 }
 
 } // namespace
+
+void EditorToolbar::ShowWindow(EditorWindow window) {
+	const auto index = ToIndex(window);
+	if (index < windowVisibility_.size()) {
+		windowVisibility_[index] = true;
+	}
+}
 
 EditorToolbar& EditorToolbar::GetInstance() {
 	static EditorToolbar instance;

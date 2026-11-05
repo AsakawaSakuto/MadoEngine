@@ -376,6 +376,8 @@ namespace MadoEngine
 				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
 				if (!json.is_discarded()) {
 					MadoEngine::SpriteManager::GetInstance().RestoreEditorSnapshot(json);
+					MadoEngine::UIGroupManager::GetInstance().RefreshBindings();
+					Editor::EditorToolbar::GetInstance().SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::UIGroup);
 				}
 			}
 		);
@@ -386,6 +388,8 @@ namespace MadoEngine
 				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
 				if (!json.is_discarded()) {
 					MadoEngine::TextManager::GetInstance().RestoreEditorSnapshot(json);
+					MadoEngine::UIGroupManager::GetInstance().RefreshBindings();
+					Editor::EditorToolbar::GetInstance().SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::UIGroup);
 				}
 			}
 		);
@@ -396,6 +400,17 @@ namespace MadoEngine
 				const nlohmann::json json = nlohmann::json::parse(snapshot, nullptr, false);
 				if (!json.is_discarded()) {
 					LightManager::GetInstance().FromJson(json);
+				}
+			}
+		);
+		toolbar.RegisterDocumentHistory(
+			Editor::EditorDocument::UIGroup,
+			[]() { return Editor::CaptureUIGroupEditorState(); },
+			[](const std::string& snapshot) {
+				if (Editor::RestoreUIGroupEditorState(snapshot)) {
+					auto& currentToolbar = Editor::EditorToolbar::GetInstance();
+					currentToolbar.SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::Sprite);
+					currentToolbar.SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::Text);
 				}
 			}
 		);
@@ -1063,11 +1078,20 @@ namespace MadoEngine
 			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Sprite);
 			MadoEngine::Editor::DrawSpriteManagerEditorUI(currentSceneType_);
 			toolbar.EndDocumentCapture();
+			toolbar.SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::UIGroup);
 		}
 		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Text)) {
 			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Text);
 			MadoEngine::Editor::DrawTextManagerEditorUI(currentSceneType_);
 			toolbar.EndDocumentCapture();
+			toolbar.SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::UIGroup);
+		}
+		if (toolbar.IsWindowVisible(Editor::EditorWindow::UIGroup)) {
+			toolbar.BeginDocumentCapture(Editor::EditorDocument::UIGroup);
+			Editor::DrawUIGroupEditorUI(currentSceneType_);
+			toolbar.EndDocumentCapture();
+			toolbar.SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::Sprite);
+			toolbar.SynchronizeDocumentHistorySnapshot(Editor::EditorDocument::Text);
 		}
 		if (toolbar.IsWindowVisible(MadoEngine::Editor::EditorWindow::Particle)) {
 			toolbar.BeginDocumentCapture(MadoEngine::Editor::EditorDocument::Particle);
@@ -1153,6 +1177,7 @@ namespace MadoEngine
 		succeeded = MadoEngine::TextManager::GetInstance().SaveToFile(
 			"Assets/Json/TextObjects.json",
 			currentSceneType_) && succeeded;
+		succeeded = UIGroupManager::GetInstance().SaveToFile("Assets/Json/UIGroupObjects.json", currentSceneType_) && succeeded;
 		succeeded = LightManager::GetInstance().SaveToJson() && succeeded;
 		succeeded = MadoEngine::Editor::SavePostEffectEditorJsonToFile(
 			MadoEngine::Render::PostEffectManager::GetInstance()) && succeeded;
@@ -1182,6 +1207,7 @@ namespace MadoEngine
 		succeeded = MadoEngine::Editor::LoadModelEditorJson(currentSceneType_) && succeeded;
 		succeeded = MadoEngine::Editor::LoadSpriteEditorJson(currentSceneType_) && succeeded;
 		succeeded = MadoEngine::Editor::LoadTextEditorJson(currentSceneType_) && succeeded;
+		succeeded = Editor::LoadUIGroupEditorJson(currentSceneType_) && succeeded;
 		succeeded = MadoEngine::Editor::LoadLightEditorJson() && succeeded;
 		succeeded = MadoEngine::Editor::LoadPostEffectEditorJson(
 			MadoEngine::Render::PostEffectManager::GetInstance()) && succeeded;
@@ -1417,6 +1443,7 @@ namespace MadoEngine
 		);
 
 		// 描画で参照したResourceをGPU処理完了後に解放
+		UIGroupManager::GetInstance().RefreshBindings();
 		MadoEngine::SpriteManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::TextManager::GetInstance().FlushPendingDestroys();
 		MadoEngine::ModelManager::GetInstance().FlushPendingDestroys();
@@ -1447,6 +1474,7 @@ namespace MadoEngine
 		// 終了処理
 		MadoEngine::AudioManager::GetInstance().Finalize();
 		MadoEngine::InputManager::GetInstance().Finalize();
+		UIGroupManager::GetInstance().Finalize();
 		MadoEngine::SpriteManager::GetInstance().Finalize();
 		MadoEngine::TextManager::GetInstance().Finalize();
 		MadoEngine::ModelManager::GetInstance().Finalize();

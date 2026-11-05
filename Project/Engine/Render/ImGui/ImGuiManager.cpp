@@ -1,6 +1,7 @@
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
 #include "Editor/EditorToolbar.h"
+#include "Editor/UIGroupEditor.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
 #include "Core/View/SRVManager.h"
@@ -391,6 +392,7 @@ namespace MadoEngine {
 			ImVec2 offset((avail.x - imageSize.x) * 0.5f, (avail.y - imageSize.y) * 0.5f);
 			ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + offset.x, ImGui::GetCursorPosY() + offset.y));
 			ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), imageSize);
+			Editor::DrawUIGroupOriginOverlay(ImGui::GetItemRectMin(), imageSize);
 			ImGui::End();
 			ImGui::PopStyleVar();
 		}
@@ -408,6 +410,7 @@ namespace MadoEngine {
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 			ImGui::Begin("Game View 1280x720", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
 			ImGui::Image(static_cast<ImTextureID>(gameViewSRV.ptr), fixedGameViewSize);
+			Editor::DrawUIGroupOriginOverlay(ImGui::GetItemRectMin(), fixedGameViewSize);
 			ImGui::End();
 			ImGui::PopStyleVar();
 		}
@@ -451,6 +454,7 @@ namespace MadoEngine {
 		ImGui::DockBuilderDockWindow("Model Editor", rightDockId);
 		ImGui::DockBuilderDockWindow("Sprite Editor", rightDockId);
 		ImGui::DockBuilderDockWindow("Text Editor", rightDockId);
+		ImGui::DockBuilderDockWindow("UI Group Editor", rightDockId);
 		ImGui::DockBuilderDockWindow("Post Effect Editor", rightDockId);
 		ImGui::DockBuilderDockWindow("Logger", bottomDockId);
 		ImGui::DockBuilderFinish(dockSpaceId);

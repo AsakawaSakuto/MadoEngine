@@ -96,7 +96,7 @@ namespace UI::Game {
 		/// @param isVisible 表示する場合はtrue
 		void SetVisible(bool isVisible);
 
-		/// @brief カードの表示状態へ決定案内の描画順と押下演出を同期
+		/// @brief カードの表示状態へRelic Group内の決定案内と押下演出を同期
 		/// @param deltaTime 停止中も進行する実時間
 		void UpdateDecisionControl(float deltaTime);
 

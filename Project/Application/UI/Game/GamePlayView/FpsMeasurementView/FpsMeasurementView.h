@@ -1,6 +1,4 @@
 #pragma once
-#include "Render/Object/ObjectHandle.h"
-#include "Render/Object/ObjectHandle.h"
 
 namespace MadoEngine {
 	class Text;
@@ -16,7 +14,8 @@ namespace UI::Game {
 
 		/// @brief FPSを計測して表示を更新
 		/// @param deltaTime 前フレームからの経過時間
-		void Update(float deltaTime);
+		/// @param fpsText 表示先のText、未接続の場合はnullptr
+		void Update(float deltaTime, MadoEngine::Text* fpsText);
 
 		/// @brief FPS表示を終了
 		void Finalize();

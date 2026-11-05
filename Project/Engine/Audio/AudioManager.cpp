@@ -311,6 +311,17 @@ namespace MadoEngine {
 		return AudioType::SE;
 	}
 
+	std::filesystem::path AudioManager::GetFilePath(const std::string& key) const {
+		const std::string lowerKey = AssetKey::Normalize(key);
+		const auto it = audioMap_.find(lowerKey);
+
+		// 読み込み元を参照し、表示側でのファイル再検索やパス情報の重複管理を回避
+		if (it != audioMap_.end() && it->second) {
+			return it->second->GetFilePath();
+		}
+		return {};
+	}
+
 	AudioType AudioManager::DetermineTypeFromPath(const std::filesystem::path& filePath) const {
 
 		// FilePath内で最初に一致するSE、BGM、VoiceのDirectory名を種別として採用

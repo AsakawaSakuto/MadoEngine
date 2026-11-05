@@ -1,0 +1,801 @@
+{
+    "groups": [
+        {
+            "children": [
+                {
+                    "name": "ContinueSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            320.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.75,
+                            4.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_41f88bcb-7668-4fc2-90a3-fe3f990b822e",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "ContinueSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            320.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            9.75,
+                            3.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_7bfa9323-a15f-42f5-a6a4-e606d2a8c848",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "ContinueText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            316.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7d349529-eab8-4dd4-b202-bb431671b4aa",
+                    "type": "Text"
+                }
+            ],
+            "id": "b35cc129-a128-45ff-b4dc-74a1154258fa",
+            "name": "Continue",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "EnemyCountText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_5d72df14-d3f3-4de6-9df2-b3bb8dbc2a12",
+                    "type": "Text"
+                },
+                {
+                    "name": "FpsCountText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            21.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_abab298d-7dc0-4dd9-b734-a0a1aa1c1bef",
+                    "type": "Text"
+                },
+                {
+                    "name": "SeedValueText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            42.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_2eacd39a-524b-4637-8d82-db9f50ee3c40",
+                    "type": "Text"
+                }
+            ],
+            "id": "a948c1cb-b6ff-4c51-ba5a-35764e0bf4ef",
+            "name": "DebugText",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    10.0,
+                    650.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "DecisionSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            11.0,
+                            5.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_ddeda112-4834-456c-affe-8a95eb039b08",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "DecisionSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_58756581-6997-4eb8-9193-41808ecb162e",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "DecisionInput",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            592.0,
+                            640.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.44999998807907104,
+                            0.44999998807907104
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_2cbde314-879d-4d4c-93b6-6f3e303d2258",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "DecisionText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            660.0,
+                            636.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_0399561f-034a-4ddc-b0c5-6c32b96f0d88",
+                    "type": "Text"
+                }
+            ],
+            "id": "3580a382-9112-46d6-9ad1-f351df93c8f4",
+            "name": "Decision",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "KillCountSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_7867485e-8382-4041-84ac-dd55ff6379f5",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "KillCountText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            66.0,
+                            -14.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_0b27d89f-7c94-49a7-92db-ecae08117b6d",
+                    "type": "Text"
+                }
+            ],
+            "id": "a627170f-095f-4d8b-a5c7-5590fb7b6df6",
+            "name": "KillCountUI",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    762.0,
+                    54.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "Sprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_2d490cda-bea2-418b-a05d-ee7997ad3d9b",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "MoneyText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            66.0,
+                            -14.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_554a2598-8ff5-4afe-9e00-eff0fe179439",
+                    "type": "Text"
+                }
+            ],
+            "id": "6fa39cdf-c845-4d15-96d0-e390c2da884f",
+            "name": "MoneyUI",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    330.0,
+                    54.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "InputUI1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1000.0,
+                            366.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.5,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_de712a27-151e-445b-8691-3a893d3434d2",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "InputUI2",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1000.0,
+                            434.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.5,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_df46366e-9d28-45c5-a2fc-0ba954dd0773",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "InputUI3",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1000.0,
+                            500.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.5,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_57ce6082-9181-4ee0-9816-82215e208d70",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "InputUI4",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1000.0,
+                            564.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.5,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_7ca8127b-297e-4743-96de-e5175dde540b",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "InputUI5",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1000.0,
+                            628.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.5,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_c86914fd-f2ab-4319-b2e7-1f10f6387419",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "InputText1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1070.0,
+                            356.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_de56888a-c62a-47c5-b9a0-149a0f1b4fcc",
+                    "type": "Text"
+                },
+                {
+                    "name": "InputText2",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1070.0,
+                            440.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_5dc49492-edb4-4c2c-9f94-ce24f3d4ba40",
+                    "type": "Text"
+                },
+                {
+                    "name": "InputText3",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1070.0,
+                            507.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_e3edae48-4152-4198-8d86-4a0f7664c350",
+                    "type": "Text"
+                },
+                {
+                    "name": "InputText4",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1066.0,
+                            566.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_09f2948c-65bf-4f6e-a19b-bb07398b824c",
+                    "type": "Text"
+                },
+                {
+                    "name": "InputText5",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            1070.0,
+                            630.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_d0a001a7-b096-4866-90e4-47e3bf61ba72",
+                    "type": "Text"
+                }
+            ],
+            "id": "3074f89f-b33a-4c47-900d-1b25dfffa25d",
+            "name": "OperationMethodUI",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "PauseSheet",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_0299088d-d2e5-44fa-937d-4df52811558a",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "PauseText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            128.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_5c9b7674-cbaa-4b4c-904c-e9ebaaf96d45",
+                    "type": "Text"
+                },
+                {
+                    "name": "Continue",
+                    "target": "b35cc129-a128-45ff-b4dc-74a1154258fa",
+                    "type": "Group"
+                },
+                {
+                    "name": "ReStart",
+                    "target": "d68295a3-9909-4f87-bff2-9e3e24fac7e5",
+                    "type": "Group"
+                },
+                {
+                    "name": "Quit",
+                    "target": "69498a8b-55c2-4ded-a4a8-a2f16599ff64",
+                    "type": "Group"
+                }
+            ],
+            "id": "fcf29552-afa6-4d3b-b573-2706f67b544e",
+            "name": "PauseGroup",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "QuitSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            560.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.75,
+                            4.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_54baa43b-e6ed-44c5-b1a3-190cb74879b8",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "QuitSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            560.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            9.75,
+                            3.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_2e305ece-2367-4cd6-a4e1-a337cacd82bc",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "QuitText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            557.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_3cfbbdd1-4239-4163-956f-b385b4204212",
+                    "type": "Text"
+                }
+            ],
+            "id": "69498a8b-55c2-4ded-a4a8-a2f16599ff64",
+            "name": "Quit",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "ReStartSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            440.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.75,
+                            4.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_a067e5fe-e6ca-40ba-bd6f-ba9a50e8c6e5",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "ReStartSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            440.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            9.75,
+                            3.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_e75ff2cd-a372-44c2-8f73-277617b0e462",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "ReStartText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            642.0,
+                            438.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_06b0fd43-f1d5-43a2-acc9-3daec354e6ca",
+                    "type": "Text"
+                }
+            ],
+            "id": "d68295a3-9909-4f87-bff2-9e3e24fac7e5",
+            "name": "ReStart",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "Decision",
+                    "target": "3580a382-9112-46d6-9ad1-f351df93c8f4",
+                    "type": "Group"
+                }
+            ],
+            "id": "6f84ae89-d44e-4026-bf99-81b8a6d9d8b4",
+            "name": "Relic",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        }
+    ],
+    "version": 1
+}

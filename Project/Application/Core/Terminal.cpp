@@ -241,6 +241,9 @@ void Terminal::Run() {
 		if (execution_->ConsumeApplicationDeltaTime(applicationDeltaTime)) {
 			sceneManager_->Update(applicationDeltaTime);
 		}
+
+		// 再生状態に関係なく最新の2D変換と文字画像を描画前に準備
+		sceneManager_->UpdateOverlayRenderData();
 		execution_->PreDraw(
 			sceneManager_->GetCurrentSceneType(),
 			sceneManager_->GetShadowFocusPosition()

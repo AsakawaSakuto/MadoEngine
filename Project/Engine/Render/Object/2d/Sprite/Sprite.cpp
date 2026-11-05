@@ -151,7 +151,7 @@ void Sprite::SetAnchorPoint(const Vector2& anchorPoint) {
 }
 
 void Sprite::Update() {
-	materialData_->color = color_;
+	materialData_->color = GetColorForRendering();
 
 	Matrix4x4 uvScaleMatrix = Matrix::MakeScale({
 		uvTransform_.scale.x,
@@ -192,6 +192,11 @@ void Sprite::Update() {
 		transMatrix
 	);
 
+	// 画像サイズとAnchorは子だけへ適用し、その後にグループの変換を合成
+	if (HasParent()) {
+		worldMatrix = Matrix::Multiply(worldMatrix, GetParentWorldMatrix());
+	}
+
 	// 正射影行列（ピクセル座標 [0,W]×[0,H] → NDC）
 	Matrix4x4 orthoMatrix = Matrix::MakeOrthographic(
 		0.0f, 0.0f, screenWidth_, screenHeight_, 0.0f, 1.0f
@@ -217,20 +222,24 @@ void Sprite::Draw() {
 }
 
 void Sprite::FromJson(const nlohmann::json& json) {
+	const auto state = GetAuthoringState();
 	const std::string textureName = json.value("texture", textureName_);
 	if (!textureName.empty() && !SetTexture(textureName)) {
 		Logger::Output("Spriteのテクスチャ設定を復元できませんでした : " + textureName, Logger::Level::Warning);
 	}
 
-	transform_.translate = ReadVector2(json.value("position", nlohmann::json::array()), transform_.translate);
-	transform_.scale = ReadVector2(json.value("scale", nlohmann::json::array()), transform_.scale);
-	transform_.rotate = json.value("rotation", transform_.rotate);
+	// 部分的な読込でもアニメーション途中の値を保存用設定の初期値へ流用しないための基準
+	transform_.translate = ReadVector2(json.value("position", nlohmann::json::array()), state.transform.translate);
+	transform_.scale = ReadVector2(json.value("scale", nlohmann::json::array()), state.transform.scale);
+	transform_.rotate = json.value("rotation", state.transform.rotate);
 	color_ = ReadVector4(json.value("color", nlohmann::json::array()), color_);
 	SetAnchorPoint(ReadVector2(json.value("anchorPoint", nlohmann::json::array()), anchorPoint_));
 	sceneType_ = SceneTypeFromString(json.value("scene", SceneTypeToString(sceneType_)));
 	renderLayer_ = MadoEngine::Render::RenderLayerFromString(
 		json.value("layer", MadoEngine::Render::RenderLayerToString(renderLayer_)));
-	isVisible_ = json.value("visible", isVisible_);
+	isVisible_ = json.value("visible", state.visible);
+	SetOpacity(json.value("opacity", state.opacity));
+	CommitLoadedAuthoringState();
 	isFitToScreen_ = json.value("fitToScreen", isFitToScreen_);
 
 	// 未指定や未知の方式では現在値を維持し、既存Jsonと部分更新の互換性を確保
@@ -254,19 +263,21 @@ void Sprite::FromJson(const nlohmann::json& json) {
 }
 
 nlohmann::json Sprite::ToJson() const {
+	const auto state = GetAuthoringState();
 	return {
 		{ "type", "Sprite2D" },
 		{ "name", objectName_ },
 		{ "texture", textureName_ },
 		{ "textureFilter", GetTextureFilterName(textureFilter_) },
-		{ "position", { transform_.translate.x, transform_.translate.y } },
-		{ "scale", { transform_.scale.x, transform_.scale.y } },
-		{ "rotation", transform_.rotate },
+		{ "position", { state.transform.translate.x, state.transform.translate.y } },
+		{ "scale", { state.transform.scale.x, state.transform.scale.y } },
+		{ "rotation", state.transform.rotate },
 		{ "color", { color_.x, color_.y, color_.z, color_.w } },
 		{ "anchorPoint", { anchorPoint_.x, anchorPoint_.y } },
 		{ "scene", SceneTypeToString(sceneType_) },
 		{ "layer", MadoEngine::Render::RenderLayerToString(renderLayer_) },
-		{ "visible", isVisible_ },
+		{ "visible", state.visible },
+		{ "opacity", state.opacity },
 		{ "fitToScreen", isFitToScreen_ },
 		{ "uvTransform", {
 			{ "translate", { uvTransform_.translate.x, uvTransform_.translate.y } },

@@ -299,6 +299,11 @@
     <ClCompile Include="Engine\Render\Object\2d\Gauge\Gauge.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Sprite\SpriteManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\Text.cpp" />
+    <ClCompile Include="Engine\Math\TransformNode2D.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\UIGroup\UIGroup.cpp" />
+    <ClCompile Include="Engine\Render\Object\2d\UIGroup\UIGroupManager.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\UIGroupEditor.cpp" />
+    <ClCompile Include="Engine\Render\ImGui\Editor\Transform2DEditor.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextManager.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextTextureGenerator.cpp" />
     <ClCompile Include="Engine\Render\Object\2d\Text\TextGlyphAtlas.cpp" />
@@ -740,6 +745,11 @@
     <ClInclude Include="Engine\Utility\ResourceHelper\ResourceHelper.h" />
     <ClInclude Include="Engine\Utility\AssetKey.h" />
     <ClInclude Include="Engine\Math\Transform.h" />
+    <ClInclude Include="Engine\Math\TransformNode2D.h" />
+    <ClInclude Include="Engine\Render\Object\2d\UIGroup\UIGroup.h" />
+    <ClInclude Include="Engine\Render\Object\2d\UIGroup\UIGroupManager.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\UIGroupEditor.h" />
+    <ClInclude Include="Engine\Render\ImGui\Editor\Transform2DEditor.h" />
     <ClInclude Include="Engine\Math\Vector2.h" />
     <ClInclude Include="Engine\Math\Vector3.h" />
     <ClInclude Include="Engine\Math\Vector4.h" />

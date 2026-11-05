@@ -12,6 +12,12 @@ namespace UI::Game {
 		const char* textName;
 	};
 
+	/// @brief Group内などで解決済みの押下演出対象
+	struct InputControlFeedbackTargets {
+		std::array<MadoEngine::SpriteHandle, 3> sprites{};
+		MadoEngine::TextHandle text{};
+	};
+
 	/// @brief Editor配置の操作案内に対する共通の押下演出
 	class InputControlFeedback final {
 	public:
@@ -20,6 +26,13 @@ namespace UI::Game {
 		/// @param isVisible 操作案内を表示する場合はtrue
 		/// @param definition 入力名と演出対象のObject名
 		void Update(float deltaTime, bool isVisible, const InputControlFeedbackDefinition& definition);
+
+		/// @brief 解決済みの描画要素へ押下中の縮小と入力解除後の復元を反映
+		/// @param deltaTime 停止中も進行する実時間
+		/// @param isVisible 操作案内を表示する場合はtrue
+		/// @param actionName 押下状態を参照する入力名
+		/// @param targets 押下演出の対象ハンドル
+		void Update(float deltaTime, bool isVisible, const char* actionName, const InputControlFeedbackTargets& targets);
 
 		/// @brief 変更したScaleを基準値へ戻して演出状態を初期化
 		void Reset();

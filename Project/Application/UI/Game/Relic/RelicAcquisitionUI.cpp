@@ -2,6 +2,7 @@
 #include "Audio/MyAudio.h"
 #include "GameObject/Relic/RelicSystem.h"
 #include "Input/MyInput.h"
+#include "Render/Object/2d/UIGroup/UIGroupManager.h"
 #ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #endif // USE_IMGUI
@@ -12,11 +13,11 @@ namespace {
 
 constexpr float kDecisionDelayDuration = 0.2f;
 constexpr const char* kDecisionSoundKey = "RelicDecision";
-constexpr UI::Game::InputControlFeedbackDefinition kDecisionControlDefinition = {
-	"Decision", { "RelicDecisionBottom", "RelicDecisionBack1", "RelicDecisionBack2" }, "RelicDecisionText"
-};
+constexpr const char* kRelicGroupName = "Relic";
+constexpr const char* kDecisionGroupName = "Decision";
+constexpr const char* kDecisionTextName = "DecisionText";
 constexpr std::array<const char*, 3> kDecisionSpriteNames = {
-	"RelicDecisionBack1", "RelicDecisionBack2", "RelicDecisionBottom"
+	"DecisionSprite", "DecisionSprite1", "DecisionInput"
 };
 
 /// @brief SpriteHandleを一時参照へ解決
@@ -379,27 +380,56 @@ namespace UI::Game {
 	}
 
 	void RelicAcquisitionUI::UpdateDecisionControl(float deltaTime) {
+		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
+		const auto relicHandle = groupManager.Find(kRelicGroupName, SceneType::Game);
+		MadoEngine::UIGroup* relicGroup = groupManager.TryGet(relicHandle);
+		if (!relicGroup) {
+			decisionControlFeedback_.Reset();
+			return;
+		}
 
-		// 動的生成した暗幕の直後へ案内を配置し、Editor配置のSpriteが暗幕の背後へ隠れる状態を防止
-		MadoEngine::SpriteHandle previousSprite = panelSprites_[0];
-		for (const char* name : kDecisionSpriteNames) {
-			const MadoEngine::SpriteHandle handle = MySprite::Find(name);
-			Sprite* sprite = ResolveSprite(handle);
-			if (!sprite || sprite->GetSceneType() != SceneType::Game) {
+		// 親の表示だけを切り替え、決定ボタンの個別設定と保存用の表示状態を維持
+		relicGroup->SetVisible(isVisible_ && relicGroup->GetAuthoringState().visible);
+		MadoEngine::UIGroupHandle decisionHandle{};
+		for (const auto& element : groupManager.GetElements(relicHandle)) {
+			if (element.type == MadoEngine::UIGroupElementType::Group && element.name == kDecisionGroupName && element.resolved) {
+				decisionHandle = element.group;
+				break;
+			}
+		}
+		const MadoEngine::UIGroup* decisionGroup = groupManager.TryGet(decisionHandle);
+		if (!decisionGroup) {
+			decisionControlFeedback_.Reset();
+			return;
+		}
+		const bool isControlVisible = isVisible_ && decisionGroup->IsVisibleInHierarchy();
+		InputControlFeedbackTargets targets;
+
+		// 管理名のGUIDではなくGroup内の登録名から対象を解決し、再読込による再生成へ追従
+		for (const auto& element : groupManager.GetElements(decisionHandle)) {
+			if (!element.resolved) {
 				continue;
 			}
-			sprite->SetVisible(isVisible_);
-			if (isVisible_ && MySprite::MoveAfter(handle, previousSprite)) {
+			if (element.type == MadoEngine::UIGroupElementType::Sprite) {
+				for (std::size_t index = 0; index < kDecisionSpriteNames.size(); ++index) {
+					if (element.name == kDecisionSpriteNames[index]) {
+						targets.sprites[index] = element.sprite;
+						break;
+					}
+				}
+			} else if (element.type == MadoEngine::UIGroupElementType::Text && element.name == kDecisionTextName) {
+				targets.text = element.text;
+			}
+		}
+
+		// 動的生成した暗幕の直後へ案内を配置し、ボタンが暗幕の背後へ隠れる状態を防止
+		MadoEngine::SpriteHandle previousSprite = panelSprites_[0];
+		for (const auto handle : targets.sprites) {
+			if (isControlVisible && MySprite::MoveAfter(handle, previousSprite)) {
 				previousSprite = handle;
 			}
 		}
-
-		// Text再生成やカード非表示にも追従し、Upgradeと共通の基準Scale復元を適用
-		MadoEngine::Text* text = ResolveText(MyText::Find(kDecisionControlDefinition.textName));
-		if (text && text->GetSceneType() == SceneType::Game) {
-			text->SetVisible(isVisible_);
-		}
-		decisionControlFeedback_.Update(deltaTime, isVisible_, kDecisionControlDefinition);
+		decisionControlFeedback_.Update(deltaTime, isControlVisible, "Decision", targets);
 	}
 
 	void RelicAcquisitionUI::ResetDecisionDelay() {

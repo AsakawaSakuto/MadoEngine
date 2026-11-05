@@ -15,6 +15,17 @@ SpriteManager& SpriteManager::GetInstance() {
 	return instance;
 }
 
+std::string SpriteManager::GetName(SpriteHandle handle) const {
+	if (IsValid(handle)) {
+		return slots_[handle.index].name;
+	}
+	return {};
+}
+
+bool SpriteManager::IsEditorManaged(SpriteHandle handle) const {
+	return IsValid(handle) && slots_[handle.index].managementMode == EditorManagementMode::EditorManaged;
+}
+
 void SpriteManager::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Render::PSORegistry* psoRegistry) {
 	assert(device);
 	assert(commandList);

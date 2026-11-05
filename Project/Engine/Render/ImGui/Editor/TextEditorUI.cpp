@@ -1,18 +1,21 @@
 #include "TextEditorUI.h"
 #include "Utility/AssetKey.h"
 #include "EditorToolbar.h"
+#include "Transform2DEditor.h"
 #include "Render/Object/2d/Text/TextManager.h"
 #include <algorithm>
 #include <array>
 #include <charconv>
 #include <cstring>
 #include <vector>
+#include <optional>
 
 namespace MadoEngine::Editor {
 
 #ifdef USE_IMGUI
 
 namespace {
+	std::optional<TextHandle> requestedSelection;
 
 	/// @brief バッファへ文字列をコピー
 	/// @tparam Size バッファサイズ
@@ -242,6 +245,96 @@ bool LoadTextEditorJson(SceneType sceneType) {
 
 #ifdef USE_IMGUI
 
+void DrawTextInspector(Text& text) {
+	Text* selectedText = &text;
+
+	// 別Inspectorで変更された本文も共有し、同じTextを複数の編集入口から操作
+	std::array<char, 4096> textBuffer{};
+	std::array<char, 128> screenBuffer{};
+	CopyToBuffer(textBuffer, text.GetText());
+	CopyToBuffer(screenBuffer, text.GetTargetScreen());
+
+	if (ImGui::InputTextMultiline("本文", textBuffer.data(), textBuffer.size(), ImVec2(-1.0f, 120.0f))) {
+		selectedText->SetText(textBuffer.data());
+	}
+
+	// 描画方式とフォントを先に確定し、通常画像とアトラスの設定を同じ入口へ集約
+	DrawFontCombo(*selectedText);
+	const char* renderModeItems[] = { "文字列画像", "数字アトラス" };
+	int renderModeIndex = static_cast<int>(selectedText->GetRenderMode());
+	if (ImGui::Combo("描画方式", &renderModeIndex, renderModeItems, 2)) {
+		selectedText->SetRenderMode(static_cast<TextRenderMode>(renderModeIndex));
+	}
+	bool sdfEnabled = selectedText->IsSdfEnabled();
+	if (ImGui::Checkbox("SDF描画", &sdfEnabled)) {
+		selectedText->SetSdfEnabled(sdfEnabled);
+	}
+	if (sdfEnabled) {
+		float outlineWidth = selectedText->GetOutlineWidth();
+		if (ImGui::DragFloat("アウトライン幅 (px)", &outlineWidth, 0.1f, 0.0f, 32.0f, "%.1f")) {
+			selectedText->SetOutlineWidth(outlineWidth);
+		}
+		const Vector4 outlineColor = selectedText->GetOutlineColor();
+		float outlineValues[4] = { outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w };
+		if (ImGui::ColorEdit4("アウトライン色", outlineValues)) {
+			selectedText->SetOutlineColor({ outlineValues[0], outlineValues[1], outlineValues[2], outlineValues[3] });
+		}
+	}
+
+	ImGui::Separator();
+
+	// 親子の配置と保存用の値はGroup Editorと同じInspectorで編集
+	DrawTransform2DInspector(*selectedText, false);
+
+	Vector4 color = selectedText->GetColor();
+	float colorValues[4] = { color.x, color.y, color.z, color.w };
+	if (ImGui::ColorEdit4("色", colorValues)) {
+		selectedText->SetColor({ colorValues[0], colorValues[1], colorValues[2], colorValues[3] });
+	}
+	DrawAnchorCombo(*selectedText);
+	ImGui::Separator();
+
+	// 文字の寸法と組版の設定をまとめ、サイズから揃えの順で調整可能な配置
+	float fontSize = selectedText->GetFontSize();
+	if (ImGui::DragFloat("フォントサイズ", &fontSize, 0.5f, 1.0f, 1024.0f)) {
+		selectedText->SetFontSize(fontSize);
+	}
+	Vector2 areaSize = selectedText->GetAreaSize();
+	float sizeValues[2] = { areaSize.x, areaSize.y };
+	if (ImGui::DragFloat2("サイズ", sizeValues, 1.0f, 0.0f, 4096.0f)) {
+		selectedText->SetAreaSize({ sizeValues[0], sizeValues[1] });
+	}
+	float characterSpacing = selectedText->GetCharacterSpacing();
+	if (ImGui::DragFloat("文字間", &characterSpacing, 0.1f, -64.0f, 1024.0f, "%.1f")) {
+		selectedText->SetCharacterSpacing(characterSpacing);
+	}
+	float lineSpacing = selectedText->GetLineSpacing();
+	if (ImGui::DragFloat("行間", &lineSpacing, 0.01f, 0.1f, 4.0f, "%.2f")) {
+		selectedText->SetLineSpacing(lineSpacing);
+	}
+	DrawAlignmentControls(*selectedText);
+
+	bool wordWrap = selectedText->IsWordWrapEnabled();
+	if (ImGui::Checkbox("自動折り返し", &wordWrap)) {
+		selectedText->SetWordWrap(wordWrap);
+	}
+
+	DrawRenderLayerCombo(*selectedText);
+
+	// Group内の編集欄はLayerまでに限定し、単独Textの追加設定は従来のEditorで維持
+	const bool grouped = selectedText->HasParent() && selectedText->HasAuthoringState();
+	if (!grouped) {
+		DrawSceneCombo(*selectedText);
+		if (ImGui::InputText("スクリーン", screenBuffer.data(), screenBuffer.size())) {
+			selectedText->SetTargetScreen(screenBuffer.data());
+		}
+	}
+}
+
+void SelectTextEditorObject(TextHandle handle) {
+	requestedSelection = handle;
+}
+
 void DrawTextManagerEditorUI(SceneType currentSceneType) {
 	TextManager& manager = TextManager::GetInstance();
 
@@ -249,9 +342,12 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 	static std::array<char, 128> createName{};
 	static TextHandle selectedHandle{};
 	static TextHandle editingHandle{};
+	if (requestedSelection) {
+		selectedHandle = *requestedSelection;
+		editingHandle = {};
+		requestedSelection.reset();
+	}
 	static std::array<char, 128> nameBuffer{};
-	static std::array<char, 4096> textBuffer{};
-	static std::array<char, 128> screenBuffer{};
 	static bool isBufferInitialized = false;
 	if (!isBufferInitialized) {
 		CopyToBuffer(createName, "Text");
@@ -295,7 +391,18 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 
 	ImGui::Separator();
 
-	const std::vector<std::string> names = manager.GetEditorManagedNames();
+	std::vector<std::string> names = manager.GetEditorManagedNames();
+
+	// Group所属の要素はUI Group Editorへ集約し、Managerの保存対象は維持
+	std::erase_if(names, [&](const std::string& name) {
+		const Text* text = manager.TryGet(manager.Find(name));
+		return !text || text->HasParent();
+	});
+	const Text* selectedNode = manager.TryGet(selectedHandle);
+	if (!selectedNode || selectedNode->HasParent()) {
+		selectedHandle = {};
+		editingHandle = {};
+	}
 	ImGui::BeginChild("TextList", ImVec2(180.0f, 0.0f), true);
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
@@ -306,9 +413,9 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 			continue;
 		}
 
-		bool visible = text->IsVisible();
+		bool visible = text->GetAuthoringState().visible;
 		if (ImGui::Checkbox("##Visible", &visible)) {
-			text->SetVisible(visible);
+			SetEditorNodeVisible(*text, visible);
 		}
 		ImGui::SameLine();
 
@@ -347,8 +454,6 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 		}
 		if (editingHandle != selectedHandle) {
 			CopyToBuffer(nameBuffer, selectedName);
-			CopyToBuffer(textBuffer, selectedText->GetText());
-			CopyToBuffer(screenBuffer, selectedText->GetTargetScreen());
 			editingHandle = selectedHandle;
 		}
 
@@ -364,79 +469,7 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 			}
 		}
 
-		if (ImGui::InputTextMultiline("本文", textBuffer.data(), textBuffer.size(), ImVec2(-1.0f, 120.0f))) {
-			selectedText->SetText(textBuffer.data());
-		}
-		DrawFontCombo(*selectedText);
-		const char* renderModeItems[] = { "文字列画像", "数字アトラス" };
-		int renderModeIndex = static_cast<int>(selectedText->GetRenderMode());
-		if (ImGui::Combo("描画方式", &renderModeIndex, renderModeItems, 2)) {
-			selectedText->SetRenderMode(static_cast<TextRenderMode>(renderModeIndex));
-		}
-		bool sdfEnabled = selectedText->IsSdfEnabled();
-		if (ImGui::Checkbox("SDF描画", &sdfEnabled)) {
-			selectedText->SetSdfEnabled(sdfEnabled);
-		}
-		if (sdfEnabled) {
-			float outlineWidth = selectedText->GetOutlineWidth();
-			if (ImGui::DragFloat("アウトライン幅 (px)", &outlineWidth, 0.1f, 0.0f, 32.0f, "%.1f")) {
-				selectedText->SetOutlineWidth(outlineWidth);
-			}
-			const Vector4 outlineColor = selectedText->GetOutlineColor();
-			float outlineValues[4] = { outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w };
-			if (ImGui::ColorEdit4("アウトライン色", outlineValues)) {
-				selectedText->SetOutlineColor({ outlineValues[0], outlineValues[1], outlineValues[2], outlineValues[3] });
-			}
-		}
-
-		float fontSize = selectedText->GetFontSize();
-		if (ImGui::DragFloat("フォントサイズ", &fontSize, 0.5f, 1.0f, 1024.0f)) {
-			selectedText->SetFontSize(fontSize);
-		}
-
-		float lineSpacing = selectedText->GetLineSpacing();
-		if (ImGui::DragFloat("行間", &lineSpacing, 0.01f, 0.1f, 4.0f, "%.2f")) {
-			selectedText->SetLineSpacing(lineSpacing);
-		}
-
-		float characterSpacing = selectedText->GetCharacterSpacing();
-		if (ImGui::DragFloat("文字間", &characterSpacing, 0.1f, -64.0f, 1024.0f, "%.1f")) {
-			selectedText->SetCharacterSpacing(characterSpacing);
-		}
-
-		Vector2 position = selectedText->GetPosition();
-		float positionValues[2] = { position.x, position.y };
-		if (ImGui::DragFloat2("位置", positionValues, 1.0f)) {
-			selectedText->SetPosition({ positionValues[0], positionValues[1] });
-		}
-
-		DrawAnchorCombo(*selectedText);
-
-		Vector2 areaSize = selectedText->GetAreaSize();
-		float sizeValues[2] = { areaSize.x, areaSize.y };
-		if (ImGui::DragFloat2("サイズ", sizeValues, 1.0f, 0.0f, 4096.0f)) {
-			selectedText->SetAreaSize({ sizeValues[0], sizeValues[1] });
-		}
-
-		Vector4 color = selectedText->GetColor();
-		float colorValues[4] = { color.x, color.y, color.z, color.w };
-		if (ImGui::ColorEdit4("色", colorValues)) {
-			selectedText->SetColor({ colorValues[0], colorValues[1], colorValues[2], colorValues[3] });
-		}
-
-		bool wordWrap = selectedText->IsWordWrapEnabled();
-		if (ImGui::Checkbox("自動折り返し", &wordWrap)) {
-			selectedText->SetWordWrap(wordWrap);
-		}
-
-		DrawAlignmentControls(*selectedText);
-		DrawRenderLayerCombo(*selectedText);
-		DrawSceneCombo(*selectedText);
-
-		if (ImGui::InputText("スクリーン", screenBuffer.data(), screenBuffer.size())) {
-			selectedText->SetTargetScreen(screenBuffer.data());
-		}
-
+		DrawTextInspector(*selectedText);
 	} else {
 		ImGui::TextDisabled("Textを選択してください。");
 	}

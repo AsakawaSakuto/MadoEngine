@@ -9,11 +9,13 @@ inline constexpr uint32_t kInvalidObjectHandleIndex = kInvalidGenerationalHandle
 
 struct SpriteHandleTag;
 struct TextHandleTag;
+struct UIGroupHandleTag;
 struct ModelHandleTag;
 struct InstancedModelHandleTag;
 
 using SpriteHandle = GenerationalHandle<SpriteHandleTag>;
 using TextHandle = GenerationalHandle<TextHandleTag>;
+using UIGroupHandle = GenerationalHandle<UIGroupHandleTag>;
 using ModelHandle = GenerationalHandle<ModelHandleTag>;
 using InstancedModelHandle = GenerationalHandle<InstancedModelHandleTag>;
 

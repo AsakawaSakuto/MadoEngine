@@ -97,7 +97,7 @@ namespace UI::Game {
 		/// @param playerFacingYaw Playerの水平Yaw角度
 		void UpdateMiniMap(const Map& map, const Vector3& playerPosition, float playerFacingYaw);
 
-		/// @brief Seed文字列を現在のMapへ同期
+		/// @brief 表示するMapのSeedを設定
 		/// @param gameSeed 表示するゲームSeed
 		void SetSeed(std::uint32_t gameSeed);
 
@@ -128,12 +128,12 @@ namespace UI::Game {
 		void DrawImGui();
 
 	private:
-		/// @brief Pause中だけ暗幕とメニューの表示および選択Scaleを同期
+		/// @brief PauseGroupの表示と子Group単位の選択拡大を同期
 		/// @param isPaused ゲームが一時停止中の場合はtrue
 		/// @param selectedIndex 選択中の項目番号、Continueから順に0から2
 		void UpdatePausePresentation(bool isPaused, std::size_t selectedIndex = 0);
 
-		/// @brief 常設SpriteとTextへ個別表示状態を維持したHUD表示切り替えを反映
+		/// @brief 常設Text・Groupへ個別表示設定を維持したHUD表示切り替えを反映
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 
@@ -156,9 +156,10 @@ namespace UI::Game {
 		/// @param deltaTime 停止中も進行する実時間（秒）
 		void UpdateMassiveEnemySpawnPresentation(float deltaTime);
 
-		/// @brief 所持金と撃破数とEnemy数と武器強化のリロール費用の文字表示を更新
+		/// @brief 所持金・撃破数・Enemy数・FPS・Seed・リロール費用の文字表示を更新
+		/// @param deltaTime 停止中も進行する実時間
 		/// @param state 現在フレームの表示情報
-		void UpdateTexts(const GameHudState& state);
+		void UpdateTexts(float deltaTime, const GameHudState& state);
 
 		PlayerExpGauge expGauge_;
 		PlayerHealthGauge healthGauge_;
@@ -175,9 +176,6 @@ namespace UI::Game {
 		DropObjectGetView dropObjectGetView_;
 		EnemyDamageView enemyDamageView_;
 		EnemyStatusEffectIconView enemyStatusEffectIconView_;
-		MadoEngine::TextHandle enemyCountText_{};
-		MadoEngine::TextHandle moneyText_{};
-		MadoEngine::TextHandle killCountText_{};
 		MadoEngine::TextHandle upgradeText_{};
 		GamingColor upgradeTextColor_;
 		GameTimer upgradeTextPulseTimer_;
@@ -185,9 +183,8 @@ namespace UI::Game {
 		bool isMassiveEnemySpawnJustStarted_ = false;
 		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };
 		std::array<InputControlFeedback, 2> upgradeControlFeedback_{};
-		int displayedMoney_ = -1;
-		std::vector<const char*> staticSprites_;
 		std::vector<const char*> staticTexts_;
+		std::uint32_t gameSeed_ = 0;
 		bool isVisible_ = true;
 		bool isWorldViewsVisible_ = false;
 	};

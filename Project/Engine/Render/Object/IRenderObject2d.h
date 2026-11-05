@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "MathHeaders.h"
+#include "Math/TransformNode2D.h"
 #include "UtilityHeaders.h"
 #include "Core/DxDevice/DxDevice.h"
 #include "Core/Command/Command.h"
@@ -10,7 +11,7 @@
 #include "Render/PSO/PSORegistry.h"
 
 /// @brief 2D描画オブジェクトの基底クラス
-class IRenderObject2d {
+class IRenderObject2d : public MadoEngine::TransformNode2D {
 public:
 	
 	/// @brief デストラクタ
@@ -25,40 +26,6 @@ public:
 	/// @brief 描画処理（派生クラスでオーバーライド）
 	virtual void Draw() = 0;
 
-	// ===== Transform関連 =====
-
-	/// @brief 座標を設定
-	/// @param pos 座標
-	void SetPosition(const Vector2& pos) { transform_.translate = pos; }
-
-	/// @brief 座標を取得
-	/// @return 座標
-	const Vector2& GetPosition() const { return transform_.translate; }
-
-	/// @brief スケールを設定
-	/// @param scale スケール
-	void SetScale(const Vector2& scale) { transform_.scale = scale; }
-
-	/// @brief スケールを取得
-	/// @return スケール
-	const Vector2& GetScale() const { return transform_.scale; }
-
-	/// @brief 回転角度を設定（ラジアン）
-	/// @param rotate 回転角度
-	void SetRotation(float rotate) { transform_.rotate = rotate; }
-
-	/// @brief 回転角度を取得（ラジアン）
-	/// @return 回転角度
-	float GetRotation() const { return transform_.rotate; }
-
-	/// @brief Transform全体を取得
-	/// @return Transform2D構造体
-	const Transform2D& GetTransform() const { return transform_; }
-
-	/// @brief Transform全体を設定
-	/// @param transform Transform2D構造体
-	void SetTransform(const Transform2D& transform) { transform_ = transform; }
-
 	// ===== 色関連 =====
 
 	/// @brief 色を設定（RGBA）
@@ -69,23 +36,23 @@ public:
 	/// @return 色（RGBA）
 	const Vector4& GetColor() const { return color_; }
 
+	/// @brief 階層の透明度を反映した描画色を取得
+	/// @return 個別の色に自身と祖先の不透明度を乗算した描画色
+	Vector4 GetColorForRendering() const {
+		Vector4 color = color_;
+		color.w *= GetWorldOpacity();
+		return color;
+	}
+
 	// ===== 可視性関連 =====
-
-	/// @brief 表示/非表示を設定
-	/// @param visible true:表示、false:非表示
-	void SetVisible(bool visible) { isVisible_ = visible; }
-
-	/// @brief 表示状態を取得
-	/// @return true:表示、false:非表示
-	bool IsVisible() const { return isVisible_; }
 
 	/// @brief 保存対象の表示設定を維持した実行時の表示許可を設定
 	/// @param visible 実行時の表示を許可する場合はtrue
 	void SetRuntimeVisible(bool visible) { isRuntimeVisible_ = visible; }
 
 	/// @brief 描画に使用する最終表示状態を取得
-	/// @return 個別設定と実行時の表示許可がともに有効な場合はtrue
-	bool IsVisibleForRendering() const { return isVisible_ && isRuntimeVisible_; }
+	/// @return 自身と祖先の表示設定および実行時の表示許可が有効な場合はtrue
+	bool IsVisibleForRendering() const { return IsVisibleInHierarchy() && isRuntimeVisible_; }
 
 	/// @brief 描画レイヤーを設定
 	/// @param layer 設定する描画レイヤー
@@ -123,9 +90,7 @@ protected:
 
 	std::string objectName_; // オブジェクト名
 
-	Transform2D transform_; // トランスフォーム（座標、スケール、回転）
 	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f}; // 色（RGBA）
-	bool isVisible_ = true;                 // 表示フラグ
 	bool isRuntimeVisible_ = true;          // 保存対象へ含めない実行時の表示許可
 	MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Default;
 

@@ -33,6 +33,7 @@ enum class EditorWindow {
 	StyleColor,
 	Logger,
 	DebugParameter,
+	UIGroup,
 	Count,
 };
 
@@ -53,6 +54,7 @@ enum class EditorDocument {
 	EffectSequence,
 	StyleColor,
 	DebugParameter,
+	UIGroup,
 	Count,
 };
 
@@ -102,6 +104,10 @@ public:
 	/// @param window 確認対象のウィンドウ種別
 	/// @return 表示する場合はtrue
 	bool IsWindowVisible(EditorWindow window) const;
+
+	/// @brief 他のInspectorから指定ウィンドウを表示
+	/// @param window 表示対象のウィンドウ
+	void ShowWindow(EditorWindow window);
 
 	/// @brief Save All要求を取得して解除
 	/// @return Save All要求がある場合はtrue

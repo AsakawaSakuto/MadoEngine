@@ -248,6 +248,15 @@ public:
 	/// @return 名前順のEditor管理Text名一覧
 	std::vector<std::string> GetEditorManagedNames() const;
 
+	/// @brief 有効なHandleに対応する管理名を取得
+	/// @param handle 対象のHandle
+	/// @return 管理名、無効な場合は空文字列
+	std::string GetName(TextHandle handle) const;
+	/// @brief Editor管理対象か確認
+	/// @param handle 対象のHandle
+	/// @return 有効なEditor管理Textの場合はtrue
+	bool IsEditorManaged(TextHandle handle) const;
+
 private:
 	struct TextSlot {
 		std::unique_ptr<Text> text;

@@ -1,11 +1,9 @@
 #include "FpsMeasurementView.h"
-#include "SceneManager/SceneType.h"
-#include "Render/Object/2d/Text/MyText.h"
+#include "Render/Object/2d/Text/Text.h"
 #include <format>
 
 namespace {
 	constexpr float kTextUpdateInterval = 0.25f;
-	constexpr const char* kTextObjectName = "FpsText";
 }
 
 namespace UI::Game {
@@ -15,9 +13,7 @@ namespace UI::Game {
 		sampleFrameCount_ = 0;
 	}
 
-	void FpsMeasurementView::Update(float deltaTime) {
-		auto fpsTextHandle = MyText::Find(kTextObjectName);
-		MadoEngine::Text* fpsText = MyText::TryGet(fpsTextHandle);
+	void FpsMeasurementView::Update(float deltaTime, MadoEngine::Text* fpsText) {
 		if (!fpsText) {
 			return;
 		}

@@ -39,6 +39,9 @@ public:
 	/// @brief 現在のシーンを更新
 	void Update(float dt);
 
+	/// @brief ゲーム時間と独立して2Dの描画データを更新
+	void UpdateOverlayRenderData();
+
 	/// @brief 現在のシーンを描画
 	void Draw();
 

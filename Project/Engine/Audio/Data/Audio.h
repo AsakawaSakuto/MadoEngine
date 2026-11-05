@@ -40,6 +40,10 @@ public:
     /// @param engine AudioManagerが所有する共有再生エンジン
     void Initialize(const std::string& filePath, IXAudio2& engine);
 
+    /// @brief 読み込み元の音声ファイルパスを取得
+    /// @return 読み込み元の音声ファイルパス
+    const std::string& GetFilePath() const { return filePath_; }
+
     /// @brief 現在の音程設定で独立した再生インスタンスを開始
     /// @param volume 音量、0から2の範囲
     /// @param loop ループ再生する場合はtrue

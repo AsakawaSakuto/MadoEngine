@@ -14,3 +14,4 @@
 #include "Render/ImGui/Editor/RibbonEditor.h"
 #include "Render/ImGui/Editor/SpriteEditor.h"
 #include "Render/ImGui/Editor/TextEditorUI.h"
+#include "Render/ImGui/Editor/UIGroupEditor.h"

@@ -170,7 +170,7 @@ void Text::InitializeCommonResources() {
 void Text::Update() {
 	RebuildTextureIfNeeded();
 
-	materialData_->color = color_;
+	materialData_->color = GetColorForRendering();
 	materialData_->outlineColor = outlineColor_;
 	materialData_->outlineWidth = outlineWidth_;
 	materialData_->textureSize = texturePixelSize_;
@@ -192,6 +192,11 @@ void Text::Update() {
 		Matrix::Multiply(Matrix::Multiply(scaleMatrix, anchorMatrix), rotateMatrix),
 		transMatrix
 	);
+
+	// 文字領域とAnchorの補正後に親を合成し、Spriteと同じ階層座標へ統一
+	if (HasParent()) {
+		worldMatrix = Matrix::Multiply(worldMatrix, GetParentWorldMatrix());
+	}
 
 	Matrix4x4 orthoMatrix = Matrix::MakeOrthographic(0.0f, 0.0f, screenWidth_, screenHeight_, 0.0f, 1.0f);
 	transformationData_->WVP = Matrix::Multiply(worldMatrix, orthoMatrix);
@@ -402,6 +407,7 @@ void Text::SetWordWrap(bool enabled) {
 }
 
 void Text::FromJson(const nlohmann::json& json) {
+	const auto state = GetAuthoringState();
 	objectName_ = json.value("name", objectName_);
 	textureKey_ = "__Text_" + objectName_;
 	text_ = json.value("text", text_);
@@ -424,9 +430,11 @@ void Text::FromJson(const nlohmann::json& json) {
 		std::clamp(loadedAnchorPoint.x, 0.0f, 1.0f),
 		std::clamp(loadedAnchorPoint.y, 0.0f, 1.0f),
 	};
-	transform_.translate = ReadVector2(json.value("position", nlohmann::json::array()), transform_.translate);
-	transform_.scale = ReadVector2(json.value("scale", nlohmann::json::array()), transform_.scale);
-	transform_.rotate = json.value("rotation", transform_.rotate);
+
+	// 欠けた配置項目には実行時の一時変化ではなく編集用設定を使用
+	transform_.translate = ReadVector2(json.value("position", nlohmann::json::array()), state.transform.translate);
+	transform_.scale = ReadVector2(json.value("scale", nlohmann::json::array()), state.transform.scale);
+	transform_.rotate = json.value("rotation", state.transform.rotate);
 	color_ = ReadVector4(json.value("color", nlohmann::json::array()), color_);
 	horizontalAlign_ = HorizontalAlignFromString(json.value("horizontalAlign", HorizontalAlignToString(horizontalAlign_)));
 	verticalAlign_ = VerticalAlignFromString(json.value("verticalAlign", VerticalAlignToString(verticalAlign_)));
@@ -434,11 +442,14 @@ void Text::FromJson(const nlohmann::json& json) {
 	targetScreen_ = json.value("screen", targetScreen_);
 	sceneType_ = SceneTypeFromString(json.value("scene", SceneTypeToString(sceneType_)));
 	renderLayer_ = Render::RenderLayerFromString(json.value("layer", Render::RenderLayerToString(renderLayer_)));
-	isVisible_ = json.value("visible", isVisible_);
+	isVisible_ = json.value("visible", state.visible);
+	SetOpacity(json.value("opacity", state.opacity));
+	CommitLoadedAuthoringState();
 	MarkDirty();
 }
 
 nlohmann::json Text::ToJson() const {
+	const auto state = GetAuthoringState();
 	return {
 		{ "type", "Text2D" },
 		{ "name", objectName_ },
@@ -454,9 +465,9 @@ nlohmann::json Text::ToJson() const {
 		{ "lineSpacing", lineSpacing_ },
 		{ "characterSpacing", characterSpacing_ },
 		{ "color", { color_.x, color_.y, color_.z, color_.w } },
-		{ "position", { transform_.translate.x, transform_.translate.y } },
-		{ "scale", { transform_.scale.x, transform_.scale.y } },
-		{ "rotation", transform_.rotate },
+		{ "position", { state.transform.translate.x, state.transform.translate.y } },
+		{ "scale", { state.transform.scale.x, state.transform.scale.y } },
+		{ "rotation", state.transform.rotate },
 		{ "size", { areaSize_.x, areaSize_.y } },
 		{ "anchorPoint", { anchorPoint_.x, anchorPoint_.y } },
 		{ "horizontalAlign", HorizontalAlignToString(horizontalAlign_) },
@@ -465,7 +476,8 @@ nlohmann::json Text::ToJson() const {
 		{ "screen", targetScreen_ },
 		{ "scene", SceneTypeToString(sceneType_) },
 		{ "layer", Render::RenderLayerToString(renderLayer_) },
-		{ "visible", isVisible_ },
+		{ "visible", state.visible },
+		{ "opacity", state.opacity },
 	};
 }
 

@@ -2,6 +2,7 @@
 #include "EditorToolbar.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
+#include "Utility/AssetKey.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -10,8 +11,10 @@
 #include <cstring>
 #include <filesystem>
 #include <limits>
+#include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace MadoEngine::Editor {
@@ -271,6 +274,68 @@ namespace MadoEngine::Editor {
 
     namespace {
 
+        /// @brief 音源一覧のファイル情報
+        struct AudioFileItem {
+            std::string key;
+            std::string fileName;
+            std::string filePath;
+        };
+
+        /// @brief 音源一覧のフォルダー階層
+        struct AudioDirectory {
+            std::map<std::string, AudioDirectory> directories;
+            std::map<std::string, AudioFileItem> files;
+        };
+
+        /// @brief 読み込み済みの音源パスから種別ごとのフォルダー階層を構築
+        /// @param type 表示対象の音声種別
+        /// @return フォルダー名と音源名の昇順に整列した階層
+        AudioDirectory CreateAudioDirectory(AudioType type) {
+            AudioDirectory root;
+            const AudioManager& audioManager = AudioManager::GetInstance();
+            const std::filesystem::path currentDirectory = std::filesystem::current_path();
+            const std::filesystem::path audioDirectory = (currentDirectory / "Assets/Audio").lexically_normal();
+            for (const std::string& key : audioManager.GetAllKeys()) {
+                if (audioManager.GetAudioType(key) != type) {
+                    continue;
+                }
+
+                // 読み込み済みのパスだけで階層を構築し、毎Frameのディスク走査を回避
+                const std::filesystem::path filePath = audioManager.GetFilePath(key);
+                std::filesystem::path relativePath =
+                    (currentDirectory / filePath).lexically_normal().lexically_relative(audioDirectory);
+                AudioDirectory* directory = &root;
+                if (filePath.empty() || relativePath.empty() || *relativePath.begin() == "..") {
+
+                    // 基準Directory外から手動登録した音源も操作できるよう専用の項目へ集約
+                    directory = &root.directories["その他（Assets/Audio外）"];
+                    relativePath = filePath.filename();
+                } else {
+
+                    // タブ名と重複する先頭の種別Directoryだけを表示階層から省略
+                    auto component = relativePath.begin();
+                    if (AssetKey::Equals(component->string(), AudioTypeToString(type))) {
+                        std::filesystem::path categoryRelativePath;
+                        for (++component; component != relativePath.end(); ++component) {
+                            categoryRelativePath /= *component;
+                        }
+                        relativePath = std::move(categoryRelativePath);
+                    }
+                }
+
+                // mapの整列順により、各階層でフォルダーを先頭、その後に音源を名前順で配置
+                for (const std::filesystem::path& component : relativePath.parent_path()) {
+                    directory = &directory->directories[component.string()];
+                }
+                std::string fileName = relativePath.filename().string();
+                if (fileName.empty()) {
+                    fileName = key;
+                }
+                directory->files.emplace(key, AudioFileItem{ key, fileName, filePath.generic_string() });
+            }
+            return root;
+        }
+
         /// @brief 個別音量反映後のラウドネスまたはピークを表示
         /// @param adjusted 個別音量反映後の推定値
         /// @param isPeak サンプルピークを表示する場合はtrue
@@ -316,6 +381,85 @@ namespace MadoEngine::Editor {
                 ImGui::EndTooltip();
             }
         }
+
+        /// @brief 階層内の音源名と個別設定および再生操作を一行で描画
+        /// @param item 描画対象の音源情報
+        /// @param loopStates 音源キーごとのループ再生設定
+        void DrawAudioFileRow(const AudioFileItem& item, std::unordered_map<std::string, bool>& loopStates) {
+            AudioManager& audioManager = AudioManager::GetInstance();
+            ImGui::PushID(item.key.c_str());
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+
+            // Leafの余白をフォルダーと共通化し、Name列だけを階層に応じて字下げ
+            ImGui::TreeNodeEx("##AudioFile", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding, "%s", item.fileName.c_str());
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s\nキー: %s", item.filePath.c_str(), item.key.c_str());
+            }
+
+            ImGui::TableNextColumn();
+            float volume = audioManager.GetVolume(item.key);
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::DragFloat("##Volume", &volume, 0.01f, 0.0f, AudioManager::kMaxIndividualVolume,
+                "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
+                audioManager.SetVolume(item.key, volume);
+            }
+
+            // 解析済みの元音源と音量倍率だけを参照し、毎FrameのPCM再解析を回避
+            const AudioLoudnessMetrics sourceMetrics = audioManager.GetLoudnessMetrics(item.key);
+            const AudioLoudnessMetrics adjustedMetrics = AudioLoudnessAnalyzer::EstimateAfterGain(sourceMetrics, volume);
+            ImGui::TableNextColumn();
+            DrawLoudnessCell(adjustedMetrics, false);
+            ImGui::TableNextColumn();
+            DrawLoudnessCell(adjustedMetrics, true);
+
+            // 半音数を保存対象へ直接反映して再生中と次回再生の設定を一致
+            ImGui::TableNextColumn();
+            float semitones = audioManager.GetPitch(item.key);
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::DragFloat("##Pitch", &semitones, 0.1f,
+                AudioManager::kMinPitchSemitones, AudioManager::kMaxPitchSemitones,
+                "%+.1f", ImGuiSliderFlags_AlwaysClamp)) {
+                audioManager.SetPitch(item.key, semitones);
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("再生速度を維持して音程を変更\n0: 元の音程 / +12: 1オクターブ上 / -12: 1オクターブ下\nCtrl+クリックで数値入力");
+            }
+
+            // 音源キーを使用して階層の開閉後も同じループ設定で再生
+            ImGui::TableNextColumn();
+            ImGui::Checkbox("##Loop", &loopStates[item.key]);
+            ImGui::TableNextColumn();
+            if (ImGui::Button("Play", ImVec2(60, 0))) {
+                audioManager.Play(item.key, loopStates[item.key]);
+            }
+            ImGui::PopID();
+        }
+
+        /// @brief フォルダーの開閉状態に応じて音源一覧を再帰的に描画
+        /// @param directory 描画対象のフォルダー階層
+        /// @param loopStates 音源キーごとのループ再生設定
+        void DrawAudioDirectory(const AudioDirectory& directory, std::unordered_map<std::string, bool>& loopStates) {
+
+            // フォルダー行にも通常の操作部品と同じ上下余白を確保し、開閉操作のクリック領域を拡張
+            for (const auto& [name, child] : directory.directories) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::PushID(name.c_str());
+                if (ImGui::TreeNodeEx("##AudioDirectory", ImGuiTreeNodeFlags_DefaultOpen |
+                    ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_LabelSpanAllColumns |
+                    ImGuiTreeNodeFlags_FramePadding, "%s", name.c_str())) {
+                    DrawAudioDirectory(child, loopStates);
+                    ImGui::TreePop();
+                }
+                ImGui::PopID();
+            }
+
+            for (const auto& [key, item] : directory.files) {
+                DrawAudioFileRow(item, loopStates);
+            }
+        }
     }
 
     void DrawAudioManagerUI() {
@@ -334,6 +478,7 @@ namespace MadoEngine::Editor {
 
             for (int i = 0; i < 3; ++i) {
                 if (ImGui::BeginTabItem(tabNames[i])) {
+                    ImGui::PushID(i);
                     static std::unordered_map<std::string, bool> loopStates;
 
                     // 種別内の全音源へ共通の上限を適用し、再生中の音を維持したまま変更
@@ -348,9 +493,9 @@ namespace MadoEngine::Editor {
 
                     // 調整後の音量指標を個別音量の隣へ配置し、狭いWindowでは横スクロールで一覧を維持
                     if (ImGui::BeginTable("AudioTable", 7, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH |
-                        ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable)) {
+                        ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable)) {
                         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 240.0f);
-                        ImGui::TableSetupColumn("Volume", ImGuiTableColumnFlags_WidthFixed, 90.0f); // 【追加】個別ボリューム列
+                        ImGui::TableSetupColumn("Volume", ImGuiTableColumnFlags_WidthFixed, 90.0f);
                         ImGui::TableSetupColumn("LUFS", ImGuiTableColumnFlags_WidthFixed, 90.0f);
                         ImGui::TableSetupColumn("Peak (dBFS)", ImGuiTableColumnFlags_WidthFixed, 110.0f);
                         ImGui::TableSetupColumn("Pitch (半音)", ImGuiTableColumnFlags_WidthFixed, 120.0f);
@@ -358,69 +503,12 @@ namespace MadoEngine::Editor {
                         ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);
                         ImGui::TableHeadersRow();
 
-                        auto keys = AudioManager::GetInstance().GetAllKeys();
-                        for (const auto& key : keys) {
-                            if (AudioManager::GetInstance().GetAudioType(key) == tabTypes[i]) {
-                                ImGui::TableNextRow();
-
-                                // --- 1列目: 音源名 ---
-                                ImGui::TableNextColumn();
-                                ImGui::Text("%s", key.c_str());
-
-                                // --- 2列目: 個別ボリューム (Loopの左側) 【追加】 ---
-                                ImGui::TableNextColumn();
-                                ImGui::PushID((key + "_vol").c_str());
-
-                                float vol = AudioManager::GetInstance().GetVolume(key); // 現在の音量を取得
-                                ImGui::PushItemWidth(-1);
-                                if (ImGui::DragFloat("##Volume", &vol, 0.01f, 0.0f, AudioManager::kMaxIndividualVolume,
-                                    "%.2f", ImGuiSliderFlags_AlwaysClamp)) {
-                                    AudioManager::GetInstance().SetVolume(key, vol); // 変更されたら即座に反映
-                                }
-                                ImGui::PopItemWidth();
-                                ImGui::PopID();
-
-                                // 解析済みの元音源と音量倍率だけを参照し、毎フレームのPCM再解析を回避
-                                const AudioLoudnessMetrics sourceMetrics = AudioManager::GetInstance().GetLoudnessMetrics(key);
-                                const AudioLoudnessMetrics adjustedMetrics = AudioLoudnessAnalyzer::EstimateAfterGain(sourceMetrics, vol);
-                                ImGui::TableNextColumn();
-                                DrawLoudnessCell(adjustedMetrics, false);
-                                ImGui::TableNextColumn();
-                                DrawLoudnessCell(adjustedMetrics, true);
-
-                                // 半音数を保存対象へ直接反映して再生中と次回再生の設定を一致
-                                ImGui::TableNextColumn();
-                                ImGui::PushID((key + "_pitch").c_str());
-                                float semitones = AudioManager::GetInstance().GetPitch(key);
-                                ImGui::SetNextItemWidth(-1);
-                                if (ImGui::DragFloat("##Pitch", &semitones, 0.1f,
-                                    AudioManager::kMinPitchSemitones, AudioManager::kMaxPitchSemitones,
-                                    "%+.1f", ImGuiSliderFlags_AlwaysClamp)) {
-                                    AudioManager::GetInstance().SetPitch(key, semitones);
-                                }
-                                if (ImGui::IsItemHovered()) {
-                                    ImGui::SetTooltip("再生速度を維持して音程を変更\n0: 元の音程 / +12: 1オクターブ上 / -12: 1オクターブ下\nCtrl+クリックで数値入力");
-                                }
-                                ImGui::PopID();
-
-                                // ループ指定は既存の再生操作へ引き継ぎ
-                                ImGui::TableNextColumn();
-                                ImGui::PushID((key + "_loop").c_str());
-                                ImGui::Checkbox("##Loop", &loopStates[key]);
-                                ImGui::PopID();
-
-                                // 現在の音量と音程設定で新しい再生インスタンスを開始
-                                ImGui::TableNextColumn();
-                                ImGui::PushID((key + "_play").c_str());
-                                if (ImGui::Button("Play", ImVec2(60, 0))) {
-                                    AudioManager::GetInstance().Play(key, loopStates[key]);
-                                }
-                                ImGui::PopID();
-                            }
-                        }
+                        const AudioDirectory directory = CreateAudioDirectory(tabTypes[i]);
+                        DrawAudioDirectory(directory, loopStates);
                         ImGui::EndTable();
                     }
                     ImGui::TextDisabled("個別Volume反映後の推定値 / *: 400ms未満の参考LUFS");
+                    ImGui::PopID();
                     ImGui::EndTabItem();
                 }
             }
@@ -487,7 +575,7 @@ namespace MadoEngine::Editor {
         bool anyPlaying = false;
         auto allKeys = AudioManager::GetInstance().GetAllKeys();
 
-        if (ImGui::BeginTable("PlayingTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg)) {
+        if (ImGui::BeginTable("PlayingTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersInnerH)) {
             ImGui::TableSetupColumn("Playing Name", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("再生数 / 上限", ImGuiTableColumnFlags_WidthFixed, 100.0f);
             ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 60.0f);

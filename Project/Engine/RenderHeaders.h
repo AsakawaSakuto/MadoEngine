@@ -12,6 +12,8 @@
 #include "Render/Object/2d/Text/Text.h"
 #include "Render/Object/2d/Text/TextManager.h"
 #include "Render/Object/2d/Text/MyText.h"
+#include "Render/Object/2d/UIGroup/UIGroup.h"
+#include "Render/Object/2d/UIGroup/UIGroupManager.h"
 #include "Render/Object/3d/Model/Model.h"
 #include "Render/Object/3d/Model/InstancedModel.h"
 #include "Render/Object/3d/Model/ModelManager.h"

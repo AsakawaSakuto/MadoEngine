@@ -41,6 +41,11 @@ namespace MadoEngine {
 		/// @return AudioType（見つからない場合はAudioType::SE）
 		AudioType GetAudioType(const std::string& key) const;
 
+		/// @brief キーに対応する読み込み元の音声ファイルパスを取得
+		/// @param key ファイル名、拡張子なし
+		/// @return 読み込み元のファイルパス、未登録の場合は空のパス
+		std::filesystem::path GetFilePath(const std::string& key) const;
+
 		/// @brief マスターボリュームを設定
 		/// @param volume 音量（0.0f～1.0f）
 		void SetMasterVolume(float volume);

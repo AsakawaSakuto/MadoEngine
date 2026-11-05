@@ -236,6 +236,15 @@ public:
 	/// @return Editor管理Sprite名一覧
 	std::vector<std::string> GetEditorManagedNames() const;
 
+	/// @brief 有効なHandleに対応する管理名を取得
+	/// @param handle 対象のHandle
+	/// @return 管理名、無効な場合は空文字列
+	std::string GetName(SpriteHandle handle) const;
+	/// @brief Editor管理対象か確認
+	/// @param handle 対象のHandle
+	/// @return 有効なEditor管理Spriteの場合はtrue
+	bool IsEditorManaged(SpriteHandle handle) const;
+
 private:
 	struct SpriteSlot {
 		std::unique_ptr<Sprite> sprite;

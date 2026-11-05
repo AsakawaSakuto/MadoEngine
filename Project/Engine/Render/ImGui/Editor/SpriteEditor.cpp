@@ -1,5 +1,6 @@
 #include "SpriteEditor.h"
 #include "EditorToolbar.h"
+#include "Transform2DEditor.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
 #include "Core/TextureManager/TextureManager.h"
 #include <algorithm>
@@ -20,8 +21,7 @@ namespace {
 
 #ifdef USE_IMGUI
 
-	constexpr float kRadiansToDegrees = 57.29577951308232f;
-	constexpr float kDegreesToRadians = 0.017453292519943295f;
+	std::optional<SpriteHandle> requestedSelection;
 	constexpr float kTexturePreviewMaxSize = 64.0f;
 	const std::filesystem::path kTextureDirectoryPath = "Assets/Texture";
 
@@ -451,11 +451,6 @@ namespace {
 			ImGui::EndCombo();
 		}
 
-		Vector2 anchorPoint = sprite.GetAnchorPoint();
-		float anchorValues[2] = { anchorPoint.x, anchorPoint.y };
-		if (ImGui::DragFloat2("アンカーポイント", anchorValues, 0.01f, 0.0f, 1.0f, "%.2f")) {
-			sprite.SetAnchorPoint({ anchorValues[0], anchorValues[1] });
-		}
 	}
 
 	/// @brief Spriteのテクスチャプレビューを描画
@@ -483,28 +478,9 @@ namespace {
 		}
 
 		DrawTexturePreview(sprite);
-		int textureFilter = static_cast<int>(sprite.GetTextureFilter());
-		if (ImGui::Combo("補間方式", &textureFilter, "Linear\0Point\0")) {
-			sprite.SetTextureFilter(static_cast<Sprite::TextureFilter>(textureFilter));
-		}
 		ImGui::Separator();
 
-		Vector2 position = sprite.GetPosition();
-		float positionValues[2] = { position.x, position.y };
-		if (ImGui::DragFloat2("位置", positionValues, 1.0f)) {
-			sprite.SetPosition({ positionValues[0], positionValues[1] });
-		}
-
-		Vector2 scale = sprite.GetScale();
-		float scaleValues[2] = { scale.x, scale.y };
-		if (ImGui::DragFloat2("スケール", scaleValues, 0.01f, 0.0f, 100.0f, "%.2f")) {
-			sprite.SetScale({ scaleValues[0], scaleValues[1] });
-		}
-
-		float rotationDegrees = sprite.GetRotation() * kRadiansToDegrees;
-		if (ImGui::DragFloat("回転", &rotationDegrees, 0.5f, -360.0f, 360.0f, "%.1f度")) {
-			sprite.SetRotation(rotationDegrees * kDegreesToRadians);
-		}
+		DrawTransform2DInspector(sprite, false);
 
 		Vector4 color = sprite.GetColor();
 		float colorValues[4] = { color.x, color.y, color.z, color.w };
@@ -514,13 +490,24 @@ namespace {
 
 		DrawAnchorCombo(sprite);
 
-		bool isFitToScreen = sprite.IsFitToScreen();
-		if (ImGui::Checkbox("画面全体へフィット", &isFitToScreen)) {
-			sprite.SetFitToScreen(isFitToScreen);
+		int textureFilter = static_cast<int>(sprite.GetTextureFilter());
+		if (ImGui::Combo("補間方式", &textureFilter, "Linear\0Point\0")) {
+			sprite.SetTextureFilter(static_cast<Sprite::TextureFilter>(textureFilter));
 		}
 
 		DrawRenderLayerCombo(sprite);
+		const bool grouped = sprite.HasParent() && sprite.HasAuthoringState();
+		ImGui::BeginDisabled(grouped);
 		DrawSceneCombo(sprite);
+		ImGui::EndDisabled();
+		if (grouped) {
+			ImGui::TextDisabled("所属シーンは親Groupに合わせて管理");
+		}
+
+		bool isFitToScreen = sprite.IsFitToScreen();
+		if (ImGui::Checkbox("全画面にフィット", &isFitToScreen)) {
+			sprite.SetFitToScreen(isFitToScreen);
+		}
 	}
 
 #endif // USE_IMGUI
@@ -537,6 +524,29 @@ bool LoadSpriteEditorJson(SceneType sceneType) {
 
 #ifdef USE_IMGUI
 
+void SelectSpriteEditorObject(SpriteHandle handle) {
+	requestedSelection = handle;
+}
+
+void DrawSpriteInspector(Sprite& sprite) {
+	DrawSpriteProperties(sprite, GetSelectableTextureNames());
+}
+
+bool DrawSpriteTextureSelector(const char* label, std::string& textureName) {
+	const auto names = GetSelectableTextureNames();
+	bool changed = false;
+
+	// 初回作成時は汎用の白画像を優先し、候補があれば未選択のままにしないための初期化
+	if (textureName.empty() && !names.empty()) {
+		textureName = names.front();
+		if (std::find(names.begin(), names.end(), "white2x2") != names.end()) {
+			textureName = "white2x2";
+		}
+		changed = true;
+	}
+	return DrawTextureCombo(label, textureName, names) || changed;
+}
+
 void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 	SpriteManager& manager = SpriteManager::GetInstance();
 	const std::vector<std::string> textureNames = GetSelectableTextureNames();
@@ -545,6 +555,10 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 	static std::array<char, 128> createName{};
 	static std::string createTextureName;
 	static SpriteHandle selectedHandle{};
+	if (requestedSelection) {
+		selectedHandle = *requestedSelection;
+		requestedSelection.reset();
+	}
 	static bool isInitialized = false;
 	if (!isInitialized) {
 		CopyToBuffer(createName, "Sprite");
@@ -605,7 +619,17 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 
 	ImGui::Separator();
 
-	const std::vector<std::string> names = manager.GetEditorManagedNames();
+	std::vector<std::string> names = manager.GetEditorManagedNames();
+
+	// Group所属の要素はUI Group Editorへ集約し、Managerの保存対象は維持
+	std::erase_if(names, [&](const std::string& name) {
+		const Sprite* sprite = manager.TryGet(manager.Find(name));
+		return !sprite || sprite->HasParent();
+	});
+	const Sprite* selectedNode = manager.TryGet(selectedHandle);
+	if (!selectedNode || selectedNode->HasParent()) {
+		selectedHandle = {};
+	}
 	ImGui::BeginChild("SpriteList", ImVec2(200.0f, 0.0f), true);
 	for (const std::string& name : names) {
 		ImGui::PushID(name.c_str());
@@ -616,9 +640,9 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 			continue;
 		}
 
-		bool isVisible = sprite->IsVisible();
+		bool isVisible = sprite->GetAuthoringState().visible;
 		if (ImGui::Checkbox("##Visible", &isVisible)) {
-			sprite->SetVisible(isVisible);
+			SetEditorNodeVisible(*sprite, isVisible);
 		}
 		ImGui::SameLine();
 

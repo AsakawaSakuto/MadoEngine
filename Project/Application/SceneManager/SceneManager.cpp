@@ -26,6 +26,7 @@ namespace {
 		MadoEngine::Editor::LoadModelEditorJson(sceneType);
 		MadoEngine::Editor::LoadSpriteEditorJson(sceneType);
 		MadoEngine::Editor::LoadTextEditorJson(sceneType);
+		MadoEngine::Editor::LoadUIGroupEditorJson(sceneType);
 	}
 
 	/// @brief PointLightとSpotLightの位置をDebugLineで表示
@@ -102,6 +103,7 @@ SceneManager::~SceneManager() {
 	currentScene_->OnExitRequested(SceneType::None);
 	currentScene_->Finalize();
 	currentScene_.reset();
+	MadoEngine::UIGroupManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
 	MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
@@ -159,16 +161,21 @@ void SceneManager::Update(float dt) {
 	MyDebugLine::AddGrid(1000.0f, 1000, { 0.5f, 0.5f, 0.5f, 1.0f });
 	AddLightPositionDebugSpheres();
 
-	// Scene固有更新後のTransformを各描画Systemへ同期
-	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
-	MadoEngine::TextManager::GetInstance().UpdateAll(currentSceneType_);
-
+	// ゲーム時間に依存する3D描画とEffectの状態をScene更新後に同期
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
 	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_, dt);
 	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Update(dt);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);
 	MadoEngine::Ribbon::RibbonEffectSystem3d::GetInstance().Update(dt);
+}
+
+void SceneManager::UpdateOverlayRenderData() {
+
+	// 一時停止中もEditorの新規作成・配置編集を描画へ反映し、ゲームの進行とは分離
+	MadoEngine::UIGroupManager::GetInstance().RefreshBindings();
+	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
+	MadoEngine::TextManager::GetInstance().UpdateAll(currentSceneType_);
 }
 
 void SceneManager::Draw() {
@@ -506,6 +513,7 @@ void SceneManager::ChangeScene(SceneType type) {
 #endif // USE_IMGUI
 		currentScene_->Finalize();
 		currentScene_.reset();
+		MadoEngine::UIGroupManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::SpriteManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::TextManager::GetInstance().DestroyByScene(previousSceneType);
 		MadoEngine::ModelManager::GetInstance().DestroyByScene(previousSceneType);
