@@ -134,6 +134,11 @@ public:
 	/// @return 描画順を設定できた場合はtrue
 	bool MoveAfter(SpriteHandle handle, SpriteHandle referenceHandle);
 
+	/// @brief 他のSpriteの順序を維持して対象を描画順の末尾へ移動
+	/// @param handle 手前へ表示するSpriteのHandle
+	/// @return 描画順を設定できた場合はtrue
+	bool MoveToFront(SpriteHandle handle);
+
 	/// @brief GPUが対象を使用していないことが保証された時点でSpriteを即時削除
 	/// @param handle 削除対象のHandle
 	/// @return 削除できた場合はtrue

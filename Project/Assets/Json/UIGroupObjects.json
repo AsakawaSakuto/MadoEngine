@@ -1,7 +1,134 @@
 {
     "groups": [
         {
-            "children": [],
+            "children": [
+                {
+                    "name": "Overlay",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            360.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            80.0,
+                            45.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_834362fc-6519-4451-83ef-478b040b953a",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Border",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            360.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            16.0,
+                            24.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_858a7d72-24eb-4141-83f5-f8bb2686ca33",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Panel",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            360.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_48040c89-4256-4d15-9d68-46f39e5d8d81",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Icon",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            378.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_ddaf91c8-d1ea-4d17-99f2-5ec902faa49b",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Name",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            264.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_0f0c0441-5792-410d-a6cd-3c5c3a70d392",
+                    "type": "Text"
+                },
+                {
+                    "name": "Rarity",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            216.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_370ab18b-ed17-4c7b-a30a-95c4fa07faca",
+                    "type": "Text"
+                },
+                {
+                    "name": "Description",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            488.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_e1d316b3-fc93-4359-b122-2f7c8690d5ca",
+                    "type": "Text"
+                }
+            ],
             "id": "f30a707b-2361-441d-ae34-01fc44cc0d24",
             "name": "CardView",
             "scene": "Game",

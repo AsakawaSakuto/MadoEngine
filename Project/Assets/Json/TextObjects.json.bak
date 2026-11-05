@@ -195,7 +195,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:21",
+            "text": "04:51",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -246,7 +246,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.3",
+            "text": "FPS : 59.9",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -297,7 +297,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 1819933160",
+            "text": "SEED : 471116107",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -348,7 +348,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 21 / 100",
+            "text": "HP : 100 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -606,7 +606,7 @@
             "text": "強化の時間だ！",
             "type": "Text2D",
             "verticalAlign": "Center",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -657,7 +657,7 @@
             "text": "10",
             "type": "Text2D",
             "verticalAlign": "Center",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -708,7 +708,7 @@
             "text": "リロール",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -807,7 +807,7 @@
                 0.0,
                 0.0
             ],
-            "text": "123",
+            "text": "74",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1317,7 +1317,7 @@
                 0.0,
                 0.0
             ],
-            "text": "35",
+            "text": "5",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1368,7 +1368,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 25",
+            "text": "Enemy : 4",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1575,6 +1575,159 @@
             "text": "決定",
             "type": "Text2D",
             "verticalAlign": "Top",
+            "visible": false,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                0.9490196108818054,
+                0.9686274528503418,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 24.0,
+            "horizontalAlign": "Center",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "UIGroupText_0f0c0441-5792-410d-a6cd-3c5c3a70d392",
+            "opacity": 1.0,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 3.0,
+            "position": [
+                640.0,
+                264.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": false,
+            "size": [
+                480.0,
+                48.0
+            ],
+            "text": "知恵のフラスコ",
+            "type": "Text2D",
+            "verticalAlign": "Center",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 32.0,
+            "horizontalAlign": "Center",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "UIGroupText_370ab18b-ed17-4c7b-a30a-95c4fa07faca",
+            "opacity": 1.0,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 0.0,
+            "position": [
+                640.0,
+                216.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": true,
+            "size": [
+                480.0,
+                48.0
+            ],
+            "text": "アンコモン",
+            "type": "Text2D",
+            "verticalAlign": "Center",
+            "visible": true,
+            "wordWrap": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "atlasRasterSize": 128.0,
+            "characterSpacing": 0.0,
+            "color": [
+                0.9490196108818054,
+                0.9686274528503418,
+                1.0,
+                1.0
+            ],
+            "fontFamily": "游ゴシック",
+            "fontFile": "Assets/Font/YuGothB.ttc",
+            "fontSize": 24.0,
+            "horizontalAlign": "Center",
+            "layer": "UI",
+            "lineSpacing": 1.0,
+            "name": "UIGroupText_e1d316b3-fc93-4359-b122-2f7c8690d5ca",
+            "opacity": 1.0,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "outlineWidth": 3.0,
+            "position": [
+                640.0,
+                488.0
+            ],
+            "renderMode": "Rasterized",
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0
+            ],
+            "scene": "Game",
+            "screen": "BackBuffer",
+            "sdfEnabled": false,
+            "size": [
+                480.0,
+                48.0
+            ],
+            "text": "獲得EXP +20%",
+            "type": "Text2D",
+            "verticalAlign": "Center",
             "visible": true,
             "wordWrap": true
         }

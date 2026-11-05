@@ -264,6 +264,20 @@ bool SpriteManager::MoveAfter(SpriteHandle handle, SpriteHandle referenceHandle)
 	return true;
 }
 
+bool SpriteManager::MoveToFront(SpriteHandle handle) {
+	if (!IsValid(handle)) {
+		return false;
+	}
+	const auto position = std::find(drawOrder_.begin(), drawOrder_.end(), handle);
+	if (position == drawOrder_.end()) {
+		return false;
+	}
+
+	// GPU資源の再生成を避け、他のSpriteの相対順序を維持したまま対象を最前面へ移動
+	std::rotate(position, position + 1, drawOrder_.end());
+	return true;
+}
+
 bool SpriteManager::Destroy(SpriteHandle handle) {
 	Sprite* sprite = TryGet(handle);
 	if (!sprite) {
