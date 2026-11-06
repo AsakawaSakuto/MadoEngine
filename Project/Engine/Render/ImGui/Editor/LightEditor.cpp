@@ -1,4 +1,9 @@
 #include "LightEditor.h"
+
+#ifdef USE_IMGUI
+
+#include "Utility/Settings/SceneObjectSettings.h"
+#include "ImGuiHeaders.h"
 #include "EditorToolbar.h"
 #include <array>
 #include <charconv>
@@ -10,8 +15,6 @@
 #include <memory>
 
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI 
 
     namespace {
         /// @brief 削除ボタンが押されたライト情報
@@ -459,14 +462,6 @@ namespace MadoEngine::Editor {
 
     } // namespace
 
-#endif // USE_IMGUI
-
-    bool LoadLightEditorJson() {
-        return LightManager::GetInstance().LoadFromJson();
-    }
-
-#ifdef USE_IMGUI
-
     void DrawLightManagerEditorUI(SceneType currentSceneType) {
         LightManager& lightManager = LightManager::GetInstance();
 
@@ -639,6 +634,6 @@ namespace MadoEngine::Editor {
         ImGui::End();
     }
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

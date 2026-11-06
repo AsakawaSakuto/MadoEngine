@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneManager/CommonData.h"
+#include "SceneManager/SceneSharedData.h"
 #include "SceneManager/IScene.h"
 #include "UI/Result/ResultWeaponStatsUI.h"
 #include "UI/Result/ResultScoreUI.h"
@@ -9,8 +9,8 @@
 class ResultScene : public IScene {
 public:
 	/// @brief コンストラクタ
-	/// @param commonData Sceneをまたいで保持するApplication共通データ
-	explicit ResultScene(CommonData& commonData);
+	/// @param sceneSharedData シーンをまたいで保持する共有データと共通システム
+	explicit ResultScene(SceneSharedData& sceneSharedData);
 
 	/// @brief デストラクタ
 	~ResultScene() override;
@@ -36,7 +36,7 @@ private:
 	/// @brief 戦績一覧を非表示にしてスコア画面へ切り替え
 	void ShowScore();
 
-	CommonData& commonData_;
+	SceneSharedData& sceneSharedData_;
 	UI::Result::WeaponStatsUI weaponStatsUI_;
 	UI::Result::ScoreUI scoreUI_;
 	bool isScoreVisible_ = false;

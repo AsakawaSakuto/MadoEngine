@@ -1,11 +1,12 @@
 #include "WeaponStatusEditor.h"
+
+#ifdef USE_IMGUI
+
 #include "WeaponStatusJson.h"
 #include "Projectile/ProjectileStatus.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
-#ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
-#endif // USE_IMGUI
 #include <cstring>
 #include <nlohmann/json.hpp>
 
@@ -33,7 +34,6 @@ namespace Weapon {
 			return sanitizedName;
 		}
 
-#ifdef USE_IMGUI
 		constexpr ImGuiTableFlags kUpgradeTableFlags =
 			ImGuiTableFlags_Borders |
 			ImGuiTableFlags_RowBg |
@@ -149,7 +149,6 @@ namespace Weapon {
 			}
 			ImGui::PopID();
 		}
-#endif // USE_IMGUI
 	}
 
 	bool StatusEditor::SaveToJson() const {
@@ -223,7 +222,6 @@ namespace Weapon {
 
 	void StatusEditor::DrawImGui() {
 
-#ifdef USE_IMGUI
 
 		ImGui::Begin("武器初期ステータス");
 
@@ -290,6 +288,7 @@ namespace Weapon {
 
 		ImGui::End();
 
-#endif // USE_IMGUI
 	}
 }
+
+#endif // USE_IMGUI

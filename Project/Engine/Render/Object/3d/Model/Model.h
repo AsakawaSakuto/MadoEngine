@@ -32,7 +32,9 @@ public:
 	/// @param spriteSheetDeltaTime スプライトシートAnimationの経過時間
 	void Update(float deltaTime, float spriteSheetDeltaTime);
 
-	void Draw(Camera& useCamera) override;
+	/// @brief 指定Cameraを使用してModelを描画
+	/// @param useCamera 読み取り専用の描画Camera
+	void Draw(const Camera& useCamera) override;
 
 	/// @brief JsonからModelの状態を復元
 	/// @param json 復元元のJson

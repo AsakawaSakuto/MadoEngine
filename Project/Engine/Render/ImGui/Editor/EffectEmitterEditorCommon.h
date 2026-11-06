@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "ImGuiHeaders.h"
 #include <algorithm>
 #include <array>
@@ -268,3 +271,5 @@ namespace MadoEngine::Editor::Detail {
 	}
 
 } // namespace MadoEngine::Editor::Detail
+
+#endif // USE_IMGUI

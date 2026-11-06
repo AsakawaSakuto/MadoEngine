@@ -1,4 +1,7 @@
 #include "LoggerEditor.h"
+
+#ifdef USE_IMGUI
+
 #include <array>
 #include <cstdint>
 #include <cstddef>
@@ -6,8 +9,6 @@
 #include <vector>
 
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI
 
 	namespace {
 
@@ -230,6 +231,6 @@ namespace MadoEngine::Editor {
 		lastTailSequence = tailSequence;
 	}
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

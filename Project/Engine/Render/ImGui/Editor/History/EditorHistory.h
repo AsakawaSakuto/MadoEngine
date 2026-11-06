@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "EditorCommand.h"
 #include <memory>
 #include <vector>
@@ -48,3 +51,5 @@ private:
 };
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

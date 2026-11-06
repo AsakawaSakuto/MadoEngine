@@ -1,4 +1,7 @@
 #include "EditorHistory.h"
+
+#ifdef USE_IMGUI
+
 #include <algorithm>
 
 namespace MadoEngine::Editor {
@@ -82,3 +85,5 @@ bool EditorHistory::CanRedo() const {
 }
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

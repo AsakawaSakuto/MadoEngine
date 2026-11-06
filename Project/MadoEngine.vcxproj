@@ -143,9 +143,6 @@
     <None Include="Tools\TextureConverter\TextureConverter.vcxproj" />
     <None Include="Tools\ModelConverter\ModelConverter.cpp" />
     <None Include="Tools\ModelConverter\ModelConverter.vcxproj" />
-    <None Include="Tools\ModelConverter\README.md" />
-    <None Include="Tools\ModelConverter\Tests\ModelCacheTests.cpp" />
-    <None Include="Tools\ModelConverter\Tests\ModelCacheTests.vcxproj" />
     <None Include="Assets\Model\Skinning\walk.animations.json" />
   </ItemGroup>
   <ItemGroup>
@@ -412,10 +409,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapEditorUI.cpp" />
+    <ClCompile Include="Engine\Utility\Settings\AudioSettings.cpp" />
+    <ClCompile Include="Engine\Utility\Settings\PostEffectSettings.cpp" />
+    <ClCompile Include="Engine\Utility\Settings\SceneObjectSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Core\Terminal.h" />
-    <ClInclude Include="Application\SceneManager\CommonData.h" />
+    <ClInclude Include="Application\SceneManager\SceneSharedData.h" />
     <ClInclude Include="Application\SceneManager\SceneType.h" />
     <ClInclude Include="Application\ColliderPairRegister.h" />
     <ClInclude Include="Application\GameObject\DropObject\DropObject.h" />
@@ -766,8 +767,9 @@
     <ClInclude Include="Externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="Externals\imgui\imstb_textedit.h" />
     <ClInclude Include="Externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="Project\Application\SceneManager\SceneType.h" />
-    <ClInclude Include="Project\Engine\Core\Resource\DxResourcesHelper.h" />
+    <ClInclude Include="Engine\Utility\Settings\AudioSettings.h" />
+    <ClInclude Include="Engine\Utility\Settings\PostEffectSettings.h" />
+    <ClInclude Include="Engine\Utility\Settings\SceneObjectSettings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,8 @@
 #include "Execution.h"
 #include "EditorUIHeaders.h"
+#include "Utility/Settings/AudioSettings.h"
+#include "Utility/Settings/PostEffectSettings.h"
+#include "Utility/Settings/SceneObjectSettings.h"
 #include "Utility/Parameter/ParameterSerializer.h"
 #include <algorithm>
 #include <cassert>

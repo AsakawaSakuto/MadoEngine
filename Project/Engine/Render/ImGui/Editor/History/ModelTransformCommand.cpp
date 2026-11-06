@@ -1,4 +1,7 @@
 #include "ModelTransformCommand.h"
+
+#ifdef USE_IMGUI
+
 #include "Render/Object/3d/Model/ModelManager.h"
 
 namespace MadoEngine::Editor {
@@ -26,3 +29,5 @@ bool ModelTransformCommand::IsValid() const {
 }
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

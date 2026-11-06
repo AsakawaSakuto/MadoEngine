@@ -1,54 +1,12 @@
 #include "UIGroupEditor.h"
+
+#ifdef USE_IMGUI
+
+#include "Utility/Settings/SceneObjectSettings.h"
 #include "Render/Object/2d/UIGroup/UIGroupManager.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
 #include "Render/Object/2d/Text/TextManager.h"
 
-namespace MadoEngine::Editor {
-
-bool LoadUIGroupEditorJson(SceneType sceneType) {
-	return UIGroupManager::GetInstance().LoadFromFile("Assets/Json/UIGroupObjects.json", sceneType);
-}
-
-bool SaveUIGroupEditorJson(SceneType sceneType) {
-
-	// 参照先の生成情報も保存し、再起動時にGroupだけが復元される状態を回避
-	bool success = SpriteManager::GetInstance().SaveToFile("Assets/Json/SpriteObjects.json", sceneType);
-	success = TextManager::GetInstance().SaveToFile("Assets/Json/TextObjects.json", sceneType) && success;
-	success = UIGroupManager::GetInstance().SaveToFile("Assets/Json/UIGroupObjects.json", sceneType) && success;
-	return success;
-}
-
-std::string CaptureUIGroupEditorState() {
-	return nlohmann::json{
-		{ "groups", UIGroupManager::GetInstance().ToJson() },
-		{ "sprites", SpriteManager::GetInstance().ToJson() },
-		{ "texts", TextManager::GetInstance().ToJson() },
-	}.dump();
-}
-
-bool RestoreUIGroupEditorState(const std::string& snapshot) {
-	const auto json = nlohmann::json::parse(snapshot, nullptr, false);
-
-	// 参照構成を先に検証し、不正なSnapshotで描画要素を破棄しないためのガード
-	if (json.is_discarded() || !json.is_object() || !json.contains("groups") ||
-		!json.contains("sprites") || !json.at("sprites").is_object() ||
-		!json.at("sprites").contains("sprites") || !json.at("sprites").at("sprites").is_array() ||
-		!json.contains("texts") || !json.at("texts").is_object() ||
-		!json.at("texts").contains("texts") || !json.at("texts").at("texts").is_array() ||
-		!UIGroupManager::GetInstance().FromJson(json.at("groups"))) {
-		return false;
-	}
-
-	// 生成元の情報も復元し、新規要素のUndoで残存、Redoで欠落する状態を防止
-	SpriteManager::GetInstance().RestoreEditorSnapshot(json.at("sprites"));
-	TextManager::GetInstance().RestoreEditorSnapshot(json.at("texts"));
-	UIGroupManager::GetInstance().RefreshBindings();
-	return true;
-}
-
-} // namespace MadoEngine::Editor
-
-#ifdef USE_IMGUI
 #include "EditorToolbar.h"
 #include "SpriteEditor.h"
 #include "TextEditorUI.h"
@@ -568,4 +526,5 @@ void DrawUIGroupOriginOverlay(const ImVec2& imageMin, const ImVec2& imageSize) {
 }
 
 } // namespace MadoEngine::Editor
-#endif
+
+#endif // USE_IMGUI

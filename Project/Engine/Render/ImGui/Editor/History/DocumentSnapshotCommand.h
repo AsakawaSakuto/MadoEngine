@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_IMGUI
+
 #include "EditorCommand.h"
 #include <cstddef>
 #include <cstdint>
@@ -55,3 +57,5 @@ private:
 };
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

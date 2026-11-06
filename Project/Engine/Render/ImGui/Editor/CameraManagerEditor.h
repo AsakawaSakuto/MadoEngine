@@ -1,9 +1,9 @@
 #pragma once
 
+#ifdef USE_IMGUI
+
 #include "SceneManager/SceneType.h"
 #include "Utility/Camera/CameraManager.h"
-
-#ifdef USE_IMGUI
 
 namespace MadoEngine::Editor {
 

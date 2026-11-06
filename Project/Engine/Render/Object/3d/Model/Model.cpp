@@ -734,7 +734,7 @@ bool Model::Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float
 }
 
 
-void Model::Draw(Camera& useCamera) {
+void Model::Draw(const Camera& useCamera) {
 	if (!sharedData_ || !isVisible_) {
 		return;
 	}

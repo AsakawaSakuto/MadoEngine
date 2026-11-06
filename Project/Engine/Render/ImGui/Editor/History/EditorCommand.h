@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_IMGUI
+
 #include <cstddef>
 #include <limits>
 
@@ -38,3 +40,5 @@ public:
 };
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

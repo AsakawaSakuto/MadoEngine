@@ -26,7 +26,9 @@ public:
 	/// @param deltaTime 前フレームからの経過時間
 	void Update(float deltaTime) override;
 
-	void Draw(Camera& useCamera) override;
+	/// @brief 指定Cameraを使用してインスタンスモデルを描画
+	/// @param useCamera 読み取り専用の描画Camera
+	void Draw(const Camera& useCamera) override;
 
 	/// @brief シャドウマップへインスタンスモデルの深度を書き込み
 	/// @param lightViewProjection ライト視点のビュー射影行列

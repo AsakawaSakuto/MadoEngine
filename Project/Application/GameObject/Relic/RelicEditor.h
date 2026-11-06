@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "RelicDefinition.h"
 #include <array>
 #include <cstddef>
@@ -49,3 +52,5 @@ namespace Relic {
 	};
 
 }
+
+#endif // USE_IMGUI

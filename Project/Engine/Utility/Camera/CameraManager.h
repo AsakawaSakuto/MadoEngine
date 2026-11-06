@@ -197,10 +197,6 @@ public:
 	/// @param deltaTime 前Frameからの経過時間
 	void Update(float deltaTime);
 
-	/// @brief 描画に使用するCameraを取得
-	/// @return 描画Camera
-	Camera& GetRenderCamera() { return renderCamera_; }
-
 	/// @brief 描画に使用する読み取り専用Cameraを取得
 	/// @return 描画Camera
 	const Camera& GetRenderCamera() const { return renderCamera_; }

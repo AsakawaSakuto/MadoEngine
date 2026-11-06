@@ -1,19 +1,23 @@
 #pragma once
 #include "MapGenerationSettings.h"
+#include <optional>
+#include <string>
+
+#ifdef USE_IMGUI
 #include "MapBlock.h"
 #include "EventObject/MapEventObjectBase.h"
 #include <memory>
-#include <optional>
-#include <string>
 #include <vector>
 
 namespace Player {
 	class Base;
 }
+#endif // USE_IMGUI
 
 /// @brief Map生成条件の編集と再生成予約を管理するクラス
 class MapEditor final {
 public:
+#ifdef USE_IMGUI
 	/// @brief 生成済みMapを参照する描画中だけ有効なプレビュー情報
 	struct PreviewData {
 		const MapGenerationSettings& settings;
@@ -21,15 +25,18 @@ public:
 		const std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects;
 		const Player::Base* player = nullptr;
 	};
+#endif // USE_IMGUI
 
 	/// @brief 保存済み設定と指定シードで編集状態を初期化
 	/// @param seed Map生成に使用するシード値
 	/// @param appliedSettings 現在生成済みMapの設定
 	void Initialize(uint32_t seed, const MapGenerationSettings& appliedSettings);
 
+#ifdef USE_IMGUI
 	/// @brief Map生成EditorのImGuiを描画
 	/// @param preview 生成済みMapの読み取り専用情報
 	void DrawImGui(const PreviewData& preview);
+#endif // USE_IMGUI
 
 	/// @brief 現在編集中の生成設定を取得
 	/// @return 現在編集中の生成設定
@@ -58,6 +65,7 @@ public:
 	bool ReloadSettings();
 
 private:
+#ifdef USE_IMGUI
 	/// @brief 各設定タブで共通の再生成操作を描画
 	/// @param appliedSettings 現在生成済みMapの設定
 	void DrawGenerationControls(const MapGenerationSettings& appliedSettings);
@@ -77,6 +85,7 @@ private:
 	/// @brief 生成済みMapの高さと主要Objectを描画
 	/// @param preview 生成済みMapの読み取り専用情報
 	void DrawHeightPreview(const PreviewData& preview) const;
+#endif // USE_IMGUI
 
 	MapGenerationSettings editorSettings_;
 	std::optional<MapGenerationSettings> pendingGenerationSettings_;

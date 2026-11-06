@@ -1,11 +1,12 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "../../../ImGuiHeaders.h"
 #include "../../../UtilityHeaders.h"
 #include "../../../MathHeaders.h"
 #include "../../../RenderHeaders.h"
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI
 
 /// @brief Game View上にTransformギズモを描画し、Transformへ反映
 /// @param camera ギズモ表示に使用するカメラ
@@ -24,6 +25,6 @@ void ResetModelGizmoOnSceneChange(ModelHandle& selectedModel);
 /// @return 選択またはTransformが変更された場合はtrue
 bool DrawModelGizmoOnGameView(const Camera& camera, SceneType sceneType, ModelHandle& selectedModel);
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

@@ -51,15 +51,15 @@ namespace {
 	}
 }
 
-GameScene::GameScene(CommonData& commonData)
-	: commonData_(commonData) {}
+GameScene::GameScene(SceneSharedData& sceneSharedData)
+	: sceneSharedData_(sceneSharedData) {}
 
 GameScene::~GameScene() {}
 
 void GameScene::Initialize() {
 
 	// Titleの選択状態を消費し、未選択時だけ新規抽選と履歴登録を実行
-	gameSeed_ = commonData_.GetGameSeedSystem().BeginGame();
+	gameSeed_ = sceneSharedData_.GetGameSeedSystem().BeginGame();
 	MyRand::SetSeed(gameSeed_);
 	playLogRecorder_.Initialize(gameSeed_);
 	playLogSaveAttempted_ = false;
@@ -86,7 +86,7 @@ void GameScene::Initialize() {
 
 	// 地形確定後に通常Block上面の中心を取得してPlayerの初期配置へ使用
 	player_ = std::make_unique<Player::Base>();
-	player_->Initialize(commonData_.GetParameterStore(), map_->CreatePlayerSpawnGroundPosition(gameSeed_));
+	player_->Initialize(sceneSharedData_.GetParameterStore(), map_->CreatePlayerSpawnGroundPosition(gameSeed_));
 	player_->SetCamera(gameCameraController_.TryGetPlayerCamera(cameraManager_));
 	SynchronizePlayerPointLight();
 
@@ -97,16 +97,12 @@ void GameScene::Initialize() {
 	enemyManager_->Initialize(player_.get());
 	enemySpawner_ = std::make_unique<Enemy::Spawner>();
 	enemySpawner_->Initialize(player_.get(), enemyManager_.get(), SceneType::Game, kGameSceneTimeLimit);
-	enemyEditor_ = std::make_unique<Enemy::Editor>();
-	enemyEditor_->Initialize(enemySpawner_.get(), enemyManager_.get());
 	SynchronizeMapDependentState();
 
 	weaponInventory_ = std::make_unique<Weapon::Inventory>();
 
 	// Titleで決定した武器を先頭Slotへ装備してゲームを開始
-	weaponInventory_->Initialize(commonData_.GetInitialWeaponType(), weaponSlotCount_);
-
-	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
+	weaponInventory_->Initialize(sceneSharedData_.GetInitialWeaponType(), weaponSlotCount_);
 
 	weaponUpgradeSystem_ = std::make_unique<Weapon::UpgradeSystem>();
 	weaponUpgradeSystem_->Initialize(player_->GetLevel(), gameSeed_);
@@ -114,7 +110,12 @@ void GameScene::Initialize() {
 	if (!relicSystem_->Initialize(gameSeed_)) {
 		Logger::Output("[Relic] レリックシステムの初期化に失敗", Logger::Level::Error);
 	}
+#ifdef USE_IMGUI
+	enemyEditor_ = std::make_unique<Enemy::Editor>();
+	enemyEditor_->Initialize(enemySpawner_.get(), enemyManager_.get());
+	weaponStatusEditor_ = std::make_unique<Weapon::StatusEditor>();
 	relicEditor_.Initialize(*relicSystem_);
+#endif // USE_IMGUI
 	appliedRelicRevision_ = relicSystem_->GetRevision();
 
 	// 常設HUDを先に生成し、報酬カードと暗幕を前面へ配置
@@ -137,7 +138,7 @@ SceneType GameScene::Update(float dt) {
 	ConsumePlayLogEvents();
 
 	// シーン遷移の完了条件を渡し、開始待機と停止状態を反映したゲーム時間を取得
-	const bool isSceneTransitioning = commonData_.GetSceneTransitionController().IsTransitioning();
+	const bool isSceneTransitioning = sceneSharedData_.GetSceneTransitionController().IsTransitioning();
 	const bool wasStarting = inGameSession_->GetCurrentPhase() == InGamePhase::Starting;
 	const bool wasPaused = inGameSession_->GetCurrentPhase() == InGamePhase::Paused;
 	const System::PauseMenuItem previousPauseMenuItem = inGameSession_->GetSelectedPauseMenuItem();
@@ -164,7 +165,7 @@ SceneType GameScene::Update(float dt) {
 
 		// 初期武器を維持し、新規Seedの抽選と進行状態の初期化をScene再生成時に実行
 		if (pauseMenuDecision.value() == System::PauseMenuItem::Restart) {
-			commonData_.GetGameSeedSystem().RequestSeed(std::nullopt);
+			sceneSharedData_.GetGameSeedSystem().RequestSeed(std::nullopt);
 			isSceneRestartRequested_ = true;
 			return SceneType::Game;
 		}
@@ -447,6 +448,8 @@ void GameScene::DrawImGui() {
 #endif // USE_IMGUI
 }
 
+#ifdef USE_IMGUI
+
 void GameScene::DrawMapGeneratorImGui() {
 	if (map_) {
 		map_->DrawImGui(player_.get());
@@ -506,6 +509,8 @@ bool GameScene::ApplyPendingEditorOperations() {
 	hud_.SetSeed(gameSeed_);
 	return true;
 }
+
+#endif // USE_IMGUI
 
 void GameScene::UpdateMiniMap() {
 	if (!map_ || !player_) {
@@ -764,11 +769,11 @@ void GameScene::FinishPlayLog(System::PlayEndReason reason) {
 	playLogRecorder_.Finish(reason, player_->GetStatus().currentMoney, player_->GetKarmaCount(), std::move(relics));
 
 	// GameSceneの破棄後も終了時の装備と戦績を参照できる値の複製
-	commonData_.SetLastPlayResult(playLogRecorder_.GetData());
+	sceneSharedData_.SetLastPlayResult(playLogRecorder_.GetData());
 
 	// 終了確定の一回だけ登録し、中断とリトライの途中スコアをランキングから除外
 	if (reason == System::PlayEndReason::Death) {
-		commonData_.GetScoreRanking().RecordScore(playLogRecorder_.GetData().score);
+		sceneSharedData_.GetScoreRanking().RecordScore(playLogRecorder_.GetData().score);
 	}
 
 	// 死亡以外の終了要求でも演出完了待ちの間にゲーム状態が変化しない停止状態へ移行

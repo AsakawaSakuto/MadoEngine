@@ -22,7 +22,8 @@ public:
 	virtual void Update(float deltaTime) = 0;
 
 	/// @brief 描画処理（派生クラスでオーバーライド）
-	virtual void Draw(Camera& useCamera) = 0;
+	/// @param useCamera 読み取り専用の描画Camera
+	virtual void Draw(const Camera& useCamera) = 0;
 
 	// ===== Transform関連 =====
 

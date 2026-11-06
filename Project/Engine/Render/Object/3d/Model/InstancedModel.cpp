@@ -179,7 +179,7 @@ void InstancedModel::Update(float deltaTime) {
 	}
 }
 
-void InstancedModel::Draw(Camera& useCamera) {
+void InstancedModel::Draw(const Camera& useCamera) {
 	if (!sharedData_ || !isVisible_ || instances_.empty()) {
 		return;
 	}

@@ -1,4 +1,7 @@
 #include "ParticleEditor.h"
+
+#ifdef USE_IMGUI
+
 #include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "TextureSelector.h"
@@ -16,8 +19,6 @@
 #include <vector>
 
 namespace {
-
-#ifdef USE_IMGUI
 
 	using namespace MadoEngine::Particle;
 
@@ -648,14 +649,11 @@ namespace {
 		return particleSystem.Play(assetName, desc);
 	}
 
-#endif // USE_IMGUI
-
 } // namespace
 
 namespace MadoEngine::Editor {
 
 	void DrawParticleSystemEditorUI() {
-#ifdef USE_IMGUI
 		ParticleSystem3d& particleSystem = ParticleSystem3d::GetInstance();
 
 		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
@@ -1119,7 +1117,8 @@ namespace MadoEngine::Editor {
 			);
 		}
 		ImGui::End();
-#endif // USE_IMGUI
 	}
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

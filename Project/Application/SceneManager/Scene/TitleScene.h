@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneManager/CommonData.h"
+#include "SceneManager/SceneSharedData.h"
 #include "SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
 #include "UI/Title/WeaponSelectIcon/WeaponSelectIcon.h"
@@ -13,8 +13,8 @@
 class TitleScene : public IScene {
 public:
 	/// @brief コンストラクタ
-	/// @param commonData Sceneをまたいで保持するApplication共通データ
-	explicit TitleScene(CommonData& commonData);
+	/// @param sceneSharedData シーンをまたいで保持する共有データと共通システム
+	explicit TitleScene(SceneSharedData& sceneSharedData);
 
 	/// @brief デストラクタ
 	~TitleScene() override;
@@ -59,7 +59,7 @@ private:
 	/// @brief 選択位置に対応するアイコン強調と武器説明の反映
 	void RefreshWeaponSelection();
 
-	CommonData& commonData_;
+	SceneSharedData& sceneSharedData_;
 	std::optional<std::size_t> selectedSeedIndex_;
 
 	static constexpr std::size_t kWeaponColumnCount = 6;

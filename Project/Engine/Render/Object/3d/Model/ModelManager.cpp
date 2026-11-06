@@ -937,7 +937,7 @@ void ModelManager::DrawAll(SceneType currentSceneType) {
 	DrawLayerMask(currentSceneType, activeCamera_, Render::kAllRenderLayers);
 }
 
-void ModelManager::DrawAll(SceneType currentSceneType, Camera& camera) {
+void ModelManager::DrawAll(SceneType currentSceneType, const Camera& camera) {
 	DrawLayerMask(currentSceneType, camera, Render::kAllRenderLayers);
 }
 
@@ -962,7 +962,7 @@ void ModelManager::DrawLayer(SceneType currentSceneType, Render::RenderLayer lay
 	DrawLayerMask(currentSceneType, activeCamera_, Render::ToRenderLayerMask(layer));
 }
 
-void ModelManager::DrawLayer(SceneType currentSceneType, Camera& camera, Render::RenderLayer layer) {
+void ModelManager::DrawLayer(SceneType currentSceneType, const Camera& camera, Render::RenderLayer layer) {
 	DrawLayerMask(currentSceneType, camera, Render::ToRenderLayerMask(layer));
 }
 
@@ -970,12 +970,12 @@ void ModelManager::DrawLayerMask(SceneType currentSceneType, Render::RenderLayer
 	DrawLayerMask(currentSceneType, activeCamera_, layerMask);
 }
 
-void ModelManager::DrawLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask) {
+void ModelManager::DrawLayerMask(SceneType currentSceneType, const Camera& camera, Render::RenderLayerMask layerMask) {
 	DrawOpaqueLayerMask(currentSceneType, camera, layerMask);
 	DrawTransparentLayerMask(currentSceneType, camera, layerMask);
 }
 
-void ModelManager::DrawOpaqueLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask) {
+void ModelManager::DrawOpaqueLayerMask(SceneType currentSceneType, const Camera& camera, Render::RenderLayerMask layerMask) {
 	activeCamera_ = camera;
 	for (const auto& [name, handle] : modelNameToHandle_) {
 		(void)name;
@@ -995,7 +995,7 @@ void ModelManager::DrawOpaqueLayerMask(SceneType currentSceneType, Camera& camer
 	}
 }
 
-void ModelManager::DrawTransparentLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask) {
+void ModelManager::DrawTransparentLayerMask(SceneType currentSceneType, const Camera& camera, Render::RenderLayerMask layerMask) {
 	activeCamera_ = camera;
 	std::vector<IRenderObject3d*> drawTargets;
 	drawTargets.reserve(modelNameToHandle_.size() + instancedModelNameToHandle_.size());

@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "WeaponStatus.h"
 #include <string>
 
@@ -28,3 +31,5 @@ namespace Weapon {
 		char statusName_[64] = "Pistol";
 	};
 }
+
+#endif // USE_IMGUI

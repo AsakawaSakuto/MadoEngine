@@ -1,4 +1,8 @@
 #include "EnemyEditor.h"
+
+#ifdef USE_IMGUI
+
+#include "ImGuiHeaders.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -7,14 +11,9 @@
 #include <limits>
 #include <string>
 
-#ifdef USE_IMGUI
-#include "ImGuiHeaders.h"
-#endif // USE_IMGUI
-
 namespace Enemy {
 
 	namespace {
-#ifdef USE_IMGUI
 		constexpr std::array<Data::Type, 5> kEditableTypes = {
 			Data::Type::Normal,
 			Data::Type::Runner,
@@ -70,7 +69,6 @@ namespace Enemy {
 
 			return static_cast<std::uint64_t>(enemySpawnCount);
 		}
-#endif // USE_IMGUI
 	} // namespace
 
 	void Editor::Initialize(Spawner* spawner, Manager* manager) {
@@ -81,7 +79,6 @@ namespace Enemy {
 	}
 
 	void Editor::DrawImGui() {
-#ifdef USE_IMGUI
 		Settings& settings = Settings::GetInstance();
 		bool settingsChanged = false;
 
@@ -125,11 +122,9 @@ namespace Enemy {
 		}
 
 		ImGui::End();
-#endif // USE_IMGUI
 	}
 
 	bool Editor::DrawEnemyStatus() {
-#ifdef USE_IMGUI
 		Settings& settings = Settings::GetInstance();
 		bool settingsChanged = false;
 
@@ -191,13 +186,9 @@ namespace Enemy {
 			"Marker Scale", &eliteSettings.markerScale.x, 0.01f, 0.01f, 100.0f, "%.2f");
 
 		return settingsChanged;
-#else
-		return false;
-#endif // USE_IMGUI
 	}
 
 	bool Editor::DrawEnemySpawner() {
-#ifdef USE_IMGUI
 		Settings& settings = Settings::GetInstance();
 		bool settingsChanged = false;
 
@@ -289,14 +280,10 @@ namespace Enemy {
 		}
 		ImGui::PopID();
 		return settingsChanged;
-#else
-		return false;
-#endif // USE_IMGUI
 	}
 
 	bool Editor::DrawWave(std::size_t index, WaveSettings& wave, bool& outRemoveRequested) {
 		outRemoveRequested = false;
-#ifdef USE_IMGUI
 		bool settingsChanged = false;
 		ImGui::PushID(static_cast<int>(index));
 		const std::uint64_t plannedEnemySpawnCount = CalculatePlannedEnemySpawnCount(wave);
@@ -340,15 +327,9 @@ namespace Enemy {
 		}
 		ImGui::PopID();
 		return settingsChanged;
-#else
-		(void)index;
-		(void)wave;
-		return false;
-#endif // USE_IMGUI
 	}
 
 	bool Editor::DrawWaveSpawnSettings(WaveSpawnSettings& waveSettings) {
-#ifdef USE_IMGUI
 		bool settingsChanged = false;
 		ImGui::SeparatorText("生成");
 		settingsChanged |= ImGui::DragFloat(
@@ -456,15 +437,10 @@ namespace Enemy {
 			"%.2f");
 		ImGui::Unindent();
 		return settingsChanged;
-#else
-		(void)waveSettings;
-		return false;
-#endif // USE_IMGUI
 	}
 
 	bool Editor::DrawBonusWaveSpawnSettings(BonusWaveSettings& waveSettings) {
 		bool settingsChanged = DrawWaveSpawnSettings(waveSettings);
-#ifdef USE_IMGUI
 
 		// 通常Waveの編集項目と分離し、Bonus開始後の一回あたり生成数だけを段階的に増加
 		ImGui::TextUnformatted("生成数");
@@ -480,8 +456,9 @@ namespace Enemy {
 			"1回の増加量##SpawnCount", ImGuiDataType_U32, &waveSettings.spawnCountIncrease.amount, 1.0f);
 		ImGui::TextDisabled("Bonus Wave開始後、指定間隔ごとに1回の生成数へ加算（0体で無効）");
 		ImGui::Unindent();
-#endif // USE_IMGUI
 		return settingsChanged;
 	}
 
 } // namespace Enemy
+
+#endif // USE_IMGUI

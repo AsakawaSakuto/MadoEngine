@@ -1,4 +1,9 @@
 #include "TextEditorUI.h"
+
+#ifdef USE_IMGUI
+
+#include "Utility/Settings/SceneObjectSettings.h"
+#include "ImGuiHeaders.h"
 #include "Utility/AssetKey.h"
 #include "EditorToolbar.h"
 #include "Transform2DEditor.h"
@@ -11,8 +16,6 @@
 #include <optional>
 
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI
 
 namespace {
 	std::optional<TextHandle> requestedSelection;
@@ -232,18 +235,6 @@ namespace {
 	}
 
 } // namespace
-
-#endif // USE_IMGUI
-
-bool LoadTextEditorJson() {
-	return TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json");
-}
-
-bool LoadTextEditorJson(SceneType sceneType) {
-	return TextManager::GetInstance().LoadFromFile("Assets/Json/TextObjects.json", sceneType);
-}
-
-#ifdef USE_IMGUI
 
 void DrawTextInspector(Text& text) {
 	Text* selectedText = &text;
@@ -478,6 +469,6 @@ void DrawTextManagerEditorUI(SceneType currentSceneType) {
 	ImGui::End();
 }
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

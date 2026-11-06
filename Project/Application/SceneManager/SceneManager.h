@@ -1,14 +1,14 @@
 #pragma once
-#include "CommonData.h"
+#include "SceneSharedData.h"
 #include "SceneBgmController.h"
 #include "SceneType.h"
 #include "Render/Object/2d/IRenderLayerBatchContext.h"
 #include "Render/Object/RenderLayer.h"
 #include "Render/Object/3d/Model/ModelManager.h"
-#include <memory>
 #include <functional>
 #include <map>
 #include <memory>
+#include <type_traits>
 
 class IScene;
 
@@ -18,7 +18,7 @@ class SceneManager
 {
 public:
 	/// @brief シーン生成関数の型
-	using CreatorFunc = std::function<std::unique_ptr<IScene>(CommonData&)>;
+	using CreatorFunc = std::function<std::unique_ptr<IScene>(SceneSharedData&)>;
 
 	/// @brief コンストラクタ
 	/// @param parameterStore Sceneより長く保持する設定値管理
@@ -31,6 +31,29 @@ public:
 	/// @param type シーンのタイプ
 	/// @param creator シーン生成関数
 	void RegisterScene(SceneType type, CreatorFunc creator);
+
+	/// @brief 指定したシーン型の生成関数を登録
+	/// @tparam TScene 登録するISceneの派生型
+	/// @param type 登録先のシーン種別
+	template <typename TScene>
+	void RegisterScene(SceneType type) {
+		static_assert(std::is_base_of_v<IScene, TScene>, "登録するシーンはISceneの派生型である必要があります");
+		static_assert(
+			std::is_constructible_v<TScene, SceneSharedData&> || std::is_default_constructible_v<TScene>,
+			"登録するシーンにはSceneSharedData&または引数なしのコンストラクタが必要です"
+		);
+
+		// 登録時は生成関数のみを保持し、初期化済みのシーン共有データをシーン切替時に受け渡し
+		RegisterScene(type, [](SceneSharedData& sceneSharedData) -> std::unique_ptr<IScene> {
+
+			// シーン共有データを受け取るコンストラクタを優先し、不要なシーンは引数なしで生成
+			if constexpr (std::is_constructible_v<TScene, SceneSharedData&>) {
+				return std::make_unique<TScene>(sceneSharedData);
+			} else {
+				return std::make_unique<TScene>();
+			}
+		});
+	}
 
 	/// @brief SceneManagerを初期化
 	/// @param initialScene 初期シーンのタイプ
@@ -135,7 +158,7 @@ private:
 	/// @param type 遷移先のシーンのタイプ
 	void ChangeScene(SceneType type);
 
-	CommonData commonData_;                     // Sceneをまたいで保持するApplication共通データ
+	SceneSharedData sceneSharedData_; // シーンをまたいで保持する共有データと共通システム
 	SceneBgmController sceneBgmController_;     // Scene固有BGMと遷移音量の管理
 	std::map<SceneType, CreatorFunc> creators_;  // 登録されたシーン生成関数
 	std::unique_ptr<IScene> currentScene_;       // 現在のシーン

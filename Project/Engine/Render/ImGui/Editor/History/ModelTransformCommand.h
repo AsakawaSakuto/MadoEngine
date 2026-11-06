@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_IMGUI
+
 #include "EditorCommand.h"
 #include "Math/Transform.h"
 #include "Render/Object/ObjectHandle.h"
@@ -36,3 +38,5 @@ private:
 };
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

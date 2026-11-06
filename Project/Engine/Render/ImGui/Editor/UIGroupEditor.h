@@ -1,29 +1,10 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "SceneManager/SceneType.h"
 #include <string>
 
-namespace MadoEngine::Editor {
-
-/// @brief 同じシーンの描画要素を復元した後にGroup設定を読込
-/// @param sceneType 読込対象のシーン
-/// @return 読込に成功した場合はtrue
-bool LoadUIGroupEditorJson(SceneType sceneType);
-/// @brief Groupと参照する描画要素の編集用設定を保存
-/// @param sceneType 保存対象のシーン
-/// @return 全ての保存に成功した場合はtrue
-bool SaveUIGroupEditorJson(SceneType sceneType);
-
-/// @brief 新規要素の生成情報を含むGroup Editorの履歴を取得
-/// @return Group・Sprite・Textの編集用Snapshot文字列
-std::string CaptureUIGroupEditorState();
-/// @brief 新規作成と削除も含めてGroup Editorの履歴を復元
-/// @param snapshot 復元するSnapshot文字列
-/// @return 形式を検証して復元できた場合はtrue
-bool RestoreUIGroupEditorState(const std::string& snapshot);
-
-} // namespace MadoEngine::Editor
-
-#ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
 #include "Render/Object/ObjectHandle.h"
 namespace MadoEngine::Editor {
@@ -42,4 +23,5 @@ void DrawUIGroupEditorUI(SceneType currentSceneType);
 void DrawUIGroupOriginOverlay(const ImVec2& imageMin, const ImVec2& imageSize);
 
 } // namespace MadoEngine::Editor
-#endif
+
+#endif // USE_IMGUI

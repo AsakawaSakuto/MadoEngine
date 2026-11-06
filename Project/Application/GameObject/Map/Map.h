@@ -40,9 +40,11 @@ public:
 	/// @param isEnabled 受付可能にする場合はtrue
 	void SetEventActionEnabled(MapEventAction action, bool isEnabled);
 
+#ifdef USE_IMGUI
 	/// @brief Map調整用のImGuiを描画
 	/// @param player プレビューへ表示するPlayer
 	void DrawImGui(const Player::Base* player);
+#endif // USE_IMGUI
 
 	/// @brief 保留中のEditor再生成要求を適用
 	/// @return Mapを再生成した場合はtrue

@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "Render/ImGui/Editor/AudioEditor.h"
 #include "Render/ImGui/Editor/CameraManagerEditor.h"
 #include "Render/ImGui/Editor/CylinderEditor.h"
@@ -15,3 +18,5 @@
 #include "Render/ImGui/Editor/SpriteEditor.h"
 #include "Render/ImGui/Editor/TextEditorUI.h"
 #include "Render/ImGui/Editor/UIGroupEditor.h"
+
+#endif // USE_IMGUI

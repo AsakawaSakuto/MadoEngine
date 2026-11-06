@@ -72,9 +72,11 @@ void Map::SetEventActionEnabled(MapEventAction action, bool isEnabled) {
 	interactionController_.SetEventActionEnabled(action, isEnabled);
 }
 
+#ifdef USE_IMGUI
 void Map::DrawImGui(const Player::Base* player) {
 	editor_.DrawImGui({ appliedSettings_, mapBlocks_, eventObjects_, player });
 }
+#endif // USE_IMGUI
 
 bool Map::ApplyPendingEditorGeneration() {
 	const std::optional<MapGenerationSettings> settings = editor_.ConsumePendingGeneration();

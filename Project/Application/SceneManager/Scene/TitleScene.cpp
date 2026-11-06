@@ -11,8 +11,8 @@ namespace {
 	constexpr float kWeaponSelectionStickNeutralThreshold = 0.2f;
 }
 
-TitleScene::TitleScene(CommonData& commonData)
-	: commonData_(commonData) {}
+TitleScene::TitleScene(SceneSharedData& sceneSharedData)
+	: sceneSharedData_(sceneSharedData) {}
 
 TitleScene::~TitleScene() {}
 
@@ -34,7 +34,7 @@ void TitleScene::Initialize() {
 	MyCollider::RegisterCollider("TitleGround", CollisionTag::MapBlock, &groundCollider_, &groundPosition_, 1.0f);
 
 	player_ = std::make_unique<Player::Base>();
-	player_->Initialize(commonData_.GetParameterStore(), {}, SceneType::Title);
+	player_->Initialize(sceneSharedData_.GetParameterStore(), {}, SceneType::Title);
 
 	MapLimit titleMapLimit;
 	titleMapLimit.min.x = -kTitleMapHorizontalLimit;
@@ -56,7 +56,7 @@ void TitleScene::Initialize() {
 SceneType TitleScene::Update(float dt) {
 	SceneType nextSceneType = SceneType::Title;
 	const SceneTransitionController& transitionController =
-		commonData_.GetSceneTransitionController();
+		sceneSharedData_.GetSceneTransitionController();
 
 	// Player移動後の座標でColliderと接地状態を確定して描画姿勢へ反映
 	player_->Update(dt);
@@ -74,15 +74,15 @@ SceneType TitleScene::Update(float dt) {
 	// 遷移中の連続入力で初期武器とSeed要求を上書きしないため決定操作を制限
 	if (!transitionController.IsTransitioning() && MyInput::Trigger("Decision")) {
 		const std::vector<System::GameSeedSystem::HistoryEntry>& history =
-			commonData_.GetGameSeedSystem().GetHistory();
+			sceneSharedData_.GetGameSeedSystem().GetHistory();
 		std::optional<std::uint32_t> requestedSeed;
 		if (selectedSeedIndex_.has_value() && selectedSeedIndex_.value() < history.size()) {
 			requestedSeed = history[selectedSeedIndex_.value()].seed;
 		}
 
 		// 遷移演出中の選択変更に影響されないよう受付時の武器とSeed要求を固定
-		commonData_.SetInitialWeaponType(Projectile::kPlayableWeaponTypes[selectedWeaponIndex_]);
-		commonData_.GetGameSeedSystem().RequestSeed(requestedSeed);
+		sceneSharedData_.SetInitialWeaponType(Projectile::kPlayableWeaponTypes[selectedWeaponIndex_]);
+		sceneSharedData_.GetGameSeedSystem().RequestSeed(requestedSeed);
 		MyAudio::Play("UpgradeCardDecision");
 		nextSceneType = SceneType::Game;
 	}
@@ -114,7 +114,7 @@ void TitleScene::InitializeWeaponSelection() {
 		};
 		const Projectile::Type weaponType = Projectile::kPlayableWeaponTypes[index];
 		weaponIcons_[index].Initialize(weaponType, position);
-		if (weaponType == commonData_.GetInitialWeaponType()) {
+		if (weaponType == sceneSharedData_.GetInitialWeaponType()) {
 			selectedWeaponIndex_ = index;
 		}
 	}
@@ -227,7 +227,7 @@ void TitleScene::Draw() {
 void TitleScene::DrawImGui() {
 #ifdef USE_IMGUI
 	
-	System::GameSeedSystem& gameSeedSystem = commonData_.GetGameSeedSystem();
+	System::GameSeedSystem& gameSeedSystem = sceneSharedData_.GetGameSeedSystem();
 	const std::vector<System::GameSeedSystem::HistoryEntry>& history = gameSeedSystem.GetHistory();
 
 	ImGui::Begin("Seed History");
@@ -238,7 +238,7 @@ void TitleScene::DrawImGui() {
 		ImGui::TextDisabled("No Seed history");
 	} else {
 		const bool isSelectionLocked =
-			commonData_.GetSceneTransitionController().IsTransitioning();
+			sceneSharedData_.GetSceneTransitionController().IsTransitioning();
 		ImGui::BeginDisabled(isSelectionLocked);
 
 		const ImGuiTableFlags tableFlags =

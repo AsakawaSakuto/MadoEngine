@@ -1,8 +1,9 @@
 #include "RelicEditor.h"
-#include "RelicSystem.h"
+
 #ifdef USE_IMGUI
+
+#include "RelicSystem.h"
 #include "ImGuiHeaders.h"
-#endif // USE_IMGUI
 #include <algorithm>
 #include <cstring>
 #include <format>
@@ -10,7 +11,6 @@
 
 namespace {
 
-#ifdef USE_IMGUI
 constexpr std::array<const char*, static_cast<std::size_t>(Relic::Stat::Count)> kStatNames = {
 	"与ダメージ",
 	"最大HP",
@@ -95,7 +95,6 @@ bool DrawPeriodicEffectEditor(Relic::PeriodicEffect& effect, std::size_t effectI
 	ImGui::PopID();
 	return shouldRemove;
 }
-#endif // USE_IMGUI
 
 }
 
@@ -109,7 +108,6 @@ namespace Relic {
 
 	void Editor::DrawImGui(System& relicSystem) {
 
-#ifdef USE_IMGUI
 
 		// 定義が存在しない場合も再読み込み操作だけを提供
 		ImGui::Begin("レリック定義");
@@ -284,11 +282,6 @@ namespace Relic {
 
 		ImGui::End();
 
-#else
-
-		(void)relicSystem;
-
-#endif // USE_IMGUI
 	}
 
 	bool Editor::Save(System& relicSystem) const {
@@ -347,3 +340,5 @@ namespace Relic {
 	}
 
 }
+
+#endif // USE_IMGUI

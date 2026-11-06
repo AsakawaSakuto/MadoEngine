@@ -22,10 +22,10 @@ Terminal::Terminal(HINSTANCE hInstance) {
 	sceneManager_ = std::make_unique<SceneManager>(execution_->GetParameterStore());
 
 	// 初期Scene生成前に利用可能なSceneTypeとFactoryを登録
-	sceneManager_->RegisterScene(SceneType::Test,   [](CommonData&) { return std::make_unique<TestScene>(); });
-	sceneManager_->RegisterScene(SceneType::Title,  [](CommonData& commonData) { return std::make_unique<TitleScene>(commonData); });
-	sceneManager_->RegisterScene(SceneType::Game,   [](CommonData& commonData) { return std::make_unique<GameScene>(commonData); });
-	sceneManager_->RegisterScene(SceneType::Result, [](CommonData& commonData) { return std::make_unique<ResultScene>(commonData); });
+	sceneManager_->RegisterScene<TestScene>(SceneType::Test);
+	sceneManager_->RegisterScene<TitleScene>(SceneType::Title);
+	sceneManager_->RegisterScene<GameScene>(SceneType::Game);
+	sceneManager_->RegisterScene<ResultScene>(SceneType::Result);
 	sceneManager_->Initialize(SceneType::Title);
 
 	// 初期Sceneの読み込み時間を最初の更新へ持ち込まない計測基準の再設定

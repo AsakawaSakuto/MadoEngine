@@ -342,8 +342,8 @@ public:
 
 	/// @brief 指定Cameraで現在SceneのModelを描画
 	/// @param currentSceneType 現在のScene
-	/// @param camera Camera
-	void DrawAll(SceneType currentSceneType, Camera& camera);
+	/// @param camera 読み取り専用の描画Camera
+	void DrawAll(SceneType currentSceneType, const Camera& camera);
 
 	/// @brief ShadowMapへModelを描画
 	/// @param currentSceneType 現在のScene
@@ -371,9 +371,9 @@ public:
 
 	/// @brief 指定CameraとLayerでModelを描画
 	/// @param currentSceneType 現在のScene
-	/// @param camera Camera
+	/// @param camera 読み取り専用の描画Camera
 	/// @param layer 描画Layer
-	void DrawLayer(SceneType currentSceneType, Camera& camera, Render::RenderLayer layer);
+	void DrawLayer(SceneType currentSceneType, const Camera& camera, Render::RenderLayer layer);
 
 	/// @brief 指定LayerMaskのModelを描画
 	/// @param currentSceneType 現在のScene
@@ -382,21 +382,21 @@ public:
 
 	/// @brief 指定CameraとLayerMaskでModelを描画
 	/// @param currentSceneType 現在のScene
-	/// @param camera Camera
+	/// @param camera 読み取り専用の描画Camera
 	/// @param layerMask 描画LayerMask
-	void DrawLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask);
+	void DrawLayerMask(SceneType currentSceneType, const Camera& camera, Render::RenderLayerMask layerMask);
 
 	/// @brief 指定CameraとLayerMaskで不透明Modelを描画
 	/// @param currentSceneType 現在のScene
-	/// @param camera Camera
+	/// @param camera 読み取り専用の描画Camera
 	/// @param layerMask 描画LayerMask
-	void DrawOpaqueLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask);
+	void DrawOpaqueLayerMask(SceneType currentSceneType, const Camera& camera, Render::RenderLayerMask layerMask);
 
 	/// @brief 指定CameraとLayerMaskで透明Modelを奥から手前へ描画
 	/// @param currentSceneType 現在のScene
-	/// @param camera Camera
+	/// @param camera 読み取り専用の描画Camera
 	/// @param layerMask 描画LayerMask
-	void DrawTransparentLayerMask(SceneType currentSceneType, Camera& camera, Render::RenderLayerMask layerMask);
+	void DrawTransparentLayerMask(SceneType currentSceneType, const Camera& camera, Render::RenderLayerMask layerMask);
 
 	/// @brief 指定LayerMaskのModelをShadowMapへ描画
 	/// @param currentSceneType 現在のScene

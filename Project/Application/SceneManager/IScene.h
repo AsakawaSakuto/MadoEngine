@@ -2,7 +2,9 @@
 #include "MathHeaders.h"
 #include "RenderHeaders.h"
 #include "UtilityHeaders.h"
+#ifdef USE_IMGUI
 #include "ImGuiHeaders.h"
+#endif // USE_IMGUI
 #include "SceneType.h"
 #include <string>
 
@@ -58,10 +60,6 @@ public:
 	/// @brief Frame末尾に保留中のEditor操作を適用
 	/// @return Scene状態を変更した場合はtrue
 	virtual bool ApplyPendingEditorOperations() { return false; }
-
-	/// @brief 描画に使用するCameraを取得
-	/// @return Sceneの描画Camera
-	Camera& GetCamera() { return cameraManager_.GetRenderCamera(); }
 
 	/// @brief 描画に使用する読み取り専用Cameraを取得
 	/// @return Sceneの描画Camera

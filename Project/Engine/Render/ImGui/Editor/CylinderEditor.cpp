@@ -1,4 +1,7 @@
 #include "CylinderEditor.h"
+
+#ifdef USE_IMGUI
+
 #include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "EffectEmitterEditorCommon.h"
@@ -19,8 +22,6 @@
 #include <vector>
 
 namespace {
-
-#ifdef USE_IMGUI
 
 	using namespace MadoEngine::Effect;
 
@@ -1071,14 +1072,11 @@ namespace {
 		assetSnapshot.clear();
 	}
 
-#endif // USE_IMGUI
-
 } // namespace
 
 namespace MadoEngine::Editor {
 
 	void DrawCylinderEffectEditorUI() {
-#ifdef USE_IMGUI
 		PrimitiveEffectSystem3d& system = PrimitiveEffectSystem3d::GetInstance();
 
 		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
@@ -1493,7 +1491,8 @@ namespace MadoEngine::Editor {
 			}
 		}
 		ImGui::End();
-#endif // USE_IMGUI
 	}
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

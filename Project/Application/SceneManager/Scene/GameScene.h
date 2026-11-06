@@ -1,19 +1,16 @@
 #pragma once
-#include "SceneManager/CommonData.h"
+#include "SceneManager/SceneSharedData.h"
 #include "SceneManager/IScene.h"
 #include "GameObject/Player/Player.h"
 #include "GameObject/Map/Map.h"
 #include "GameObject/Map/MapLimit.h"
-#include "GameObject/Enemy/EnemyEditor.h"
 #include "GameObject/Enemy/EnemyManager.h"
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
-#include "GameObject/Weapon/WeaponStatusEditor.h"
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"
 #include "GameObject/Relic/RelicSystem.h"
-#include "GameObject/Relic/RelicEditor.h"
 #include "Utility/Light/LightManager.h"
 #include "Utility/Random.h"
 #include "UI/Game/GameHud.h"
@@ -23,13 +20,19 @@
 #include "System/RewardSelection/RewardSelectionController.h"
 #include <cstdint>
 
+#ifdef USE_IMGUI
+#include "GameObject/Enemy/EnemyEditor.h"
+#include "GameObject/Relic/RelicEditor.h"
+#include "GameObject/Weapon/WeaponStatusEditor.h"
+#endif // USE_IMGUI
+
 /// @brief ゲームシーン
 /// @details ゲーム本編の更新順序、システム間の通知、Scene遷移の管理
 class GameScene : public IScene {
 public:
 	/// @brief コンストラクタ
-	/// @param commonData Sceneをまたいで保持するApplication共通データ
-	explicit GameScene(CommonData& commonData);
+	/// @param sceneSharedData シーンをまたいで保持する共有データと共通システム
+	explicit GameScene(SceneSharedData& sceneSharedData);
 
 	/// @brief デストラクタ
 	~GameScene() override;
@@ -67,6 +70,7 @@ public:
 	/// @brief ImGui描画処理
 	void DrawImGui() override;
 
+#ifdef USE_IMGUI
 	/// @brief Map生成Editorを提供しているか確認
 	/// @return Map生成Editorを提供している場合はtrue
 	bool HasMapGeneratorEditor() const override { return map_ != nullptr; }
@@ -93,6 +97,7 @@ public:
 	/// @brief Frame末尾に保留中のMap再生成を適用
 	/// @return Mapを再生成した場合はtrue
 	bool ApplyPendingEditorOperations() override;
+#endif // USE_IMGUI
 
 	/// @brief シャドウマップ生成時に中心へ置くワールド座標を取得
 	/// @return Playerのワールド座標
@@ -156,7 +161,7 @@ private:
 	/// @param intensity 低体力Vignetteの強度（0から1）
 	void SetLowHealthVignetteIntensity(float intensity);
 
-	CommonData& commonData_;
+	SceneSharedData& sceneSharedData_;
 	std::uint32_t gameSeed_ = 0;
 	
 	LightHandle playerPointLightHandle_{};
@@ -171,13 +176,15 @@ private:
 
 	std::unique_ptr<Enemy::Manager> enemyManager_;
 	std::unique_ptr<Enemy::Spawner> enemySpawner_;
+#ifdef USE_IMGUI
 	std::unique_ptr<Enemy::Editor> enemyEditor_;
+	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
+	Relic::Editor relicEditor_;
+#endif // USE_IMGUI
 
 	std::unique_ptr<Weapon::Inventory> weaponInventory_;
-	std::unique_ptr<Weapon::StatusEditor> weaponStatusEditor_;
 	std::unique_ptr<Weapon::UpgradeSystem> weaponUpgradeSystem_;
 	std::unique_ptr<Relic::System> relicSystem_;
-	Relic::Editor relicEditor_;
 	
 	UI::Game::GameHud hud_;
 	System::RewardSelectionController rewardSelectionController_;

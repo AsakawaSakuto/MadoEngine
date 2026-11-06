@@ -1,4 +1,9 @@
 #include "ModelEditor.h"
+
+#ifdef USE_IMGUI
+
+#include "Utility/Settings/SceneObjectSettings.h"
+#include "ImGuiHeaders.h"
 #include "EditorToolbar.h"
 #include "TextureSelector.h"
 #include "Render/Object/3d/Line/MyDebugLine.h"
@@ -14,10 +19,7 @@ namespace MadoEngine::Editor {
 
 	namespace {
 
-		const std::filesystem::path kModelEditorJsonPath = "Assets/Json/ModelObjects.json";
 		const std::filesystem::path kModelDirectoryPath = "Assets/Model";
-
-#ifdef USE_IMGUI
 
 		constexpr float kRadiansToDegrees = 57.29577951308232f;
 		constexpr float kDegreesToRadians = 0.017453292519943295f;
@@ -518,19 +520,7 @@ namespace MadoEngine::Editor {
 			DrawVertexSearch(model);
 		}
 
-#endif // USE_IMGUI
-
 	} // namespace
-
-	bool LoadModelEditorJson() {
-		return ModelManager::GetInstance().LoadFromFile(kModelEditorJsonPath);
-	}
-
-	bool LoadModelEditorJson(SceneType sceneType) {
-		return ModelManager::GetInstance().LoadFromFile(kModelEditorJsonPath, sceneType);
-	}
-
-#ifdef USE_IMGUI
 
 	void DrawModelManagerEditorUI(SceneType currentSceneType) {
 		ModelManager& manager = ModelManager::GetInstance();
@@ -668,6 +658,6 @@ namespace MadoEngine::Editor {
 		ImGui::End();
 	}
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

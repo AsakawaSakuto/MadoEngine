@@ -1,4 +1,7 @@
 #include "GuizmoEditor.h"
+
+#ifdef USE_IMGUI
+
 #include "EditorToolbar.h"
 #include "./History/EditorHistory.h"
 #include <array>
@@ -7,8 +10,6 @@
 #include <cstring>
 
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI 
 
     namespace {
         constexpr ImVec2 kEditorIconButtonSize = { 28.0f, 28.0f };
@@ -440,6 +441,6 @@ namespace MadoEngine::Editor {
         return isChanged;
     }
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

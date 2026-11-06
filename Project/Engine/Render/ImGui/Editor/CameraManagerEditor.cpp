@@ -1,7 +1,8 @@
 #include "CameraManagerEditor.h"
-#include "EditorToolbar.h"
 
 #ifdef USE_IMGUI
+
+#include "EditorToolbar.h"
 
 #include "ImGuiHeaders.h"
 #include "Utility/Camera/DebugCamera.h"

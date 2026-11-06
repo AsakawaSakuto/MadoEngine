@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef USE_IMGUI
+
 #include "EnemyManager.h"
 #include "EnemySettings.h"
 #include "EnemySpawner.h"
@@ -51,3 +54,5 @@ namespace Enemy {
 	};
 
 } // namespace Enemy
+
+#endif // USE_IMGUI

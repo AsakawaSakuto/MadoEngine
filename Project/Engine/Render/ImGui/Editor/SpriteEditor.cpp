@@ -1,4 +1,9 @@
 #include "SpriteEditor.h"
+
+#ifdef USE_IMGUI
+
+#include "Utility/Settings/SceneObjectSettings.h"
+#include "ImGuiHeaders.h"
 #include "EditorToolbar.h"
 #include "Transform2DEditor.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
@@ -16,10 +21,6 @@
 namespace MadoEngine::Editor {
 
 namespace {
-
-	const std::filesystem::path kSpriteEditorJsonPath = "Assets/Json/SpriteObjects.json";
-
-#ifdef USE_IMGUI
 
 	std::optional<SpriteHandle> requestedSelection;
 	constexpr float kTexturePreviewMaxSize = 64.0f;
@@ -510,19 +511,7 @@ namespace {
 		}
 	}
 
-#endif // USE_IMGUI
-
 } // namespace
-
-bool LoadSpriteEditorJson() {
-	return SpriteManager::GetInstance().LoadFromFile(kSpriteEditorJsonPath);
-}
-
-bool LoadSpriteEditorJson(SceneType sceneType) {
-	return SpriteManager::GetInstance().LoadFromFile(kSpriteEditorJsonPath, sceneType);
-}
-
-#ifdef USE_IMGUI
 
 void SelectSpriteEditorObject(SpriteHandle handle) {
 	requestedSelection = handle;
@@ -697,6 +686,6 @@ void DrawSpriteManagerEditorUI(SceneType currentSceneType) {
 	ImGui::End();
 }
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

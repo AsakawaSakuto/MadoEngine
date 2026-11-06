@@ -1,4 +1,7 @@
 #include "TextureSelector.h"
+
+#ifdef USE_IMGUI
+
 #include "ImGuiHeaders.h"
 #include "Core/TextureManager/TextureManager.h"
 #include <algorithm>
@@ -9,8 +12,6 @@
 #include <vector>
 
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI
 
 namespace {
 
@@ -366,6 +367,6 @@ bool TextureSelector::Draw(const char* label, std::string& selectedTextureName) 
 	return isChanged;
 }
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

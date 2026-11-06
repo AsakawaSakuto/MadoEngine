@@ -1,4 +1,7 @@
 #include "EffectSequenceEditor.h"
+
+#ifdef USE_IMGUI
+
 #include "EditorToolbar.h"
 #include "EffectAssetEditorCommon.h"
 #include "ImGuiHeaders.h"
@@ -17,8 +20,6 @@
 #include <vector>
 
 namespace {
-
-#ifdef USE_IMGUI
 
 	using namespace MadoEngine::EffectSequence;
 
@@ -279,14 +280,11 @@ namespace {
 		return changed;
 	}
 
-#endif // USE_IMGUI
-
 } // namespace
 
 namespace MadoEngine::Editor {
 
 	void DrawEffectSequenceEditorUI() {
-#ifdef USE_IMGUI
 		EffectSequenceSystem& system = EffectSequenceSystem::GetInstance();
 
 		// 選択、Preview、未保存SnapshotをFrame間で維持するEditor Session状態
@@ -801,7 +799,8 @@ namespace MadoEngine::Editor {
 			}
 		}
 		ImGui::End();
-#endif // USE_IMGUI
 	}
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

@@ -1,4 +1,7 @@
 #include "DocumentSnapshotCommand.h"
+
+#ifdef USE_IMGUI
+
 #include <utility>
 
 namespace MadoEngine::Editor {
@@ -50,3 +53,5 @@ std::size_t DocumentSnapshotCommand::GetHistoryDomain() const {
 }
 
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

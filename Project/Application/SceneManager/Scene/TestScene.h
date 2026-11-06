@@ -6,7 +6,6 @@
 #include "GameObject/Enemy/EnemyManager.h"
 #include "GameObject/Enemy/EnemySpawner.h"
 #include "GameObject/Weapon/WeaponInventory.h"
-#include "GameObject/Weapon/WeaponStatusEditor.h"
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
 #include "GameObject/Weapon/Projectile/ProjectileManager.h"
 #include "GameObject/Weapon/Projectile/ProjectileStatus.h"

@@ -1,6 +1,5 @@
 #include "SceneManager.h"
 #include "IScene.h"
-#include "ImGuiHeaders.h"
 #include "Utility/Logger/Logger.h"
 #include "Utility/Light/LightManager.h"
 #include "Render/Object/2d/Sprite/SpriteManager.h"
@@ -12,7 +11,11 @@
 #include "Render/Object/3d/RibbonEffect/RibbonEffectSystem3d.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include "EditorUIHeaders.h"
+#ifdef USE_IMGUI
+#include "ImGuiHeaders.h"
 #include "Render/ImGui/Editor/History/EditorHistory.h"
+#endif // USE_IMGUI
+#include "Utility/Settings/SceneObjectSettings.h"
 #include "../InputRegister.h"
 #include "../ColliderPairRegister.h"
 #include <cassert>
@@ -79,7 +82,7 @@ namespace {
 } // namespace
 
 SceneManager::SceneManager(MadoEngine::ParameterStore& parameterStore)
-	: commonData_(parameterStore)
+	: sceneSharedData_(parameterStore)
 	, currentScene_(nullptr)
 	, currentSceneType_(SceneType::Title)
 	, pendingSceneType_(SceneType::None)
@@ -94,8 +97,8 @@ SceneManager::~SceneManager() {
 
 	// Scene本体を終了してからScene寿命のResourceを管理Systemごとに破棄
 	const SceneType previousSceneType = currentSceneType_;
-	MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
+	MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 	MadoEngine::Editor::ResetModelGizmoOnSceneChange(selectedModel_);
 #else
 	selectedModel_ = {};
@@ -125,7 +128,7 @@ void SceneManager::Initialize(SceneType initialScene) {
 	// Scene生成前に共通入力Action、衝突Pair、永続Applicationデータを初期化
 	RegisterInput();
 	RegisterColliderPair();
-	commonData_.Initialize();
+	sceneSharedData_.Initialize();
 
 	ChangeScene(initialScene);
 
@@ -133,7 +136,7 @@ void SceneManager::Initialize(SceneType initialScene) {
 }
 
 void SceneManager::Update(float dt) {
-	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
+	SceneTransitionController& transitionController = sceneSharedData_.GetSceneTransitionController();
 	transitionController.Update(dt);
 
 	if (currentScene_) {
@@ -203,7 +206,7 @@ void SceneManager::DrawSceneLayerMask(MadoEngine::Render::RenderLayerMask layerM
 		return;
 	}
 
-	Camera& camera = currentScene_->GetCamera();
+	const Camera& camera = currentScene_->GetCamera();
 	if (MadoEngine::Render::ContainsRenderLayer(layerMask, MadoEngine::Render::RenderLayer::Debug)) {
 		MadoEngine::DebugLineManager::GetInstance().Draw(camera);
 	}
@@ -215,7 +218,7 @@ void SceneManager::DrawTransparentLayerMask(MadoEngine::Render::RenderLayerMask 
 		return;
 	}
 
-	Camera& camera = currentScene_->GetCamera();
+	const Camera& camera = currentScene_->GetCamera();
 
 	// 背景が完成したColor Targetへ透明Modelを奥から手前の順でAlpha Blend
 	MadoEngine::ModelManager::GetInstance().DrawTransparentLayerMask(currentSceneType_, camera, layerMask);
@@ -426,7 +429,7 @@ bool SceneManager::ApplyPendingSceneChange() {
 	pendingSceneType_ = SceneType::None;
 
 	ChangeScene(nextSceneType);
-	commonData_.GetSceneTransitionController().NotifySceneChanged(currentSceneType_);
+	sceneSharedData_.GetSceneTransitionController().NotifySceneChanged(currentSceneType_);
 	return true;
 }
 
@@ -452,11 +455,11 @@ void SceneManager::RequestConfirmedEditorSceneChange(SceneType type) {
 }
 
 float SceneManager::GetSceneTransitionEffectProgress() const {
-	return commonData_.GetSceneTransitionController().GetEffectProgress();
+	return sceneSharedData_.GetSceneTransitionController().GetEffectProgress();
 }
 
 bool SceneManager::IsSceneTransitioning() const {
-	return commonData_.GetSceneTransitionController().IsTransitioning();
+	return sceneSharedData_.GetSceneTransitionController().IsTransitioning();
 }
 
 void SceneManager::RequestSceneChange(SceneType type) {
@@ -472,7 +475,7 @@ void SceneManager::RequestSceneChange(SceneType type) {
 		return;
 	}
 
-	SceneTransitionController& transitionController = commonData_.GetSceneTransitionController();
+	SceneTransitionController& transitionController = sceneSharedData_.GetSceneTransitionController();
 	if (transitionController.Request(type)) {
 
 		// 遷移演出中の追加プレイを含めないよう受理時点で終了理由と戦績を確定
@@ -505,8 +508,8 @@ void SceneManager::ChangeScene(SceneType type) {
 
 		// 旧SceneのHandleが新Sceneへ残らないようScene寿命のResourceを生成前に破棄
 		const SceneType previousSceneType = currentSceneType_;
-		MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 #ifdef USE_IMGUI
+		MadoEngine::Editor::EditorHistory::GetInstance().Clear();
 		MadoEngine::Editor::ResetModelGizmoOnSceneChange(selectedModel_);
 #else
 		selectedModel_ = {};
@@ -526,7 +529,7 @@ void SceneManager::ChangeScene(SceneType type) {
 	}
 
 	// Editor管理Objectを復元してからScene固有初期化を実行
-	currentScene_ = it->second(commonData_);
+	currentScene_ = it->second(sceneSharedData_);
 	currentSceneType_ = type;
 	LoadEditorSceneObjects(currentSceneType_);
 	currentScene_->Initialize();

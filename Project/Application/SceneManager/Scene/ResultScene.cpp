@@ -3,15 +3,15 @@
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
 
-ResultScene::ResultScene(CommonData& commonData)
-	: commonData_(commonData) {}
+ResultScene::ResultScene(SceneSharedData& sceneSharedData)
+	: sceneSharedData_(sceneSharedData) {}
 
 ResultScene::~ResultScene() {}
 
 void ResultScene::Initialize() {
 	isScoreVisible_ = false;
-	const System::PlayLogData& result = commonData_.GetLastPlayResult();
-	const System::ScoreRanking& ranking = commonData_.GetScoreRanking();
+	const System::PlayLogData& result = sceneSharedData_.GetLastPlayResult();
+	const System::ScoreRanking& ranking = sceneSharedData_.GetScoreRanking();
 	std::optional<std::size_t> currentRank;
 
 	// ランキング対象のプレイ結果だけに今回の順位を渡し、中断後の古い記録の強調を防止
@@ -26,7 +26,7 @@ void ResultScene::Initialize() {
 SceneType ResultScene::Update(float dt) {
 
 	// Sceneの遷移演出中に持ち込まれた決定入力でページを飛ばさないガード
-	if (commonData_.GetSceneTransitionController().IsTransitioning()) {
+	if (sceneSharedData_.GetSceneTransitionController().IsTransitioning()) {
 		return SceneType::Result;
 	}
 

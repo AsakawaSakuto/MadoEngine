@@ -72,8 +72,8 @@ inline void DestroyByScene(SceneType sceneType) {
 }
 
 /// @brief 描画に使用するCameraを設定
-/// @param camera Camera
-inline void SetCamera(Camera& camera) {
+/// @param camera 読み取り専用の描画Camera
+inline void SetCamera(const Camera& camera) {
 	MadoEngine::ModelManager::GetInstance().SetCamera(camera);
 }
 

@@ -1,10 +1,10 @@
 #pragma once
 
+#ifdef USE_IMGUI
+
 #include <string>
 
 namespace MadoEngine::Editor {
-
-#ifdef USE_IMGUI
 
 	/// @brief テクスチャ選択とプレビューをまとめて描画するUI部品
 	class TextureSelector final {
@@ -23,6 +23,6 @@ namespace MadoEngine::Editor {
 		float previewMaxSize_ = 64.0f;
 	};
 
-#endif // USE_IMGUI
-
 } // namespace MadoEngine::Editor
+
+#endif // USE_IMGUI

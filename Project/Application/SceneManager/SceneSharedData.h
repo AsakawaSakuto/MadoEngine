@@ -6,18 +6,18 @@
 #include "System/ScoreRanking/ScoreRanking.h"
 #include "Utility/Parameter/ParameterStore.h"
 
-/// @brief Sceneをまたいで保持するApplication共通データ
-class CommonData final {
+/// @brief シーンをまたいで保持する共有データと共通システム
+class SceneSharedData final {
 public:
-	/// @brief Engine所有の設定値管理を共通データへ接続
+	/// @brief Engine所有の設定値管理をシーン共有データへ接続
 	/// @param parameterStore Sceneより長く保持する設定値管理
-	explicit CommonData(MadoEngine::ParameterStore& parameterStore) : parameterStore_(parameterStore) {}
+	explicit SceneSharedData(MadoEngine::ParameterStore& parameterStore) : parameterStore_(parameterStore) {}
 
 	/// @brief 調整用設定値管理を取得
 	/// @return Engine所有の設定値管理
 	MadoEngine::ParameterStore& GetParameterStore() { return parameterStore_; }
 
-	/// @brief Application共通データの初期化
+	/// @brief シーン共有データの初期化
 	void Initialize() {
 		gameSeedSystem_.Initialize();
 		scoreRanking_.Initialize();
