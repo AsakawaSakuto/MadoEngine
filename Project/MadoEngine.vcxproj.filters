@@ -167,6 +167,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Jar\Jar.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Chest\Chest.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Karma\Karma.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Anvil\Anvil.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\GameObject\Enemy\Type\EnemyTank.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.h" />
     <ClInclude Include="Engine\Math\Vector2.h">
       <Filter>�w�b�_�[ �t�@�C��</Filter>
     </ClInclude>

@@ -2,6 +2,14 @@
 #include "Utility/Collider/CollisionFunction.h"
 #include "Utility/Collider/MyCollider.h"
 
+void MapEventObjectBase::ApplyInteractionSettings(const MapEventObjectSettings& settings) {
+	MapEventObjectSettings validatedSettings = settings;
+	validatedSettings.Clamp();
+
+	// 登録済みColliderShapeの参照を保ったまま配置判定と同じ接触範囲へ更新
+	autoInteractionDuration_ = validatedSettings.autoInteractionDuration;
+	colliderShape_ = validatedSettings.CreateCollider(transform_.translate);
+}
 
 bool MapEventObjectBase::IsHitPlayer() const {
 	return MyCollider::IsHitWithTag(colliderName_, CollisionTag::PlayerHitBox);

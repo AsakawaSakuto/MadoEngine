@@ -22,6 +22,7 @@ void MapInteractionController::Reset() {
 		currentHitEventObject_->SetHighlighted(false);
 	}
 	currentHitEventObject_ = nullptr;
+	autoInteractionTimer_.Reset();
 	pendingEventRequests_.clear();
 	pendingInteractionEvents_.clear();
 
@@ -101,6 +102,7 @@ void MapInteractionController::Update(Player::Base& player, float deltaTime, std
 
 	if (currentHitEventObject_ != hitObject) {
 		interactionMarkerScaleTimer_.Reset();
+		autoInteractionTimer_.Reset();
 
 		// 接触対象が変化したフレームだけOutline表示を切り替え
 		if (currentHitEventObject_) {
@@ -114,24 +116,38 @@ void MapInteractionController::Update(Player::Base& player, float deltaTime, std
 		currentHitEventObject_ = hitObject;
 	}
 
-	HandleEventObjectInteraction(player, eventObjects);
+	HandleEventObjectInteraction(player, deltaTime, eventObjects);
 	UpdateInteractionMarker(deltaTime);
 	UpdateInteractionText(player);
 }
 
-void MapInteractionController::HandleEventObjectInteraction(Player::Base& player, std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects) {
-	if (!currentHitEventObject_ || !MyInput::Trigger("Interact")) {
+void MapInteractionController::HandleEventObjectInteraction(Player::Base& player, float deltaTime, std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects) {
+	if (!currentHitEventObject_) {
+		autoInteractionTimer_.Reset();
 		return;
 	}
 
 	MapEventObjectBase* interactedObject = currentHitEventObject_;
 	const MapEventRequest request = interactedObject->GetInteractionRequest();
-	if (!IsEventActionEnabled(request.action)) {
+
+	// 支払い不能や要求受付の停止中は計測を破棄し、操作可能になってから接触時間を計測
+	if (!IsEventActionEnabled(request.action) || !interactedObject->CanInteract(player)) {
+		autoInteractionTimer_.Reset();
+		return;
+	}
+
+	// 接触が続く同一対象だけを計測し、ボタン入力時は待ち時間に関係なく即時実行
+	if (!autoInteractionTimer_.IsActive() && !autoInteractionTimer_.IsFinished()) {
+		autoInteractionTimer_.Start(interactedObject->GetAutoInteractionDuration());
+	}
+	autoInteractionTimer_.Update(deltaTime);
+	if (!MyInput::Trigger("Interact") && !autoInteractionTimer_.IsFinished()) {
 		return;
 	}
 
 	// 外部Systemが要求を受け付けられる状態を確認してから支払いとObject削除を確定
 	if (!interactedObject->Interact(player)) {
+		autoInteractionTimer_.Reset();
 		return;
 	}
 	pendingInteractionEvents_.push_back(interactedObject->GetInteractionEvent());
@@ -156,6 +172,7 @@ void MapInteractionController::HandleEventObjectInteraction(Player::Base& player
 	}
 
 	currentHitEventObject_ = nullptr;
+	autoInteractionTimer_.Reset();
 }
 
 void MapInteractionController::UpdateInteractionMarker(float deltaTime) {

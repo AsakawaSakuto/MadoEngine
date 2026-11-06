@@ -58,12 +58,17 @@ public:
 	bool ReloadSettings();
 
 private:
+	/// @brief 各設定タブで共通の再生成操作を描画
+	/// @param appliedSettings 現在生成済みMapの設定
+	void DrawGenerationControls(const MapGenerationSettings& appliedSettings);
+
 	/// @brief 地形生成条件と再生成操作を描画
 	/// @param appliedSettings 現在生成済みMapの設定
 	void DrawMapStatusEditor(const MapGenerationSettings& appliedSettings);
 
-	/// @brief イベントオブジェクトの配置数を描画
-	void DrawEventObjectStatusEditor();
+	/// @brief イベント種別ごとの配置数と自動発火時間と接触範囲を描画
+	/// @param appliedSettings 現在生成済みMapの設定
+	void DrawEventObjectStatusEditor(const MapGenerationSettings& appliedSettings);
 
 	/// @brief 生成済みMapの情報と高さプレビューを描画
 	/// @param preview 生成済みMapの読み取り専用情報

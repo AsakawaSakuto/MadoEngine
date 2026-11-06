@@ -25,20 +25,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -173,6 +173,7 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\Anvil\Anvil.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\Magnet\Magnet.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
+    <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.cpp" />
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
@@ -433,7 +434,6 @@
     <ClInclude Include="Application\GameObject\Enemy\EnemySpawner.h" />
     <ClInclude Include="Application\GameObject\Enemy\EnemyStatus.h" />
     <ClInclude Include="Application\GameObject\Enemy\Type\EnemyTank.h" />
-    <ClInclude Include="Application\GameObject\GameObjectHeaders.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\BossSpawner\BossSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\Chest.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Chest\ChestType.h" />
@@ -443,6 +443,7 @@
     <ClInclude Include="Application\GameObject\Map\EventObject\Anvil\Anvil.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\Magnet\Magnet.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
+    <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.h" />
     <ClInclude Include="Application\GameObject\Map\Map.h" />
     <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h" />
     <ClInclude Include="Application\GameObject\Map\MapEditor.h" />
@@ -777,10 +778,8 @@
       <_TextureConverterRoot>$([System.IO.Path]::Combine('$(ProjectDir)', '$(IntDir)', 'TextureConverter\'))</_TextureConverterRoot>
       <_TextureConverterRoot>$([System.IO.Path]::GetFullPath('$(_TextureConverterRoot)'))</_TextureConverterRoot>
     </PropertyGroup>
-    <MSBuild Projects="$(ProjectDir)Tools\TextureConverter\TextureConverter.vcxproj" Targets="Build"
-             Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_TextureConverterRoot)Bin\;IntDir=$(_TextureConverterRoot)Obj\" />
-    <Exec Command="&quot;$(_TextureConverterRoot)Bin\TextureConverter.exe&quot; &quot;$(ProjectDir)Assets\Texture&quot;"
-          UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
+    <MSBuild Projects="$(ProjectDir)Tools\TextureConverter\TextureConverter.vcxproj" Targets="Build" Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_TextureConverterRoot)Bin\;IntDir=$(_TextureConverterRoot)Obj\" />
+    <Exec Command="&quot;$(_TextureConverterRoot)Bin\TextureConverter.exe&quot; &quot;$(ProjectDir)Assets\Texture&quot;" UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
   </Target>
   <!-- Modelの解析結果もAssetsのコピー対象収集より先に差分生成 -->
   <Target Name="BuildModelCache" BeforeTargets="CollectAssetCopyFiles" Condition="'$(DesignTimeBuild)' != 'true'">
@@ -788,10 +787,8 @@
       <_ModelConverterRoot>$([System.IO.Path]::Combine('$(ProjectDir)', '$(IntDir)', 'ModelConverter\'))</_ModelConverterRoot>
       <_ModelConverterRoot>$([System.IO.Path]::GetFullPath('$(_ModelConverterRoot)'))</_ModelConverterRoot>
     </PropertyGroup>
-    <MSBuild Projects="$(ProjectDir)Tools\ModelConverter\ModelConverter.vcxproj" Targets="Build"
-             Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_ModelConverterRoot)Bin\;IntDir=$(_ModelConverterRoot)Obj\" />
-    <Exec Command="&quot;$(_ModelConverterRoot)Bin\ModelConverter.exe&quot; &quot;$(ProjectDir)Assets\Model&quot;"
-          WorkingDirectory="$(ProjectDir)" UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
+    <MSBuild Projects="$(ProjectDir)Tools\ModelConverter\ModelConverter.vcxproj" Targets="Build" Properties="Configuration=Release;Platform=x64;PlatformToolset=$(PlatformToolset);OutDir=$(_ModelConverterRoot)Bin\;IntDir=$(_ModelConverterRoot)Obj\" />
+    <Exec Command="&quot;$(_ModelConverterRoot)Bin\ModelConverter.exe&quot; &quot;$(ProjectDir)Assets\Model&quot;" WorkingDirectory="$(ProjectDir)" UseUtf8Encoding="Always" StdOutEncoding="utf-8" StdErrEncoding="utf-8" />
   </Target>
   <!-- VSのプロジェクト編集との互換性を保つため、ワイルドカード展開をビルド時に限定 -->
   <Target Name="CollectAssetCopyFiles" BeforeTargets="PrepareForBuild">

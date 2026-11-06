@@ -3,6 +3,8 @@
 #include "Utility/GameTimer/GameTimer.h"
 #include <array>
 #include <cstddef>
+#include <optional>
+#include <string>
 
 namespace Weapon {
 
@@ -14,11 +16,11 @@ namespace UI::Game {
 	/// @brief 武器アップグレード候補を1枚のカードとして表示するクラス
 	class WeaponUpgradeCardUI {
 	public:
-		/// @brief カードを初期化
+		/// @brief Editor管理のカードGroupへの参照を初期化
 		/// @param cardIndex 左から数えたカード番号
 		void Initialize(std::size_t cardIndex);
 
-		/// @brief カードが所有する描画オブジェクトを破棄
+		/// @brief Editor管理の描画要素を維持した参照と演出状態の解放
 		void Finalize();
 
 		/// @brief 表示するアップグレード候補を設定
@@ -51,13 +53,28 @@ namespace UI::Game {
 		enum class CardSpriteType {
 			Border,
 			Background,
+			LegendaryBackground,
 			IconBorder,
 			IconBackground,
 			Count,
 		};
 
-		/// @brief カードの配置を設定
-		void ApplyLayout();
+		/// @brief 再読込後の要素にも反映するカードの表示内容
+		struct CardContent {
+			std::string textureName;
+			std::string weaponName;
+			std::string category;
+			std::string detail;
+			std::string newWeaponDescription;
+			std::string currentValue;
+			std::string upgradedValue;
+		};
+
+		/// @brief Upgrade内のカードGroupから現在の描画要素を再取得
+		void RefreshBindings();
+
+		/// @brief 候補内容とレアリティ色を現在の描画要素へ同期
+		void ApplyChoiceContent();
 
 		/// @brief カード全体へ選択状態の拡大率を適用
 		/// @param scale カード全体へ適用する拡大率
@@ -70,11 +87,14 @@ namespace UI::Game {
 			static_cast<std::size_t>(CardSpriteType::Count);
 
 		std::size_t cardIndex_ = 0;
+		MadoEngine::UIGroupHandle cardGroup_{};
+		std::optional<CardContent> content_;
 		std::array<MadoEngine::SpriteHandle, kCardSpriteCount> cardSprites_{};
 		MadoEngine::SpriteHandle cardIconSprite_{};
 		MadoEngine::TextHandle weaponNameText_{}; // 武器名とカテゴリを表示するテキスト
 		MadoEngine::TextHandle categoryText_{};   // カテゴリ名とレアリティを表示するテキスト
 		MadoEngine::TextHandle detailText_{};     // 強化ステータス名や説明を表示するテキスト
+		MadoEngine::TextHandle newWeaponDescriptionText_{};
 		MadoEngine::TextHandle currentValueText_{}; // 強化前の現在値を表示するテキスト
 		MadoEngine::TextHandle valueArrowText_{}; // 現在値から強化後の値への矢印を表示するテキスト
 		MadoEngine::TextHandle upgradedValueText_{}; // 強化後の値を表示するテキスト
@@ -86,10 +106,10 @@ namespace UI::Game {
 		float currentScale_ = 1.0f;
 		float decisionOffsetY_ = 0.0f;
 		Vector4 accentColor_ = { 0.35f, 0.38f, 0.45f, 1.0f }; // 未選択時のカード枠とアイコン枠の色
-		Vector4 backgroundColor_ = { 0.055f, 0.07f, 0.11f, 0.96f }; // カード本体の背景色
 		bool isSelected_ = false;
 		bool isDecisionAnimationPlaying_ = false;
 		bool isOwnedWeaponUpgrade_ = false;
+		bool isLegendary_ = false;
 		bool isVisible_ = false;
 		bool isInitialized_ = false;
 	};

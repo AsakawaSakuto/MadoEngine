@@ -29,7 +29,7 @@ namespace UI::Game {
 			overlay->SetVisible(false);
 		}
 
-		// 暗幕の後にCardを生成して既存HUDと選択肢の間へ描画順を固定
+		// Editor管理の3枚へ接続し、候補内容と選択演出の更新を分離
 		for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
 			upgradeCards_[cardIndex].Initialize(cardIndex);
 		}
@@ -268,8 +268,16 @@ namespace UI::Game {
 	void UpgradeUI::UpdateCards(float deltaTime) {
 		for (std::size_t cardIndex = 0; cardIndex < upgradeCards_.size(); ++cardIndex) {
 			WeaponUpgradeCardUI& card = upgradeCards_[cardIndex];
-			card.SetSelected(cardIndex < visibleChoiceCount_ && cardIndex == selectedChoiceIndex_);
-			card.Update(deltaTime);
+			const bool isSelected = cardIndex < visibleChoiceCount_ && cardIndex == selectedChoiceIndex_;
+			card.SetSelected(isSelected);
+			if (!isSelected) {
+				card.Update(deltaTime);
+			}
+		}
+
+		// 拡大したカードが重なる配置でも選択中のカードを手前へ維持
+		if (selectedChoiceIndex_ < visibleChoiceCount_ && selectedChoiceIndex_ < upgradeCards_.size()) {
+			upgradeCards_[selectedChoiceIndex_].Update(deltaTime);
 		}
 	}
 

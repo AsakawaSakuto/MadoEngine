@@ -4,6 +4,44 @@
 #include <cmath>
 #include <nlohmann/json.hpp>
 
+namespace {
+/// @brief 保存名と種別ごとの設定メンバーの対応
+struct EventObjectSettingsMember {
+	const char* name;
+	MapEventObjectSettings MapGenerationSettings::* member;
+	const char* legacyName = nullptr;
+	const char* fallbackLegacyName = nullptr;
+};
+
+constexpr EventObjectSettingsMember kEventObjectSettingsMembers[] = {
+	{ "jar", &MapGenerationSettings::jarSettings, "moneyJar", "expJar" },
+	{ "chest", &MapGenerationSettings::chestSettings, "normalChest", "freeChest" },
+	{ "karma", &MapGenerationSettings::karmaSettings },
+	{ "magnet", &MapGenerationSettings::magnetSettings },
+	{ "anvil", &MapGenerationSettings::anvilSettings },
+	{ "bossSpawner", &MapGenerationSettings::bossSpawnerSettings },
+};
+
+/// @brief 指定されたJsonの三成分配列を復元
+/// @param json 読み込み元Json
+/// @param key 三成分配列の保存名
+/// @param value 復元先のベクトル
+/// @return 未指定または有効な三成分配列の場合はtrue
+bool LoadOptionalVector3(const nlohmann::json& json, const char* key, Vector3& value) {
+	const auto it = json.find(key);
+	if (it == json.end()) {
+		return true;
+	}
+
+	// 一部成分だけの更新を拒否してColliderの形状を一組として復元
+	if (!it->is_array() || it->size() != 3) {
+		return false;
+	}
+	value = { (*it)[0].get<float>(), (*it)[1].get<float>(), (*it)[2].get<float>() };
+	return true;
+}
+}
+
 void MapGenerationSettings::Clamp() {
 
 	// 配置数の内訳と有限な寸法を先に確定して生成時の不正な範囲を防止
@@ -19,6 +57,12 @@ void MapGenerationSettings::Clamp() {
 	magnetSpawnCount      = std::clamp(magnetSpawnCount, 0, kMaximumEventObjectCount);
 	anvilSpawnCount       = std::clamp(anvilSpawnCount, 0, kMaximumEventObjectCount);
 	bossSpawnerSpawnCount = std::clamp(bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
+
+	// 種別を追加した場合も保存・比較と同じ一覧で相互作用設定の補正漏れを防止
+	for (const EventObjectSettingsMember& entry : kEventObjectSettingsMembers) {
+		(this->*entry.member).Clamp();
+	}
+
 	blockSize.x = std::clamp([&]() {
 		if (std::isfinite(blockSize.x)) {
 			return (blockSize.x);
@@ -68,6 +112,14 @@ void MapGenerationSettings::ClampForGeneration() {
 }
 
 bool MapGenerationSettings::IsEqualTo(const MapGenerationSettings& rhs) const {
+
+	// Colliderや待ち時間だけの編集も未適用表示とUndoの差分として検出
+	for (const EventObjectSettingsMember& entry : kEventObjectSettingsMembers) {
+		if (!(this->*entry.member).IsEqualTo(rhs.*entry.member)) {
+			return false;
+		}
+	}
+
 	return seed == rhs.seed &&
 		mapWidth == rhs.mapWidth &&
 		mapHeight == rhs.mapHeight &&
@@ -114,6 +166,17 @@ nlohmann::json MapGenerationSettings::ToJson() const {
 		} }
 	};
 	json["blockSize"] = { blockSize.x, blockSize.y, blockSize.z };
+
+	// 配置数とは独立した設定として種別ごとの接触範囲と待ち時間を保存
+	for (const EventObjectSettingsMember& entry : kEventObjectSettingsMembers) {
+		const MapEventObjectSettings& settings = this->*entry.member;
+		json["eventObjectSettings"][entry.name] = {
+			{ "autoInteractionDuration", settings.autoInteractionDuration },
+			{ "aabbMin", { settings.colliderMin.x, settings.colliderMin.y, settings.colliderMin.z } },
+			{ "aabbMax", { settings.colliderMax.x, settings.colliderMax.y, settings.colliderMax.z } },
+		};
+	}
+
 	json["height"] = {
 		{ "min", minHeight },
 		{ "max", maxHeight },
@@ -165,6 +228,37 @@ bool MapGenerationSettings::LoadFromJson(const nlohmann::json& json) {
 				settings.freeChestSpawnCount = settings.chestSpawnCount - settings.normalChestSpawnCount;
 			}
 		}
+
+		// 旧Jsonに相互作用設定がない場合は従来の時間とCollider寸法を維持
+		if (const auto eventSettingsIt = json.find("eventObjectSettings"); eventSettingsIt != json.end()) {
+			if (!eventSettingsIt->is_object()) {
+				return false;
+			}
+			for (const EventObjectSettingsMember& entry : kEventObjectSettingsMembers) {
+				auto objectIt = eventSettingsIt->find(entry.name);
+
+				// 旧タイプ別設定はMoneyとNormalを優先し、共通設定がある場合はそちらを採用
+				if (objectIt == eventSettingsIt->end() && entry.legacyName) {
+					objectIt = eventSettingsIt->find(entry.legacyName);
+					if (objectIt == eventSettingsIt->end() && entry.fallbackLegacyName) {
+						objectIt = eventSettingsIt->find(entry.fallbackLegacyName);
+					}
+				}
+				if (objectIt == eventSettingsIt->end()) {
+					continue;
+				}
+				if (!objectIt->is_object()) {
+					return false;
+				}
+				MapEventObjectSettings& objectSettings = settings.*entry.member;
+				objectSettings.autoInteractionDuration = objectIt->value("autoInteractionDuration", objectSettings.autoInteractionDuration);
+				if (!LoadOptionalVector3(*objectIt, "aabbMin", objectSettings.colliderMin) ||
+					!LoadOptionalVector3(*objectIt, "aabbMax", objectSettings.colliderMax)) {
+					return false;
+				}
+			}
+		}
+
 		if (const auto blockSizeIt = json.find("blockSize"); blockSizeIt != json.end() && blockSizeIt->is_array() && blockSizeIt->size() >= 3) {
 			settings.blockSize = {
 				(*blockSizeIt)[0].get<float>(),

@@ -197,7 +197,7 @@ void MapEventObjectSpawner::GenerateJars() {
 	}
 
 	eventObjects_.reserve(static_cast<size_t>(maxSpawnCount));
-	const AABB jarLocalCollider = Jar::CreatePlacementCollider({});
+	const AABB jarLocalCollider = settings_.jarSettings.CreateCollider({});
 	std::vector<JarType> jarTypes;
 	jarTypes.reserve(static_cast<std::size_t>(maxSpawnCount));
 	jarTypes.insert(jarTypes.end(), static_cast<std::size_t>(settings_.moneyJarSpawnCount), JarType::Money);
@@ -222,7 +222,7 @@ void MapEventObjectSpawner::GenerateJars() {
 		if (!TryCreateSpawnPosition(jarLocalCollider, spawnPosition, spawnBlock)) {
 			continue;
 		}
-		if (IsEventObjectColliderOverlapping(Jar::CreatePlacementCollider(spawnPosition))) {
+		if (IsEventObjectColliderOverlapping(settings_.jarSettings.CreateCollider(spawnPosition))) {
 			continue;
 		}
 
@@ -241,6 +241,7 @@ void MapEventObjectSpawner::GenerateJars() {
 
 		std::unique_ptr<Jar> jar = std::make_unique<Jar>();
 		jar->Initialize(desc);
+		jar->ApplyInteractionSettings(settings_.jarSettings);
 		eventObjects_.push_back(std::move(jar));
 		++createdCount;
 	}
@@ -256,7 +257,7 @@ void MapEventObjectSpawner::GenerateChests() {
 	}
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
-	const AABB chestLocalCollider = Chest::CreatePlacementCollider({});
+	const AABB chestLocalCollider = settings_.chestSettings.CreateCollider({});
 	std::vector<ChestType> chestTypes;
 	chestTypes.reserve(static_cast<std::size_t>(maxSpawnCount));
 	chestTypes.insert(chestTypes.end(), static_cast<std::size_t>(settings_.normalChestSpawnCount), ChestType::Normal);
@@ -284,7 +285,7 @@ void MapEventObjectSpawner::GenerateChests() {
 		if (!TryCreateSpawnPosition(chestLocalCollider, spawnPosition, spawnBlock)) {
 			continue;
 		}
-		if (IsEventObjectColliderOverlapping(Chest::CreatePlacementCollider(spawnPosition))) {
+		if (IsEventObjectColliderOverlapping(settings_.chestSettings.CreateCollider(spawnPosition))) {
 			continue;
 		}
 
@@ -300,6 +301,7 @@ void MapEventObjectSpawner::GenerateChests() {
 
 		std::unique_ptr<Chest> chest = std::make_unique<Chest>();
 		chest->Initialize(desc);
+		chest->ApplyInteractionSettings(settings_.chestSettings);
 		eventObjects_.push_back(std::move(chest));
 		++createdCount;
 	}
@@ -315,7 +317,7 @@ void MapEventObjectSpawner::GenerateKarmas() {
 	}
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<size_t>(maxSpawnCount));
-	const AABB karmaLocalCollider = Karma::CreatePlacementCollider({});
+	const AABB karmaLocalCollider = settings_.karmaSettings.CreateCollider({});
 
 	int createdCount = 0;
 	int retryCount = 0;
@@ -330,7 +332,7 @@ void MapEventObjectSpawner::GenerateKarmas() {
 		if (!TryCreateSpawnPosition(karmaLocalCollider, spawnPosition, spawnBlock)) {
 			continue;
 		}
-		if (IsEventObjectColliderOverlapping(Karma::CreatePlacementCollider(spawnPosition))) {
+		if (IsEventObjectColliderOverlapping(settings_.karmaSettings.CreateCollider(spawnPosition))) {
 			continue;
 		}
 
@@ -343,6 +345,7 @@ void MapEventObjectSpawner::GenerateKarmas() {
 
 		std::unique_ptr<Karma> karma = std::make_unique<Karma>();
 		karma->Initialize(desc);
+		karma->ApplyInteractionSettings(settings_.karmaSettings);
 		eventObjects_.push_back(std::move(karma));
 		++createdCount;
 	}
@@ -387,7 +390,7 @@ void MapEventObjectSpawner::GenerateBossSpawner() {
 		const Vector3 spawnPosition = spawnCandidates[static_cast<size_t>(spawnIndex)];
 		spawnCandidates[static_cast<size_t>(spawnIndex)] = spawnCandidates.back();
 		spawnCandidates.pop_back();
-		if (IsEventObjectColliderOverlapping(BossSpawner::CreatePlacementCollider(spawnPosition))) {
+		if (IsEventObjectColliderOverlapping(settings_.bossSpawnerSettings.CreateCollider(spawnPosition))) {
 			continue;
 		}
 
@@ -397,6 +400,7 @@ void MapEventObjectSpawner::GenerateBossSpawner() {
 
 		std::unique_ptr<BossSpawner> bossSpawner = std::make_unique<BossSpawner>();
 		bossSpawner->Initialize(desc);
+		bossSpawner->ApplyInteractionSettings(settings_.bossSpawnerSettings);
 		eventObjects_.push_back(std::move(bossSpawner));
 		++createdCount;
 	}
@@ -413,7 +417,7 @@ void MapEventObjectSpawner::GenerateMagnets() {
 	}
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<std::size_t>(settings_.magnetSpawnCount));
-	const AABB localCollider = Magnet::CreatePlacementCollider({});
+	const AABB localCollider = settings_.magnetSettings.CreateCollider({});
 	int createdCount = 0;
 	int retryCount = 0;
 	const int maxRetryCount = settings_.magnetSpawnCount * 20;
@@ -426,7 +430,7 @@ void MapEventObjectSpawner::GenerateMagnets() {
 		if (!TryCreateSpawnPosition(localCollider, position, spawnBlock)) {
 			continue;
 		}
-		if (IsEventObjectColliderOverlapping(Magnet::CreatePlacementCollider(position))) {
+		if (IsEventObjectColliderOverlapping(settings_.magnetSettings.CreateCollider(position))) {
 			continue;
 		}
 
@@ -438,6 +442,7 @@ void MapEventObjectSpawner::GenerateMagnets() {
 		desc.colliderName = "MagnetAABB_" + std::to_string(createdCount);
 		auto magnet = std::make_unique<Magnet>();
 		magnet->Initialize(desc);
+		magnet->ApplyInteractionSettings(settings_.magnetSettings);
 		eventObjects_.push_back(std::move(magnet));
 		++createdCount;
 	}
@@ -451,7 +456,7 @@ void MapEventObjectSpawner::GenerateAnvils() {
 	}
 
 	eventObjects_.reserve(eventObjects_.size() + static_cast<std::size_t>(settings_.anvilSpawnCount));
-	const AABB localCollider = Anvil::CreatePlacementCollider({});
+	const AABB localCollider = settings_.anvilSettings.CreateCollider({});
 	int createdCount = 0;
 	int retryCount = 0;
 	const int maxRetryCount = settings_.anvilSpawnCount * 20;
@@ -464,7 +469,7 @@ void MapEventObjectSpawner::GenerateAnvils() {
 		if (!TryCreateSpawnPosition(localCollider, position, spawnBlock)) {
 			continue;
 		}
-		if (IsEventObjectColliderOverlapping(Anvil::CreatePlacementCollider(position))) {
+		if (IsEventObjectColliderOverlapping(settings_.anvilSettings.CreateCollider(position))) {
 			continue;
 		}
 
@@ -476,6 +481,7 @@ void MapEventObjectSpawner::GenerateAnvils() {
 		desc.colliderName = "AnvilAABB_" + std::to_string(createdCount);
 		auto anvil = std::make_unique<Anvil>();
 		anvil->Initialize(desc);
+		anvil->ApplyInteractionSettings(settings_.anvilSettings);
 		eventObjects_.push_back(std::move(anvil));
 		++createdCount;
 	}

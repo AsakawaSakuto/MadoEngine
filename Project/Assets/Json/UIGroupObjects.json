@@ -149,6 +149,278 @@
         {
             "children": [
                 {
+                    "name": "Border",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            16.0,
+                            24.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_f7a1e273-3d81-4c63-8875-1bbf51d1e0ed",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Background",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_90cf846e-5431-4f2a-96eb-56ff475557a8",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "LegendaryBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_691b891a-0a4b-44df-8541-f26b7fa53268",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.800000190734863,
+                            4.800000190734863
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_fca5edfa-b0ed-4320-bf38-58365ccb9e89",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Icon",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            3.5999999046325684,
+                            3.5999999046325684
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_7f6ba682-1dff-4dca-841c-cdb6fbda1159",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "WeaponName",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            38.0,
+                            -155.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_3aa63a87-a011-49ef-bcbe-01206f69441b",
+                    "type": "Text"
+                },
+                {
+                    "name": "Category",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            38.0,
+                            -120.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_800b4dff-d2d9-4fd1-a5f5-b35dc166b033",
+                    "type": "Text"
+                },
+                {
+                    "name": "Detail",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            5.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7793d67c-14aa-4bd7-b8be-ef298e3dde32",
+                    "type": "Text"
+                },
+                {
+                    "name": "NewWeaponDescription",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            30.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_e2213452-56eb-4211-9604-04050b2601b2",
+                    "type": "Text"
+                },
+                {
+                    "name": "CurrentValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_4a3b3196-3d9c-48ef-b8c8-6b57d06dbd32",
+                    "type": "Text"
+                },
+                {
+                    "name": "ValueArrow",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_565c7e5b-9495-4191-aef3-9e3517f9d19d",
+                    "type": "Text"
+                },
+                {
+                    "name": "UpgradedValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7e3c5ed6-6d4a-4209-81ec-9ccf79284f51",
+                    "type": "Text"
+                },
+                {
+                    "name": "Selection",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            155.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_cf5eb8d9-cef9-41e9-bd2c-d0e365bb9bd0",
+                    "type": "Text"
+                }
+            ],
+            "id": "60d55a5a-6442-4f76-8899-52fd69e55ca5",
+            "name": "CenterCard",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    640.0,
+                    360.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
                     "name": "ContinueSprite",
                     "state": {
                         "opacity": 1.0,
@@ -525,6 +797,278 @@
                 "position": [
                     762.0,
                     54.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "Border",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            16.0,
+                            24.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_feb5ed8c-3820-413d-b16c-61cfe89248e1",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Background",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_5dfdb2b6-58bd-482e-8bec-0b3c8ebdcc33",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "LegendaryBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_3835bf2b-9d57-4afc-b658-5d2709d36bf1",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.800000190734863,
+                            4.800000190734863
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_63598b9c-d384-474a-b42f-55d67673b982",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_090cfff4-638d-4277-b5c3-48b845bdfeb1",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Icon",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            3.5999999046325684,
+                            3.5999999046325684
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_185a2b11-cb65-4837-a89c-a03027455223",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "WeaponName",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            38.0,
+                            -155.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_33115682-7cf8-46d2-bb6a-17a9090d1d91",
+                    "type": "Text"
+                },
+                {
+                    "name": "Category",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            38.0,
+                            -120.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_2aafc68e-6834-4599-83c9-017bdfba50aa",
+                    "type": "Text"
+                },
+                {
+                    "name": "Detail",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            5.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_26a5703e-6684-45c8-846f-6960609d2dbf",
+                    "type": "Text"
+                },
+                {
+                    "name": "NewWeaponDescription",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            30.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_e08fdd2f-9abe-48ae-b2e2-e3ede8281e4a",
+                    "type": "Text"
+                },
+                {
+                    "name": "CurrentValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_90104d56-4a53-4fdf-ab11-4a61d26dd784",
+                    "type": "Text"
+                },
+                {
+                    "name": "ValueArrow",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_67371298-79ea-4dfa-9e1a-f140af14b4ae",
+                    "type": "Text"
+                },
+                {
+                    "name": "UpgradedValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_b2244c9e-832c-46dd-ae59-57c03363ba6d",
+                    "type": "Text"
+                },
+                {
+                    "name": "Selection",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            155.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_488a33dc-5028-4e06-907a-df704748275f",
+                    "type": "Text"
+                }
+            ],
+            "id": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
+            "name": "LeftCard",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    360.0,
+                    360.0
                 ],
                 "rotation": 0.0,
                 "scale": [
@@ -1170,6 +1714,293 @@
         {
             "children": [
                 {
+                    "name": "Border",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            16.0,
+                            24.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_7b6dcf1c-5965-4d98-96ed-99d61d6143f9",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Background",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_19629aca-fd3c-4626-95a5-088e72ce6151",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "LegendaryBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            15.0,
+                            23.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_8fa04474-74bf-4bf4-abba-a9c8d4aaa66e",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.800000190734863,
+                            4.800000190734863
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            4.0,
+                            4.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_f2b941c5-5975-4762-a0aa-7fa0b1b465cd",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Icon",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            3.5999999046325684,
+                            3.5999999046325684
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_ba79e9b3-246d-4714-83b2-ef56225519a6",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "WeaponName",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            38.0,
+                            -155.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_eefb6b93-5ae1-42d3-a047-9aa8d80795c1",
+                    "type": "Text"
+                },
+                {
+                    "name": "Category",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            38.0,
+                            -120.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_4c9d1cbb-6eea-484f-ad2d-fbaaed80dae5",
+                    "type": "Text"
+                },
+                {
+                    "name": "Detail",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            5.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_2fc1eebd-a73b-4d5f-959b-08cb1a5630d8",
+                    "type": "Text"
+                },
+                {
+                    "name": "NewWeaponDescription",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            30.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_73e05e07-aada-43ad-b389-4e4701ba46e0",
+                    "type": "Text"
+                },
+                {
+                    "name": "CurrentValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_1b276de9-c4dc-4c32-ae6d-6ded60214807",
+                    "type": "Text"
+                },
+                {
+                    "name": "ValueArrow",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7eac20ab-e6d0-4090-87c7-9cacc2491e99",
+                    "type": "Text"
+                },
+                {
+                    "name": "UpgradedValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_4df9f914-6cb6-48c1-a1f0-1aae4a71591a",
+                    "type": "Text"
+                },
+                {
+                    "name": "Selection",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            155.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_469d1f53-4914-4726-af71-5f275422554e",
+                    "type": "Text"
+                }
+            ],
+            "id": "190c2c8a-d566-4ceb-8b47-eb43d7f83827",
+            "name": "RightCard",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    920.0,
+                    360.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "LeftCard",
+                    "target": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
+                    "type": "Group"
+                },
+                {
+                    "name": "CenterCard",
+                    "target": "60d55a5a-6442-4f76-8899-52fd69e55ca5",
+                    "type": "Group"
+                },
+                {
+                    "name": "RightCard",
+                    "target": "190c2c8a-d566-4ceb-8b47-eb43d7f83827",
+                    "type": "Group"
+                },
+                {
                     "name": "Decision",
                     "target": "54fda760-64b2-46ee-a4a2-01bfa3a64c1c",
                     "type": "Group"
@@ -1178,6 +2009,24 @@
                     "name": "Reroll",
                     "target": "1455aff3-c384-413a-bf6a-28af35ed9a68",
                     "type": "Group"
+                },
+                {
+                    "name": "UpgradeText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            657.0,
+                            90.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            0.6761082410812378,
+                            0.6761082410812378
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeText",
+                    "type": "Text"
                 }
             ],
             "id": "4ee11fa7-1075-4a6f-89cd-4104b041975d",

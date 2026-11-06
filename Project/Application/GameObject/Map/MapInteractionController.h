@@ -45,8 +45,9 @@ public:
 private:
 	/// @brief 接触対象への操作とイベントオブジェクトの削除を処理
 	/// @param player 相互作用するPlayer
+	/// @param deltaTime 前フレームからの経過時間
 	/// @param eventObjects 削除の対象になるイベントオブジェクト
-	void HandleEventObjectInteraction(Player::Base& player, std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects);
+	void HandleEventObjectInteraction(Player::Base& player, float deltaTime, std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects);
 
 	/// @brief 操作案内Modelを現在の接触対象へ同期
 	/// @param deltaTime 前フレームからの経過時間
@@ -71,5 +72,6 @@ private:
 	Vector3 interactionMarkerStartScale_ = { 0.5f, 0.5f, 0.5f };
 	Vector3 interactionMarkerEndScale_   = { 0.75f, 0.75f, 0.75f };
 	GameTimer interactionMarkerScaleTimer_;
+	GameTimer autoInteractionTimer_;
 	bool isInteractionTextVisible_ = true;
 };

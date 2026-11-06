@@ -1,33 +1,27 @@
 #include "WeaponUpgradeCardUI.h"
+#include "Core/TextureManager/TextureManager.h"
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
+#include "Render/Object/2d/UIGroup/UIGroupManager.h"
 #include "Utility/Easing/Easing.h"
 #include <algorithm>
 #include <cmath>
 #include <format>
 #include <numbers>
-#include <string>
+#include <utility>
 
 namespace {
 
-constexpr float kCardBasePositionX = 360.0f;
-constexpr float kCardPositionDifferenceX = 280.0f;
-constexpr float kCardPositionY = 360.0f;
-constexpr Vector2 kCardBorderScale = { 16.0f, 24.0f };
-constexpr Vector2 kCardBackgroundScale = { 15.0f, 23.0f };
-constexpr Vector2 kIconBorderScale = { 4.8f, 4.8f };
-constexpr Vector2 kIconBackgroundScale = { 4.0f, 4.0f };
-constexpr Vector2 kIconScale = { 3.6f, 3.6f };
-constexpr float kSelectedCardScale = 1.08f;          // 選択中カードの拡大率
-constexpr float kSelectedCardPulseScale = 0.01f;     // 選択中カードの拡縮幅
-constexpr float kScaleTransitionDuration = 0.18f;    // 選択状態の拡大率を適用する際の補間時間
-constexpr float kSelectedCardPulseDuration = 1.25f;  // 選択中カードの拡縮周期
-constexpr float kDecisionAnimationDuration = 0.2f;   // 選択決定時にカードを上昇させる時間
-constexpr float kDecisionRiseDistance = 64.0f;       // 選択決定時のカード上昇量
+constexpr std::array<const char*, 3> kCardGroupNames = { "LeftCard", "CenterCard", "RightCard" };
+constexpr std::array<const char*, 5> kCardSpriteNames = {
+	"Border", "Background", "LegendaryBackground", "IconBorder", "IconBackground"
+};
+constexpr float kSelectedCardScale = 1.08f;
+constexpr float kSelectedCardPulseScale = 0.01f;
+constexpr float kScaleTransitionDuration = 0.18f;
+constexpr float kSelectedCardPulseDuration = 1.25f;
+constexpr float kDecisionAnimationDuration = 0.2f;
+constexpr float kDecisionRiseDistance = 64.0f;
 constexpr Vector4 kNewWeaponColor = { 0.95f, 0.97f, 1.0f, 1.0f };
-constexpr Vector4 kDefaultCardBackgroundColor = { 0.055f, 0.07f, 0.11f, 0.96f };
-constexpr Vector4 kLegendaryCardBackgroundColor = { 0.22f, 0.13f, 0.025f, 0.98f };
-constexpr Vector4 kUpgradeResultTextColor = { 0.30f, 0.95f, 0.40f, 1.0f };
-constexpr const char* kCardObjectNamePrefix = "WeaponUpgradeCard";
 
 /// @brief 配列形式の色をVector4へ変換
 /// @param color RGBA色
@@ -87,90 +81,12 @@ std::string FormatUpgradeDetail(const Weapon::UpgradeChoice& choice) {
 	return choice.statDisplayName;
 }
 
-/// @brief 基準位置を中心として座標を拡大
-/// @param position 拡大する座標
-/// @param center 拡大の中心座標
-/// @param scale 拡大率
-/// @return 拡大後の座標
-Vector2 ScalePositionAroundCenter(const Vector2& position, const Vector2& center, float scale) {
-	return {
-		center.x + (position.x - center.x) * scale,
-		center.y + (position.y - center.y) * scale,
-	};
-}
-
 } // namespace
 
 namespace UI::Game {
 
 void WeaponUpgradeCardUI::Initialize(std::size_t cardIndex) {
 	cardIndex_ = cardIndex;
-	const std::string suffix = std::to_string(cardIndex_);
-	const MadoEngine::Render::RenderLayer layer = MadoEngine::Render::RenderLayer::UI;
-
-	// Cardを構成するSpriteとTextをIndex付きの一意名で事前生成
-	cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)] = MySprite::Create(
-		std::string(kCardObjectNamePrefix) + "Border" + suffix,
-		"white16x16",
-		SceneType::Game,
-		layer);
-	cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)] = MySprite::Create(
-		std::string(kCardObjectNamePrefix) + "Background" + suffix,
-		"white16x16",
-		SceneType::Game,
-		layer);
-	cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)] = MySprite::Create(
-		std::string(kCardObjectNamePrefix) + "IconBorder" + suffix,
-		"white16x16",
-		SceneType::Game,
-		layer);
-	cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBackground)] = MySprite::Create(
-		std::string(kCardObjectNamePrefix) + "IconBackground" + suffix,
-		"white16x16",
-		SceneType::Game,
-		layer);
-	cardIconSprite_ = MySprite::Create(
-		std::string(kCardObjectNamePrefix) + "Icon" + suffix,
-		"None",
-		SceneType::Game,
-		layer);
-	weaponNameText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "WeaponName" + suffix,
-		"",
-		SceneType::Game,
-		layer);
-	categoryText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "Category" + suffix,
-		"",
-		SceneType::Game,
-		layer);
-	detailText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "Detail" + suffix,
-		"",
-		SceneType::Game,
-		layer);
-	currentValueText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "CurrentValue" + suffix,
-		"",
-		SceneType::Game,
-		layer);
-	valueArrowText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "ValueArrow" + suffix,
-		"→",
-		SceneType::Game,
-		layer);
-	upgradedValueText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "UpgradedValue" + suffix,
-		"",
-		SceneType::Game,
-		layer);
-	selectionText_ = MyText::Create(
-		std::string(kCardObjectNamePrefix) + "Selection" + suffix,
-		"選択中",
-		SceneType::Game,
-		layer);
-
-	ApplyLayout();
 	isInitialized_ = true;
 	SetVisible(false);
 }
@@ -180,100 +96,55 @@ void WeaponUpgradeCardUI::Finalize() {
 		return;
 	}
 
-	// Scene管理側のResource破棄に任せてUI側はHandleと演出状態だけを解放
+	// Editor所有の要素は削除せず、Groupの演出用変換を戻して参照だけを解放
+	SetVisible(false);
+	cardGroup_ = {};
+	content_.reset();
 	cardSprites_.fill({});
 	cardIconSprite_ = {};
 	weaponNameText_ = {};
 	categoryText_ = {};
 	detailText_ = {};
+	newWeaponDescriptionText_ = {};
 	currentValueText_ = {};
 	valueArrowText_ = {};
 	upgradedValueText_ = {};
 	selectionText_ = {};
-	scaleTransitionTimer_.Reset();
-	selectedPulseTimer_.Reset();
-	decisionAnimationTimer_.Reset();
-	scaleTransitionStart_ = 1.0f;
-	currentScale_ = 1.0f;
-	decisionOffsetY_ = 0.0f;
 	accentColor_ = { 0.35f, 0.38f, 0.45f, 1.0f };
-	backgroundColor_ = kDefaultCardBackgroundColor;
 	isSelected_ = false;
-	isDecisionAnimationPlaying_ = false;
 	isOwnedWeaponUpgrade_ = false;
-	isVisible_ = false;
+	isLegendary_ = false;
 	isInitialized_ = false;
 }
 
 void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
+	RefreshBindings();
 
-	// 前候補の選択演出を持ち越さない初期状態へ復帰
+	// 前候補の選択演出を持ち越さず、候補の内容だけを再読込に備えて保持
 	scaleTransitionTimer_.Reset();
 	selectedPulseTimer_.Reset();
 	scaleTransitionStart_ = 1.0f;
 	currentScale_ = 1.0f;
 	isSelected_ = false;
 	ResetDecisionAnimation();
-
-	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
-		const std::string textureName = Projectile::ProjectileTypeToString(choice.weaponType);
-		if (!cardIconSprite->SetTexture(textureName)) {
-			(void)cardIconSprite->SetTexture("None");
-		}
-	}
-	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
-		weaponNameText->SetText(choice.weaponDisplayName);
-	}
-
-	// 所持武器強化と新規武器でCard配色と表示情報を切り替え
 	isOwnedWeaponUpgrade_ = choice.choiceType == Weapon::UpgradeChoiceType::OwnedWeaponUpgrade;
+	isLegendary_ = isOwnedWeaponUpgrade_ && choice.rarity && *choice.rarity == Rarity::Legendary;
+	CardContent content;
+	content.textureName = Projectile::ProjectileTypeToString(choice.weaponType);
+	content.weaponName = choice.weaponDisplayName;
+	content.detail = FormatUpgradeDetail(choice);
+	content.newWeaponDescription = choice.weaponDescription;
+	content.currentValue = FormatUpgradeValue(choice, choice.currentValue);
+	content.upgradedValue = FormatUpgradeValue(choice, choice.currentValue + choice.calculatedAmount);
 	if (isOwnedWeaponUpgrade_) {
 		accentColor_ = ToVector4(choice.rarityDisplayColor);
+		content.category = choice.rarityDisplayName + "\n" + choice.choiceTypeDisplayName;
 	} else {
 		accentColor_ = kNewWeaponColor;
+		content.category = "NEW\n新規武器";
 	}
-	const bool isLegendary = isOwnedWeaponUpgrade_ && choice.rarity &&
-		*choice.rarity == Rarity::Legendary;
-	if (isLegendary) {
-		backgroundColor_ = kLegendaryCardBackgroundColor;
-	} else {
-		backgroundColor_ = kDefaultCardBackgroundColor;
-	}
-	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
-		if (isOwnedWeaponUpgrade_) {
-			categoryText->SetText(choice.rarityDisplayName + "\n" + choice.choiceTypeDisplayName);
-			categoryText->SetColor(accentColor_);
-		} else {
-			categoryText->SetText("NEW\n新規武器");
-			categoryText->SetColor(accentColor_);
-		}
-	}
-	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
-		if (isOwnedWeaponUpgrade_) {
-			detailText->SetText(FormatUpgradeDetail(choice));
-		} else {
-			detailText->SetText(choice.weaponDescription);
-		}
-	}
-	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
-		currentValueText->SetText(FormatUpgradeValue(choice, choice.currentValue));
-	}
-	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
-		upgradedValueText->SetText(FormatUpgradeValue(
-			choice,
-			choice.currentValue + choice.calculatedAmount
-		));
-	}
-	if (Sprite* iconBorder = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)])) {
-		iconBorder->SetColor(accentColor_);
-	}
-	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
-		border->SetColor(accentColor_);
-	}
-	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
-		background->SetColor(backgroundColor_);
-	}
-	ApplySelectionScale(currentScale_);
+	content_ = std::move(content);
+	ApplyChoiceContent();
 	SetVisible(true);
 }
 
@@ -290,10 +161,11 @@ void WeaponUpgradeCardUI::SetSelected(bool isSelected) {
 }
 
 void WeaponUpgradeCardUI::SetVisible(bool isVisible) {
+	RefreshBindings();
 	isVisible_ = isVisible;
 	if (!isVisible_) {
 
-		// 再表示時に前回の選択・決定Animationを残さない状態へ復帰
+		// 再表示時に前回の選択・決定演出を残さない状態へ復帰
 		scaleTransitionTimer_.Reset();
 		selectedPulseTimer_.Reset();
 		decisionAnimationTimer_.Reset();
@@ -307,38 +179,24 @@ void WeaponUpgradeCardUI::SetVisible(bool isVisible) {
 }
 
 void WeaponUpgradeCardUI::Update(float deltaTime) {
+	RefreshBindings();
+	ApplyVisibility();
 	if (!isVisible_) {
 		return;
 	}
-	Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)]);
-	if (!border) {
-		return;
-	}
+
+	// Editor再読込後も候補を再生成せず、内容と演出を新しい要素へ同期
+	ApplyChoiceContent();
 	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
 	scaleTransitionTimer_.Update(safeDeltaTime);
-
-	// 選択状態の変化を現在Scaleから目標Scaleへ補間
-	const float transitionProgress = scaleTransitionTimer_.GetProgress();
-	const float targetScale = [&]() {
-		if (isSelected_) {
-			return (kSelectedCardScale);
-		} else {
-			return (1.0f);
-		}
-	}();
-	const EaseType easeType = [&]() {
-		if (isSelected_) {
-			return (EaseType::EaseOutBack);
-		} else {
-			return (EaseType::EaseOutCubic);
-		}
-	}();
+	float targetScale = 1.0f;
+	EaseType easeType = EaseType::EaseOutCubic;
+	if (isSelected_) {
+		targetScale = kSelectedCardScale;
+		easeType = EaseType::EaseOutBack;
+	}
 	currentScale_ = Easing::Lerp(
-		scaleTransitionStart_,
-		targetScale,
-		transitionProgress,
-		easeType);
-
+		scaleTransitionStart_, targetScale, scaleTransitionTimer_.GetProgress(), easeType);
 	float displayScale = currentScale_;
 	if (isSelected_ && scaleTransitionTimer_.IsFinished() && !isDecisionAnimationPlaying_) {
 
@@ -347,23 +205,29 @@ void WeaponUpgradeCardUI::Update(float deltaTime) {
 			selectedPulseTimer_.Start(kSelectedCardPulseDuration, true);
 		}
 		selectedPulseTimer_.Update(safeDeltaTime);
-		const float pulseAngle = selectedPulseTimer_.GetProgress() *
-			2.0f * std::numbers::pi_v<float>;
+		const float pulseAngle = selectedPulseTimer_.GetProgress() * 2.0f * std::numbers::pi_v<float>;
 		displayScale += std::sin(pulseAngle) * kSelectedCardPulseScale;
 	}
 	if (isDecisionAnimationPlaying_) {
 
-		// 決定Cardを上方向へ退避させる確定演出
+		// 描画要素が編集中に削除されても決定処理が止まらない独立した時間管理
 		decisionAnimationTimer_.Update(safeDeltaTime);
 		decisionOffsetY_ = Easing::Lerp(
-			0.0f,
-			-kDecisionRiseDistance,
-			decisionAnimationTimer_.GetProgress(),
-			EaseType::EaseOutCubic);
+			0.0f, -kDecisionRiseDistance, decisionAnimationTimer_.GetProgress(), EaseType::EaseOutCubic);
 	}
-
 	ApplySelectionScale(displayScale);
-	border->SetColor(accentColor_);
+
+	// 親の表示更新より前に暗幕との描画順を確定し、Editorで追加した装飾も登録順で前面化
+	auto& groups = MadoEngine::UIGroupManager::GetInstance();
+	const MadoEngine::UIGroup* group = groups.TryGet(cardGroup_);
+	if (group && group->IsVisible()) {
+		auto& sprites = MadoEngine::SpriteManager::GetInstance();
+		for (const auto& element : groups.GetElements(cardGroup_)) {
+			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Sprite) {
+				sprites.MoveToFront(element.sprite);
+			}
+		}
+	}
 }
 
 void WeaponUpgradeCardUI::PlayDecisionAnimation() {
@@ -371,6 +235,7 @@ void WeaponUpgradeCardUI::PlayDecisionAnimation() {
 		return;
 	}
 
+	// 選択中の微小拡縮を止め、決定後の上昇演出へ移行
 	selectedPulseTimer_.Reset();
 	decisionAnimationTimer_.Start(kDecisionAnimationDuration, false);
 	decisionOffsetY_ = 0.0f;
@@ -378,6 +243,8 @@ void WeaponUpgradeCardUI::PlayDecisionAnimation() {
 }
 
 void WeaponUpgradeCardUI::ResetDecisionAnimation() {
+
+	// 候補更新時や演出中断時に上昇量を元へ戻し、選択状態の拡大率だけを維持
 	decisionAnimationTimer_.Reset();
 	decisionOffsetY_ = 0.0f;
 	isDecisionAnimationPlaying_ = false;
@@ -388,197 +255,138 @@ bool WeaponUpgradeCardUI::IsDecisionAnimationFinished() const {
 	return isDecisionAnimationPlaying_ && decisionAnimationTimer_.IsFinished();
 }
 
-void WeaponUpgradeCardUI::ApplyLayout() {
+void WeaponUpgradeCardUI::RefreshBindings() {
+	cardGroup_ = {};
+	cardSprites_.fill({});
+	cardIconSprite_ = {};
+	weaponNameText_ = {};
+	categoryText_ = {};
+	detailText_ = {};
+	newWeaponDescriptionText_ = {};
+	currentValueText_ = {};
+	valueArrowText_ = {};
+	upgradedValueText_ = {};
+	selectionText_ = {};
+	if (cardIndex_ >= kCardGroupNames.size()) {
+		return;
+	}
+	auto& groups = MadoEngine::UIGroupManager::GetInstance();
+	const auto upgrade = groups.Find("Upgrade", SceneType::Game);
 
-	// 拡縮時の位置ずれを避けるため全構成要素のAnchorを中央へ統一
-	for (MadoEngine::SpriteHandle handle : cardSprites_) {
-		if (Sprite* sprite = ResolveSprite(handle)) {
-			sprite->SetAnchorPoint({ 0.5f, 0.5f });
+	// 親内の登録名で解決し、他の親にある同名カードや再読込前のHandleの誤参照を防止
+	for (const auto& element : groups.GetElements(upgrade)) {
+		if (element.resolved && element.type == MadoEngine::UIGroupElementType::Group &&
+			element.name == kCardGroupNames[cardIndex_]) {
+			cardGroup_ = element.group;
+			break;
 		}
 	}
-	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
-		border->SetColor(accentColor_);
+	const std::array<std::pair<const char*, MadoEngine::TextHandle*>, 8> textTargets = {{
+		{ "WeaponName", &weaponNameText_ }, { "Category", &categoryText_ },
+		{ "Detail", &detailText_ }, { "NewWeaponDescription", &newWeaponDescriptionText_ },
+		{ "CurrentValue", &currentValueText_ }, { "ValueArrow", &valueArrowText_ },
+		{ "UpgradedValue", &upgradedValueText_ }, { "Selection", &selectionText_ }
+	}};
+	for (const auto& element : groups.GetElements(cardGroup_)) {
+		if (!element.resolved) {
+			continue;
+		}
+		if (element.type == MadoEngine::UIGroupElementType::Sprite) {
+			if (element.name == "Icon") {
+				cardIconSprite_ = element.sprite;
+			}
+			for (std::size_t index = 0; index < cardSprites_.size(); ++index) {
+				if (element.name == kCardSpriteNames[index]) {
+					cardSprites_[index] = element.sprite;
+					break;
+				}
+			}
+		} else if (element.type == MadoEngine::UIGroupElementType::Text) {
+			for (const auto& [name, handle] : textTargets) {
+				if (element.name == name) {
+					*handle = element.text;
+					break;
+				}
+			}
+		}
 	}
-	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
-		background->SetColor(backgroundColor_);
-	}
-	if (Sprite* iconBackground = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBackground)])) {
-		iconBackground->SetColor({ 0.025f, 0.03f, 0.05f, 1.0f });
-	}
-	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
-		cardIconSprite->SetAnchorPoint({ 0.5f, 0.5f });
-	}
-	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
-		weaponNameText->SetFontFamily("Yu Gothic UI");
-		weaponNameText->SetFontSize(24.0f);
-		weaponNameText->SetAreaSize({ 125.0f, 60.0f });
-		weaponNameText->SetAnchorPoint({ 0.5f, 0.5f });
-		weaponNameText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
-		weaponNameText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
-		weaponNameText->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	}
-	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
-		categoryText->SetFontFamily("Yu Gothic UI");
-		categoryText->SetFontSize(17.0f);
-		categoryText->SetAreaSize({ 125.0f, 70.0f });
-		categoryText->SetAnchorPoint({ 0.5f, 0.5f });
-		categoryText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
-		categoryText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
-	}
-	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
-		detailText->SetFontFamily("Yu Gothic UI");
-		detailText->SetFontSize(22.0f);
-		detailText->SetAreaSize({ 210.0f, 60.0f });
-		detailText->SetAnchorPoint({ 0.5f, 0.5f });
-		detailText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
-		detailText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
-		detailText->SetColor({ 0.92f, 0.94f, 1.0f, 1.0f });
-	}
-	const std::array<MadoEngine::TextHandle, 3> upgradeValueTextHandles = {
-		currentValueText_,
-		valueArrowText_,
-		upgradedValueText_,
-	};
+}
 
-	// 分割した値の行へ共通書式を適用して拡縮時の見た目を統一
-	for (MadoEngine::TextHandle handle : upgradeValueTextHandles) {
+void WeaponUpgradeCardUI::ApplyChoiceContent() {
+	if (!content_) {
+		return;
+	}
+
+	// 候補に依存する値だけを更新し、配置・フォント・サイズはEditor設定を維持
+	if (Sprite* icon = ResolveSprite(cardIconSprite_)) {
+
+		// 未登録テクスチャの再確認で毎フレーム警告を出さない事前照会
+		const auto& textures = MadoEngine::TextureManager::GetInstance();
+		uint32_t textureIndex = UINT32_MAX;
+		if (textures.TryGetTextureIndex(content_->textureName, textureIndex)) {
+			if (icon->GetTextureName() != content_->textureName) {
+				(void)icon->SetTexture(content_->textureName);
+			}
+		} else if (icon->GetTextureName() != "None" && textures.TryGetTextureIndex("None", textureIndex)) {
+			(void)icon->SetTexture("None");
+		}
+	}
+	const std::array<std::pair<MadoEngine::TextHandle, const std::string*>, 6> textTargets = {{
+		{ weaponNameText_, &content_->weaponName }, { categoryText_, &content_->category },
+		{ detailText_, &content_->detail }, { newWeaponDescriptionText_, &content_->newWeaponDescription },
+		{ currentValueText_, &content_->currentValue }, { upgradedValueText_, &content_->upgradedValue }
+	}};
+	for (const auto& [handle, value] : textTargets) {
 		if (MadoEngine::Text* text = ResolveText(handle)) {
-			text->SetFontFamily("Yu Gothic UI");
-			text->SetFontSize(22.0f);
-			text->SetAnchorPoint({ 0.5f, 0.5f });
-			text->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
-			text->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
-			text->SetColor({ 0.92f, 0.94f, 1.0f, 1.0f });
+			text->SetText(*value);
 		}
 	}
-	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
-		currentValueText->SetAreaSize({ 85.0f, 42.0f });
+	if (MadoEngine::Text* category = ResolveText(categoryText_)) {
+		category->SetColor(accentColor_);
 	}
-	if (MadoEngine::Text* valueArrowText = ResolveText(valueArrowText_)) {
-		valueArrowText->SetAreaSize({ 35.0f, 42.0f });
+	for (const auto type : { CardSpriteType::Border, CardSpriteType::IconBorder }) {
+		if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(type)])) {
+			border->SetColor(accentColor_);
+		}
 	}
-	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
-		upgradedValueText->SetAreaSize({ 85.0f, 42.0f });
-		upgradedValueText->SetColor(kUpgradeResultTextColor);
-	}
-	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
-		selectionText->SetFontFamily("Yu Gothic UI");
-		selectionText->SetFontSize(20.0f);
-		selectionText->SetAreaSize({ 150.0f, 36.0f });
-		selectionText->SetAnchorPoint({ 0.5f, 0.5f });
-		selectionText->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
-		selectionText->SetVerticalAlign(MadoEngine::TextVerticalAlign::Center);
-		selectionText->SetColor({ 1.0f, 0.82f, 0.18f, 1.0f });
-	}
-	ApplySelectionScale(1.0f);
 }
 
 void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
-	const float cardPositionX = kCardBasePositionX + kCardPositionDifferenceX * static_cast<float>(cardIndex_);
-	const Vector2 cardPosition = { cardPositionX, kCardPositionY + decisionOffsetY_ };
+	if (MadoEngine::UIGroup* group = MadoEngine::UIGroupManager::GetInstance().TryGet(cardGroup_)) {
 
-	// Card中心を基準に子要素の位置とScaleを同時変換
-	const Vector2 iconPosition = ScalePositionAroundCenter(
-		{ cardPositionX - 70.0f, 225.0f + decisionOffsetY_ }, cardPosition, scale);
-
-	if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Border)])) {
-		border->SetPosition(cardPosition);
-		border->SetScale(kCardBorderScale * scale);
-	}
-	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
-		background->SetPosition(cardPosition);
-		background->SetScale(kCardBackgroundScale * scale);
-	}
-	if (Sprite* iconBorder = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBorder)])) {
-		iconBorder->SetPosition(iconPosition);
-		iconBorder->SetScale(kIconBorderScale * scale);
-	}
-	if (Sprite* iconBackground = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::IconBackground)])) {
-		iconBackground->SetPosition(iconPosition);
-		iconBackground->SetScale(kIconBackgroundScale * scale);
-	}
-	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
-		cardIconSprite->SetPosition(iconPosition);
-		cardIconSprite->SetScale(kIconScale * scale);
-	}
-
-	const Vector2 textScale = { scale, scale };
-	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
-		weaponNameText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX + 38.0f, 205.0f + decisionOffsetY_ }, cardPosition, scale));
-		weaponNameText->SetScale(textScale);
-	}
-	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
-		categoryText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX + 38.0f, 240.0f + decisionOffsetY_ }, cardPosition, scale));
-		categoryText->SetScale(textScale);
-	}
-	const float detailPositionY = [&]() {
-		if (isOwnedWeaponUpgrade_) {
-			return (365.0f);
-		} else {
-			return (390.0f);
-		}
-	}();
-	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
-		detailText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX, detailPositionY + decisionOffsetY_ }, cardPosition, scale));
-		detailText->SetScale(textScale);
-	}
-	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
-		currentValueText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX - 48.0f, 410.0f + decisionOffsetY_ }, cardPosition, scale));
-		currentValueText->SetScale(textScale);
-	}
-	if (MadoEngine::Text* valueArrowText = ResolveText(valueArrowText_)) {
-		valueArrowText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX, 410.0f + decisionOffsetY_ }, cardPosition, scale));
-		valueArrowText->SetScale(textScale);
-	}
-	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
-		upgradedValueText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX + 48.0f, 410.0f + decisionOffsetY_ }, cardPosition, scale));
-		upgradedValueText->SetScale(textScale);
-	}
-	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
-		selectionText->SetPosition(ScalePositionAroundCenter(
-			{ cardPositionX, 515.0f + decisionOffsetY_ }, cardPosition, scale));
-		selectionText->SetScale(textScale);
+		// 毎回編集用Transformを基準に合成し、拡縮の累積とEditor設定の書き換えを防止
+		auto transform = group->GetAuthoringState().transform;
+		transform.scale *= scale;
+		transform.translate.y += decisionOffsetY_;
+		group->SetTransform(transform);
 	}
 }
 
 void WeaponUpgradeCardUI::ApplyVisibility() {
+	if (MadoEngine::UIGroup* group = MadoEngine::UIGroupManager::GetInstance().TryGet(cardGroup_)) {
+		group->SetVisible(isVisible_ && group->GetAuthoringState().visible);
+	}
 
-	// Card構成要素へ共通表示状態を反映し候補種別と選択状態に応じて補助Textを制御
-	for (MadoEngine::SpriteHandle handle : cardSprites_) {
-		if (Sprite* sprite = ResolveSprite(handle)) {
-			sprite->SetVisible(isVisible_);
+	// Groupの表示と候補種別の条件を分離し、各要素のEditor表示設定を維持
+	if (Sprite* background = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::Background)])) {
+		background->SetRuntimeVisible(!isLegendary_);
+	}
+	if (Sprite* legendary = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::LegendaryBackground)])) {
+		legendary->SetRuntimeVisible(isLegendary_);
+	}
+	if (MadoEngine::Text* detail = ResolveText(detailText_)) {
+		detail->SetRuntimeVisible(isOwnedWeaponUpgrade_);
+	}
+	if (MadoEngine::Text* description = ResolveText(newWeaponDescriptionText_)) {
+		description->SetRuntimeVisible(!isOwnedWeaponUpgrade_);
+	}
+	for (const auto handle : { currentValueText_, valueArrowText_, upgradedValueText_ }) {
+		if (MadoEngine::Text* text = ResolveText(handle)) {
+			text->SetRuntimeVisible(isOwnedWeaponUpgrade_);
 		}
 	}
-	if (Sprite* cardIconSprite = ResolveSprite(cardIconSprite_)) {
-		cardIconSprite->SetVisible(isVisible_);
-	}
-	if (MadoEngine::Text* weaponNameText = ResolveText(weaponNameText_)) {
-		weaponNameText->SetVisible(isVisible_);
-	}
-	if (MadoEngine::Text* categoryText = ResolveText(categoryText_)) {
-		categoryText->SetVisible(isVisible_);
-	}
-	if (MadoEngine::Text* detailText = ResolveText(detailText_)) {
-		detailText->SetVisible(isVisible_);
-	}
-	const bool areUpgradeValuesVisible = isVisible_ && isOwnedWeaponUpgrade_;
-	if (MadoEngine::Text* currentValueText = ResolveText(currentValueText_)) {
-		currentValueText->SetVisible(areUpgradeValuesVisible);
-	}
-	if (MadoEngine::Text* valueArrowText = ResolveText(valueArrowText_)) {
-		valueArrowText->SetVisible(areUpgradeValuesVisible);
-	}
-	if (MadoEngine::Text* upgradedValueText = ResolveText(upgradedValueText_)) {
-		upgradedValueText->SetVisible(areUpgradeValuesVisible);
-	}
-	if (MadoEngine::Text* selectionText = ResolveText(selectionText_)) {
-		selectionText->SetVisible(isVisible_ && isSelected_);
+	if (MadoEngine::Text* selection = ResolveText(selectionText_)) {
+		selection->SetRuntimeVisible(isSelected_);
 	}
 }
 

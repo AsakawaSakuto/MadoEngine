@@ -1,5 +1,6 @@
 #pragma once
 #include "Math/Vector3.h"
+#include "EventObject/MapEventObjectSettings.h"
 #include <cstdint>
 #include <nlohmann/json_fwd.hpp>
 
@@ -23,6 +24,12 @@ struct MapGenerationSettings {
 	int magnetSpawnCount = 1;
 	int anvilSpawnCount = 5;
 	int bossSpawnerSpawnCount = 1;
+	MapEventObjectSettings jarSettings;
+	MapEventObjectSettings chestSettings = { 1.0f, { -2.0f, 0.0f, -2.0f }, { 2.0f, 1.5f, 2.0f } };
+	MapEventObjectSettings karmaSettings = { 1.0f, { -0.75f, 0.0f, -0.75f }, { 0.75f, 2.5f, 0.75f } };
+	MapEventObjectSettings magnetSettings = { 1.0f, { -1.0f, 0.0f, -1.0f }, { 1.0f, 4.0f, 1.0f } };
+	MapEventObjectSettings anvilSettings = { 1.0f, { -1.5f, 0.0f, -1.5f }, { 1.5f, 4.0f, 1.5f } };
+	MapEventObjectSettings bossSpawnerSettings = { 1.0f, { -3.5f, 0.0f, -3.5f }, { 3.5f, 3.5f, 3.5f } };
 	Vector3 blockSize = { 15.0f, 7.5f, 15.0f };
 	int minHeight = 1;
 	int maxHeight = 10;

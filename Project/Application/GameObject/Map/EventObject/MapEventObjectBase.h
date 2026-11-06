@@ -1,6 +1,7 @@
 #pragma once
 #include "../../IGameObject.h"
 #include "MapInteractionEvent.h"
+#include "MapEventObjectSettings.h"
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -29,6 +30,14 @@ struct MapEventRequest {
 class MapEventObjectBase : public IGameObject {
 public:
 	virtual ~MapEventObjectBase() = default;
+
+	/// @brief 種別ごとの自動発火時間と接触範囲を適用
+	/// @param settings 適用するイベント設定
+	void ApplyInteractionSettings(const MapEventObjectSettings& settings);
+
+	/// @brief 自動発火までに必要な接触時間を取得
+	/// @return 自動発火までの秒数
+	float GetAutoInteractionDuration() const { return autoInteractionDuration_; }
 
 	/// @brief Playerの当たり判定と衝突しているか判定
 	/// @return Playerと衝突していればtrue
@@ -119,4 +128,7 @@ protected:
 	MadoEngine::InstancedModelHandle outlineInstancedModel_{};
 	uint32_t normalInstanceHandle_ = UINT32_MAX;
 	uint32_t outlineInstanceHandle_ = UINT32_MAX;
+
+private:
+	float autoInteractionDuration_ = 1.0f;
 };

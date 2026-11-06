@@ -332,41 +332,44 @@ namespace UI::Game {
 
 		// 親だけでUpgrade中の表示を切り替え、子の個別設定と保存用表示状態を維持
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
-		MadoEngine::UIGroup* upgradeGroup = groupManager.TryGet(groupManager.Find(kUpgradeGroupName, SceneType::Game));
+		const auto upgradeHandle = groupManager.Find(kUpgradeGroupName, SceneType::Game);
+		MadoEngine::UIGroup* upgradeGroup = groupManager.TryGet(upgradeHandle);
 		if (upgradeGroup) {
 			upgradeGroup->SetVisible(isVisible && upgradeGroup->GetAuthoringState().visible);
 		}
 		UpdateUpgradeControlFeedback(deltaTime, isVisible);
-		if (!isVisible) {
 
-			// 次の武器強化イベントで赤色から循環を開始するため非表示中は時刻を初期化
-			upgradeTextColor_.Reset();
+		// 管理名の変更や再読込に追従し、Upgrade内の登録名に限定して見出しを解決
+		MadoEngine::TextHandle textHandle{};
+		for (const auto& element : groupManager.GetElements(upgradeHandle)) {
+			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Text && element.name == kUpgradeTextName) {
+				textHandle = element.text;
+				break;
+			}
 		}
-
-		// Json再読込やEditor削除後も現在のTextだけへイベントの表示状態を反映
-		const MadoEngine::TextHandle textHandle = MyText::Find(kUpgradeTextName);
 		MadoEngine::Text* upgradeText = MyText::TryGet(textHandle);
-		if (!upgradeText || upgradeText->GetSceneType() != SceneType::Game) {
-			upgradeTextPulseTimer_.Reset();
-			upgradeText_ = {};
-			return;
+		bool isTextVisible = false;
+		if (upgradeText) {
+			isTextVisible = isVisible && upgradeText->IsVisibleForRendering();
 		}
-		upgradeText->SetVisible(isVisible);
-		if (!isVisible) {
+		if (!isTextVisible || upgradeText_ != textHandle) {
 
-			// 演出で変更したScaleを非表示時に戻し、次回の基準Scaleへの拡大率の累積を防止
-			if (upgradeTextPulseTimer_.IsActive() && upgradeText_ == textHandle) {
-				upgradeText->SetScale(upgradeTextBaseScale_);
+			// 非表示や参照先の変更時は以前の演出だけを解除し、子自身の表示設定を維持
+			if (MadoEngine::Text* previousText = MyText::TryGet(upgradeText_)) {
+				previousText->SetScale(previousText->GetAuthoringState().transform.scale);
 			}
 			upgradeTextPulseTimer_.Reset();
+			upgradeTextColor_.Reset();
 			upgradeText_ = {};
+		}
+		if (!isTextVisible) {
 			return;
 		}
 
-		// 表示開始とText再生成時に基準Scaleを取得し、Editor設定の縦横比を維持
+		// 演出中の編集や再読込でも保存用Scaleを毎回基準とし、拡大率の累積を防止
+		upgradeTextBaseScale_ = upgradeText->GetAuthoringState().transform.scale;
 		if (!upgradeTextPulseTimer_.IsActive() || upgradeText_ != textHandle) {
 			upgradeText_ = textHandle;
-			upgradeTextBaseScale_ = upgradeText->GetScale();
 			upgradeTextPulseTimer_.Start(kUpgradeTextPulseDuration, true);
 		}
 		upgradeTextPulseTimer_.Update(deltaTime);

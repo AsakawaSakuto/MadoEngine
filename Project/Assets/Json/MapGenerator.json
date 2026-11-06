@@ -22,6 +22,86 @@
             "karma": 10,
             "magnet": 3
         },
+        "eventObjectSettings": {
+            "anvil": {
+                "aabbMax": [
+                    1.5,
+                    4.0,
+                    1.5
+                ],
+                "aabbMin": [
+                    -1.5,
+                    0.0,
+                    -1.5
+                ],
+                "autoInteractionDuration": 1.0
+            },
+            "bossSpawner": {
+                "aabbMax": [
+                    3.5,
+                    3.5,
+                    3.5
+                ],
+                "aabbMin": [
+                    -3.5,
+                    0.0,
+                    -3.5
+                ],
+                "autoInteractionDuration": 1.0
+            },
+            "chest": {
+                "aabbMax": [
+                    2.0,
+                    1.5,
+                    2.0
+                ],
+                "aabbMin": [
+                    -2.0,
+                    0.0,
+                    -2.0
+                ],
+                "autoInteractionDuration": 1.0
+            },
+            "jar": {
+                "aabbMax": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "aabbMin": [
+                    -1.0,
+                    0.0,
+                    -1.0
+                ],
+                "autoInteractionDuration": 0.0
+            },
+            "karma": {
+                "aabbMax": [
+                    0.75,
+                    2.5,
+                    0.75
+                ],
+                "aabbMin": [
+                    -0.75,
+                    0.0,
+                    -0.75
+                ],
+                "autoInteractionDuration": 1.0
+            },
+            "magnet": {
+                "aabbMax": [
+                    1.0,
+                    4.0,
+                    1.0
+                ],
+                "aabbMin": [
+                    -1.0,
+                    0.0,
+                    -1.0
+                ],
+                "autoInteractionDuration": 1.0
+            }
+        },
         "height": {
             "max": 9,
             "min": 1,
@@ -34,7 +114,7 @@
             16,
             16
         ],
-        "seed": 2725307748,
+        "seed": 3000276326,
         "slopeSpawnRate": 1.0
     }
 }
