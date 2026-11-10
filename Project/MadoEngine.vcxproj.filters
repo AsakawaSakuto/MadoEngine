@@ -480,6 +480,9 @@
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Bow.cpp">
       <Filter>Application\GameObject\Weapon\Projectile\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Dice.cpp">
+      <Filter>Application\GameObject\Weapon\Projectile\Entity</Filter>
+    </ClCompile>
     <ClCompile Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.cpp">
       <Filter>Application\GameObject\Weapon\Projectile\Entity</Filter>
     </ClCompile>
@@ -1089,6 +1092,9 @@
     <ClInclude Include="Application\GameObject\Combat\DamageEvent.h">
       <Filter>Application\GameObject\Combat</Filter>
     </ClInclude>
+    <ClInclude Include="Application\GameObject\Combat\ProjectileDamage.h">
+      <Filter>Application\GameObject\Combat</Filter>
+    </ClInclude>
     <ClInclude Include="Application\GameObject\DropObject\DropObject.h">
       <Filter>Application\GameObject\DropObject</Filter>
     </ClInclude>
@@ -1252,6 +1258,9 @@
       <Filter>Application\GameObject\Weapon\Projectile\Entity</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Bow.h">
+      <Filter>Application\GameObject\Weapon\Projectile\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Dice.h">
       <Filter>Application\GameObject\Weapon\Projectile\Entity</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Weapon\Projectile\Entity\Explosion.h">

@@ -4,7 +4,7 @@ namespace UI::Game {
 
 	void PlayerStaminaGauge::Initialize() {
 		staminaGauge_ = std::make_unique<Gauge2d>();
-		staminaGauge_->Initialize("PlayerStaminaGauge", SceneType::Game, MadoEngine::Render::RenderLayer::UI);
+		staminaGauge_->Initialize("PlayerStaminaGauge", SceneType::Game, MadoEngine::Render::RenderLayer::Default);
 		staminaGauge_->SetVisible(false);
 	}
 

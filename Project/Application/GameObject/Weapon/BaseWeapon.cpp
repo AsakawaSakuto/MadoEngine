@@ -32,11 +32,12 @@ namespace Weapon {
 			return static_cast<int>(clampedValue);
 		}
 
-		/// @brief 上限付き割合として扱う状態異常ステータスか確認
+		/// @brief 上限付き割合として扱うステータスか確認
 		/// @param type 確認する強化ステータス
 		/// @return 0から100の割合として扱う場合はtrue
-		bool IsStatusEffectPercentage(UpgradeStatType type) {
-			return type == UpgradeStatType::BurnApplyChance ||
+		bool IsCappedPercentageStat(UpgradeStatType type) {
+			return type == UpgradeStatType::InstantKillChance ||
+				type == UpgradeStatType::BurnApplyChance ||
 				type == UpgradeStatType::PoisonApplyChance ||
 				type == UpgradeStatType::FrozenApplyChance ||
 				type == UpgradeStatType::FrozenSlowRate;
@@ -153,12 +154,6 @@ namespace Weapon {
 		selectableTypes.reserve(kUpgradeStatTypes.size());
 
 		for (const UpgradeStatType statType : kUpgradeStatTypes) {
-			const UpgradeValue* value = GetUpgradeValue(statType);
-			if (!value || !value->isSelected || !std::isfinite(value->value) ||
-				!std::isfinite(value->fixedAddValue) || !std::isfinite(value->rarityAddValue)) {
-				continue;
-			}
-
 			// 候補表示後の計算失敗を防ぐため全レアリティの加算値を事前検証
 			bool canUseForAllRarities = true;
 			for (int rarityValue = static_cast<int>(Rarity::Uncommon);
@@ -179,6 +174,12 @@ namespace Weapon {
 	}
 
 	bool BaseWeapon::CalculateUpgradeAmount(UpgradeStatType statType, Rarity rarity, float& outAmount) const {
+		float upgradedValue = 0.0f;
+		return CalculateUpgrade(statType, rarity, outAmount, upgradedValue);
+	}
+
+	bool BaseWeapon::CalculateUpgrade(
+		UpgradeStatType statType, Rarity rarity, float& outAmount, float& outUpgradedValue) const {
 		outAmount = 0.0f;
 
 		// 武器強化用Rarityと有限な設定値だけを計算対象として受付
@@ -187,30 +188,31 @@ namespace Weapon {
 		}
 
 		const UpgradeValue* value = GetUpgradeValue(statType);
-		if (!value || !value->isSelected || !std::isfinite(value->value) ||
-			!std::isfinite(value->fixedAddValue) || !std::isfinite(value->rarityAddValue)) {
+		if (!value || !value->isSelected || !IsFiniteUpgradeValue(*value)) {
 			return false;
 		}
 
 		const float rarityValue = static_cast<float>(static_cast<int>(rarity));
 		const float configuredAmount = value->fixedAddValue + value->rarityAddValue * rarityValue;
 		float amount = configuredAmount;
+		std::optional<float> upgradeLimit = value->upgradeLimit;
+		const bool usesMinimum = statType == UpgradeStatType::ShotCooldown;
 
 		// Cooldownの設定値だけは秒数ではなく現在時間に対する短縮率として扱う
-		if (statType == UpgradeStatType::ShotCooldown) {
+		if (usesMinimum) {
 			constexpr float kPercentageScale = 0.01f;
 			if (value->value <= 0.0f || configuredAmount <= 0.0f || configuredAmount >= 100.0f) {
 				return false;
 			}
 
 			amount = -value->value * configuredAmount * kPercentageScale;
-		} else if (IsStatusEffectPercentage(statType)) {
+		} else if (IsCappedPercentageStat(statType)) {
 
-			// 付与率と減速率は100%を上限として上限直前の強化量だけを切り詰め
-			if (value->value < 0.0f || value->value >= 100.0f || configuredAmount <= 0.0f) {
+			// 割合の仕様上限を維持し、武器ごとの制限が低ければその値を優先
+			if (value->value < 0.0f || configuredAmount <= 0.0f) {
 				return false;
 			}
-			amount = std::min(configuredAmount, 100.0f - value->value);
+			upgradeLimit = std::min(upgradeLimit.value_or(100.0f), 100.0f);
 		} else if (IsPositiveStatusEffectValue(statType)) {
 
 			// ダメージと持続時間が強化によって無効値へ遷移しないよう正の加算だけを受付
@@ -219,18 +221,46 @@ namespace Weapon {
 			}
 		}
 
-		if (!std::isfinite(amount) || !std::isfinite(value->value + amount)) {
+		float upgradedValue = value->value + amount;
+		if (upgradeLimit) {
+			const float limit = *upgradeLimit;
+			float limitedValue = upgradedValue;
+
+			// 制限に到達済みの項目を候補から除外し、最後の強化だけ制限までに調整
+			if (usesMinimum) {
+				if (value->value <= limit) {
+					return false;
+				}
+				limitedValue = std::max(upgradedValue, limit);
+			} else {
+				if (value->value >= limit) {
+					return false;
+				}
+				limitedValue = std::min(upgradedValue, limit);
+			}
+			if (limitedValue == value->value) {
+				return false;
+			}
+			if (limitedValue != upgradedValue) {
+				upgradedValue = limitedValue;
+				amount = upgradedValue - value->value;
+			}
+		}
+
+		if (!std::isfinite(amount) || !std::isfinite(upgradedValue)) {
 			return false;
 		}
 
 		outAmount = amount;
+		outUpgradedValue = upgradedValue;
 		return true;
 	}
 
 	bool BaseWeapon::ApplyUpgrade(UpgradeStatType statType, Rarity rarity, float expectedAmount, float& outAppliedAmount) {
 		outAppliedAmount = 0.0f;
 		float amount = 0.0f;
-		if (!CalculateUpgradeAmount(statType, rarity, amount) ||
+		float upgradedValue = 0.0f;
+		if (!CalculateUpgrade(statType, rarity, amount, upgradedValue) ||
 			!std::isfinite(expectedAmount) || amount != expectedAmount) {
 			return false;
 		}
@@ -244,7 +274,8 @@ namespace Weapon {
 			return false;
 		}
 
-		value->value += amount;
+		// 丸め誤差で制限値を越えないよう計算済みの強化後の値を直接反映
+		value->value = upgradedValue;
 		++upgradeLevel_;
 		outAppliedAmount = amount;
 		return true;
@@ -382,6 +413,7 @@ namespace Weapon {
 			context.criticalChance = std::clamp(status_.criticalChance.value, 0.0f, 100.0f);
 		}
 		context.criticalDamage = status_.criticalDamage.value;
+		context.instantKillChance = status_.instantKillChance.value;
 		context.knockbackPower = status_.knockbackPower.value;
 		context.moveSpeed = status_.speed.value;
 		context.sizeRate = status_.size.value;

@@ -2,6 +2,7 @@
 #include "Audio/MyAudio.h"
 #include "Input/MyInput.h"
 #include "Utility/Logger/Logger.h"
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -9,6 +10,7 @@ namespace {
 	constexpr float kTitleMapHorizontalLimit = 16.0f;
 	constexpr float kWeaponSelectionStickInputThreshold = 0.5f;
 	constexpr float kWeaponSelectionStickNeutralThreshold = 0.2f;
+	constexpr float kWeaponIconColumnSpacing = 124.0f;
 }
 
 TitleScene::TitleScene(SceneSharedData& sceneSharedData)
@@ -107,9 +109,10 @@ void TitleScene::InitializeWeaponSelection() {
 	isWeaponSelectionStickReady_ = false;
 
 	// 使用可能武器の共通一覧を行優先で配置し、再訪時は前回決定した武器を復元
+	const float gridLeft = 640.0f - static_cast<float>(kWeaponColumnCount - 1) * kWeaponIconColumnSpacing * 0.5f;
 	for (std::size_t index = 0; index < weaponIcons_.size(); ++index) {
 		const Vector2 position = {
-			330.0f + static_cast<float>(index % kWeaponColumnCount) * 124.0f,
+			gridLeft + static_cast<float>(index % kWeaponColumnCount) * kWeaponIconColumnSpacing,
 			250.0f + static_cast<float>(index / kWeaponColumnCount) * 140.0f,
 		};
 		const Projectile::Type weaponType = Projectile::kPlayableWeaponTypes[index];
@@ -155,19 +158,22 @@ void TitleScene::InitializeWeaponSelection() {
 void TitleScene::UpdateWeaponSelection() {
 	std::size_t column = selectedWeaponIndex_ % kWeaponColumnCount;
 	std::size_t row = selectedWeaponIndex_ / kWeaponColumnCount;
+	const std::size_t columnsInRow = (std::min)(kWeaponColumnCount, weaponIcons_.size() - row * kWeaponColumnCount);
 	const Vector2 stickInput = GetWeaponSelectionStickInput();
 
-	// 横移動は同じ行、縦移動は同じ列を保った循環選択
+	// 横移動は現在行にある武器だけで循環し、縦移動では可能な限り列を維持
 	if (MyInput::Trigger("Left") || stickInput.x < 0.0f) {
-		column = (column + kWeaponColumnCount - 1) % kWeaponColumnCount;
+		column = (column + columnsInRow - 1) % columnsInRow;
 	} else if (MyInput::Trigger("Right") || stickInput.x > 0.0f) {
-		column = (column + 1) % kWeaponColumnCount;
+		column = (column + 1) % columnsInRow;
 	} else if (MyInput::Trigger("Up") || stickInput.y > 0.0f) {
 		row = (row + kWeaponRowCount - 1) % kWeaponRowCount;
 	} else if (MyInput::Trigger("Down") || stickInput.y < 0.0f) {
 		row = (row + 1) % kWeaponRowCount;
 	}
-	const std::size_t selectedIndex = row * kWeaponColumnCount + column;
+
+	// 移動先の行で対応する列が空なら最後の武器を選択
+	const std::size_t selectedIndex = (std::min)(row * kWeaponColumnCount + column, weaponIcons_.size() - 1);
 	if (selectedIndex == selectedWeaponIndex_) {
 		return;
 	}

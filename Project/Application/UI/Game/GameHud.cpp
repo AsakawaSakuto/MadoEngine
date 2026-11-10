@@ -56,8 +56,10 @@ namespace {
 	constexpr float kMassiveEnemySpawnTotalDuration = kMassiveEnemySpawnFadeDuration +
 		kMassiveEnemySpawnHoldDuration + kMassiveEnemySpawnMoveDuration;
 	constexpr const char* kStaticHudTextNames[] = {
-		"GamePlayTimerText", "OverTimeText", "PlayerHealthText", "TheGoalText", kMassiveEnemySpawnTextName,
+		"GamePlayTimerText", "OverTimeText", "TheGoalText", kMassiveEnemySpawnTextName,
 	};
+	constexpr const char* kPlayerHealthGroupName = "PlayerHealthUI";
+	constexpr const char* kPlayerHealthTextName = "PlayerHealth";
 	constexpr const char* kMoneyGroupName = "MoneyUI";
 	constexpr const char* kMoneyTextName = "MoneyText";
 	constexpr const char* kKillCountGroupName = "KillCountUI";
@@ -67,7 +69,7 @@ namespace {
 	constexpr const char* kFpsCountTextName = "FpsCountText";
 	constexpr const char* kSeedValueTextName = "SeedValueText";
 	constexpr const char* kStaticHudGroupNames[] = {
-		"OperationMethodUI", kMoneyGroupName, kKillCountGroupName, kDebugGroupName,
+		"OperationMethodUI", kPlayerHealthGroupName, kMoneyGroupName, kKillCountGroupName, kDebugGroupName,
 	};
 
 	/// @brief 親内の登録名から接続済みの子Groupを検索
@@ -266,6 +268,7 @@ namespace UI::Game {
 	void GameHud::DrawImGui() {
 #ifdef USE_IMGUI
 		playerResourceGainView_.DrawImGui();
+		healthGauge_.DrawImGui();
 #endif
 	}
 
@@ -517,6 +520,16 @@ namespace UI::Game {
 
 	void GameHud::UpdateTexts(float deltaTime, const GameHudState& state) {
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
+
+		// 表示状態に関係なく現在HPを同期し、開始演出が終わった直後から最新値を表示
+		MadoEngine::UIGroup* healthGroup = groupManager.TryGet(groupManager.Find(kPlayerHealthGroupName, SceneType::Game));
+		if (healthGroup) {
+			if (MadoEngine::Text* healthText = healthGroup->TryGetText(kPlayerHealthTextName)) {
+				const int currentHealth = static_cast<int>(state.playerStatus.currentHealth);
+				const int maxHealth = static_cast<int>(state.playerStatus.maxHealth);
+				healthText->SetText(std::format("HP : {} / {}", currentHealth, maxHealth));
+			}
+		}
 
 		// Upgrade内のRerollへ現在の費用を同期し、同額のままの再読込にも追従
 		const auto upgrade = groupManager.Find(kUpgradeGroupName, SceneType::Game);

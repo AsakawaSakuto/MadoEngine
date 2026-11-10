@@ -4,6 +4,7 @@
 #include "EnemyMovement.h"
 #include "EnemyStatus.h"
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -39,6 +40,7 @@ namespace Enemy {
 		bool wasApplied = false;
 		bool isCritical = false;
 		bool wasKilled = false;
+		bool wasInstantKilled = false;
 	};
 
 	/// @brief 状態異常によるダメージ結果
@@ -95,18 +97,22 @@ namespace Enemy {
 		/// @brief Projectileからのダメージを適用
 		/// @param projectileId Projectileの識別番号
 		/// @param damage 適用するダメージ量
+		/// @param instantKillChance ボス以外のEnemyに対する即死率（%）
 		/// @param criticalChance クリティカル率
 		/// @param criticalDamage クリティカル発生時のダメージ倍率
 		/// @param knockbackDirection Enemyを押し出す方向
 		/// @param knockbackPower Enemyへ適用するノックバック力
-		/// @return 実際に適用されたダメージと死亡状態
+		/// @param instantKillRoll 発射時の即死抽選結果、当選時はtrue、命中時に抽選する場合は空
+		/// @return 実際に適用されたダメージと撃破結果
 		DamageResult TakeProjectileDamage(
 			std::uint64_t projectileId,
 			float damage,
+			float instantKillChance,
 			float criticalChance,
 			float criticalDamage,
 			const Vector3& knockbackDirection,
-			float knockbackPower);
+			float knockbackPower,
+			std::optional<bool> instantKillRoll = std::nullopt);
 
 		/// @brief Enemyへ状態異常を適用
 		/// @param request 状態異常の適用内容

@@ -191,7 +191,7 @@ namespace UI::Game {
 					ImGui::TextColored(
 						ImVec4(0.30f, 0.95f, 0.40f, 1.0f),
 						"%.3f秒（%.1f%%短縮）",
-						choice.currentValue + choice.calculatedAmount,
+						choice.upgradedValue,
 						reductionRate
 					);
 				} else {
@@ -200,7 +200,7 @@ namespace UI::Game {
 					ImGui::TextColored(
 						ImVec4(0.30f, 0.95f, 0.40f, 1.0f),
 						"%.1f",
-						choice.currentValue + choice.calculatedAmount
+						choice.upgradedValue
 					);
 				}
 			} else {

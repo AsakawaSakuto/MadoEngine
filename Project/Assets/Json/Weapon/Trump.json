@@ -25,6 +25,13 @@
             "rarityAddValue": 1.0,
             "value": 0.0
         },
+        "instantKillChance": {
+            "fixedAddValue": 0.25,
+            "isSelected": true,
+            "rarityAddValue": 0.25,
+            "upgradeLimit": 5.0,
+            "value": 1.0
+        },
         "knockbackPower": {
             "fixedAddValue": 0.0,
             "isSelected": false,

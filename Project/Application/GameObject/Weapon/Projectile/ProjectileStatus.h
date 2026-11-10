@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include "../WeaponStatus.h"
 #include "MathHeaders.h"
@@ -21,6 +22,7 @@ namespace Projectile {
 		float damage = 10.0f;        // 投射物のダメージ量
 		float criticalChance = 0.0f; // 投射物のクリティカル率
 		float criticalDamage = 1.0f; // 投射物のクリティカルダメージ倍率
+		float instantKillChance = 0.0f; // 投射物の即死率（%）
 		float knockbackPower = 0.0f; // 投射物のノックバック力
 		float moveSpeed = 10.0f;     // 投射物の移動速度
 		float sizeRate = 1.0f;       // 投射物のサイズ倍率
@@ -32,6 +34,7 @@ namespace Projectile {
 
 		float explosionDamageDecreaseRate = 10.0f; // 爆発ダメージの減衰率（1.0fで減衰なし、0.0fで爆発ダメージなし）
 		float explosionRadius = 1.0f;              // 爆発の半径
+		std::optional<bool> instantKillRoll;       // 派生Projectileへ引き継ぐ即死抽選結果
 	};
 
 	/// @brief 武器の種類を表す列挙型
@@ -52,10 +55,11 @@ namespace Projectile {
 		Sword,
 
 		Explosion, // 爆発で使用される、武器ではない
+		Dice,
 	};
 
 	// ゲームロジックで使用できる武器を一か所で管理
-	inline constexpr std::array<Type, 12> kPlayableWeaponTypes = {
+	inline constexpr std::array<Type, 13> kPlayableWeaponTypes = {
 		Type::Pistol,
 		Type::Bow,
 		Type::FireBall,
@@ -68,6 +72,7 @@ namespace Projectile {
 		Type::Hammer,
 		Type::SnowCrystal,
 		Type::Sword,
+		Type::Dice,
 	};
 
 	/// @brief 武器種類をリソース名へ変換
@@ -88,6 +93,7 @@ namespace Projectile {
 		case Type::Hammer:      return "Hammer";
 		case Type::SnowCrystal: return "SnowCrystal";
 		case Type::Sword:       return "Sword";
+		case Type::Dice:        return "Dice";
 		default:                return "Unknown";
 		}
 	}
@@ -141,6 +147,7 @@ namespace Projectile {
 		case Type::Hammer:      return "ハンマー";
 		case Type::SnowCrystal: return "雪の結晶";
 		case Type::Sword:       return "剣";
+		case Type::Dice:        return "デスダイス";
 		default:                return "不明";
 		}
 	}
@@ -150,18 +157,19 @@ namespace Projectile {
 	/// @return 武器種類に対応する固有説明
 	inline const char* ProjectileTypeToDescription(Type type) {
 		switch (type) {
-		case Type::Axe:         return "前方へ投擲して\nその場に滞留する";
+		case Type::Axe:         return "近くの敵へ投擲して\nその場に滞留する";
 		case Type::FireBall:    return "着弾時に範囲攻撃\n稀に火傷を付与";
 		case Type::Pistol:      return "近くの敵に向かって\n弾丸を連射する";
 		case Type::Bow:         return "近くの敵に向かって\n貫通する矢を放つ";
 		case Type::Bomb:        return "弧を描くボムを放つ\n敵に火傷を付与";
-		case Type::Trump:       return "1～13のダメージ\n稀にJokerが即死させる";
+		case Type::Trump:       return "直進するカードを投げ\n1～13のダメージ\n稀に敵を即死させる";
 		case Type::Eye:         return "足元にエリアを展開\n触れた敵にダメージ";
 		case Type::ToxicBoots:  return "足元に魔法陣を設置\n触れた敵に毒を付与";
 		case Type::Thunder:     return "敵の頭上に雷を生成\n跳弾して敵を攻撃する";
 		case Type::Hammer:      return "頭上にハンマーを構え\n敵へ向けて振り下ろす";
 		case Type::SnowCrystal: return "前方へ結晶を投げ\n自分のもとへ戻ってくる";
 		case Type::Sword:       return "自分を中心に回転\n周囲の敵を薙ぎ払う";
+		case Type::Dice:        return "着弾時に範囲攻撃\n1～12のダメージ\n稀に敵を即死させる";
 		default:                return "武器の詳細情報なし";
 		}
 	}

@@ -1,7 +1,32 @@
 #include "Explosion.h"
-#include <cmath>
+#include "../ProjectileManager.h"
 
 namespace Projectile {
+
+	void Explosion::SpawnFromProjectile(const IProjectile& source, float radius, float damageRate) {
+
+		// 元の弾が消滅しても攻撃情報と即死の当落を使えるよう生成要求へ値をコピー
+		InitializeDesc context{};
+		context.sourceWeaponId = source.GetSourceWeaponId();
+		context.projectileName = source.GetColliderName();
+		context.ownerPosition = source.GetPosition();
+		context.damage = source.GetDamage();
+		context.instantKillChance = source.GetInstantKillChance();
+		context.instantKillRoll = source.GetInstantKillRoll();
+		context.criticalChance = source.GetCriticalChance();
+		context.criticalDamage = source.GetCriticalDamage();
+		context.knockbackPower = source.GetKnockbackPower();
+		context.statusEffects = source.GetStatusEffects();
+		context.explosionDamageDecreaseRate = damageRate;
+		context.explosionRadius = radius;
+		Manager::GetInstance().AddProjectile(Type::Explosion, context);
+
+		MadoEngine::Particle::PlayDesc desc;
+		desc.transform.translate = context.ownerPosition;
+		desc.sceneType = SceneType::Game;
+		desc.loopOverride = false;
+		MyParticle3d::Play("DefaultExplosion", desc);
+	}
 	
 	Explosion::~Explosion() {
 		if (!objectName_.empty()) {

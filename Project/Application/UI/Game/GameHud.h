@@ -156,7 +156,7 @@ namespace UI::Game {
 		/// @param deltaTime 停止中も進行する実時間（秒）
 		void UpdateMassiveEnemySpawnPresentation(float deltaTime);
 
-		/// @brief 所持金・撃破数・Enemy数・FPS・Seed・リロール費用の文字表示を更新
+		/// @brief HP・所持金・撃破数・Enemy数・FPS・Seed・リロール費用の文字表示を更新
 		/// @param deltaTime 停止中も進行する実時間
 		/// @param state 現在フレームの表示情報
 		void UpdateTexts(float deltaTime, const GameHudState& state);

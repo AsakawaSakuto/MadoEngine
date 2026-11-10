@@ -48,7 +48,7 @@ namespace UI::Game {
 		void UpdateWeaponLevelText(std::size_t slotIndex, const Weapon::BaseWeapon* weapon);
 
 		float attackAnimationDuration_ = 0.15f;  // 攻撃アニメーションの合計時間（秒）
-		Vector2 startIconScale_ = { 3.6f, 3.6f }; // 武器アイコンの通常時の拡縮率
+		Vector2 startIconScale_ = { 3.0f, 3.0f }; // 武器アイコンの通常時の拡縮率
 		Vector2 endIconScale_ = { 5.0f, 5.0f }; // 武器アイコンの攻撃アニメーション時の拡縮率
 		float shotGaugeSize_ = 28.0f;            // 射撃待機ゲージの最大サイズ
 

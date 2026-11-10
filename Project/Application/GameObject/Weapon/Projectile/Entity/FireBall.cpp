@@ -1,7 +1,5 @@
 #include "FireBall.h"
-#include "../../../Map/MapLimit.h"
-#include "../ProjectileManager.h"
-#include <cmath>
+#include "Explosion.h"
 
 namespace Projectile {
 
@@ -42,7 +40,7 @@ namespace Projectile {
 
 		// Map外への到達と寿命切れのどちらでも終端Explosionを生成
 		if (!MyCollider::IsHitWithTag(objectName_, CollisionTag::MapLimitBox) || lifeTimer_.IsFinished()) {
-			SpawnExplosion();
+			Explosion::SpawnFromProjectile(*this, sizeRate_, kExplosionDamageRate);
 			isDead_ = true;
 			return;
 		}
@@ -57,7 +55,7 @@ namespace Projectile {
 	void FireBall::OnEnemyHit() {
 
 		// 本体の貫通状態とは独立して接触地点へ範囲攻撃を生成
-		SpawnExplosion();
+		Explosion::SpawnFromProjectile(*this, sizeRate_, kExplosionDamageRate);
 	}
 
 	void FireBall::StartEffectSequence() {
@@ -81,28 +79,5 @@ namespace Projectile {
 
 	void FireBall::StopEffectSequence() {
 		effectSequence_.Stop(MadoEngine::EffectSequence::EffectSequenceStopMode::Immediate);
-	}
-
-	void FireBall::SpawnExplosion() {
-
-		// Manager走査中でも安全に追加できる生成要求としてExplosionを登録
-		Projectile::InitializeDesc context{};
-		context.sourceWeaponId = sourceWeaponId_;
-		context.projectileName = objectName_;
-		context.ownerPosition = transform_.translate;
-		context.damage = damage_;
-		context.criticalChance = criticalChance_;
-		context.criticalDamage = criticalDamage_;
-		context.knockbackPower = knockbackPower_;
-		context.statusEffects = statusEffects_;
-		context.explosionDamageDecreaseRate = 0.5f;
-		context.explosionRadius = sizeRate_;
-		Projectile::Manager::GetInstance().AddProjectile(Projectile::Type::Explosion, context);
-
-		MadoEngine::Particle::PlayDesc desc;
-		desc.transform.translate = transform_.translate;
-		desc.sceneType = SceneType::Game;
-		desc.loopOverride = false;
-		auto handle = MyParticle3d::Play("DefaultExplosion", desc);
 	}
 }

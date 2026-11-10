@@ -9,7 +9,7 @@
 #include <optional>
 
 /// @brief タイトルシーン
-/// @details 2行6列のアイコンから初期武器を選択してゲームシーンへ遷移
+/// @details 武器アイコンから初期武器を選択してゲームシーンへ遷移
 class TitleScene : public IScene {
 public:
 	/// @brief コンストラクタ
@@ -46,7 +46,7 @@ public:
 	bool TryGetShadowDebugTargetPosition(Vector3& outPosition) const override;
 
 private:
-	/// @brief 2行6列の武器アイコンと操作案内の初期化
+	/// @brief 武器アイコンと操作案内の初期化
 	void InitializeWeaponSelection();
 
 	/// @brief 行と列を維持した方向入力による武器選択の更新
@@ -62,9 +62,9 @@ private:
 	SceneSharedData& sceneSharedData_;
 	std::optional<std::size_t> selectedSeedIndex_;
 
-	static constexpr std::size_t kWeaponColumnCount = 6;
-	static constexpr std::size_t kWeaponRowCount = 2;
-	static_assert(Projectile::kPlayableWeaponTypes.size() == kWeaponColumnCount * kWeaponRowCount);
+	static constexpr std::size_t kWeaponColumnCount = 7;
+	static constexpr std::size_t kWeaponRowCount =
+		(Projectile::kPlayableWeaponTypes.size() + kWeaponColumnCount - 1) / kWeaponColumnCount;
 	std::array<UI::Title::WeaponSelectIcon, Projectile::kPlayableWeaponTypes.size()> weaponIcons_{};
 	std::size_t selectedWeaponIndex_ = 0;
 	bool isWeaponSelectionStickReady_ = false;

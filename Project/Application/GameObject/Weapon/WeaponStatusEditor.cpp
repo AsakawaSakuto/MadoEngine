@@ -7,6 +7,7 @@
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include "ImGuiHeaders.h"
+#include <cmath>
 #include <cstring>
 #include <nlohmann/json.hpp>
 
@@ -44,7 +45,7 @@ namespace Weapon {
 		/// @param id テーブルの識別名
 		/// @return テーブルを描画できる場合はtrue
 		bool BeginUpgradeValueTable(const char* id) {
-			if (!ImGui::BeginTable(id, 5, kUpgradeTableFlags, ImVec2(-1.0f, 0.0f))) {
+			if (!ImGui::BeginTable(id, 6, kUpgradeTableFlags, ImVec2(-1.0f, 0.0f))) {
 				return false;
 			}
 
@@ -52,6 +53,7 @@ namespace Weapon {
 			ImGui::TableSetupColumn("初期値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
 			ImGui::TableSetupColumn("固定加算値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
 			ImGui::TableSetupColumn("上昇幅", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+			ImGui::TableSetupColumn("上限値 / 下限値", ImGuiTableColumnFlags_WidthStretch, 1.0f);
 			ImGui::TableSetupColumn("選択肢に表示", ImGuiTableColumnFlags_WidthFixed, 110.0f);
 			ImGui::TableHeadersRow();
 			return true;
@@ -62,7 +64,7 @@ namespace Weapon {
 		/// @param value 編集するアップグレード値
 		void DrawUpgradeValueTableRow(const char* label, UpgradeValue& value) {
 
-			// 一つの強化値を初期値、固定加算、Rarity加算、候補化の列へ展開
+			// 一つの強化値を初期値、固定加算、Rarity加算、制限値、候補化の列へ展開
 			ImGui::PushID(label);
 			ImGui::TableNextRow();
 
@@ -83,6 +85,29 @@ namespace Weapon {
 			ImGui::DragFloat("##RarityAddValue", &value.rarityAddValue, 0.01f, -999999.0f, 999999.0f, "%.3f");
 
 			ImGui::TableSetColumnIndex(4);
+			bool hasLimit = value.upgradeLimit.has_value();
+			if (ImGui::Checkbox("##HasUpgradeLimit", &hasLimit)) {
+
+				// 有効化時は初期値を基準とし、無効化時は制限の設定を解除
+				if (hasLimit && std::isfinite(value.value)) {
+					value.upgradeLimit = value.value;
+				} else {
+					value.upgradeLimit.reset();
+				}
+			}
+			ImGui::SameLine();
+			if (value.upgradeLimit) {
+				ImGui::SetNextItemWidth(-1.0f);
+				float limit = *value.upgradeLimit;
+				if (ImGui::DragFloat("##UpgradeLimit", &limit, 0.01f, -999999.0f, 999999.0f, "%.3f",
+					ImGuiSliderFlags_AlwaysClamp) && std::isfinite(limit)) {
+					value.upgradeLimit = limit;
+				}
+			} else {
+				ImGui::TextDisabled("なし");
+			}
+
+			ImGui::TableSetColumnIndex(5);
 			ImGui::Checkbox("##IsSelected", &value.isSelected);
 			ImGui::PopID();
 		}
@@ -151,8 +176,22 @@ namespace Weapon {
 		}
 	}
 
+	StatusEditor::StatusEditor() {
+
+		// 初回表示から保存済み設定を編集し、起動時は未作成のファイルを生成しないよう既存分だけ読み込み
+		if (MadoEngine::Json::JsonFile::Exists(GetJsonFilePath())) {
+			LoadOrCreateJson();
+		}
+	}
+
 	bool StatusEditor::SaveToJson() const {
 		const std::string filePath = GetJsonFilePath();
+
+		// 無効な即死率を保存して武器の読み込みに失敗する状態を回避
+		if (!IsValidInstantKillChance(editingStatus_.instantKillChance)) {
+			Logger::Output("[Assets] 即死率は0から100の範囲で設定してください: " + filePath, Logger::Level::Error);
+			return false;
+		}
 		if (!IsValidStatusEffectUpgradeStatus(editingStatusEffects_)) {
 			Logger::Output("[Assets] 状態異常ステータスに不正な値があります: " + filePath, Logger::Level::Error);
 			return false;
@@ -196,7 +235,8 @@ namespace Weapon {
 			statusJson = &json.at("upgradeStatus");
 		}
 
-		UpgradeStatus loadedStatus = editingStatus_;
+		// 旧形式で省略された設定は実行時と同じ既定値を使い、他の武器からの引き継ぎを防止
+		UpgradeStatus loadedStatus;
 		if (!UpgradeStatusFromJson(*statusJson, loadedStatus)) {
 			Logger::Output("[Assets] 武器初期ステータスJsonに不正な値があります: " + filePath, Logger::Level::Error);
 			return false;
@@ -266,9 +306,10 @@ namespace Weapon {
 			DrawUpgradeValueTableRow("ダメージ量", editingStatus_.damage);
 			DrawUpgradeValueTableRow("最大射撃数", editingStatus_.shotMaxCount);
 			DrawUpgradeValueTableRow("射撃間隔", editingStatus_.shotIntervalTime);
-			DrawUpgradeValueTableRow("射撃クールダウン短縮率(%)", editingStatus_.shotCooldown);
+			DrawUpgradeValueTableRow("射撃クールダウン(秒)", editingStatus_.shotCooldown);
 			DrawUpgradeValueTableRow("クリティカル率", editingStatus_.criticalChance);
 			DrawUpgradeValueTableRow("クリティカル倍率", editingStatus_.criticalDamage);
+			DrawUpgradeValueTableRow("即死率(%)", editingStatus_.instantKillChance);
 			DrawUpgradeValueTableRow("サイズ", editingStatus_.size);
 			DrawUpgradeValueTableRow("跳弾回数", editingStatus_.bounceCount);
 			DrawUpgradeValueTableRow("貫通回数", editingStatus_.penetrationCount);
@@ -278,6 +319,7 @@ namespace Weapon {
 
 			ImGui::EndTable();
 		}
+		ImGui::TextDisabled("射撃クールダウンは下限値を秒で、固定加算値と上昇幅を短縮率（%%）で指定");
 
 		ImGui::SeparatorText("状態異常");
 

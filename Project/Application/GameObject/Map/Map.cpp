@@ -68,6 +68,10 @@ void Map::SetInteractionTextVisible(bool isVisible) {
 	interactionController_.SetInteractionTextVisible(isVisible);
 }
 
+void Map::UpdateInteractionGauge(const Camera& camera) {
+	interactionController_.UpdateInteractionGauge(camera);
+}
+
 void Map::SetEventActionEnabled(MapEventAction action, bool isEnabled) {
 	interactionController_.SetEventActionEnabled(action, isEnabled);
 }

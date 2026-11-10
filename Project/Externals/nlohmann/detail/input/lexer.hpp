@@ -849,7 +849,7 @@ class lexer : public lexer_base<BasicJsonType>
             // single-line comments skip input until a newline or EOF is read
             case '/':
             {
-                while (true)
+                for (;;)
                 {
                     switch (get())
                     {
@@ -868,7 +868,7 @@ class lexer : public lexer_base<BasicJsonType>
             // multi-line comments skip input until */ is read
             case '*':
             {
-                while (true)
+                for (;;)
                 {
                     switch (get())
                     {

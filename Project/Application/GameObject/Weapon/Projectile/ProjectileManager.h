@@ -14,6 +14,7 @@
 #include "Entity/Sword.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -31,12 +32,13 @@ namespace Projectile {
 		std::uint64_t projectileId = 0;
 		std::uint64_t sourceWeaponId = 0;
 		float damage = 0.0f;
-		DamageMode damageMode = DamageMode::Standard;
+		float instantKillChance = 0.0f;
 		float criticalChance = 0.0f;
 		float criticalDamage = 1.0f;
 		float knockbackPower = 0.0f;
 		Weapon::StatusEffectStatus statusEffects;
 		Vector3 knockbackDirection = { 0.0f, 0.0f, 0.0f };
+		std::optional<bool> instantKillRoll;
 	};
 
 	class Manager {

@@ -90,6 +90,10 @@ public:
 	/// @return アイコンを表示しない場合は空文字列
 	virtual std::string_view GetInteractionIconTextureName() const { return {}; }
 
+	/// @brief 自動インタラクトの計測開始時に使用する効果音キーを取得
+	/// @return チャージ音の音声リソースキー
+	virtual std::string_view GetInteractionChargeSoundKey() const { return "MeterCharge"; }
+
 	/// @brief EventObjectの名前を取得
 	/// @return 音声リソースとの対応に使用するEventObject名
 	virtual std::string_view GetEventObjectName() const = 0;

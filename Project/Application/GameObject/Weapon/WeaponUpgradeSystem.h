@@ -28,6 +28,7 @@ namespace Weapon {
 		std::optional<UpgradeStatType> statType;
 		std::optional<Rarity> rarity;
 		float currentValue = 0.0f;
+		float upgradedValue = 0.0f;
 		float calculatedAmount = 0.0f;
 		std::uint64_t generation = 0;
 		std::string weaponDisplayName;
@@ -94,7 +95,7 @@ namespace Weapon {
 		bool SelectChoice(std::size_t choiceIndex, std::uint64_t generation, Inventory& inventory);
 
 	private:
-		/// @brief 現在の装備状態から三つの選択肢を生成
+		/// @brief 現在の装備状態から最大三つの選択肢を生成
 		/// @param inventory 候補生成に使用する武器インベントリ
 		/// @return 候補生成に成功した場合はtrue
 		bool GenerateChoices(const Inventory& inventory);

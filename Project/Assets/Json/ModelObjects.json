@@ -13,7 +13,7 @@
                 1.0,
                 1.0,
                 1.0,
-                1.0
+                0.0
             ],
             "frustumCulling": true,
             "layer": "Default",
@@ -21,9 +21,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                109.15171813964844,
-                17.5,
-                21.375263214111328
+                204.6361846923828,
+                14.700515747070313,
+                162.09896850585938
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -63,16 +63,16 @@
             "model": "Assets/Model/Static/PlayerDefense.obj",
             "name": "PlayerDefense",
             "position": [
-                80.20381164550781,
+                28.03942108154297,
                 23.000999450683594,
-                196.69906616210938
+                55.59689712524414
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
             "rotation": [
-                -3.141592502593994,
-                -0.2670447528362274,
-                -3.141592502593994
+                -0.002588863717392087,
+                -1.0998371839523315,
+                0.25357744097709656
             ],
             "scale": [
                 1.0,

@@ -31,9 +31,13 @@ public:
 	/// @param playerPosition Playerのワールド座標
 	void UpdateCameraOcclusion(const Vector3& cameraPosition, const Vector3& playerPosition);
 
-	/// @brief 操作案内Textの表示可否を設定
+	/// @brief 操作案内Textと獲得ゲージの表示可否を設定
 	/// @param isVisible 表示する場合はtrue
 	void SetInteractionTextVisible(bool isVisible);
+
+	/// @brief 接触対象の位置と獲得進行度を3Dゲージへ反映
+	/// @param camera 描画に使用するCamera
+	void UpdateInteractionGauge(const Camera& camera);
 
 	/// @brief 指定したMapイベント要求の受付可否を設定
 	/// @param action 設定対象のイベント要求

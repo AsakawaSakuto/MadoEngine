@@ -36,6 +36,7 @@ namespace Projectile {
 		float arcHeight_ = kMinArcHeight;
 		float arrivalElapsedTime_ = 0.0f;
 		float explosionDamage_ = 0.0f;
+		float explosionInstantKillChance_ = 0.0f;
 		bool hasArrived_ = false;
 	};
 }

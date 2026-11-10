@@ -30,8 +30,7 @@ namespace Projectile {
 		/// @brief FireBall Effect Sequenceを即時停止
 		void StopEffectSequence();
 
-		/// @brief 現在座標に爆発を生成
-		void SpawnExplosion();
+		static constexpr float kExplosionDamageRate = 0.5f;
 
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;

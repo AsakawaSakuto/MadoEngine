@@ -53,8 +53,9 @@ std::string FormatUpgradeValue(const Weapon::UpgradeChoice& choice, float value)
 		return std::format("{:.3f}秒", value);
 	}
 
-	// 状態異常値の意味をカード上で判別できるよう割合と時間へ単位を付与
-	if (choice.statType == Weapon::UpgradeStatType::BurnApplyChance ||
+	// 強化値の意味をカード上で判別できるよう割合と時間へ単位を付与
+	if (choice.statType == Weapon::UpgradeStatType::InstantKillChance ||
+		choice.statType == Weapon::UpgradeStatType::BurnApplyChance ||
 		choice.statType == Weapon::UpgradeStatType::PoisonApplyChance ||
 		choice.statType == Weapon::UpgradeStatType::FrozenApplyChance ||
 		choice.statType == Weapon::UpgradeStatType::FrozenSlowRate) {
@@ -135,7 +136,7 @@ void WeaponUpgradeCardUI::SetChoice(const Weapon::UpgradeChoice& choice) {
 	content.detail = FormatUpgradeDetail(choice);
 	content.newWeaponDescription = choice.weaponDescription;
 	content.currentValue = FormatUpgradeValue(choice, choice.currentValue);
-	content.upgradedValue = FormatUpgradeValue(choice, choice.currentValue + choice.calculatedAmount);
+	content.upgradedValue = FormatUpgradeValue(choice, choice.upgradedValue);
 	if (isOwnedWeaponUpgrade_) {
 		accentColor_ = ToVector4(choice.rarityDisplayColor);
 		content.category = choice.rarityDisplayName + "\n" + choice.choiceTypeDisplayName;

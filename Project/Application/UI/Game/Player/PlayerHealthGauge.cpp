@@ -1,6 +1,5 @@
 #include "PlayerHealthGauge.h"
 #include "Utility/Camera/Camera.h"
-#include <format>
 
 namespace UI::Game {
 
@@ -31,15 +30,9 @@ namespace UI::Game {
 			healthGauge2d_->SetMaxValue(maxHealth);
 		}
 
-		// 同じHP情報から画面固定表示とPlayer追従表示を同期
+		// 同じHP情報から画面固定ゲージとPlayer追従ゲージを同期
 		healthGauge3d_->SetPosition(playerPosition);
 		healthGauge3d_->Update(camera, currentHealth, maxHealth);
-
-		auto healthTextHandle = MyText::Find("PlayerHealthText");
-		MadoEngine::Text* healthText = MyText::TryGet(healthTextHandle);
-		if (healthText) {
-			healthText->SetText(std::format("HP : {} / {}", static_cast<int>(currentHealth), static_cast<int>(maxHealth)));
-		}
 	}
 
 	void PlayerHealthGauge::Finalize() {
@@ -48,7 +41,7 @@ namespace UI::Game {
 	}
 
 	void PlayerHealthGauge::DrawImGui() {
-		
+		healthGauge2d_->DrawImGui("PlayerHealthGauge");
 	}
 
 } // namespace UI::Game

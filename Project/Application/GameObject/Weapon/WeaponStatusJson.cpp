@@ -5,12 +5,18 @@
 namespace Weapon {
 
 	nlohmann::json UpgradeValueToJson(const UpgradeValue& value) {
-		return {
+		nlohmann::json json = {
 			{ "value", value.value },
 			{ "fixedAddValue", value.fixedAddValue },
 			{ "rarityAddValue", value.rarityAddValue },
 			{ "isSelected", value.isSelected },
 		};
+
+		// 制限を設定した項目だけを保存し、従来形式では未指定として読み込み
+		if (value.upgradeLimit) {
+			json["upgradeLimit"] = *value.upgradeLimit;
+		}
+		return json;
 	}
 
 	bool UpgradeValueFromJson(const nlohmann::json& json, UpgradeValue& value) {
@@ -44,6 +50,15 @@ namespace Weapon {
 			!readFiniteFloat("fixedAddValue", parsedValue.fixedAddValue) ||
 			!readFiniteFloat("rarityAddValue", parsedValue.rarityAddValue)) {
 			return false;
+		}
+
+		// 数値の0と制限なしを区別するため、設定が存在する場合だけ制限値を格納
+		if (json.contains("upgradeLimit")) {
+			float upgradeLimit = 0.0f;
+			if (!readFiniteFloat("upgradeLimit", upgradeLimit)) {
+				return false;
+			}
+			parsedValue.upgradeLimit = upgradeLimit;
 		}
 
 		if (json.contains("isSelected")) {
@@ -179,6 +194,7 @@ namespace Weapon {
 			{ "shotCooldown", UpgradeValueToJson(status.shotCooldown) },
 			{ "criticalChance", UpgradeValueToJson(status.criticalChance) },
 			{ "criticalDamage", UpgradeValueToJson(status.criticalDamage) },
+			{ "instantKillChance", UpgradeValueToJson(status.instantKillChance) },
 			{ "size", UpgradeValueToJson(status.size) },
 			{ "bounceCount", UpgradeValueToJson(status.bounceCount) },
 			{ "penetrationCount", UpgradeValueToJson(status.penetrationCount) },
@@ -209,6 +225,8 @@ namespace Weapon {
 			!readValue("shotCooldown", parsedStatus.shotCooldown) ||
 			!readValue("criticalChance", parsedStatus.criticalChance) ||
 			!readValue("criticalDamage", parsedStatus.criticalDamage) ||
+			!readValue("instantKillChance", parsedStatus.instantKillChance) ||
+			!IsValidInstantKillChance(parsedStatus.instantKillChance) ||
 			!readValue("size", parsedStatus.size) ||
 			!readValue("bounceCount", parsedStatus.bounceCount) ||
 			!readValue("penetrationCount", parsedStatus.penetrationCount) ||

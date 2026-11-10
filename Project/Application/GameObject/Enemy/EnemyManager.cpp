@@ -451,47 +451,22 @@ namespace Enemy {
 			}
 
 			Base* enemy = enemyIterator->second;
-			const bool dealsRemainingHealthDamage =
-				hitInfo.damageMode == Projectile::DamageMode::RemainingHealth &&
-				enemy->GetType() != Data::Type::Boss;
-
-			// 即死抽選成功時は適用直前の残りHPを使い、Critical倍率による過剰Damageを抑制
-			const float damage = [&]() {
-				if (dealsRemainingHealthDamage) {
-					return (enemy->GetCurrentHealth());
-				} else {
-					return (hitInfo.damage);
-				}
-			}();
-			const float criticalChance = [&]() {
-				if (dealsRemainingHealthDamage) {
-					return (0.0f);
-				} else {
-					return (hitInfo.criticalChance);
-				}
-			}();
-			const float criticalDamage = [&]() {
-				if (dealsRemainingHealthDamage) {
-					return (1.0f);
-				} else {
-					return (hitInfo.criticalDamage);
-				}
-			}();
 			const DamageResult damageResult =
 				enemy->TakeProjectileDamage(
 					hitInfo.projectileId,
-					damage,
-					criticalChance,
-					criticalDamage,
+					hitInfo.damage,
+					hitInfo.instantKillChance,
+					hitInfo.criticalChance,
+					hitInfo.criticalDamage,
 					hitInfo.knockbackDirection,
-					hitInfo.knockbackPower);
+					hitInfo.knockbackPower,
+					hitInfo.instantKillRoll);
 			if (!damageResult.wasApplied) {
 				continue;
 			}
-			const bool wasInstantKilled = dealsRemainingHealthDamage && damageResult.wasKilled;
 
-			// Trumpの即死成立時だけ専用SEを重ねて通常撃破と区別
-			if (wasInstantKilled && MyAudio::IsLoaded("Joker")) {
+			// 武器共通の即死成立時にJokerのSEを重ねて通常撃破と区別
+			if (damageResult.wasInstantKilled && MyAudio::IsLoaded("Joker")) {
 				MyAudio::Play("Joker");
 			}
 
@@ -504,7 +479,7 @@ namespace Enemy {
 				damageResult.isCritical,
 				damageResult.wasKilled,
 				[&]() {
-					if (wasInstantKilled) {
+					if (damageResult.wasInstantKilled) {
 						return (Combat::DamageDisplayType::InstantKill);
 					} else {
 						return (Combat::DamageDisplayType::Number);

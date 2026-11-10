@@ -1,4 +1,5 @@
 #include "Trump.h"
+#include "GameObject/Combat/ProjectileDamage.h"
 #include "Render/Object/3d/RibbonEffect/MyRibbonEffect3d.h"
 #include <algorithm>
 #include <cmath>
@@ -22,7 +23,10 @@ namespace Projectile {
 		trail_ = {};
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
-		baseDamage_ = damage_;
+
+		// 跳弾や貫通でも同じ結果を使うため、追加ダメージと即死の当落を発射時に確定
+		damage_ += static_cast<float>(MyRand::GetInt(kMinRandomDamageBonus, kMaxRandomDamageBonus));
+		instantKillRoll_ = Combat::RollInstantKill(instantKillChance_);
 
 		transform_.translate = ownerPosition_;
 		const float safeSizeRate = [&]() {
@@ -90,17 +94,5 @@ namespace Projectile {
 		}
 
 		MyDebugLine::AddShape(std::get<Sphere>(hitbox_));
-	}
-
-	void Trump::OnEnemyHit() {
-
-		// 貫通数が後から設定された場合も、前回の命中結果を引き継がず命中ごとに再抽選
-		damage_ = baseDamage_ + static_cast<float>(
-			MyRand::GetInt(kMinRandomDamageBonus, kMaxRandomDamageBonus));
-		if (MyRand::GetInt(kInstantKillRollMin, kInstantKillRollMax) == kInstantKillRollSuccess) {
-			damageMode_ = DamageMode::RemainingHealth;
-		} else {
-			damageMode_ = DamageMode::Standard;
-		}
 	}
 }

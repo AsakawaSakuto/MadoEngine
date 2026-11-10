@@ -42,15 +42,16 @@ namespace UI::Game {
 				sprite->SetVisible(false);
 			}
 
-			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "IconFrame", SceneType::Game);
+			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "WeaponIconFrame", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIconFrames_[i])) {
-				sprite->SetPosition(Vector2{ -68.0f + 100.0f + i * 68.0f, 200.0f - 64.0f });
-				sprite->SetScale(Vector2{ 4.0f, 4.0f });
+				sprite->SetPosition(Vector2{ -69.0f + 100.0f + i * 68.0f, 200.0f - 65.0f });
+				sprite->SetScale(Vector2{ 1.05f, 1.05f });
 			}
 
 			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIcons_[i])) {
 				sprite->SetPosition(Vector2{ -68.0f + 132.0f + i * 68.0f, 232.0f - 64.0f });
+				sprite->SetScale(startIconScale_);
 				sprite->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
 				sprite->SetVisible(false);
 			}
@@ -69,8 +70,11 @@ namespace UI::Game {
 					kWeaponLevelTextBasePosition.y,
 				});
 				levelText->SetAnchorPoint({ 0.5f, 0.5f });
-				levelText->SetFontAsset("Assets/Font/YuGothB.ttc", "游ゴシック");
+				levelText->SetFontAsset("Assets/Font/dot.ttf", "dot");
 				levelText->SetFontSize(kWeaponLevelTextFontSize);
+				levelText->SetSdfEnabled(true);
+				levelText->SetOutlineWidth(2.0f);
+				levelText->SetOutlineColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 				levelText->SetWordWrap(true);
 				levelText->SetVisible(false);
 			}

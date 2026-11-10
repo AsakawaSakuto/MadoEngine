@@ -60,6 +60,7 @@ namespace Projectile {
 		ownerPosition_ = context.ownerPosition;
 		UpdateGroundPosition();
 		damage_ = context.damage;
+		instantKillChance_ = context.instantKillChance;
 		criticalChance_ = context.criticalChance;
 		criticalDamage_ = context.criticalDamage;
 		knockbackPower_ = context.knockbackPower;

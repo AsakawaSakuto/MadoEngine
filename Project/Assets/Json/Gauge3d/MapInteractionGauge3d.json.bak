@@ -1,0 +1,15 @@
+{
+    "name": "MapInteractionGauge3d",
+    "position": [0.0, 0.0, 0.0],
+    "translateOffset": [0.0, 0.0, 0.0],
+    "cameraTranslateOffset": [0.0, 0.0, 0.0],
+    "size": [2.0, 0.2],
+    "currentValue": 0.0,
+    "maxValue": 1.0,
+    "depthOffset": 0.01,
+    "backgroundColor": [0.125, 0.125, 0.125, 1.0],
+    "gaugeColor": [0.2, 0.85, 1.0, 1.0],
+    "direction": "Right",
+    "drawBackground": true,
+    "visible": false
+}

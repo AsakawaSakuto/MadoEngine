@@ -241,6 +241,9 @@ SceneType GameScene::Update(float dt) {
 	// Camera切り替え後の描画姿勢へ追従し、表示開始Frameから宝箱を画面中央へ配置
 	rewardSelectionController_.FollowCamera(cameraManager_.GetRenderCamera());
 	map_->SetInteractionTextVisible(inGameSession_->IsPlaying());
+
+	// Camera切り替え後の向きへ接触対象の獲得進行ゲージを同期
+	map_->UpdateInteractionGauge(cameraManager_.GetRenderCamera());
 	hud_.UpdateWorldViews(deltaTime, inGameSession_->IsPlaying(),
 		*enemyManager_, cameraManager_.GetRenderCamera());
 

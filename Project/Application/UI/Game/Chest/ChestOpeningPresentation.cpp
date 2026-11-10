@@ -1,6 +1,7 @@
 #include "ChestOpeningPresentation.h"
 #include "Audio/MyAudio.h"
 #include "Math/Function/MathFunction.h"
+#include "Utility/Easing/Easing.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -10,7 +11,7 @@ namespace {
 	constexpr float kReferenceDisplayDistance = 8.0f;
 	constexpr float kReferenceScale = 0.65f;
 	constexpr float kReferenceFovY = 0.45f;
-	constexpr float kFlashDuration = 1.0f;
+	constexpr float kFlashDuration = 0.5f;
 	constexpr float kOpeningPulsePitchStepSemitones = 2.0f;
 	constexpr std::array<float, 4> kOpeningPulseScales = { 1.1f, 1.2f, 1.3f, 1.5f };
 
@@ -138,18 +139,23 @@ namespace UI::Game {
 		}
 	}
 
-	bool ChestOpeningPresentation::Update(float deltaTime, bool canAdvanceOpening) {
+	void ChestOpeningPresentation::Update(float deltaTime, bool canAdvanceOpening, bool skipOpening) {
 		UpdateFlash(deltaTime);
 
-		// 膨張中はカードを閉じたまま維持し、獲得待機中だけ入力なしで演出を進行
+		// 獲得待機中の膨張演出だけをスキップ対象に限定
 		if (!canAdvanceOpening || !IsActive()) {
-			return false;
+			return;
 		}
 
-		return UpdateOpening(deltaTime);
+		// 残りの膨張段階と効果音を飛ばし、通常の開封と同じフラッシュを開始
+		if (skipOpening) {
+			StartFlash();
+			return;
+		}
+		UpdateOpening(deltaTime);
 	}
 
-	bool ChestOpeningPresentation::UpdateOpening(float deltaTime) {
+	void ChestOpeningPresentation::UpdateOpening(float deltaTime) {
 		openingElapsedTime_ += (std::max)(0.0f, deltaTime);
 		float expansionTime = 0.0f;
 
@@ -157,7 +163,7 @@ namespace UI::Game {
 		for (std::size_t pulseIndex = 0; pulseIndex < openingPulseCount_; ++pulseIndex) {
 			expansionTime += (std::max)(0.0f, kOpeningStepDelays[pulseIndex]);
 			if (openingElapsedTime_ < expansionTime) {
-				return false;
+				return;
 			}
 
 			// 到達済みの膨張段階を除外し、倍率変更と効果音を各段階で一度だけ反映
@@ -177,9 +183,7 @@ namespace UI::Game {
 		const float flashStartTime = expansionTime + (std::max)(0.0f, kFinalExpansionToFlashDelays[rarityIndex]);
 		if (openingElapsedTime_ >= flashStartTime) {
 			StartFlash();
-			return true;
 		}
-		return false;
 	}
 
 	void ChestOpeningPresentation::StartFlash() {
@@ -203,11 +207,11 @@ namespace UI::Game {
 		// 獲得待ち解除後も継続し、負の時間入力で透明度が増加しないよう下限を制限
 		flashRemainingTime_ = (std::max)(0.0f, flashRemainingTime_ - (std::max)(0.0f, deltaTime));
 		if (Sprite* flash = MySprite::TryGet(flashSprite_)) {
-			const float alpha = flashRemainingTime_ / kFlashDuration;
+			const float progress = 1.0f - flashRemainingTime_ / kFlashDuration;
+			Vector4 flashColor = Math::Lerp(Vector4{ 1.0f, 1.0f, 1.0f, 1.0f }, flashTargetColor_, progress);
 
-			// 色の補間と透明化を同じ進捗に同期し、レアリティ色のAlphaから独立
-			Vector4 flashColor = Math::Lerp(Vector4{ 1.0f, 1.0f, 1.0f, 1.0f }, flashTargetColor_, 1.0f - alpha);
-			flashColor.w = alpha;
+			// 序盤は緩やかに透明化し、終盤に向けて加速
+			flashColor.w = Easing::Lerp(1.0f, 0.0f, progress, EaseType::EaseInCirc);
 			flash->SetColor(flashColor);
 			flash->SetVisible(flashRemainingTime_ > 0.0f);
 		}

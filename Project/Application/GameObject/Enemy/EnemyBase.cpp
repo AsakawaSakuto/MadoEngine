@@ -1,10 +1,10 @@
 #include "EnemyBase.h"
 #include "EnemySettings.h"
 #include "EnemyStatusEffectVisualSettings.h"
+#include "GameObject/Combat/ProjectileDamage.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
 #include "Utility/Logger/Logger.h"
-#include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
 
@@ -15,9 +15,6 @@ namespace Enemy {
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
 		constexpr float kPlayerKnockbackPower = 1.5f;
 		constexpr float kPlayerKnockbackDirectionEpsilonSq = 0.000001f;
-		constexpr int kCriticalRollMin = 1;
-		constexpr int kCriticalRollMax = 100;
-		constexpr float kGuaranteedCriticalChance = static_cast<float>(kCriticalRollMax);
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
@@ -232,36 +229,55 @@ namespace Enemy {
 	DamageResult Base::TakeProjectileDamage(
 		std::uint64_t projectileId,
 		float damage,
+		float instantKillChance,
 		float criticalChance,
 		float criticalDamage,
 		const Vector3& knockbackDirection,
-		float knockbackPower) {
+		float knockbackPower,
+		std::optional<bool> instantKillRoll) {
 		DamageResult result;
 
 		// 不正なProjectile識別子と非有限Damageを状態へ反映しないため入力を検証
-		if (!isActive_ || isEmerging_ || projectileId == 0 || !std::isfinite(damage) || damage <= 0.0f) {
+		if (!isActive_ || isEmerging_ || projectileId == 0 || !std::isfinite(damage)) {
 			return result;
 		}
 
+		// 持続攻撃が接触し続けても、再ダメージ間隔を満たした命中だけを処理
 		if (projectileDamageCooldowns_.contains(projectileId)) {
 			return result;
 		}
 
-		// 確定率以上では乱数消費を避け、それ未満では1から100の整数値で命中ごとに抽選
-		const bool isCritical = criticalChance >= kGuaranteedCriticalChance ||
-			static_cast<float>(MyRand::GetInt(kCriticalRollMin, kCriticalRollMax)) <= criticalChance;
-		const float resolvedDamage = [&]() {
-			if (isCritical) {
-				return (damage * criticalDamage);
+		// 即死対象への命中では、発射時に確定した即死の当落を優先
+		bool isInstantKill = false;
+		if (type_ != Data::Type::Boss) {
+			if (instantKillRoll.has_value()) {
+				isInstantKill = *instantKillRoll;
 			} else {
-				return (damage);
+				isInstantKill = Combat::RollInstantKill(instantKillChance);
 			}
-		}();
+		}
+
+		// 即死が成立した場合は適用直前のHPを使い、クリティカルによる過剰ダメージを防止
+		float resolvedDamage = damage;
+		bool isCritical = false;
+		if (isInstantKill) {
+			resolvedDamage = status_.currentHealth;
+		} else if (damage <= 0.0f) {
+			return result;
+		} else {
+
+			// 即死が適用されない命中ごとにクリティカルを抽選
+			isCritical = Combat::RollCritical(criticalChance);
+			if (isCritical) {
+				resolvedDamage *= criticalDamage;
+			}
+		}
 		if (!std::isfinite(resolvedDamage) || resolvedDamage <= 0.0f) {
 			return result;
 		}
 
 		result = ApplyDamage(resolvedDamage, isCritical, true);
+		result.wasInstantKilled = isInstantKill && result.wasKilled;
 		if (result.wasApplied) {
 
 			// 同じProjectileが接触中に毎フレームDamageを与えないよう適用成功後に待機時間を登録

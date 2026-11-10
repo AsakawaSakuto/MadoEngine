@@ -4,15 +4,30 @@
 #include <algorithm>
 
 namespace {
+constexpr const char* kInteractionGaugeName = "MapInteractionGauge3d";
 constexpr const char* kInteractionIconSpriteName = "MapInteractionIcon";
 constexpr float kInteractionIconPixelSize = 48.0f;
 constexpr float kInteractionIconSpacing = 8.0f;
 const Vector4 kInteractionTextDefaultColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 const Vector4 kInteractionTextUnavailableColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+
+/// @brief 指定したMapイベントオブジェクトのチャージ音を停止
+/// @param eventObject チャージ音の停止対象
+void StopInteractionChargeSound(const MapEventObjectBase& eventObject) {
+	const std::string chargeSoundKey(eventObject.GetInteractionChargeSoundKey());
+	if (MyAudio::IsLoaded(chargeSoundKey)) {
+		MyAudio::Stop(chargeSoundKey);
+	}
+}
 }
 
 void MapInteractionController::Initialize() {
 	eventActionEnabled_.fill(true);
+
+	// 全EventObjectで一つのゲージを共有し、接触対象の切り替え時のModel生成を回避
+	interactionGauge_.Initialize(kInteractionGaugeName, SceneType::Game, MadoEngine::Render::RenderLayer::World);
+	interactionGauge_.SetValue(0.0f, 1.0f);
+	interactionGauge_.SetVisible(false);
 }
 
 void MapInteractionController::Reset() {
@@ -23,6 +38,8 @@ void MapInteractionController::Reset() {
 	}
 	currentHitEventObject_ = nullptr;
 	autoInteractionTimer_.Reset();
+	interactionGauge_.SetVisible(false);
+	interactionGauge_.SetValue(0.0f, 1.0f);
 	pendingEventRequests_.clear();
 	pendingInteractionEvents_.clear();
 
@@ -59,10 +76,26 @@ void MapInteractionController::SetInteractionTextVisible(bool isVisible) {
 		interactionText->SetVisible(isInteractionTextVisible_ && currentHitEventObject_ != nullptr);
 	}
 	if (!isInteractionTextVisible_) {
+		interactionGauge_.SetVisible(false);
 		if (Sprite* interactionIcon = MySprite::TryGet(interactionIcon_)) {
 			interactionIcon->SetVisible(false);
 		}
 	}
+}
+
+void MapInteractionController::UpdateInteractionGauge(const Camera& camera) {
+
+	// 計測停止中やPause中はゲージを隠し、対象変更後へ前の進行度を持ち越さない表示状態
+	if (!isInteractionTextVisible_ || !currentHitEventObject_ || !autoInteractionTimer_.IsActive()) {
+		interactionGauge_.SetVisible(false);
+		interactionGauge_.SetValue(0.0f, 1.0f);
+		return;
+	}
+
+	// ObjectのX・Zとワールド座標へ変換済みのAABB上端へ、最終Camera姿勢で追従
+	interactionGauge_.SetPosition(currentHitEventObject_->GetPosition());
+	interactionGauge_.Update(camera, autoInteractionTimer_.GetProgress(), 1.0f);
+	interactionGauge_.SetVisible(true);
 }
 
 void MapInteractionController::SetEventActionEnabled(MapEventAction action, bool isEnabled) {
@@ -106,6 +139,9 @@ void MapInteractionController::Update(Player::Base& player, float deltaTime, std
 
 		// 接触対象が変化したフレームだけOutline表示を切り替え
 		if (currentHitEventObject_) {
+
+			// 接触解除や対象変更の後まで前のチャージ音が残らないよう停止
+			StopInteractionChargeSound(*currentHitEventObject_);
 			currentHitEventObject_->SetHighlighted(false);
 		}
 
@@ -137,11 +173,21 @@ void MapInteractionController::HandleEventObjectInteraction(Player::Base& player
 	}
 
 	// 接触が続く同一対象だけを計測し、ボタン入力時は待ち時間に関係なく即時実行
-	if (!autoInteractionTimer_.IsActive() && !autoInteractionTimer_.IsFinished()) {
+	const bool isStartingTimer = !autoInteractionTimer_.IsActive() && !autoInteractionTimer_.IsFinished();
+	if (isStartingTimer) {
 		autoInteractionTimer_.Start(interactedObject->GetAutoInteractionDuration());
 	}
 	autoInteractionTimer_.Update(deltaTime);
-	if (!MyInput::Trigger("Interact") && !autoInteractionTimer_.IsFinished()) {
+	const bool isChargeComplete = autoInteractionTimer_.IsFinished();
+	if (!MyInput::Trigger("Interact") && !isChargeComplete) {
+
+		// 計測が継続する最初のFrameだけ鳴らし、即時取得時の効果音との重複を回避
+		if (isStartingTimer) {
+			const std::string chargeSoundKey(interactedObject->GetInteractionChargeSoundKey());
+			if (MyAudio::IsLoaded(chargeSoundKey)) {
+				MyAudio::Play(chargeSoundKey);
+			}
+		}
 		return;
 	}
 
@@ -149,6 +195,11 @@ void MapInteractionController::HandleEventObjectInteraction(Player::Base& player
 	if (!interactedObject->Interact(player)) {
 		autoInteractionTimer_.Reset();
 		return;
+	}
+
+	// 計測途中のボタン取得では獲得SEと重ならないようチャージ音を停止
+	if (!isChargeComplete) {
+		StopInteractionChargeSound(*interactedObject);
 	}
 	pendingInteractionEvents_.push_back(interactedObject->GetInteractionEvent());
 

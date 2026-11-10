@@ -212,8 +212,8 @@
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            4.800000190734863,
-                            4.800000190734863
+                            1.2000000476837158,
+                            1.2000000476837158
                         ],
                         "visible": true
                     },
@@ -863,24 +863,6 @@
                     "type": "Sprite"
                 },
                 {
-                    "name": "IconBorder",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            -70.0,
-                            -135.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            4.800000190734863,
-                            4.800000190734863
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_63598b9c-d384-474a-b42f-55d67673b982",
-                    "type": "Sprite"
-                },
-                {
                     "name": "IconBackground",
                     "state": {
                         "opacity": 1.0,
@@ -1059,6 +1041,24 @@
                     },
                     "target": "UIGroupText_488a33dc-5028-4e06-907a-df704748275f",
                     "type": "Text"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.2000000476837158,
+                            1.2000000476837158
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_8929c19b-b79e-461f-a3e1-0c206f4a9685",
+                    "type": "Sprite"
                 }
             ],
             "id": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
@@ -1390,6 +1390,62 @@
             ],
             "id": "fcf29552-afa6-4d3b-b573-2706f67b544e",
             "name": "PauseGroup",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "PlayerHealthFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            170.0,
+                            86.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.5,
+                            2.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "HealthFrame",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "PlayerHealth",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            170.0,
+                            86.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "PlayerHealthText",
+                    "type": "Text"
+                }
+            ],
+            "id": "4da77292-2a0d-451c-b2d4-0d23f6b2f69c",
+            "name": "PlayerHealthUI",
             "scene": "Game",
             "state": {
                 "opacity": 1.0,
@@ -1777,8 +1833,8 @@
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            4.800000190734863,
-                            4.800000190734863
+                            1.2000000476837158,
+                            1.2000000476837158
                         ],
                         "visible": true
                     },

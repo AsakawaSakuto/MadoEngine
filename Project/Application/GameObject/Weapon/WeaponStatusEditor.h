@@ -10,6 +10,9 @@ namespace Weapon {
 	/// @brief 武器初期ステータス編集用のImGuiを管理するクラス
 	class StatusEditor {
 	public:
+		/// @brief 最初に選択される武器の保存済み設定を読み込み
+		StatusEditor();
+
 		/// @brief 武器初期ステータス編集用のImGuiを描画
 		void DrawImGui();
 

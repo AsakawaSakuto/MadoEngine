@@ -1,4 +1,5 @@
 #include "ProjectileManager.h"
+#include "Entity/Dice.h"
 #include "Audio/MyAudio.h"
 #include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include <algorithm>
@@ -208,6 +209,7 @@ namespace Projectile {
 		case Projectile::Type::Hammer:     projectile = std::make_unique<Hammer>();     break;
 		case Projectile::Type::SnowCrystal: projectile = std::make_unique<SnowCrystal>(); break;
 		case Projectile::Type::Sword:       projectile = std::make_unique<Sword>();       break;
+		case Projectile::Type::Dice:        projectile = std::make_unique<Dice>();        break;
 		default:
 			return;
 		}
@@ -290,18 +292,21 @@ namespace Projectile {
 				// 貫通数や跳弾状態の確定後にProjectile固有のHit効果を適用
 				projectile->OnEnemyHit();
 
-				outHitInfos.push_back({
-					enemyTarget.enemyId,
-					projectile->GetProjectileId(),
-					projectile->GetSourceWeaponId(),
-					projectile->GetDamage(),
-					projectile->GetDamageMode(),
-					projectile->GetCriticalChance(),
-					projectile->GetCriticalDamage(),
-					projectile->GetKnockbackPower(),
-					projectile->GetStatusEffects(),
-					knockbackDirection
-				});
+				if (projectile->DealsContactDamage()) {
+					outHitInfos.push_back({
+						enemyTarget.enemyId,
+						projectile->GetProjectileId(),
+						projectile->GetSourceWeaponId(),
+						projectile->GetDamage(),
+						projectile->GetInstantKillChance(),
+						projectile->GetCriticalChance(),
+						projectile->GetCriticalDamage(),
+						projectile->GetKnockbackPower(),
+						projectile->GetStatusEffects(),
+						knockbackDirection,
+						projectile->GetInstantKillRoll(),
+					});
+				}
 
 				if (projectile->IsDead()) {
 					break;

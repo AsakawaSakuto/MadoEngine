@@ -9,6 +9,7 @@
 #include <string>
 
 namespace {
+	constexpr const char* kEditorFrameName = "MinMapFrame";
 	constexpr const char* kBlockTextureName = "BlockMinMap";
 	constexpr const char* kSlopeTextureName = "SlopeMinMap";
 	constexpr std::uint32_t kMaximumCellCountPerAxis = 128;
@@ -298,6 +299,13 @@ namespace UI::Game {
 	void MiniMapUI::UpdateView() {
 		const bool shouldShow = hasMapData_ && isVisible_ && hasLayout_ &&
 			std::isfinite(playerPosition_.x) && std::isfinite(playerPosition_.z);
+
+		// Editorでの表示設定を維持し、再読込後の枠にもミニマップの表示条件を反映
+		Sprite* editorFrame = MySprite::TryGet(MySprite::Find(kEditorFrameName));
+		if (editorFrame && editorFrame->GetSceneType() == SceneType::Game) {
+			editorFrame->SetRuntimeVisible(shouldShow);
+		}
+
 		for (MadoEngine::SpriteHandle handle : { frame_, background_ }) {
 			if (Sprite* sprite = MySprite::TryGet(handle)) {
 				sprite->SetVisible(shouldShow);
@@ -533,7 +541,7 @@ namespace UI::Game {
 		contentSize_ = {};
 		hasMapData_ = false;
 		hasLayout_ = false;
-		isVisible_ = false;
+		SetVisible(false);
 	}
 
 }

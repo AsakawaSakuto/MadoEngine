@@ -20,6 +20,7 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text",
+            "opacity": 1.0,
             "outlineColor": [
                 0.0,
                 0.0,
@@ -70,6 +71,7 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text1",
+            "opacity": 1.0,
             "outlineColor": [
                 0.0,
                 0.0,
@@ -120,6 +122,7 @@
             "layer": "Default",
             "lineSpacing": 1.0,
             "name": "Text2",
+            "opacity": 1.0,
             "outlineColor": [
                 0.0,
                 0.0,
@@ -246,7 +249,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 60.2",
+            "text": "FPS : 60.1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -297,7 +300,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 3000276326",
+            "text": "SEED : 206893878",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -316,9 +319,9 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
+            "fontFamily": "x8y12pxDenkiChip",
+            "fontFile": "Assets/Font/dot.ttf",
+            "fontSize": 28.5,
             "horizontalAlign": "Left",
             "layer": "Default",
             "lineSpacing": 1.0,
@@ -330,10 +333,10 @@
                 0.0,
                 1.0
             ],
-            "outlineWidth": 0.0,
+            "outlineWidth": 3.0,
             "position": [
-                155.0,
-                84.0
+                170.0,
+                86.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,
@@ -343,7 +346,7 @@
             ],
             "scene": "Game",
             "screen": "BackBuffer",
-            "sdfEnabled": false,
+            "sdfEnabled": true,
             "size": [
                 0.0,
                 0.0
@@ -420,7 +423,7 @@
             ],
             "fontFamily": "游ゴシック",
             "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
+            "fontSize": 24.0,
             "horizontalAlign": "Left",
             "layer": "Default",
             "lineSpacing": 1.0,
@@ -450,7 +453,7 @@
                 0.0,
                 0.0
             ],
-            "text": "敵の数を増やす",
+            "text": "40で開ける",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -524,7 +527,7 @@
             "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
-            "layer": "UI",
+            "layer": "PauseUI",
             "lineSpacing": 1.0,
             "name": "UIGroupText_3cfbbdd1-4239-4163-956f-b385b4204212",
             "opacity": 1.0,
@@ -705,7 +708,7 @@
                 125.0,
                 60.0
             ],
-            "text": "デストランプ",
+            "text": "拳銃",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -719,9 +722,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                1.0,
-                0.00469699501991272,
                 0.0,
+                1.0,
+                0.4982631206512451,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -909,7 +912,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-10",
+            "text": "-3.5",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -974,9 +977,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                1.0,
-                0.10588235408067703,
-                0.10588235408067703,
+                0.9921568632125854,
+                0.1411764770746231,
+                0.7098039388656616,
                 1.0
             ],
             "fontFamily": "游ゴシック",
@@ -1011,7 +1014,7 @@
                 0.0,
                 0.0
             ],
-            "text": "ダメージ↑",
+            "text": "回復",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1264,9 +1267,9 @@
             "sdfEnabled": false,
             "size": [
                 210.0,
-                60.0
+                128.0
             ],
-            "text": "近くの敵に向かって\n弾丸を連射する",
+            "text": "足元に魔法陣を設置\n触れた敵に毒を付与",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1674,7 +1677,7 @@
                 85.0,
                 42.0
             ],
-            "text": "1.000秒",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1697,7 +1700,7 @@
             "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 120.0,
             "horizontalAlign": "Center",
-            "layer": "UI",
+            "layer": "PauseUI",
             "lineSpacing": 1.0,
             "name": "UIGroupText_5c9b7674-cbaa-4b4c-904c-e9ebaaf96d45",
             "opacity": 1.0,
@@ -1748,7 +1751,7 @@
             "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 26.0,
             "horizontalAlign": "Left",
-            "layer": "UI",
+            "layer": "PauseUI",
             "lineSpacing": 1.0,
             "name": "UIGroupText_06b0fd43-f1d5-43a2-acc9-3daec354e6ca",
             "opacity": 1.0,
@@ -1878,7 +1881,7 @@
                 85.0,
                 42.0
             ],
-            "text": "2.0",
+            "text": "1.5",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1901,7 +1904,7 @@
             "fontFile": "Assets/Font/YuGothB.ttc",
             "fontSize": 32.0,
             "horizontalAlign": "Left",
-            "layer": "UI",
+            "layer": "PauseUI",
             "lineSpacing": 1.0,
             "name": "UIGroupText_7d349529-eab8-4dd4-b202-bb431671b4aa",
             "opacity": 1.0,
@@ -2133,7 +2136,7 @@
                 210.0,
                 60.0
             ],
-            "text": "射撃クールダウン\n10.0%短縮",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2235,7 +2238,7 @@
                 125.0,
                 60.0
             ],
-            "text": "雷",
+            "text": "ハンマー",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2386,9 +2389,9 @@
             "sdfEnabled": false,
             "size": [
                 210.0,
-                60.0
+                128.0
             ],
-            "text": "敵の頭上に雷を生成\n跳弾して敵を攻撃する",
+            "text": "頭上にハンマーを構え\n敵へ向けて振り下ろす",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2454,8 +2457,8 @@
             "characterSpacing": 0.0,
             "color": [
                 0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.550000011920929,
+                1.0,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -2490,7 +2493,7 @@
                 125.0,
                 70.0
             ],
-            "text": "アンコモン\n所持武器を強化",
+            "text": "レア\n所持武器を強化",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2541,7 +2544,7 @@
                 210.0,
                 60.0
             ],
-            "text": "最大射撃数",
+            "text": "跳弾回数",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2590,9 +2593,9 @@
             "sdfEnabled": false,
             "size": [
                 210.0,
-                60.0
+                128.0
             ],
-            "text": "1～13のダメージ\n稀にJokerが即死させる",
+            "text": "近くの敵に向かって\n弾丸を連射する",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2643,7 +2646,7 @@
                 125.0,
                 60.0
             ],
-            "text": "拳銃",
+            "text": "毒靴",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2694,7 +2697,7 @@
                 85.0,
                 42.0
             ],
-            "text": "1.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2759,9 +2762,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.949999988079071,
+                0.9700000286102295,
+                1.0,
                 1.0
             ],
             "fontFamily": "Yu Gothic UI",
@@ -2796,7 +2799,7 @@
                 125.0,
                 70.0
             ],
-            "text": "アンコモン\n所持武器を強化",
+            "text": "NEW\n新規武器",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2898,7 +2901,7 @@
                 85.0,
                 42.0
             ],
-            "text": "0.900秒",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,

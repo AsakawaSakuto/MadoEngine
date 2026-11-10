@@ -24,8 +24,8 @@ namespace UI::Game {
 		/// @brief 宝箱の膨張演出とフラッシュを更新
 		/// @param deltaTime 前フレームからの経過時間（秒）
 		/// @param canAdvanceOpening 開封演出を進行する場合はtrue
-		/// @return 宝箱の開封演出が完了した場合はtrue
-		bool Update(float deltaTime, bool canAdvanceOpening);
+		/// @param skipOpening 膨張演出からフラッシュへ進む場合はtrue
+		void Update(float deltaTime, bool canAdvanceOpening, bool skipOpening);
 
 		/// @brief 描画Cameraの前方へ宝箱Modelを追従
 		/// @param camera 追従対象の描画Camera
@@ -48,8 +48,7 @@ namespace UI::Game {
 
 		/// @brief 各段階の待ち時間とレアリティに応じた宝箱の膨張倍率を更新
 		/// @param deltaTime 前フレームからの経過時間（秒）
-		/// @return 膨張演出が完了してフラッシュを開始した場合はtrue
-		bool UpdateOpening(float deltaTime);
+		void UpdateOpening(float deltaTime);
 
 		/// @brief 宝箱を非表示にして開封フラッシュを開始
 		void StartFlash();

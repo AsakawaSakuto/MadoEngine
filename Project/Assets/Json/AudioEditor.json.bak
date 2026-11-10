@@ -71,7 +71,7 @@
             "volume": 1.0
         },
         "chestnextrarity": {
-            "pitchSemitones": 2.0,
+            "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
         },
@@ -200,6 +200,11 @@
             "type": "SE",
             "volume": 2.0
         },
+        "karmametercharge": {
+            "pitchSemitones": 2.0,
+            "type": "SE",
+            "volume": 2.0
+        },
         "lockin": {
             "pitchSemitones": 0.0,
             "type": "SE",
@@ -214,6 +219,11 @@
             "pitchSemitones": 0.0,
             "type": "SE",
             "volume": 1.0
+        },
+        "metercharge": {
+            "pitchSemitones": 2.0,
+            "type": "SE",
+            "volume": 2.0
         },
         "money": {
             "pitchSemitones": 0.0,

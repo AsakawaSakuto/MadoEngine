@@ -73,5 +73,5 @@ bool Karma::Interact(Player::Base& player) {
 }
 
 std::string_view Karma::GetInteractionText() const {
-	return "敵の数を増やす";
+	return "敵の数を1体増やす";
 }

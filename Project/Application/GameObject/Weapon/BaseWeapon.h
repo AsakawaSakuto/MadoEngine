@@ -97,6 +97,14 @@ namespace Weapon {
 		/// @return 計算に成功した場合はtrue
 		bool CalculateUpgradeAmount(UpgradeStatType statType, Rarity rarity, float& outAmount) const;
 
+		/// @brief 制限値を反映した強化後のステータスと変化量を計算
+		/// @param statType 強化対象ステータス
+		/// @param rarity 強化レアリティ
+		/// @param outAmount 計算した変化量の出力先
+		/// @param outUpgradedValue 強化後のステータス値の出力先
+		/// @return 適用可能な強化を計算できた場合はtrue
+		bool CalculateUpgrade(UpgradeStatType statType, Rarity rarity, float& outAmount, float& outUpgradedValue) const;
+
 		/// @brief 指定した強化を武器へ適用
 		/// @param statType 強化対象ステータス
 		/// @param rarity 強化レアリティ

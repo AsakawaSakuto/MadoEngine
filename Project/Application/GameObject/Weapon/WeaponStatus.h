@@ -41,16 +41,18 @@ namespace Weapon {
 		FrozenApplyChance,
 		FrozenSlowRate,
 		FrozenDuration,
+		InstantKillChance,
 	};
 
 	// 抽選対象の強化ステータスを一か所で管理
-	inline constexpr std::array<UpgradeStatType, 21> kUpgradeStatTypes = {
+	inline constexpr std::array<UpgradeStatType, 22> kUpgradeStatTypes = {
 		UpgradeStatType::Damage,
 		UpgradeStatType::ShotMaxCount,
 		UpgradeStatType::ShotIntervalTime,
 		UpgradeStatType::ShotCooldown,
 		UpgradeStatType::CriticalChance,
 		UpgradeStatType::CriticalDamage,
+		UpgradeStatType::InstantKillChance,
 		UpgradeStatType::Size,
 		UpgradeStatType::BounceCount,
 		UpgradeStatType::PenetrationCount,
@@ -74,6 +76,7 @@ namespace Weapon {
 		float fixedAddValue = 0.0f;  // 強化時の固定加算値
 		float rarityAddValue = 0.0f; // レアリティ値ごとの上昇幅
 		bool isSelected = false;     // 選択肢に出るかどうか
+		std::optional<float> upgradeLimit = std::nullopt; // 強化の上限値、射撃クールダウンでは下限値
 	};
 
 	/// @brief 継続ダメージ型状態異常の強化設定
@@ -126,6 +129,7 @@ namespace Weapon {
 		UpgradeValue shotCooldown     = { 1.0f, 1.0f, 0.1f, true }; // 武器の射撃クールダウンと強化時の短縮率
 		UpgradeValue criticalChance   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカル率
 		UpgradeValue criticalDamage   = { 1.0f, 1.0f, 0.1f, true }; // 武器のクリティカルダメージ倍率
+		UpgradeValue instantKillChance = {};                       // 武器の即死率（%）
 		UpgradeValue size             = { 1.0f, 1.0f, 0.1f, true }; // 武器のサイズ
 		UpgradeValue bounceCount      = { 1.0f, 1.0f, 0.1f, true }; // 武器の跳弾回数
 		UpgradeValue penetrationCount = { 1.0f, 1.0f, 0.1f, true }; // 武器の貫通回数
@@ -145,6 +149,7 @@ namespace Weapon {
 		case UpgradeStatType::ShotCooldown:     return "射撃クールダウン";
 		case UpgradeStatType::CriticalChance:   return "クリティカル率";
 		case UpgradeStatType::CriticalDamage:   return "クリティカル倍率";
+		case UpgradeStatType::InstantKillChance: return "即死率";
 		case UpgradeStatType::Size:             return "サイズ";
 		case UpgradeStatType::BounceCount:      return "跳弾回数";
 		case UpgradeStatType::PenetrationCount: return "貫通回数";
@@ -176,6 +181,7 @@ namespace Weapon {
 		case UpgradeStatType::ShotCooldown:     return &status.shotCooldown;
 		case UpgradeStatType::CriticalChance:   return &status.criticalChance;
 		case UpgradeStatType::CriticalDamage:   return &status.criticalDamage;
+		case UpgradeStatType::InstantKillChance: return &status.instantKillChance;
 		case UpgradeStatType::Size:             return &status.size;
 		case UpgradeStatType::BounceCount:      return &status.bounceCount;
 		case UpgradeStatType::PenetrationCount: return &status.penetrationCount;
@@ -288,7 +294,15 @@ namespace Weapon {
 	inline bool IsFiniteUpgradeValue(const UpgradeValue& value) {
 		return std::isfinite(value.value) &&
 			std::isfinite(value.fixedAddValue) &&
-			std::isfinite(value.rarityAddValue);
+			std::isfinite(value.rarityAddValue) &&
+			(!value.upgradeLimit || std::isfinite(*value.upgradeLimit));
+	}
+
+	/// @brief 武器の即死率の強化設定を検証
+	/// @param chance 検証対象の即死率の強化設定
+	/// @return 設定値が有限で即死率が0から100の場合はtrue
+	inline bool IsValidInstantKillChance(const UpgradeValue& chance) {
+		return IsFiniteUpgradeValue(chance) && chance.value >= 0.0f && chance.value <= 100.0f;
 	}
 
 	/// @brief 継続ダメージ型状態異常の強化設定を検証

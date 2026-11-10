@@ -1,6 +1,7 @@
 #include "RewardSelectionController.h"
 #include "GameObject/Relic/RelicSystem.h"
 #include "GameObject/Weapon/WeaponUpgradeSystem.h"
+#include "Input/MyInput.h"
 
 namespace {
 	constexpr int kRelicAcquisitionBgmPlaybackId = -1;
@@ -40,16 +41,20 @@ namespace System {
 			chestOpeningPresentation_.Hide();
 		}
 
-		// 選択待機中も実時間で進行し、獲得確定後もフラッシュの透明化を継続
-		const bool didFinishChestPresentation = chestOpeningPresentation_.Update(
-			deltaTime, phase == InGamePhase::WaitingGetItem);
+		// 獲得待機へ切り替わってから押下を検出し、宝箱を開けた入力による即時スキップを防止
+		const bool isWaitingForRelic = phase == InGamePhase::WaitingGetItem;
+		const bool skipChestOpening = isWaitingForRelic && chestOpeningPresentation_.IsActive() &&
+			(MyInput::Trigger("Decision") || MyInput::Trigger("Interact"));
+		const bool wasChestFlashActive = chestOpeningPresentation_.IsFlashActive();
+		chestOpeningPresentation_.Update(deltaTime, isWaitingForRelic, skipChestOpening);
+		const bool isChestFlashActive = chestOpeningPresentation_.IsFlashActive();
 		relicAcquisitionUI_.SetDisplayEnabled(!chestOpeningPresentation_.IsActive());
-		relicAcquisitionUI_.SetBackgroundEnabled(!chestOpeningPresentation_.IsFlashActive());
-		if (phase == InGamePhase::WaitingGetItem) {
+		relicAcquisitionUI_.SetBackgroundEnabled(!isChestFlashActive);
+		if (isWaitingForRelic) {
 			if (!chestOpeningPresentation_.IsActive()) {
 
-				// 開封完了Frameの決定入力が表示直後の獲得カードへ伝わることを抑止
-				relicAcquisitionUI_.Update(deltaTime, relicSystem, !didFinishChestPresentation);
+				// 開始と終了のFrameも含め、フラッシュ中の押下による獲得確定を防止
+				relicAcquisitionUI_.Update(deltaTime, relicSystem, !wasChestFlashActive && !isChestFlashActive);
 			}
 		} else if (phase == InGamePhase::WaitingUpgrade) {
 			weaponUpgradeUI_.Update(deltaTime, upgradeSystem, inventory, player);
@@ -79,7 +84,7 @@ namespace System {
 			return true;
 		}
 
-		// 獲得確定後に残る開封フラッシュの終了まで一時停止を継続
+		// 選択待機が解除された場合も開封演出の終了まで一時停止を継続
 		return ShouldSuppressPlayerOutline();
 	}
 

@@ -13,6 +13,7 @@ namespace MadoEngine::Render {
     X(Enemy, "Enemy") \
 	X(Effect, "Effect") \
 	X(UI, "UI") \
+    X(PauseUI, "PauseUI") \
 	X(Debug, "Debug") \
 	X(ScreenEffect, "ScreenEffect") \
 	X(MapBlock, "MapBlock") \

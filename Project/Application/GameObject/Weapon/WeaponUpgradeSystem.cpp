@@ -185,19 +185,20 @@ namespace Weapon {
 			}
 		}
 
-		if (newWeaponCandidates.size() + ownedWeaponCandidates.size() < kChoiceCount) {
-			if (!generationFailureLogged_) {
-				Logger::Output("[Application] 異なる武器を対象とした三つの強化候補を生成できません。", Logger::Level::Error);
-				generationFailureLogged_ = true;
-			}
+		const std::size_t choiceCount = std::min(kChoiceCount, newWeaponCandidates.size() + ownedWeaponCandidates.size());
+		if (choiceCount == 0) {
+
+			// 全項目が上限に達した場合も、候補のない選択待ちでゲームを停止させないよう要求を解消
+			pendingUpgradeCount_ = 0;
+			choices_.clear();
 			return false;
 		}
 
 		const std::uint64_t generation = nextGeneration_;
 		std::vector<UpgradeChoice> generatedChoices;
-		generatedChoices.reserve(kChoiceCount);
+		generatedChoices.reserve(choiceCount);
 
-		for (std::size_t choiceIndex = 0; choiceIndex < kChoiceCount; ++choiceIndex) {
+		for (std::size_t choiceIndex = 0; choiceIndex < choiceCount; ++choiceIndex) {
 
 			// 両方に候補がある間は50%ずつで種類を決定し、片方が尽きた場合は残る側を選択
 			std::vector<Projectile::Type>* candidateWeapons = &ownedWeaponCandidates;
@@ -207,7 +208,7 @@ namespace Weapon {
 				candidateWeapons = &newWeaponCandidates;
 			}
 
-			// 選択した種類の中では等確率で抽選し、抽選済み武器を除外して三種類の武器を保証
+			// 選択した種類の中で等確率で抽選し、抽選済み武器を除外して候補の重複を防止
 			const int randomIndex = random_.Int(0, static_cast<int>(candidateWeapons->size()) - 1);
 			const Projectile::Type weaponType = (*candidateWeapons)[static_cast<std::size_t>(randomIndex)];
 			candidateWeapons->erase(candidateWeapons->begin() + randomIndex);
@@ -242,7 +243,8 @@ namespace Weapon {
 			const Rarity rarity = DrawRarity();
 			const UpgradeValue* upgradeValue = weapon->GetUpgradeValue(statType);
 			float calculatedAmount = 0.0f;
-			if (!upgradeValue || !weapon->CalculateUpgradeAmount(statType, rarity, calculatedAmount)) {
+			float upgradedValue = 0.0f;
+			if (!upgradeValue || !weapon->CalculateUpgrade(statType, rarity, calculatedAmount, upgradedValue)) {
 
 				// 不完全な候補群を表示しないよう生成全体を取り消し
 				if (!generationFailureLogged_) {
@@ -257,6 +259,7 @@ namespace Weapon {
 			choice.statType = statType;
 			choice.rarity = rarity;
 			choice.currentValue = upgradeValue->value;
+			choice.upgradedValue = upgradedValue;
 			choice.calculatedAmount = calculatedAmount;
 			choice.statDisplayName = UpgradeStatTypeToDisplayName(statType);
 			choice.rarityDisplayName = GetRarityDisplayName(rarity);
@@ -269,7 +272,7 @@ namespace Weapon {
 		choiceInventoryRevision_ = inventory.GetRevision();
 		++nextGeneration_;
 		generationFailureLogged_ = false;
-		Logger::Output("[Application] 武器アップグレード候補を三つ生成しました。", Logger::Level::Debug);
+		Logger::Output("[Application] 武器アップグレード候補を" + std::to_string(choiceCount) + "件生成しました。", Logger::Level::Debug);
 
 		// 新しいUpgrade選択肢が公開される瞬間に通知SEを再生
 		MyAudio::Play(kUpgradeTimingSoundKey);
@@ -340,12 +343,14 @@ namespace Weapon {
 			}
 
 			float recalculatedAmount = 0.0f;
+			float recalculatedValue = 0.0f;
 			const UpgradeValue* currentUpgradeValue = weapon->GetUpgradeValue(*choice.statType);
 
 			// 表示後の現在値・設定変更や不正な候補改変を適用直前の再計算で拒否
 			if (!currentUpgradeValue ||
 				!IsSameUpgradeValue(currentUpgradeValue->value, choice.currentValue) ||
-				!weapon->CalculateUpgradeAmount(*choice.statType, *choice.rarity, recalculatedAmount) ||
+				!weapon->CalculateUpgrade(*choice.statType, *choice.rarity, recalculatedAmount, recalculatedValue) ||
+				!IsSameUpgradeValue(recalculatedValue, choice.upgradedValue) ||
 				!IsSameUpgradeValue(recalculatedAmount, choice.calculatedAmount)) {
 				Logger::Output("[Application] 表示時と適用時の武器強化値が一致しません。", Logger::Level::Error);
 				return false;

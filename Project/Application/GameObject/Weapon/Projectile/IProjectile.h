@@ -5,16 +5,11 @@
 #include "../WeaponStatus.h"
 #include <algorithm>
 #include <cmath>
+#include <optional>
 #include <string>
 #include <unordered_set>
 
 namespace Projectile {
-
-	/// @brief Enemy命中時のダメージ計算方式
-	enum class DamageMode {
-		Standard,
-		RemainingHealth,
-	};
 
 	class IProjectile {
 	public:
@@ -53,6 +48,10 @@ namespace Projectile {
 		virtual void OnEnemyHit() {
 		}
 
+		/// @brief Projectile本体の接触でダメージを与えるか確認
+		/// @return 接触したEnemyへ本体の攻撃情報を渡す場合はtrue
+		virtual bool DealsContactDamage() const { return true; }
+
 		/// @brief 通常更新での消滅確定時に固有処理を実行、全消去時は対象外
 		virtual void OnDestroy() {
 		}
@@ -76,9 +75,9 @@ namespace Projectile {
 		/// @return Projectileのダメージ量
 		float GetDamage() const { return damage_; }
 
-		/// @brief Projectileのダメージ計算方式を取得
-		/// @return Projectileのダメージ計算方式
-		DamageMode GetDamageMode() const { return damageMode_; }
+		/// @brief Projectileの即死率を取得
+		/// @return Projectileの即死率（%）
+		float GetInstantKillChance() const { return instantKillChance_; }
 
 		/// @brief Projectileのクリティカル率を取得
 		/// @return Projectileのクリティカル率
@@ -87,6 +86,10 @@ namespace Projectile {
 		/// @brief Projectileのクリティカルダメージ倍率を取得
 		/// @return Projectileのクリティカルダメージ倍率
 		float GetCriticalDamage() const { return criticalDamage_; }
+
+		/// @brief Projectileの発射時に確定した即死抽選結果を取得
+		/// @return 即死に当選した場合はtrue、命中時に抽選する場合は空
+		std::optional<bool> GetInstantKillRoll() const { return instantKillRoll_; }
 
 		/// @brief Projectileのノックバック力を取得
 		/// @return Projectileのノックバック力
@@ -179,9 +182,10 @@ namespace Projectile {
 			targetPosition_ = context.targetPosition;
 
 			damage_ = context.damage;
-			damageMode_ = DamageMode::Standard;
+			instantKillChance_ = context.instantKillChance;
 			criticalChance_ = context.criticalChance;
 			criticalDamage_ = context.criticalDamage;
+			instantKillRoll_ = context.instantKillRoll;
 			knockbackPower_ = context.knockbackPower;
 			moveSpeed_ = context.moveSpeed;
 			sizeRate_ = context.sizeRate;
@@ -273,9 +277,10 @@ namespace Projectile {
 		std::string colliderName_;       // Projectileのコライダー名
 
 		float damage_ = 10.0f;              // ダメージ量
-		DamageMode damageMode_ = DamageMode::Standard; // ダメージ計算方式
+		float instantKillChance_ = 0.0f;     // 即死率（%）
 		float criticalChance_ = 0.0f;       // クリティカル率
 		float criticalDamage_ = 1.0f;       // クリティカルダメージ倍率
+		std::optional<bool> instantKillRoll_; // 発射時に確定した即死抽選結果
 		float knockbackPower_ = 0.0f;        // ノックバック力
 		float moveSpeed_ = 25.0f;           // 移動速度
 		float sizeRate_ = 1.0f;             // サイズ倍率

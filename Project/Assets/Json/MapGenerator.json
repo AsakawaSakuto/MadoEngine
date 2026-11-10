@@ -26,7 +26,7 @@
             "anvil": {
                 "aabbMax": [
                     1.5,
-                    4.0,
+                    4.5,
                     1.5
                 ],
                 "aabbMin": [
@@ -52,7 +52,7 @@
             "chest": {
                 "aabbMax": [
                     2.0,
-                    1.5,
+                    2.0,
                     2.0
                 ],
                 "aabbMin": [
@@ -77,27 +77,27 @@
             },
             "karma": {
                 "aabbMax": [
-                    0.75,
-                    2.5,
-                    0.75
+                    1.5,
+                    4.0,
+                    1.5
                 ],
                 "aabbMin": [
-                    -0.75,
+                    -1.5,
                     0.0,
-                    -0.75
+                    -1.5
                 ],
-                "autoInteractionDuration": 1.0
+                "autoInteractionDuration": 2.0
             },
             "magnet": {
                 "aabbMax": [
-                    1.0,
-                    4.0,
-                    1.0
+                    1.5,
+                    4.5,
+                    1.5
                 ],
                 "aabbMin": [
-                    -1.0,
+                    -1.5,
                     0.0,
-                    -1.0
+                    -1.5
                 ],
                 "autoInteractionDuration": 1.0
             }
@@ -114,7 +114,7 @@
             16,
             16
         ],
-        "seed": 3000276326,
+        "seed": 206893878,
         "slopeSpawnRate": 1.0
     }
 }

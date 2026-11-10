@@ -17,8 +17,11 @@ namespace Projectile {
 		objectName_ = context.projectileName + "_" + std::to_string(context.projectileId);
 		InitializeCommonProperties(context, objectName_);
 
+		// 飛翔中の接触で攻撃効果が発生しないようダメージと即死率を爆発へ引き継ぎ
 		explosionDamage_ = context.damage;
-		damage_ = 0.0f; // 爆発でダメージを与えるため、Bomb自体のダメージは0に設定
+		explosionInstantKillChance_ = context.instantKillChance;
+		damage_ = 0.0f;
+		instantKillChance_ = 0.0f;
 
 		startPosition_ = ownerPosition_;
 		transform_.translate = startPosition_;
@@ -102,6 +105,7 @@ namespace Projectile {
 		context.createSoundKey = "BombExplosion";
 		context.ownerPosition = transform_.translate;
 		context.damage = explosionDamage_;
+		context.instantKillChance = explosionInstantKillChance_;
 		context.criticalChance = criticalChance_;
 		context.criticalDamage = criticalDamage_;
 		context.knockbackPower = knockbackPower_;

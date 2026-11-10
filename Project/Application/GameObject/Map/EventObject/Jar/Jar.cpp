@@ -140,10 +140,12 @@ bool Jar::Interact(Player::Base& player) {
 	const int rewardAmount = CalculateRewardAmount(size_);
 	if (type_ == JarType::Exp) {
 		player.AddExp(rewardAmount);
-		Logger::Output("Jarを取得しました。経験値を" + std::to_string(rewardAmount) + "加算しました。", Logger::Level::Application);
+		Logger::Output("Jarを取得しました。経験値を" + std::to_string(rewardAmount) + "加算しました。",
+			Logger::Level::Application);
 	} else {
 		player.AddMoney(rewardAmount);
-		Logger::Output("Jarを取得しました。所持金を" + std::to_string(rewardAmount) + "加算しました。", Logger::Level::Application);
+		Logger::Output("Jarを取得しました。所持金を" + std::to_string(rewardAmount) + "加算しました。", 
+			Logger::Level::Application);
 	}
 
 	// 通常報酬の確定後、Jarの種別やサイズにかかわらず破壊位置への特殊Dropを一度抽選

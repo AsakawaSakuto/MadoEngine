@@ -25,9 +25,13 @@ public:
 	/// @param eventObjects 更新と削除の対象になるイベントオブジェクト
 	void Update(Player::Base& player, float deltaTime, std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects);
 
-	/// @brief 操作案内Textの表示可否を設定
+	/// @brief 操作案内Textと獲得ゲージの表示可否を設定
 	/// @param isVisible 表示する場合はtrue
 	void SetInteractionTextVisible(bool isVisible);
+
+	/// @brief 接触対象の位置と獲得進行度を3Dゲージへ反映
+	/// @param camera 描画に使用するCamera
+	void UpdateInteractionGauge(const Camera& camera);
 
 	/// @brief 指定イベント要求の受付可否を設定
 	/// @param action 設定対象のイベント要求
@@ -66,6 +70,7 @@ private:
 	std::vector<MapInteractionEvent> pendingInteractionEvents_;
 	std::array<bool, static_cast<std::size_t>(MapEventAction::Count)> eventActionEnabled_{};
 	MapEventObjectBase* currentHitEventObject_ = nullptr;
+	Gauge3d interactionGauge_;
 	MadoEngine::ModelHandle interactionMarkerModel_{};
 	MadoEngine::TextHandle interactionText_{};
 	MadoEngine::SpriteHandle interactionIcon_{};

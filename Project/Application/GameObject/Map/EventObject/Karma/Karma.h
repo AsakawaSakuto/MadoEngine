@@ -33,6 +33,10 @@ public:
 	/// @return 操作案内に表示するUTF-8文字列
 	std::string_view GetInteractionText() const override;
 
+	/// @brief Karma専用のチャージ音キーを取得
+	/// @return KarmaMeterChargeの音声リソースキー
+	std::string_view GetInteractionChargeSoundKey() const override { return "KarmaMeterCharge"; }
+
 	/// @brief KarmaのEventObject名を取得
 	/// @return KarmaのEventObject名
 	std::string_view GetEventObjectName() const override { return "Karma"; }
