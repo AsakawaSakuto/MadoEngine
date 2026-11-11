@@ -167,8 +167,8 @@ namespace MadoEngine::EffectSequence {
 		}
 		playbackSpeed_ = std::clamp(
 			playbackSpeed_,
-			kMinimumEffectSequencePlaybackSpeed,
-			kMaximumEffectSequencePlaybackSpeed
+			kEffectSequencePlaybackSpeedRange.min,
+			kEffectSequencePlaybackSpeedRange.max
 		);
 		RebuildWorldTransforms();
 		FireNodes(0.0f, 0.0f, true);
@@ -200,7 +200,7 @@ namespace MadoEngine::EffectSequence {
 				}
 			}(),
 			0.0f,
-			kMaximumEffectSequenceDuration
+			kEffectSequenceDurationRange.max
 		);
 		float remainingTime = safeDeltaTime * playbackSpeed_;
 		const float duration = asset_->GetConfig().duration;
@@ -337,8 +337,8 @@ namespace MadoEngine::EffectSequence {
 	bool EffectSequenceInstance::SetPlaybackSpeed(float playbackSpeed) {
 		if (
 			!std::isfinite(playbackSpeed) ||
-			playbackSpeed < kMinimumEffectSequencePlaybackSpeed ||
-			playbackSpeed > kMaximumEffectSequencePlaybackSpeed) {
+			playbackSpeed < kEffectSequencePlaybackSpeedRange.min ||
+			playbackSpeed > kEffectSequencePlaybackSpeedRange.max) {
 			return false;
 		}
 		playbackSpeed_ = playbackSpeed;
@@ -387,7 +387,7 @@ namespace MadoEngine::EffectSequence {
 		}
 		const float childPlaybackSpeed = std::clamp(
 			playbackSpeed_ * node.playbackSpeed,
-			kMinimumEffectSequencePlaybackSpeed,
+			kEffectSequencePlaybackSpeedRange.min,
 			256.0f
 		);
 		const std::optional<EffectSequenceChildHandle> child = dispatcher_->Play(
@@ -480,7 +480,7 @@ namespace MadoEngine::EffectSequence {
 			}
 			const float childPlaybackSpeed = std::clamp(
 				playbackSpeed_ * nodes[nodeIndex->second].playbackSpeed,
-				kMinimumEffectSequencePlaybackSpeed,
+				kEffectSequencePlaybackSpeedRange.min,
 				256.0f
 			);
 			dispatcher_->SetPlaybackSpeed(child.handle, childPlaybackSpeed);

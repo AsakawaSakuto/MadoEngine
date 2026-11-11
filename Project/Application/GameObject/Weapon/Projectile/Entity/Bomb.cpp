@@ -33,7 +33,7 @@ namespace Projectile {
 		flightDuration_ = distance / moveSpeed_;
 
 		const float horizontalDistance = std::sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z);
-		arcHeight_ = std::clamp(horizontalDistance * kArcHeightDistanceRate, kMinArcHeight, kMaxArcHeight);
+		arcHeight_ = std::clamp(horizontalDistance * kArcHeightDistanceRate, kArcHeightRange.min, kArcHeightRange.max);
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
 		if (Model* model = MyModel::TryGet(model_)) {

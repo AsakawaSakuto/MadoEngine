@@ -105,12 +105,12 @@ namespace UI::Game {
 		const std::size_t verticalOffsetIndex =
 			(offsetIndex + 2) % kOffsetRates.size();
 		slot->horizontalOffset = std::lerp(
-			horizontalOffsetMin_,
-			horizontalOffsetMax_,
+			horizontalOffset_.start,
+			horizontalOffset_.end,
 			kOffsetRates[offsetIndex]);
 		slot->verticalOffset = std::lerp(
-			enemyHeadOffsetMin_,
-			enemyHeadOffsetMax_,
+			enemyHeadOffset_.start,
+			enemyHeadOffset_.end,
 			kOffsetRates[verticalOffsetIndex]);
 		slot->elapsedTime = 0.0f;
 		slot->type = ResolveDamageTextType(event);
@@ -279,8 +279,8 @@ namespace UI::Game {
 		ImGui::DragFloat("上昇距離", &riseDistance_, 1.0f, -500.0f, 500.0f, "%.0f px");
 		ImGui::DragFloatRange2(
 			"頭上オフセット範囲",
-			&enemyHeadOffsetMin_,
-			&enemyHeadOffsetMax_,
+			&enemyHeadOffset_.start,
+			&enemyHeadOffset_.end,
 			0.05f,
 			-10.0f,
 			10.0f,
@@ -288,8 +288,8 @@ namespace UI::Game {
 			"最大: %.2f");
 		ImGui::DragFloatRange2(
 			"左右オフセット範囲",
-			&horizontalOffsetMin_,
-			&horizontalOffsetMax_,
+			&horizontalOffset_.start,
+			&horizontalOffset_.end,
 			1.0f,
 			-500.0f,
 			500.0f,
@@ -317,15 +317,15 @@ namespace UI::Game {
 		scaleSettleProgress_ = std::clamp(scaleSettleProgress_, 0.01f, 1.0f);
 		initialScaleAddition_ = std::clamp(initialScaleAddition_, 0.0f, 3.0f);
 		riseDistance_ = std::clamp(riseDistance_, -500.0f, 500.0f);
-		enemyHeadOffsetMin_ = std::clamp(enemyHeadOffsetMin_, -10.0f, 10.0f);
-		enemyHeadOffsetMax_ = std::clamp(enemyHeadOffsetMax_, -10.0f, 10.0f);
-		horizontalOffsetMin_ = std::clamp(horizontalOffsetMin_, -500.0f, 500.0f);
-		horizontalOffsetMax_ = std::clamp(horizontalOffsetMax_, -500.0f, 500.0f);
-		if (enemyHeadOffsetMin_ > enemyHeadOffsetMax_) {
-			std::swap(enemyHeadOffsetMin_, enemyHeadOffsetMax_);
+		enemyHeadOffset_.start = std::clamp(enemyHeadOffset_.start, -10.0f, 10.0f);
+		enemyHeadOffset_.end = std::clamp(enemyHeadOffset_.end, -10.0f, 10.0f);
+		horizontalOffset_.start = std::clamp(horizontalOffset_.start, -500.0f, 500.0f);
+		horizontalOffset_.end = std::clamp(horizontalOffset_.end, -500.0f, 500.0f);
+		if (enemyHeadOffset_.start > enemyHeadOffset_.end) {
+			std::swap(enemyHeadOffset_.start, enemyHeadOffset_.end);
 		}
-		if (horizontalOffsetMin_ > horizontalOffsetMax_) {
-			std::swap(horizontalOffsetMin_, horizontalOffsetMax_);
+		if (horizontalOffset_.start > horizontalOffset_.end) {
+			std::swap(horizontalOffset_.start, horizontalOffset_.end);
 		}
 		normalFontSize_ = std::clamp(normalFontSize_, 1.0f, 200.0f);
 		criticalFontSize_ = std::clamp(criticalFontSize_, 1.0f, 200.0f);

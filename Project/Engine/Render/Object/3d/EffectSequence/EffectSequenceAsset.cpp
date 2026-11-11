@@ -442,8 +442,8 @@ namespace MadoEngine::EffectSequence {
 					return (1.0f);
 				}
 			}(),
-			kMinimumEffectSequenceDuration,
-			kMaximumEffectSequenceDuration
+			kEffectSequenceDurationRange.min,
+			kEffectSequenceDurationRange.max
 		);
 		config_.playbackSpeed = std::clamp(
 			[&]() {
@@ -453,8 +453,8 @@ namespace MadoEngine::EffectSequence {
 					return (1.0f);
 				}
 			}(),
-			kMinimumEffectSequencePlaybackSpeed,
-			kMaximumEffectSequencePlaybackSpeed
+			kEffectSequencePlaybackSpeedRange.min,
+			kEffectSequencePlaybackSpeedRange.max
 		);
 		if (config_.nodes.size() > kMaximumEffectSequenceNodeCount) {
 			config_.nodes.resize(kMaximumEffectSequenceNodeCount);
@@ -505,8 +505,8 @@ namespace MadoEngine::EffectSequence {
 						return (1.0f);
 					}
 				}(),
-				kMinimumEffectSequencePlaybackSpeed,
-				kMaximumEffectSequencePlaybackSpeed
+				kEffectSequencePlaybackSpeedRange.min,
+				kEffectSequencePlaybackSpeedRange.max
 			);
 			NormalizeTransform(node.localTransform);
 			if (node.renderLayer.has_value() && !MadoEngine::Render::IsValidRenderLayer(node.renderLayer.value())) {

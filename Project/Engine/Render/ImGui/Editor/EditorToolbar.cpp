@@ -5,6 +5,7 @@
 #include "History/EditorHistory.h"
 #include "History/DocumentSnapshotCommand.h"
 #include "ImGuiHeaders.h"
+#include "Math/ClampRange.h"
 #include "Utility/Json/Core/JsonFile.h"
 #include "Utility/Logger/Logger.h"
 #include <algorithm>
@@ -21,10 +22,8 @@ namespace MadoEngine::Editor {
 namespace {
 
 constexpr const char* kEditorToolbarSettingsPath = "SavedData/EditorToolbar.json";
-constexpr float kMinimumTimeScale = 0.05f;
-constexpr float kMaximumTimeScale = 4.0f;
-constexpr float kMinimumFixedStep = 1.0f / 240.0f;
-constexpr float kMaximumFixedStep = 1.0f;
+constexpr Math::ClampRange kTimeScaleRange{ 0.05f, 4.0f };
+constexpr Math::ClampRange kFixedStepRange{ 1.0f / 240.0f, 1.0f };
 constexpr double kOperationStatusDuration = 3.0;
 constexpr std::uint32_t kGuizmoTransactionItemId = (std::numeric_limits<std::uint32_t>::max)();
 
@@ -572,13 +571,13 @@ bool EditorToolbar::LoadSettings() {
 
 	timeScale_ = std::clamp(
 		ReadFiniteFloat(root, "timeScale", timeScale_),
-		kMinimumTimeScale,
-		kMaximumTimeScale
+		kTimeScaleRange.min,
+		kTimeScaleRange.max
 	);
 	fixedStepDeltaTime_ = std::clamp(
 		ReadFiniteFloat(root, "fixedStepDeltaTime", fixedStepDeltaTime_),
-		kMinimumFixedStep,
-		kMaximumFixedStep
+		kFixedStepRange.min,
+		kFixedStepRange.max
 	);
 
 	const nlohmann::json visibility = root.value("windowVisibility", nlohmann::json::object());
@@ -727,8 +726,8 @@ float EditorToolbar::DrawPlaybackToolbar() {
 		"時間倍率",
 		&timeScale_,
 		0.01f,
-		kMinimumTimeScale,
-		kMaximumTimeScale,
+		kTimeScaleRange.min,
+		kTimeScaleRange.max,
 		"%.2fx",
 		ImGuiSliderFlags_AlwaysClamp
 	);
@@ -738,8 +737,8 @@ float EditorToolbar::DrawPlaybackToolbar() {
 		"固定Δt",
 		&fixedStepDeltaTime_,
 		0.0001f,
-		kMinimumFixedStep,
-		kMaximumFixedStep,
+		kFixedStepRange.min,
+		kFixedStepRange.max,
 		"%.5f s",
 		ImGuiSliderFlags_AlwaysClamp
 	);

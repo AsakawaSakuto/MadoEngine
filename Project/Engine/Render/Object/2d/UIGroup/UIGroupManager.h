@@ -55,6 +55,11 @@ public:
 	/// @param sceneType 所属シーン
 	/// @return 対応するハンドル、未登録の場合は無効ハンドル
 	UIGroupHandle Find(const std::string& name, SceneType sceneType) const;
+	/// @brief 親内の登録名から接続済みの直下の子Groupを検索
+	/// @param parent 親Groupのハンドル
+	/// @param name 親Group内での子Groupの登録名
+	/// @return 子Groupのハンドル、親が無効または子が未接続の場合は無効ハンドル
+	UIGroupHandle FindChildGroup(UIGroupHandle parent, const std::string& name) const;
 	/// @brief 永続IDからハンドルを取得
 	/// @param id 保存用の永続ID
 	/// @return 対応するハンドル、未登録の場合は無効ハンドル

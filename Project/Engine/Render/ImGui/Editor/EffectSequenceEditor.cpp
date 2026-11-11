@@ -456,16 +456,16 @@ namespace MadoEngine::Editor {
 			"再生時間",
 			&config.duration,
 			0.01f,
-			kMinimumEffectSequenceDuration,
-			kMaximumEffectSequenceDuration,
+			kEffectSequenceDurationRange.min,
+			kEffectSequenceDurationRange.max,
 			"%.3f 秒"
 		);
 		changed |= ImGui::DragFloat(
 			"シーケンス再生速度",
 			&config.playbackSpeed,
 			0.01f,
-			kMinimumEffectSequencePlaybackSpeed,
-			kMaximumEffectSequencePlaybackSpeed,
+			kEffectSequencePlaybackSpeedRange.min,
+			kEffectSequencePlaybackSpeedRange.max,
 			"%.2f倍"
 		);
 
@@ -500,8 +500,8 @@ namespace MadoEngine::Editor {
 			"プレビュー速度",
 			&previewSpeed,
 			0.01f,
-			kMinimumEffectSequencePlaybackSpeed,
-			kMaximumEffectSequencePlaybackSpeed,
+			kEffectSequencePlaybackSpeedRange.min,
+			kEffectSequencePlaybackSpeedRange.max,
 			"%.2f倍"
 		);
 		if (ImGui::TreeNodeEx("プレビュールートトランスフォーム", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -684,8 +684,8 @@ namespace MadoEngine::Editor {
 					"##NodePlaybackSpeed",
 					&node.playbackSpeed,
 					0.01f,
-					kMinimumEffectSequencePlaybackSpeed,
-					kMaximumEffectSequencePlaybackSpeed,
+					kEffectSequencePlaybackSpeedRange.min,
+					kEffectSequencePlaybackSpeedRange.max,
 					"%.2f倍"
 				);
 				if (ImGui::IsItemActivated()) {

@@ -1,4 +1,5 @@
 #include "Hammer.h"
+#include "Math/ClampRange.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -12,8 +13,10 @@ namespace Projectile {
 		constexpr float kMinSizeRate = 0.1f;
 		constexpr float kMinSwingSpeed = 0.1f;
 		constexpr float kMinDirectionLengthSq = 0.000001f;
-		constexpr float kMinSwingEndAngle = std::numbers::pi_v<float> * 0.5f;
-		constexpr float kMaxSwingEndAngle = std::numbers::pi_v<float> * (2.0f / 3.0f);
+		constexpr Math::ClampRange kSwingEndAngleRange{
+			std::numbers::pi_v<float> * 0.5f,
+			std::numbers::pi_v<float> * (2.0f / 3.0f)
+		};
 
 		constexpr Vector3 kHitboxHalfSize = { 0.5f, 2.0f, 0.5f };
 	}
@@ -61,7 +64,7 @@ namespace Projectile {
 		}
 		aimYaw_ = std::atan2(moveDirection_.x, moveDirection_.z);
 		swingEndAngle_ = std::clamp(
-			std::atan2(horizontalDistance, targetHeightDifference), kMinSwingEndAngle, kMaxSwingEndAngle);
+			std::atan2(horizontalDistance, targetHeightDifference), kSwingEndAngleRange.min, kSwingEndAngleRange.max);
 		swingDuration_ = swingEndAngle_ / swingSpeed;
 		lifeTimer_.Start(lifeTime_, false);
 

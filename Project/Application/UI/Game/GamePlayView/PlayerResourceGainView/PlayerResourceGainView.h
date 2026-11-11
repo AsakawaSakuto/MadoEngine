@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject/Player/PlayerStatus.h"
+#include "Math/LerpEndpoints.h"
 #include "Math/Vector2.h"
 #include "Math/Vector4.h"
 #include "Render/Object/ObjectHandle.h"
@@ -81,8 +82,7 @@ namespace UI::Game {
 		float fadeStartProgress_ = 0.99f;                        // フェードを開始する寿命の進捗率
 		float initialScaleAddition_ = 0.5f;                      // 表示開始時のスケール加算量
 		float riseDistance_ = 48.0f;                             // 表示中に上昇するピクセル距離
-		float horizontalOffsetMin_ = -2.0f;                      // 通知を分散する最小Xオフセット
-		float horizontalOffsetMax_ = 2.0f;                       // 通知を分散する最大Xオフセット
+		Math::LerpEndpoints horizontalOffset_{ -2.0f, 2.0f };   // 通知を分散するXオフセット範囲
 		float fontSize_ = 16.0f;                                 // 獲得通知のフォントサイズ
 		Vector2 healthBasePosition_ = { 600.0f, 440.0f };        // HP獲得通知の基準座標
 		Vector2 expBasePosition_ = { 600.0f, 440.0f };           // Exp獲得通知の基準座標

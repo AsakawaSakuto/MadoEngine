@@ -570,9 +570,11 @@
     <ClInclude Include="Engine\Input\MyInput.h" />
     <ClInclude Include="Engine\Input\InputManager.h" />
     <ClInclude Include="Engine\MathHeaders.h" />
+    <ClInclude Include="Engine\Math\ClampRange.h" />
     <ClInclude Include="Engine\Math\Function\MathFunction.h" />
     <ClInclude Include="Engine\Math\Function\MatrixFunction.h" />
     <ClInclude Include="Engine\Math\Function\QuaternionFunction.h" />
+    <ClInclude Include="Engine\Math\LerpEndpoints.h" />
     <ClInclude Include="Engine\Math\Matrix2x2.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />

@@ -172,7 +172,7 @@ namespace MadoEngine::Editor {
             float semitones = audioManager.GetPitch(item.key);
             ImGui::SetNextItemWidth(-1);
             if (ImGui::DragFloat("##Pitch", &semitones, 0.1f,
-                AudioManager::kMinPitchSemitones, AudioManager::kMaxPitchSemitones,
+                AudioManager::kPitchSemitoneRange.min, AudioManager::kPitchSemitoneRange.max,
                 "%+.1f", ImGuiSliderFlags_AlwaysClamp)) {
                 audioManager.SetPitch(item.key, semitones);
             }

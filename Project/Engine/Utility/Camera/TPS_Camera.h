@@ -1,4 +1,5 @@
 #pragma once
+#include "Math/ClampRange.h"
 #include "Utility/Camera/Camera.h"
 #include <corecrt_math_defines.h>
 #include <algorithm>
@@ -17,8 +18,7 @@ struct TPSCameraSettings {
 	float yaw = 0.0f;
 	float pitch = 0.3f;
 	float distance = 15.0f;
-	float minPitch = -0.1f;
-	float maxPitch = 1.5f;
+	Math::ClampRange pitchLimit{ -0.1f, 1.5f };
 	float mouseSensitivity = 0.003f;
 	float gamePadSensitivity = 2.5f;
 	float followStrength = 0.5f;
@@ -100,10 +100,10 @@ public:
 	/// @return ローカルオフセット
 	const Vector3& GetOffset() const { return offset_; }
 
-	/// @brief Pitch角のクランプ範囲を設定する（ラジアン）
+	/// @brief 仰俯角のクランプ範囲をラジアンで設定
 	/// @param minPitch 最小仰俯角（例: -1.2f）
 	/// @param maxPitch 最大仰俯角（例: 1.2f）
-	void SetPitchLimit(float minPitch, float maxPitch) { minPitch_ = (std::min)(minPitch, maxPitch); maxPitch_ = (std::max)(minPitch, maxPitch); ClampPitch();}
+	void SetPitchLimit(float minPitch, float maxPitch);
 
 	/// @brief GamePad未接続時のマウス入力許可を設定
 	/// @param enable マウス入力を許可する場合はtrue
@@ -153,8 +153,7 @@ private:
 	float distance_ = 15.0f;  // ターゲットからの距離
 
 	// Pitch角クランプ範囲
-	float minPitch_ = -0.1f;
-	float maxPitch_ = 1.5f;
+	Math::ClampRange pitchLimit_ = TPSCameraSettings{}.pitchLimit;
 
 	// 入力感度
 	float mouseSensitivity_   = 0.003f; // マウス感度

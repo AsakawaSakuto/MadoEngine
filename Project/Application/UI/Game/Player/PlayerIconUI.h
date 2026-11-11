@@ -1,6 +1,6 @@
 #pragma once
-#include <RenderHeaders.h>
 #include "GameObject/Player/PlayerStatus.h"
+#include "Render/Object/2d/UIGroup/UIGroup.h"
 
 namespace UI::Game {
 	
@@ -9,6 +9,7 @@ namespace UI::Game {
 	public:
 
 		/// @brief プレイヤーアイコンUIを初期化
+		/// @param type 表示対象のプレイヤー種別
 		void Initialize(Player::Type type = Player::Type::Gunman);
 
 		/// @brief プレイヤーアイコンと背景と枠の表示状態を設定
@@ -16,8 +17,6 @@ namespace UI::Game {
 		void SetVisible(bool isVisible);
 
 	private:
-		MadoEngine::SpriteHandle playerIcon_{};
-		MadoEngine::SpriteHandle playerIconBG_{};
-		MadoEngine::SpriteHandle playerIconFrame_{};
+		MadoEngine::UIGroup iconGroup_;
 	};
 }

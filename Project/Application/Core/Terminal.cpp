@@ -1,4 +1,5 @@
 #include "Terminal.h"
+#include "Math/LerpEndpoints.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -12,8 +13,7 @@ namespace {
 	constexpr const char* kSceneTransitionUiPassName = "UI_PixelArt";
 	constexpr const char* kSceneTransitionDefaultPassName = "Default_PixelArt";
 	constexpr const char* kPixelSizeParameterKey = "PixelSize";
-	constexpr float kMinimumPixelSize = 1.0f;
-	constexpr float kMaximumPixelSize = 64.0f;
+	constexpr Math::LerpEndpoints kPixelSizeEndpoints{ 1.0f, 64.0f };
 }
 
 Terminal::Terminal(HINSTANCE hInstance) {
@@ -76,7 +76,7 @@ void Terminal::UpdateSceneTransitionPixelArt() {
 		1.0f
 	);
 	const float pixelSize =
-		kMinimumPixelSize + (kMaximumPixelSize - kMinimumPixelSize) * progress;
+		kPixelSizeEndpoints.start + (kPixelSizeEndpoints.end - kPixelSizeEndpoints.start) * progress;
 
 	// Editorで内部キーが変更されても追従できるよう表示名とEffect種別の両方で対象を特定
 	for (MadoEngine::Render::PostEffectPassHandle handle : postEffectManager.GetScreenPassHandles()) {

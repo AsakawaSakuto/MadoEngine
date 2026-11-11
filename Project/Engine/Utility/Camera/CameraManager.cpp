@@ -546,8 +546,8 @@ nlohmann::json CameraManager::ToJson() const {
 				{ "yaw", settings.yaw },
 				{ "pitch", settings.pitch },
 				{ "distance", settings.distance },
-				{ "minPitch", settings.minPitch },
-				{ "maxPitch", settings.maxPitch },
+				{ "minPitch", settings.pitchLimit.min },
+				{ "maxPitch", settings.pitchLimit.max },
 				{ "mouseSensitivity", settings.mouseSensitivity },
 				{ "gamePadSensitivity", settings.gamePadSensitivity },
 				{ "followStrength", settings.followStrength },
@@ -916,10 +916,10 @@ bool CameraManager::FromJson(const nlohmann::json& root) {
 					settingsJson, "pitch", settings.pitch, -kCameraPitchLimit, kCameraPitchLimit);
 				settings.distance = ReadClampedFloat(
 					settingsJson, "distance", settings.distance, kMinCameraDistance, kMaxCameraDistance);
-				settings.minPitch = ReadClampedFloat(
-					settingsJson, "minPitch", settings.minPitch, -kCameraPitchLimit, kCameraPitchLimit);
-				settings.maxPitch = ReadClampedFloat(
-					settingsJson, "maxPitch", settings.maxPitch, -kCameraPitchLimit, kCameraPitchLimit);
+				settings.pitchLimit.min = ReadClampedFloat(
+					settingsJson, "minPitch", settings.pitchLimit.min, -kCameraPitchLimit, kCameraPitchLimit);
+				settings.pitchLimit.max = ReadClampedFloat(
+					settingsJson, "maxPitch", settings.pitchLimit.max, -kCameraPitchLimit, kCameraPitchLimit);
 				settings.mouseSensitivity = ReadClampedFloat(
 					settingsJson, "mouseSensitivity", settings.mouseSensitivity, 0.0f, kMaxCameraSensitivity);
 				settings.gamePadSensitivity = ReadClampedFloat(

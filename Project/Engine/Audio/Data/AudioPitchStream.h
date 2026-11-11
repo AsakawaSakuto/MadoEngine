@@ -1,13 +1,13 @@
 #pragma once
 
 #include "AudioData.h"
+#include "Math/ClampRange.h"
 #include <memory>
 
 /// @brief 再生時間を維持したPCMの音程変換ストリーム
 class AudioPitchStream {
 public:
-    static constexpr float kMinSemitones = -12.0f;
-    static constexpr float kMaxSemitones = 12.0f;
+    static constexpr Math::ClampRange kSemitoneRange{ -12.0f, 12.0f };
 
     /// @brief 音程変換ストリームを生成
     AudioPitchStream();

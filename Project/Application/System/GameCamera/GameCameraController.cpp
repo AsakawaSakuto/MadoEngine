@@ -1,12 +1,12 @@
 #include "GameCameraController.h"
 #include "Input/MyInput.h"
+#include "Math/ClampRange.h"
 #include <algorithm>
 
 namespace {
 	constexpr float kTpsCameraGamePadZoomSpeed = 15.0f;
 	constexpr float kTpsCameraMouseWheelZoomStep = 2.0f;
-	constexpr float kTpsCameraMinDistance = 5.0f;
-	constexpr float kTpsCameraMaxDistance = 30.0f;
+	constexpr Math::ClampRange kTpsCameraDistanceRange{ 5.0f, 30.0f };
 }
 
 namespace System {
@@ -21,7 +21,7 @@ namespace System {
 		useDebugCamera_ = false;
 
 		if (TPS_Camera* tpsCamera = TryGetPlayerCamera(cameraManager)) {
-			tpsCamera->SetDistance(kTpsCameraMinDistance);
+			tpsCamera->SetDistance(kTpsCameraDistanceRange.min);
 		}
 	}
 
@@ -54,7 +54,8 @@ namespace System {
 				}
 				if (distanceDelta != 0.0f) {
 					const float nextDistance = tpsCamera->GetDistance() + distanceDelta;
-					tpsCamera->SetDistance(std::clamp(nextDistance, kTpsCameraMinDistance, kTpsCameraMaxDistance));
+					tpsCamera->SetDistance(
+						std::clamp(nextDistance, kTpsCameraDistanceRange.min, kTpsCameraDistanceRange.max));
 				}
 			}
 		}

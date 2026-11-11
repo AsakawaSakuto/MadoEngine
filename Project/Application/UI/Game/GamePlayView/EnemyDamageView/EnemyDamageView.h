@@ -1,5 +1,6 @@
 #pragma once
 #include "Render/Object/ObjectHandle.h"
+#include "Math/LerpEndpoints.h"
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
@@ -104,10 +105,8 @@ namespace UI::Game {
 		float scaleSettleProgress_ = 1.0f;        // ダメージ表示のスケールが落ち着くタイミング
 		float initialScaleAddition_ = 1.0f;       // ダメージ表示の初期スケール増加量
 		float riseDistance_ = 64.0f;              // ダメージ表示の上昇距離（ピクセル）
-		float enemyHeadOffsetMin_ = 1.0f;         // Enemy座標から頭上への最小オフセット
-		float enemyHeadOffsetMax_ = 2.0f;         // Enemy座標から頭上への最大オフセット
-		float horizontalOffsetMin_ = -24.0f;      // ダメージ表示の最小左右オフセット
-		float horizontalOffsetMax_ = 24.0f;       // ダメージ表示の最大左右オフセット
+		Math::LerpEndpoints enemyHeadOffset_{ 1.0f, 2.0f };    // Enemy座標から頭上へのオフセット範囲
+		Math::LerpEndpoints horizontalOffset_{ -24.0f, 24.0f }; // ダメージ表示の左右オフセット範囲
 		float normalFontSize_ = 24.0f;            // 通常ダメージ表示のフォントサイズ
 		float criticalFontSize_ = 36.0f;          // クリティカルダメージ表示のフォントサイズ
 		float jokerPixelSize_ = 64.0f;            // Joker表示の最大辺サイズ

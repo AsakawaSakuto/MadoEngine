@@ -12,10 +12,11 @@
 namespace {
 
 constexpr std::array<const char*, 3> kCardGroupNames = { "LeftCard", "CenterCard", "RightCard" };
+constexpr const char* kOwnedWeaponDetailsGroupName = "OwnedWeaponDetails";
 constexpr std::array<const char*, 5> kCardSpriteNames = {
 	"Border", "Background", "LegendaryBackground", "IconBorder", "IconBackground"
 };
-constexpr float kSelectedCardScale = 1.08f;
+constexpr float kSelectedCardScale = 1.1f;
 constexpr float kSelectedCardPulseScale = 0.01f;
 constexpr float kScaleTransitionDuration = 0.18f;
 constexpr float kSelectedCardPulseDuration = 1.25f;
@@ -105,11 +106,7 @@ void WeaponUpgradeCardUI::Finalize() {
 	cardIconSprite_ = {};
 	weaponNameText_ = {};
 	categoryText_ = {};
-	detailText_ = {};
 	newWeaponDescriptionText_ = {};
-	currentValueText_ = {};
-	valueArrowText_ = {};
-	upgradedValueText_ = {};
 	selectionText_ = {};
 	accentColor_ = { 0.35f, 0.38f, 0.45f, 1.0f };
 	isSelected_ = false;
@@ -262,31 +259,17 @@ void WeaponUpgradeCardUI::RefreshBindings() {
 	cardIconSprite_ = {};
 	weaponNameText_ = {};
 	categoryText_ = {};
-	detailText_ = {};
 	newWeaponDescriptionText_ = {};
-	currentValueText_ = {};
-	valueArrowText_ = {};
-	upgradedValueText_ = {};
 	selectionText_ = {};
 	if (cardIndex_ >= kCardGroupNames.size()) {
 		return;
 	}
 	auto& groups = MadoEngine::UIGroupManager::GetInstance();
 	const auto upgrade = groups.Find("Upgrade", SceneType::Game);
-
-	// 親内の登録名で解決し、他の親にある同名カードや再読込前のHandleの誤参照を防止
-	for (const auto& element : groups.GetElements(upgrade)) {
-		if (element.resolved && element.type == MadoEngine::UIGroupElementType::Group &&
-			element.name == kCardGroupNames[cardIndex_]) {
-			cardGroup_ = element.group;
-			break;
-		}
-	}
-	const std::array<std::pair<const char*, MadoEngine::TextHandle*>, 8> textTargets = {{
+	cardGroup_ = groups.FindChildGroup(upgrade, kCardGroupNames[cardIndex_]);
+	const std::array<std::pair<const char*, MadoEngine::TextHandle*>, 4> textTargets = {{
 		{ "WeaponName", &weaponNameText_ }, { "Category", &categoryText_ },
-		{ "Detail", &detailText_ }, { "NewWeaponDescription", &newWeaponDescriptionText_ },
-		{ "CurrentValue", &currentValueText_ }, { "ValueArrow", &valueArrowText_ },
-		{ "UpgradedValue", &upgradedValueText_ }, { "Selection", &selectionText_ }
+		{ "NewWeaponDescription", &newWeaponDescriptionText_ }, { "Selection", &selectionText_ }
 	}};
 	for (const auto& element : groups.GetElements(cardGroup_)) {
 		if (!element.resolved) {
@@ -332,14 +315,28 @@ void WeaponUpgradeCardUI::ApplyChoiceContent() {
 			(void)icon->SetTexture("None");
 		}
 	}
-	const std::array<std::pair<MadoEngine::TextHandle, const std::string*>, 6> textTargets = {{
+	const std::array<std::pair<MadoEngine::TextHandle, const std::string*>, 3> textTargets = {{
 		{ weaponNameText_, &content_->weaponName }, { categoryText_, &content_->category },
-		{ detailText_, &content_->detail }, { newWeaponDescriptionText_, &content_->newWeaponDescription },
-		{ currentValueText_, &content_->currentValue }, { upgradedValueText_, &content_->upgradedValue }
+		{ newWeaponDescriptionText_, &content_->newWeaponDescription }
 	}};
 	for (const auto& [handle, value] : textTargets) {
 		if (MadoEngine::Text* text = ResolveText(handle)) {
 			text->SetText(*value);
+		}
+	}
+
+	// 強化値の表示可否は親Groupで管理し、本文だけを各Textへ反映
+	if (MadoEngine::UIGroup* group = MadoEngine::UIGroupManager::GetInstance().TryGet(cardGroup_)) {
+		if (MadoEngine::UIGroup* details = group->TryGetGroup(kOwnedWeaponDetailsGroupName)) {
+			const std::array<std::pair<const char*, const std::string*>, 3> detailTargets = {{
+				{ "Detail", &content_->detail }, { "CurrentValue", &content_->currentValue },
+				{ "UpgradedValue", &content_->upgradedValue }
+			}};
+			for (const auto& [name, value] : detailTargets) {
+				if (MadoEngine::Text* text = details->TryGetText(name)) {
+					text->SetText(*value);
+				}
+			}
 		}
 	}
 	if (MadoEngine::Text* category = ResolveText(categoryText_)) {
@@ -364,8 +361,13 @@ void WeaponUpgradeCardUI::ApplySelectionScale(float scale) {
 }
 
 void WeaponUpgradeCardUI::ApplyVisibility() {
+
+	// カード全体と既存武器の詳細をそれぞれの親Groupで表示制御
 	if (MadoEngine::UIGroup* group = MadoEngine::UIGroupManager::GetInstance().TryGet(cardGroup_)) {
 		group->SetVisible(isVisible_ && group->GetAuthoringState().visible);
+		if (MadoEngine::UIGroup* details = group->TryGetGroup(kOwnedWeaponDetailsGroupName)) {
+			details->SetVisible(isOwnedWeaponUpgrade_ && details->GetAuthoringState().visible);
+		}
 	}
 
 	// Groupの表示と候補種別の条件を分離し、各要素のEditor表示設定を維持
@@ -375,16 +377,8 @@ void WeaponUpgradeCardUI::ApplyVisibility() {
 	if (Sprite* legendary = ResolveSprite(cardSprites_[static_cast<std::size_t>(CardSpriteType::LegendaryBackground)])) {
 		legendary->SetRuntimeVisible(isLegendary_);
 	}
-	if (MadoEngine::Text* detail = ResolveText(detailText_)) {
-		detail->SetRuntimeVisible(isOwnedWeaponUpgrade_);
-	}
 	if (MadoEngine::Text* description = ResolveText(newWeaponDescriptionText_)) {
 		description->SetRuntimeVisible(!isOwnedWeaponUpgrade_);
-	}
-	for (const auto handle : { currentValueText_, valueArrowText_, upgradedValueText_ }) {
-		if (MadoEngine::Text* text = ResolveText(handle)) {
-			text->SetRuntimeVisible(isOwnedWeaponUpgrade_);
-		}
 	}
 	if (MadoEngine::Text* selection = ResolveText(selectionText_)) {
 		selection->SetRuntimeVisible(isSelected_);

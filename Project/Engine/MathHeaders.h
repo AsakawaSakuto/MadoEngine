@@ -7,6 +7,8 @@
 #include "Math/Matrix4x4.h"
 #include "Math/Transform.h"
 #include "Math/Quaternion.h"
+#include "Math/ClampRange.h"
+#include "Math/LerpEndpoints.h"
 #include "Math/Function/MatrixFunction.h"
 #include "Math/Function/MathFunction.h"
 #include "Math/Function/QuaternionFunction.h"

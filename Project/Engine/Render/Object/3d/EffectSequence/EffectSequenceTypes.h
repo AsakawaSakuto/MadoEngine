@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneManager/SceneType.h"
+#include "Math/ClampRange.h"
 #include "Math/Transform.h"
 #include "Math/Vector3.h"
 #include "Render/Object/3d/Particle/ParticleTypes.h"
@@ -16,10 +17,8 @@
 namespace MadoEngine::EffectSequence {
 
 	inline constexpr std::size_t kMaximumEffectSequenceNodeCount = 512;
-	inline constexpr float kMinimumEffectSequenceDuration = 0.001f;
-	inline constexpr float kMaximumEffectSequenceDuration = 3600.0f;
-	inline constexpr float kMinimumEffectSequencePlaybackSpeed = 0.01f;
-	inline constexpr float kMaximumEffectSequencePlaybackSpeed = 16.0f;
+	inline constexpr Math::ClampRange kEffectSequenceDurationRange{ 0.001f, 3600.0f };
+	inline constexpr Math::ClampRange kEffectSequencePlaybackSpeedRange{ 0.01f, 16.0f };
 	inline constexpr uint32_t kMaximumEffectSequenceLoopsPerUpdate = 64;
 
 	enum class EffectSequenceNodeType : uint32_t {

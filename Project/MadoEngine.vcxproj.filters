@@ -1554,6 +1554,12 @@
     <ClInclude Include="Engine\Math\Function\QuaternionFunction.h">
       <Filter>Engine\Math\Function</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Math\ClampRange.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\LerpEndpoints.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Math\Matrix2x2.h">
       <Filter>Engine\Math</Filter>
     </ClInclude>

@@ -1,7 +1,7 @@
 #include "GameHud.h"
 #include "GameObject/Map/Map.h"
 #include "Input/MyInput.h"
-#include "Math/Function/MatrixFunction.h"
+#include "Math/LerpEndpoints.h"
 #include "Render/Object/2d/Sprite/MySprite.h"
 #include "Render/Object/2d/Text/MyText.h"
 #include "Render/Object/2d/UIGroup/UIGroupManager.h"
@@ -10,82 +10,29 @@
 #include <format>
 
 namespace {
-	constexpr UI::Game::InputControlFeedbackDefinition kUpgradeControlDefinitions[] = {
-		{ "Decision", { "DecisionSprite", "DecisionSprite1", "DecisionInput" }, "DecisionText" },
-		{ "Reroll", { "RerollSprite", "RerollSprite1", "RerollInput" }, "RerollText" },
-	};
-	constexpr const char* kUpgradeGroupName = "Upgrade";
-	constexpr const char* kUpgradeRerollGroupName = "Reroll";
-	constexpr const char* kUpgradeRerollCoinName = "RerollMoneyIcon";
-	constexpr const char* kUpgradeRerollCoinTextName = "RerollMoneyText";
-	constexpr const char* kGameStartBandNames[] = { "Band_Up", "Band_Bottom" };
-	constexpr float kGameStartBandInitialScaleY = 8.0f;
-	constexpr const char* kGameStartTextName = "StartText";
-	constexpr const char* kUpgradeTextName = "UpgradeText";
-	/// @brief Pauseメニューの選択単位と拡大基準の参照名
-	struct PauseMenuDefinition {
-		const char* groupName;
-		const char* pivotSpriteName;
-	};
-	constexpr const char* kPauseGroupName = "PauseGroup";
-	constexpr PauseMenuDefinition kPauseMenuDefinitions[] = {
-		{ "Continue", "ContinueSprite" },
-		{ "ReStart", "ReStartSprite" },
-		{ "Quit", "QuitSprite" },
-	};
-	constexpr float kPauseMenuSelectedScale = 1.1f;
-	constexpr float kUpgradeTextColorChangeTime = 0.5f;
-	constexpr float kUpgradeTextPulseDuration = 0.6f;
-	constexpr float kUpgradeTextPulseStartSize = 45.0f;
-	constexpr float kUpgradeTextPulseEndSize = 60.0f;
-	constexpr float kGameStartTextInitialX = 640.0f;
-	constexpr float kGameStartTextEndX = -360.0f;
-	constexpr float kGameStartTextY = 256.0f;
-	constexpr float kGameStartTextMoveDuration = 1.0f;
-	constexpr const char* kGoalTextName = "TheGoalText";
-	constexpr float kGoalTextInitialX = -200.0f;
-	constexpr float kGoalTextEndX = 232.0f;
-	constexpr float kGoalTextMoveDelay = 2.0f;
-	constexpr float kGoalTextMoveDuration = 1.0f;
-	constexpr const char* kMassiveEnemySpawnTextName = "MassiveEnemySpawnText";
-	constexpr float kMassiveEnemySpawnTextInitialY = 170.0f;
-	constexpr float kMassiveEnemySpawnTextEndY = -100.0f;
-	constexpr float kMassiveEnemySpawnFadeDuration = 1.0f;
-	constexpr float kMassiveEnemySpawnHoldDuration = 1.0f;
-	constexpr float kMassiveEnemySpawnMoveDuration = 1.0f;
+	constexpr float kGameStartBandInitialScaleY = 8.0f; // 開始待機時の上下帯の初期縦倍率
+	constexpr float kPauseMenuSelectedScale = 1.1f;     // ポーズメニューの選択中項目に適用する拡大倍率
+
+	constexpr float kUpgradeTextColorChangeTime = 0.5f;                   // 強化見出しの色相を1区間進める秒数
+	constexpr float kUpgradeTextPulseDuration = 0.6f;                     // 強化見出しの拡大演出を繰り返す周期（秒）
+	constexpr Math::LerpEndpoints kUpgradeTextPulseSize{ 75.0f, 100.0f }; // 強化見出しの拡大開始時と終了時の文字サイズ
+
+	constexpr Math::LerpEndpoints kGameStartTextX{ 640.0f, -360.0f }; // 開始テキストの表示位置と退場先のX座標
+	constexpr float kGameStartTextY = 256.0f;                         // 開始テキストの移動中に固定するY座標
+	constexpr float kGameStartTextMoveDuration = 1.0f;                // プレイ開始から開始テキストの退場完了までの秒数
+
+	constexpr Math::LerpEndpoints kGoalTextX{ -200.0f, 232.0f }; // 目標テキストの登場前と登場後のX座標
+	constexpr float kGoalTextMoveDelay = 2.0f;                   // プレイ開始から目標テキストの移動開始までの秒数
+	constexpr float kGoalTextMoveDuration = 1.0f;                // 目標テキストが画面内の定位置に到達するまでの移動時間（秒）
+
+	constexpr Math::LerpEndpoints kMassiveEnemySpawnTextY{ 170.0f, -100.0f }; // 大量出現通知の表示位置と退場先のY座標
+	constexpr float kMassiveEnemySpawnFadeDuration = 1.0f;                    // 大量出現通知のフェードイン時間（秒）
+	constexpr float kMassiveEnemySpawnHoldDuration = 1.0f;                    // フェードイン後に通知を定位置に留める秒数
+	constexpr float kMassiveEnemySpawnMoveDuration = 1.0f;                    // 通知が画面上方へ退場するまでの移動時間（秒）
+
+	// 通知タイマーと各段階の進行率の計算に使う演出全体の秒数
 	constexpr float kMassiveEnemySpawnTotalDuration = kMassiveEnemySpawnFadeDuration +
 		kMassiveEnemySpawnHoldDuration + kMassiveEnemySpawnMoveDuration;
-	constexpr const char* kStaticHudTextNames[] = {
-		"GamePlayTimerText", "OverTimeText", "TheGoalText", kMassiveEnemySpawnTextName,
-	};
-	constexpr const char* kPlayerHealthGroupName = "PlayerHealthUI";
-	constexpr const char* kPlayerHealthTextName = "PlayerHealth";
-	constexpr const char* kMoneyGroupName = "MoneyUI";
-	constexpr const char* kMoneyTextName = "MoneyText";
-	constexpr const char* kKillCountGroupName = "KillCountUI";
-	constexpr const char* kKillCountTextName = "KillCountText";
-	constexpr const char* kDebugGroupName = "DebugText";
-	constexpr const char* kEnemyCountTextName = "EnemyCountText";
-	constexpr const char* kFpsCountTextName = "FpsCountText";
-	constexpr const char* kSeedValueTextName = "SeedValueText";
-	constexpr const char* kStaticHudGroupNames[] = {
-		"OperationMethodUI", kPlayerHealthGroupName, kMoneyGroupName, kKillCountGroupName, kDebugGroupName,
-	};
-
-	/// @brief 親内の登録名から接続済みの子Groupを検索
-	/// @param parent 親Groupのハンドル
-	/// @param name 子Groupの登録名
-	/// @return 子Groupのハンドル、未接続の場合は無効ハンドル
-	MadoEngine::UIGroupHandle FindChildUIGroup(MadoEngine::UIGroupHandle parent, const char* name) {
-
-		// 別の親にも同じ登録名が存在するため、親の構成情報に限定した参照解決
-		for (const auto& element : MadoEngine::UIGroupManager::GetInstance().GetElements(parent)) {
-			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Group && element.name == name) {
-				return element.group;
-			}
-		}
-		return {};
-	}
 }
 
 namespace UI::Game {
@@ -94,17 +41,11 @@ namespace UI::Game {
 		const MapMiniMapData& miniMapData, std::uint32_t gameSeed) {
 		isVisible_ = true;
 		isWorldViewsVisible_ = false;
-		staticTexts_.clear();
 		massiveEnemySpawnTimer_.Reset();
 		isMassiveEnemySpawnJustStarted_ = false;
 		UpdateMassiveEnemySpawnPresentation(0.0f);
 		UpdateUpgradePresentation(0.0f, false);
 		UpdatePausePresentation(false);
-
-		// Editor配置の常設表示だけを管理対象へ登録し、開始演出とMap操作Textを分離
-		for (const char* name : kStaticHudTextNames) {
-			staticTexts_.push_back(name);
-		}
 
 		expGauge_.Initialize();
 		healthGauge_.Initialize();
@@ -255,7 +196,6 @@ namespace UI::Game {
 	}
 
 	void GameHud::ShowMassiveEnemySpawn() {
-
 		// 各通知で演出時間を初期化し、開始Frameの時間差分をフェードへ持ち込まない状態へ遷移
 		massiveEnemySpawnTimer_.Start(kMassiveEnemySpawnTotalDuration);
 		isMassiveEnemySpawnJustStarted_ = true;
@@ -274,7 +214,7 @@ namespace UI::Game {
 
 	void GameHud::UpdatePausePresentation(bool isPaused, std::size_t selectedIndex) {
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
-		MadoEngine::UIGroup* pauseGroup = groupManager.TryGet(groupManager.Find(kPauseGroupName, SceneType::Game));
+		MadoEngine::UIGroup* pauseGroup = groupManager.TryGet(groupManager.Find("PauseGroup", SceneType::Game));
 		if (!pauseGroup) {
 			return;
 		}
@@ -283,51 +223,29 @@ namespace UI::Game {
 		const bool isVisible = isVisible_ && isPaused;
 		pauseGroup->SetVisible(isVisible && pauseGroup->GetAuthoringState().visible);
 
-		// 保存用のTransformから毎回計算し、倍率の累積と拡大中の値の保存を防止
-		for (std::size_t index = 0; index < std::size(kPauseMenuDefinitions); ++index) {
-			const auto& definition = kPauseMenuDefinitions[index];
-			MadoEngine::UIGroup* menuGroup = pauseGroup->TryGetGroup(definition.groupName);
+		// 選択番号と一致するようPauseMenuItemの定義順でGroup名を対応付け
+		constexpr const char* kPauseMenuGroupNames[] = { "Continue", "ReStart", "Quit" };
+
+		// 各項目の原点を背景の中心に配置し、保存用Transformを基準に位置を固定したまま拡大
+		for (std::size_t index = 0; index < std::size(kPauseMenuGroupNames); ++index) {
+			MadoEngine::UIGroup* menuGroup = pauseGroup->TryGetGroup(kPauseMenuGroupNames[index]);
 			if (!menuGroup) {
 				continue;
 			}
-			const auto baseTransform = menuGroup->GetAuthoringState().transform;
-			menuGroup->SetTransform(baseTransform);
-			if (!isVisible || index != selectedIndex) {
-				continue;
+			auto transform = menuGroup->GetAuthoringState().transform;
+			if (isVisible && index == selectedIndex) {
+				transform.scale *= kPauseMenuSelectedScale;
 			}
-
-			// 子が画面座標に近い位置でも背景の基準点を固定し、拡大によるボタン全体の移動を相殺
-			Vector3 pivot{};
-			if (const Sprite* background = menuGroup->TryGetSprite(definition.pivotSpriteName)) {
-				const Vector2 position = background->GetAuthoringState().transform.translate;
-				pivot = { position.x, position.y, 0.0f };
-			}
-			const Vector3 basePivot = Matrix::Transform(pivot, menuGroup->GetLocalMatrix());
-			menuGroup->SetScale(baseTransform.scale * kPauseMenuSelectedScale);
-			const Vector3 scaledPivot = Matrix::Transform(pivot, menuGroup->GetLocalMatrix());
-			menuGroup->SetPosition({ baseTransform.translate.x + basePivot.x - scaledPivot.x,
-				baseTransform.translate.y + basePivot.y - scaledPivot.y });
+			menuGroup->SetTransform(transform);
 		}
 	}
 
 	void GameHud::ApplyStaticVisibility(bool isVisible) {
 
-		// 再読込後も親Groupを再取得し、子の個別設定を維持したままHUDの表示条件を合成
+		// HUD全体の表示条件を親に適用し、タイマーや通知が管理する子の表示状態を維持
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
-		for (const char* name : kStaticHudGroupNames) {
-			MadoEngine::UIGroup* group = groupManager.TryGet(groupManager.Find(name, SceneType::Game));
-			if (group) {
-				group->SetVisible(isVisible && group->GetAuthoringState().visible);
-			}
-		}
-
-		// 非表示中も名前から再取得し、Json再読込で復元された常設Textの表示漏れを防止
-		for (const char* name : staticTexts_) {
-			MadoEngine::Text* text = MyText::TryGet(MyText::Find(name));
-			if (!text || text->GetSceneType() != SceneType::Game) {
-				continue;
-			}
-			text->SetRuntimeVisible(isVisible);
+		if (MadoEngine::UIGroup* group = groupManager.TryGet(groupManager.Find("StaticHud", SceneType::Game))) {
+			group->SetVisible(isVisible && group->GetAuthoringState().visible);
 		}
 	}
 
@@ -335,17 +253,17 @@ namespace UI::Game {
 
 		// 親だけでUpgrade中の表示を切り替え、子の個別設定と保存用表示状態を維持
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
-		const auto upgradeHandle = groupManager.Find(kUpgradeGroupName, SceneType::Game);
+		const auto upgradeHandle = groupManager.Find("Upgrade", SceneType::Game);
 		MadoEngine::UIGroup* upgradeGroup = groupManager.TryGet(upgradeHandle);
 		if (upgradeGroup) {
 			upgradeGroup->SetVisible(isVisible && upgradeGroup->GetAuthoringState().visible);
 		}
-		UpdateUpgradeControlFeedback(deltaTime, isVisible);
+		UpdateUpgradeControlFeedback(deltaTime, upgradeHandle);
 
 		// 管理名の変更や再読込に追従し、Upgrade内の登録名に限定して見出しを解決
 		MadoEngine::TextHandle textHandle{};
 		for (const auto& element : groupManager.GetElements(upgradeHandle)) {
-			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Text && element.name == kUpgradeTextName) {
+			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Text && element.name == "UpgradeText") {
 				textHandle = element.text;
 				break;
 			}
@@ -378,7 +296,7 @@ namespace UI::Game {
 		upgradeTextPulseTimer_.Update(deltaTime);
 
 		// EaseOutQuadで指定サイズ範囲の変化を繰り返し、文字画像の再生成を避けるためScaleへ換算
-		const float pulseSize = Easing::Lerp(kUpgradeTextPulseStartSize, kUpgradeTextPulseEndSize,
+		const float pulseSize = Easing::Lerp(kUpgradeTextPulseSize.start, kUpgradeTextPulseSize.end,
 			upgradeTextPulseTimer_.GetProgress(), EaseType::EaseOutQuad);
 		const float pulseScale = pulseSize / (std::max)(1.0f, upgradeText->GetFontSize());
 		upgradeText->SetScale(upgradeTextBaseScale_ * pulseScale);
@@ -389,79 +307,57 @@ namespace UI::Game {
 		upgradeText->SetColor(color);
 	}
 
-	void GameHud::UpdateUpgradeControlFeedback(float deltaTime, bool isVisible) {
+	void GameHud::UpdateUpgradeControlFeedback(float deltaTime, MadoEngine::UIGroupHandle upgrade) {
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
-		const auto upgrade = groupManager.Find(kUpgradeGroupName, SceneType::Game);
-		for (std::size_t index = 0; index < upgradeControlFeedback_.size(); ++index) {
-			const auto& definition = kUpgradeControlDefinitions[index];
-			const auto controlHandle = FindChildUIGroup(upgrade, definition.actionName);
-			const MadoEngine::UIGroup* controlGroup = groupManager.TryGet(controlHandle);
-			bool isControlVisible = false;
-			if (controlGroup) {
-				isControlVisible = isVisible && controlGroup->IsVisibleInHierarchy();
-			}
-			InputControlFeedbackTargets targets;
-			MadoEngine::SpriteHandle moneyIcon{};
+		const auto decision = groupManager.FindChildGroup(upgrade, "Decision");
+		const auto reroll = groupManager.FindChildGroup(upgrade, "Reroll");
+		const auto rerollButton = groupManager.FindChildGroup(reroll, "Button");
+		upgradeDecisionFeedback_.Update(deltaTime, "Decision", decision);
+		upgradeRerollFeedback_.Update(deltaTime, "Reroll", rerollButton);
 
-			// 親内の登録名から実体を解決し、レリック側のDecisionとの取り違えを防止
-			for (const auto& element : groupManager.GetElements(controlHandle)) {
-				if (!element.resolved) {
-					continue;
-				}
-				if (element.type == MadoEngine::UIGroupElementType::Sprite) {
-					for (std::size_t spriteIndex = 0; spriteIndex < definition.spriteNames.size(); ++spriteIndex) {
-						if (element.name == definition.spriteNames[spriteIndex]) {
-							targets.sprites[spriteIndex] = element.sprite;
-							break;
-						}
-					}
-					if (element.name == kUpgradeRerollCoinName) {
-						moneyIcon = element.sprite;
-					}
-				} else if (element.type == MadoEngine::UIGroupElementType::Text && element.name == definition.textName) {
-					targets.text = element.text;
+		// 費用アイコンはボタンの拡縮から独立させ、強化画面の暗幕より手前に表示
+		const MadoEngine::UIGroup* rerollGroup = groupManager.TryGet(reroll);
+		if (rerollGroup && rerollGroup->IsVisibleInHierarchy()) {
+			for (const auto& element : groupManager.GetElements(reroll)) {
+				if (element.resolved && element.type == MadoEngine::UIGroupElementType::Sprite &&
+					element.name == "RerollMoneyIcon") {
+					MadoEngine::SpriteManager::GetInstance().MoveToFront(element.sprite);
+					break;
 				}
 			}
-
-			// 暗幕より手前へ背景・入力アイコン・費用アイコンを並べ、既存の押下演出を継続
-			if (isControlVisible) {
-				auto& sprites = MadoEngine::SpriteManager::GetInstance();
-				for (const auto handle : targets.sprites) {
-					sprites.MoveToFront(handle);
-				}
-				sprites.MoveToFront(moneyIcon);
-			}
-			upgradeControlFeedback_[index].Update(deltaTime, isControlVisible, definition.actionName, targets);
 		}
 	}
 
 	void GameHud::UpdateGameStartPresentation(float progress, float gamePlayElapsedTime) {
 		const float scaleY = Easing::Lerp(kGameStartBandInitialScaleY, 0.0f, progress, EaseType::EaseInCirc);
 
-		// Json再読込やEditor削除に対応するため現在のHandleを名前から毎Frame取得
-		for (const char* name : kGameStartBandNames) {
-			Sprite* band = MySprite::TryGet(MySprite::Find(name));
-			if (!band || band->GetSceneType() != SceneType::Game) {
+		// Json再読込後もStartBandに接続されているSpriteを演出対象として取得
+		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
+		const auto bandGroup = groupManager.Find("StartBand", SceneType::Game);
+		for (const auto& element : groupManager.GetElements(bandGroup)) {
+			if (!element.resolved || element.type != MadoEngine::UIGroupElementType::Sprite) {
 				continue;
 			}
 
-			// 横幅と上下端のAnchorを維持し、高さだけを同じ進行率で縮小
-			Vector2 scale = band->GetScale();
-			scale.y = scaleY;
-			band->SetScale(scale);
+			// 上下端の位置を固定するため、子Spriteの高さだけを縮小
+			if (Sprite* band = MySprite::TryGet(element.sprite)) {
+				Vector2 scale = band->GetScale();
+				scale.y = scaleY;
+				band->SetScale(scale);
+			}
 		}
 
 		// Playing開始後2秒間は初期位置を保ち、Pauseを除いた経過時間で目標Textをスライド
-		MadoEngine::Text* goalText = MyText::TryGet(MyText::Find(kGoalTextName));
+		MadoEngine::Text* goalText = MyText::TryGet(MyText::Find("TheGoalText"));
 		if (goalText && goalText->GetSceneType() == SceneType::Game) {
 			const float goalMoveProgress = (gamePlayElapsedTime - kGoalTextMoveDelay) / kGoalTextMoveDuration;
 			Vector2 position = goalText->GetPosition();
-			position.x = Easing::Lerp(kGoalTextInitialX, kGoalTextEndX, goalMoveProgress, EaseType::EaseOutExpo);
+			position.x = Easing::Lerp(kGoalTextX.start, kGoalTextX.end, goalMoveProgress, EaseType::EaseOutExpo);
 			goalText->SetPosition(position);
 		}
 
 		// 帯と同じ開始待機の進行率でAlphaだけを補間し、Editor設定の文字色を維持
-		MadoEngine::Text* startText = MyText::TryGet(MyText::Find(kGameStartTextName));
+		MadoEngine::Text* startText = MyText::TryGet(MyText::Find("StartText"));
 		if (!startText || startText->GetSceneType() != SceneType::Game) {
 			return;
 		}
@@ -472,7 +368,7 @@ namespace UI::Game {
 		// 縦移動の終了座標がJsonに残っていても高さを中央へ戻し、Sessionの累積時間でX方向だけ移動
 		const float moveProgress = gamePlayElapsedTime / kGameStartTextMoveDuration;
 		Vector2 position = startText->GetPosition();
-		position.x = Easing::Lerp(kGameStartTextInitialX, kGameStartTextEndX, moveProgress, EaseType::EaseInBack);
+		position.x = Easing::Lerp(kGameStartTextX.start, kGameStartTextX.end, moveProgress, EaseType::EaseInBack);
 		position.y = kGameStartTextY;
 		startText->SetPosition(position);
 	}
@@ -487,13 +383,13 @@ namespace UI::Game {
 		}
 
 		// Json再読込後も現在の演出時刻を最新Textへ反映し、X座標とRGBの編集値を維持
-		MadoEngine::Text* text = MyText::TryGet(MyText::Find(kMassiveEnemySpawnTextName));
+		MadoEngine::Text* text = MyText::TryGet(MyText::Find("MassiveEnemySpawnText"));
 		if (!text || text->GetSceneType() != SceneType::Game) {
 			return;
 		}
 		const bool hasStarted = massiveEnemySpawnTimer_.IsActive() || massiveEnemySpawnTimer_.IsFinished();
 		Vector2 position = text->GetPosition();
-		position.y = kMassiveEnemySpawnTextInitialY;
+		position.y = kMassiveEnemySpawnTextY.start;
 		Vector4 color = text->GetColor();
 		color.w = 0.0f;
 		if (hasStarted) {
@@ -507,9 +403,9 @@ namespace UI::Game {
 			if (moveProgress >= 1.0f) {
 
 				// 補間の丸め誤差を残さず、退場完了後は指定された終点へ固定
-				position.y = kMassiveEnemySpawnTextEndY;
+				position.y = kMassiveEnemySpawnTextY.end;
 			} else {
-				position.y = Easing::Lerp(kMassiveEnemySpawnTextInitialY, kMassiveEnemySpawnTextEndY,
+				position.y = Easing::Lerp(kMassiveEnemySpawnTextY.start, kMassiveEnemySpawnTextY.end,
 					moveProgress, EaseType::EaseInBack);
 			}
 		}
@@ -522,9 +418,9 @@ namespace UI::Game {
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
 
 		// 表示状態に関係なく現在HPを同期し、開始演出が終わった直後から最新値を表示
-		MadoEngine::UIGroup* healthGroup = groupManager.TryGet(groupManager.Find(kPlayerHealthGroupName, SceneType::Game));
+		MadoEngine::UIGroup* healthGroup = groupManager.TryGet(groupManager.Find("PlayerHealthUI", SceneType::Game));
 		if (healthGroup) {
-			if (MadoEngine::Text* healthText = healthGroup->TryGetText(kPlayerHealthTextName)) {
+			if (MadoEngine::Text* healthText = healthGroup->TryGetText("PlayerHealth")) {
 				const int currentHealth = static_cast<int>(state.playerStatus.currentHealth);
 				const int maxHealth = static_cast<int>(state.playerStatus.maxHealth);
 				healthText->SetText(std::format("HP : {} / {}", currentHealth, maxHealth));
@@ -532,42 +428,42 @@ namespace UI::Game {
 		}
 
 		// Upgrade内のRerollへ現在の費用を同期し、同額のままの再読込にも追従
-		const auto upgrade = groupManager.Find(kUpgradeGroupName, SceneType::Game);
-		MadoEngine::UIGroup* rerollGroup = groupManager.TryGet(FindChildUIGroup(upgrade, kUpgradeRerollGroupName));
+		const auto upgrade = groupManager.Find("Upgrade", SceneType::Game);
+		MadoEngine::UIGroup* rerollGroup = groupManager.TryGet(groupManager.FindChildGroup(upgrade, "Reroll"));
 		if (rerollGroup) {
-			if (MadoEngine::Text* rerollCoinText = rerollGroup->TryGetText(kUpgradeRerollCoinTextName)) {
+			if (MadoEngine::Text* rerollCoinText = rerollGroup->TryGetText("RerollMoneyText")) {
 				rerollCoinText->SetText(std::format("{}", state.upgradeRerollCost));
 			}
 		}
 
 		// 親Group内の登録名から毎回解決し、金額が同じでも再読込後のTextへ同期
-		MadoEngine::UIGroup* moneyGroup = groupManager.TryGet(groupManager.Find(kMoneyGroupName, SceneType::Game));
+		MadoEngine::UIGroup* moneyGroup = groupManager.TryGet(groupManager.Find("MoneyUI", SceneType::Game));
 		if (moneyGroup) {
-			if (MadoEngine::Text* moneyText = moneyGroup->TryGetText(kMoneyTextName)) {
+			if (MadoEngine::Text* moneyText = moneyGroup->TryGetText("MoneyText")) {
 				const int currentMoney = static_cast<int>(state.playerStatus.currentMoney);
 				moneyText->SetText(std::format("{}", currentMoney));
 			}
 		}
 
 		// 撃破数も親Group内の登録名から解決し、再生成されたTextへ最新値を同期
-		MadoEngine::UIGroup* killCountGroup = groupManager.TryGet(groupManager.Find(kKillCountGroupName, SceneType::Game));
+		MadoEngine::UIGroup* killCountGroup = groupManager.TryGet(groupManager.Find("KillCountUI", SceneType::Game));
 		if (killCountGroup) {
-			if (MadoEngine::Text* killCountText = killCountGroup->TryGetText(kKillCountTextName)) {
+			if (MadoEngine::Text* killCountText = killCountGroup->TryGetText("KillCountText")) {
 				killCountText->SetText(std::format("{}", state.killCount));
 			}
 		}
 
 		// Debug表示も親から解決し、再読込後のTextへ現在の敵数とSeedを復元
 		MadoEngine::Text* fpsCountText = nullptr;
-		MadoEngine::UIGroup* debugGroup = groupManager.TryGet(groupManager.Find(kDebugGroupName, SceneType::Game));
+		MadoEngine::UIGroup* debugGroup = groupManager.TryGet(groupManager.Find("DebugText", SceneType::Game));
 		if (debugGroup) {
-			if (MadoEngine::Text* enemyCountText = debugGroup->TryGetText(kEnemyCountTextName)) {
+			if (MadoEngine::Text* enemyCountText = debugGroup->TryGetText("EnemyCountText")) {
 				enemyCountText->SetText(std::format("Enemy : {}", state.enemyCount));
 			}
-			if (MadoEngine::Text* seedValueText = debugGroup->TryGetText(kSeedValueTextName)) {
+			if (MadoEngine::Text* seedValueText = debugGroup->TryGetText("SeedValueText")) {
 				seedValueText->SetText(std::format("SEED : {}", gameSeed_));
 			}
-			fpsCountText = debugGroup->TryGetText(kFpsCountTextName);
+			fpsCountText = debugGroup->TryGetText("FpsCountText");
 		}
 		fpsMeasurementView_.Update(deltaTime, fpsCountText);
 	}

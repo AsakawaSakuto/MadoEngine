@@ -102,8 +102,8 @@ namespace UI::Game {
 		slot->type = type;
 		slot->amount = amount;
 		slot->horizontalOffset = std::lerp(
-			horizontalOffsetMin_,
-			horizontalOffsetMax_,
+			horizontalOffset_.start,
+			horizontalOffset_.end,
 			kHorizontalOffsetRates[offsetIndex]);
 		slot->elapsedTime = 0.0f;
 		slot->isActive = true;
@@ -210,8 +210,8 @@ namespace UI::Game {
 		ImGui::DragFloat("上昇距離", &riseDistance_, 1.0f, -500.0f, 500.0f, "%.0f px");
 		ImGui::DragFloatRange2(
 			"左右オフセット範囲",
-			&horizontalOffsetMin_,
-			&horizontalOffsetMax_,
+			&horizontalOffset_.start,
+			&horizontalOffset_.end,
 			1.0f,
 			-500.0f,
 			500.0f,
@@ -249,10 +249,10 @@ namespace UI::Game {
 		fadeStartProgress_ = std::clamp(fadeStartProgress_, 0.0f, 0.99f);
 		initialScaleAddition_ = std::clamp(initialScaleAddition_, 0.0f, 3.0f);
 		riseDistance_ = std::clamp(riseDistance_, -500.0f, 500.0f);
-		horizontalOffsetMin_ = std::clamp(horizontalOffsetMin_, -500.0f, 500.0f);
-		horizontalOffsetMax_ = std::clamp(horizontalOffsetMax_, -500.0f, 500.0f);
-		if (horizontalOffsetMin_ > horizontalOffsetMax_) {
-			std::swap(horizontalOffsetMin_, horizontalOffsetMax_);
+		horizontalOffset_.start = std::clamp(horizontalOffset_.start, -500.0f, 500.0f);
+		horizontalOffset_.end = std::clamp(horizontalOffset_.end, -500.0f, 500.0f);
+		if (horizontalOffset_.start > horizontalOffset_.end) {
+			std::swap(horizontalOffset_.start, horizontalOffset_.end);
 		}
 		fontSize_ = std::clamp(fontSize_, 1.0f, 200.0f);
 		if (fontSizeChanged) {

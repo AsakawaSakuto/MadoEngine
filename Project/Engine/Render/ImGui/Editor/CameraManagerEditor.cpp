@@ -5,6 +5,7 @@
 #include "EditorToolbar.h"
 
 #include "ImGuiHeaders.h"
+#include "Math/ClampRange.h"
 #include "Utility/Camera/DebugCamera.h"
 #include "Utility/Camera/TPS_Camera.h"
 #include <algorithm>
@@ -398,8 +399,10 @@ namespace {
 		bool isChanged = false;
 		float yawDegrees = settings.yaw * kRadiansToDegrees;
 		float pitchDegrees = settings.pitch * kRadiansToDegrees;
-		float minPitchDegrees = settings.minPitch * kRadiansToDegrees;
-		float maxPitchDegrees = settings.maxPitch * kRadiansToDegrees;
+		Math::ClampRange pitchLimitDegrees{
+			settings.pitchLimit.min * kRadiansToDegrees,
+			settings.pitchLimit.max * kRadiansToDegrees
+		};
 		if (ImGui::DragFloat("Yaw", &yawDegrees, 0.25f)) {
 			settings.yaw = yawDegrees * kDegreesToRadians;
 			isChanged = true;
@@ -412,13 +415,13 @@ namespace {
 		isChanged |= ImGui::DragFloat(
 			"距離", &settings.distance, 0.1f, 1.0f, 1000.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 		if (ImGui::DragFloat(
-			"最小Pitch", &minPitchDegrees, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
-			settings.minPitch = minPitchDegrees * kDegreesToRadians;
+			"最小Pitch", &pitchLimitDegrees.min, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
+			settings.pitchLimit.min = pitchLimitDegrees.min * kDegreesToRadians;
 			isChanged = true;
 		}
 		if (ImGui::DragFloat(
-			"最大Pitch", &maxPitchDegrees, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
-			settings.maxPitch = maxPitchDegrees * kDegreesToRadians;
+			"最大Pitch", &pitchLimitDegrees.max, 0.25f, -89.82f, 89.82f, "%.2f deg", ImGuiSliderFlags_AlwaysClamp)) {
+			settings.pitchLimit.max = pitchLimitDegrees.max * kDegreesToRadians;
 			isChanged = true;
 		}
 		isChanged |= ImGui::DragFloat3("オフセット", &settings.offset.x, 0.01f);

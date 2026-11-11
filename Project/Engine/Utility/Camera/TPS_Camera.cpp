@@ -17,13 +17,25 @@ TPS_Camera::TPS_Camera() {
 	Camera::Update(1.0f / 60.0f);
 }
 
+void TPS_Camera::SetPitchLimit(float minPitch, float maxPitch) {
+
+	// 非有限の境界は現在値で補い、クランプ前に上下限の順序を保証
+	if (!std::isfinite(minPitch)) {
+		minPitch = pitchLimit_.min;
+	}
+	if (!std::isfinite(maxPitch)) {
+		maxPitch = pitchLimit_.max;
+	}
+	pitchLimit_ = { (std::min)(minPitch, maxPitch), (std::max)(minPitch, maxPitch) };
+	ClampPitch();
+}
+
 TPSCameraSettings TPS_Camera::GetSettings() const {
 	return {
 		yaw_,
 		pitch_,
 		distance_,
-		minPitch_,
-		maxPitch_,
+		pitchLimit_,
 		mouseSensitivity_,
 		gamePadSensitivity_,
 		followStrength_,
@@ -46,22 +58,15 @@ void TPS_Camera::ApplySettings(const TPSCameraSettings& settings) {
 	} else {
 		distance_ = distance_;
 	}
-	const float requestedMinPitch = [&]() {
-		if (std::isfinite(settings.minPitch)) {
-			return (std::clamp(settings.minPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit));
-		} else {
-			return (minPitch_);
-		}
-	}();
-	const float requestedMaxPitch = [&]() {
-		if (std::isfinite(settings.maxPitch)) {
-			return (std::clamp(settings.maxPitch, -kPitchAbsoluteLimit, kPitchAbsoluteLimit));
-		} else {
-			return (maxPitch_);
-		}
-	}();
-	minPitch_ = (std::min)(requestedMinPitch, requestedMaxPitch);
-	maxPitch_ = (std::max)(requestedMinPitch, requestedMaxPitch);
+
+	// 設定側の有限な上下限を許容仰俯角へ制限し、非有限値は範囲の適用時に補完
+	Math::ClampRange requestedPitchLimit = settings.pitchLimit;
+	if (std::isfinite(requestedPitchLimit.min)) {
+		requestedPitchLimit.min = std::clamp(requestedPitchLimit.min, -kPitchAbsoluteLimit, kPitchAbsoluteLimit);
+	}
+	if (std::isfinite(requestedPitchLimit.max)) {
+		requestedPitchLimit.max = std::clamp(requestedPitchLimit.max, -kPitchAbsoluteLimit, kPitchAbsoluteLimit);
+	}
 	if (std::isfinite(settings.pitch)) {
 		pitch_ = settings.pitch;
 	} else {
@@ -89,7 +94,7 @@ void TPS_Camera::ApplySettings(const TPSCameraSettings& settings) {
 	}
 	useMouseInput_ = settings.useMouseInput;
 	useGamePadInput_ = settings.useGamePadInput;
-	ClampPitch();
+	SetPitchLimit(requestedPitchLimit.min, requestedPitchLimit.max);
 
 	// Editor変更直後のViewとProjectionを次Frameまで待たず描画状態へ同期
 	ApplySphericalCoord();
@@ -196,7 +201,7 @@ void TPS_Camera::ApplyLookAtRotation(const Vector3& viewCenter) {
 }
 
 void TPS_Camera::ClampPitch() {
-	pitch_ = std::clamp(pitch_, minPitch_, maxPitch_);
+	pitch_ = std::clamp(pitch_, pitchLimit_.min, pitchLimit_.max);
 }
 
 void TPS_Camera::DrawImGui() {
@@ -216,15 +221,27 @@ void TPS_Camera::DrawImGui() {
 	float pitchDeg = pitch_ * kRadiansToDegrees;
 	ImGui::SliderFloat("Yaw (deg)",   &yawDeg,   -180.0f, 180.0f);
 	ImGui::SliderFloat("Pitch (deg)", &pitchDeg,
-		minPitch_ * kRadiansToDegrees,
-		maxPitch_ * kRadiansToDegrees);
+		pitchLimit_.min * kRadiansToDegrees,
+		pitchLimit_.max * kRadiansToDegrees);
 	yaw_   = yawDeg   * kDegreesToRadians;
 	pitch_ = pitchDeg * kDegreesToRadians;
 	ClampPitch();
 
 	ImGui::DragFloat("Distance",          &distance_,          0.1f, 1.0f, 100.0f);
-	ImGui::DragFloat("Min Pitch (deg)", &minPitch_, 1.0f, -89.0f, 89.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
-	ImGui::DragFloat("Max Pitch (deg)", &maxPitch_, 1.0f, -89.0f, 89.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+
+	// UIの度数と内部のラジアンを分け、編集後の上下限を一組として適用
+	Math::ClampRange pitchLimitDegrees{
+		pitchLimit_.min * kRadiansToDegrees,
+		pitchLimit_.max * kRadiansToDegrees
+	};
+	const bool minPitchChanged = ImGui::DragFloat(
+		"Min Pitch (deg)", &pitchLimitDegrees.min, 1.0f, -89.0f, 89.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+	const bool maxPitchChanged = ImGui::DragFloat(
+		"Max Pitch (deg)", &pitchLimitDegrees.max, 1.0f, -89.0f, 89.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+	if (minPitchChanged || maxPitchChanged) {
+		SetPitchLimit(pitchLimitDegrees.min * kDegreesToRadians, pitchLimitDegrees.max * kDegreesToRadians);
+	}
+
 	ImGui::DragFloat3("Offset",           &offset_.x,          0.01f);
 	ImGui::SliderFloat("Follow Strength", &followStrength_,    0.0f, 1.0f);
 	ImGui::Separator();

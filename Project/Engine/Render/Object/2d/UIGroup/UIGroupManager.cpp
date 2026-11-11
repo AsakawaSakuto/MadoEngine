@@ -245,6 +245,30 @@ UIGroupHandle UIGroupManager::Find(const std::string& name, SceneType sceneType)
 	return {};
 }
 
+UIGroupHandle UIGroupManager::FindChildGroup(UIGroupHandle parent, const std::string& name) const {
+	const UIGroup* parentGroup = TryGet(parent);
+	if (!parentGroup) {
+		return {};
+	}
+
+	// 要素一覧のコピーを避け、親の登録情報から該当する子Groupだけを検索
+	const auto& elements = slots_[parent.index].elements;
+	const auto it = std::find_if(elements.begin(), elements.end(), [&](const UIGroupElementInfo& element) {
+		return element.type == UIGroupElementType::Group && element.name == name;
+	});
+	if (it == elements.end()) {
+		return {};
+	}
+
+	// Json再読込や所属変更後の未接続ハンドルを除外するため現在の子参照と照合
+	const auto child = FindById(it->target);
+	const UIGroup* childGroup = TryGet(child);
+	if (childGroup && parentGroup->TryGetGroup(name) == childGroup) {
+		return child;
+	}
+	return {};
+}
+
 UIGroupHandle UIGroupManager::FindById(const std::string& id) const {
 	const auto it = ids_.find(id);
 	if (it != ids_.end()) {

@@ -908,9 +908,9 @@
                 0.5
             ],
             "color": [
-                1.0,
-                1.0,
-                1.0,
+                0.0784313753247261,
+                0.09803921729326248,
+                0.13725490868091583,
                 1.0
             ],
             "fitToScreen": false,
@@ -923,8 +923,8 @@
             ],
             "rotation": 0.0,
             "scale": [
-                11.0,
-                5.0
+                10.0,
+                4.300000190734863
             ],
             "scene": "Game",
             "texture": "white16x16",
@@ -949,9 +949,9 @@
                 0.5
             ],
             "color": [
-                0.09019608050584793,
-                0.10588235408067703,
-                0.1411764770746231,
+                1.0,
+                1.0,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
@@ -964,11 +964,11 @@
             ],
             "rotation": 0.0,
             "scale": [
-                10.0,
-                4.0
+                1.2999999523162842,
+                1.2999999523162842
             ],
             "scene": "Game",
-            "texture": "white16x16",
+            "texture": "ButtonFrame",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1000,16 +1000,16 @@
             "name": "UpgradeDecisionBottom",
             "opacity": 1.0,
             "position": [
-                472.0,
+                475.0,
                 640.0
             ],
             "rotation": 0.0,
             "scale": [
-                0.44999998807907104,
-                0.44999998807907104
+                3.0,
+                3.0
             ],
             "scene": "Game",
-            "texture": "Decision_Pad",
+            "texture": "xbox_A",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1031,9 +1031,9 @@
                 0.5
             ],
             "color": [
-                1.0,
-                1.0,
-                1.0,
+                0.0784313753247261,
+                0.09803921729326248,
+                0.13725490868091583,
                 1.0
             ],
             "fitToScreen": false,
@@ -1046,8 +1046,8 @@
             ],
             "rotation": 0.0,
             "scale": [
-                11.0,
-                5.0
+                10.0,
+                4.300000190734863
             ],
             "scene": "Game",
             "texture": "white16x16",
@@ -1072,9 +1072,9 @@
                 0.5
             ],
             "color": [
-                0.09150892496109009,
-                0.10751760751008987,
-                0.13953489065170288,
+                1.0,
+                1.0,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
@@ -1087,11 +1087,11 @@
             ],
             "rotation": 0.0,
             "scale": [
-                10.0,
-                4.0
+                1.2999999523162842,
+                1.2999999523162842
             ],
             "scene": "Game",
-            "texture": "white16x16",
+            "texture": "ButtonFrame",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1123,16 +1123,16 @@
             "name": "UpgradeRerollBottom",
             "opacity": 1.0,
             "position": [
-                712.0,
+                715.0,
                 640.0
             ],
             "rotation": 0.0,
             "scale": [
-                0.44999998807907104,
-                0.44999998807907104
+                3.0,
+                3.0
             ],
             "scene": "Game",
-            "texture": "xbox_button_color_y_outline",
+            "texture": "xbox_Y",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1164,7 +1164,7 @@
             "name": "UpgradeRerollCoin",
             "opacity": 1.0,
             "position": [
-                844.0,
+                840.0,
                 604.0
             ],
             "rotation": 0.0,
@@ -1195,9 +1195,9 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
                 1.0,
+                0.8500000238418579,
+                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -1318,9 +1318,9 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
                 1.0,
+                0.8500000238418579,
+                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -1419,7 +1419,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Bow",
+            "texture": "Pistol",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1441,9 +1441,9 @@
                 0.5
             ],
             "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.949999988079071,
+                0.9700000286102295,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
@@ -1564,9 +1564,9 @@
                 0.5
             ],
             "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.949999988079071,
+                0.9700000286102295,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
@@ -1665,7 +1665,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Trump",
+            "texture": "SnowCrystal",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1687,9 +1687,9 @@
                 0.5
             ],
             "color": [
+                0.949999988079071,
+                0.9700000286102295,
                 1.0,
-                0.8500000238418579,
-                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -1870,7 +1870,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Pistol",
+            "texture": "FireBall",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1892,9 +1892,9 @@
                 0.5
             ],
             "color": [
+                0.949999988079071,
+                0.9700000286102295,
                 1.0,
-                0.8500000238418579,
-                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -2075,48 +2075,7 @@
                 4.0
             ],
             "scene": "Game",
-            "texture": "Flask",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_ddeda112-4834-456c-affe-8a95eb039b08",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                640.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                11.0,
-                5.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
+            "texture": "SpeedRobe",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2145,7 +2104,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_58756581-6997-4eb8-9193-41808ecb162e",
+            "name": "UIGroupSprite_ddeda112-4834-456c-affe-8a95eb039b08",
             "opacity": 1.0,
             "position": [
                 640.0,
@@ -2154,10 +2113,51 @@
             "rotation": 0.0,
             "scale": [
                 10.0,
-                4.0
+                4.300000190734863
             ],
             "scene": "Game",
             "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_58756581-6997-4eb8-9193-41808ecb162e",
+            "opacity": 1.0,
+            "position": [
+                640.0,
+                640.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.2999999523162842,
+                1.2999999523162842
+            ],
+            "scene": "Game",
+            "texture": "ButtonFrame",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2189,16 +2189,16 @@
             "name": "UIGroupSprite_2cbde314-879d-4d4c-93b6-6f3e303d2258",
             "opacity": 1.0,
             "position": [
-                592.0,
+                595.0,
                 640.0
             ],
             "rotation": 0.0,
             "scale": [
-                0.44999998807907104,
-                0.44999998807907104
+                3.0,
+                3.0
             ],
             "scene": "Game",
-            "texture": "Decision_Pad",
+            "texture": "xbox_A",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {

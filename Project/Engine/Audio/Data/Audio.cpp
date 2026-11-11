@@ -437,7 +437,7 @@ bool AudioX::SetPitch(float semitones) {
     if (!std::isfinite(semitones) || !AudioPitchStream::SupportsFormat(wfex_)) {
         return false;
     }
-    semitones = std::clamp(semitones, AudioPitchStream::kMinSemitones, AudioPitchStream::kMaxSemitones);
+    semitones = std::clamp(semitones, AudioPitchStream::kSemitoneRange.min, AudioPitchStream::kSemitoneRange.max);
     if (semitones == pitchSemitones_) {
         return true;
     }

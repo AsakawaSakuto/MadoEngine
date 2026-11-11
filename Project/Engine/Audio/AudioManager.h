@@ -17,8 +17,7 @@ namespace MadoEngine {
 	class AudioManager {
 	public:
 		static constexpr float kMaxIndividualVolume = AudioX::kMaxVolume;
-		static constexpr float kMinPitchSemitones = AudioPitchStream::kMinSemitones;
-		static constexpr float kMaxPitchSemitones = AudioPitchStream::kMaxSemitones;
+		static constexpr Math::ClampRange kPitchSemitoneRange = AudioPitchStream::kSemitoneRange;
 
 		/// @brief シングルトンインスタンスを取得
 		/// @return AudioManagerのインスタンスポインタ

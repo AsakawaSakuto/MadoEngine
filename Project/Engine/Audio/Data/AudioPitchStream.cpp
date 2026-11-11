@@ -176,7 +176,7 @@ bool AudioPitchStream::Initialize(std::shared_ptr<const std::vector<BYTE>> pcm, 
     next->input.resize(kProcessFrames * format.nChannels);
     next->discarded.resize(kProcessFrames * format.nChannels);
     next->stretch.presetDefault(format.nChannels, static_cast<float>(format.nSamplesPerSec));
-    next->stretch.setTransposeSemitones(std::clamp(semitones, kMinSemitones, kMaxSemitones));
+    next->stretch.setTransposeSemitones(std::clamp(semitones, kSemitoneRange.min, kSemitoneRange.max));
 
     // 先読みで初期遅延を除去し、終端では同じ量の無音入力から末尾を回収
     size_t preRoll = static_cast<size_t>(next->stretch.inputLatency() + next->stretch.outputLatency());
@@ -191,7 +191,7 @@ bool AudioPitchStream::Initialize(std::shared_ptr<const std::vector<BYTE>> pcm, 
 
 void AudioPitchStream::SetPitch(float semitones) {
     if (impl_ && std::isfinite(semitones)) {
-        impl_->stretch.setTransposeSemitones(std::clamp(semitones, kMinSemitones, kMaxSemitones));
+        impl_->stretch.setTransposeSemitones(std::clamp(semitones, kSemitoneRange.min, kSemitoneRange.max));
     }
 }
 

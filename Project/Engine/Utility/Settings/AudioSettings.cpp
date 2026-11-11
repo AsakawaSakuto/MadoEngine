@@ -82,8 +82,8 @@ namespace MadoEngine::Editor {
                 return 0.0f;
             }
             return static_cast<float>(std::clamp(semitones,
-                static_cast<double>(AudioManager::kMinPitchSemitones),
-                static_cast<double>(AudioManager::kMaxPitchSemitones)));
+                static_cast<double>(AudioManager::kPitchSemitoneRange.min),
+                static_cast<double>(AudioManager::kPitchSemitoneRange.max)));
         }
 
         /// @brief Jsonオブジェクトから同時再生数上限を読み込み

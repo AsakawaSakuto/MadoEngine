@@ -19,10 +19,6 @@ constexpr std::array<const char*, 3> kCardPanelNames = { "Overlay", "Border", "P
 constexpr const char* kCardIconName = "Icon";
 constexpr std::array<const char*, 3> kCardTextNames = { "Name", "Rarity", "Description" };
 constexpr const char* kDecisionGroupName = "Decision";
-constexpr const char* kDecisionTextName = "DecisionText";
-constexpr std::array<const char*, 3> kDecisionSpriteNames = {
-	"DecisionSprite", "DecisionSprite1", "DecisionInput"
-};
 
 /// @brief SpriteHandleを一時参照へ解決
 /// @param handle SpriteHandle
@@ -185,15 +181,7 @@ namespace UI::Game {
 		iconSprite_ = {};
 		auto& groups = MadoEngine::UIGroupManager::GetInstance();
 		const auto relic = groups.Find(kRelicGroupName, SceneType::Game);
-		MadoEngine::UIGroupHandle cardView{};
-
-		// 親内の登録名で参照を解決し、GUIDやEditor再読込時の世代変更へ依存しない接続
-		for (const auto& element : groups.GetElements(relic)) {
-			if (element.resolved && element.type == MadoEngine::UIGroupElementType::Group && element.name == kCardViewGroupName) {
-				cardView = element.group;
-				break;
-			}
-		}
+		const auto cardView = groups.FindChildGroup(relic, kCardViewGroupName);
 		for (const auto& element : groups.GetElements(cardView)) {
 			if (!element.resolved) {
 				continue;
@@ -279,45 +267,10 @@ namespace UI::Game {
 			}
 			sprites.MoveToFront(iconSprite_);
 		}
-		MadoEngine::UIGroupHandle decisionHandle{};
-		for (const auto& element : groupManager.GetElements(relicHandle)) {
-			if (element.type == MadoEngine::UIGroupElementType::Group && element.name == kDecisionGroupName && element.resolved) {
-				decisionHandle = element.group;
-				break;
-			}
-		}
-		const MadoEngine::UIGroup* decisionGroup = groupManager.TryGet(decisionHandle);
-		if (!decisionGroup) {
-			decisionControlFeedback_.Reset();
-			return;
-		}
-		const bool isControlVisible = isVisible_ && decisionGroup->IsVisibleInHierarchy();
-		InputControlFeedbackTargets targets;
+		const auto decisionHandle = groupManager.FindChildGroup(relicHandle, kDecisionGroupName);
 
-		// 管理名のGUIDではなくGroup内の登録名から対象を解決し、再読込による再生成へ追従
-		for (const auto& element : groupManager.GetElements(decisionHandle)) {
-			if (!element.resolved) {
-				continue;
-			}
-			if (element.type == MadoEngine::UIGroupElementType::Sprite) {
-				for (std::size_t index = 0; index < kDecisionSpriteNames.size(); ++index) {
-					if (element.name == kDecisionSpriteNames[index]) {
-						targets.sprites[index] = element.sprite;
-						break;
-					}
-				}
-			} else if (element.type == MadoEngine::UIGroupElementType::Text && element.name == kDecisionTextName) {
-				targets.text = element.text;
-			}
-		}
-
-		// 決定ボタンはカード全体より手前に配置し、背景と入力アイコンの前後関係も維持
-		for (const auto handle : targets.sprites) {
-			if (isControlVisible) {
-				sprites.MoveToFront(handle);
-			}
-		}
-		decisionControlFeedback_.Update(deltaTime, isControlVisible, "Decision", targets);
+		// カードの前面化後に決定ボタンを更新し、ボタンをカードより手前に配置
+		decisionControlFeedback_.Update(deltaTime, kDecisionGroupName, decisionHandle);
 	}
 
 	void RelicAcquisitionUI::ResetDecisionDelay() {

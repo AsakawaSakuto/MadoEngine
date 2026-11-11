@@ -133,7 +133,7 @@ namespace UI::Game {
 		/// @param selectedIndex 選択中の項目番号、Continueから順に0から2
 		void UpdatePausePresentation(bool isPaused, std::size_t selectedIndex = 0);
 
-		/// @brief 常設Text・Groupへ個別表示設定を維持したHUD表示切り替えを反映
+		/// @brief 常設HUDの親Groupへ表示状態を反映
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 
@@ -144,8 +144,8 @@ namespace UI::Game {
 
 		/// @brief Upgrade内の決定とリロールの押下状態へ操作案内の拡縮演出を同期
 		/// @param deltaTime 停止中も進行する実時間
-		/// @param isVisible 操作案内を表示する場合はtrue
-		void UpdateUpgradeControlFeedback(float deltaTime, bool isVisible);
+		/// @param upgrade Upgrade Groupのハンドル
+		void UpdateUpgradeControlFeedback(float deltaTime, MadoEngine::UIGroupHandle upgrade);
 
 		/// @brief 開始待機とPlayingの経過時間に合わせて帯と開始Textの演出を更新
 		/// @param progress 開始待機の進行率、0.0fから1.0f
@@ -161,32 +161,43 @@ namespace UI::Game {
 		/// @param state 現在フレームの表示情報
 		void UpdateTexts(float deltaTime, const GameHudState& state);
 
-		PlayerExpGauge expGauge_;
-		PlayerHealthGauge healthGauge_;
-		PlayerStaminaGauge staminaGauge_;
-		PlayerIconUI playerIconUI_;
-		WeaponIconUI weaponIconUI_;
-		RelicInventoryUI relicInventoryUI_;
-		FpsMeasurementView fpsMeasurementView_;
-		GamePlayTimerView gamePlayTimerView_;
-		MiniMapUI miniMapUI_;
-		MapMiniMapObjectPositions miniMapObjectPositions_;
-		PlayerResourceGainView playerResourceGainView_;
-		PlayerDamageView playerDamageView_;
-		DropObjectGetView dropObjectGetView_;
-		EnemyDamageView enemyDamageView_;
-		EnemyStatusEffectIconView enemyStatusEffectIconView_;
-		MadoEngine::TextHandle upgradeText_{};
-		GamingColor upgradeTextColor_;
-		GameTimer upgradeTextPulseTimer_;
-		GameTimer massiveEnemySpawnTimer_;
-		bool isMassiveEnemySpawnJustStarted_ = false;
-		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };
-		std::array<InputControlFeedback, 2> upgradeControlFeedback_{};
-		std::vector<const char*> staticTexts_;
-		std::uint32_t gameSeed_ = 0;
-		bool isVisible_ = true;
-		bool isWorldViewsVisible_ = false;
+		// プレイヤーの状態と装備の表示
+		PlayerExpGauge expGauge_;           // 経験値ゲージと強化待機中の表示
+		PlayerHealthGauge healthGauge_;     // 画面固定とプレイヤー頭上のHPゲージ
+		PlayerStaminaGauge staminaGauge_;   // 壁登り可能時間のゲージ
+		PlayerIconUI playerIconUI_;         // プレイヤーのアイコンと背景および枠
+		WeaponIconUI weaponIconUI_;         // 武器スロットのアイコン、レベル、発射ゲージ
+		RelicInventoryUI relicInventoryUI_; // 所持レリックのアイコンと個数
+
+		// 計測表示とミニマップ
+		FpsMeasurementView fpsMeasurementView_;            // FPSの計測とデバッグ欄の表示
+		GamePlayTimerView gamePlayTimerView_;              // 残り時間と超過時の通知
+		MiniMapUI miniMapUI_;                              // マップとプレイヤーおよびオブジェクトの位置表示
+		MapMiniMapObjectPositions miniMapObjectPositions_; // ミニマップ更新で再利用するオブジェクトの座標バッファ
+
+		// 戦闘と取得の通知
+		PlayerResourceGainView playerResourceGainView_;       // プレイヤーが得たリソースの増加量
+		PlayerDamageView playerDamageView_;                   // プレイヤーが受けたダメージの表示演出
+		DropObjectGetView dropObjectGetView_;                 // 特殊ドロップ取得時の通知演出
+		EnemyDamageView enemyDamageView_;                     // 敵の位置に追従するダメージ表示
+		EnemyStatusEffectIconView enemyStatusEffectIconView_; // 敵の頭上に追従する状態異常アイコン
+
+		// 強化選択画面の演出
+		MadoEngine::TextHandle upgradeText_{};         // 拡大演出を適用中の強化見出し
+		GamingColor upgradeTextColor_;                 // 強化見出しの色相の循環状態
+		GameTimer upgradeTextPulseTimer_;              // 強化見出しの拡大演出の進行
+		Vector2 upgradeTextBaseScale_{ 1.0f, 1.0f };   // 強化見出しの拡大倍率を掛ける前の編集用Scale
+		InputControlFeedback upgradeDecisionFeedback_; // 決定ボタンの押下と復元の演出
+		InputControlFeedback upgradeRerollFeedback_;   // リロールボタンの押下と復元の演出
+
+		// 敵の大量出現通知
+		GameTimer massiveEnemySpawnTimer_;            // フェードインから退場までの進行
+		bool isMassiveEnemySpawnJustStarted_ = false; // 通知開始フレームのタイマー加算を抑える場合はtrue
+
+		// HUDの共通状態
+		std::uint32_t gameSeed_ = 0;       // デバッグ欄に表示する現在のゲームシード
+		bool isVisible_ = true;            // HUDの表示を許可する場合はtrue
+		bool isWorldViewsVisible_ = false; // プレイ進行中の通知表示を許可する場合はtrue
 	};
 
 }

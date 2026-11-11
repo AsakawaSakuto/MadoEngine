@@ -1,5 +1,6 @@
 #pragma once
 #include "../IProjectile.h"
+#include "Math/ClampRange.h"
 #include <string>
 
 namespace Projectile {
@@ -23,8 +24,7 @@ namespace Projectile {
 
 	private:
 		static constexpr float kArcHeightDistanceRate = 0.25f;
-		static constexpr float kMinArcHeight = 2.0f;
-		static constexpr float kMaxArcHeight = 8.0f;
+		static constexpr Math::ClampRange kArcHeightRange{ 2.0f, 8.0f };
 		static constexpr float kArrivalHoldDuration = 0.1f;
 		static constexpr float kRotationSpeed = 3.14f;
 
@@ -33,7 +33,7 @@ namespace Projectile {
 		Vector3 startPosition_ = {};
 		float flightDuration_ = 0.0f;
 		float flightElapsedTime_ = 0.0f;
-		float arcHeight_ = kMinArcHeight;
+		float arcHeight_ = kArcHeightRange.min;
 		float arrivalElapsedTime_ = 0.0f;
 		float explosionDamage_ = 0.0f;
 		float explosionInstantKillChance_ = 0.0f;
