@@ -133,7 +133,7 @@ namespace UI::Game {
 		/// @param selectedIndex 選択中の項目番号、Continueから順に0から2
 		void UpdatePausePresentation(bool isPaused, std::size_t selectedIndex = 0);
 
-		/// @brief 常設HUDの親Groupへ表示状態を反映
+		/// @brief 常設HUDのGroupとTextへ表示状態を反映
 		/// @param isVisible HUDを表示する場合はtrue
 		void ApplyStaticVisibility(bool isVisible);
 

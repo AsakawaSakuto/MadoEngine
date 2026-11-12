@@ -94,7 +94,7 @@
             "renderer": {
                 "blendMode": "normal",
                 "sortMode": "none",
-                "texture": "Coin"
+                "texture": "Money"
             },
             "shape": {
                 "offset": [
@@ -133,7 +133,7 @@
                 "endColor": [
                     1.0,
                     1.0,
-                    0.0,
+                    0.15294118225574493,
                     1.0
                 ],
                 "endWidth": 0.0,
@@ -146,7 +146,7 @@
                 "startColor": [
                     1.0,
                     1.0,
-                    0.0,
+                    0.1534883975982666,
                     1.0
                 ],
                 "startWidth": 0.05000000074505806,

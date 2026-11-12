@@ -242,10 +242,22 @@ namespace UI::Game {
 
 	void GameHud::ApplyStaticVisibility(bool isVisible) {
 
-		// HUD全体の表示条件を親に適用し、タイマーや通知が管理する子の表示状態を維持
+		// 現在のシーンのGroupを解決し直し、再読込後も編集時の個別表示設定とHUDの表示条件を合成
+		constexpr const char* kGroupNames[] = { "OperationMethodUI", "PlayerHealthUI", "MoneyUI", "KillCountUI", "DebugText" };
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
-		if (MadoEngine::UIGroup* group = groupManager.TryGet(groupManager.Find("StaticHud", SceneType::Game))) {
-			group->SetVisible(isVisible && group->GetAuthoringState().visible);
+		for (const char* name : kGroupNames) {
+			if (MadoEngine::UIGroup* group = groupManager.TryGet(groupManager.Find(name, SceneType::Game))) {
+				group->SetVisible(isVisible && group->GetAuthoringState().visible);
+			}
+		}
+
+		// タイマーや通知が更新する個別の表示状態を保つため、HUD全体の描画許可だけを切り替え
+		constexpr const char* kTextNames[] = { "GamePlayTimerText", "OverTimeText", "TheGoalText", "MassiveEnemySpawnText" };
+		for (const char* name : kTextNames) {
+			MadoEngine::Text* text = MyText::TryGet(MyText::Find(name));
+			if (text && text->GetSceneType() == SceneType::Game) {
+				text->SetRuntimeVisible(isVisible);
+			}
 		}
 	}
 

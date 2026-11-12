@@ -354,6 +354,98 @@
         {
             "children": [
                 {
+                    "name": "Detail",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            5.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7793d67c-14aa-4bd7-b8be-ef298e3dde32",
+                    "type": "Text"
+                },
+                {
+                    "name": "CurrentValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_4a3b3196-3d9c-48ef-b8c8-6b57d06dbd32",
+                    "type": "Text"
+                },
+                {
+                    "name": "ValueArrow",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_565c7e5b-9495-4191-aef3-9e3517f9d19d",
+                    "type": "Text"
+                },
+                {
+                    "name": "UpgradedValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7e3c5ed6-6d4a-4209-81ec-9ccf79284f51",
+                    "type": "Text"
+                }
+            ],
+            "id": "1261f369-ba49-45f3-a4ca-19c963f63e07",
+            "name": "CenterCardOwnedWeaponDetails",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
                     "name": "ContinueSprite",
                     "state": {
                         "opacity": 1.0,
@@ -947,6 +1039,98 @@
         {
             "children": [
                 {
+                    "name": "Detail",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            5.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_26a5703e-6684-45c8-846f-6960609d2dbf",
+                    "type": "Text"
+                },
+                {
+                    "name": "CurrentValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_90104d56-4a53-4fdf-ab11-4a61d26dd784",
+                    "type": "Text"
+                },
+                {
+                    "name": "ValueArrow",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_67371298-79ea-4dfa-9e1a-f140af14b4ae",
+                    "type": "Text"
+                },
+                {
+                    "name": "UpgradedValue",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            48.0,
+                            50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_b2244c9e-832c-46dd-ae59-57c03363ba6d",
+                    "type": "Text"
+                }
+            ],
+            "id": "d197b308-b5bb-48ec-b38f-c7f8cee0a877",
+            "name": "LeftCardOwnedWeaponDetails",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
                     "name": "Sprite",
                     "state": {
                         "opacity": 1.0,
@@ -969,8 +1153,8 @@
                     "state": {
                         "opacity": 1.0,
                         "position": [
-                            66.0,
-                            -14.0
+                            72.0,
+                            13.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -1569,6 +1753,98 @@
         {
             "children": [
                 {
+                    "name": "RerollSprite",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            10.0,
+                            4.300000190734863
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollBack1",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollSprite1",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.2999999523162842,
+                            1.2999999523162842
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollBack2",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollInput",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -45.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            3.0,
+                            3.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollBottom",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "RerollText",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            25.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UpgradeRerollText",
+                    "type": "Text"
+                }
+            ],
+            "id": "4f41884c-6481-42d0-95cd-fa8be4cc7651",
+            "name": "RerollButton",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    760.0,
+                    640.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
                     "name": "Border",
                     "state": {
                         "opacity": 1.0,
@@ -1774,345 +2050,6 @@
         {
             "children": [
                 {
-                    "name": "LeftCard",
-                    "target": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
-                    "type": "Group"
-                },
-                {
-                    "name": "CenterCard",
-                    "target": "60d55a5a-6442-4f76-8899-52fd69e55ca5",
-                    "type": "Group"
-                },
-                {
-                    "name": "RightCard",
-                    "target": "190c2c8a-d566-4ceb-8b47-eb43d7f83827",
-                    "type": "Group"
-                },
-                {
-                    "name": "Decision",
-                    "target": "54fda760-64b2-46ee-a4a2-01bfa3a64c1c",
-                    "type": "Group"
-                },
-                {
-                    "name": "Reroll",
-                    "target": "1455aff3-c384-413a-bf6a-28af35ed9a68",
-                    "type": "Group"
-                },
-                {
-                    "name": "UpgradeText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            657.0,
-                            90.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            0.6761082410812378,
-                            0.6761082410812378
-                        ],
-                        "visible": true
-                    },
-                    "target": "UpgradeText",
-                    "type": "Text"
-                }
-            ],
-            "id": "4ee11fa7-1075-4a6f-89cd-4104b041975d",
-            "name": "Upgrade",
-            "scene": "Game",
-            "state": {
-                "opacity": 1.0,
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "visible": true
-            }
-        },
-        {
-            "children": [
-                {
-                    "name": "RerollSprite",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            0.0,
-                            0.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            10.0,
-                            4.300000190734863
-                        ],
-                        "visible": true
-                    },
-                    "target": "UpgradeRerollBack1",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "RerollSprite1",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            0.0,
-                            0.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.2999999523162842,
-                            1.2999999523162842
-                        ],
-                        "visible": true
-                    },
-                    "target": "UpgradeRerollBack2",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "RerollInput",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            -45.0,
-                            0.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            3.0,
-                            3.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UpgradeRerollBottom",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "RerollText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            25.0,
-                            0.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UpgradeRerollText",
-                    "type": "Text"
-                }
-            ],
-            "id": "4f41884c-6481-42d0-95cd-fa8be4cc7651",
-            "name": "RerollButton",
-            "scene": "Game",
-            "state": {
-                "opacity": 1.0,
-                "position": [
-                    760.0,
-                    640.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "visible": true
-            }
-        },
-        {
-            "children": [
-                {
-                    "name": "Detail",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            0.0,
-                            5.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_26a5703e-6684-45c8-846f-6960609d2dbf",
-                    "type": "Text"
-                },
-                {
-                    "name": "CurrentValue",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            -48.0,
-                            50.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_90104d56-4a53-4fdf-ab11-4a61d26dd784",
-                    "type": "Text"
-                },
-                {
-                    "name": "ValueArrow",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            0.0,
-                            50.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_67371298-79ea-4dfa-9e1a-f140af14b4ae",
-                    "type": "Text"
-                },
-                {
-                    "name": "UpgradedValue",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            48.0,
-                            50.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_b2244c9e-832c-46dd-ae59-57c03363ba6d",
-                    "type": "Text"
-                }
-            ],
-            "id": "d197b308-b5bb-48ec-b38f-c7f8cee0a877",
-            "name": "LeftCardOwnedWeaponDetails",
-            "scene": "Game",
-            "state": {
-                "opacity": 1.0,
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "visible": true
-            }
-        },
-        {
-            "children": [
-                {
-                    "name": "Detail",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            0.0,
-                            5.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_7793d67c-14aa-4bd7-b8be-ef298e3dde32",
-                    "type": "Text"
-                },
-                {
-                    "name": "CurrentValue",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            -48.0,
-                            50.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_4a3b3196-3d9c-48ef-b8c8-6b57d06dbd32",
-                    "type": "Text"
-                },
-                {
-                    "name": "ValueArrow",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            0.0,
-                            50.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_565c7e5b-9495-4191-aef3-9e3517f9d19d",
-                    "type": "Text"
-                },
-                {
-                    "name": "UpgradedValue",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            48.0,
-                            50.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_7e3c5ed6-6d4a-4209-81ec-9ccf79284f51",
-                    "type": "Text"
-                }
-            ],
-            "id": "1261f369-ba49-45f3-a4ca-19c963f63e07",
-            "name": "CenterCardOwnedWeaponDetails",
-            "scene": "Game",
-            "state": {
-                "opacity": 1.0,
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "visible": true
-            }
-        },
-        {
-            "children": [
-                {
                     "name": "Detail",
                     "state": {
                         "opacity": 1.0,
@@ -2205,105 +2142,107 @@
         {
             "children": [
                 {
-                    "name": "OperationMethodUI",
-                    "target": "3074f89f-b33a-4c47-900d-1b25dfffa25d",
-                    "type": "Group"
-                },
-                {
-                    "name": "PlayerHealthUI",
-                    "target": "4da77292-2a0d-451c-b2d4-0d23f6b2f69c",
-                    "type": "Group"
-                },
-                {
-                    "name": "MoneyUI",
-                    "target": "6fa39cdf-c845-4d15-96d0-e390c2da884f",
-                    "type": "Group"
-                },
-                {
-                    "name": "KillCountUI",
-                    "target": "a627170f-095f-4d8b-a5c7-5590fb7b6df6",
-                    "type": "Group"
-                },
-                {
-                    "name": "DebugText",
-                    "target": "a948c1cb-b6ff-4c51-ba5a-35764e0bf4ef",
-                    "type": "Group"
-                },
-                {
-                    "name": "GamePlayTimerText",
+                    "name": "Band_UP",
                     "state": {
                         "opacity": 1.0,
                         "position": [
-                            640.0,
-                            76.0
+                            0.0,
+                            0.0
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            1.0,
-                            1.0
+                            80.0,
+                            0.0
                         ],
                         "visible": true
                     },
-                    "target": "GamePlayTimerText",
-                    "type": "Text"
+                    "target": "Band_Up",
+                    "type": "Sprite"
                 },
                 {
-                    "name": "OverTimeText",
+                    "name": "Band_Bottom",
                     "state": {
                         "opacity": 1.0,
                         "position": [
-                            640.0,
-                            140.0
+                            0.0,
+                            720.0
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": false
-                    },
-                    "target": "OverTimeText",
-                    "type": "Text"
-                },
-                {
-                    "name": "TheGoalText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            232.0,
-                            235.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
+                            80.0,
+                            0.0
                         ],
                         "visible": true
                     },
-                    "target": "TheGoalText",
-                    "type": "Text"
+                    "target": "Band_Bottom",
+                    "type": "Sprite"
+                }
+            ],
+            "id": "55ffc4a8-c918-41e9-b9f2-135831bd6dfa",
+            "name": "StartBand",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
+                    "name": "LeftCard",
+                    "target": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
+                    "type": "Group"
                 },
                 {
-                    "name": "MassiveEnemySpawnText",
+                    "name": "CenterCard",
+                    "target": "60d55a5a-6442-4f76-8899-52fd69e55ca5",
+                    "type": "Group"
+                },
+                {
+                    "name": "RightCard",
+                    "target": "190c2c8a-d566-4ceb-8b47-eb43d7f83827",
+                    "type": "Group"
+                },
+                {
+                    "name": "Decision",
+                    "target": "54fda760-64b2-46ee-a4a2-01bfa3a64c1c",
+                    "type": "Group"
+                },
+                {
+                    "name": "Reroll",
+                    "target": "1455aff3-c384-413a-bf6a-28af35ed9a68",
+                    "type": "Group"
+                },
+                {
+                    "name": "UpgradeText",
                     "state": {
                         "opacity": 1.0,
                         "position": [
-                            640.0,
-                            170.0
+                            657.0,
+                            90.0
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            1.0,
-                            1.0
+                            0.6761082410812378,
+                            0.6761082410812378
                         ],
-                        "visible": false
+                        "visible": true
                     },
-                    "target": "MassiveEnemySpawnText",
+                    "target": "UpgradeText",
                     "type": "Text"
                 }
             ],
-            "id": "7a69af98-3725-4c32-9aeb-0c5aeaba446b",
-            "name": "StaticHud",
+            "id": "4ee11fa7-1075-4a6f-89cd-4104b041975d",
+            "name": "Upgrade",
             "scene": "Game",
             "state": {
                 "opacity": 1.0,

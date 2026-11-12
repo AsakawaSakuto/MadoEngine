@@ -590,8 +590,8 @@
             "name": "UIGroupSprite_41f88bcb-7668-4fc2-90a3-fe3f990b822e",
             "opacity": 1.0,
             "position": [
-                640.0,
-                320.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -631,8 +631,8 @@
             "name": "UIGroupSprite_7bfa9323-a15f-42f5-a6a4-e606d2a8c848",
             "opacity": 1.0,
             "position": [
-                640.0,
-                320.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -672,8 +672,8 @@
             "name": "UIGroupSprite_a067e5fe-e6ca-40ba-bd6f-ba9a50e8c6e5",
             "opacity": 1.0,
             "position": [
-                640.0,
-                440.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -713,8 +713,8 @@
             "name": "UIGroupSprite_e75ff2cd-a372-44c2-8f73-277617b0e462",
             "opacity": 1.0,
             "position": [
-                640.0,
-                440.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -754,8 +754,8 @@
             "name": "UIGroupSprite_54baa43b-e6ed-44c5-b1a3-190cb74879b8",
             "opacity": 1.0,
             "position": [
-                640.0,
-                560.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -795,8 +795,8 @@
             "name": "UIGroupSprite_2e305ece-2367-4cd6-a4e1-a337cacd82bc",
             "opacity": 1.0,
             "position": [
-                640.0,
-                560.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -918,8 +918,8 @@
             "name": "UpgradeDecisionBack1",
             "opacity": 1.0,
             "position": [
-                520.0,
-                640.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -959,8 +959,8 @@
             "name": "UpgradeDecisionBack2",
             "opacity": 1.0,
             "position": [
-                520.0,
-                640.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -1000,8 +1000,8 @@
             "name": "UpgradeDecisionBottom",
             "opacity": 1.0,
             "position": [
-                475.0,
-                640.0
+                -45.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -1041,8 +1041,8 @@
             "name": "UpgradeRerollBack1",
             "opacity": 1.0,
             "position": [
-                760.0,
-                640.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -1082,8 +1082,8 @@
             "name": "UpgradeRerollBack2",
             "opacity": 1.0,
             "position": [
-                760.0,
-                640.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -1123,8 +1123,8 @@
             "name": "UpgradeRerollBottom",
             "opacity": 1.0,
             "position": [
-                715.0,
-                640.0
+                -45.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -1173,7 +1173,7 @@
                 2.0
             ],
             "scene": "Game",
-            "texture": "Coin",
+            "texture": "Money",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1195,9 +1195,9 @@
                 0.5
             ],
             "color": [
+                0.949999988079071,
+                0.9700000286102295,
                 1.0,
-                0.8500000238418579,
-                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -1318,9 +1318,9 @@
                 0.5
             ],
             "color": [
+                0.949999988079071,
+                0.9700000286102295,
                 1.0,
-                0.8500000238418579,
-                0.15000000596046448,
                 1.0
             ],
             "fitToScreen": false,
@@ -1419,7 +1419,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Pistol",
+            "texture": "Bomb",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1441,9 +1441,9 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
-                1.0,
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
                 1.0
             ],
             "fitToScreen": false,
@@ -1564,9 +1564,9 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
-                1.0,
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
                 1.0
             ],
             "fitToScreen": false,
@@ -1665,7 +1665,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "SnowCrystal",
+            "texture": "Pistol",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1870,7 +1870,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "FireBall",
+            "texture": "Thunder",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -1974,9 +1974,9 @@
                 0.5
             ],
             "color": [
-                0.20000000298023224,
-                0.8500000238418579,
+                0.699999988079071,
                 0.30000001192092896,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
@@ -2075,7 +2075,7 @@
                 4.0
             ],
             "scene": "Game",
-            "texture": "SpeedRobe",
+            "texture": "Uchiwa",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2107,8 +2107,8 @@
             "name": "UIGroupSprite_ddeda112-4834-456c-affe-8a95eb039b08",
             "opacity": 1.0,
             "position": [
-                640.0,
-                640.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -2148,8 +2148,8 @@
             "name": "UIGroupSprite_58756581-6997-4eb8-9193-41808ecb162e",
             "opacity": 1.0,
             "position": [
-                640.0,
-                640.0
+                0.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -2189,8 +2189,8 @@
             "name": "UIGroupSprite_2cbde314-879d-4d4c-93b6-6f3e303d2258",
             "opacity": 1.0,
             "position": [
-                595.0,
-                640.0
+                -45.0,
+                0.0
             ],
             "rotation": 0.0,
             "scale": [

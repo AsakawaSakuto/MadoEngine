@@ -787,8 +787,8 @@
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            4.0,
-                            4.0
+                            3.5,
+                            3.5
                         ],
                         "visible": true
                     },
@@ -801,7 +801,7 @@
                         "opacity": 1.0,
                         "position": [
                             66.0,
-                            -14.0
+                            13.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -1153,8 +1153,8 @@
                     "state": {
                         "opacity": 1.0,
                         "position": [
-                            66.0,
-                            -14.0
+                            72.0,
+                            13.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -2180,123 +2180,6 @@
             ],
             "id": "55ffc4a8-c918-41e9-b9f2-135831bd6dfa",
             "name": "StartBand",
-            "scene": "Game",
-            "state": {
-                "opacity": 1.0,
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "visible": true
-            }
-        },
-        {
-            "children": [
-                {
-                    "name": "OperationMethodUI",
-                    "target": "3074f89f-b33a-4c47-900d-1b25dfffa25d",
-                    "type": "Group"
-                },
-                {
-                    "name": "PlayerHealthUI",
-                    "target": "4da77292-2a0d-451c-b2d4-0d23f6b2f69c",
-                    "type": "Group"
-                },
-                {
-                    "name": "MoneyUI",
-                    "target": "6fa39cdf-c845-4d15-96d0-e390c2da884f",
-                    "type": "Group"
-                },
-                {
-                    "name": "KillCountUI",
-                    "target": "a627170f-095f-4d8b-a5c7-5590fb7b6df6",
-                    "type": "Group"
-                },
-                {
-                    "name": "DebugText",
-                    "target": "a948c1cb-b6ff-4c51-ba5a-35764e0bf4ef",
-                    "type": "Group"
-                },
-                {
-                    "name": "GamePlayTimerText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            640.0,
-                            76.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "GamePlayTimerText",
-                    "type": "Text"
-                },
-                {
-                    "name": "OverTimeText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            640.0,
-                            140.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": false
-                    },
-                    "target": "OverTimeText",
-                    "type": "Text"
-                },
-                {
-                    "name": "TheGoalText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            232.0,
-                            235.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "TheGoalText",
-                    "type": "Text"
-                },
-                {
-                    "name": "MassiveEnemySpawnText",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            640.0,
-                            170.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": false
-                    },
-                    "target": "MassiveEnemySpawnText",
-                    "type": "Text"
-                }
-            ],
-            "id": "7a69af98-3725-4c32-9aeb-0c5aeaba446b",
-            "name": "StaticHud",
             "scene": "Game",
             "state": {
                 "opacity": 1.0,

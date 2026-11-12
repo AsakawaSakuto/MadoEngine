@@ -21,6 +21,10 @@
 namespace MadoEngine::Editor {
 namespace {
 
+constexpr float kHierarchyMinWidth = 180.0f;
+constexpr float kInspectorMinWidth = 220.0f;
+constexpr float kHierarchySplitterWidth = 8.0f;
+
 struct EditorSession {
 	UIGroupHandle selected;
 	UIGroupHandle editing;
@@ -37,6 +41,7 @@ struct EditorSession {
 	int createType = 0;
 	std::string target;
 	int type = 0;
+	float hierarchyWidth = 240.0f;
 	bool global = false;
 	bool showOrigin = true;
 };
@@ -404,12 +409,31 @@ void DrawUIGroupEditorUI(SceneType currentSceneType) {
 	}
 	ImGui::Checkbox("原点をGame Viewに表示", &session.showOrigin);
 	ImGui::Separator();
-	const bool wideLayout = ImGui::GetContentRegionAvail().x >= 600.0f;
-	ImVec2 treeSize(240.0f, 0.0f);
-	if (!wideLayout) {
+	const ImVec2 contentSize = ImGui::GetContentRegionAvail();
+	const bool wideLayout = contentSize.x >= 600.0f;
+	ImVec2 treeSize;
+	if (wideLayout) {
+
+		// ウィンドウを狭めたときは表示幅だけを制限し、Inspectorの最小幅を確保
+		const float paneWidth = contentSize.x - kHierarchySplitterWidth;
+		const float currentWidth = std::clamp(session.hierarchyWidth, kHierarchyMinWidth, paneWidth - kInspectorMinWidth);
+		float hierarchyWidth = currentWidth;
+		float inspectorWidth = paneWidth - currentWidth;
+
+		// 一覧とInspectorの間に当たり判定を置き、描画前にドラッグ量を両方の幅へ反映
+		const ImVec2 origin = ImGui::GetCursorScreenPos();
+		const float splitterCenter = origin.x + currentWidth + kHierarchySplitterWidth * 0.5f;
+		const ImRect splitter(splitterCenter - 1.0f, origin.y, splitterCenter + 1.0f, origin.y + (std::max)(4.0f, contentSize.y));
+		ImGui::SplitterBehavior(splitter, ImGui::GetID("##HierarchySplitter"), ImGuiAxis_X,
+			&hierarchyWidth, &inspectorWidth, kHierarchyMinWidth, kInspectorMinWidth, (kHierarchySplitterWidth - 2.0f) * 0.5f);
+		if (hierarchyWidth != currentWidth) {
+			session.hierarchyWidth = hierarchyWidth;
+		}
+		treeSize = { hierarchyWidth, 0.0f };
+	} else {
 
 		// 右側Dockの狭い幅でもInspectorを潰さないよう縦方向へ配置
-		treeSize = { 0.0f, (std::max)(60.0f, (std::min)(150.0f, ImGui::GetContentRegionAvail().y * 0.35f)) };
+		treeSize = { 0.0f, std::clamp(contentSize.y * 0.35f, 60.0f, 150.0f) };
 	}
 	ImGui::BeginChild("Hierarchy", treeSize, true);
 	std::unordered_set<uint32_t> visited;
@@ -436,7 +460,7 @@ void DrawUIGroupEditorUI(SceneType currentSceneType) {
 		session.deleteAlias.clear();
 	}
 	if (wideLayout) {
-		ImGui::SameLine();
+		ImGui::SameLine(0.0f, kHierarchySplitterWidth);
 	}
 	ImGui::BeginChild("Inspector", { 0.0f, 0.0f }, true);
 	if (auto* group = manager.TryGet(session.selected)) {
