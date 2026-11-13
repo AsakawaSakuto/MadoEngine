@@ -19,7 +19,7 @@
                 "Threshold": 1.0
             },
             "scope": "Layer",
-            "targetLayerMask": 1024
+            "targetLayerMask": 2048
         },
         {
             "effectShaderKey": "PostEffect/DepthOutline.PS",

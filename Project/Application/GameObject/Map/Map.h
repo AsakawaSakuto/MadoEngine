@@ -104,9 +104,9 @@ private:
 	/// @param settings 生成に使用する設定
 	void Generate(const MapGenerationSettings& settings);
 
-	/// @brief Player初期配置Colliderと配置禁止Objectの重複を判定
+	/// @brief Player初期配置ColliderとEventObjectの重なりを判定
 	/// @param collider Player初期配置時の移動Collider
-	/// @return 配置禁止Objectと重なる場合はtrue
+	/// @return EventObjectと重なる場合はtrue
 	bool IsPlayerSpawnBlocked(const Sphere& collider) const;
 
 	/// @brief 指定座標のブロック高さを取得

@@ -324,7 +324,7 @@ namespace UI::Game {
 		const auto decision = groupManager.FindChildGroup(upgrade, "Decision");
 		const auto reroll = groupManager.FindChildGroup(upgrade, "Reroll");
 		const auto rerollButton = groupManager.FindChildGroup(reroll, "Button");
-		upgradeDecisionFeedback_.Update(deltaTime, "Decision", decision);
+		upgradeDecisionFeedback_.Update(deltaTime, "RewardDecision", decision);
 		upgradeRerollFeedback_.Update(deltaTime, "Reroll", rerollButton);
 
 		// 費用アイコンはボタンの拡縮から独立させ、強化画面の暗幕より手前に表示

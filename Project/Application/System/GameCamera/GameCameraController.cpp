@@ -21,7 +21,9 @@ namespace System {
 		useDebugCamera_ = false;
 
 		if (TPS_Camera* tpsCamera = TryGetPlayerCamera(cameraManager)) {
-			tpsCamera->SetDistance(kTpsCameraDistanceRange.min);
+
+			// 操作時のズーム上限と同じ距離からゲームを開始
+			tpsCamera->SetDistance(kTpsCameraDistanceRange.max);
 		}
 	}
 

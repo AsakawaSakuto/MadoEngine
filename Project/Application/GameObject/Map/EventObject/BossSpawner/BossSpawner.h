@@ -38,10 +38,6 @@ public:
 	/// @return BossSpawnerのEventObject名
 	std::string_view GetEventObjectName() const override { return "BossSpawner"; }
 
-	/// @brief Playerの初期配置を妨げるObjectか判定
-	/// @return Playerの初期配置を妨げるためtrue
-	bool ShouldBlockPlayerSpawn() const override { return true; }
-
 	/// @brief Boss生成用のMapイベント要求を取得
 	/// @return BossSpawner上端を生成座標にしたBoss生成要求
 	MapEventRequest GetInteractionRequest() const override;

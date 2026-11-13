@@ -360,9 +360,9 @@ void Map::CollectMiniMapObjectPositions(MapMiniMapObjectPositions& objectPositio
 
 bool Map::IsPlayerSpawnBlocked(const Sphere& collider) const {
 
-	// Player配置を禁止するObjectだけを対象にして他のイベント配置ルールと分離
+	// 種類を問わず、配置済みのEventObjectに重なる位置をPlayerの初期配置候補から除外
 	for (const std::unique_ptr<MapEventObjectBase>& object : eventObjects_) {
-		if (object && object->ShouldBlockPlayerSpawn() && object->IsColliderOverlapping(collider)) {
+		if (object && object->IsColliderOverlapping(collider)) {
 			return true;
 		}
 	}

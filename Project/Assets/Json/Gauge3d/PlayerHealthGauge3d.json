@@ -11,7 +11,7 @@
         -2.5
     ],
     "currentValue": 100.0,
-    "depthOffset": 0.009999999776482582,
+    "depthOffset": 0.05,
     "direction": "Right",
     "drawBackground": true,
     "gaugeColor": [

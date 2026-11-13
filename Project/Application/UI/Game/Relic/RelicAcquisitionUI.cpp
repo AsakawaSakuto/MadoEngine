@@ -12,6 +12,7 @@
 namespace {
 
 constexpr float kDecisionDelayDuration = 0.2f;
+constexpr const char* kDecisionActionName = "RewardDecision";
 constexpr const char* kDecisionSoundKey = "RelicDecision";
 constexpr const char* kRelicGroupName = "Relic";
 constexpr const char* kCardViewGroupName = "CardView";
@@ -122,7 +123,7 @@ namespace UI::Game {
 		}
 
 		// 前段の開封入力で獲得表示まで閉じないよう表示開始と決定受付を分離
-		if (acceptDecisionInput && MyInput::Trigger("Decision")) {
+		if (acceptDecisionInput && MyInput::Trigger(kDecisionActionName)) {
 			decisionRelicId_ = definition->id;
 			decisionRevision_ = relicSystem.GetRevision();
 			decisionDelayTimer_.Start(kDecisionDelayDuration);
@@ -270,7 +271,7 @@ namespace UI::Game {
 		const auto decisionHandle = groupManager.FindChildGroup(relicHandle, kDecisionGroupName);
 
 		// カードの前面化後に決定ボタンを更新し、ボタンをカードより手前に配置
-		decisionControlFeedback_.Update(deltaTime, kDecisionGroupName, decisionHandle);
+		decisionControlFeedback_.Update(deltaTime, kDecisionActionName, decisionHandle);
 	}
 
 	void RelicAcquisitionUI::ResetDecisionDelay() {

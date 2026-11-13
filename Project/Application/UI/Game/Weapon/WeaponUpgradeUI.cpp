@@ -122,7 +122,7 @@ namespace UI::Game {
 		UpdateCards(deltaTime);
 
 		// 表示直後の決定入力を持ち越さず、待機完了後の新しい入力だけを受付
-		if (!decisionInputDelayTimer_.IsFinished() || !MyInput::Trigger("Decision")) {
+		if (!decisionInputDelayTimer_.IsFinished() || !MyInput::Trigger("RewardDecision")) {
 			return;
 		} else {
 			MyAudio::Play(kUpgradeCardDecisionSoundKey);
@@ -141,7 +141,7 @@ namespace UI::Game {
 		ImGui::Begin("武器アップグレード");
 		ImGui::Text("未処理アップグレード: %d", upgradeSystem.GetPendingUpgradeCount());
 		ImGui::Text("次回リロール料金: %d", upgradeSystem.GetRerollCost());
-		ImGui::TextDisabled("← / A・→ / D・Lスティック左右: 選択　Space / A: 決定　R / X: リロール　F5: 無料リロール(Debug)");
+		ImGui::TextDisabled("← / A・→ / D・Lスティック左右: 選択　Space / A / X: 決定　R / Y: リロール　F5: 無料リロール(Debug)");
 		if (isDecisionAnimationPlaying_) {
 			ImGui::TextDisabled("選択決定演出中");
 		}

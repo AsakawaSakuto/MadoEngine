@@ -787,8 +787,8 @@
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            4.0,
-                            4.0
+                            3.5,
+                            3.5
                         ],
                         "visible": true
                     },
@@ -801,7 +801,7 @@
                         "opacity": 1.0,
                         "position": [
                             66.0,
-                            -14.0
+                            13.0
                         ],
                         "rotation": 0.0,
                         "scale": [
