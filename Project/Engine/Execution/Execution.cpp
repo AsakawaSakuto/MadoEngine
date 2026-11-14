@@ -26,7 +26,7 @@ namespace {
 	const std::string kOverlayLayerEffectWorkTarget = "OverlayLayerEffectWork";     // 表示色空間のレイヤー用作業バッファ
 
 	const std::filesystem::path kScreenshotOutputDirectory = "SavedData/Screenshots"; // スクリーンショットの出力先ディレクトリ
-	constexpr int kGameViewCaptureKey = DIK_F11;                                  // スクリーンショットを撮るキー
+	constexpr int kGameViewCaptureKey = DIK_F10;                                  // スクリーンショットを撮るキー
 
 	/// @brief Effect Systemが保持する全Assetを保存
 	/// @tparam System 保存対象のEffect System型

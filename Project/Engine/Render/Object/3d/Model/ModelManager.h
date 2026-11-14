@@ -2,6 +2,7 @@
 
 #include "InstancedModel.h"
 #include "Model.h"
+#include "SharedSkinningAnimation.h"
 #include "Render/Object/ObjectHandle.h"
 #include "Render/Object/RenderLayer.h"
 #include "Utility/EditorManagementMode.h"
@@ -26,6 +27,8 @@ struct ModelCreateDesc {
 	std::string modelName;
 	SceneType sceneType = SceneType::None;
 	EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
+	Render::RenderLayer renderLayer = Render::RenderLayer::Default;
+	std::optional<std::uint32_t> sharedSkinningPhaseGroup = std::nullopt; // 既定のループクリップを共有する位相グループ
 };
 
 /// @brief InstancedModel生成情報
@@ -422,10 +425,20 @@ public:
 		Render::RenderLayerMask layerMask);
 
 private:
+	friend class ::Model;
+
+	struct SharedSkinningEntry {
+		SceneType sceneType;
+		Render::RenderLayer renderLayer;
+		const ModelSharedData* modelData;
+		std::unique_ptr<SharedSkinningAnimation> animation;
+	};
+
 	struct ModelSlot {
 		std::unique_ptr<Model> model;
 		std::string name;
 		std::string assetName;
+		std::optional<std::uint32_t> sharedSkinningPhaseGroup;
 		EditorManagementMode managementMode = EditorManagementMode::RuntimeOnly;
 		uint32_t generation = 1;
 		bool active = false;
@@ -463,6 +476,16 @@ private:
 	/// @return 共有データ、見つからない場合はnullptr
 	const ModelSharedData* FindSharedData(const std::string& modelName) const;
 
+	/// @brief Sceneと描画レイヤーに対応する共有再生を取得または生成
+	/// @param sceneType 所属Scene
+	/// @param layer 所属する描画レイヤー
+	/// @param sharedData モデルの共有データ
+	/// @param phaseGroup 確保する位相グループ、未指定の場合は個別再生
+	/// @return ModelManagerが所有する共有再生へのポインタ、個別再生の場合はnullptr
+	SharedSkinningAnimation* GetOrCreateSharedSkinningAnimation(
+		SceneType sceneType, Render::RenderLayer layer, const ModelSharedData& sharedData,
+		std::optional<std::uint32_t> phaseGroup);
+
 	/// @brief Modelアセット名を正規化したパスへ解決
 	/// @param modelName Modelアセット名またはパス
 	/// @return 解決したパス
@@ -476,6 +499,7 @@ private:
 	std::unordered_set<SceneType> spriteSheetAnimationPausedScenes_;
 	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>, AssetKey::Hash, AssetKey::Equal> sharedData_;
 	std::unordered_map<std::string, std::string, AssetKey::Hash, AssetKey::Equal> aliases_;
+	std::vector<SharedSkinningEntry> sharedSkinningAnimations_;
 	std::vector<ModelSlot> modelSlots_;
 	std::vector<uint32_t> freeModelSlots_;
 	std::unordered_map<std::string, ModelHandle> modelNameToHandle_;

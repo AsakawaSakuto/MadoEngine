@@ -1,4 +1,6 @@
 #include "Model.h"
+#include "ModelManager.h"
+#include "SharedSkinningAnimation.h"
 #include "Core/View/SRVManager.h"
 #include "Render/Shadow/ShadowMap.h"
 #include "Shader/RootSignatureManager.h"
@@ -7,6 +9,7 @@
 #include <cassert>
 #include <cfloat>
 #include <cmath>
+#include <utility>
 
 namespace {
 
@@ -144,12 +147,19 @@ Model::~Model() {
 }
 
 void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData) {
+	Initialize(device, commandList, sharedData, nullptr, 0);
+}
+
+void Model::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData,
+	MadoEngine::SharedSkinningAnimation* sharedSkinningAnimation, std::uint32_t sharedSkinningPhaseGroup) {
 	assert(device);
 	assert(commandList);
 
 	device_ = device;
 	commandList_ = commandList;
 	sharedData_ = &sharedData;
+	sharedSkinningAnimation_ = sharedSkinningAnimation;
+	sharedSkinningPhaseGroup_ = sharedSkinningPhaseGroup;
 
 	InitializeInstanceResources();
 }
@@ -177,25 +187,25 @@ bool Model::TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition
 	}
 
 	Vector3 localPosition = GetVertexPosition(vertexIndex);
-	if (type_ == ModelType::Skinning &&
-		vertexIndex < skinClusterData_.mappedInfluence.size()) {
+	const SkinCluster& skinCluster = GetSkinCluster();
+	if (type_ == ModelType::Skinning && vertexIndex < skinCluster.mappedInfluence.size()) {
 
 		// JointごとのSkeleton空間変換をWeight合成して現在Poseの頂点位置を復元
-		const VertexInfluence& influence = skinClusterData_.mappedInfluence[vertexIndex];
+		const VertexInfluence& influence = skinCluster.mappedInfluence[vertexIndex];
 		Vector3 skinnedPosition{};
 		for (uint32_t influenceIndex = 0; influenceIndex < kNumMaxInfluence; ++influenceIndex) {
 			const float weight = influence.weights[influenceIndex];
 			const int32_t jointIndex = influence.jointIndices[influenceIndex];
 			if (weight <= 0.0f ||
 				jointIndex < 0 ||
-				static_cast<size_t>(jointIndex) >= skinClusterData_.mappedPalette.size()) {
+				static_cast<size_t>(jointIndex) >= skinCluster.mappedPalette.size()) {
 				continue;
 			}
 
 			skinnedPosition +=
 				Matrix::Transform(
 					localPosition,
-					skinClusterData_.mappedPalette[static_cast<size_t>(jointIndex)].skeletonSpaceMatrix
+					skinCluster.mappedPalette[static_cast<size_t>(jointIndex)].skeletonSpaceMatrix
 				) * weight;
 		}
 
@@ -213,7 +223,7 @@ bool Model::TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition
 	if (type_ == ModelType::Animated) {
 
 		// Animation Root NodeのLocal変換をModel World変換より先に適用
-		worldMatrix = Matrix::Multiply(rootNode_.localMatrix, worldMatrix);
+		worldMatrix = Matrix::Multiply(animationRootLocalMatrix_, worldMatrix);
 	}
 
 	outPosition = Matrix::Transform(localPosition, worldMatrix);
@@ -386,8 +396,28 @@ void Model::SetUseHalfLambert(bool enabled) {
 }
 
 void Model::SetSceneType(SceneType sceneType) {
-	sceneType_ = sceneType;
+	if (sceneType_ != sceneType) {
+		RebindSharedSkinningAnimation(sceneType, GetRenderLayer());
+		sceneType_ = sceneType;
+	}
 	UpdateLightGpuData();
+}
+
+void Model::SetRenderLayer(MadoEngine::Render::RenderLayer layer) {
+	if (GetRenderLayer() == layer) {
+		return;
+	}
+	RebindSharedSkinningAnimation(sceneType_, layer);
+	IRenderObject3d::SetRenderLayer(layer);
+}
+
+void Model::RebindSharedSkinningAnimation(SceneType sceneType, MadoEngine::Render::RenderLayer layer) {
+	if (sharedSkinningAnimation_) {
+
+		// 移動元のSceneが破棄されても参照を維持できるよう変更先のパレットへ接続
+		sharedSkinningAnimation_ = MadoEngine::ModelManager::GetInstance().GetOrCreateSharedSkinningAnimation(
+			sceneType, layer, *sharedData_, sharedSkinningPhaseGroup_);
+	}
 }
 
 void Model::SetReceiveLightMask(LightLayerMask receiveLightMask) {
@@ -412,7 +442,9 @@ void Model::InitializeInstanceResources() {
 
 	type_ = sharedData_->type;
 	psoDesc_ = sharedData_->psoDesc;
-	rootNode_ = sharedData_->modelData.rootNode;
+	if (type_ == ModelType::Animated) {
+		animationRootLocalMatrix_ = sharedData_->modelData.rootNode.localMatrix;
+	}
 	textureNames_ = sharedData_->textureNames;
 	textureIndices_ = sharedData_->textureIndices;
 	if (!textureNames_.empty() && !textureIndices_.empty()) {
@@ -420,15 +452,17 @@ void Model::InitializeInstanceResources() {
 		textureIndex_ = textureIndices_[0];
 	}
 
-	// Animation対象ModelはPoseをInstance単位で保持し、SkinningだけPalette SRVも確保
-	if (type_ == ModelType::Skinning || type_ == ModelType::Animated) {
+	// 共有再生の個体は位相グループの骨格とPaletteを参照し、個別再生のときだけ骨格を確保
+	if (!sharedSkinningAnimation_ && (type_ == ModelType::Skinning || type_ == ModelType::Animated)) {
 		skeletonData_ = CreateSkeleton(sharedData_->modelData.rootNode);
 		if (type_ == ModelType::Skinning) {
 			skinClusterIndex_ = MadoEngine::Core::SRVManager::GetInstance().Allocate();
 			skinClusterData_ = CreateSkinCluster(device_, skeletonData_, sharedData_->modelData, skinClusterIndex_);
 		}
 	}
-	animator_.Initialize(&sharedData_->animationSet, skeletonData_);
+	if (!sharedSkinningAnimation_) {
+		animator_.Initialize(&sharedData_->animationSet, skeletonData_);
+	}
 
 	// 最初のUpdateより先に描画される場合に備えてSkinning Paletteを更新対象に登録
 	isAnimationPoseDirty_ = type_ == ModelType::Skinning && !skeletonData_.joints.empty();
@@ -601,7 +635,7 @@ void Model::UpdateAnimationPose() {
 		static_cast<std::size_t>(skeletonData_.root) < skeletonData_.joints.size()) {
 
 		// Node Animation ModelはRoot JointのLocal行列をObject Transformより先に適用
-		rootNode_.localMatrix = skeletonData_.joints[static_cast<std::size_t>(skeletonData_.root)].localMatrix;
+		animationRootLocalMatrix_ = skeletonData_.joints[static_cast<std::size_t>(skeletonData_.root)].localMatrix;
 	}
 	isAnimationPoseDirty_ = false;
 }
@@ -628,6 +662,12 @@ void Model::UpdateAnimationPoseForDraw() {
 }
 
 bool Model::PlayAnimation(std::string_view clipName, float blendDuration, bool restart) {
+	if (sharedSkinningAnimation_) {
+
+		// 個体からの再開やClip変更で同じ位相の他の個体へ影響しないよう共有中は継続のみ許可
+		return !restart && clipName == sharedSkinningAnimation_->GetClipName();
+	}
+
 	if (deferSkinningUntilDraw_ && isAnimationPoseDirty_ &&
 		(restart || clipName != animator_.GetCurrentClipName()) && HasAnimationClip(clipName)) {
 
@@ -638,7 +678,24 @@ bool Model::PlayAnimation(std::string_view clipName, float blendDuration, bool r
 }
 
 bool Model::HasAnimationClip(std::string_view clipName) const {
+	if (sharedSkinningAnimation_) {
+		return clipName == sharedSkinningAnimation_->GetClipName();
+	}
 	return sharedData_ && sharedData_->animationSet.FindClip(clipName) != nullptr;
+}
+
+std::string_view Model::GetCurrentAnimationName() const {
+	if (sharedSkinningAnimation_) {
+		return sharedSkinningAnimation_->GetClipName();
+	}
+	return animator_.GetCurrentClipName();
+}
+
+const SkinCluster& Model::GetSkinCluster() const {
+	if (sharedSkinningAnimation_) {
+		return sharedSkinningAnimation_->GetSkinCluster(sharedSkinningPhaseGroup_);
+	}
+	return skinClusterData_;
 }
 
 void Model::UpdateTransformGpuData(const Camera& camera) {
@@ -653,8 +710,8 @@ void Model::UpdateTransformGpuData(const Camera& camera) {
 	// Node Animation型だけRoot Local行列をWorld変換の前段へ追加
 	switch (type_) {
 	case ModelType::Animated:
-		transformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
-		transformationData_->World = Matrix::Multiply(rootNode_.localMatrix, worldMatrix_);
+		transformationData_->WVP = Matrix::Multiply(animationRootLocalMatrix_, worldViewProjectionMatrix);
+		transformationData_->World = Matrix::Multiply(animationRootLocalMatrix_, worldMatrix_);
 		break;
 	case ModelType::Skinning:
 	case ModelType::Static:
@@ -677,8 +734,8 @@ void Model::UpdateShadowTransformGpuData(const Matrix4x4& lightViewProjection, c
 
 	switch (type_) {
 	case ModelType::Animated:
-		shadowTransformationData_->WVP = Matrix::Multiply(rootNode_.localMatrix, worldViewProjectionMatrix);
-		shadowTransformationData_->World = Matrix::Multiply(rootNode_.localMatrix, worldMatrix_);
+		shadowTransformationData_->WVP = Matrix::Multiply(animationRootLocalMatrix_, worldViewProjectionMatrix);
+		shadowTransformationData_->World = Matrix::Multiply(animationRootLocalMatrix_, worldMatrix_);
 		break;
 	case ModelType::Skinning:
 	case ModelType::Static:
@@ -720,7 +777,7 @@ bool Model::CalculateWorldAABB(Vector3& outMin, Vector3& outMax, const Camera* b
 
 	// Animated ModelのRoot Node変換も描画時と同じ順序で包含範囲へ反映
 	if (type_ == ModelType::Animated) {
-		cullingMatrix = Matrix::Multiply(rootNode_.localMatrix, cullingMatrix);
+		cullingMatrix = Matrix::Multiply(animationRootLocalMatrix_, cullingMatrix);
 	}
 
 	const Vector3 corners[8] = {
@@ -801,8 +858,11 @@ void Model::Draw(const Camera& useCamera) {
 		return;
 	}
 
-	// 視錐台内で更新するフレームだけ骨格を計算し、間のフレームは前回のPoseを再利用
-	UpdateAnimationPoseForDraw();
+	// 個別再生は従来の更新間隔を適用し、共有再生は描画に使う位相だけを評価
+	if (!sharedSkinningAnimation_) {
+		UpdateAnimationPoseForDraw();
+	}
+	const SkinCluster& skinCluster = GetSkinCluster();
 
 	// Frustum内のModelだけGPU Constant BufferとPipelineを更新
 	UpdateTransformGpuData(useCamera);
@@ -823,7 +883,7 @@ void Model::Draw(const Camera& useCamera) {
 		// Skinning PipelineではMesh属性とJoint Influenceを別Vertex SlotへBind
 		D3D12_VERTEX_BUFFER_VIEW vbvs[] = {
 			sharedData_->vertexBufferView,
-			skinClusterData_.influenceBufferView
+			skinCluster.influenceBufferView
 		};
 		commandList_->IASetVertexBuffers(0, _countof(vbvs), vbvs);
 	} else {
@@ -858,7 +918,7 @@ void Model::Draw(const Camera& useCamera) {
 	commandList_->SetGraphicsRootConstantBufferView(lightGpuDataRootIndex, lightGpuDataResource_->GetGPUVirtualAddress());
 
 	if (type_ == ModelType::Skinning) {
-		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinClusterData_.paletteSrvHandle.second);
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinCluster.paletteSrvHandle.second);
 	}
 
 	if (useEnvironmentMap_) {
@@ -925,8 +985,11 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 		return;
 	}
 
-	// 画面外のModelが落とす影にも現在のPoseを反映
-	UpdateAnimationPose();
+	// 画面外の影にも姿勢を反映し、共有再生では通常描画と同じPaletteを使用
+	if (!sharedSkinningAnimation_) {
+		UpdateAnimationPose();
+	}
+	const SkinCluster& skinCluster = GetSkinCluster();
 
 	assert(psoRegistry_);
 	UpdateShadowTransformGpuData(lightViewProjection, billboardCamera);
@@ -946,7 +1009,7 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 	if (type_ == ModelType::Skinning) {
 		D3D12_VERTEX_BUFFER_VIEW vbvs[] = {
 			sharedData_->vertexBufferView,
-			skinClusterData_.influenceBufferView
+			skinCluster.influenceBufferView
 		};
 		commandList_->IASetVertexBuffers(0, _countof(vbvs), vbvs);
 	} else {
@@ -957,7 +1020,7 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	if (type_ == ModelType::Skinning) {
 		commandList_->SetGraphicsRootConstantBufferView(kModelRootTransform, shadowTransformationResource_->GetGPUVirtualAddress());
-		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinClusterData_.paletteSrvHandle.second);
+		commandList_->SetGraphicsRootDescriptorTable(kSkinningRootPalette, skinCluster.paletteSrvHandle.second);
 	} else {
 		commandList_->SetGraphicsRootConstantBufferView(0, shadowTransformationResource_->GetGPUVirtualAddress());
 	}

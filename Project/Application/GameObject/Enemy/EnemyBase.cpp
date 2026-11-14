@@ -4,6 +4,7 @@
 #include "GameObject/Combat/ProjectileDamage.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
+#include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -132,8 +133,17 @@ namespace Enemy {
 		damageFlashColor_ = kDamageFlashColor;
 		const EnemyModelAssets modelAssets = GetEnemyModelAssets(type_);
 
-		// 各モデルの既定クリップを使用し、モデルごとのアニメーションを生成時に再生
-		model_ = MyModel::Create(modelName_, modelAssets.modelPath, sceneType_, MadoEngine::Render::RenderLayer::Enemy);
+		// 描画専用の乱数列で歩行位相を割り振り、出現や報酬の乱数列を維持
+		static Random animationPhaseRandom;
+		const auto phaseGroup = static_cast<std::uint32_t>(animationPhaseRandom.Int(0,
+			static_cast<int>(MadoEngine::SharedSkinningAnimation::kPhaseGroupCount) - 1));
+		model_ = MadoEngine::ModelManager::GetInstance().Create({
+			.name = modelName_,
+			.modelName = modelAssets.modelPath,
+			.sceneType = sceneType_,
+			.renderLayer = MadoEngine::Render::RenderLayer::Enemy,
+			.sharedSkinningPhaseGroup = phaseGroup,
+		});
 		if (Model* model = MyModel::TryGet(model_)) {
 			if (modelAssets.textureName && model->SetTexture(modelAssets.textureName)) {
 
@@ -147,7 +157,7 @@ namespace Enemy {
 			// 地形に落ちる影で敵の位置と接地を見分けやすくするため投影を有効化
 			model->SetCastShadow(true);
 
-			// 画面内の敵の骨格を10フレームに1回更新し、敵IDに応じて計算するフレームを分散
+			// 共有再生を使用できないモデルでは通常描画の個別骨格更新を従来の間隔に分散
 			model->SetDeferSkinningUntilDraw(true, 10, enemyId_);
 		}
 		CreateEliteMarkerModel();

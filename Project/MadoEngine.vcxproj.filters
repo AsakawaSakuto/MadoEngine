@@ -876,6 +876,9 @@
     <ClCompile Include="Engine\Render\Object\3d\Model\ModelSharedData.cpp">
       <Filter>Engine\Render\Object\3d\Model</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Render\Object\3d\Model\SharedSkinningAnimation.cpp">
+      <Filter>Engine\Render\Object\3d\Model</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Render\Object\3d\Particle\CpuParticleEmitterRuntime.cpp">
       <Filter>Engine\Render\Object\3d\Particle</Filter>
     </ClCompile>
@@ -1789,6 +1792,9 @@
       <Filter>Engine\Render\Object\3d\Model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelSharedData.h">
+      <Filter>Engine\Render\Object\3d\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\Object\3d\Model\SharedSkinningAnimation.h">
       <Filter>Engine\Render\Object\3d\Model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Render\Object\3d\Model\ModelType.h">

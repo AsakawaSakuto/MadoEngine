@@ -15,6 +15,7 @@
 
 namespace MadoEngine {
 	class ModelManager;
+	class SharedSkinningAnimation;
 }
 
 class Model : public IRenderObject3d, public MadoEngine::Json::IJsonSerializable {
@@ -23,6 +24,10 @@ public:
 	Model(std::string objectName);
 	~Model() override;
 
+	/// @brief 個別再生のモデルを初期化
+	/// @param device D3D12デバイス
+	/// @param commandList 描画コマンドリスト
+	/// @param sharedData モデルの共有データ
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData);
 
 	/// @brief Model状態とAnimation Poseを更新
@@ -147,7 +152,14 @@ public:
 	/// @return レイがModelにヒットした場合はtrue
 	bool Raycast(const Vector3& rayOrigin, const Vector3& rayDirection, float maxDistance, float& outDistance) const;
 
+	/// @brief 所属Sceneを変更し、共有再生を移動先へ接続
+	/// @param sceneType 移動先のScene
 	void SetSceneType(SceneType sceneType);
+
+	/// @brief 描画レイヤーを変更し、共有再生を変更先へ接続
+	/// @param layer 変更先の描画レイヤー
+	void SetRenderLayer(MadoEngine::Render::RenderLayer layer) override;
+
 	SceneType GetSceneType() const { return sceneType_; }
 
 	/// @brief モデルが受け取るライトレイヤーマスクを設定
@@ -237,7 +249,7 @@ public:
 	/// @return 頂点を取得できた場合はtrue
 	bool TryGetVertexWorldPosition(uint32_t vertexIndex, Vector3& outPosition) const;
 
-	/// @brief 指定したAnimationClipへ遷移
+	/// @brief 指定したAnimationClipへ遷移、共有再生中は同じClipの継続のみ許可
 	/// @param clipName 再生するAnimationClip名
 	/// @param blendDuration 遷移時間、負数の場合はClipの標準値
 	/// @param restart 同じClipでも先頭から再生する場合はtrue
@@ -251,13 +263,13 @@ public:
 
 	/// @brief 現在再生中のAnimationClip名を取得
 	/// @return 現在再生中のAnimationClip名
-	std::string_view GetCurrentAnimationName() const { return animator_.GetCurrentClipName(); }
+	std::string_view GetCurrentAnimationName() const;
 
 	/// @brief 現在のAnimationClipが終端へ到達したか判定
 	/// @return 終端へ到達した場合はtrue
 	bool IsAnimationFinished() const { return animator_.IsFinished(); }
 
-	/// @brief Animation再生速度倍率を設定
+	/// @brief 個別再生するAnimationの再生速度倍率を設定
 	/// @param playbackSpeed 再生速度倍率
 	void SetAnimationPlaybackSpeed(float playbackSpeed) { animator_.SetPlaybackSpeed(playbackSpeed); }
 
@@ -276,7 +288,25 @@ private:
 	/// @param objectName 新しい識別名
 	void SetObjectName(const std::string& objectName) { objectName_ = objectName; }
 
+	/// @brief 共有再生を使用する場合は既存の位相グループへ接続して初期化
+	/// @param device D3D12デバイス
+	/// @param commandList 描画コマンドリスト
+	/// @param sharedData モデルの共有データ
+	/// @param sharedSkinningAnimation ModelManagerが所有する共有再生、個別再生の場合はnullptr
+	/// @param sharedSkinningPhaseGroup 共有再生の位相グループ番号
+	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const ModelSharedData& sharedData,
+		MadoEngine::SharedSkinningAnimation* sharedSkinningAnimation, std::uint32_t sharedSkinningPhaseGroup);
+
 	void InitializeInstanceResources();
+
+	/// @brief 同じ位相グループで変更先の共有再生へ接続
+	/// @param sceneType 変更先のScene
+	/// @param layer 変更先の描画レイヤー
+	void RebindSharedSkinningAnimation(SceneType sceneType, MadoEngine::Render::RenderLayer layer);
+
+	/// @brief 現在の骨格パレットと頂点ウェイトを取得
+	/// @return 描画と頂点座標の取得に使うスキニングデータ
+	const SkinCluster& GetSkinCluster() const;
 
 	/// @brief 共通のフレーム番号を使用してModelとAnimationの状態を更新
 	/// @param deltaTime Model状態と骨格Animationの経過時間
@@ -346,7 +376,9 @@ private:
 
 	Animator animator_;
 	Skeleton skeletonData_;
-	SkinCluster skinClusterData_;
+	SkinCluster skinClusterData_{};
+	MadoEngine::SharedSkinningAnimation* sharedSkinningAnimation_ = nullptr; // ModelManagerが所有
+	std::uint32_t sharedSkinningPhaseGroup_ = 0;
 	uint32_t skinClusterIndex_ = UINT32_MAX;
 	bool deferSkinningUntilDraw_ = false;
 	bool isAnimationPoseDirty_ = false;
@@ -364,7 +396,7 @@ private:
 	CameraForGPU* cameraData_ = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> shadowTransformationResource_;
 
-	ModelNode rootNode_;
+	Matrix4x4 animationRootLocalMatrix_ = Matrix::MakeIdentity();
 	SceneType sceneType_ = SceneType::None;
 	LightLayerMask receiveLightMask_ = ToLightLayerMask(LightLayer::World);
 	bool enableFrustumCulling_ = true;

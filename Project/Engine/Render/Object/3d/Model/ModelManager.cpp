@@ -5,9 +5,11 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <format>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <nlohmann/json.hpp>
 #include <unordered_set>
 #include <utility>
@@ -74,6 +76,7 @@ void ModelManager::Finalize() {
 		slot.model.reset();
 		slot.name.clear();
 		slot.assetName.clear();
+		slot.sharedSkinningPhaseGroup.reset();
 		slot.managementMode = EditorManagementMode::RuntimeOnly;
 		slot.active = false;
 		slot.generation = NextObjectGeneration(slot.generation);
@@ -95,6 +98,9 @@ void ModelManager::Finalize() {
 		freeInstancedModelSlots_.push_back(index);
 	}
 
+
+	// 参照元のModelを破棄済みの状態で共有再生を解放し、その後で元のアセットを解放
+	sharedSkinningAnimations_.clear();
 	for (auto& [key, data] : sharedData_) {
 		(void)key;
 		ModelResource::Finalize(*data);
@@ -185,9 +191,12 @@ ModelHandle ModelManager::Create(const ModelCreateDesc& desc) {
 	}
 
 	auto model = std::make_unique<Model>(desc.name);
-	model->Initialize(device_, commandList_, *sharedData);
-	model->SetPSORegistry(psoRegistry_);
 	model->SetSceneType(desc.sceneType);
+	model->SetRenderLayer(desc.renderLayer);
+	model->Initialize(device_, commandList_, *sharedData,
+		GetOrCreateSharedSkinningAnimation(desc.sceneType, desc.renderLayer, *sharedData, desc.sharedSkinningPhaseGroup),
+		desc.sharedSkinningPhaseGroup.value_or(0));
+	model->SetPSORegistry(psoRegistry_);
 
 	// 破棄済みSlotを再利用してHandle Indexの増加を抑制
 	uint32_t index = 0;
@@ -203,12 +212,41 @@ ModelHandle ModelManager::Create(const ModelCreateDesc& desc) {
 	slot.model = std::move(model);
 	slot.name = desc.name;
 	slot.assetName = resolvedModelPath;
+	slot.sharedSkinningPhaseGroup = desc.sharedSkinningPhaseGroup;
 	slot.managementMode = desc.managementMode;
 	slot.active = true;
 	const ModelHandle handle{ index, slot.generation };
 	modelNameToHandle_.emplace(slot.name, handle);
 	Logger::Output("Modelを生成しました: " + desc.name + " アセット: " + resolvedModelPath, Logger::Level::Application);
 	return handle;
+}
+
+SharedSkinningAnimation* ModelManager::GetOrCreateSharedSkinningAnimation(
+	SceneType sceneType, Render::RenderLayer layer, const ModelSharedData& sharedData,
+	std::optional<std::uint32_t> phaseGroup) {
+	const AnimationClip* clip = sharedData.animationSet.GetDefaultClip();
+	if (!phaseGroup || *phaseGroup >= SharedSkinningAnimation::kPhaseGroupCount ||
+		sharedData.type != ModelType::Skinning || !clip || !clip->loop ||
+		!std::isfinite(clip->duration) || clip->duration <= 0.0f) {
+
+		// ループする既定Clipを持つスキニングモデルのみ位相の共有対象
+		return nullptr;
+	}
+
+	// 同じアセットでも一時停止条件が異なるSceneや描画レイヤーでは別々の時計を使用
+	auto entry = std::find_if(sharedSkinningAnimations_.begin(), sharedSkinningAnimations_.end(),
+		[sceneType, layer, &sharedData](const SharedSkinningEntry& candidate) {
+			return candidate.sceneType == sceneType && candidate.renderLayer == layer &&
+				candidate.modelData == &sharedData;
+		});
+	if (entry == sharedSkinningAnimations_.end()) {
+		sharedSkinningAnimations_.push_back({ sceneType, layer, &sharedData,
+			std::make_unique<SharedSkinningAnimation>(sharedData.modelData, *clip) });
+		entry = std::prev(sharedSkinningAnimations_.end());
+	}
+
+	entry->animation->PrepareGroup(device_, *phaseGroup);
+	return entry->animation.get();
 }
 
 ModelHandle ModelManager::FindOrCreate(const ModelCreateDesc& desc) {
@@ -220,7 +258,9 @@ ModelHandle ModelManager::FindOrCreate(const ModelCreateDesc& desc) {
 	const ModelSlot& slot = modelSlots_[existing.index];
 	if (slot.assetName != ResolveModelPath(desc.modelName) ||
 		slot.model->GetSceneType() != desc.sceneType ||
-		slot.managementMode != desc.managementMode) {
+		slot.managementMode != desc.managementMode ||
+		slot.sharedSkinningPhaseGroup != desc.sharedSkinningPhaseGroup ||
+		(desc.sharedSkinningPhaseGroup && slot.model->GetRenderLayer() != desc.renderLayer)) {
 		Logger::Output("既存Modelの生成条件が一致しません: " + desc.name, Logger::Level::Warning);
 		return {};
 	}
@@ -358,6 +398,7 @@ bool ModelManager::Destroy(ModelHandle handle) {
 	slot.model.reset();
 	slot.name.clear();
 	slot.assetName.clear();
+	slot.sharedSkinningPhaseGroup.reset();
 	slot.managementMode = EditorManagementMode::RuntimeOnly;
 	slot.active = false;
 
@@ -604,6 +645,11 @@ void ModelManager::DestroyByScene(SceneType sceneType) {
 	for (InstancedModelHandle handle : instancedHandles) {
 		Destroy(handle);
 	}
+
+	// 個体を破棄してからScene全体で使っていた共有パレットと時計を解放
+	std::erase_if(sharedSkinningAnimations_, [sceneType](const SharedSkinningEntry& entry) {
+		return entry.sceneType == sceneType;
+	});
 	Logger::Output("Scene内のModelを削除しました: " + SceneTypeToString(sceneType) + " 通常: " + std::to_string(modelHandles.size()) + " Instanced: " + std::to_string(instancedHandles.size()), Logger::Level::Application);
 }
 
@@ -903,6 +949,14 @@ void ModelManager::SetSpriteSheetAnimationsPaused(SceneType sceneType, bool paus
 void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime, Render::RenderLayerMask pausedSkeletalAnimationLayers) {
 	++animationFrameIndex_;
 	float spriteSheetDeltaTime = deltaTime;
+
+	// 個体の表示状態や増減に依存せず、共有する時計をモデルごとに一度だけ更新
+	for (const SharedSkinningEntry& entry : sharedSkinningAnimations_) {
+		if ((entry.sceneType == currentSceneType || entry.sceneType == SceneType::None) &&
+			!Render::ContainsRenderLayer(pausedSkeletalAnimationLayers, entry.renderLayer)) {
+			entry.animation->AdvanceTime(deltaTime);
+		}
+	}
 
 	// スプライトシートの再生時間はScene単位で制御
 	if (spriteSheetAnimationPausedScenes_.contains(currentSceneType)) {

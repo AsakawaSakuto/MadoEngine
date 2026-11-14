@@ -118,7 +118,7 @@ public:
 
 	/// @brief 描画レイヤーを設定
 	/// @param layer 設定する描画レイヤー
-	void SetRenderLayer(MadoEngine::Render::RenderLayer layer) { renderLayer_ = layer; }
+	virtual void SetRenderLayer(MadoEngine::Render::RenderLayer layer) { renderLayer_ = layer; }
 
 	/// @brief 描画レイヤーを取得
 	/// @return 現在の描画レイヤー
