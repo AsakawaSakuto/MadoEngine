@@ -67,10 +67,6 @@ namespace Enemy {
 		}
 	}
 
-	std::string Boss::GetModelAssetName() const {
-		return "BossEnemy";
-	}
-
 	Vector3 Boss::GetModelScale() const {
 		const float scaleMultiplier = Settings::GetInstance().GetTypeSettings(Data::Type::Boss).scaleMultiplier;
 		return { scaleMultiplier, scaleMultiplier, scaleMultiplier };

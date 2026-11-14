@@ -176,10 +176,15 @@ void UpdateAnimation(Skeleton& skeleton) {
 void UpdateCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
 	for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
 		assert(jointIndex < skinCluster.inverseBindPoseMatrices.size());
-		skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
+
+		// UPLOADヒープからの読み戻しを避けるため、両方の行列をCPU側で計算してから転送
+		const Matrix4x4 skeletonSpaceMatrix =
 			skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
-		skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-			Matrix::Transpose(Matrix::Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
+		const WellForGPU paletteEntry{
+			skeletonSpaceMatrix,
+			Matrix::Transpose(Matrix::Inverse(skeletonSpaceMatrix))
+		};
+		std::memcpy(&skinCluster.mappedPalette[jointIndex], &paletteEntry, sizeof(paletteEntry));
 	}
 }
 

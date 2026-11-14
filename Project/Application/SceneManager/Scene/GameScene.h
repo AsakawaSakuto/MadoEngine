@@ -57,6 +57,10 @@ public:
 	/// @return 武器選択では未処理回数、開封後のレリック獲得待機では-1、それ以外は0
 	int GetSelectionBgmPlaybackId() const override;
 
+	/// @brief ゲーム進行に応じて骨格アニメーションの再生を一時停止するレイヤーを取得
+	/// @return 開始待機やポーズなどの停止中はEnemyのレイヤーマスク、プレイ中は0
+	MadoEngine::Render::RenderLayerMask GetPausedSkeletalAnimationLayers() const override;
+
 	/// @brief 終了処理
 	void Finalize() override;
 

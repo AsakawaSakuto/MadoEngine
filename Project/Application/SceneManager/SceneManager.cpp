@@ -166,7 +166,8 @@ void SceneManager::Update(float dt) {
 
 	// ゲーム時間に依存する3D描画とEffectの状態をScene更新後に同期
 	MadoEngine::ModelManager::GetInstance().SetCamera(currentScene_->GetCamera());
-	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_, dt);
+	MadoEngine::ModelManager::GetInstance().UpdateAll(currentSceneType_, dt,
+		currentScene_->GetPausedSkeletalAnimationLayers());
 	MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Update(dt);
 	MadoEngine::Particle::ParticleSystem3d::GetInstance().Update(dt);
 	MadoEngine::Effect::PrimitiveEffectSystem3d::GetInstance().Update(dt);

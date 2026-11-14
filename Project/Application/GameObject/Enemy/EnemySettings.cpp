@@ -454,21 +454,22 @@ namespace Enemy {
 		// 既存ゲームバランスを初回生成時の基準値として維持
 		typeSettings_[ToTypeIndex(Data::Type::Normal)] = {
 			{ 10.0f, 5.0f, 3.0f }, 0.5f, 0.5f, { -0.5f, 0.0f, -0.5f }, { 0.5f, 2.0f, 0.5f },
-			{ 0.85f, 0.18f, 0.18f, 1.0f }, 0.0f
+			{ 1.0f, 1.0f, 1.0f, 1.0f }, 0.0f
 		};
 		typeSettings_[ToTypeIndex(Data::Type::Runner)] = {
 			{ 5.0f, 3.5f, 5.4f }, 0.35f, 0.35f, { -0.35f, 0.0f, -0.35f }, { 0.35f, 1.4f, 0.35f },
-			{ 0.15f, 0.65f, 1.0f, 1.0f }, 0.0f
+			{ 1.0f, 1.0f, 1.0f, 1.0f }, 0.0f
 		};
 		typeSettings_[ToTypeIndex(Data::Type::Tank)] = {
 			{ 40.0f, 7.5f, 1.65f }, 0.8f, 0.8f, { -0.8f, 0.0f, -0.8f }, { 0.8f, 3.2f, 0.8f },
-			{ 0.95f, 0.55f, 0.1f, 1.0f }, 0.0f
+			{ 1.0f, 1.0f, 1.0f, 1.0f }, 0.0f
 		};
 		typeSettings_[ToTypeIndex(Data::Type::Boss)] = {
 			{ 1000.0f, 20.0f, 1.5f }, 1.5f, 1.5f, { -1.5f, 0.0f, -1.5f }, { 1.5f, 4.0f, 1.5f },
 			{ 0.7f, 0.15f, 0.9f, 1.0f }, 0.0f
 		};
 		typeSettings_[ToTypeIndex(Data::Type::OverTime)] = typeSettings_[ToTypeIndex(Data::Type::Normal)];
+		typeSettings_[ToTypeIndex(Data::Type::OverTime)].color = { 0.85f, 0.18f, 0.18f, 1.0f };
 		eliteSettings_ = {};
 		maxAliveEnemies_ = 500;
 		waves_ = { WaveSettings{} };

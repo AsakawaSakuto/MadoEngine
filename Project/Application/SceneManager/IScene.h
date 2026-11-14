@@ -30,6 +30,10 @@ public:
 	/// @return 再生区間の識別値、再生不要の場合は0
 	virtual int GetSelectionBgmPlaybackId() const { return 0; }
 
+	/// @brief 骨格アニメーションの再生を一時停止するレイヤーを取得
+	/// @return 停止対象のレイヤーマスク、対象がない場合は0
+	virtual MadoEngine::Render::RenderLayerMask GetPausedSkeletalAnimationLayers() const { return 0; }
+
 	/// @brief 受理された終了要求をResource破棄前に通知
 	/// @param destination 遷移先Scene、アプリ終了の場合はSceneType::None
 	virtual void OnExitRequested(SceneType destination) { (void)destination; }

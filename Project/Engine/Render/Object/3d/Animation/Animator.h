@@ -18,10 +18,13 @@ public:
 	/// @return 再生を開始できた場合はtrue
 	bool Play(std::string_view clipName, float blendDuration = -1.0f, bool restart = false);
 
-	/// @brief Animation再生時刻とSkeleton Poseを更新
+	/// @brief Animationの再生時刻と遷移時間を更新
 	/// @param deltaTime 前フレームからの経過時間
+	void AdvanceTime(float deltaTime);
+
+	/// @brief 現在の再生時刻に対応するPoseをSkeletonへ反映
 	/// @param skeleton Pose反映対象のSkeleton
-	void Update(float deltaTime, Skeleton& skeleton);
+	void ApplyCurrentPose(Skeleton& skeleton);
 
 	/// @brief 再生速度倍率を設定
 	/// @param playbackSpeed 再生速度倍率

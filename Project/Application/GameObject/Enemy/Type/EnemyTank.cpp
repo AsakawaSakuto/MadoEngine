@@ -7,10 +7,6 @@ namespace Enemy {
 		MoveTowardPlayer(deltaTime);
 	}
 
-	std::string Tank::GetModelAssetName() const {
-		return "TankEnemy";
-	}
-
 	Vector3 Tank::GetModelScale() const {
 		const float scaleMultiplier = Settings::GetInstance().GetTypeSettings(Data::Type::Tank).scaleMultiplier;
 		return { scaleMultiplier, scaleMultiplier, scaleMultiplier };

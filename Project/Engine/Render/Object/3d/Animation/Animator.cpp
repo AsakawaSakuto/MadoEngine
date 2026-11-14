@@ -50,9 +50,8 @@ bool Animator::Play(std::string_view clipName, float blendDuration, bool restart
 	return true;
 }
 
-void Animator::Update(float deltaTime, Skeleton& skeleton) {
+void Animator::AdvanceTime(float deltaTime) {
 	if (!currentClip_) {
-		ApplyAnimationPose(skeleton, currentPose_);
 		return;
 	}
 
@@ -80,8 +79,19 @@ void Animator::Update(float deltaTime, Skeleton& skeleton) {
 		isFinished_ = true;
 	}
 
-	SampleAnimationPose(skeleton, *currentClip_, animationTime_, targetPose_);
+	// Poseの計算を省く間もクリップ間の遷移を実際の経過時間に同期
 	blendElapsedTime_ = (std::min)(blendDuration_, blendElapsedTime_ + safeDeltaTime);
+}
+
+void Animator::ApplyCurrentPose(Skeleton& skeleton) {
+	if (!currentClip_) {
+
+		// 再生Clipがない場合も初期化時に保存したBind Poseを適用
+		ApplyAnimationPose(skeleton, currentPose_);
+		return;
+	}
+
+	SampleAnimationPose(skeleton, *currentClip_, animationTime_, targetPose_);
 	if (blendDuration_ > 0.0f && blendElapsedTime_ < blendDuration_) {
 
 		// 切り替え直前のPoseから新しいClipの現在PoseへJoint単位で補間

@@ -7,10 +7,6 @@ namespace Enemy {
 		MoveTowardPlayer(deltaTime);
 	}
 
-	std::string Runner::GetModelAssetName() const {
-		return "SpeedEnemy";
-	}
-
 	Vector3 Runner::GetModelScale() const {
 		const float scaleMultiplier = Settings::GetInstance().GetTypeSettings(Data::Type::Runner).scaleMultiplier;
 		return { scaleMultiplier, scaleMultiplier, scaleMultiplier };

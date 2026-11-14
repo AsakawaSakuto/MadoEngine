@@ -900,10 +900,11 @@ void ModelManager::SetSpriteSheetAnimationsPaused(SceneType sceneType, bool paus
 	}
 }
 
-void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime) {
+void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime, Render::RenderLayerMask pausedSkeletalAnimationLayers) {
+	++animationFrameIndex_;
 	float spriteSheetDeltaTime = deltaTime;
 
-	// 死亡演出などの骨格アニメーションを進めながら、ゲーム停止中のシート再生だけを停止
+	// スプライトシートの再生時間はScene単位で制御
 	if (spriteSheetAnimationPausedScenes_.contains(currentSceneType)) {
 		spriteSheetDeltaTime = 0.0f;
 	}
@@ -917,7 +918,8 @@ void ModelManager::UpdateAll(SceneType currentSceneType, float deltaTime) {
 		if (modelScene != SceneType::None && modelScene != currentSceneType) {
 			continue;
 		}
-		model->Update(deltaTime, spriteSheetDeltaTime);
+		const bool isSkeletalAnimationPaused = model->IsRenderLayerIncluded(pausedSkeletalAnimationLayers);
+		model->Update(deltaTime, spriteSheetDeltaTime, animationFrameIndex_, isSkeletalAnimationPaused);
 	}
 	for (const auto& [name, handle] : instancedModelNameToHandle_) {
 		(void)name;

@@ -7,7 +7,9 @@
 #include "Utility/Light/LightManager.h"
 #include "Utility/Json/Core/IJsonSerializable.h"
 #include "SceneManager/SceneType.h"
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -259,6 +261,12 @@ public:
 	/// @param playbackSpeed 再生速度倍率
 	void SetAnimationPlaybackSpeed(float playbackSpeed) { animator_.SetPlaybackSpeed(playbackSpeed); }
 
+	/// @brief Skinning Modelの骨格計算を描画まで遅延し、更新間隔を設定
+	/// @param enabled 描画まで骨格計算を遅延する場合はtrue
+	/// @param frameInterval 通常描画で骨格を更新する間隔のフレーム数、最小値は1
+	/// @param frameOffset 更新を分散するためのフレーム番号のオフセット
+	void SetDeferSkinningUntilDraw(bool enabled, std::uint32_t frameInterval = 1, std::uint32_t frameOffset = 0);
+
 	const ModelSharedData* GetSharedData() const { return sharedData_; }
 
 private:
@@ -269,6 +277,19 @@ private:
 	void SetObjectName(const std::string& objectName) { objectName_ = objectName; }
 
 	void InitializeInstanceResources();
+
+	/// @brief 共通のフレーム番号を使用してModelとAnimationの状態を更新
+	/// @param deltaTime Model状態と骨格Animationの経過時間
+	/// @param spriteSheetDeltaTime スプライトシートAnimationの経過時間
+	/// @param frameIndex Model間で共有するフレーム番号
+	/// @param isSkeletalAnimationPaused 骨格アニメーションの再生を一時停止する場合はtrue
+	void Update(float deltaTime, float spriteSheetDeltaTime, std::uint64_t frameIndex, bool isSkeletalAnimationPaused);
+
+	/// @brief 更新待ちのPoseを骨格行列と描画用データへ反映
+	void UpdateAnimationPose();
+
+	/// @brief 通常描画の間隔と表示再開に応じてPoseを反映
+	void UpdateAnimationPoseForDraw();
 
 	/// @brief 現在コマのUV範囲をシート用行列へ反映
 	void UpdateSpriteSheetUVMatrix();
@@ -327,6 +348,12 @@ private:
 	Skeleton skeletonData_;
 	SkinCluster skinClusterData_;
 	uint32_t skinClusterIndex_ = UINT32_MAX;
+	bool deferSkinningUntilDraw_ = false;
+	bool isAnimationPoseDirty_ = false;
+	std::uint32_t skinningUpdateInterval_ = 1;
+	std::uint32_t skinningUpdateOffset_ = 0;
+	std::uint64_t animationFrameIndex_ = 0;
+	std::optional<std::uint64_t> lastSkinningDrawFrame_;
 
 	ModelMaterial materialData_{};
 	ModelMaterialBuffer materialBuffer_;

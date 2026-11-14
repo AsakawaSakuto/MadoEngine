@@ -8,6 +8,7 @@
 #include "Utility/AssetKey.h"
 #include "SceneManager/SceneType.h"
 #include <cstddef>
+#include <cstdint>
 #include <d3d12.h>
 #include <filesystem>
 #include <memory>
@@ -329,7 +330,8 @@ public:
 	/// @brief 現在SceneのModelを更新
 	/// @param currentSceneType 現在のScene
 	/// @param deltaTime 前フレームからの経過時間
-	void UpdateAll(SceneType currentSceneType, float deltaTime);
+	/// @param pausedSkeletalAnimationLayers 骨格アニメーションの再生を一時停止するレイヤーマスク
+	void UpdateAll(SceneType currentSceneType, float deltaTime, Render::RenderLayerMask pausedSkeletalAnimationLayers = 0);
 
 	/// @brief 指定Sceneのスプライトシート再生の時間進行を制御
 	/// @param sceneType 対象のScene
@@ -470,6 +472,7 @@ private:
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
 	Render::PSORegistry* psoRegistry_ = nullptr;
 	Camera activeCamera_;
+	std::uint64_t animationFrameIndex_ = 0;
 	std::unordered_set<SceneType> spriteSheetAnimationPausedScenes_;
 	std::unordered_map<std::string, std::unique_ptr<ModelSharedData>, AssetKey::Hash, AssetKey::Equal> sharedData_;
 	std::unordered_map<std::string, std::string, AssetKey::Hash, AssetKey::Equal> aliases_;

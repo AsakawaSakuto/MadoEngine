@@ -7,10 +7,6 @@ namespace Enemy {
 		MoveTowardPlayer(deltaTime);
 	}
 
-	std::string OverTime::GetModelAssetName() const {
-		return "OverTimeEnemy";
-	}
-
 	Vector3 OverTime::GetModelScale() const {
 		const float scaleMultiplier = Settings::GetInstance().GetTypeSettings(Data::Type::OverTime).scaleMultiplier;
 		return { scaleMultiplier, scaleMultiplier, scaleMultiplier };

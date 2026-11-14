@@ -21,9 +21,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                -1.0326380729675293,
-                69.5,
-                213.63735961914063
+                116.29780578613281,
+                15.101097106933594,
+                101.86844635009766
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -63,21 +63,21 @@
             "model": "Assets/Model/Static/PlayerDefense.obj",
             "name": "PlayerDefense",
             "position": [
-                159.35671997070313,
-                14.631776809692383,
-                167.35618591308594
+                149.05984497070313,
+                23.03729820251465,
+                77.49578857421875
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
             "rotation": [
-                0.31146740913391113,
-                0.6493521928787231,
-                -0.3202399015426636
+                0.3747997581958771,
+                0.4779965877532959,
+                -0.28626903891563416
             ],
             "scale": [
-                1.0,
-                1.0,
-                1.0
+                0.0,
+                0.0,
+                0.0
             ],
             "scene": "Game",
             "texture": "white2x2",

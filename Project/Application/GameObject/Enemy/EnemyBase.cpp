@@ -4,21 +4,46 @@
 #include "GameObject/Combat/ProjectileDamage.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
-#include "Utility/Logger/Logger.h"
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 namespace Enemy {
 	namespace {
+		constexpr float kSkinningModelScale = 3.10f / 1.47f;
 		constexpr float kDamageFlashDuration = 6.0f / 60.0f;
 		constexpr float kEmergenceSpeed = 4.0f;
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
 		constexpr float kPlayerKnockbackPower = 1.5f;
 		constexpr float kPlayerKnockbackDirectionEpsilonSq = 0.000001f;
 		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		constexpr Vector4 kTexturedDamageFlashColor = { 2.0f, 2.0f, 2.0f, 1.0f };
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
 		constexpr const char* kEliteMarkerTextureName = "Elite";
+
+		struct EnemyModelAssets {
+			const char* modelPath;
+			const char* textureName;
+		};
+
+		/// @brief Enemyの種類に対応するModelとテクスチャの組み合わせを取得
+		/// @param type Enemyの種類
+		/// @return 使用するModelのパスとテクスチャ名、専用テクスチャがない場合はnullptr
+		EnemyModelAssets GetEnemyModelAssets(Data::Type type) {
+			switch (type) {
+			case Data::Type::Normal:
+				return { "Assets/Model/Skinning/Enemy/NormalEnemy.gltf", "NormalModelTexture" };
+			case Data::Type::Runner:
+				return { "Assets/Model/Skinning/Enemy/RunnerEnemy.gltf", "RunnerModelTexture" };
+			case Data::Type::Tank:
+				return { "Assets/Model/Skinning/Enemy/TankEnemy.gltf", "TankModelTexture" };
+			default:
+
+				// 専用モデルのない種類は共通モデルと基礎色で表示
+				return { "Assets/Model/Skinning/EnemyWalk.gltf", nullptr };
+			}
+		}
 
 		/// @brief Enemy基礎色へ有効な状態異常の色係数を合成
 		/// @param baseColor Enemy種類ごとの基礎色
@@ -104,21 +129,26 @@ namespace Enemy {
 			RegisterColliders();
 		}
 
-		std::string modelAssetName = GetModelAssetName();
-		if (!MadoEngine::ModelManager::GetInstance().GetSharedData(modelAssetName)) {
+		damageFlashColor_ = kDamageFlashColor;
+		const EnemyModelAssets modelAssets = GetEnemyModelAssets(type_);
 
-			// 専用Modelが未配置でもEnemyの当たり判定と行動を検証できるようNormalのModelへ代替
-			Logger::Output(
-				"Enemy用Modelアセットが見つからないためNormalEnemyへ切り替えます: " + modelAssetName,
-				Logger::Level::Warning);
-			modelAssetName = "NormalEnemy";
-		}
-
-		model_ = MyModel::Create(modelName_, modelAssetName, desc.sceneType);
+		// 各モデルの既定クリップを使用し、モデルごとのアニメーションを生成時に再生
+		model_ = MyModel::Create(modelName_, modelAssets.modelPath, sceneType_, MadoEngine::Render::RenderLayer::Enemy);
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Enemy);
-			model->SetTexture("white16x16");
-			model->SetColor(Settings::GetInstance().GetTypeSettings(type_).color);
+			if (modelAssets.textureName && model->SetTexture(modelAssets.textureName)) {
+
+				// 基礎色が白でも被弾を識別できるよう、専用画像の輝度を点滅中だけ増幅
+				damageFlashColor_ = kTexturedDamageFlashColor;
+			} else {
+				model->SetTexture("white16x16");
+			}
+			model->SetColor(typeSettings.color);
+
+			// 地形に落ちる影で敵の位置と接地を見分けやすくするため投影を有効化
+			model->SetCastShadow(true);
+
+			// 画面内の敵の骨格を10フレームに1回更新し、敵IDに応じて計算するフレームを分散
+			model->SetDeferSkinningUntilDraw(true, 10, enemyId_);
 		}
 		CreateEliteMarkerModel();
 
@@ -403,7 +433,7 @@ namespace Enemy {
 		damageFlashRemainingTime_ = kDamageFlashDuration;
 
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetColor(kDamageFlashColor);
+			model->SetColor(damageFlashColor_);
 		}
 	}
 
@@ -425,7 +455,7 @@ namespace Enemy {
 			}
 
 			if (Model* model = MyModel::TryGet(model_)) {
-				model->SetColor(kDamageFlashColor);
+				model->SetColor(damageFlashColor_);
 			}
 			return;
 		}
@@ -513,9 +543,13 @@ namespace Enemy {
 
 	void Base::ApplyModelTransform() {
 		if (Model* model = MyModel::TryGet(model_)) {
+
+			// Modelの正面がローカル-Zを向くため、斜面の傾きを保って描画時の向きだけを反転
 			model->SetPosition(transform_.translate + GetModelOffset() * bodyScaleMultiplier_);
-			model->SetRotation(transform_.rotate);
-			model->SetScale(transform_.scale);
+			model->SetRotation(movement_.GetGroundAlignedRotation(std::numbers::pi_v<float>));
+
+			// Modelの高さに合わせてColliderと頭上Markerに対する体格を調整
+			model->SetScale(transform_.scale * kSkinningModelScale);
 		}
 
 		if (Model* eliteMarkerModel = MyModel::TryGet(eliteMarkerModel_)) {

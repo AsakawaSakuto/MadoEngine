@@ -13,10 +13,6 @@ namespace Enemy {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateBehavior(float deltaTime) override;
 
-		/// @brief Boss専用Modelアセット名を取得
-		/// @return Modelアセット名
-		std::string GetModelAssetName() const override;
-
 		/// @brief BossのModel表示倍率を取得
 		/// @return Model表示倍率
 		Vector3 GetModelScale() const override;

@@ -33,6 +33,11 @@ namespace Enemy {
 		/// @param transform 更新対象のTransform
 		void ResolveAfterCollision(const std::string& movementColliderName, Transform3D& transform);
 
+		/// @brief 現在の接地面に沿った回転を取得
+		/// @param yawOffset 進行方向からの角度補正（ラジアン）
+		/// @return 接地面の傾きと角度補正を反映した回転
+		Vector3 GetGroundAlignedRotation(float yawOffset) const;
+
 	private:
 		/// @brief 目標へ向かう正規化済みの水平方向を取得
 		/// @param currentPosition 現在のワールド座標

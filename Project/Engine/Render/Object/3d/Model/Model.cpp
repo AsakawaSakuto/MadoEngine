@@ -430,6 +430,9 @@ void Model::InitializeInstanceResources() {
 	}
 	animator_.Initialize(&sharedData_->animationSet, skeletonData_);
 
+	// 最初のUpdateより先に描画される場合に備えてSkinning Paletteを更新対象に登録
+	isAnimationPoseDirty_ = type_ == ModelType::Skinning && !skeletonData_.joints.empty();
+
 	materialBuffer_.Initialize(device_.Get(), sharedData_->modelData.materialColors);
 	materialData_.color = color_;
 	if (enableLighting_) {
@@ -516,9 +519,15 @@ void Model::Update(float deltaTime) {
 }
 
 void Model::Update(float deltaTime, float spriteSheetDeltaTime) {
+	Update(deltaTime, spriteSheetDeltaTime, animationFrameIndex_ + 1, false);
+}
+
+void Model::Update(float deltaTime, float spriteSheetDeltaTime, std::uint64_t frameIndex, bool isSkeletalAnimationPaused) {
 	if (!sharedData_ || !transformationData_ || !cameraData_) {
 		return;
 	}
+
+	animationFrameIndex_ = frameIndex;
 
 	// 描画対象を選ばない専用Animatorでコマを進め、変更があった時だけシート用行列を更新
 	if (spriteSheetAnimator_.Update(spriteSheetDeltaTime)) {
@@ -527,23 +536,20 @@ void Model::Update(float deltaTime, float spriteSheetDeltaTime) {
 
 	if (type_ != ModelType::Static && !skeletonData_.joints.empty()) {
 
-		// Animatorの合成済みPoseからSkeleton空間行列を更新
-		animator_.Update(deltaTime, skeletonData_);
-		UpdateAnimation(skeletonData_);
-		if (type_ == ModelType::Skinning) {
-			UpdateCluster(skinClusterData_, skeletonData_);
+		if (!isSkeletalAnimationPaused) {
+
+			// 再生中は描画範囲外でも時刻を進め、画面復帰時の歩行位相を維持
+			animator_.AdvanceTime(deltaTime);
+			isAnimationPoseDirty_ = true;
+		}
+
+		// 停止中も初期姿勢などの保留中の更新を一度だけ反映
+		if (type_ != ModelType::Skinning || !deferSkinningUntilDraw_) {
+			UpdateAnimationPose();
 		}
 	}
 
 	cameraData_->worldPosition = camera_.GetPosition();
-	if (type_ == ModelType::Animated &&
-		skeletonData_.root >= 0 &&
-		static_cast<std::size_t>(skeletonData_.root) < skeletonData_.joints.size()) {
-
-		// Node Animation ModelはRoot JointのLocal行列をObject Transformより先に適用
-		rootNode_.localMatrix = skeletonData_.joints[static_cast<std::size_t>(skeletonData_.root)].localMatrix;
-	}
-
 	UpdateTransformGpuData(camera_);
 
 	Matrix4x4 scale = Matrix::MakeIdentity();
@@ -580,7 +586,54 @@ void Model::Update(float deltaTime, float spriteSheetDeltaTime) {
 	}
 }
 
+void Model::UpdateAnimationPose() {
+	if (!isAnimationPoseDirty_) {
+		return;
+	}
+
+	// 同一Frameの通常描画と影描画で再利用できるよう現在のPoseを一度だけ反映
+	animator_.ApplyCurrentPose(skeletonData_);
+	UpdateAnimation(skeletonData_);
+	if (type_ == ModelType::Skinning) {
+		UpdateCluster(skinClusterData_, skeletonData_);
+	} else if (type_ == ModelType::Animated &&
+		skeletonData_.root >= 0 &&
+		static_cast<std::size_t>(skeletonData_.root) < skeletonData_.joints.size()) {
+
+		// Node Animation ModelはRoot JointのLocal行列をObject Transformより先に適用
+		rootNode_.localMatrix = skeletonData_.joints[static_cast<std::size_t>(skeletonData_.root)].localMatrix;
+	}
+	isAnimationPoseDirty_ = false;
+}
+
+void Model::SetDeferSkinningUntilDraw(bool enabled, std::uint32_t frameInterval, std::uint32_t frameOffset) {
+	deferSkinningUntilDraw_ = enabled;
+	skinningUpdateInterval_ = (std::max)(frameInterval, 1u);
+	skinningUpdateOffset_ = frameOffset % skinningUpdateInterval_;
+	lastSkinningDrawFrame_.reset();
+}
+
+void Model::UpdateAnimationPoseForDraw() {
+	if (!deferSkinningUntilDraw_ || skinningUpdateInterval_ == 1) {
+		UpdateAnimationPose();
+		return;
+	}
+
+	// 初回と画面復帰時は更新順を待たず、現在時刻のPoseで表示
+	const bool isResumingDraw = !lastSkinningDrawFrame_ || animationFrameIndex_ - *lastSkinningDrawFrame_ > 1;
+	lastSkinningDrawFrame_ = animationFrameIndex_;
+	if (isResumingDraw || animationFrameIndex_ % skinningUpdateInterval_ == skinningUpdateOffset_) {
+		UpdateAnimationPose();
+	}
+}
+
 bool Model::PlayAnimation(std::string_view clipName, float blendDuration, bool restart) {
+	if (deferSkinningUntilDraw_ && isAnimationPoseDirty_ &&
+		(restart || clipName != animator_.GetCurrentClipName()) && HasAnimationClip(clipName)) {
+
+		// 画面外でClipが切り替わる場合も現在時刻のPoseを遷移開始姿勢として使用
+		animator_.ApplyCurrentPose(skeletonData_);
+	}
 	return animator_.Play(clipName, blendDuration, restart);
 }
 
@@ -748,6 +801,9 @@ void Model::Draw(const Camera& useCamera) {
 		return;
 	}
 
+	// 視錐台内で更新するフレームだけ骨格を計算し、間のフレームは前回のPoseを再利用
+	UpdateAnimationPoseForDraw();
+
 	// Frustum内のModelだけGPU Constant BufferとPipelineを更新
 	UpdateTransformGpuData(useCamera);
 
@@ -868,6 +924,9 @@ void Model::DrawShadowInternal(const Matrix4x4& lightViewProjection, const Camer
 	if (!sharedData_ || !isVisible_ || !castShadow_) {
 		return;
 	}
+
+	// 画面外のModelが落とす影にも現在のPoseを反映
+	UpdateAnimationPose();
 
 	assert(psoRegistry_);
 	UpdateShadowTransformGpuData(lightViewProjection, billboardCamera);

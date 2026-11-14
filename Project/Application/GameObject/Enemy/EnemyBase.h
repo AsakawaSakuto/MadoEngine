@@ -193,10 +193,6 @@ namespace Enemy {
 		/// @param deltaTime 前フレームからの経過時間
 		virtual void UpdateBehavior(float deltaTime) = 0;
 
-		/// @brief 使用するModelアセット名を取得
-		/// @return Modelアセット名
-		virtual std::string GetModelAssetName() const = 0;
-
 		/// @brief Modelの表示倍率を取得
 		/// @return Modelの表示倍率
 		virtual Vector3 GetModelScale() const = 0;
@@ -250,7 +246,7 @@ namespace Enemy {
 		/// @param deltaTime 前フレームからの経過時間
 		void UpdateProjectileDamageCooldowns(float deltaTime);
 
-		/// @brief 被ダメージ時の白色点滅を開始
+		/// @brief 被ダメージ時の点滅を開始
 		void StartDamageFlash();
 
 		/// @brief 被ダメージEffect Sequenceを現在座標に再生
@@ -306,6 +302,7 @@ namespace Enemy {
 		std::vector<StatusEffectDamageEvent> statusEffectDamageEvents_;
 		float playerDamageCooldown_ = 0.0f;
 		float damageFlashRemainingTime_ = 0.0f;
+		Vector4 damageFlashColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float emergenceTargetY_ = 0.0f;
 		float bodyScaleMultiplier_ = 1.0f;
 		float knockbackResistance_ = 0.0f;

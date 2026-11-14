@@ -677,6 +677,15 @@ bool GameScene::TryGetShadowDebugTargetPosition(Vector3& outPosition) const {
 	return true;
 }
 
+MadoEngine::Render::RenderLayerMask GameScene::GetPausedSkeletalAnimationLayers() const {
+	if (inGameSession_ && inGameSession_->IsPlaying()) {
+		return 0;
+	}
+
+	// Resultへの遷移に必要なPlayerの死亡アニメーションを進めるため、Enemyレイヤーのみを停止対象に指定
+	return MadoEngine::Render::ToRenderLayerMask(MadoEngine::Render::RenderLayer::Enemy);
+}
+
 bool GameScene::ShouldPauseBgm() const {
 	InGamePhase phase = InGamePhase::Starting;
 	if (inGameSession_) {

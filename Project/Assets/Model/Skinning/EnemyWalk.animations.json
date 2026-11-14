@@ -1,0 +1,11 @@
+{
+  "model": "EnemyWalk.gltf",
+  "defaultClip": "Walk",
+  "clips": {
+    "Walk": {
+      "file": "EnemyWalk.gltf",
+      "index": 0,
+      "loop": true
+    }
+  }
+}

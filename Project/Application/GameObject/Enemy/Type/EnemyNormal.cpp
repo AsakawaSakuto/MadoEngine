@@ -7,10 +7,6 @@ namespace Enemy {
 		MoveTowardPlayer(deltaTime);
 	}
 
-	std::string Normal::GetModelAssetName() const {
-		return "NormalEnemy";
-	}
-
 	Vector3 Normal::GetModelScale() const {
 		const float scaleMultiplier = Settings::GetInstance().GetTypeSettings(Data::Type::Normal).scaleMultiplier;
 		return { scaleMultiplier, scaleMultiplier, scaleMultiplier };

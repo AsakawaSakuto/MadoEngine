@@ -195,6 +195,10 @@ namespace Enemy {
 		UpdateGroundRotation(movementColliderName, isSlopeGroundContact, transform);
 	}
 
+	Vector3 Movement::GetGroundAlignedRotation(float yawOffset) const {
+		return CreateSlopeAlignedRotation(faceYaw_ + yawOffset, currentGroundNormal_);
+	}
+
 	Vector3 Movement::GetDirectionToTarget(const Vector3& currentPosition, const Vector3& targetPosition) const {
 		Vector3 direction = targetPosition - currentPosition;
 		direction.y = 0.0f;
@@ -297,7 +301,7 @@ namespace Enemy {
 		// フレームレートに依存しない指数補間で斜面法線への追従を平滑化
 		const float normalT = std::clamp(1.0f - std::exp(-modelGroundNormalFollowSpeed_ * lastDeltaTime_), 0.0f, 1.0f);
 		currentGroundNormal_ = NormalizeOrFallback(Math::Lerp(currentGroundNormal_, targetGroundNormal, normalT), targetGroundNormal);
-		transform.rotate = CreateSlopeAlignedRotation(faceYaw_, currentGroundNormal_);
+		transform.rotate = GetGroundAlignedRotation(0.0f);
 	}
 
 } // namespace Enemy
