@@ -205,7 +205,6 @@ SceneType GameScene::Update(float dt) {
 		inGameSession_->GetCurrentPhase() != InGamePhase::Starting &&
 		inGameSession_->GetCurrentPhase() != InGamePhase::Paused &&
 		!rewardSelectionController_.ShouldBlockCameraInput();
-	gameCameraController_.UpdateTracking(cameraManager_, player_->GetPosition(), deltaTime, isCameraInputEnabled);
 
 	// MapとDrop取得による経験値加算が完了してからLevel差分を確認
 	weaponUpgradeSystem_->UpdatePlayerLevel(player_->GetLevel(), *weaponInventory_);
@@ -225,6 +224,10 @@ SceneType GameScene::Update(float dt) {
 	if (!isRelicRewardPending) {
 		inGameSession_->SetUpgradeSelectionActive(weaponUpgradeSystem_->IsUpgrading());
 	}
+
+	// 報酬待機を含めたPhase確定後、Cameraが移動量を読む前にカーソル固定を同期
+	gameCameraController_.UpdateMouseRelativeMode(cameraManager_, isCameraInputEnabled && inGameSession_->IsPlaying());
+	gameCameraController_.UpdateTracking(cameraManager_, player_->GetPosition(), deltaTime, isCameraInputEnabled);
 
 	// 選択画面やPause中はDropの移動と同じ条件でシート再生の時間進行も停止
 	MadoEngine::ModelManager::GetInstance().SetSpriteSheetAnimationsPaused(SceneType::Game, !inGameSession_->IsPlaying());
@@ -704,6 +707,9 @@ int GameScene::GetSelectionBgmPlaybackId() const {
 
 void GameScene::Finalize() {
 
+	// 通常のScene遷移以外の終了経路でもカーソルの拘束を解除
+	gameCameraController_.UpdateMouseRelativeMode(cameraManager_, false);
+
 	// 終了要求のない通常Shutdownにも対応し、Resource解放前に一回だけ保存
 	if (!playLogRecorder_.IsFinished()) {
 		FinishPlayLog(System::PlayEndReason::ApplicationExit);
@@ -793,6 +799,9 @@ void GameScene::FinishPlayLog(System::PlayEndReason reason) {
 }
 
 void GameScene::OnExitRequested(SceneType destination) {
+
+	// Scene破棄を待たず遷移演出の開始時点でカーソルの拘束を解除
+	gameCameraController_.UpdateMouseRelativeMode(cameraManager_, false);
 
 	// 死亡による終了を後続のScene操作で別理由へ変更しない優先判定
 	if (player_->IsDead()) {

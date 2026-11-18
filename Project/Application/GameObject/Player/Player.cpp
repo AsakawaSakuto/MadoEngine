@@ -46,7 +46,7 @@ namespace Player {
 
 		const Sphere movementCollider = CreateSpawnMovementCollider(spawnGroundPosition);
 		transform_.translate = movementCollider.center;
-		transform_.SetAllScale(0.5f);
+		transform_.SetAllScale(1.5f);
 		colliderShape_ = movementCollider;
 		UpdateDefenseModel(0.0f);
 
@@ -76,10 +76,10 @@ namespace Player {
 		MyCollider::RegisterCollider("PlayerAttackRangeSphere", CollisionTag::PlayerAttackRangeSphere, &attackRangeSphere_, &transform_.translate, 0.0f);
 		MyCollider::RegisterCollider("PlayerEnemyDeleteRangeSphere", CollisionTag::EnemyDeleteRangeSphere, &enemyDeleteRangeSphere_, &transform_.translate, 0.0f);
 
-		model_ = MyModel::Create("Player", "walk", sceneType_);
+		model_ = MyModel::Create("Player", "Assets/Model/Skinning/Player/PlayerWalk.gltf", sceneType_);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetRenderLayer(MadoEngine::Render::RenderLayer::Player);
-			model->SetTexture("white2x2");
+			model->SetTexture("PlayerModelTexture");
 			model->SetColor(Color::Red);
 			model->SetPosition(transform_.translate + Vector3{ 0.0f, -kMovementSphereRadius, 0.0f });
 			model->SetScale(transform_.scale);

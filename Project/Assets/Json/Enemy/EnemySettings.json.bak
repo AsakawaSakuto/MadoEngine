@@ -302,8 +302,8 @@
         "Normal": {
             "color": [
                 1.0,
-                1.0,
-                1.0,
+                0.0,
+                0.0,
                 1.0
             ],
             "health": 10.0,
@@ -369,7 +369,7 @@
             "moveSpeed": 5.0,
             "movementColliderRadius": 0.3499999940395355,
             "power": 3.5,
-            "scaleMultiplier": 0.44999998807907104
+            "scaleMultiplier": 0.800000011920929
         },
         "Tank": {
             "color": [

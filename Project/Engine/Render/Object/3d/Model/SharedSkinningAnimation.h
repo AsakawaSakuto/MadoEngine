@@ -9,7 +9,7 @@ namespace MadoEngine {
 /// @brief 同じスキニングモデルのループ再生時刻と位相ごとのパレットを管理
 class SharedSkinningAnimation {
 public:
-	static constexpr std::uint32_t kPhaseGroupCount = 8;
+	static constexpr std::uint32_t kPhaseGroupCount = 4;
 
 	/// @brief モデルの骨格と共有するループクリップを設定
 	/// @param modelData 共有するモデルデータ

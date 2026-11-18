@@ -2,9 +2,8 @@
 #include <numbers>
 
 namespace {
-
-	const char* kMaxBlockTextureName = "blockTexture2";
 	constexpr float kCameraOcclusionAlpha = 0.3f;
+	constexpr int kMaxBlockTextureIndex = 7;
 
 /// @brief 坂の向きに対応するY軸回転角を取得
 /// @param direction 坂の向き
@@ -188,7 +187,8 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 		return;
 	}
 
-	groundModel->SetTexture(kMaxBlockTextureName);
+	std::string textureName = "BlockTexture_" + std::to_string(MyRand::GetInt(0, kMaxBlockTextureIndex));
+	groundModel->SetTexture(textureName);
 
 	// 高さ分の土台をブロック中心から上方向へ拡張
 	InstancedModel::InstanceDesc instanceDesc;
@@ -205,7 +205,7 @@ void MapBlock::CreateGroundModel(const Vector3& blockSize) {
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapBlock);
 	if (InstancedModel* occludedModel = MyInstancedModel::TryGet(groundOccludedInstancedModel_)) {
-		occludedModel->SetTexture(kMaxBlockTextureName);
+		occludedModel->SetTexture(textureName);
 		occludedModel->SetColor({ 1.0f, 1.0f, 1.0f, kCameraOcclusionAlpha });
 		occludedModel->SetCastShadow(false);
 		instanceDesc.isVisible = false;
@@ -225,7 +225,8 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 		return;
 	}
 
-	slopeModel->SetTexture(kMaxBlockTextureName);
+	std::string textureName = "BlockTexture_" + std::to_string(MyRand::GetInt(0, kMaxBlockTextureIndex));
+	slopeModel->SetTexture(textureName);
 
 	// 坂Modelの既定方向を上り方向へ合わせて土台上へ配置
 	InstancedModel::InstanceDesc instanceDesc;
@@ -242,7 +243,7 @@ void MapBlock::CreateSlopeModel(const Vector3& blockSize) {
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapBlock);
 	if (InstancedModel* occludedModel = MyInstancedModel::TryGet(slopeOccludedInstancedModel_)) {
-		occludedModel->SetTexture(kMaxBlockTextureName);
+		occludedModel->SetTexture(textureName);
 		occludedModel->SetColor({ 1.0f, 1.0f, 1.0f, kCameraOcclusionAlpha });
 		occludedModel->SetCastShadow(false);
 		instanceDesc.isVisible = false;

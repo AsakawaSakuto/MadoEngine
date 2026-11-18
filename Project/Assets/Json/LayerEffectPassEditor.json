@@ -117,7 +117,7 @@
                 "DepthSensitivity": 80.0,
                 "EdgeThreshold": 0.004999999888241291,
                 "Intensity": 1.0,
-                "Thickness": 1.0
+                "Thickness": 0.5
             },
             "scope": "Layer",
             "targetLayerMask": 16
@@ -208,7 +208,7 @@
                 "ColorG": 0.0,
                 "ColorR": 0.669767439365387,
                 "InnerRadius": 0.5,
-                "Intensity": 0.0,
+                "Intensity": 0.14424972236156464,
                 "OuterScale": 2.0
             },
             "scope": "Screen",

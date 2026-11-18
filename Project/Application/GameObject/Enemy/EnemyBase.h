@@ -302,7 +302,6 @@ namespace Enemy {
 		std::vector<StatusEffectDamageEvent> statusEffectDamageEvents_;
 		float playerDamageCooldown_ = 0.0f;
 		float damageFlashRemainingTime_ = 0.0f;
-		Vector4 damageFlashColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float emergenceTargetY_ = 0.0f;
 		float bodyScaleMultiplier_ = 1.0f;
 		float knockbackResistance_ = 0.0f;

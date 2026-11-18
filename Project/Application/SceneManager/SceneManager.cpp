@@ -23,6 +23,8 @@
 
 namespace {
 
+	constexpr const char* kFadeSpriteName = "FadeSprite";
+
 	/// @brief 指定シーン所属のEditor管理オブジェクトをJSONから読み込み
 	/// @param sceneType 読み込み対象のシーン
 	void LoadEditorSceneObjects(SceneType sceneType) {
@@ -178,8 +180,15 @@ void SceneManager::UpdateOverlayRenderData() {
 
 	// 一時停止中もEditorの新規作成・配置編集を描画へ反映し、ゲームの進行とは分離
 	MadoEngine::UIGroupManager::GetInstance().RefreshBindings();
-	MadoEngine::SpriteManager::GetInstance().UpdateAll(currentSceneType_);
+	MadoEngine::SpriteManager& spriteManager = MadoEngine::SpriteManager::GetInstance();
+	spriteManager.UpdateAll(currentSceneType_);
 	MadoEngine::TextManager::GetInstance().UpdateAll(currentSceneType_);
+
+	// 通常のSprite更新後にPixelArtと共通の遷移進行度を描画用アルファ値へ反映
+	if (Sprite* fadeSprite = spriteManager.TryGet(spriteManager.Find(kFadeSpriteName));
+		fadeSprite && fadeSprite->GetSceneType() == currentSceneType_) {
+		fadeSprite->OverrideRenderAlpha(GetSceneTransitionEffectProgress());
+	}
 }
 
 void SceneManager::Draw() {

@@ -243,7 +243,7 @@ namespace UI::Game {
 	void GameHud::ApplyStaticVisibility(bool isVisible) {
 
 		// 現在のシーンのGroupを解決し直し、再読込後も編集時の個別表示設定とHUDの表示条件を合成
-		constexpr const char* kGroupNames[] = { "OperationMethodUI", "PlayerHealthUI", "MoneyUI", "KillCountUI", "DebugText" };
+		constexpr const char* kGroupNames[] = { "OperationMethodUI", "PlayerHealthUI", "MoneyUI", "KillCountUI", "DebugText", "Controller" };
 		auto& groupManager = MadoEngine::UIGroupManager::GetInstance();
 		for (const char* name : kGroupNames) {
 			if (MadoEngine::UIGroup* group = groupManager.TryGet(groupManager.Find(name, SceneType::Game))) {

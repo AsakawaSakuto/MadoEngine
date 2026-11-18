@@ -32,7 +32,7 @@ namespace Player {
 
 			// 成立したJump入力を最優先し、空中での再入力も先頭Poseから即時再生
 			model.SetAnimationPlaybackSpeed(1.0f);
-			if (model.PlayAnimation("Jump", 0.0f, true)) {
+			if (model.PlayAnimation("PlayerJump", 0.0f, true)) {
 				currentMotion_ = Motion::Jump;
 				isJumpAnimationActive_ = true;
 				isLandingAnimationActive_ = false;
@@ -114,11 +114,11 @@ namespace Player {
 		case Motion::Idle:
 			return "Idle";
 		case Motion::Walk:
-			return "Walk";
+			return "PlayerWalk";
 		case Motion::Crouching:
 			return "Crouching";
 		case Motion::Jump:
-			return "Jump";
+			return "PlayerJump";
 		case Motion::Climbing:
 			return "Climbing";
 		default:

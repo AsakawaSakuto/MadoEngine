@@ -44,10 +44,11 @@ struct Material
     float4 color;
     int enableLighting;
     int useEnvironmentMap;
-    float2 padding1;
+    int useColorOverride;
+    float padding1;
     float4x4 uvTransform;
     float shininess;
-    float3 padding2;
+    float3 colorOverride;
 };
 
 struct DirectionalLight

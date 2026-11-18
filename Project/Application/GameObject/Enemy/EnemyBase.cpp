@@ -17,8 +17,7 @@ namespace Enemy {
 		constexpr float kEmergenceCompletionEpsilon = 1e-4f;
 		constexpr float kPlayerKnockbackPower = 1.5f;
 		constexpr float kPlayerKnockbackDirectionEpsilonSq = 0.000001f;
-		constexpr Vector4 kDamageFlashColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-		constexpr Vector4 kTexturedDamageFlashColor = { 2.0f, 2.0f, 2.0f, 1.0f };
+		constexpr Vector3 kDamageFlashColor = { 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kEliteMarkerColor = { 1.0f, 1.0f, 1.0f, 0.999f };
 		constexpr const char* kEliteMarkerModelAssetName = "Plane";          
 		constexpr const char* kEliteMarkerTextureName = "Elite";
@@ -130,7 +129,6 @@ namespace Enemy {
 			RegisterColliders();
 		}
 
-		damageFlashColor_ = kDamageFlashColor;
 		const EnemyModelAssets modelAssets = GetEnemyModelAssets(type_);
 
 		// 描画専用の乱数列で歩行位相を割り振り、出現や報酬の乱数列を維持
@@ -145,11 +143,7 @@ namespace Enemy {
 			.sharedSkinningPhaseGroup = phaseGroup,
 		});
 		if (Model* model = MyModel::TryGet(model_)) {
-			if (modelAssets.textureName && model->SetTexture(modelAssets.textureName)) {
-
-				// 基礎色が白でも被弾を識別できるよう、専用画像の輝度を点滅中だけ増幅
-				damageFlashColor_ = kTexturedDamageFlashColor;
-			} else {
+			if (!modelAssets.textureName || !model->SetTexture(modelAssets.textureName)) {
 				model->SetTexture("white16x16");
 			}
 			model->SetColor(typeSettings.color);
@@ -443,7 +437,9 @@ namespace Enemy {
 		damageFlashRemainingTime_ = kDamageFlashDuration;
 
 		if (Model* model = MyModel::TryGet(model_)) {
-			model->SetColor(damageFlashColor_);
+
+			// 描画直前の被弾も同じフレームで表示できるよう点滅色を即時適用
+			model->SetColorOverride(kDamageFlashColor);
 		}
 	}
 
@@ -465,14 +461,15 @@ namespace Enemy {
 			}
 
 			if (Model* model = MyModel::TryGet(model_)) {
-				model->SetColor(damageFlashColor_);
+				model->SetColorOverride(kDamageFlashColor);
 			}
 			return;
 		}
 
 		if (Model* model = MyModel::TryGet(model_)) {
 
-			// 基礎色へ現在有効な全状態異常の色係数を重ねて解除時は自動的に元色へ復元
+			// 点滅終了時に現在有効な状態異常を反映した通常表示へ復帰
+			model->SetColorOverride(std::nullopt);
 			model->SetColor(ApplyStatusEffectColorMultipliers(baseColor, statusEffectController_));
 		}
 	}

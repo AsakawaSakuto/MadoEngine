@@ -205,6 +205,10 @@ void Sprite::Update() {
 	transformationData_->WVP = Matrix::Multiply(worldMatrix, orthoMatrix);
 }
 
+void Sprite::OverrideRenderAlpha(float alpha) {
+	materialData_->color.w = alpha * GetWorldOpacity();
+}
+
 void Sprite::Draw() {
 	if (textureIndex_ == UINT32_MAX || !activeVBV_ || !activeIBV_) {
 		return;

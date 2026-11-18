@@ -89,7 +89,13 @@ PixelShaderOutput main(VertexShaderOutput input)
     float3 N = normalize(input.normal);
     float3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
 
-    if (gMaterial.enableLighting != 0)
+    // 一時的な色の上書き中もテクスチャの透明部分と半透明の輪郭を維持
+    output.color.a = gMaterial.color.a * input.color.a * textureColor.a;
+    if (gMaterial.useColorOverride != 0)
+    {
+        output.color.rgb = gMaterial.colorOverride;
+    }
+    else if (gMaterial.enableLighting != 0)
     {
 
         // 全Lightの直接光を集計し、Ambientと環境反射は別経路で合成
@@ -118,11 +124,10 @@ PixelShaderOutput main(VertexShaderOutput input)
         output.color.rgb = max(
             ambient + (lightContribution.diffuse + lightContribution.specular) * shadowFactor + environmentReflection,
             0.0f);
-        output.color.a = gMaterial.color.a * input.color.a * textureColor.a;
     }
     else
     {
-        output.color = gMaterial.color * input.color * textureColor;
+        output.color.rgb = albedo;
     }
 
     if (output.color.a <= 0.0f)

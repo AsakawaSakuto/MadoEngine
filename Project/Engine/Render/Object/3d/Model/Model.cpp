@@ -362,6 +362,13 @@ void Model::SetLightingEnabled(bool enabled) {
 	}
 }
 
+void Model::SetColorOverride(const std::optional<Vector3>& color) {
+	materialData_.useColorOverride = color.has_value();
+	if (color.has_value()) {
+		materialData_.colorOverride = *color;
+	}
+}
+
 void Model::SetDirectionalLight(const DirectionalLight& light) {
 	directionalLight_ = light;
 	directionalLight_.direction = NormalizeLightDirection(light.direction);

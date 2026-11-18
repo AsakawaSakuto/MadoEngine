@@ -43,10 +43,11 @@ struct ModelMaterial {
     Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};             // 色
     int32_t enableLighting = true;                        // ライティングの有効化
     int32_t useEnvironmentMap = 0;                        // 環境マップの使用
-    float pad1[2];
+    int32_t useColorOverride = 0;                        // RGB色の上書き
+    float pad1;
     Matrix4x4 uvTransformMatrix = Matrix::MakeIdentity(); // UV変換行列
     float shininess = 64.0f;                              // 光沢度
-    float pad2[3];
+    Vector3 colorOverride;                              // 上書きするRGB色
 };
 
 struct ModelTransformationMatrix {

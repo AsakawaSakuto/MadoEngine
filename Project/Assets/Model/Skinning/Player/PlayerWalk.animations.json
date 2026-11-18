@@ -1,58 +1,58 @@
 {
-  "model": "walk.gltf",
+  "model": "PlayerWalk.gltf",
   "defaultClip": "Idle",
   "clips": {
     "Idle": {
-      "file": "walk.gltf",
+      "file": "PlayerIdle.gltf",
       "index": 0,
       "loop": true,
-      "playbackSpeed": 0.0,
+      "playbackSpeed": 1.0,
       "blendDuration": 0.15
     },
-    "Walk": {
-      "file": "walk.gltf",
+    "PlayerWalk": {
+      "file": "PlayerWalk.gltf",
       "index": 0,
       "loop": true,
       "playbackSpeed": 1.0,
       "blendDuration": 0.15
     },
     "Crouching": {
-      "file": "Crouching.gltf",
+      "file": "PlayerCrouching.gltf",
       "index": 0,
       "loop": true,
       "playbackSpeed": 1.0,
       "blendDuration": 0.12
     },
-    "Jump": {
-      "file": "jump.gltf",
+    "PlayerJump": {
+      "file": "PlayerJump.gltf",
       "index": 0,
       "loop": false,
       "playbackSpeed": 1.0,
       "blendDuration": 0.1
     },
     "Climbing": {
-      "file": "Climbing.gltf",
+      "file": "PlayerClimbing.gltf",
       "index": 0,
       "loop": true,
       "playbackSpeed": 1.0,
       "blendDuration": 0.12
     },
     "Landing": {
-      "file": "landing.gltf",
+      "file": "Playerlanding.gltf",
       "index": 0,
       "loop": false,
       "playbackSpeed": 1.0,
       "blendDuration": 0.08
     },
     "Dash": {
-      "file": "Dash.gltf",
+      "file": "../Dash.gltf",
       "index": 0,
       "loop": false,
       "playbackSpeed": 1.0,
       "blendDuration": 0.08
     },
     "Die": {
-      "file": "Die.gltf",
+      "file": "PlayerDie.gltf",
       "index": 0,
       "loop": false,
       "playbackSpeed": 1.0,

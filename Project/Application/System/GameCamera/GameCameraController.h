@@ -21,6 +21,11 @@ namespace System {
 		void UpdateTracking(CameraManager& cameraManager, const Vector3& playerPosition,
 			float gameDeltaTime, bool isInputEnabled);
 
+		/// @brief ゲーム進行と入力機器に応じてマウスの相対入力モードを同期
+		/// @param cameraManager TPS Cameraの所有先
+		/// @param isEnabled カーソルの中央固定を許可する場合はtrue
+		void UpdateMouseRelativeMode(const CameraManager& cameraManager, bool isEnabled);
+
 		/// @brief Editorの選択状態に追従してデバッグCamera切り替え入力を処理
 		/// @param cameraManager 切り替え対象のCamera所有先
 		void UpdateSwitchInput(CameraManager& cameraManager);

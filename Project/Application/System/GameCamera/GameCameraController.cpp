@@ -66,6 +66,19 @@ namespace System {
 		cameraManager.Update(gameDeltaTime);
 	}
 
+	void GameCameraController::UpdateMouseRelativeMode(const CameraManager& cameraManager, bool isEnabled) {
+		MadoEngine::InputDevice::Mouse* mouse = MyInput::GetMouse();
+		if (!mouse) {
+			return;
+		}
+
+		// ゲームパッド接続中はTPSのマウス入力と同じ条件でカーソルを解放
+		const TPS_Camera* tpsCamera = cameraManager.TryGetCamera<TPS_Camera>(tpsCameraHandle_);
+		const MadoEngine::InputDevice::GamePad* gamePad = MyInput::GetGamePad();
+		const bool isGamePadConnected = gamePad && gamePad->IsConnected();
+		mouse->SetRelativeMode(isEnabled && tpsCamera && tpsCamera->GetUseMouseInput() && !isGamePadConnected);
+	}
+
 	void GameCameraController::UpdateSwitchInput(CameraManager& cameraManager) {
 
 		// EditorやJson復元後のActive Cameraを基準に次の切り替え先を決定

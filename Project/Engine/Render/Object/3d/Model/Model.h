@@ -120,6 +120,10 @@ public:
 	/// @return 有効な場合はtrue
 	bool IsLightingEnabled() const { return enableLighting_; }
 
+	/// @brief 透明度を維持したままモデルの描画色を一時的に上書き
+	/// @param color 上書きするRGB色、std::nulloptの場合は上書きを解除
+	void SetColorOverride(const std::optional<Vector3>& color);
+
 	/// @brief 平行光源を設定
 	/// @param light モデル描画に使用する平行光源
 	void SetDirectionalLight(const DirectionalLight& light);

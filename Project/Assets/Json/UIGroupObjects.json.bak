@@ -520,6 +520,458 @@
         {
             "children": [
                 {
+                    "name": "GamePad",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_e5c2c38d-f7eb-4bc0-b203-7f33b9f19561",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_A",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            58.0,
+                            -1.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_1258e800-36e4-4149-8f87-9f0b0acd4442",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_B",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            79.0,
+                            -22.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_61594e8b-884c-475b-9c4a-733cf395d298",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_X",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            35.0,
+                            -22.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_d47b6d90-d940-4278-95fc-c478a1b93427",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_Y",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            58.0,
+                            -44.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_50c4e4d2-473a-4257-8a46-7ca9d0ff9372",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Home",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -18.5,
+                            -52.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.200000047683716,
+                            2.200000047683716
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_2975da99-37a6-4458-b992-a60dd2d44d15",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_Cross",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -72.0,
+                            1.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_0672a049-54ba-4d80-adcf-12a73a64b25f",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_StickR",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            13.0,
+                            13.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.5,
+                            2.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_6b7d5af2-4808-46ef-a6f3-1d2dfb26fc0e",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_StickL",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -95.0,
+                            -31.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.5,
+                            2.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_6d580819-81a8-47eb-990d-9bae60e4f0ea",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_R",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            58.0,
+                            -74.0
+                        ],
+                        "rotation": 0.20071285963058472,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_5f5035ee-1c70-4bd7-866f-d1a1016e34be",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_L",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -91.0,
+                            -68.0
+                        ],
+                        "rotation": -0.16580627858638763,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_090a0a30-3f87-4a4d-a021-aff5eb330a3b",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_Start",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            2.0,
+                            -26.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_508368d3-f86d-4db6-b865-aaa6f51faef7",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Pad_End",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -40.0,
+                            -26.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_e840b400-0c32-426e-969f-f7b739534ed9",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Line_A",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            86.0,
+                            24.0
+                        ],
+                        "rotation": 0.7853981852531433,
+                        "scale": [
+                            10.0,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_ecc2bff1-0a1e-4d83-99ba-d1414e302e32",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Text_A",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            105.0,
+                            31.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_19fc3c18-0e36-44cd-9976-ab30f61fbbc1",
+                    "type": "Text"
+                },
+                {
+                    "name": "Line_B",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            100.0,
+                            -21.0
+                        ],
+                        "rotation": -1.2217304706573486,
+                        "scale": [
+                            7.0,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_5d2cd6a1-f446-4925-a377-8d143cec6735",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Text_B",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            105.0,
+                            -50.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_7d3ed391-0216-4d0e-bca0-9c4c2ef47672",
+                    "type": "Text"
+                },
+                {
+                    "name": "Line_StickR",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            50.0,
+                            46.0
+                        ],
+                        "rotation": 0.7853981852531433,
+                        "scale": [
+                            10.0,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_c69b69e6-4a54-4d76-81c2-0953c6f968c7",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Text_StickR",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            65.0,
+                            59.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_5d399a78-53d7-4244-8baf-40d91e7736ae",
+                    "type": "Text"
+                },
+                {
+                    "name": "Line_StickL",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -90.0,
+                            5.0
+                        ],
+                        "rotation": 2.356194496154785,
+                        "scale": [
+                            10.0,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_c2a7fe26-1f15-4a01-9647-4b3c70c65e65",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Text_StickL",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -144.0,
+                            16.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_2e0a05a5-db60-4b5c-8765-1e6358b6f977",
+                    "type": "Text"
+                },
+                {
+                    "name": "Line_R",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            60.0,
+                            -72.0
+                        ],
+                        "rotation": -2.5307273864746094,
+                        "scale": [
+                            10.0,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_34b47adc-7029-4a02-a3f9-39d49d8b442e",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Line_L",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -60.0,
+                            -72.0
+                        ],
+                        "rotation": 2.5307273864746094,
+                        "scale": [
+                            10.0,
+                            0.5
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_670e0dd6-1bef-490d-b958-6344fa80fa8a",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "Text_LR",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -47.0,
+                            -88.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.0,
+                            1.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupText_3d69fed7-78bd-44db-b44c-1b1811d3ce53",
+                    "type": "Text"
+                }
+            ],
+            "id": "1fb0d4b3-c931-4a00-a530-b8472bb490df",
+            "name": "Controller",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    1090.0,
+                    600.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [
+                {
                     "name": "EnemyCountText",
                     "state": {
                         "opacity": 1.0,
@@ -1381,7 +1833,7 @@
                     1.0,
                     1.0
                 ],
-                "visible": true
+                "visible": false
             }
         },
         {
@@ -1462,7 +1914,7 @@
                     "state": {
                         "opacity": 1.0,
                         "position": [
-                            170.0,
+                            174.0,
                             86.0
                         ],
                         "rotation": 0.0,

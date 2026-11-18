@@ -1,5 +1,4 @@
 #pragma once
-#include "Math/Vector2.h"
 #include "Render/Object/ObjectHandle.h"
 
 namespace MadoEngine {
@@ -30,7 +29,7 @@ namespace UI::Game {
 		void Finalize();
 
 	private:
-		/// @brief 名前からTextを再取得してEditor再生成後の基準配置を保持
+		/// @brief 名前からTextを取得して保存用の基準配置を確保
 		/// @return Game所属のText、存在しない場合はnullptr
 		MadoEngine::Text* ResolveText();
 
@@ -39,8 +38,6 @@ namespace UI::Game {
 		void Stop(MadoEngine::Text& text);
 
 		MadoEngine::TextHandle text_{};
-		Vector2 basePosition_{};
-		Vector2 baseScale_{ 1.0f, 1.0f };
 		float elapsedTime_ = 0.0f;
 		float displayLifeTime_ = 0.3f;      // 上昇と初期拡大の収束に使用する時間（秒）
 		float shrinkDuration_ = 0.1f;       // 上昇後に縮小して消える時間（秒）

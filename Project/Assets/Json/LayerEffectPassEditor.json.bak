@@ -26,6 +26,48 @@
             "effectType": "DepthOutline",
             "enabled": true,
             "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_3",
+            "layerEffectStage": "Scene",
+            "name": "MapObjectOutline",
+            "parameters": {
+                "ColorA": 1.0,
+                "ColorB": 1.0,
+                "ColorG": 1.0,
+                "ColorR": 1.0,
+                "DepthSensitivity": 80.0,
+                "EdgeThreshold": 0.004999999888241291,
+                "Intensity": 1.0,
+                "Thickness": 1.5
+            },
+            "scope": "Layer",
+            "targetLayerMask": 8
+        },
+        {
+            "effectShaderKey": "PostEffect/Bloom.PS",
+            "effectType": "Bloom",
+            "enabled": true,
+            "ignoreDepthForMask": false,
+            "key": "LayerEffectPass_5",
+            "layerEffectStage": "Scene",
+            "name": "MapObjectBloom",
+            "parameters": {
+                "BloomColorA": 1.0,
+                "BloomColorB": 1.0,
+                "BloomColorG": 1.0,
+                "BloomColorR": 1.0,
+                "Intensity": 1.0,
+                "Radius": 3.5,
+                "SoftKnee": 1.0,
+                "Threshold": 0.5
+            },
+            "scope": "Layer",
+            "targetLayerMask": 8
+        },
+        {
+            "effectShaderKey": "PostEffect/DepthOutline.PS",
+            "effectType": "DepthOutline",
+            "enabled": false,
+            "ignoreDepthForMask": false,
             "key": "LayerEffectPass_1",
             "layerEffectStage": "Scene",
             "name": "EnemyOutline",
@@ -75,7 +117,7 @@
                 "DepthSensitivity": 80.0,
                 "EdgeThreshold": 0.004999999888241291,
                 "Intensity": 1.0,
-                "Thickness": 1.0
+                "Thickness": 0.5
             },
             "scope": "Layer",
             "targetLayerMask": 16
@@ -96,48 +138,6 @@
             },
             "scope": "Layer",
             "targetLayerMask": 16
-        },
-        {
-            "effectShaderKey": "PostEffect/DepthOutline.PS",
-            "effectType": "DepthOutline",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_3",
-            "layerEffectStage": "Scene",
-            "name": "MapObjectOutline",
-            "parameters": {
-                "ColorA": 1.0,
-                "ColorB": 1.0,
-                "ColorG": 1.0,
-                "ColorR": 1.0,
-                "DepthSensitivity": 80.0,
-                "EdgeThreshold": 0.004999999888241291,
-                "Intensity": 1.0,
-                "Thickness": 1.5
-            },
-            "scope": "Layer",
-            "targetLayerMask": 8
-        },
-        {
-            "effectShaderKey": "PostEffect/Bloom.PS",
-            "effectType": "Bloom",
-            "enabled": true,
-            "ignoreDepthForMask": false,
-            "key": "LayerEffectPass_5",
-            "layerEffectStage": "Scene",
-            "name": "MapObjectBloom",
-            "parameters": {
-                "BloomColorA": 1.0,
-                "BloomColorB": 1.0,
-                "BloomColorG": 1.0,
-                "BloomColorR": 1.0,
-                "Intensity": 1.0,
-                "Radius": 3.5,
-                "SoftKnee": 1.0,
-                "Threshold": 0.5
-            },
-            "scope": "Layer",
-            "targetLayerMask": 8
         },
         {
             "effectShaderKey": "PostEffect/PixelArt.PS",

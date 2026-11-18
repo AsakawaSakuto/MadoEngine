@@ -32,6 +32,10 @@ public:
 
 	/// @brief 更新
 	void Update() override;
+
+	/// @brief 保存用の色を保持したまま次の更新まで描画用アルファ値を上書き
+	/// @param alpha 階層の不透明度を適用する前のアルファ値
+	void OverrideRenderAlpha(float alpha);
 	
 	/// @brief 描画
 	void Draw() override;

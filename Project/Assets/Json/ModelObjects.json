@@ -21,9 +21,9 @@
             "model": "Assets/Model/Static/Primitive/Plane2.obj",
             "name": "Interact_x",
             "position": [
-                116.29780578613281,
-                15.101097106933594,
-                101.86844635009766
+                74.20964050292969,
+                17.0,
+                175.75997924804688
             ],
             "receiveLightMask": 1,
             "receiveShadow": false,
@@ -52,9 +52,9 @@
             ],
             "castShadow": false,
             "color": [
-                0.0,
                 1.0,
-                0.12156862765550613,
+                1.0,
+                1.0,
                 0.501960813999176
             ],
             "frustumCulling": true,
@@ -70,14 +70,14 @@
             "receiveLightMask": 1,
             "receiveShadow": false,
             "rotation": [
-                0.3747997581958771,
-                0.4779965877532959,
-                -0.28626903891563416
-            ],
-            "scale": [
                 0.0,
                 0.0,
                 0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
             ],
             "scene": "Game",
             "texture": "white2x2",

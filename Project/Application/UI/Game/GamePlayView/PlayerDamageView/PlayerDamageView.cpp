@@ -48,16 +48,13 @@ namespace UI::Game {
 			return;
 		}
 
-		// 非表示中のEditor配置変更だけを基準へ取り込み、連続被弾で移動量や拡大率の累積を防止
-		if (!isActive_) {
-			basePosition_ = text->GetPosition();
-			baseScale_ = text->GetScale();
-		}
+		// 連続被弾でも編集用配置から再開し、移動量と拡大率の累積を防止
+		Transform2D transform = text->GetAuthoringState().transform;
+		transform.scale *= 1.0f + initialScaleAddition_;
 		elapsedTime_ = 0.0f;
 		isActive_ = true;
 		text->SetText(FormatDamageAmount(damage));
-		text->SetPosition(basePosition_);
-		text->SetScale(baseScale_ * (1.0f + initialScaleAddition_));
+		text->SetTransform(transform);
 		text->SetRuntimeVisible(isVisible_);
 	}
 
@@ -85,9 +82,10 @@ namespace UI::Game {
 		const float displayScale = 1.0f + initialScaleAddition_ * (1.0f - displayProgress);
 		const float shrinkProgress = std::clamp(
 			(elapsedTime_ - displayLifeTime_) / shrinkDuration_, 0.0f, 1.0f);
-		const float scale = displayScale * (1.0f - shrinkProgress);
-		text->SetPosition(basePosition_ - Vector2{ 0.0f, riseDistance_ * displayProgress });
-		text->SetScale(baseScale_ * scale);
+		Transform2D transform = text->GetAuthoringState().transform;
+		transform.translate.y -= riseDistance_ * displayProgress;
+		transform.scale *= displayScale * (1.0f - shrinkProgress);
+		text->SetTransform(transform);
 		text->SetRuntimeVisible(isVisible_);
 	}
 
@@ -120,19 +118,21 @@ namespace UI::Game {
 			return nullptr;
 		}
 
-		// Json再読込で世代が変わった場合は前の演出を中断し、新しいEditor配置を基準に再開
+		// Json再読込で世代が変わった場合は前の演出を中断
 		if (text_ != handle) {
 			Finalize();
-			text_ = handle;
-			basePosition_ = text->GetPosition();
-			baseScale_ = text->GetScale();
 		}
+
+		// 単独のTextでも編集用配置を保持し、再生中の座標と拡縮率がJsonへ保存されることを防止
+		if (!text->HasAuthoringState() && !text->SetAuthoringState(text->GetAuthoringState())) {
+			return nullptr;
+		}
+		text_ = handle;
 		return text;
 	}
 
 	void PlayerDamageView::Stop(MadoEngine::Text& text) {
-		text.SetPosition(basePosition_);
-		text.SetScale(baseScale_);
+		text.SetTransform(text.GetAuthoringState().transform);
 		text.SetRuntimeVisible(false);
 		elapsedTime_ = 0.0f;
 		isActive_ = false;
