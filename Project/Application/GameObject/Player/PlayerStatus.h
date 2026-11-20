@@ -66,6 +66,11 @@ namespace Player {
 		float maxSlideSpeed_ = 25.0f;          // スライディングの最大速度
 		float slideFriction_ = 2.0f;           // スライディング中の摩擦
 		float jumpMoveBoostSpeed_ = 3.0f;      // ジャンプ時の水平初速
+		float bunnyHopWindow_ = 0.15f;        // 着地後のバニーホップ受付時間
+		float bunnyHopSpeedBoost_ = 2.0f;     // バニーホップ成立時の加速量
+		float bunnyHopMaxSpeed_ = 20.0f;      // バニーホップで加速できる水平速度の上限
+		float bunnyHopGroundFriction_ = 12.0f; // 受付時間を過ぎた地上での水平初速の減速量
+		float bunnyHopSteerRate_ = 5.0f;      // バニーホップ中の入力方向への追従速度
 		float wallClimbSpeed_ = 2.0f;          // Block側面を上る速度
 		float wallClimbMaxDuration_ = 3.0f;    // 着地までに壁登りできる最大時間
 		float jumpCount_ = 1.0f;			   // ジャンプ可能回数

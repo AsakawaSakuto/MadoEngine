@@ -57,6 +57,24 @@
                     "type": "Sprite"
                 },
                 {
+                    "name": "IconBackground",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            378.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            7.25,
+                            7.25
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_08820456-0ab1-4dd8-a408-2dc1f5a3242a",
+                    "type": "Sprite"
+                },
+                {
                     "name": "Icon",
                     "state": {
                         "opacity": 1.0,
@@ -66,12 +84,30 @@
                         ],
                         "rotation": 0.0,
                         "scale": [
-                            4.0,
-                            4.0
+                            2.5,
+                            2.5
                         ],
                         "visible": true
                     },
                     "target": "UIGroupSprite_ddaf91c8-d1ea-4d17-99f2-5ec902faa49b",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            378.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.0,
+                            2.0
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_df22bc8d-c231-436b-b646-53ab918f3fee",
                     "type": "Sprite"
                 },
                 {
@@ -80,7 +116,7 @@
                         "opacity": 1.0,
                         "position": [
                             640.0,
-                            264.0
+                            270.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -203,24 +239,6 @@
                     "type": "Sprite"
                 },
                 {
-                    "name": "IconBorder",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            -70.0,
-                            -135.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.2000000476837158,
-                            1.2000000476837158
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
-                    "type": "Sprite"
-                },
-                {
                     "name": "IconBackground",
                     "state": {
                         "opacity": 1.0,
@@ -321,7 +339,7 @@
                         "opacity": 1.0,
                         "position": [
                             0.0,
-                            155.0
+                            145.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -332,6 +350,24 @@
                     },
                     "target": "UIGroupText_cf5eb8d9-cef9-41e9-bd2c-d0e365bb9bd0",
                     "type": "Text"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.2000000476837158,
+                            1.2000000476837158
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
+                    "type": "Sprite"
                 }
             ],
             "id": "60d55a5a-6442-4f76-8899-52fd69e55ca5",
@@ -359,7 +395,7 @@
                         "opacity": 1.0,
                         "position": [
                             0.0,
-                            5.0
+                            1.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -1440,7 +1476,7 @@
                         "opacity": 1.0,
                         "position": [
                             0.0,
-                            155.0
+                            145.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -1496,7 +1532,7 @@
                         "opacity": 1.0,
                         "position": [
                             0.0,
-                            5.0
+                            1.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -2351,24 +2387,6 @@
                     "type": "Sprite"
                 },
                 {
-                    "name": "IconBorder",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            -70.0,
-                            -135.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.2000000476837158,
-                            1.2000000476837158
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
-                    "type": "Sprite"
-                },
-                {
                     "name": "IconBackground",
                     "state": {
                         "opacity": 1.0,
@@ -2469,7 +2487,7 @@
                         "opacity": 1.0,
                         "position": [
                             0.0,
-                            155.0
+                            145.0
                         ],
                         "rotation": 0.0,
                         "scale": [
@@ -2480,6 +2498,24 @@
                     },
                     "target": "UIGroupText_469d1f53-4914-4726-af71-5f275422554e",
                     "type": "Text"
+                },
+                {
+                    "name": "IconBorder",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            -70.0,
+                            -135.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            1.2000000476837158,
+                            1.2000000476837158
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
+                    "type": "Sprite"
                 }
             ],
             "id": "190c2c8a-d566-4ceb-8b47-eb43d7f83827",
@@ -2507,7 +2543,7 @@
                         "opacity": 1.0,
                         "position": [
                             0.0,
-                            5.0
+                            1.0
                         ],
                         "rotation": 0.0,
                         "scale": [

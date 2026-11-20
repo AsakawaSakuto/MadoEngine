@@ -39,6 +39,7 @@ namespace UI::Game {
 
 	void GameHud::Initialize(int weaponSlotCount, const Relic::System& relicSystem,
 		const MapMiniMapData& miniMapData, std::uint32_t gameSeed) {
+		controllerInputFeedback_.Reset();
 		isVisible_ = true;
 		isWorldViewsVisible_ = false;
 		massiveEnemySpawnTimer_.Reset();
@@ -69,6 +70,7 @@ namespace UI::Game {
 	}
 
 	void GameHud::Finalize() {
+		controllerInputFeedback_.Reset();
 		massiveEnemySpawnTimer_.Reset();
 		isMassiveEnemySpawnJustStarted_ = false;
 		UpdateMassiveEnemySpawnPresentation(0.0f);
@@ -96,6 +98,7 @@ namespace UI::Game {
 	void GameHud::SetVisible(bool isVisible) {
 		ApplyStaticVisibility(isVisible);
 		if (!isVisible) {
+			controllerInputFeedback_.Reset();
 			UpdateUpgradePresentation(0.0f, false);
 			UpdatePausePresentation(false);
 		}
@@ -140,6 +143,7 @@ namespace UI::Game {
 		UpdateMassiveEnemySpawnPresentation(deltaTime);
 		UpdateGameStartPresentation(state.gameStartProgress, state.gamePlayElapsedTime);
 		ApplyStaticVisibility(isVisible_);
+		controllerInputFeedback_.Update();
 		UpdateUpgradePresentation(deltaTime, isVisible_ && state.isWaitingUpgradeSelection);
 		UpdatePausePresentation(state.isPaused, state.pauseMenuSelectedIndex);
 	}
@@ -445,6 +449,14 @@ namespace UI::Game {
 		if (rerollGroup) {
 			if (MadoEngine::Text* rerollCoinText = rerollGroup->TryGetText("RerollMoneyText")) {
 				rerollCoinText->SetText(std::format("{}", state.upgradeRerollCost));
+
+				// 支払い可否へ文字色を同期し、所持金の回復時は透明度を維持したまま通常色へ復帰
+				Vector4 color{ 1.0f, 1.0f, 1.0f, rerollCoinText->GetColor().w };
+				if (state.playerStatus.currentMoney < static_cast<float>(state.upgradeRerollCost)) {
+					color.y = 0.0f;
+					color.z = 0.0f;
+				}
+				rerollCoinText->SetColor(color);
 			}
 		}
 

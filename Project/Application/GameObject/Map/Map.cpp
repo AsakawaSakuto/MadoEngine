@@ -41,10 +41,14 @@ void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("MapBlock.Slope");
 	MyInstancedModel::Destroy("MapBlock.Ground.Occluded");
 	MyInstancedModel::Destroy("MapBlock.Slope.Occluded");
-	MyInstancedModel::Destroy("Jar.Small.Normal");
-	MyInstancedModel::Destroy("Jar.Small.Outline");
-	MyInstancedModel::Destroy("Jar.Big.Normal");
-	MyInstancedModel::Destroy("Jar.Big.Outline");
+	MyInstancedModel::Destroy("Jar.Small.Money.Normal");
+	MyInstancedModel::Destroy("Jar.Small.Money.Outline");
+	MyInstancedModel::Destroy("Jar.Small.Exp.Normal");
+	MyInstancedModel::Destroy("Jar.Small.Exp.Outline");
+	MyInstancedModel::Destroy("Jar.Big.Money.Normal");
+	MyInstancedModel::Destroy("Jar.Big.Money.Outline");
+	MyInstancedModel::Destroy("Jar.Big.Exp.Normal");
+	MyInstancedModel::Destroy("Jar.Big.Exp.Outline");
 	MyInstancedModel::Destroy("Chest.Normal");
 	MyInstancedModel::Destroy("Chest.Outline");
 	MyInstancedModel::Destroy("Karma.Normal");

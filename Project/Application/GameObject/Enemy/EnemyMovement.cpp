@@ -146,13 +146,19 @@ namespace Enemy {
 		transform.translate.y = std::clamp(transform.translate.y, mapLimit_.min.y, mapLimit_.max.y);
 		transform.translate.z = std::clamp(transform.translate.z, mapLimit_.min.z, mapLimit_.max.z);
 
+		FaceTowardDirection(direction, transform);
+
+		// Map下限まで落下したEnemyをManager側でKillするため生存可能位置を返却
+		return transform.translate.y > mapLimit_.min.y;
+	}
+
+	void Movement::FaceTowardDirection(const Vector3& direction, Transform3D& transform) {
+
+		// 水平位置が重なる場合は向きを維持して不定な回転を防止
 		if (GetHorizontalLengthSq(direction) > kDirectionEpsilon) {
 			faceYaw_ = std::atan2(direction.x, direction.z);
 			transform.rotate.y = faceYaw_;
 		}
-
-		// Map下限まで落下したEnemyをManager側でKillするため生存可能位置を返却
-		return transform.translate.y > mapLimit_.min.y;
 	}
 
 	void Movement::ApplyKnockback(const Vector3& direction, float power) {

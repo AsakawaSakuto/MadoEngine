@@ -10,11 +10,11 @@ namespace Projectile {
 		/// @brief SnowCrystalのデストラクタ
 		~SnowCrystal() override;
 
-		/// @brief SnowCrystalの発射方向と初速度を初期化
+		/// @brief SnowCrystalの発射方向と初速度、斜面に沿った姿勢を初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
-		/// @brief 減速による折り返し、回転と寿命を更新
+		/// @brief 減速による折り返し、斜面に沿った回転と寿命を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
@@ -29,6 +29,8 @@ namespace Projectile {
 
 		MadoEngine::ModelHandle model_{};
 		std::string objectName_;
+		Vector3 groundNormal_ = { 0.0f, 1.0f, 0.0f }; // 発射時の斜面に沿った回転軸
+		float rotationYaw_ = 0.0f; // 斜面上の回転角度
 		float currentSpeed_ = 0.0f;
 	};
 }

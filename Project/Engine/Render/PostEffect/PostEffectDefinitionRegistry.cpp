@@ -250,10 +250,20 @@ const PostEffectFloatParameterDefinition kToneMappingParameters[] = {
 	{ "ACESBlend", "Filmic ACES適用率", offsetof(ToneMappingParameters, acesBlend), 0.0f, 1.0f, 0.01f },
 };
 
+const std::string_view kVignetteShapeOptions[] = {
+	"楕円",
+	"長方形",
+};
+
 const PostEffectFloatParameterDefinition kVignetteParameters[] = {
+	{ "Shape", "形状", offsetof(VignetteParameters, shape), 0.0f, 1.0f, 1.0f, kVignetteShapeOptions, 2 },
 	{ "Intensity", "強度", offsetof(VignetteParameters, intensity), 0.0f, 1.0f, 0.01f },
 	{ "InnerRadius", "内側半径", offsetof(VignetteParameters, innerRadius), 0.0f, 1.0f, 0.01f },
 	{ "OuterScale", "外側倍率", offsetof(VignetteParameters, outerScale), 1.0f, 4.0f, 0.01f },
+	{ "CenterX", "中心X", offsetof(VignetteParameters, centerX), 0.0f, 1.0f, 0.01f },
+	{ "CenterY", "中心Y", offsetof(VignetteParameters, centerY), 0.0f, 1.0f, 0.01f },
+	{ "ScaleX", "スケールX", offsetof(VignetteParameters, scaleX), 0.01f, 4.0f, 0.01f },
+	{ "ScaleY", "スケールY", offsetof(VignetteParameters, scaleY), 0.01f, 4.0f, 0.01f },
 	{ "ColorR", "色R", VectorComponentOffset(offsetof(VignetteParameters, color), 0), 0.0f, 1.0f, 0.01f },
 	{ "ColorG", "色G", VectorComponentOffset(offsetof(VignetteParameters, color), 1), 0.0f, 1.0f, 0.01f },
 	{ "ColorB", "色B", VectorComponentOffset(offsetof(VignetteParameters, color), 2), 0.0f, 1.0f, 0.01f },

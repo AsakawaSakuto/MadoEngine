@@ -59,7 +59,7 @@ namespace Player {
 			&transform_.translate, 0.0f);
 
 		Sphere s2;
-		s2.radius = 2.5f;
+		s2.radius = 3.25f;
 		expGetSphere_ = s2;
 
 		Sphere s3;

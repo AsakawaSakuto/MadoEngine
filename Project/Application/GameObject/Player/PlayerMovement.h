@@ -133,8 +133,17 @@ namespace Player {
 
 	private:
 
+		/// @brief Camera基準の移動入力と水平初速による移動を更新
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
+		/// @param camera 移動方向の基準Camera
+		/// @param input Playerの移動操作入力
 		void Move(float deltaTime, Transform3D& transform, const Camera* camera, const MoveInput& input);
 
+		/// @brief ジャンプ入力と重力による上下移動を更新
+		/// @param deltaTime 1フレームの経過時間
+		/// @param transform 更新対象のTransform
+		/// @param input Playerの移動操作入力
 		void Jump(float deltaTime, Transform3D& transform, const MoveInput& input);
 
 		/// @brief Slope上を移動しているときに足元を斜面へ追従
@@ -146,6 +155,29 @@ namespace Player {
 		/// @param deltaTime 1フレームの経過時間
 		/// @param transform 更新対象のTransform
 		void ApplyJumpMoveBoost(float deltaTime, Transform3D& transform);
+
+		/// @brief 着地後の受付時間と受付終了後の水平減速を更新
+		/// @param deltaTime 1フレームの経過時間
+		void UpdateBunnyHopState(float deltaTime);
+
+		/// @brief 着地直後の再Jumpへ進行方向の加速を適用
+		/// @param input Playerの移動操作入力
+		/// @return バニーホップが成立する場合はtrue
+		bool TryAddBunnyHopBoost(const MoveInput& input);
+
+		/// @brief バニーホップの水平初速を維持した入力方向への旋回
+		/// @param deltaTime 1フレームの経過時間
+		/// @param moveDir Camera基準の入力を変換したワールド空間の水平移動方向
+		void UpdateBunnyHopSteering(float deltaTime, const Vector3& moveDir);
+
+		/// @brief バニーホップ継続中の歩行と水平初速の合算速度を制限
+		/// @param moveVelocity 移動入力による水平速度
+		void ClampBunnyHopSpeed(const Vector3& moveVelocity);
+
+		/// @brief ジャンプ由来の水平初速へ方向を維持した摩擦を適用
+		/// @param deltaTime 減速対象の経過時間
+		/// @param friction 1秒あたりの減速量
+		void ApplyJumpMoveFriction(float deltaTime, float friction);
 
 		/// @brief 移動入力中のジャンプに水平初速を加算
 		/// @param input Playerの移動操作入力
@@ -180,6 +212,9 @@ namespace Player {
 		/// @return Block側面で前進を阻害された場合はtrue
 		bool IsHorizontalMoveBlocked(const Vector3& currentPosition) const;
 
+		/// @brief 壁登り中の向きを基準に背面方向へのJumpを開始
+		void StartWallJump();
+
 		/// @brief 壁登り時間切れによる強制Jumpを開始
 		void StartWallClimbTimeoutJump();
 
@@ -205,6 +240,9 @@ namespace Player {
 		bool isWallClimbing_ = false;
 		bool hasWallClimbStartedSinceLanding_ = false;
 		bool wasGroundContact_ = true;
+		bool isBaseGroundContact_ = false;
+		bool hasBunnyHopLanding_ = false;
+		bool isBunnyHopMomentumActive_ = false;
 
 		float groundY_ = 0.0f;               // 接地している地面のY座標
 		float slopeSnapDistance_ = 1.0f;     // Slopeに足が届いているとみなす距離
@@ -212,6 +250,7 @@ namespace Player {
 		float slideReleaseFriction_ = 10.0f; // スライディング解除時の摩擦
 		float remainingJumpCount_ = 0.0f;    // 残りジャンプ回数
 		float wallClimbElapsedTime_ = 0.0f;  // 着地後から累積した壁登り時間
+		float timeSinceLanding_ = 0.0f;     // バニーホップ判定用の着地後経過時間
 		float moveSpeedMultiplier_ = 1.0f;   // 外部効果による歩行速度倍率
 		int additionalJumpCount_ = 0;        // 外部効果による追加ジャンプ回数
 

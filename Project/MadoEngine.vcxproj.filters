@@ -573,6 +573,9 @@
     <ClCompile Include="Application\UI\Game\Chest\ChestOpeningPresentation.cpp">
       <Filter>Application\UI\Game\Chest</Filter>
     </ClCompile>
+    <ClCompile Include="Application\UI\Game\Control\ControllerInputFeedback.cpp">
+      <Filter>Application\UI\Game\Control</Filter>
+    </ClCompile>
     <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp">
       <Filter>Application\UI\Game\Control</Filter>
     </ClCompile>
@@ -1388,6 +1391,9 @@
     </ClInclude>
     <ClInclude Include="Application\UI\Game\Chest\ChestOpeningPresentation.h">
       <Filter>Application\UI\Game\Chest</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\UI\Game\Control\ControllerInputFeedback.h">
+      <Filter>Application\UI\Game\Control</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Game\Control\InputControlFeedback.h">
       <Filter>Application\UI\Game\Control</Filter>

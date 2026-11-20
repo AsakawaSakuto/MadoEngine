@@ -18,6 +18,7 @@ constexpr const char* kRelicGroupName = "Relic";
 constexpr const char* kCardViewGroupName = "CardView";
 constexpr std::array<const char*, 3> kCardPanelNames = { "Overlay", "Border", "Panel" };
 constexpr const char* kCardIconName = "Icon";
+constexpr const char* kCardIconBorderName = "IconBorder";
 constexpr std::array<const char*, 3> kCardTextNames = { "Name", "Rarity", "Description" };
 constexpr const char* kDecisionGroupName = "Decision";
 
@@ -51,6 +52,7 @@ namespace UI::Game {
 		panelSprites_.fill({});
 		textHandles_.fill({});
 		iconSprite_ = {};
+		iconBorderSprite_ = {};
 		displayedRelicId_.clear();
 		displayedRevision_ = 0;
 		isVisible_ = false;
@@ -180,6 +182,9 @@ namespace UI::Game {
 		panelSprites_.fill({});
 		textHandles_.fill({});
 		iconSprite_ = {};
+		iconBorderSprite_ = {};
+
+		// Editor再読込で無効化されたHandleを残さず、現在のGroup要素へ再接続
 		auto& groups = MadoEngine::UIGroupManager::GetInstance();
 		const auto relic = groups.Find(kRelicGroupName, SceneType::Game);
 		const auto cardView = groups.FindChildGroup(relic, kCardViewGroupName);
@@ -190,6 +195,8 @@ namespace UI::Game {
 			if (element.type == MadoEngine::UIGroupElementType::Sprite) {
 				if (element.name == kCardIconName) {
 					iconSprite_ = element.sprite;
+				} else if (element.name == kCardIconBorderName) {
+					iconBorderSprite_ = element.sprite;
 				}
 				for (std::size_t index = 0; index < kCardPanelNames.size(); ++index) {
 					if (element.name == kCardPanelNames[index]) {
@@ -213,9 +220,15 @@ namespace UI::Game {
 		displayedRelicId_ = definition.id;
 		const auto& color = GetRarityDefaultColor(definition.rarity);
 		const Vector4 rarityColor{ color[0], color[1], color[2], color[3] };
-		if (Sprite* border = ResolveSprite(panelSprites_[1])) {
-			border->SetColor(rarityColor);
+
+		// カード枠とアイコン枠へ同じレアリティ色を適用
+		for (const auto handle : { panelSprites_[1], iconBorderSprite_ }) {
+			if (Sprite* border = ResolveSprite(handle)) {
+				border->SetColor(rarityColor);
+			}
 		}
+
+		// アイコンと本文だけを同期し、Editorで調整した配置やサイズを維持
 		if (Sprite* icon = ResolveSprite(iconSprite_)) {
 			if (icon->GetTextureName() != definition.textureName && !icon->SetTexture(definition.textureName)) {
 				(void)icon->SetTexture("None");
@@ -260,13 +273,15 @@ namespace UI::Game {
 			overlay->SetRuntimeVisible(isBackgroundEnabled_);
 		}
 
-		// 保存済みの描画要素もHUDより手前へ並べ、暗幕・枠・パネル・アイコンの順序を保証
+		// Groupの登録順で前面化し、HUDより手前で背景・アイコン・フレームの重なりを維持
 		auto& sprites = MadoEngine::SpriteManager::GetInstance();
 		if (relicGroup->IsVisibleInHierarchy()) {
-			for (const auto handle : panelSprites_) {
-				sprites.MoveToFront(handle);
+			const auto cardView = groupManager.FindChildGroup(relicHandle, kCardViewGroupName);
+			for (const auto& element : groupManager.GetElements(cardView)) {
+				if (element.resolved && element.type == MadoEngine::UIGroupElementType::Sprite) {
+					sprites.MoveToFront(element.sprite);
+				}
 			}
-			sprites.MoveToFront(iconSprite_);
 		}
 		const auto decisionHandle = groupManager.FindChildGroup(relicHandle, kDecisionGroupName);
 

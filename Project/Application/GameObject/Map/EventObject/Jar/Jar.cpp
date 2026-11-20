@@ -6,12 +6,30 @@ namespace {
 
 /// @brief Jarのサイズに対応するモデル名を取得
 /// @param size Jarのサイズ
+/// @param type Jarの種別
 /// @return 読み込むモデル名
-const char* GetJarModelAssetName(JarSize size) {
+const char* GetJarModelAssetName(JarSize size, JarType type) {
 	switch (size) {
 	case JarSize::Big:
-		return "maxJar";
+		
+		switch (type) {
+		case JarType::Exp:
+			return "maxJarExp";
+		case JarType::Money:
+		default:
+			return "maxJarMoney";
+		}
+
 	case JarSize::Small:
+
+		switch (type) {
+		case JarType::Exp:
+			return "minJarExp";
+		case JarType::Money:
+		default:
+			return "minJarMoney";
+		}
+
 	default:
 		return "minJar";
 	}
@@ -19,22 +37,31 @@ const char* GetJarModelAssetName(JarSize size) {
 
 /// @brief Jarのインスタンス描画バッチ名を取得
 /// @param size Jarのサイズ
+/// @param type Jarの種別
 /// @param isOutline アウトライン表示用の場合はtrue
 /// @return インスタンス描画バッチ名
-const char* GetJarBatchName(JarSize size, bool isOutline) {
+std::string GetJarBatchName(JarSize size, JarType type, bool isOutline) {
+
+	// モデルアセットが異なるJarを共有しないようサイズと種別でBatchを分離
+	std::string batchName = "Jar.";
 	if (size == JarSize::Big) {
-		if (isOutline) {
-			return "Jar.Big.Outline";
-		} else {
-			return "Jar.Big.Normal";
-		}
+		batchName += "Big.";
+	} else {
+		batchName += "Small.";
+	}
+
+	if (type == JarType::Exp) {
+		batchName += "Exp.";
+	} else {
+		batchName += "Money.";
 	}
 
 	if (isOutline) {
-		return "Jar.Small.Outline";
+		batchName += "Outline";
 	} else {
-		return "Jar.Small.Normal";
+		batchName += "Normal";
 	}
+	return batchName;
 }
 
 /// @brief Jarの取得報酬量を計算
@@ -81,19 +108,14 @@ void Jar::Initialize(const InitializeDesc& desc) {
 
 	MyCollider::RegisterCollider(colliderName_, CollisionTag::MapEventObject, &colliderShape_, &transform_.translate, 0.0f);
 
-	Vector4 color = { 0.0f, 0.0f, 1.0f, 1.0f };
-	if (type_ == JarType::Money) {
-		color = { 1.0f, 1.0f, 0.0f, 1.0f };
-	}
-
 	const MadoEngine::InstancedModelHandle normalBatchHandle = MyInstancedModel::GetOrCreate(
-		GetJarBatchName(size_, false),
-		GetJarModelAssetName(size_),
+		GetJarBatchName(size_, type_, false),
+		GetJarModelAssetName(size_, type_),
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObject);
 	const MadoEngine::InstancedModelHandle outlineBatchHandle = MyInstancedModel::GetOrCreate(
-		GetJarBatchName(size_, true),
-		GetJarModelAssetName(size_),
+		GetJarBatchName(size_, type_, true),
+		GetJarModelAssetName(size_, type_),
 		SceneType::Game,
 		MadoEngine::Render::RenderLayer::MapEventObjectOutline);
 
@@ -101,13 +123,17 @@ void Jar::Initialize(const InitializeDesc& desc) {
 	InstancedModel* outlineBatch = MyInstancedModel::TryGet(outlineBatchHandle);
 	if (normalBatch && outlineBatch) {
 
-		// 強調表示をInstanceの表示切り替えだけで完結させるため同一Transformを二重登録
-		normalBatch->SetTexture("white16x16");
-		outlineBatch->SetTexture("white16x16");
+		// 強調表示へ切り替えても種別ごとの外観を維持するため両Batchへ同じTextureを適用
+		const char* textureName = "JarMoneyModelTexture";
+		if (type_ == JarType::Exp) {
+			textureName = "JarExpModelTexture";
+		}
+		normalBatch->SetTexture(textureName);
+		outlineBatch->SetTexture(textureName);
 
+		// 強調表示をInstanceの表示切り替えだけで完結させるため同一Transformを二重登録
 		InstancedModel::InstanceDesc normalInstance;
 		normalInstance.transform = transform_;
-		normalInstance.color = color;
 		normalInstance.isVisible = true;
 
 		InstancedModel::InstanceDesc outlineInstance = normalInstance;

@@ -12,11 +12,11 @@ namespace Projectile {
 		/// @brief Axeのデストラクタ
 		~Axe() override;
 
-		/// @brief Axeを初期化
+		/// @brief Axeの発射方向と斜面に沿った姿勢を初期化
 		/// @param context 初期化に使用する情報
 		void Initialize(InitializeDesc context) override;
 
-		/// @brief Axeを更新
+		/// @brief Axeの移動、斜面に沿った回転と寿命を更新
 		/// @param deltaTime 前フレームからの経過時間
 		void Update(float deltaTime) override;
 
@@ -27,6 +27,8 @@ namespace Projectile {
 		MadoEngine::ModelHandle model_{};
 		std::array<MadoEngine::Ribbon::RibbonEffectHandle, kTrailVertexIndices.size()> trails_{};
 		std::string objectName_;
+		Vector3 groundNormal_ = { 0.0f, 1.0f, 0.0f }; // 発射時の斜面に沿った回転軸
+		float rotationYaw_ = 0.0f; // 斜面上の回転角度
 
 		GameTimer startTimer_;
 		GameTimer reductionTimer_;

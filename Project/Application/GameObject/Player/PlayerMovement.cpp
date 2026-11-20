@@ -1,10 +1,12 @@
 #include "PlayerMovement.h"
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 namespace {
 	constexpr float kRotationEpsilon = 1e-5f;
 	constexpr float kBlockedProgressRate = 0.35f;
+	constexpr float kBunnyHopTimeEpsilon = 1e-6f;
 	constexpr float kKnockbackDamping = 10.0f;
 	constexpr float kKnockbackVelocityEpsilonSq = 0.000001f;
 	constexpr float kMaxKnockbackSpeed = 30.0f;
@@ -104,6 +106,15 @@ namespace Player {
 		debugParameter_->Register("最大スライド速度", movementParams_.maxSlideSpeed_, 3, "スライド", attributes);
 		debugParameter_->Register("スライド摩擦", movementParams_.slideFriction_, 4, "スライド", attributes);
 		debugParameter_->Register("ジャンプ横初速", movementParams_.jumpMoveBoostSpeed_, 3, "移動", attributes);
+		debugParameter_->Register("加速量", movementParams_.bunnyHopSpeedBoost_, 1, "バニーホップ", attributes);
+		debugParameter_->Register("最大水平速度", movementParams_.bunnyHopMaxSpeed_, 2, "バニーホップ", attributes);
+		debugParameter_->Register("地上減速量", movementParams_.bunnyHopGroundFriction_, 3, "バニーホップ", attributes);
+		debugParameter_->Register("方向補正率", movementParams_.bunnyHopSteerRate_, 4, "バニーホップ", attributes);
+		attributes.maximum = 1.0;
+		attributes.dragSpeed = 0.01f;
+		debugParameter_->Register("受付時間", movementParams_.bunnyHopWindow_, 0, "バニーホップ", attributes);
+		attributes.maximum = 100.0;
+		attributes.dragSpeed = 0.1f;
 		debugParameter_->Register("壁上り速度", movementParams_.wallClimbSpeed_, 0, "壁上り", attributes);
 		attributes.maximum = 60.0;
 		debugParameter_->Register("壁上り最大時間", movementParams_.wallClimbMaxDuration_, 1, "壁上り", attributes);
@@ -116,7 +127,8 @@ namespace Player {
 		parameterStore.SetGroupPriority("Player/移動", 0);
 		parameterStore.SetGroupPriority("Player/スライド", 1);
 		parameterStore.SetGroupPriority("Player/壁上り", 2);
-		parameterStore.SetGroupPriority("Player/確認用", 3);
+		parameterStore.SetGroupPriority("Player/バニーホップ", 3);
+		parameterStore.SetGroupPriority("Player/確認用", 4);
 		debugParameter_->Apply();
 	}
 
@@ -130,6 +142,8 @@ namespace Player {
 		velocityY_ = 0.0f;
 		isGrounded_ = true;
 		remainingJumpCount_ = GetMaxJumpCount();
+		slideVelocity_ = {};
+		jumpMoveVelocity_ = {};
 		lastMoveStartPosition_ = {};
 		lastAttemptedHorizontalMove_ = {};
 		knockbackVelocity_ = {};
@@ -138,6 +152,10 @@ namespace Player {
 		isWallClimbing_ = false;
 		hasWallClimbStartedSinceLanding_ = false;
 		wasGroundContact_ = true;
+		isBaseGroundContact_ = false;
+		hasBunnyHopLanding_ = false;
+		isBunnyHopMomentumActive_ = false;
+		timeSinceLanding_ = 0.0f;
 		wallClimbElapsedTime_ = 0.0f;
 	}
 
@@ -173,13 +191,22 @@ namespace Player {
 		lastMoveStartPosition_ = transform.translate;
 		lastAttemptedHorizontalMove_ = {};
 		hasWallClimbInput_ = false;
+		isBaseGroundContact_ = false;
+		UpdateBunnyHopState(deltaTime);
 
-		// 入力移動と重力落下へ外力を重ねてから接地中の斜面追従で位置を補正
-		Move(deltaTime, transform, camera, input);
-		hasWallClimbInput_ = hasMoveInput_ && !input.isCrouching;
-		if (!hasWallClimbInput_) {
-			isWallClimbing_ = false;
+		// 入力による向き変更や壁登り解除より先に、登っていた姿勢の背面へ離脱
+		if (isWallClimbing_ && input.isJumpTriggered) {
+			StartWallJump();
+			ApplyJumpMoveBoost(deltaTime, transform);
+		} else {
+			Move(deltaTime, transform, camera, input);
+			hasWallClimbInput_ = hasMoveInput_ && !input.isCrouching;
+			if (!hasWallClimbInput_) {
+				isWallClimbing_ = false;
+			}
 		}
+
+		// 離脱初速または入力移動へ重力と外力を重ねてから接地中の斜面追従で位置を補正
 		Jump(deltaTime, transform, input);
 		UpdateKnockback(deltaTime, transform);
 		ApplySlopeGroundSnap(deltaTime, transform);
@@ -226,13 +253,25 @@ namespace Player {
 	}
 
 	void Movement::SetGroundContact(bool isGroundContact, bool isSlopeGroundContact, const MoveInput& input) {
-		const bool hasGroundContact = isGroundContact || isSlopeGroundContact;
+
+		// 上昇中の接触を着地とみなさず、Colliderがない基準地面も同じ着地判定へ統合
+		const bool hasGroundContact = (isGroundContact || isSlopeGroundContact || isBaseGroundContact_) && velocityY_ <= 0.0f;
 		if (hasGroundContact && !wasGroundContact_) {
 
 			// 空中または壁登り状態から地表へ着地した時点で利用可能時間と開始履歴を初期化
 			landedThisFrame_ = true;
 			wallClimbElapsedTime_ = 0.0f;
 			hasWallClimbStartedSinceLanding_ = false;
+			timeSinceLanding_ = 0.0f;
+			hasBunnyHopLanding_ = true;
+			if (input.move.LengthSq() <= 1e-5f) {
+
+				// 移動入力のない着地では意図しない滑走を防ぐため、保持中の水平速度をすべて破棄
+				jumpMoveVelocity_ = {};
+				slideVelocity_ = {};
+				knockbackVelocity_ = {};
+				isBunnyHopMomentumActive_ = false;
+			}
 		}
 
 		if (hasGroundContact) {
@@ -246,11 +285,9 @@ namespace Player {
 			if (!input.isCrouching) {
 				slideVelocity_ = { 0.0f, 0.0f, 0.0f };
 			}
-			if (velocityY_ <= 0.0f) {
-				jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
-			}
 		} else {
 			isGrounded_ = false;
+			hasBunnyHopLanding_ = false;
 		}
 
 		wasGroundContact_ = hasGroundContact;
@@ -339,10 +376,17 @@ namespace Player {
 			hasMoveInput = false;
 		}
 
+		const Vector3 moveVelocity = moveDir * (movementParams_.moveSpeed_ * moveSpeedMultiplier_);
+		if (!isCrouching) {
+
+			// 保持中の勢いを入力方向へ旋回させてから、歩行を含む合算速度を上限内へ制限
+			UpdateBunnyHopSteering(deltaTime, moveDir);
+			ClampBunnyHopSpeed(moveVelocity);
+		}
+
 		if (!isCrouching && hasMoveInput) {
-			const float moveSpeed = movementParams_.moveSpeed_ * moveSpeedMultiplier_;
-			transform.translate.x += moveDir.x * moveSpeed * deltaTime;
-			transform.translate.z += moveDir.z * moveSpeed * deltaTime;
+			transform.translate.x += moveVelocity.x * deltaTime;
+			transform.translate.z += moveVelocity.z * deltaTime;
 			currentMotion_ = Player::Motion::Walk;
 		} else if (!isCrouching && !isGrounded_) {
 			currentMotion_ = Player::Motion::Jump;
@@ -493,6 +537,26 @@ namespace Player {
 		return actualProgress < attemptedLength * kBlockedProgressRate;
 	}
 
+	void Movement::StartWallJump() {
+
+		// 壁へ進む入力を押し続けても離脱できるよう歩行速度を上回る背面初速を設定
+		const Vector3 backward = CreateHorizontalForward(faceYaw_) * -1.0f;
+		const float wallJumpSpeed = std::max(0.0f, movementParams_.moveSpeed_ * moveSpeedMultiplier_) +
+			std::max(0.0f, movementParams_.jumpMoveBoostSpeed_);
+		jumpMoveVelocity_ = backward * wallJumpSpeed;
+		isBunnyHopMomentumActive_ = false;
+		slideVelocity_ = {};
+		lastMoveDirection_ = {};
+		hasMoveInput_ = false;
+
+		// 壁登り時間と残りジャンプ回数を維持し、通常Jumpと同じ入力の二重処理を防止
+		velocityY_ = movementParams_.jumpPower_;
+		isGrounded_ = false;
+		isWallClimbing_ = false;
+		jumpStartedThisFrame_ = true;
+		currentMotion_ = Player::Motion::Jump;
+	}
+
 	void Movement::StartWallClimbTimeoutJump() {
 
 		// 通常Jumpと分離して残り回数を参照または消費せず上向き初速だけを付与
@@ -503,11 +567,6 @@ namespace Player {
 	}
 
 	void Movement::ApplyJumpMoveBoost(float deltaTime, Transform3D& transform) {
-		if (isGrounded_ && velocityY_ <= 0.0f) {
-			jumpMoveVelocity_ = { 0.0f, 0.0f, 0.0f };
-			return;
-		}
-
 		const float boostSpeedSq = jumpMoveVelocity_.x * jumpMoveVelocity_.x + jumpMoveVelocity_.z * jumpMoveVelocity_.z;
 		if (boostSpeedSq < 1e-6f) {
 			jumpMoveVelocity_.x = 0.0f;
@@ -518,12 +577,126 @@ namespace Player {
 		transform.translate.x += jumpMoveVelocity_.x * deltaTime;
 		transform.translate.z += jumpMoveVelocity_.z * deltaTime;
 
-		// 空中の水平初速をフレーム時間に応じて減衰
-		const float boostSpeed = std::sqrt(boostSpeedSq);
-		const float nextSpeed = std::max(0.0f, boostSpeed - jumpMoveBoostFriction_ * deltaTime);
+		// 地上の減速は受付時間を考慮した更新側へ集約し、空中では従来の摩擦だけを適用
+		if (!isGrounded_) {
+			ApplyJumpMoveFriction(deltaTime, jumpMoveBoostFriction_);
+		}
+	}
+
+	void Movement::UpdateBunnyHopState(float deltaTime) {
+		if (!isGrounded_ || isWallClimbing_) {
+			hasBunnyHopLanding_ = false;
+			return;
+		}
+
+		float frictionTime = std::max(0.0f, deltaTime);
+		if (hasBunnyHopLanding_) {
+			const float previousElapsedTime = timeSinceLanding_;
+			timeSinceLanding_ += frictionTime;
+			const float window = std::max(0.0f, movementParams_.bunnyHopWindow_);
+
+			// 受付終了をまたぐフレームでも、受付時間を超えた区間だけを減速へ反映
+			frictionTime = std::max(0.0f, timeSinceLanding_ - window) -
+				std::max(0.0f, previousElapsedTime - window);
+		}
+
+		ApplyJumpMoveFriction(frictionTime, movementParams_.bunnyHopGroundFriction_);
+	}
+
+	bool Movement::TryAddBunnyHopBoost(const MoveInput& input) {
+
+		// 時間の加算誤差で受付時間ちょうどのJumpを取りこぼさないよう微小誤差を許容
+		const float window = std::max(0.0f, movementParams_.bunnyHopWindow_);
+		if (!isGrounded_ || !hasBunnyHopLanding_ || input.isCrouching ||
+			window <= 0.0f || timeSinceLanding_ > window + kBunnyHopTimeEpsilon) {
+			return false;
+		}
+
+		// 保持速度が小さい場合も通常Jumpの初速を確保し、成功時だけ遅くなる逆転を防止
+		const float normalBoostSpeed = std::max(0.0f, movementParams_.jumpMoveBoostSpeed_);
+		if (jumpMoveVelocity_.LengthSq() < normalBoostSpeed * normalBoostSpeed) {
+			AddJumpMoveBoost(input);
+		}
+
+		// 歩行入力と保持中の初速を合成し、実際に進んでいる水平方向を加速基準に採用
+		Vector3 horizontalVelocity = jumpMoveVelocity_;
+		if (hasMoveInput_) {
+			const float inputLength = std::sqrt(input.move.x * input.move.x + input.move.y * input.move.y);
+			horizontalVelocity += lastMoveDirection_ * (movementParams_.moveSpeed_ * moveSpeedMultiplier_ * inputLength);
+		}
+		const float speedSq = horizontalVelocity.LengthSq();
+		if (speedSq < kRotationEpsilon) {
+			return false;
+		}
+
+		// 歩行速度を含む上限までだけ加速し、既に上限を超える勢いは急減速させず維持
+		const float speed = std::sqrt(speedSq);
+		const float speedBoost = std::min(
+			std::max(0.0f, movementParams_.bunnyHopSpeedBoost_),
+			std::max(0.0f, movementParams_.bunnyHopMaxSpeed_ - speed)
+		);
+		jumpMoveVelocity_ += horizontalVelocity * (speedBoost / speed);
+		if (speedBoost > 0.0f) {
+			isBunnyHopMomentumActive_ = true;
+		}
+		return true;
+	}
+
+	void Movement::UpdateBunnyHopSteering(float deltaTime, const Vector3& moveDir) {
+
+		// バニーホップで得た勢いだけを旋回対象とし、入力のない空中では慣性を維持
+		if (!isBunnyHopMomentumActive_ || !hasMoveInput_ || isWallClimbing_ || deltaTime <= 0.0f) {
+			return;
+		}
+
+		const float speedSq = jumpMoveVelocity_.LengthSq();
+		const float steerRate = std::max(0.0f, movementParams_.bunnyHopSteerRate_);
+		if (speedSq < kRotationEpsilon || steerRate <= 0.0f) {
+			return;
+		}
+
+		// 正反対の入力でも方向補間が相殺されないよう、最短の水平角度差を指数補間
+		const float currentYaw = std::atan2(jumpMoveVelocity_.x, jumpMoveVelocity_.z);
+		const float targetYaw = std::atan2(moveDir.x, moveDir.z);
+		const float yawDelta = std::remainder(targetYaw - currentYaw, 2.0f * std::numbers::pi_v<float>);
+		const float inputStrength = std::min(1.0f, std::sqrt(moveDir.LengthSq()));
+		const float steerT = 1.0f - std::exp(-steerRate * inputStrength * deltaTime);
+		const float steeredYaw = currentYaw + yawDelta * steerT;
+		const float speed = std::sqrt(speedSq);
+		jumpMoveVelocity_ = { std::sin(steeredYaw) * speed, 0.0f, std::cos(steeredYaw) * speed };
+	}
+
+	void Movement::ClampBunnyHopSpeed(const Vector3& moveVelocity) {
+		if (!isBunnyHopMomentumActive_) {
+			return;
+		}
+
+		// 外部補正による歩行速度そのものは妨げず、加速分を含む合算速度だけを制限
+		const float maxSpeed = std::max(
+			std::max(0.0f, movementParams_.bunnyHopMaxSpeed_),
+			std::sqrt(moveVelocity.LengthSq())
+		);
+		const Vector3 horizontalVelocity = moveVelocity + jumpMoveVelocity_;
+		const float speedSq = horizontalVelocity.LengthSq();
+		if (speedSq <= maxSpeed * maxSpeed) {
+			return;
+		}
+
+		jumpMoveVelocity_ = horizontalVelocity * (maxSpeed / std::sqrt(speedSq)) - moveVelocity;
+	}
+
+	void Movement::ApplyJumpMoveFriction(float deltaTime, float friction) {
+		if (deltaTime <= 0.0f || friction <= 0.0f) {
+			return;
+		}
+
+		// 各軸への個別減算による方向の歪みを防ぐため、速度長の比率で水平成分を減衰
+		const float boostSpeed = std::sqrt(jumpMoveVelocity_.LengthSq());
+		const float nextSpeed = std::max(0.0f, boostSpeed - friction * deltaTime);
 		if (nextSpeed <= 0.001f) {
 			jumpMoveVelocity_.x = 0.0f;
 			jumpMoveVelocity_.z = 0.0f;
+			isBunnyHopMomentumActive_ = false;
 			return;
 		}
 
@@ -537,18 +710,21 @@ namespace Player {
 			return;
 		}
 
-		jumpMoveVelocity_.x += lastMoveDirection_.x * movementParams_.jumpMoveBoostSpeed_;
-		jumpMoveVelocity_.z += lastMoveDirection_.z * movementParams_.jumpMoveBoostSpeed_;
+		const float boostSpeed = std::max(0.0f, movementParams_.jumpMoveBoostSpeed_);
+		float maxBoostSpeed = boostSpeed * 2.0f;
+		if (isGrounded_) {
+			maxBoostSpeed = boostSpeed;
+		}
 
-		// 多段ジャンプで水平初速が無制限に増えないよう上限を設定
-		const float maxBoostSpeed = movementParams_.jumpMoveBoostSpeed_ * 2.0f;
+		// 通常Jumpでは加速上限を維持しつつ、バニーホップや壁Jumpの勢いの切り捨てを防止
+		maxBoostSpeed = std::max(maxBoostSpeed, std::sqrt(jumpMoveVelocity_.LengthSq()));
+		jumpMoveVelocity_ += lastMoveDirection_ * boostSpeed;
 		const float boostSpeedSq = jumpMoveVelocity_.x * jumpMoveVelocity_.x + jumpMoveVelocity_.z * jumpMoveVelocity_.z;
 		if (boostSpeedSq <= maxBoostSpeed * maxBoostSpeed) {
 			return;
 		}
 
-		const float boostSpeed = std::sqrt(boostSpeedSq);
-		const float speedScale = maxBoostSpeed / boostSpeed;
+		const float speedScale = maxBoostSpeed / std::sqrt(boostSpeedSq);
 		jumpMoveVelocity_.x *= speedScale;
 		jumpMoveVelocity_.z *= speedScale;
 	}
@@ -619,12 +795,17 @@ namespace Player {
 			remainingJumpCount_ = GetMaxJumpCount();
 		}
 
-		// 壁登り中のJump入力は回数を消費せず、壁登り解除後まで無視
-		if (!isWallClimbing_ && remainingJumpCount_ > 0 && input.isJumpTriggered) {
+		// 壁Jumpが成立したフレームは通常Jumpによる初速加算と回数消費を抑止
+		if (!jumpStartedThisFrame_ && !isWallClimbing_ && remainingJumpCount_ > 0 && input.isJumpTriggered) {
+
+			// 着地直後の地上Jumpだけ加速を追加し、空中Jumpでは通常の水平初速処理を使用
+			if (!TryAddBunnyHopBoost(input)) {
+				AddJumpMoveBoost(input);
+			}
+			hasBunnyHopLanding_ = false;
 			velocityY_ = movementParams_.jumpPower_;
 			isGrounded_ = false;
 			jumpStartedThisFrame_ = true;
-			AddJumpMoveBoost(input);
 			remainingJumpCount_--;
 			Logger::Output("[Engine] ジャンプ開始 残り回数: " + std::to_string(remainingJumpCount_), Logger::Level::Application);
 		}
@@ -637,6 +818,7 @@ namespace Player {
 
 		// Collider接地を取りこぼしても基準地面を貫通しないよう最終補正
 		if (transform.translate.y <= groundY_) {
+			isBaseGroundContact_ = true;
 			transform.translate.y = groundY_;
 			velocityY_ = 0.0f;
 			if (!isGrounded_) {

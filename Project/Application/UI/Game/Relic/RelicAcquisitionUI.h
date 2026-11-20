@@ -63,6 +63,7 @@ namespace UI::Game {
 
 		std::array<MadoEngine::SpriteHandle, 3> panelSprites_{};
 		MadoEngine::SpriteHandle iconSprite_{};
+		MadoEngine::SpriteHandle iconBorderSprite_{};
 		std::array<MadoEngine::TextHandle, 3> textHandles_{};
 		InputControlFeedback decisionControlFeedback_;
 		GameTimer decisionDelayTimer_;

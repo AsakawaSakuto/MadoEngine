@@ -195,6 +195,7 @@
     <ClCompile Include="Application\UI\Result\ResultScoreUI.cpp" />
     <ClCompile Include="Application\UI\Result\ScorePresentation.cpp" />
     <ClCompile Include="Application\UI\Result\RankingPresentation.cpp" />
+    <ClCompile Include="Application\UI\Game\Control\ControllerInputFeedback.cpp" />
     <ClCompile Include="Application\UI\Game\Control\InputControlFeedback.cpp" />
     <ClCompile Include="Application\System\GameCamera\GameCameraController.cpp" />
     <ClCompile Include="Application\System\RewardSelection\RewardSelectionController.cpp" />
@@ -466,6 +467,7 @@
     <ClInclude Include="Application\SceneManager\SceneBgmController.h" />
     <ClInclude Include="Application\SceneManager\SceneTransitionController.h" />
     <ClInclude Include="Application\UI\Game\GameHud.h" />
+    <ClInclude Include="Application\UI\Game\Control\ControllerInputFeedback.h" />
     <ClInclude Include="Application\UI\Game\Control\InputControlFeedback.h" />
     <ClInclude Include="Application\System\GameCamera\GameCameraController.h" />
     <ClInclude Include="Application\System\RewardSelection\RewardSelectionController.h" />

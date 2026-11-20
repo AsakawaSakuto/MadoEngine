@@ -203,13 +203,18 @@
             "key": "ScreenEffectPass_5",
             "name": "LowHealthVignette",
             "parameters": {
+                "CenterX": 0.5,
+                "CenterY": 0.5249999761581421,
                 "ColorA": 1.0,
                 "ColorB": 0.0,
                 "ColorG": 0.0,
                 "ColorR": 0.669767439365387,
-                "InnerRadius": 0.5,
-                "Intensity": 0.14424972236156464,
-                "OuterScale": 2.0
+                "InnerRadius": 0.4000000059604645,
+                "Intensity": 0.0,
+                "OuterScale": 2.0,
+                "ScaleX": 1.0,
+                "ScaleY": 1.0,
+                "Shape": 0.0
             },
             "scope": "Screen",
             "screenEffectStage": "Final"
@@ -225,6 +230,29 @@
                 "Contrast": 1.149999976158142,
                 "Intensity": 1.0,
                 "PixelSize": 1.0
+            },
+            "scope": "Screen",
+            "screenEffectStage": "Final"
+        },
+        {
+            "effectShaderKey": "PostEffect/Vignette.PS",
+            "effectType": "Vignette",
+            "enabled": true,
+            "key": "ScreenEffectPass_3",
+            "name": "Screen Effect 3",
+            "parameters": {
+                "CenterX": 0.5,
+                "CenterY": 0.5249999761581421,
+                "ColorA": 1.0,
+                "ColorB": 0.8186047077178955,
+                "ColorG": 1.0,
+                "ColorR": 0.0,
+                "InnerRadius": 0.25,
+                "Intensity": 0.0,
+                "OuterScale": 2.0,
+                "ScaleX": 1.5,
+                "ScaleY": 1.350000023841858,
+                "Shape": 1.0
             },
             "scope": "Screen",
             "screenEffectStage": "Final"

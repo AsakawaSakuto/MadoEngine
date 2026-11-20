@@ -183,7 +183,7 @@ namespace Enemy {
 
 		if (isEmerging_) {
 
-			// 地中では追跡と重力を停止して地表面へ向かう出現移動だけを更新
+			// 地中では水平移動と重力を停止してPlayerへの向きと地表面への上昇を更新
 			UpdateEmergence(deltaTime);
 			return;
 		}
@@ -501,14 +501,16 @@ namespace Enemy {
 		}();
 		transform_.translate.y =
 			std::min(emergenceTargetY_, transform_.translate.y + kEmergenceSpeed * safeDeltaTime);
+
+		// 水平移動や重力を進めず、出現中もPlayerへの向きだけを追従
+		movement_.FaceTowardDirection(GetTargetPlayerPosition() - transform_.translate, transform_);
 		if (transform_.translate.y < emergenceTargetY_ - kEmergenceCompletionEpsilon) {
 			return;
 		}
 
-		// 地表面到達時に座標誤差を除去して通常移動と衝突判定へ一度だけ遷移
+		// 移動状態は生成時に初期化済みのため、現在の向きを保って通常移動と衝突判定へ遷移
 		transform_.translate.y = emergenceTargetY_;
 		isEmerging_ = false;
-		movement_.Initialize();
 		RegisterColliders();
 	}
 

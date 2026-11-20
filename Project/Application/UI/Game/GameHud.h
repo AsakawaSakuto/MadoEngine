@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject/Player/PlayerStatus.h"
+#include "Control/ControllerInputFeedback.h"
 #include "Control/InputControlFeedback.h"
 #include "GamePlayView/DropObjectGetView/DropObjectGetView.h"
 #include "GamePlayView/EnemyDamageView/EnemyDamageView.h"
@@ -195,6 +196,7 @@ namespace UI::Game {
 		bool isMassiveEnemySpawnJustStarted_ = false; // 通知開始フレームのタイマー加算を抑える場合はtrue
 
 		// HUDの共通状態
+		ControllerInputFeedback controllerInputFeedback_; // コントローラーのボタンとスティックの入力表示
 		std::uint32_t gameSeed_ = 0;       // デバッグ欄に表示する現在のゲームシード
 		bool isVisible_ = true;            // HUDの表示を許可する場合はtrue
 		bool isWorldViewsVisible_ = false; // プレイ進行中の通知表示を許可する場合はtrue

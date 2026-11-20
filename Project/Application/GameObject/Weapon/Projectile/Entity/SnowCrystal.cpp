@@ -42,13 +42,17 @@ namespace Projectile {
 		const float modelScale = kBaseModelScale * sizeRate_;
 		transform_.scale = { modelScale, modelScale, modelScale };
 
-		// 往路は発射時の水平向きを固定し、Targetの移動による軌道変更を抑制
-		Vector3 toTarget = targetPosition_ - transform_.translate;
-		toTarget.y = 0.0f;
+		// 高低差を含む敵への向きを発射時に固定し、往路の途中での軌道変更を抑制
+		const Vector3 toTarget = targetPosition_ - transform_.translate;
 		moveDirection_ = { 0.0f, 0.0f, 1.0f };
 		if (toTarget.LengthSq() > kMinDirectionLengthSq) {
 			moveDirection_ = toTarget.Normalized();
 		}
+
+		// 飛行方向と回転軸を分離し、発射時の斜面に沿った面を往復中も維持
+		groundNormal_ = context.ownerUpDirection;
+		rotationYaw_ = 0.0f;
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		lifeTimer_.Start(lifeTime_, false);
 
 		model_ = MyModel::Create(objectName_, context.projectileName, SceneType::Game);
@@ -87,9 +91,10 @@ namespace Projectile {
 			return;
 		}
 
-		// 移動方向とは独立した一定速度の回転でブーメランの往復を表現
-		transform_.rotate.y = std::fmod(
-			transform_.rotate.y + kRotationSpeed * deltaTime, std::numbers::pi_v<float> * 2.0f);
+		// Euler角のY成分への加算を避け、回転中もModelの上方向を斜面法線へ拘束
+		rotationYaw_ = std::fmod(
+			rotationYaw_ + kRotationSpeed * deltaTime, std::numbers::pi_v<float> * 2.0f);
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 		if (Model* model = MyModel::TryGet(model_)) {
 			model->SetTransform(transform_);
 		}

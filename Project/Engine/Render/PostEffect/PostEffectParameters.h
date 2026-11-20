@@ -205,8 +205,12 @@ struct alignas(16) VignetteParameters {
 	float intensity = 0.8f;
 	float innerRadius = 0.35f;
 	float outerScale = 2.0f;
-	float padding = 0.0f;
+	float shape = 0.0f;
 	Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float centerX = 0.5f;
+	float centerY = 0.5f;
+	float scaleX = 1.0f;
+	float scaleY = 1.0f;
 };
 
 template<class T>
@@ -269,7 +273,7 @@ MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(RandomParameters, 16);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(SplitToningParameters, 48);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(ToonParameters, 48);
 MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(ToneMappingParameters, 16);
-MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(VignetteParameters, 32);
+MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS(VignetteParameters, 48);
 
 #undef MADOENGINE_VALIDATE_POST_EFFECT_PARAMETERS
 

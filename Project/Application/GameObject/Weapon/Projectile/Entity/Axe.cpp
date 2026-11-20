@@ -36,7 +36,13 @@ namespace Projectile {
 		transform_.translate = ownerPosition_;
 		transform_.scale = { 0.5f * sizeRate_, 0.5f * sizeRate_, 0.5f * sizeRate_ };
 
-		SetMoveDirectionTowards(targetPosition_, true);
+		// 発射位置と敵の高低差を含めて狙い、斜面上でも敵へ直進
+		SetMoveDirectionTowards(targetPosition_);
+
+		// 敵への仰角とは独立して発射時の斜面へModelの回転面を整列
+		groundNormal_ = context.ownerUpDirection;
+		rotationYaw_ = std::atan2(moveDirection_.x, moveDirection_.z);
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 
 		AABB hitbox;
 		float boxSize = 0.5f * sizeRate_;
@@ -93,8 +99,9 @@ namespace Projectile {
 			reductionTimer_.Start(lifeTime_ * 0.3f, false);
 		}
 
-		// 滞留中も武器らしい視認性を保つ一定速度の回転
-		transform_.rotate.y += 3.14f * deltaTime;
+		// 滞留中も発射時の斜面に沿った回転面を維持し、傾いたModelの軸ぶれを防止
+		rotationYaw_ += 3.14f * deltaTime;
+		transform_.rotate = CreateGroundAlignedRotation(rotationYaw_, groundNormal_);
 
 		if (Model* model = MyModel::TryGet(model_)) {
 

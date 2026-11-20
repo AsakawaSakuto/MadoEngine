@@ -23,6 +23,11 @@ namespace Enemy {
 		/// @return EnemyがMap内に存在していればtrue
 		bool Update(float deltaTime, const Vector3& targetPosition, float moveSpeed, Transform3D& transform);
 
+		/// @brief 指定方向へ水平の向きだけを更新
+		/// @param direction 向きを合わせるワールド方向
+		/// @param transform 更新対象のTransform
+		void FaceTowardDirection(const Vector3& direction, Transform3D& transform);
+
 		/// @brief 水平方向のノックバック衝撃を追加
 		/// @param direction Enemyを押し出す方向
 		/// @param power ノックバック力
