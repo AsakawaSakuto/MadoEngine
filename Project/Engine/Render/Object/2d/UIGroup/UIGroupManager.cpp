@@ -17,6 +17,7 @@ struct ParsedGroup {
 	std::string name;
 	SceneType scene = SceneType::None;
 	TransformNode2D::AuthoringState state;
+	std::optional<Gauge2d::Settings> gauge;
 	std::vector<UIGroupElementInfo> elements;
 };
 
@@ -118,6 +119,15 @@ bool ParseDocument(const nlohmann::json& json, std::vector<ParsedGroup>& groups)
 				return false;
 			}
 			std::unordered_set<std::string> aliases;
+
+			// ゲージ固有の設定も構成の置換前に検証し、破損したJsonによる部分適用を防止
+			if (item.contains("gauge")) {
+				Gauge2d::Settings settings;
+				if (!Gauge2d::DecodeSettings(item.at("gauge"), settings)) {
+					return false;
+				}
+				group.gauge = std::move(settings);
+			}
 			for (const auto& child : item.at("children")) {
 				UIGroupElementInfo element;
 				element.name = child.at("name").get<std::string>();
@@ -209,6 +219,51 @@ UIGroupHandle UIGroupManager::Create(const std::string& name, SceneType sceneTyp
 	names_[NameKey(name, sceneType)] = handle;
 	ids_[id] = handle;
 	return handle;
+}
+
+UIGroupHandle UIGroupManager::CreateGauge(const std::string& name, SceneType sceneType) {
+	const auto handle = Create(name, sceneType);
+	if (!TryGet(handle)) {
+		return {};
+	}
+
+	// 通常Groupと同じ寿命と永続IDを使い、生成失敗時は空Groupも回収
+	if (!ConfigureGauge(handle, {})) {
+		Destroy(handle);
+		return {};
+	}
+	return handle;
+}
+
+bool UIGroupManager::ConfigureGauge(UIGroupHandle handle, const Gauge2d::Settings& settings) {
+	if (!TryGet(handle)) {
+		return false;
+	}
+	auto& slot = slots_[handle.index];
+	if (slot.gauge) {
+		slot.gauge->SetSceneType(slot.scene);
+		return slot.gauge->SetSettings(settings);
+	}
+
+	// 同じGroupを配置の唯一の管理元とし、Gaugeの寿命をGroupの寿命内へ限定
+	auto gauge = std::unique_ptr<Gauge2d>(new Gauge2d(*slot.group, "UIGroupGauge_" + slot.id));
+	gauge->sceneType_ = slot.scene;
+	if (!gauge->SetSettings(settings) || !gauge->InitializeSprites()) {
+		return false;
+	}
+	slot.gauge = std::move(gauge);
+	return true;
+}
+
+Gauge2d* UIGroupManager::TryGetGauge(UIGroupHandle handle) {
+	return const_cast<Gauge2d*>(std::as_const(*this).TryGetGauge(handle));
+}
+
+const Gauge2d* UIGroupManager::TryGetGauge(UIGroupHandle handle) const {
+	if (!TryGet(handle)) {
+		return nullptr;
+	}
+	return slots_[handle.index].gauge.get();
 }
 
 UIGroup* UIGroupManager::TryGet(UIGroupHandle handle) {
@@ -343,6 +398,7 @@ bool UIGroupManager::Destroy(UIGroupHandle handle) {
 	auto& slot = slots_[handle.index];
 	names_.erase(NameKey(slot.name, slot.scene));
 	ids_.erase(slot.id);
+	slot.gauge.reset();
 	slot.group.reset();
 	slot.elements.clear();
 	slot.name.clear();
@@ -552,6 +608,20 @@ bool UIGroupManager::RemoveElement(UIGroupHandle handle, const std::string& name
 	return true;
 }
 
+UIGroupHandle UIGroupManager::CreateGaugeElement(UIGroupHandle handle, const std::string& name) {
+	const auto created = CreateGroupElement(handle, name);
+	if (!TryGet(created)) {
+		return {};
+	}
+
+	// 接続まで完了したGroupに機能を付加し、失敗時は親の登録もまとめて解除
+	if (!ConfigureGauge(created, {})) {
+		Destroy(created);
+		return {};
+	}
+	return created;
+}
+
 TransformNode2D* UIGroupManager::TryGetElement(UIGroupHandle handle, const std::string& name) {
 	auto* group = TryGet(handle);
 	if (!group) {
@@ -746,9 +816,15 @@ nlohmann::json UIGroupManager::ToJson() const {
 			}
 			children.push_back(std::move(child));
 		}
-		groups.push_back({ { "id", GetId(handle) }, { "name", GetName(handle) },
+		nlohmann::json item = { { "id", GetId(handle) }, { "name", GetName(handle) },
 			{ "scene", SceneTypeToString(GetSceneType(handle)) },
-			{ "state", EncodeState(TryGet(handle)->GetAuthoringState()) }, { "children", children } });
+			{ "state", EncodeState(TryGet(handle)->GetAuthoringState()) }, { "children", children } };
+
+		// 現在値や実行時の非表示を含めず、ゲージの満タン時の見た目だけを保存
+		if (const auto* gauge = TryGetGauge(handle)) {
+			item["gauge"] = gauge->ToJson();
+		}
+		groups.push_back(std::move(item));
 	}
 	return { { "version", 1 }, { "groups", groups } };
 }
@@ -764,6 +840,15 @@ bool UIGroupManager::FromJson(const nlohmann::json& json, std::optional<SceneTyp
 			continue;
 		}
 		selectedIds.insert(group.id);
+
+		// 参照画像の欠落も既存構成を変更する前に検出
+		if (group.gauge) {
+			auto& textures = TextureManager::GetInstance();
+			if (textures.GetTextureIndex(group.gauge->backgroundTexture) == UINT32_MAX ||
+				textures.GetTextureIndex(group.gauge->gaugeTexture) == UINT32_MAX) {
+				return false;
+			}
+		}
 		const auto existing = Find(group.name, group.scene);
 		const auto sameId = FindById(group.id);
 		if ((TryGet(existing) && !MatchesScene(GetSceneType(existing), sceneType)) ||
@@ -806,6 +891,15 @@ bool UIGroupManager::FromJson(const nlohmann::json& json, std::optional<SceneTyp
 		slot.group->SetAuthoringState(group.state);
 		ids_[slot.id] = handle;
 		names_[NameKey(slot.name, slot.scene)] = handle;
+
+		// 同じゲージは現在値を維持して見た目だけを復元し、Undo中のHP巻き戻りを防止
+		if (group.gauge) {
+			if (!ConfigureGauge(handle, *group.gauge)) {
+				return false;
+			}
+		} else {
+			slot.gauge.reset();
+		}
 	}
 	RefreshBindings();
 	return true;

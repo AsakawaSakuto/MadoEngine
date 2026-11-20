@@ -382,211 +382,6 @@
             ],
             "fitToScreen": false,
             "layer": "Default",
-            "name": "UIGroupSprite_de712a27-151e-445b-8691-3a893d3434d2",
-            "opacity": 1.0,
-            "position": [
-                1000.0,
-                366.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.5,
-                0.5
-            ],
-            "scene": "Game",
-            "texture": "Pause_Pad",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "UIGroupSprite_df46366e-9d28-45c5-a2fc-0ba954dd0773",
-            "opacity": 1.0,
-            "position": [
-                1000.0,
-                434.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.5,
-                0.5
-            ],
-            "scene": "Game",
-            "texture": "Decision_Pad",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "UIGroupSprite_57ce6082-9181-4ee0-9816-82215e208d70",
-            "opacity": 1.0,
-            "position": [
-                1000.0,
-                500.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.5,
-                0.5
-            ],
-            "scene": "Game",
-            "texture": "Crouching_Pad",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "UIGroupSprite_7ca8127b-297e-4743-96de-e5175dde540b",
-            "opacity": 1.0,
-            "position": [
-                1000.0,
-                564.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.5,
-                0.5
-            ],
-            "scene": "Game",
-            "texture": "xbox_stick_r",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
-            "name": "UIGroupSprite_c86914fd-f2ab-4319-b2e7-1f10f6387419",
-            "opacity": 1.0,
-            "position": [
-                1000.0,
-                628.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.5,
-                0.5
-            ],
-            "scene": "Game",
-            "texture": "xbox_stick_l_up",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "Default",
             "name": "UIGroupSprite_2d490cda-bea2-418b-a05d-ee7997ad3d9b",
             "opacity": 1.0,
             "position": [
@@ -1851,375 +1646,6 @@
                 0.5
             ],
             "color": [
-                0.0,
-                0.0,
-                0.0,
-                0.8627451062202454
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_834362fc-6519-4451-83ef-478b040b953a",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                360.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                80.0,
-                45.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_858a7d72-24eb-4141-83f5-f8bb2686ca33",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                360.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                16.0,
-                24.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.0784313753247261,
-                0.09803921729326248,
-                0.13725490868091583,
-                0.9803921580314636
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_48040c89-4256-4d15-9d68-46f39e5d8d81",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                360.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                15.0,
-                23.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.062745101749897,
-                0.062745101749897,
-                0.062745101749897,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_08820456-0ab1-4dd8-a408-2dc1f5a3242a",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                378.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                7.25,
-                7.25
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_ddaf91c8-d1ea-4d17-99f2-5ec902faa49b",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                378.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                2.5,
-                2.5
-            ],
-            "scene": "Game",
-            "texture": "CriticalFish",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_df22bc8d-c231-436b-b646-53ab918f3fee",
-            "opacity": 1.0,
-            "position": [
-                640.0,
-                378.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                2.0,
-                2.0
-            ],
-            "scene": "Game",
-            "texture": "WeaponIconFrame",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.0784313753247261,
-                0.09803921729326248,
-                0.13725490868091583,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_ddeda112-4834-456c-affe-8a95eb039b08",
-            "opacity": 1.0,
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                10.0,
-                4.300000190734863
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_58756581-6997-4eb8-9193-41808ecb162e",
-            "opacity": 1.0,
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.2999999523162842,
-                1.2999999523162842
-            ],
-            "scene": "Game",
-            "texture": "ButtonFrame",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_2cbde314-879d-4d4c-93b6-6f3e303d2258",
-            "opacity": 1.0,
-            "position": [
-                -45.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                3.0,
-                3.0
-            ],
-            "scene": "Game",
-            "texture": "xbox_A",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
                 0.0784313753247261,
                 0.09803921729326248,
                 0.13725490868091583,
@@ -2507,8 +1933,8 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
+                0.699999988079071,
+                0.30000001192092896,
                 1.0,
                 1.0
             ],
@@ -2690,7 +2116,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "FireBall",
+            "texture": "Axe",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2712,8 +2138,8 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
+                0.699999988079071,
+                0.30000001192092896,
                 1.0,
                 1.0
             ],
@@ -2754,7 +2180,253 @@
             ],
             "color": [
                 0.20000000298023224,
-                0.550000011920929,
+                0.8500000238418579,
+                0.30000001192092896,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_7b6dcf1c-5965-4d98-96ed-99d61d6143f9",
+            "opacity": 1.0,
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                16.0,
+                24.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.054999999701976776,
+                0.07000000029802322,
+                0.10999999940395355,
+                0.9599999785423279
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_19629aca-fd3c-4626-95a5-088e72ce6151",
+            "opacity": 1.0,
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                15.0,
+                23.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.2199999988079071,
+                0.12999999523162842,
+                0.02500000037252903,
+                0.9800000190734863
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_8fa04474-74bf-4bf4-abba-a9c8d4aaa66e",
+            "opacity": 1.0,
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                15.0,
+                23.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.02500000037252903,
+                0.029999999329447746,
+                0.05000000074505806,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_f2b941c5-5975-4762-a0aa-7fa0b1b465cd",
+            "opacity": 1.0,
+            "position": [
+                -70.0,
+                -135.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                4.0,
+                4.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_ba79e9b3-246d-4714-83b2-ef56225519a6",
+            "opacity": 1.0,
+            "position": [
+                -70.0,
+                -135.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                3.5999999046325684,
+                3.5999999046325684
+            ],
+            "scene": "Game",
+            "texture": "FireBall",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
+            "opacity": 1.0,
+            "position": [
+                -70.0,
+                -135.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.2000000476837158,
+                1.2000000476837158
+            ],
+            "scene": "Game",
+            "texture": "WeaponIconFrame",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.699999988079071,
+                0.30000001192092896,
                 1.0,
                 1.0
             ],
@@ -2936,7 +2608,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Pistol",
+            "texture": "Bomb",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2958,8 +2630,8 @@
                 0.5
             ],
             "color": [
-                0.20000000298023224,
-                0.550000011920929,
+                0.699999988079071,
+                0.30000001192092896,
                 1.0,
                 1.0
             ],
@@ -2999,18 +2671,59 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
-                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.8627451062202454
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_834362fc-6519-4451-83ef-478b040b953a",
+            "opacity": 1.0,
+            "position": [
+                640.0,
+                360.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                80.0,
+                45.0
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
                 1.0
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_7b6dcf1c-5965-4d98-96ed-99d61d6143f9",
+            "name": "UIGroupSprite_858a7d72-24eb-4141-83f5-f8bb2686ca33",
             "opacity": 1.0,
             "position": [
-                0.0,
-                0.0
+                640.0,
+                360.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -3040,18 +2753,18 @@
                 0.5
             ],
             "color": [
-                0.054999999701976776,
-                0.07000000029802322,
-                0.10999999940395355,
-                0.9599999785423279
+                0.0784313753247261,
+                0.09803921729326248,
+                0.13725490868091583,
+                0.9803921580314636
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_19629aca-fd3c-4626-95a5-088e72ce6151",
+            "name": "UIGroupSprite_48040c89-4256-4d15-9d68-46f39e5d8d81",
             "opacity": 1.0,
             "position": [
-                0.0,
-                0.0
+                640.0,
+                360.0
             ],
             "rotation": 0.0,
             "scale": [
@@ -3081,64 +2794,23 @@
                 0.5
             ],
             "color": [
-                0.2199999988079071,
-                0.12999999523162842,
-                0.02500000037252903,
-                0.9800000190734863
-            ],
-            "fitToScreen": false,
-            "layer": "UI",
-            "name": "UIGroupSprite_8fa04474-74bf-4bf4-abba-a9c8d4aaa66e",
-            "opacity": 1.0,
-            "position": [
-                0.0,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                15.0,
-                23.0
-            ],
-            "scene": "Game",
-            "texture": "white16x16",
-            "textureFilter": "Point",
-            "type": "Sprite2D",
-            "uvTransform": {
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "translate": [
-                    0.0,
-                    0.0
-                ]
-            },
-            "visible": true
-        },
-        {
-            "anchorPoint": [
-                0.5,
-                0.5
-            ],
-            "color": [
-                0.02500000037252903,
-                0.029999999329447746,
-                0.05000000074505806,
+                0.062745101749897,
+                0.062745101749897,
+                0.062745101749897,
                 1.0
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_f2b941c5-5975-4762-a0aa-7fa0b1b465cd",
+            "name": "UIGroupSprite_08820456-0ab1-4dd8-a408-2dc1f5a3242a",
             "opacity": 1.0,
             "position": [
-                -70.0,
-                -135.0
+                640.0,
+                378.0
             ],
             "rotation": 0.0,
             "scale": [
-                4.0,
-                4.0
+                7.25,
+                7.25
             ],
             "scene": "Game",
             "texture": "white16x16",
@@ -3170,19 +2842,19 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_ba79e9b3-246d-4714-83b2-ef56225519a6",
+            "name": "UIGroupSprite_ddaf91c8-d1ea-4d17-99f2-5ec902faa49b",
             "opacity": 1.0,
             "position": [
-                -70.0,
-                -135.0
+                640.0,
+                378.0
             ],
             "rotation": 0.0,
             "scale": [
-                3.5999999046325684,
-                3.5999999046325684
+                2.5,
+                2.5
             ],
             "scene": "Game",
-            "texture": "Trump",
+            "texture": "Milk",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -3204,26 +2876,190 @@
                 0.5
             ],
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
-                1.0,
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
                 1.0
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
+            "name": "UIGroupSprite_df22bc8d-c231-436b-b646-53ab918f3fee",
             "opacity": 1.0,
             "position": [
-                -70.0,
-                -135.0
+                640.0,
+                378.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.2000000476837158,
-                1.2000000476837158
+                2.0,
+                2.0
             ],
             "scene": "Game",
             "texture": "WeaponIconFrame",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_c651e9bb-a4c3-4a84-be36-e5d8831904ca",
+            "opacity": 1.0,
+            "position": [
+                640.0,
+                360.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                2.75,
+                2.75
+            ],
+            "scene": "Game",
+            "texture": "CardFrame",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                0.0784313753247261,
+                0.09803921729326248,
+                0.13725490868091583,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_ddeda112-4834-456c-affe-8a95eb039b08",
+            "opacity": 1.0,
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                10.0,
+                4.300000190734863
+            ],
+            "scene": "Game",
+            "texture": "white16x16",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_58756581-6997-4eb8-9193-41808ecb162e",
+            "opacity": 1.0,
+            "position": [
+                0.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.2999999523162842,
+                1.2999999523162842
+            ],
+            "scene": "Game",
+            "texture": "ButtonFrame",
+            "textureFilter": "Point",
+            "type": "Sprite2D",
+            "uvTransform": {
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "visible": true
+        },
+        {
+            "anchorPoint": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "fitToScreen": false,
+            "layer": "UI",
+            "name": "UIGroupSprite_2cbde314-879d-4d4c-93b6-6f3e303d2258",
+            "opacity": 1.0,
+            "position": [
+                -45.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                3.0,
+                3.0
+            ],
+            "scene": "Game",
+            "texture": "xbox_A",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {

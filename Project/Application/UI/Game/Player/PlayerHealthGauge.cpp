@@ -1,19 +1,30 @@
 #include "PlayerHealthGauge.h"
 #include "Utility/Camera/Camera.h"
+#include "Render/Object/2d/UIGroup/UIGroupManager.h"
 
 namespace UI::Game {
 
 	void PlayerHealthGauge::Initialize() {
-		healthGauge2d_ = std::make_unique<Gauge2d>();
-		healthGauge2d_->Initialize("PlayerHealthGauge", SceneType::Game, MadoEngine::Render::RenderLayer::Default);
+		auto& manager = MadoEngine::UIGroupManager::GetInstance();
+		auto handle = manager.Find("PlayerHealthGauge", SceneType::Game);
+
+		// Editorで復元済みの配置を優先し、保存データにない場合だけ新規生成
+		if (!manager.TryGet(handle)) {
+			handle = manager.CreateGauge("PlayerHealthGauge", SceneType::Game);
+		}
+		gaugeId_ = manager.GetId(handle);
+		isVisible_ = true;
 
 		healthGauge3d_ = std::make_unique<Gauge3d>();
 		healthGauge3d_->Initialize("PlayerHealthGauge3d", SceneType::Game, MadoEngine::Render::RenderLayer::World);
 	}
 
 	void PlayerHealthGauge::SetVisible(bool isVisible) {
-		if (healthGauge2d_) {
-			healthGauge2d_->SetVisible(isVisible);
+		isVisible_ = isVisible;
+
+		// 個別の表示設定を維持した実行時の表示制御
+		if (auto* gauge = TryGetGauge()) {
+			gauge->SetVisible(isVisible_);
 		}
 		if (healthGauge3d_) {
 			healthGauge3d_->SetVisible(isVisible);
@@ -25,23 +36,28 @@ namespace UI::Game {
 		float currentHealth,
 		float maxHealth,
 		const Camera& camera) {
-		if (healthGauge2d_) {
-			healthGauge2d_->SetCurrentValue(currentHealth);
-			healthGauge2d_->SetMaxValue(maxHealth);
+
+		// 再読込やUndoで再生成されたゲージへ最新値と実行時の表示状態を再接続
+		if (auto* gauge = TryGetGauge()) {
+			gauge->SetVisible(isVisible_);
+			gauge->Update(currentHealth, maxHealth);
 		}
 
 		// 同じHP情報から画面固定ゲージとPlayer追従ゲージを同期
-		healthGauge3d_->SetPosition(playerPosition);
-		healthGauge3d_->Update(camera, currentHealth, maxHealth);
+		if (healthGauge3d_) {
+			healthGauge3d_->SetPosition(playerPosition);
+			healthGauge3d_->Update(camera, currentHealth, maxHealth);
+		}
 	}
 
 	void PlayerHealthGauge::Finalize() {
 		healthGauge3d_.reset();
-		healthGauge2d_.reset();
+		gaugeId_.clear();
 	}
 
-	void PlayerHealthGauge::DrawImGui() {
-		healthGauge2d_->DrawImGui("PlayerHealthGauge");
+	Gauge2d* PlayerHealthGauge::TryGetGauge() const {
+		auto& manager = MadoEngine::UIGroupManager::GetInstance();
+		return manager.TryGetGauge(manager.FindById(gaugeId_));
 	}
 
 } // namespace UI::Game

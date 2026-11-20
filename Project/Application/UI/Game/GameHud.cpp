@@ -212,7 +212,6 @@ namespace UI::Game {
 	void GameHud::DrawImGui() {
 #ifdef USE_IMGUI
 		playerResourceGainView_.DrawImGui();
-		healthGauge_.DrawImGui();
 #endif
 	}
 

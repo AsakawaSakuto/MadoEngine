@@ -97,8 +97,14 @@ public:
 	/// @brief 個別の表示状態を取得
 	/// @return 個別設定で表示する場合はtrue
 	bool IsVisible() const { return isVisible_; }
+	/// @brief 保存対象の表示設定を維持した実行時の表示許可を設定
+	/// @param visible 実行時の表示を許可する場合はtrue
+	void SetRuntimeVisible(bool visible) { isRuntimeVisible_ = visible; }
+	/// @brief 個別の実行時の表示許可を取得
+	/// @return 実行時の表示を許可する場合はtrue
+	bool IsRuntimeVisible() const { return isRuntimeVisible_; }
 	/// @brief 全祖先を含めた表示状態を取得
-	/// @return 自身と全祖先が表示中の場合はtrue
+	/// @return 自身と全祖先の表示設定および実行時の表示許可が有効な場合はtrue
 	bool IsVisibleInHierarchy() const;
 	/// @brief 個別の透明度を設定
 	/// @param opacity 0から1までの不透明度
@@ -124,6 +130,7 @@ private:
 	std::shared_ptr<const LifetimeState> lifetime_;
 	std::weak_ptr<const LifetimeState> parent_;
 	float opacity_ = 1.0f;
+	bool isRuntimeVisible_ = true;
 	std::optional<AuthoringState> authoringState_;
 };
 

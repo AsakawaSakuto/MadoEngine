@@ -14,12 +14,13 @@ namespace UI::Game {
 
 		void Update(float currentExp, float maxExp);
 
-		void DrawImGui();
-
 		void IsUpgrade(bool isUpgrade, float deltaTime);
 	private:
+		/// @brief 永続IDから最新のゲージを一時取得
+		/// @return 接続中のゲージ、削除済みの場合はnullptr
+		Gauge2d* TryGetGauge() const;
 
-		std::unique_ptr<Gauge2d> expGauge_;
+		std::string gaugeId_;
 		MadoEngine::SpriteHandle dopaGauge_{};
 
 		float uvOffsetX_ = 0.0f;

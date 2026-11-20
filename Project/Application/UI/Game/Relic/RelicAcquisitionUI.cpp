@@ -17,6 +17,7 @@ constexpr const char* kDecisionSoundKey = "RelicDecision";
 constexpr const char* kRelicGroupName = "Relic";
 constexpr const char* kCardViewGroupName = "CardView";
 constexpr std::array<const char*, 3> kCardPanelNames = { "Overlay", "Border", "Panel" };
+constexpr const char* kCardFrameName = "CardFrame";
 constexpr const char* kCardIconName = "Icon";
 constexpr const char* kCardIconBorderName = "IconBorder";
 constexpr std::array<const char*, 3> kCardTextNames = { "Name", "Rarity", "Description" };
@@ -51,6 +52,7 @@ namespace UI::Game {
 		SetVisible(false);
 		panelSprites_.fill({});
 		textHandles_.fill({});
+		cardFrameSprite_ = {};
 		iconSprite_ = {};
 		iconBorderSprite_ = {};
 		displayedRelicId_.clear();
@@ -181,6 +183,7 @@ namespace UI::Game {
 	void RelicAcquisitionUI::RefreshCardBindings() {
 		panelSprites_.fill({});
 		textHandles_.fill({});
+		cardFrameSprite_ = {};
 		iconSprite_ = {};
 		iconBorderSprite_ = {};
 
@@ -193,7 +196,9 @@ namespace UI::Game {
 				continue;
 			}
 			if (element.type == MadoEngine::UIGroupElementType::Sprite) {
-				if (element.name == kCardIconName) {
+				if (element.name == kCardFrameName) {
+					cardFrameSprite_ = element.sprite;
+				} else if (element.name == kCardIconName) {
 					iconSprite_ = element.sprite;
 				} else if (element.name == kCardIconBorderName) {
 					iconBorderSprite_ = element.sprite;
@@ -221,8 +226,8 @@ namespace UI::Game {
 		const auto& color = GetRarityDefaultColor(definition.rarity);
 		const Vector4 rarityColor{ color[0], color[1], color[2], color[3] };
 
-		// カード枠とアイコン枠へ同じレアリティ色を適用
-		for (const auto handle : { panelSprites_[1], iconBorderSprite_ }) {
+		// カード枠と装飾フレーム、アイコン枠へ同じレアリティ色を適用
+		for (const auto handle : { panelSprites_[1], cardFrameSprite_, iconBorderSprite_ }) {
 			if (Sprite* border = ResolveSprite(handle)) {
 				border->SetColor(rarityColor);
 			}

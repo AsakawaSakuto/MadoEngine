@@ -46,13 +46,9 @@ public:
 
 	// ===== 可視性関連 =====
 
-	/// @brief 保存対象の表示設定を維持した実行時の表示許可を設定
-	/// @param visible 実行時の表示を許可する場合はtrue
-	void SetRuntimeVisible(bool visible) { isRuntimeVisible_ = visible; }
-
 	/// @brief 描画に使用する最終表示状態を取得
 	/// @return 自身と祖先の表示設定および実行時の表示許可が有効な場合はtrue
-	bool IsVisibleForRendering() const { return IsVisibleInHierarchy() && isRuntimeVisible_; }
+	bool IsVisibleForRendering() const { return IsVisibleInHierarchy(); }
 
 	/// @brief 描画レイヤーを設定
 	/// @param layer 設定する描画レイヤー
@@ -91,7 +87,6 @@ protected:
 	std::string objectName_; // オブジェクト名
 
 	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f}; // 色（RGBA）
-	bool isRuntimeVisible_ = true;          // 保存対象へ含めない実行時の表示許可
 	MadoEngine::Render::RenderLayer renderLayer_ = MadoEngine::Render::RenderLayer::Default;
 
 	uint32_t textureIndex_ = 0;

@@ -56,6 +56,7 @@ namespace UI::Game {
 			LegendaryBackground,
 			IconBorder,
 			IconBackground,
+			CardFrame,
 			Count,
 		};
 

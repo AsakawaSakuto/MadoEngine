@@ -11,6 +11,7 @@
 #include "SpriteEditor.h"
 #include "TextEditorUI.h"
 #include "Transform2DEditor.h"
+#include "TextureSelector.h"
 #include "Math/Function/MatrixFunction.h"
 #include <algorithm>
 #include <array>
@@ -24,6 +25,7 @@ namespace {
 constexpr float kHierarchyMinWidth = 180.0f;
 constexpr float kInspectorMinWidth = 220.0f;
 constexpr float kHierarchySplitterWidth = 8.0f;
+constexpr int kGaugeCreationType = 3;
 
 struct EditorSession {
 	UIGroupHandle selected;
@@ -75,6 +77,51 @@ const char* ElementLabel(UIGroupElementType type) {
 		return "Text";
 	}
 	return "Group";
+}
+
+/// @brief 新規作成する要素の初期名を取得
+/// @param type 作成UIの種類番号
+/// @return 要素名の基底文字列
+const char* CreationLabel(int type) {
+	if (type == kGaugeCreationType) {
+		return "Gauge";
+	}
+	return ElementLabel(static_cast<UIGroupElementType>(type));
+}
+
+/// @brief ゲージの満タン時のサイズと見た目を編集
+/// @param handle ゲージ機能を持つGroup
+void DrawGaugeInspector(UIGroupHandle handle) {
+	auto* gauge = UIGroupManager::GetInstance().TryGetGauge(handle);
+	if (!gauge) {
+		return;
+	}
+	ImGui::SeparatorText("2Dゲージ設定");
+	ImGui::Text("現在値: %.1f / %.1f (%.1f%%)", gauge->GetCurrentValue(), gauge->GetMaxValue(), gauge->GetRatio() * 100.0f);
+	auto settings = gauge->GetSettings();
+	bool changed = ImGui::DragFloat2("満タン時のサイズ（px）", &settings.size.x, 1.0f, 0.0f, 16384.0f);
+	int direction = static_cast<int>(settings.direction);
+	if (ImGui::Combo("伸びる方向", &direction, "Right\0Left\0Up\0Down\0")) {
+		settings.direction = static_cast<GaugeDirection>(direction);
+		changed = true;
+	}
+	changed = ImGui::Checkbox("背景を表示", &settings.drawBackground) || changed;
+	changed = ImGui::ColorEdit4("背景色", &settings.backgroundColor.x) || changed;
+	changed = ImGui::ColorEdit4("ゲージ色", &settings.gaugeColor.x) || changed;
+	static TextureSelector textureSelector;
+	changed = textureSelector.Draw("背景テクスチャ", settings.backgroundTexture) || changed;
+	changed = textureSelector.Draw("ゲージテクスチャ", settings.gaugeTexture) || changed;
+	int layer = static_cast<int>(settings.renderLayer);
+	if (ImGui::Combo("描画レイヤー", &layer, Render::kRenderLayerNames, static_cast<int>(Render::kRenderLayerCount))) {
+		settings.renderLayer = static_cast<Render::RenderLayer>(layer);
+		changed = true;
+	}
+
+	// 編集確定時だけ見た目を更新し、実行時の割合を履歴や保存データへ混入させないための分離
+	if (changed) {
+		EditorToolbar::GetInstance().NotifyOperationResult("ゲージ設定の変更", gauge->SetSettings(settings));
+	}
+	ImGui::TextDisabled("枠・アイコン・数値はこのGroupの子要素として追加できます");
 }
 
 /// @brief 名前の左側に配置する表示チェックボックスを描画
@@ -134,7 +181,11 @@ void DrawGroupTree(UIGroupHandle handle, const std::string& label, std::unordere
 	if (handle == session.selected && session.alias.empty()) {
 		flags |= ImGuiTreeNodeFlags_Selected;
 	}
-	const bool open = ImGui::TreeNodeEx("Group", flags, "%s", label.c_str());
+	std::string displayLabel = label;
+	if (manager.TryGetGauge(handle)) {
+		displayLabel += " [Gauge]";
+	}
+	const bool open = ImGui::TreeNodeEx("Group", flags, "%s", displayLabel.c_str());
 	if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
 		session.selected = handle;
 		session.alias.clear();
@@ -190,14 +241,14 @@ std::string NextElementName(UIGroupHandle handle, const std::string& baseName) {
 	return name;
 }
 
-/// @brief Group内でSprite・Text・子Groupを新規作成
+/// @brief Group内でSprite・Text・子Group・ゲージを新規作成
 /// @param handle 作成先のGroup
 void DrawCreation(UIGroupHandle handle) {
 	auto& manager = UIGroupManager::GetInstance();
 	ImGui::PushID("CreateElement");
 	ImGui::SeparatorText("新規要素の追加");
-	if (ImGui::Combo("種類", &session.createType, "Sprite\0Text\0Group\0")) {
-		CopyBuffer(session.createElementName, NextElementName(handle, ElementLabel(static_cast<UIGroupElementType>(session.createType))));
+	if (ImGui::Combo("種類", &session.createType, "Sprite\0Text\0Group\0Gauge\0")) {
+		CopyBuffer(session.createElementName, NextElementName(handle, CreationLabel(session.createType)));
 	}
 	ImGui::InputText("要素名", session.createElementName.data(), session.createElementName.size());
 	const bool canCreate = session.createElementName[0] != '\0';
@@ -205,20 +256,28 @@ void DrawCreation(UIGroupHandle handle) {
 	if (ImGui::Button("作成して追加")) {
 		const std::string name = session.createElementName.data();
 		bool success = false;
+		UIGroupHandle createdGauge;
 
 		// 作成時は既定値を使用し、詳細設定を追加後のInspectorへ集約
 		if (session.createType == static_cast<int>(UIGroupElementType::Sprite)) {
 			success = manager.CreateSpriteElement(handle, name, "white2x2").IsValid();
 		} else if (session.createType == static_cast<int>(UIGroupElementType::Text)) {
 			success = manager.CreateTextElement(handle, name, "Text").IsValid();
+		} else if (session.createType == kGaugeCreationType) {
+			createdGauge = manager.CreateGaugeElement(handle, name);
+			success = createdGauge.IsValid();
 		} else {
 			success = manager.CreateGroupElement(handle, name).IsValid();
 		}
 		EditorToolbar::GetInstance().NotifyOperationResult("要素の新規作成", success);
 		if (success) {
 			session.alias = name;
+			if (createdGauge.IsValid()) {
+				session.selected = createdGauge;
+				session.alias.clear();
+			}
 			session.editing = {};
-			CopyBuffer(session.createElementName, NextElementName(handle, ElementLabel(static_cast<UIGroupElementType>(session.createType))));
+			CopyBuffer(session.createElementName, NextElementName(session.selected, CreationLabel(session.createType)));
 		}
 	}
 	ImGui::EndDisabled();
@@ -328,6 +387,7 @@ void DrawElementInspector(UIGroupHandle handle) {
 			DrawTextInspector(*static_cast<Text*>(node));
 		} else {
 			DrawTransform2DInspector(*node);
+			DrawGaugeInspector(it->group);
 			if (ImGui::Button("子Groupを編集")) {
 				session.selected = it->group;
 				session.alias.clear();
@@ -483,6 +543,7 @@ void DrawUIGroupEditorUI(SceneType currentSceneType) {
 			}
 			ImGui::Text("シーン: %s", SceneTypeToString(manager.GetSceneType(session.selected)).c_str());
 			DrawTransform2DInspector(*group);
+			DrawGaugeInspector(session.selected);
 			DrawCreation(session.selected);
 			if (ImGui::CollapsingHeader("既存要素を登録")) {
 				DrawRegistration(session.selected);

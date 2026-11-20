@@ -1,12 +1,22 @@
-# Blender 5.0.1 MTL File: 'None'
+# Blender 5.3.0 MTL File: 'None'
 # www.blender.org
 
-newmtl box
-Ns 250.000000
+newmtl texture.002
+Ns 302.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 1.500000
+Ni 1.450000
+d 1.000000
 illum 2
-map_Kd box.png
-map_d box.png
+map_Kd C:/Users/k024g/Downloads/KayKit_Dungeon_Pack_1.1_FREE/KayKit_Dungeon_Pack_1.1_FREE/Assets/obj/dungeon_texture.png
+
+newmtl texture.003
+Ns 302.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/k024g/Downloads/KayKit_Dungeon_Pack_1.1_FREE/KayKit_Dungeon_Pack_1.1_FREE/Assets/obj/dungeon_texture.png

@@ -114,13 +114,13 @@ Matrix4x4 TransformNode2D::GetWorldMatrix() const {
 }
 
 bool TransformNode2D::IsVisibleInHierarchy() const {
-	if (!isVisible_) {
+	if (!isVisible_ || !isRuntimeVisible_) {
 		return false;
 	}
 
-	// 子の個別設定を変更せず祖先の表示許可だけを合成
+	// 子の個別設定を変更せず、祖先の編集用設定と実行時の表示許可を合成
 	for (auto parent = parent_.lock(); parent; parent = parent->node->parent_.lock()) {
-		if (!parent->node->isVisible_) {
+		if (!parent->node->isVisible_ || !parent->node->isRuntimeVisible_) {
 			return false;
 		}
 	}

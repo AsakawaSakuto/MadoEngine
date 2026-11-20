@@ -6,7 +6,7 @@
 
 namespace {
 	constexpr float kWeaponIconSlotSpacing = 68.0f;
-	constexpr Vector2 kWeaponLevelTextBasePosition = { -68.0f + 133.0f, 196.0f };
+	constexpr Vector2 kWeaponLevelTextBasePosition = { -88.0f + 133.0f, 196.0f };
 	constexpr float kWeaponLevelTextFontSize = 20.0f;
 	constexpr const char* kWeaponLevelTextNamePrefix = "LevelText";
 }
@@ -28,14 +28,14 @@ namespace UI::Game {
 
 			weaponIconsBG_[i] = MySprite::Create("weaponIconBG" + std::to_string(i), "white2x2", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIconsBG_[i])) {
-				sprite->SetPosition(Vector2{ -68.0f + 100.0f + i * 68.0f, 200.0f - 64.0f });
+				sprite->SetPosition(Vector2{ -88.0f + 100.0f + i * 68.0f, 200.0f - 64.0f });
 				sprite->SetScale(Vector2{ 32.0f, 32.0f });
 				sprite->SetColor(Vector4{ 0.1f, 0.1f, 0.1f, 1.0f });
 			}
 
 			weaponIconsShotGauge_[i] = MySprite::Create("weaponIconShotGauge" + std::to_string(i), "white2x2", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIconsShotGauge_[i])) {
-				sprite->SetPosition(Vector2{ -68.0f + 104.0f + i * 68.0f, 260.0f - 64.0f });
+				sprite->SetPosition(Vector2{ -88.0f + 104.0f + i * 68.0f, 260.0f - 64.0f });
 				sprite->SetScale(Vector2{ shotGaugeSize_, 0.0f });
 				sprite->SetColor(Vector4{ 0.5f, 0.5f, 0.5f, 1.0f });
 				sprite->SetAnchorPoint(Vector2{ 0.0f, 1.0f });
@@ -44,13 +44,13 @@ namespace UI::Game {
 
 			weaponIconFrames_[i] = MySprite::Create("weaponFrame" + std::to_string(i), "WeaponIconFrame", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIconFrames_[i])) {
-				sprite->SetPosition(Vector2{ -69.0f + 100.0f + i * 68.0f, 200.0f - 65.0f });
+				sprite->SetPosition(Vector2{ -89.0f + 100.0f + i * 68.0f, 200.0f - 65.0f });
 				sprite->SetScale(Vector2{ 1.05f, 1.05f });
 			}
 
 			weaponIcons_[i] = MySprite::Create("weaponIcon" + std::to_string(i), "None", SceneType::Game);
 			if (Sprite* sprite = MySprite::TryGet(weaponIcons_[i])) {
-				sprite->SetPosition(Vector2{ -68.0f + 132.0f + i * 68.0f, 232.0f - 64.0f });
+				sprite->SetPosition(Vector2{ -88.0f + 132.0f + i * 68.0f, 232.0f - 64.0f });
 				sprite->SetScale(startIconScale_);
 				sprite->SetAnchorPoint(Vector2{ 0.5f, 0.5f });
 				sprite->SetVisible(false);

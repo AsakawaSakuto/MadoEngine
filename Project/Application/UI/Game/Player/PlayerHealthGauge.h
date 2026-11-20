@@ -27,15 +27,17 @@ namespace UI::Game {
 			const Camera& camera
 		);
 
-		/// @brief Playerの2Dと3DのHP表示を解放
+		/// @brief Playerの2Dゲージ参照と頭上3D表示を解放
 		void Finalize();
 
-		/// @brief 2Dと3DのHPゲージのImGuiを描画
-		void DrawImGui();
-
 	private:
-		std::unique_ptr<Gauge2d> healthGauge2d_;
+		/// @brief 永続IDから最新の2Dゲージを一時取得
+		/// @return 接続中の2Dゲージ、削除済みの場合はnullptr
+		Gauge2d* TryGetGauge() const;
+
+		std::string gaugeId_;
 		std::unique_ptr<Gauge3d> healthGauge3d_;
+		bool isVisible_ = true;
 	};
 
 } // namespace UI::Game

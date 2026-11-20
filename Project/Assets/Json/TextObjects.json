@@ -198,7 +198,7 @@
                 0.0,
                 0.0
             ],
-            "text": "01:23",
+            "text": "04:57",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -249,7 +249,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 58.6",
+            "text": "FPS : 61.5",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -300,7 +300,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 32801693",
+            "text": "SEED : 3437901089",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -351,7 +351,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 112 / 125",
+            "text": "HP : 125 / 125",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -453,7 +453,7 @@
                 0.0,
                 0.0
             ],
-            "text": "20で開ける",
+            "text": "10で開ける",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -711,7 +711,7 @@
             "text": "目標:敵を沢山撃破しよう",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -759,7 +759,7 @@
                 125.0,
                 60.0
             ],
-            "text": "デストランプ",
+            "text": "ボム",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -824,9 +824,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.0,
-                0.31380486488342285,
                 1.0,
+                0.0,
+                0.7936878204345703,
                 1.0
             ],
             "fontFamily": "x8y12pxDenkiChip",
@@ -912,7 +912,7 @@
                 0.0,
                 0.0
             ],
-            "text": "20",
+            "text": "30",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1014,7 +1014,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-8.8",
+            "text": "-6.9",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1065,7 +1065,7 @@
                 0.0,
                 0.0
             ],
-            "text": "450",
+            "text": "60",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1235,7 +1235,7 @@
                 1.0,
                 0.0,
                 0.0,
-                1.0
+                0.0
             ],
             "fontFamily": "ドットゴシック16",
             "fontFile": "Assets/Font/DotGothic16-Regular.ttf",
@@ -1254,7 +1254,7 @@
             "outlineWidth": 4.0,
             "position": [
                 640.0,
-                -100.0
+                170.0
             ],
             "renderMode": "Rasterized",
             "rotation": 0.0,
@@ -1272,7 +1272,7 @@
             "text": "敵が大量発生",
             "type": "Text2D",
             "verticalAlign": "Top",
-            "visible": true,
+            "visible": false,
             "wordWrap": true
         },
         {
@@ -1328,57 +1328,6 @@
         },
         {
             "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 46.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "UIGroupText_de56888a-c62a-47c5-b9a0-149a0f1b4fcc",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                1070.0,
-                356.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "一時停止",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
                 0.5,
                 0.5
             ],
@@ -1422,7 +1371,7 @@
                 85.0,
                 42.0
             ],
-            "text": "10.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1473,162 +1422,9 @@
                 210.0,
                 128.0
             ],
-            "text": "足元に魔法陣を設置\n触れた敵に毒を付与",
+            "text": "着弾時に範囲攻撃\n1～12のダメージ\n稀に敵を即死させる",
             "type": "Text2D",
             "verticalAlign": "Center",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 28.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "UIGroupText_e3edae48-4152-4198-8d86-4a0f7664c350",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                1070.0,
-                507.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "スライディング",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "UIGroupText_5dc49492-edb4-4c2c-9f94-ce24f3d4ba40",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                1070.0,
-                440.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "ジャンプ",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "UIGroupText_09f2948c-65bf-4f6e-a19b-bb07398b824c",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                1066.0,
-                566.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "カメラ操作\n",
-            "type": "Text2D",
-            "verticalAlign": "Top",
             "visible": true,
             "wordWrap": true
         },
@@ -1696,57 +1492,6 @@
                 1.0,
                 1.0
             ],
-            "fontFamily": "游ゴシック",
-            "fontFile": "Assets/Font/YuGothB.ttc",
-            "fontSize": 32.0,
-            "horizontalAlign": "Left",
-            "layer": "Default",
-            "lineSpacing": 1.0,
-            "name": "UIGroupText_d0a001a7-b096-4866-90e4-47e3bf61ba72",
-            "opacity": 1.0,
-            "outlineColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "outlineWidth": 3.0,
-            "position": [
-                1070.0,
-                630.0
-            ],
-            "renderMode": "Rasterized",
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0
-            ],
-            "scene": "Game",
-            "screen": "BackBuffer",
-            "sdfEnabled": true,
-            "size": [
-                0.0,
-                0.0
-            ],
-            "text": "壁登り",
-            "type": "Text2D",
-            "verticalAlign": "Top",
-            "visible": true,
-            "wordWrap": true
-        },
-        {
-            "anchorPoint": [
-                0.0,
-                0.0
-            ],
-            "atlasRasterSize": 128.0,
-            "characterSpacing": 0.0,
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
             "fontFamily": "x8y12pxDenkiChip",
             "fontFile": "Assets/Font/dot.ttf",
             "fontSize": 40.0,
@@ -1779,7 +1524,7 @@
                 0.0,
                 0.0
             ],
-            "text": "180",
+            "text": "0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1830,7 +1575,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 28",
+            "text": "Enemy : 3",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -2034,7 +1779,7 @@
                 85.0,
                 42.0
             ],
-            "text": "5.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2085,7 +1830,7 @@
                 85.0,
                 42.0
             ],
-            "text": "25.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2442,7 +2187,7 @@
                 125.0,
                 60.0
             ],
-            "text": "魔眼",
+            "text": "毒靴",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2456,9 +2201,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.949999988079071,
+                0.9700000286102295,
+                1.0,
                 1.0
             ],
             "fontFamily": "PixelMplus12",
@@ -2493,7 +2238,7 @@
                 125.0,
                 70.0
             ],
-            "text": "アンコモン\n所持武器を強化",
+            "text": "NEW\n新規武器",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2544,7 +2289,7 @@
                 210.0,
                 60.0
             ],
-            "text": "クリティカル率",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2595,7 +2340,7 @@
                 210.0,
                 128.0
             ],
-            "text": "足元にエリアを展開\n触れた敵にダメージ",
+            "text": "足元に魔法陣を設置\n触れた敵に毒を付与",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2660,9 +2405,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.949999988079071,
+                0.9700000286102295,
+                1.0,
                 1.0
             ],
             "fontFamily": "PixelMplus12",
@@ -2697,7 +2442,7 @@
                 125.0,
                 70.0
             ],
-            "text": "アンコモン\n所持武器を強化",
+            "text": "NEW\n新規武器",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2748,7 +2493,7 @@
                 210.0,
                 60.0
             ],
-            "text": "クリティカル率",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2799,7 +2544,7 @@
                 210.0,
                 128.0
             ],
-            "text": "直進するカードを投げ\n1～13のダメージ\n稀に敵を即死させる",
+            "text": "弧を描くボムを放つ\n敵に火傷を付与",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2850,7 +2595,7 @@
                 125.0,
                 60.0
             ],
-            "text": "毒靴",
+            "text": "デスダイス",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2901,7 +2646,7 @@
                 85.0,
                 42.0
             ],
-            "text": "20.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,

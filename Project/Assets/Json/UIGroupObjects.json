@@ -163,6 +163,24 @@
                     },
                     "target": "UIGroupText_e1d316b3-fc93-4359-b122-2f7c8690d5ca",
                     "type": "Text"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            640.0,
+                            360.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_c651e9bb-a4c3-4a84-be36-e5d8831904ca",
+                    "type": "Sprite"
                 }
             ],
             "id": "f30a707b-2361-441d-ae34-01fc44cc0d24",
@@ -367,6 +385,24 @@
                         "visible": true
                     },
                     "target": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_3c0675d9-9cbf-4c3f-87f4-cf6ca9f97dab",
                     "type": "Sprite"
                 }
             ],
@@ -1308,7 +1344,7 @@
             "state": {
                 "opacity": 1.0,
                 "position": [
-                    762.0,
+                    780.0,
                     54.0
                 ],
                 "rotation": 0.0,
@@ -1505,6 +1541,24 @@
                     },
                     "target": "UIGroupSprite_8929c19b-b79e-461f-a3e1-0c206f4a9685",
                     "type": "Sprite"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_38580e4f-ba81-42e5-bde1-cb3e84ae2e79",
+                    "type": "Sprite"
                 }
             ],
             "id": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
@@ -1661,7 +1715,7 @@
             "state": {
                 "opacity": 1.0,
                 "position": [
-                    330.0,
+                    286.0,
                     54.0
                 ],
                 "rotation": 0.0,
@@ -1670,206 +1724,6 @@
                     1.0
                 ],
                 "visible": true
-            }
-        },
-        {
-            "children": [
-                {
-                    "name": "InputUI1",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1000.0,
-                            366.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            0.5,
-                            0.5
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_de712a27-151e-445b-8691-3a893d3434d2",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "InputUI2",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1000.0,
-                            434.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            0.5,
-                            0.5
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_df46366e-9d28-45c5-a2fc-0ba954dd0773",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "InputUI3",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1000.0,
-                            500.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            0.5,
-                            0.5
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_57ce6082-9181-4ee0-9816-82215e208d70",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "InputUI4",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1000.0,
-                            564.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            0.5,
-                            0.5
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_7ca8127b-297e-4743-96de-e5175dde540b",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "InputUI5",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1000.0,
-                            628.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            0.5,
-                            0.5
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupSprite_c86914fd-f2ab-4319-b2e7-1f10f6387419",
-                    "type": "Sprite"
-                },
-                {
-                    "name": "InputText1",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1070.0,
-                            356.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_de56888a-c62a-47c5-b9a0-149a0f1b4fcc",
-                    "type": "Text"
-                },
-                {
-                    "name": "InputText2",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1070.0,
-                            440.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_5dc49492-edb4-4c2c-9f94-ce24f3d4ba40",
-                    "type": "Text"
-                },
-                {
-                    "name": "InputText3",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1070.0,
-                            507.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_e3edae48-4152-4198-8d86-4a0f7664c350",
-                    "type": "Text"
-                },
-                {
-                    "name": "InputText4",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1066.0,
-                            566.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_09f2948c-65bf-4f6e-a19b-bb07398b824c",
-                    "type": "Text"
-                },
-                {
-                    "name": "InputText5",
-                    "state": {
-                        "opacity": 1.0,
-                        "position": [
-                            1070.0,
-                            630.0
-                        ],
-                        "rotation": 0.0,
-                        "scale": [
-                            1.0,
-                            1.0
-                        ],
-                        "visible": true
-                    },
-                    "target": "UIGroupText_d0a001a7-b096-4866-90e4-47e3bf61ba72",
-                    "type": "Text"
-                }
-            ],
-            "id": "3074f89f-b33a-4c47-900d-1b25dfffa25d",
-            "name": "OperationMethodUI",
-            "scene": "Game",
-            "state": {
-                "opacity": 1.0,
-                "position": [
-                    0.0,
-                    0.0
-                ],
-                "rotation": 0.0,
-                "scale": [
-                    1.0,
-                    1.0
-                ],
-                "visible": false
             }
         },
         {
@@ -1944,6 +1798,90 @@
             }
         },
         {
+            "children": [],
+            "gauge": {
+                "backgroundColor": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "backgroundTexture": "white2x2",
+                "direction": "Right",
+                "drawBackground": true,
+                "gaugeColor": [
+                    0.0,
+                    0.9581396579742432,
+                    1.0,
+                    1.0
+                ],
+                "gaugeTexture": "white2x2",
+                "renderLayer": "UI",
+                "size": [
+                    1280.0,
+                    32.0
+                ]
+            },
+            "id": "3ed442ee-be87-4789-b38b-f6fa0305483d",
+            "name": "PlayerExpGauge",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [],
+            "gauge": {
+                "backgroundColor": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "backgroundTexture": "white2x2",
+                "direction": "Right",
+                "drawBackground": true,
+                "gaugeColor": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "gaugeTexture": "white2x2",
+                "renderLayer": "Default",
+                "size": [
+                    232.0,
+                    52.0
+                ]
+            },
+            "id": "5f63a9de-95e9-4b9a-9277-a3ef2b8aef1d",
+            "name": "PlayerHealthGauge",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    54.0,
+                    60.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.024999976158142,
+                    1.0
+                ],
+                "visible": true
+            }
+        },
+        {
             "children": [
                 {
                     "name": "PlayerHealthFrame",
@@ -1980,6 +1918,11 @@
                     },
                     "target": "PlayerHealthText",
                     "type": "Text"
+                },
+                {
+                    "name": "Gauge",
+                    "target": "5f63a9de-95e9-4b9a-9277-a3ef2b8aef1d",
+                    "type": "Group"
                 }
             ],
             "id": "4da77292-2a0d-451c-b2d4-0d23f6b2f69c",
@@ -1988,8 +1931,50 @@
             "state": {
                 "opacity": 1.0,
                 "position": [
-                    0.0,
+                    -20.0,
                     0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    0.949999988079071,
+                    0.949999988079071
+                ],
+                "visible": true
+            }
+        },
+        {
+            "children": [],
+            "gauge": {
+                "backgroundColor": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "backgroundTexture": "white2x2",
+                "direction": "Up",
+                "drawBackground": true,
+                "gaugeColor": [
+                    1.0,
+                    0.7534883618354797,
+                    0.0,
+                    1.0
+                ],
+                "gaugeTexture": "white2x2",
+                "renderLayer": "Default",
+                "size": [
+                    8.0,
+                    96.0
+                ]
+            },
+            "id": "e734ec12-062b-45a5-910f-db473dfa9c9e",
+            "name": "PlayerStaminaGauge",
+            "scene": "Game",
+            "state": {
+                "opacity": 1.0,
+                "position": [
+                    666.0,
+                    400.0
                 ],
                 "rotation": 0.0,
                 "scale": [
@@ -2515,6 +2500,24 @@
                         "visible": true
                     },
                     "target": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_33bd394b-cd86-490e-87be-7355e146a8e2",
                     "type": "Sprite"
                 }
             ],

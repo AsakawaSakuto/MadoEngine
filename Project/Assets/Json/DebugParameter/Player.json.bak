@@ -33,7 +33,7 @@
             },
             "地上減速量": {
                 "type": "float",
-                "value": 12.0
+                "value": 10.0
             },
             "方向補正率": {
                 "type": "float",
@@ -76,7 +76,7 @@
             },
             "移動速度": {
                 "type": "float",
-                "value": 7.5
+                "value": 6.5
             },
             "重力": {
                 "type": "float",

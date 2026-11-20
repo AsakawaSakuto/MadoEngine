@@ -19,14 +19,15 @@ namespace UI::Game {
 		/// @param isVisible ゲージを表示する場合はtrue
 		void Update(float remainingTime, float maxDuration, bool isVisible);
 
-		/// @brief 壁登り可能時間ゲージを解放
+		/// @brief Manager管理の壁登り可能時間ゲージへの参照を解放
 		void Finalize();
 
-		/// @brief 壁登り可能時間ゲージのImGuiを描画
-		void DrawImGui();
-
 	private:
-		std::unique_ptr<Gauge2d> staminaGauge_;
+		/// @brief 永続IDから最新のゲージを一時取得
+		/// @return 接続中のゲージ、削除済みの場合はnullptr
+		Gauge2d* TryGetGauge() const;
+
+		std::string gaugeId_;
 		bool isVisible_ = true;
 		bool isClimbing_ = false;
 	};

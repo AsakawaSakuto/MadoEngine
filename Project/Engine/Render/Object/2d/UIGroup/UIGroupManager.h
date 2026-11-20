@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UIGroup.h"
+#include "Render/Object/2d/Gauge/Gauge.h"
 #include "SceneManager/SceneType.h"
 #include <filesystem>
 #include <optional>
@@ -38,6 +39,19 @@ public:
 	/// @param sceneType 所属シーン
 	/// @return 生成したハンドル、失敗時は無効ハンドル
 	UIGroupHandle Create(const std::string& name, SceneType sceneType);
+	/// @brief ゲージ機能を持つ編集用Groupを生成
+	/// @param name シーン内で一意なGroup名
+	/// @param sceneType 所属シーン
+	/// @return 生成したGroup、失敗した場合は無効ハンドル
+	UIGroupHandle CreateGauge(const std::string& name, SceneType sceneType);
+	/// @brief Groupに接続されたゲージ機能を一時取得
+	/// @param handle ゲージのGroup
+	/// @return 接続中のゲージ、通常Groupまたは無効な場合はnullptr
+	Gauge2d* TryGetGauge(UIGroupHandle handle);
+	/// @brief Groupに接続されたゲージ機能を定数参照として一時取得
+	/// @param handle ゲージのGroup
+	/// @return 接続中のゲージ、通常Groupまたは無効な場合はnullptr
+	const Gauge2d* TryGetGauge(UIGroupHandle handle) const;
 	/// @brief 世代が一致するGroupを一時取得
 	/// @param handle 対象のハンドル
 	/// @return 有効なGroup、無効な場合はnullptr
@@ -119,6 +133,11 @@ public:
 	/// @param name 親Group内の要素名
 	/// @return 追加した子Groupのハンドル、失敗した場合は無効ハンドル
 	UIGroupHandle CreateGroupElement(UIGroupHandle handle, const std::string& name);
+	/// @brief ゲージ機能を持つ子Groupを新規生成して追加
+	/// @param handle 追加先のGroup
+	/// @param name 親Group内の要素名
+	/// @return 生成したゲージのGroup、失敗した場合は無効ハンドル
+	UIGroupHandle CreateGaugeElement(UIGroupHandle handle, const std::string& name);
 	/// @brief 接続先と編集用設定を維持した登録名の変更
 	/// @param handle 対象のGroup
 	/// @param name 現在の登録名
@@ -175,6 +194,7 @@ public:
 private:
 	struct Slot {
 		std::unique_ptr<UIGroup> group;
+		std::unique_ptr<Gauge2d> gauge;
 		std::string id;
 		std::string name;
 		SceneType scene = SceneType::None;
@@ -189,6 +209,11 @@ private:
 	/// @param name 確認する要素名
 	/// @return 有効かつ未使用の要素名の場合はtrue
 	bool CanCreateElement(UIGroupHandle handle, const std::string& name) const;
+	/// @brief Groupのゲージ機能を生成または更新
+	/// @param handle 接続先のGroup
+	/// @param settings 満タン時の見た目の設定
+	/// @return ゲージ機能を反映できた場合はtrue
+	bool ConfigureGauge(UIGroupHandle handle, const Gauge2d::Settings& settings);
 
 	/// @brief 指定スロットの子情報を現在の参照状態へ同期
 	/// @param slot 対象のスロット

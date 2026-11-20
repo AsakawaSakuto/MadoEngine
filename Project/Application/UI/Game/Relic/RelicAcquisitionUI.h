@@ -62,6 +62,7 @@ namespace UI::Game {
 		void ResetDecisionDelay();
 
 		std::array<MadoEngine::SpriteHandle, 3> panelSprites_{};
+		MadoEngine::SpriteHandle cardFrameSprite_{};
 		MadoEngine::SpriteHandle iconSprite_{};
 		MadoEngine::SpriteHandle iconBorderSprite_{};
 		std::array<MadoEngine::TextHandle, 3> textHandles_{};

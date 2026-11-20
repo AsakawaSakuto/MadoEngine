@@ -63,7 +63,7 @@ namespace UI::Game {
 		if (Model* model = MyModel::TryGet(model_)) {
 
 			// Camera基底で向きと移動量を扱い、Mapの照明と影への依存を解除
-			model->SetTexture("Chest");
+			model->SetTexture("ChestModelTexture");
 			model->SetLightingEnabled(false);
 			model->SetCastShadow(false);
 			model->SetReceiveShadow(false);

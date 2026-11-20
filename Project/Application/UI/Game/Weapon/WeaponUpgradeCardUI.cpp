@@ -13,8 +13,8 @@ namespace {
 
 constexpr std::array<const char*, 3> kCardGroupNames = { "LeftCard", "CenterCard", "RightCard" };
 constexpr const char* kOwnedWeaponDetailsGroupName = "OwnedWeaponDetails";
-constexpr std::array<const char*, 5> kCardSpriteNames = {
-	"Border", "Background", "LegendaryBackground", "IconBorder", "IconBackground"
+constexpr std::array<const char*, 6> kCardSpriteNames = {
+	"Border", "Background", "LegendaryBackground", "IconBorder", "IconBackground", "CardFrame"
 };
 constexpr float kSelectedCardScale = 1.1f;
 constexpr float kSelectedCardPulseScale = 0.01f;
@@ -342,7 +342,9 @@ void WeaponUpgradeCardUI::ApplyChoiceContent() {
 	if (MadoEngine::Text* category = ResolveText(categoryText_)) {
 		category->SetColor(accentColor_);
 	}
-	for (const auto type : { CardSpriteType::Border, CardSpriteType::IconBorder }) {
+
+	// カード枠と装飾フレーム、アイコン枠へ同じ候補色を適用
+	for (const auto type : { CardSpriteType::Border, CardSpriteType::CardFrame, CardSpriteType::IconBorder }) {
 		if (Sprite* border = ResolveSprite(cardSprites_[static_cast<std::size_t>(type)])) {
 			border->SetColor(accentColor_);
 		}

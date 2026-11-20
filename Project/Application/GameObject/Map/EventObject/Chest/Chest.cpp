@@ -66,13 +66,13 @@ void Chest::Initialize(const InitializeDesc& desc) {
 	if (normalBatch && outlineBatch) {
 
 		// 強調表示をInstanceの表示切り替えだけで完結させるため同一Transformを二重登録
-		normalBatch-> SetTexture("Chest");
-		outlineBatch->SetTexture("Chest");
+		normalBatch-> SetTexture("ChestModelTexture");
+		outlineBatch->SetTexture("ChestModelTexture");
 
 		InstancedModel::InstanceDesc normalInstance;
 		normalInstance.transform = transform_;
-		normalInstance.transform.scale = { 0.75f, 0.75f, 0.75f };
-
+		normalInstance.transform.scale = { 1.25f, 1.25f, 1.25f };
+		
 		normalInstance.color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
 		normalInstance.isVisible = true;
 
