@@ -4,6 +4,7 @@
 #include "GameObject/Combat/ProjectileDamage.h"
 #include "GameObject/DropObject/DropObjectManager.h"
 #include "GameObject/Player/Player.h"
+#include "Render/Object/3d/EffectSequence/EffectSequenceSystem.h"
 #include "Utility/Random.h"
 #include <algorithm>
 #include <cmath>
@@ -294,25 +295,31 @@ namespace Enemy {
 		// 即死が成立した場合は適用直前のHPを使い、クリティカルによる過剰ダメージを防止
 		float resolvedDamage = damage;
 		bool isCritical = false;
+		int multiCriticalCount = 0;
 		if (isInstantKill) {
 			resolvedDamage = status_.currentHealth;
 		} else if (damage <= 0.0f) {
 			return result;
 		} else {
 
-			// 即死が適用されない命中ごとにクリティカルを抽選
-			isCritical = Combat::RollCritical(criticalChance);
+			// 即死が適用されない命中ごとに多重回数を抽選し、元の倍率から加算倍率を計算
+			const int criticalCount = Combat::RollCriticalCount(criticalChance);
+			isCritical = criticalCount > 0;
 			if (isCritical) {
-				resolvedDamage *= criticalDamage;
+				multiCriticalCount = criticalCount - 1;
+				resolvedDamage *= Combat::CalculateCriticalDamageMultiplier(criticalDamage, criticalCount);
 			}
 		}
 		if (!std::isfinite(resolvedDamage) || resolvedDamage <= 0.0f) {
 			return result;
 		}
 
-		result = ApplyDamage(resolvedDamage, isCritical, true);
+		result = ApplyDamage(resolvedDamage, isCritical);
 		result.wasInstantKilled = isInstantKill && result.wasKilled;
 		if (result.wasApplied) {
+
+			// 命中時の抽選結果を表示側へ渡し、倍率計算と文字色の段階を一致
+			result.multiCriticalCount = multiCriticalCount;
 
 			// 同じProjectileが接触中に毎フレームDamageを与えないよう適用成功後に待機時間を登録
 			projectileDamageCooldowns_.emplace(projectileId, projectileDamageInterval_);
@@ -361,13 +368,14 @@ namespace Enemy {
 		status_.currentHealth = 0.0f;
 		statusEffectController_.Clear();
 
-		// Map外への落下とPlayer周辺の管理範囲外は撃破として扱わず報酬生成を抑制
+		// 範囲外削除と区別し、撃破されたEnemyだけに死亡演出と報酬を一度生成
 		if (reason == DeathReason::Defeated) {
+			PlayDeathEffect();
 			SpawnDeathReward();
 		}
 	}
 
-	DamageResult Base::ApplyDamage(float resolvedDamage, bool isCritical, bool playsDamageEffect) {
+	DamageResult Base::ApplyDamage(float resolvedDamage, bool isCritical) {
 		DamageResult result;
 		if (!isActive_ || !std::isfinite(resolvedDamage) || resolvedDamage <= 0.0f) {
 			return result;
@@ -383,9 +391,6 @@ namespace Enemy {
 		result.wasKilled = status_.currentHealth <= 0.0f;
 		if (result.wasApplied) {
 			StartDamageFlash();
-			if (playsDamageEffect) {
-				PlayDamageEffect();
-			}
 		}
 		if (result.wasKilled) {
 			Kill();
@@ -400,7 +405,7 @@ namespace Enemy {
 			const StatusEffect::DamageEvent& damageEvent = updateResult.damageEvents[index];
 
 			// 複数の継続Damageが同Frameに発生しても死亡後の追加適用を停止
-			const DamageResult damageResult = ApplyDamage(damageEvent.damage, false, false);
+			const DamageResult damageResult = ApplyDamage(damageEvent.damage, false);
 			if (damageResult.wasApplied) {
 				statusEffectDamageEvents_.push_back({
 					damageEvent.type,
@@ -443,12 +448,14 @@ namespace Enemy {
 		}
 	}
 
-	void Base::PlayDamageEffect() const {
-		/*MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
+	void Base::PlayDeathEffect() const {
+
+		// Enemy破棄後も死亡位置で演出を継続するため、追従対象を持たないSequenceを生成
+		MadoEngine::EffectSequence::EffectSequencePlayDesc desc;
 		desc.rootTransform.translate = transform_.translate;
 		desc.sceneType = sceneType_;
 		desc.loopOverride = false;
-		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play("EnemyHitEffect", desc);*/
+		MadoEngine::EffectSequence::EffectSequenceSystem::GetInstance().Play("EnemyHitEffect", desc);
 	}
 
 	void Base::UpdateAppearance(float deltaTime) {

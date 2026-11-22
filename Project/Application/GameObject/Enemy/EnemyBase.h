@@ -41,6 +41,7 @@ namespace Enemy {
 		bool isCritical = false;
 		bool wasKilled = false;
 		bool wasInstantKilled = false;
+		int multiCriticalCount = 0; // 通常クリティカルを除く追加発動回数
 	};
 
 	/// @brief 状態異常によるダメージ結果
@@ -98,8 +99,8 @@ namespace Enemy {
 		/// @param projectileId Projectileの識別番号
 		/// @param damage 適用するダメージ量
 		/// @param instantKillChance ボス以外のEnemyに対する即死率（%）
-		/// @param criticalChance クリティカル率
-		/// @param criticalDamage クリティカル発生時のダメージ倍率
+		/// @param criticalChance 100%ごとに通常または多重1回を保証するクリティカル率（%）
+		/// @param criticalDamage 多重補正前のクリティカルダメージ倍率
 		/// @param knockbackDirection Enemyを押し出す方向
 		/// @param knockbackPower Enemyへ適用するノックバック力
 		/// @param instantKillRoll 発射時の即死抽選結果、当選時はtrue、命中時に抽選する場合は空
@@ -234,9 +235,8 @@ namespace Enemy {
 		/// @brief 検証済みのダメージをEnemyのHPへ適用
 		/// @param resolvedDamage 補正計算後のダメージ量
 		/// @param isCritical クリティカルダメージの場合はtrue
-		/// @param playsDamageEffect 被弾Effectを再生する場合はtrue
 		/// @return 実際に適用されたダメージと死亡状態
-		DamageResult ApplyDamage(float resolvedDamage, bool isCritical, bool playsDamageEffect);
+		DamageResult ApplyDamage(float resolvedDamage, bool isCritical);
 
 		/// @brief 状態異常の時間経過と継続ダメージを更新
 		/// @param deltaTime 前フレームからの経過時間
@@ -249,8 +249,8 @@ namespace Enemy {
 		/// @brief 被ダメージ時の点滅を開始
 		void StartDamageFlash();
 
-		/// @brief 被ダメージEffect Sequenceを現在座標に再生
-		void PlayDamageEffect() const;
+		/// @brief 死亡時のEffect Sequenceを現在座標に一度再生
+		void PlayDeathEffect() const;
 
 		/// @brief 種類別表示色、状態異常色、被ダメージFlashを敵Modelへ反映
 		/// @param deltaTime 前フレームからの経過時間

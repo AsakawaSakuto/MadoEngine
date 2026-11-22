@@ -407,10 +407,12 @@ namespace Weapon {
 		const float modifiedCriticalChance =
 			(status_.criticalChance.value + modifiers.criticalChanceFlat) *
 			(1.0f + modifiers.criticalChanceRate);
+
+		// 100%超過分を命中時の多重クリティカル抽選へ渡すため下限だけを制限
 		if (std::isfinite(modifiedCriticalChance)) {
-			context.criticalChance = std::clamp(modifiedCriticalChance, 0.0f, 100.0f);
+			context.criticalChance = std::max(modifiedCriticalChance, 0.0f);
 		} else {
-			context.criticalChance = std::clamp(status_.criticalChance.value, 0.0f, 100.0f);
+			context.criticalChance = std::max(status_.criticalChance.value, 0.0f);
 		}
 		context.criticalDamage = status_.criticalDamage.value;
 		context.instantKillChance = status_.instantKillChance.value;

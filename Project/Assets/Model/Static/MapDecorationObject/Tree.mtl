@@ -1,0 +1,23 @@
+# Blender 5.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl Bark_NormalTree
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/k024g/Downloads/TreeKit/OBJ/C:/Bark_NormalTree.png
+map_Bump -bm 1.000000 C:/Users/k024g/Downloads/TreeKit/OBJ/C:/Bark_NormalTree_Normal.png
+
+newmtl Leaves_Pine
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd C:/Users/k024g/Downloads/TreeKit/OBJ/C:/Leaf_Pine_C.png
+map_d C:/Users/k024g/Downloads/TreeKit/OBJ/C:/Leaf_Pine_C.png

@@ -485,6 +485,7 @@ namespace Enemy {
 						return (Combat::DamageDisplayType::Number);
 					}
 				}(),
+				damageResult.multiCriticalCount,
 			});
 
 			// 撃破済みEnemyへの不要な状態登録を避け、実ダメージ成立後だけ付与抽選

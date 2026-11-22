@@ -301,7 +301,9 @@ namespace UI::Game {
 			ImGui::DragFloat("クリティカルフォントサイズ", &criticalFontSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::DragFloat("Joker表示サイズ", &jokerPixelSize_, 1.0f, 1.0f, 200.0f, "%.0f px");
 		ImGui::ColorEdit4("通常ダメージ文字色", &damageTextColor_.x);
-		ImGui::ColorEdit4("クリティカルダメージ文字色", &criticalDamageTextColor_.x);
+		ImGui::ColorEdit4("通常クリティカル文字色", &criticalDamageTextColor_.x);
+		ImGui::ColorEdit4("多重クリティカル1回の文字色", &firstMultiCriticalDamageTextColor_.x);
+		ImGui::ColorEdit4("多重クリティカル2回以上の文字色", &repeatedMultiCriticalDamageTextColor_.x);
 		Enemy::StatusEffect::VisualSettings& visualSettings =
 			Enemy::StatusEffect::VisualSettings::GetInstance();
 		ImGui::ColorEdit4(
@@ -388,7 +390,14 @@ namespace UI::Game {
 			break;
 		}
 
+		// 命中時の多重回数だけで表示段階を決定し、ダメージ倍率やクリティカル率への依存を回避
 		if (event.isCritical) {
+			if (event.multiCriticalCount >= 2) {
+				return DamageTextType::RepeatedMultiCritical;
+			}
+			if (event.multiCriticalCount == 1) {
+				return DamageTextType::MultiCritical;
+			}
 			return DamageTextType::Critical;
 		} else {
 			return DamageTextType::Normal;
@@ -396,7 +405,9 @@ namespace UI::Game {
 	}
 
 	float EnemyDamageView::GetDamageTextFontSize(DamageTextType type) const {
-		if (type == DamageTextType::Critical) {
+		if (type == DamageTextType::Critical ||
+			type == DamageTextType::MultiCritical ||
+			type == DamageTextType::RepeatedMultiCritical) {
 			return criticalFontSize_;
 		}
 		return normalFontSize_;
@@ -406,6 +417,10 @@ namespace UI::Game {
 		switch (type) {
 		case DamageTextType::Critical:
 			return criticalDamageTextColor_;
+		case DamageTextType::MultiCritical:
+			return firstMultiCriticalDamageTextColor_;
+		case DamageTextType::RepeatedMultiCritical:
+			return repeatedMultiCriticalDamageTextColor_;
 		case DamageTextType::Burn:
 			return Enemy::StatusEffect::VisualSettings::GetInstance()
 				.Get(Enemy::StatusEffect::Type::Burn).damageTextColor;

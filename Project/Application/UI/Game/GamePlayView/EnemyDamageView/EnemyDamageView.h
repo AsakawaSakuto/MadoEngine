@@ -49,6 +49,8 @@ namespace UI::Game {
 		enum class DamageTextType {
 			Normal,
 			Critical,
+			MultiCritical,
+			RepeatedMultiCritical,
 			Burn,
 			Poison,
 		};
@@ -112,6 +114,8 @@ namespace UI::Game {
 		float jokerPixelSize_ = 64.0f;            // Joker表示の最大辺サイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
 		Vector4 criticalDamageTextColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色
+		Vector4 firstMultiCriticalDamageTextColor_ = { 1.0f, 0.5f, 0.0f, 1.0f }; // 多重クリティカル1回の文字色
+		Vector4 repeatedMultiCriticalDamageTextColor_ = { 1.0f, 0.0f, 0.0f, 1.0f }; // 多重クリティカル2回以上の文字色
 	};
 
 } // namespace UI::Game

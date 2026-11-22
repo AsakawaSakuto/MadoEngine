@@ -27,6 +27,7 @@ namespace Combat {
 		bool isCritical = false;                                   // クリティカルダメージの場合はtrue
 		bool wasKilled = false;                                    // このダメージで対象を倒した場合はtrue
 		DamageDisplayType displayType = DamageDisplayType::Number; // 画面表示種別
+		int multiCriticalCount = 0;                               // 通常クリティカルを除く追加発動回数
 	};
 
 } // namespace Combat
