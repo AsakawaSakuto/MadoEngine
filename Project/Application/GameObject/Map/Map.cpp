@@ -1,6 +1,7 @@
 #include "Map.h"
 #include "MapEventObjectSpawner.h"
 #include "MapDecorationObjectSpawner.h"
+#include "MapTerrainPostProcessor.h"
 #include "EventObject/BossSpawner/BossSpawner.h"
 #include "EventObject/Chest/Chest.h"
 #include "EventObject/Jar/Jar.h"
@@ -12,30 +13,6 @@
 #include <optional>
 
 namespace {
-/// @brief 低い側がMap外周の壁を向いている坂か判定
-/// @param x Map上のX座標
-/// @param z Map上のZ座標
-/// @param mapWidth Mapの横幅
-/// @param mapHeight Mapの奥行き
-/// @param direction 坂の上り方向
-/// @return 低い側がMap外周の壁を向いていればtrue
-bool IsSlopeMinFacingMapWall(int x, int z, int mapWidth, int mapHeight, SlopeDirection direction) {
-
-	// 上り方向と反対側の低端が外周へ接する組み合わせを判定
-	switch (direction) {
-	case SlopeDirection::PulsX:
-		return x == 0;
-	case SlopeDirection::MinusX:
-		return x == mapWidth - 1;
-	case SlopeDirection::PulsZ:
-		return z == 0;
-	case SlopeDirection::MinusZ:
-		return z == mapHeight - 1;
-	}
-
-	return false;
-}
-
 /// @brief Mapで使用するインスタンス描画バッチを破棄
 void DestroyMapInstancedBatches() {
 	MyInstancedModel::Destroy("MapBlock.Ground");
@@ -140,70 +117,60 @@ void Map::Generate(const MapGenerationSettings& settings) {
 	for (std::vector<MapBlock>& row : mapBlocks_) {
 		row.resize(static_cast<std::size_t>(appliedSettings_.mapWidth));
 	}
+	MapTerrainPostProcessor::Grid terrain(static_cast<std::size_t>(appliedSettings_.mapHeight),
+		std::vector<MapTerrainPostProcessor::Cell>(static_cast<std::size_t>(appliedSettings_.mapWidth)));
 
+	// 高さ変化の抽選順序を維持するため、平均の端数処理には専用の乱数系列を使用
+	Random terrainHeightRoundingRandom(MyRand::MakeDerivedSeed(appliedSettings_.seed, 101));
 	for (int z = 0; z < appliedSettings_.mapHeight; ++z) {
 		for (int x = 0; x < appliedSettings_.mapWidth; ++x) {
 			if (x == 0 && z == 0) {
-				mapBlocks_[z][x].SetHeight(terrainRandom_.Int(appliedSettings_.minStartHeight, std::max(appliedSettings_.minStartHeight, appliedSettings_.maxStartHeight / 2)));
+				terrain[z][x].height = static_cast<uint32_t>(terrainRandom_.Int(appliedSettings_.minStartHeight, std::max(appliedSettings_.minStartHeight, appliedSettings_.maxStartHeight / 2)));
 				continue;
 			}
 
 			// 生成済みの隣接ブロックを基準にして急激な高低差を抑制
 			uint32_t baseHeight = 0;
 			if (x > 0 && z > 0) {
-				baseHeight = (GetBlockHeight(x - 1, z) + GetBlockHeight(x, z - 1)) / 2;
+
+				// 平均の端数を等確率で上下へ丸め、生成方向に沿った低地への偏りを防止
+				const uint32_t neighborHeightSum = terrain[z][x - 1].height + terrain[z - 1][x].height;
+				baseHeight = neighborHeightSum / 2;
+				if (neighborHeightSum % 2 != 0) {
+					baseHeight += static_cast<uint32_t>(terrainHeightRoundingRandom.Int(0, 1));
+				}
 			} else if (x > 0) {
-				baseHeight = GetBlockHeight(x - 1, z);
+				baseHeight = terrain[z][x - 1].height;
 			} else {
-				baseHeight = GetBlockHeight(x, z - 1);
+				baseHeight = terrain[z - 1][x].height;
 			}
 
 			int nextHeight = static_cast<int>(baseHeight) + terrainRandom_.Int(appliedSettings_.minRangeHeight, appliedSettings_.maxRangeHeight);
-			mapBlocks_[z][x].SetHeight(static_cast<uint32_t>(std::clamp(nextHeight, appliedSettings_.minHeight, appliedSettings_.maxHeight)));
+			terrain[z][x].height = static_cast<uint32_t>(std::clamp(nextHeight, appliedSettings_.minHeight, appliedSettings_.maxHeight));
 		}
+	}
+
+	// リソースの生成前に地形だけを補正し、接地位置やミニマップとの不一致を防止
+	MapTerrainPostProcessor postProcessor(terrain);
+	if (appliedSettings_.terrainCleanupEnabled) {
+		postProcessor.SmoothHeights(appliedSettings_.terrainSmoothingPassCount);
+		postProcessor.FinalizeTerrain(terrainRandom_, appliedSettings_.slopeSpawnRate);
+	} else {
+		postProcessor.GenerateSlopes(terrainRandom_, appliedSettings_.slopeSpawnRate, false);
 	}
 
 	for (int z = 0; z < appliedSettings_.mapHeight; ++z) {
 		for (int x = 0; x < appliedSettings_.mapWidth; ++x) {
-			uint32_t currentHeight = GetBlockHeight(x, z);
-			SlopeDirection slopeDirection = SlopeDirection::PulsX;
-			bool useSlope = false;
+			const MapTerrainPostProcessor::Cell& cell = terrain[z][x];
 
-			// 一段高い隣接ブロックへ接続できる方向だけを坂の候補として選択
-			if (x + 1 < appliedSettings_.mapWidth && GetBlockHeight(x + 1, z) == currentHeight + 1 &&
-				!IsSlopeMinFacingMapWall(x, z, appliedSettings_.mapWidth, appliedSettings_.mapHeight, SlopeDirection::PulsX)) {
-				slopeDirection = SlopeDirection::PulsX;
-				useSlope = true;
-			} else if (x > 0 && GetBlockHeight(x - 1, z) == currentHeight + 1 &&
-				!IsSlopeMinFacingMapWall(x, z, appliedSettings_.mapWidth, appliedSettings_.mapHeight, SlopeDirection::MinusX)) {
-				slopeDirection = SlopeDirection::MinusX;
-				useSlope = true;
-			} else if (z + 1 < appliedSettings_.mapHeight && GetBlockHeight(x, z + 1) == currentHeight + 1 &&
-				!IsSlopeMinFacingMapWall(x, z, appliedSettings_.mapWidth, appliedSettings_.mapHeight, SlopeDirection::PulsZ)) {
-				slopeDirection = SlopeDirection::PulsZ;
-				useSlope = true;
-			} else if (z > 0 && GetBlockHeight(x, z - 1) == currentHeight + 1 &&
-				!IsSlopeMinFacingMapWall(x, z, appliedSettings_.mapWidth, appliedSettings_.mapHeight, SlopeDirection::MinusZ)) {
-				slopeDirection = SlopeDirection::MinusZ;
-				useSlope = true;
-			}
-
-			if (useSlope && terrainRandom_.Float(0.0f, 1.0f) >= appliedSettings_.slopeSpawnRate) {
-				useSlope = false;
-			}
-
-			// 高さ確定後にColliderと描画インスタンスを一括生成
+			// 補正済みの高さと坂の接続をColliderと描画インスタンスへ共通適用
 			MapBlock::InitializeDesc desc;
 			desc.x = x;
 			desc.z = z;
 			desc.mapWidth = appliedSettings_.mapWidth;
-			desc.height = currentHeight;
-			if (useSlope) {
-				desc.type = MapBlockType::Slope;
-			} else {
-				desc.type = MapBlockType::Ground;
-			}
-			desc.slopeDirection = slopeDirection;
+			desc.height = cell.height;
+			desc.type = cell.type;
+			desc.slopeDirection = cell.slopeDirection;
 			desc.blockSize = appliedSettings_.blockSize;
 			desc.isModelDraw = isModelDraw_;
 
@@ -390,8 +357,4 @@ bool Map::IsPlayerSpawnBlocked(const Sphere& collider) const {
 	}
 
 	return false;
-}
-
-uint32_t Map::GetBlockHeight(int x, int z) const {
-	return mapBlocks_[z][x].GetHeight();
 }

@@ -216,6 +216,14 @@ void MapEditor::DrawMapStatusEditor(const MapGenerationSettings& appliedSettings
 	ImGui::DragInt("高さ変化 Min", &editorSettings_.minRangeHeight, 1.0f, -10, 0, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::DragInt("高さ変化 Max", &editorSettings_.maxRangeHeight, 1.0f, 0, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::SliderFloat("Slope出現率", &editorSettings_.slopeSpawnRate, 0.0f, 1.0f, "%.2f");
+
+	ImGui::SeparatorText("生成後の地形整理");
+	ImGui::Checkbox("凹凸と坂の接続を補正", &editorSettings_.terrainCleanupEnabled);
+	ImGui::BeginDisabled(!editorSettings_.terrainCleanupEnabled);
+	ImGui::SliderInt("平滑化の回数", &editorSettings_.terrainSmoothingPassCount,
+		1, MapGenerationSettings::kMaximumTerrainSmoothingPassCount);
+	ImGui::EndDisabled();
+	ImGui::TextWrapped("局所的な凹凸をならし、通常地形の複数段の段差を維持。坂を配置した後、閉じた窪みを埋めて接続を再確認");
 }
 
 void MapEditor::DrawEventObjectStatusEditor(const MapGenerationSettings& appliedSettings) {

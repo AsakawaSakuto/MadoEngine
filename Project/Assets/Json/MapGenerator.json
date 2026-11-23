@@ -144,7 +144,11 @@
             16,
             16
         ],
-        "seed": 400163275,
-        "slopeSpawnRate": 1.0
+        "seed": 1739939058,
+        "slopeSpawnRate": 1.0,
+        "terrainCleanup": {
+            "enabled": true,
+            "smoothingPassCount": 1
+        }
     }
 }

@@ -178,6 +178,7 @@
     <ClCompile Include="Application\GameObject\Map\MapDecorationObjectSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapTerrainPostProcessor.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
     <ClCompile Include="Application\UI\Game\MiniMap\MiniMapUI.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEventObjectSpawner.cpp" />
@@ -460,6 +461,7 @@
     <ClInclude Include="Application\GameObject\Map\MapDecorationObjectSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\Map.h" />
     <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h" />
+    <ClInclude Include="Application\GameObject\Map\MapTerrainPostProcessor.h" />
     <ClInclude Include="Application\GameObject\Map\MapEditor.h" />
     <ClInclude Include="Application\GameObject\Map\MapEventObjectSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\MapInteractionController.h" />

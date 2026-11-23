@@ -462,6 +462,9 @@
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp">
       <Filter>Application\GameObject\Map</Filter>
     </ClCompile>
+    <ClCompile Include="Application\GameObject\Map\MapTerrainPostProcessor.cpp">
+      <Filter>Application\GameObject\Map</Filter>
+    </ClCompile>
     <ClCompile Include="Application\GameObject\Map\MapInteractionController.cpp">
       <Filter>Application\GameObject\Map</Filter>
     </ClCompile>
@@ -1246,6 +1249,9 @@
       <Filter>Application\GameObject\Map</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h">
+      <Filter>Application\GameObject\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\MapTerrainPostProcessor.h">
       <Filter>Application\GameObject\Map</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\MapInteractionController.h">

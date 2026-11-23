@@ -108,6 +108,7 @@ void MapGenerationSettings::Clamp() {
 	maxStartHeight = std::clamp(maxStartHeight, minStartHeight, maxHeight);
 	minRangeHeight = std::clamp(minRangeHeight, -10, 0);
 	maxRangeHeight = std::clamp(maxRangeHeight, 0, 10);
+	terrainSmoothingPassCount = std::clamp(terrainSmoothingPassCount, 1, kMaximumTerrainSmoothingPassCount);
 	slopeSpawnRate = std::clamp(
 		[&]() {
 			if (std::isfinite(slopeSpawnRate)) {
@@ -169,7 +170,9 @@ bool MapGenerationSettings::IsEqualTo(const MapGenerationSettings& rhs) const {
 		maxStartHeight == rhs.maxStartHeight &&
 		minRangeHeight == rhs.minRangeHeight &&
 		maxRangeHeight == rhs.maxRangeHeight &&
-		slopeSpawnRate == rhs.slopeSpawnRate;
+		slopeSpawnRate == rhs.slopeSpawnRate &&
+		terrainCleanupEnabled == rhs.terrainCleanupEnabled &&
+		terrainSmoothingPassCount == rhs.terrainSmoothingPassCount;
 }
 
 nlohmann::json MapGenerationSettings::ToJson() const {
@@ -226,6 +229,10 @@ nlohmann::json MapGenerationSettings::ToJson() const {
 		{ "rangeMax", maxRangeHeight }
 	};
 	json["slopeSpawnRate"] = slopeSpawnRate;
+	json["terrainCleanup"] = {
+		{ "enabled", terrainCleanupEnabled },
+		{ "smoothingPassCount", terrainSmoothingPassCount }
+	};
 	return json;
 }
 
@@ -355,6 +362,15 @@ bool MapGenerationSettings::LoadFromJson(const nlohmann::json& json) {
 			settings.maxRangeHeight = heightIt->value("rangeMax", settings.maxRangeHeight);
 		}
 		settings.slopeSpawnRate = json.value("slopeSpawnRate", settings.slopeSpawnRate);
+
+		// 旧Jsonでは既定の補正条件を使用し、不正な設定では全体の読み込みを拒否
+		if (const auto cleanupIt = json.find("terrainCleanup"); cleanupIt != json.end()) {
+			if (!cleanupIt->is_object()) {
+				return false;
+			}
+			settings.terrainCleanupEnabled = cleanupIt->value("enabled", settings.terrainCleanupEnabled);
+			settings.terrainSmoothingPassCount = cleanupIt->value("smoothingPassCount", settings.terrainSmoothingPassCount);
+		}
 		settings.Clamp();
 		*this = settings;
 		return true;

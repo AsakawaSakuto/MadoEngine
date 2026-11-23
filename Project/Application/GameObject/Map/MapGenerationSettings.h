@@ -12,6 +12,7 @@ struct MapGenerationSettings {
 	static constexpr int kMaximumMapSize = 128;
 	static constexpr int kMaximumEventObjectCount = 4096;
 	static constexpr int kMaximumDecorationObjectCount = 4096;
+	static constexpr int kMaximumTerrainSmoothingPassCount = 8;
 
 	uint32_t seed = 0;
 	int mapWidth = 20;
@@ -44,6 +45,8 @@ struct MapGenerationSettings {
 	int minRangeHeight = -1;
 	int maxRangeHeight = 1;
 	float slopeSpawnRate = 1.0f;
+	bool terrainCleanupEnabled = true;
+	int terrainSmoothingPassCount = 2;
 
 	/// @brief 編集値を有効範囲に補正
 	void Clamp();

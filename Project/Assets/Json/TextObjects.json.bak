@@ -198,7 +198,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:35",
+            "text": "04:39",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -249,7 +249,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 48.3",
+            "text": "FPS : 51.7",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -300,7 +300,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 1216271360",
+            "text": "SEED : 3921348460",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -351,7 +351,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 100 / 100",
+            "text": "HP : 86 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -453,7 +453,7 @@
                 0.0,
                 0.0
             ],
-            "text": "武器を強化する",
+            "text": "10で開ける",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": false,
@@ -759,7 +759,7 @@
                 125.0,
                 60.0
             ],
-            "text": "デスダイス",
+            "text": "魔眼",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -824,9 +824,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                1.0,
                 0.0,
-                0.37314319610595703,
+                1.0,
+                0.4039134979248047,
                 1.0
             ],
             "fontFamily": "x8y12pxDenkiChip",
@@ -1014,7 +1014,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-5",
+            "text": "-10",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1065,7 +1065,7 @@
                 0.0,
                 0.0
             ],
-            "text": "120",
+            "text": "121",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1422,7 +1422,7 @@
                 210.0,
                 128.0
             ],
-            "text": "足元にエリアを展開\n触れた敵にダメージ",
+            "text": "弧を描くボムを放つ\n敵に火傷を付与",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1524,7 +1524,7 @@
                 0.0,
                 0.0
             ],
-            "text": "11",
+            "text": "1",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1575,7 +1575,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 16",
+            "text": "Enemy : 8",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1626,7 +1626,7 @@
                 85.0,
                 42.0
             ],
-            "text": "5.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1830,7 +1830,7 @@
                 85.0,
                 42.0
             ],
-            "text": "0.0",
+            "text": "1.6",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2085,7 +2085,7 @@
                 210.0,
                 60.0
             ],
-            "text": "ダメージ量",
+            "text": "",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2405,9 +2405,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
-                1.0,
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
                 1.0
             ],
             "fontFamily": "PixelMplus12",
@@ -2442,7 +2442,7 @@
                 125.0,
                 70.0
             ],
-            "text": "NEW\n新規武器",
+            "text": "アンコモン\n所持武器を強化",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2493,7 +2493,7 @@
                 210.0,
                 60.0
             ],
-            "text": "",
+            "text": "サイズ",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2544,7 +2544,7 @@
                 210.0,
                 128.0
             ],
-            "text": "着弾時に範囲攻撃\n1～12のダメージ\n稀に敵を即死させる",
+            "text": "足元にエリアを展開\n触れた敵にダメージ",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2595,7 +2595,7 @@
                 125.0,
                 60.0
             ],
-            "text": "魔眼",
+            "text": "ボム",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2646,7 +2646,7 @@
                 85.0,
                 42.0
             ],
-            "text": "0.0",
+            "text": "1.5",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2711,8 +2711,8 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.699999988079071,
-                0.30000001192092896,
+                0.949999988079071,
+                0.9700000286102295,
                 1.0,
                 1.0
             ],
@@ -2748,7 +2748,7 @@
                 125.0,
                 70.0
             ],
-            "text": "エピック\n所持武器を強化",
+            "text": "NEW\n新規武器",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2850,7 +2850,7 @@
                 85.0,
                 42.0
             ],
-            "text": "7.0",
+            "text": "0.0",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,

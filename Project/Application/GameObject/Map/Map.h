@@ -110,12 +110,6 @@ private:
 	/// @return EventObjectと重なる場合はtrue
 	bool IsPlayerSpawnBlocked(const Sphere& collider) const;
 
-	/// @brief 指定座標のブロック高さを取得
-	/// @param x Map上のX座標
-	/// @param z Map上のZ座標
-	/// @return ブロックの高さ
-	uint32_t GetBlockHeight(int x, int z) const;
-
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
 	std::vector<std::unique_ptr<MapDecorationObjectBase>> decorationObjects_;
