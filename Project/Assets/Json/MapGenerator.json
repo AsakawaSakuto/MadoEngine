@@ -6,6 +6,36 @@
             7.5,
             15.0
         ],
+        "decorationObjectCounts": {
+            "rock": 100,
+            "tree": 100
+        },
+        "decorationObjectSettings": {
+            "rock": {
+                "aabbMax": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "aabbMin": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "tree": {
+                "aabbMax": [
+                    3.0,
+                    10.0,
+                    3.0
+                ],
+                "aabbMin": [
+                    -3.0,
+                    0.0,
+                    -3.0
+                ]
+            }
+        },
         "eventObjectCounts": {
             "anvil": 10,
             "bossSpawner": 0,
@@ -114,7 +144,7 @@
             16,
             16
         ],
-        "seed": 3437901089,
+        "seed": 400163275,
         "slopeSpawnRate": 1.0
     }
 }

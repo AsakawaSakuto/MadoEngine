@@ -1,15 +1,17 @@
 #pragma once
 #include "Math/Vector3.h"
 #include "EventObject/MapEventObjectSettings.h"
+#include "DecorationObject/MapDecorationObjectSettings.h"
 #include <cstdint>
 #include <nlohmann/json_fwd.hpp>
 
-/// @brief 地形とイベント配置で共有するMap生成条件
+/// @brief 地形とイベントと装飾の配置で共有するMap生成条件
 struct MapGenerationSettings {
 	static constexpr const char* kFilePath = "Assets/Json/MapGenerator.json";
 	static constexpr int kMinimumMapSize = 2;
 	static constexpr int kMaximumMapSize = 128;
 	static constexpr int kMaximumEventObjectCount = 4096;
+	static constexpr int kMaximumDecorationObjectCount = 4096;
 
 	uint32_t seed = 0;
 	int mapWidth = 20;
@@ -24,12 +26,16 @@ struct MapGenerationSettings {
 	int magnetSpawnCount = 1;
 	int anvilSpawnCount = 5;
 	int bossSpawnerSpawnCount = 1;
+	int treeSpawnCount = 100;
+	int rockSpawnCount = 90;
 	MapEventObjectSettings jarSettings;
 	MapEventObjectSettings chestSettings = { 1.0f, { -2.0f, 0.0f, -2.0f }, { 2.0f, 1.5f, 2.0f } };
 	MapEventObjectSettings karmaSettings = { 1.0f, { -0.75f, 0.0f, -0.75f }, { 0.75f, 2.5f, 0.75f } };
 	MapEventObjectSettings magnetSettings = { 1.0f, { -1.0f, 0.0f, -1.0f }, { 1.0f, 4.0f, 1.0f } };
 	MapEventObjectSettings anvilSettings = { 1.0f, { -1.5f, 0.0f, -1.5f }, { 1.5f, 4.0f, 1.5f } };
 	MapEventObjectSettings bossSpawnerSettings = { 1.0f, { -3.5f, 0.0f, -3.5f }, { 3.5f, 3.5f, 3.5f } };
+	MapDecorationObjectSettings treeSettings = { { -5.5f, -0.5f, -5.5f }, { 5.5f, 12.0f, 5.5f } };
+	MapDecorationObjectSettings rockSettings = { { -1.75f, -0.25f, -1.75f }, { 1.75f, 1.0f, 1.75f } };
 	Vector3 blockSize = { 15.0f, 7.5f, 15.0f };
 	int minHeight = 1;
 	int maxHeight = 10;

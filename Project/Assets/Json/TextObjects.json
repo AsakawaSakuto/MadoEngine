@@ -198,7 +198,7 @@
                 0.0,
                 0.0
             ],
-            "text": "04:57",
+            "text": "04:07",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -249,7 +249,7 @@
                 0.0,
                 0.0
             ],
-            "text": "FPS : 61.5",
+            "text": "FPS : 47.0",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -300,7 +300,7 @@
                 0.0,
                 0.0
             ],
-            "text": "SEED : 3437901089",
+            "text": "SEED : 400163275",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -351,7 +351,7 @@
                 0.0,
                 0.0
             ],
-            "text": "HP : 125 / 125",
+            "text": "HP : 80 / 100",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -759,7 +759,7 @@
                 125.0,
                 60.0
             ],
-            "text": "ボム",
+            "text": "魔眼",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -824,9 +824,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                1.0,
                 0.0,
-                0.7936878204345703,
+                1.0,
+                0.4039134979248047,
                 1.0
             ],
             "fontFamily": "x8y12pxDenkiChip",
@@ -912,7 +912,7 @@
                 0.0,
                 0.0
             ],
-            "text": "30",
+            "text": "10",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1014,7 +1014,7 @@
                 0.0,
                 0.0
             ],
-            "text": "-6.9",
+            "text": "-10",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1065,7 +1065,7 @@
                 0.0,
                 0.0
             ],
-            "text": "60",
+            "text": "173",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1422,7 +1422,7 @@
                 210.0,
                 128.0
             ],
-            "text": "着弾時に範囲攻撃\n1～12のダメージ\n稀に敵を即死させる",
+            "text": "弧を描くボムを放つ\n敵に火傷を付与",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -1524,7 +1524,7 @@
                 0.0,
                 0.0
             ],
-            "text": "0",
+            "text": "38",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1575,7 +1575,7 @@
                 0.0,
                 0.0
             ],
-            "text": "Enemy : 3",
+            "text": "Enemy : 26",
             "type": "Text2D",
             "verticalAlign": "Top",
             "visible": true,
@@ -1830,7 +1830,7 @@
                 85.0,
                 42.0
             ],
-            "text": "0.0",
+            "text": "1.6",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2187,7 +2187,7 @@
                 125.0,
                 60.0
             ],
-            "text": "毒靴",
+            "text": "雷",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2340,7 +2340,7 @@
                 210.0,
                 128.0
             ],
-            "text": "足元に魔法陣を設置\n触れた敵に毒を付与",
+            "text": "敵の頭上に雷を生成\n跳弾して敵を攻撃する",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2405,9 +2405,9 @@
             "atlasRasterSize": 128.0,
             "characterSpacing": 0.0,
             "color": [
-                0.949999988079071,
-                0.9700000286102295,
-                1.0,
+                0.20000000298023224,
+                0.8500000238418579,
+                0.30000001192092896,
                 1.0
             ],
             "fontFamily": "PixelMplus12",
@@ -2442,7 +2442,7 @@
                 125.0,
                 70.0
             ],
-            "text": "NEW\n新規武器",
+            "text": "アンコモン\n所持武器を強化",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2493,7 +2493,7 @@
                 210.0,
                 60.0
             ],
-            "text": "",
+            "text": "サイズ",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2544,7 +2544,7 @@
                 210.0,
                 128.0
             ],
-            "text": "弧を描くボムを放つ\n敵に火傷を付与",
+            "text": "足元にエリアを展開\n触れた敵にダメージ",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2595,7 +2595,7 @@
                 125.0,
                 60.0
             ],
-            "text": "デスダイス",
+            "text": "ボム",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,
@@ -2646,7 +2646,7 @@
                 85.0,
                 42.0
             ],
-            "text": "0.0",
+            "text": "1.5",
             "type": "Text2D",
             "verticalAlign": "Center",
             "visible": true,

@@ -1,5 +1,6 @@
 #include "Map.h"
 #include "MapEventObjectSpawner.h"
+#include "MapDecorationObjectSpawner.h"
 #include "EventObject/BossSpawner/BossSpawner.h"
 #include "EventObject/Chest/Chest.h"
 #include "EventObject/Jar/Jar.h"
@@ -82,7 +83,7 @@ void Map::SetEventActionEnabled(MapEventAction action, bool isEnabled) {
 
 #ifdef USE_IMGUI
 void Map::DrawImGui(const Player::Base* player) {
-	editor_.DrawImGui({ appliedSettings_, mapBlocks_, eventObjects_, player });
+	editor_.DrawImGui({ appliedSettings_, mapBlocks_, eventObjects_, player, decorationObjects_.size() });
 }
 #endif // USE_IMGUI
 
@@ -128,6 +129,8 @@ void Map::Generate(const MapGenerationSettings& settings) {
 	// 借用中の接触参照を解除してからObjectと共有描画バッチを破棄
 	interactionController_.Reset();
 	eventObjects_.clear();
+	decorationObjects_.clear();
+	MapDecorationObjectSpawner::DestroyInstancedBatches();
 	DestroyMapInstancedBatches();
 	terrainRandom_.SetSeed(MyRand::MakeDerivedSeed(appliedSettings_.seed, 100));
 
@@ -211,6 +214,8 @@ void Map::Generate(const MapGenerationSettings& settings) {
 	Logger::Output("Map : 地形を生成しました", Logger::Level::Application);
 	MapEventObjectSpawner spawner(appliedSettings_, mapBlocks_, eventObjects_);
 	spawner.Generate();
+	MapDecorationObjectSpawner decorationSpawner(appliedSettings_, mapBlocks_, decorationObjects_);
+	decorationSpawner.Generate(isModelDraw_);
 }
 
 Vector3 Map::CreatePlayerSpawnGroundPosition(uint32_t seed) const {
@@ -261,6 +266,9 @@ void Map::Update(Player::Base& player, float deltaTime) {
 				block.SetVisible(isModelDraw_);
 			}
 		}
+		for (const std::unique_ptr<MapDecorationObjectBase>& object : decorationObjects_) {
+			object->SetVisible(isModelDraw_);
+		}
 	}
 
 	for (std::vector<MapBlock>& row : mapBlocks_) {
@@ -268,6 +276,11 @@ void Map::Update(Player::Base& player, float deltaTime) {
 			block.Update(0.0f);
 			block.DrawDebugLine();
 		}
+	}
+
+	// 装飾の固定AABBもF2のデバッグ表示へ追加し、Editor調整後の判定範囲を確認
+	for (const std::unique_ptr<MapDecorationObjectBase>& object : decorationObjects_) {
+		object->DrawDebugLine();
 	}
 
 	interactionController_.Update(player, deltaTime, eventObjects_);
@@ -281,6 +294,11 @@ void Map::UpdateCameraOcclusion(const Vector3& cameraPosition, const Vector3& pl
 		for (MapBlock& block : row) {
 			block.UpdateCameraOcclusion(sightLine);
 		}
+	}
+
+	// 地形と同じ最終Camera座標で装飾も判定し、PauseやCamera切り替え時の表示を同期
+	for (const std::unique_ptr<MapDecorationObjectBase>& object : decorationObjects_) {
+		object->UpdateCameraOcclusion(sightLine);
 	}
 }
 

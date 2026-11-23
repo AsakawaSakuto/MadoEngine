@@ -17,6 +17,7 @@ namespace MadoEngine::Render {
 	X(Debug, "Debug") \
 	X(ScreenEffect, "ScreenEffect") \
 	X(MapBlock, "MapBlock") \
+	X(MapDecorationObject, "MapDecorationObject") \
     /*X(Test, "Test") \*/
 
 	/// @brief 描画対象を分類するレイヤー

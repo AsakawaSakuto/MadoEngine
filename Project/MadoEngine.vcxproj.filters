@@ -25,6 +25,15 @@
     <Filter Include="Application\GameObject\Map">
       <UniqueIdentifier>{5DEACE72-E8FB-5E00-B691-4258F2F3BCC6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\GameObject\Map\DecorationObject">
+      <UniqueIdentifier>{B977D3AC-21D3-476B-9723-23C1D1CF4E44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GameObject\Map\DecorationObject\Tree">
+      <UniqueIdentifier>{78A1FB55-CEBD-4F77-9B36-2A4C681A5D32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GameObject\Map\DecorationObject\Rock">
+      <UniqueIdentifier>{D147280B-EA1F-4A02-8B5D-98D79B7DEEDC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Application\GameObject\Map\EventObject">
       <UniqueIdentifier>{2B2711AC-4375-568A-A7EC-0B080F45A3D5}</UniqueIdentifier>
     </Filter>
@@ -422,6 +431,21 @@
     </ClCompile>
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.cpp">
       <Filter>Application\GameObject\Map\EventObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectBase.cpp">
+      <Filter>Application\GameObject\Map\DecorationObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectSettings.cpp">
+      <Filter>Application\GameObject\Map\DecorationObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\Tree\Tree.cpp">
+      <Filter>Application\GameObject\Map\DecorationObject\Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\Rock\Rock.cpp">
+      <Filter>Application\GameObject\Map\DecorationObject\Rock</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\GameObject\Map\MapDecorationObjectSpawner.cpp">
+      <Filter>Application\GameObject\Map</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObject\Map\Map.cpp">
       <Filter>Application\GameObject\Map</Filter>
@@ -1190,6 +1214,21 @@
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\EventObject\MapInteractionEvent.h">
       <Filter>Application\GameObject\Map\EventObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectBase.h">
+      <Filter>Application\GameObject\Map\DecorationObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectSettings.h">
+      <Filter>Application\GameObject\Map\DecorationObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\Tree\Tree.h">
+      <Filter>Application\GameObject\Map\DecorationObject\Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\Rock\Rock.h">
+      <Filter>Application\GameObject\Map\DecorationObject\Rock</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObject\Map\MapDecorationObjectSpawner.h">
+      <Filter>Application\GameObject\Map</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObject\Map\Map.h">
       <Filter>Application\GameObject\Map</Filter>

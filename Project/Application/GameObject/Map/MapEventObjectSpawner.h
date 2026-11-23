@@ -9,6 +9,7 @@
 /// @brief 生成済み地形へのイベントオブジェクト配置を担当するクラス
 class MapEventObjectSpawner final {
 public:
+
 	/// @brief 一回の生成に使用する設定と配置先を接続
 	/// @param settings 適用済みの生成設定
 	/// @param blocks 配置先の読み取り専用地形

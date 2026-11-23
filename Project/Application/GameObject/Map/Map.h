@@ -5,6 +5,7 @@
 #include "MapEditor.h"
 #include "MapGenerationSettings.h"
 #include "MapInteractionController.h"
+#include "DecorationObject/MapDecorationObjectBase.h"
 #include "Utility/Random.h"
 #include <memory>
 #include <string>
@@ -26,7 +27,7 @@ public:
 	/// @param deltaTime 前フレームからの経過時間
 	void Update(Player::Base& player, float deltaTime);
 
-	/// @brief CameraとPlayerの間を遮る地形の表示状態を更新
+	/// @brief CameraとPlayerの間を遮る地形と装飾の表示状態を更新
 	/// @param cameraPosition 描画Cameraのワールド座標
 	/// @param playerPosition Playerのワールド座標
 	void UpdateCameraOcclusion(const Vector3& cameraPosition, const Vector3& playerPosition);
@@ -100,7 +101,7 @@ public:
 	std::vector<MapInteractionEvent> ConsumeInteractionEvents();
 
 private:
-	/// @brief 指定設定で地形とイベントオブジェクトを生成
+	/// @brief 指定設定で地形とイベントオブジェクトと装飾を生成
 	/// @param settings 生成に使用する設定
 	void Generate(const MapGenerationSettings& settings);
 
@@ -117,6 +118,7 @@ private:
 
 	std::vector<std::vector<MapBlock>> mapBlocks_;
 	std::vector<std::unique_ptr<MapEventObjectBase>> eventObjects_;
+	std::vector<std::unique_ptr<MapDecorationObjectBase>> decorationObjects_;
 	MapGenerationSettings appliedSettings_;
 	MapEditor editor_;
 	MapInteractionController interactionController_;

@@ -171,6 +171,11 @@
     <ClCompile Include="Application\GameObject\Map\EventObject\Magnet\Magnet.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectBase.cpp" />
     <ClCompile Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.cpp" />
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectBase.cpp" />
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectSettings.cpp" />
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\Tree\Tree.cpp" />
+    <ClCompile Include="Application\GameObject\Map\DecorationObject\Rock\Rock.cpp" />
+    <ClCompile Include="Application\GameObject\Map\MapDecorationObjectSpawner.cpp" />
     <ClCompile Include="Application\GameObject\Map\Map.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapGenerationSettings.cpp" />
     <ClCompile Include="Application\GameObject\Map\MapEditor.cpp" />
@@ -448,6 +453,11 @@
     <ClInclude Include="Application\GameObject\Map\EventObject\Magnet\Magnet.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectBase.h" />
     <ClInclude Include="Application\GameObject\Map\EventObject\MapEventObjectSettings.h" />
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectBase.h" />
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\MapDecorationObjectSettings.h" />
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\Tree\Tree.h" />
+    <ClInclude Include="Application\GameObject\Map\DecorationObject\Rock\Rock.h" />
+    <ClInclude Include="Application\GameObject\Map\MapDecorationObjectSpawner.h" />
     <ClInclude Include="Application\GameObject\Map\Map.h" />
     <ClInclude Include="Application\GameObject\Map\MapGenerationSettings.h" />
     <ClInclude Include="Application\GameObject\Map\MapEditor.h" />

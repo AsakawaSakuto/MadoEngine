@@ -62,7 +62,7 @@ bool DrawEventObjectCountRow(const char* label, int& count) {
 /// @brief AABBテーブルの三軸入力を一行で描画
 /// @param label MinまたはMaxの表示名とImGui識別子
 /// @param value 編集対象のローカル座標
-void DrawEventObjectColliderRow(const char* label, Vector3& value) {
+void DrawObjectColliderRow(const char* label, Vector3& value) {
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
 	ImGui::AlignTextToFramePadding();
@@ -77,6 +77,33 @@ void DrawEventObjectColliderRow(const char* label, Vector3& value) {
 		ImGui::DragFloat("##Value", &value[axis], 0.05f, 0.0f, 0.0f, "%.2f");
 		ImGui::PopID();
 	}
+	ImGui::PopID();
+}
+
+/// @brief Object原点からのAABBオフセットの共通編集欄を描画
+/// @param label 編集対象のImGui識別子
+/// @param colliderMin 編集対象の最小オフセット
+/// @param colliderMax 編集対象の最大オフセット
+void DrawObjectColliderSettings(const char* label, Vector3& colliderMin, Vector3& colliderMax) {
+	ImGui::PushID(label);
+	const ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX |
+		ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+	ImGui::SeparatorText("AABB（原点からのオフセット）");
+
+	// EventObjectと装飾で同じ軸配置を使い、判定範囲の入力操作を統一
+	if (ImGui::BeginTable("ColliderSettings", 4, tableFlags)) {
+		ImGui::TableSetupColumn("範囲", ImGuiTableColumnFlags_WidthFixed, 52.0f);
+		ImGui::TableSetupColumn("X", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("Y", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("Z", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableHeadersRow();
+		DrawObjectColliderRow("Min", colliderMin);
+		DrawObjectColliderRow("Max", colliderMax);
+		ImGui::EndTable();
+	}
+	ImGui::PushTextWrapPos();
+	ImGui::TextDisabled("左右ドラッグで調整 / Ctrl+クリックで数値入力");
+	ImGui::PopTextWrapPos();
 	ImGui::PopID();
 }
 
@@ -105,20 +132,7 @@ void DrawEventObjectInteractionSettings(const char* label, MapEventObjectSetting
 		ImGui::EndTable();
 	}
 
-	ImGui::SeparatorText("AABB（原点からのオフセット）");
-	if (ImGui::BeginTable("ColliderSettings", 4, tableFlags | ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
-		ImGui::TableSetupColumn("範囲", ImGuiTableColumnFlags_WidthFixed, 52.0f);
-		ImGui::TableSetupColumn("X", ImGuiTableColumnFlags_WidthStretch);
-		ImGui::TableSetupColumn("Y", ImGuiTableColumnFlags_WidthStretch);
-		ImGui::TableSetupColumn("Z", ImGuiTableColumnFlags_WidthStretch);
-		ImGui::TableHeadersRow();
-		DrawEventObjectColliderRow("Min", settings.colliderMin);
-		DrawEventObjectColliderRow("Max", settings.colliderMax);
-		ImGui::EndTable();
-	}
-	ImGui::PushTextWrapPos();
-	ImGui::TextDisabled("左右ドラッグで調整 / Ctrl+クリックで数値入力");
-	ImGui::PopTextWrapPos();
+	DrawObjectColliderSettings("Collider", settings.colliderMin, settings.colliderMax);
 	ImGui::PopID();
 }
 }
@@ -135,6 +149,10 @@ void MapEditor::DrawImGui(const PreviewData& preview) {
 			}
 			if (ImGui::BeginTabItem("EventObjStatus")) {
 				DrawEventObjectStatusEditor(preview.settings);
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("DecorationObjStatus")) {
+				DrawDecorationObjectStatusEditor(preview.settings);
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("MapView")) {
@@ -291,6 +309,36 @@ void MapEditor::DrawEventObjectStatusEditor(const MapGenerationSettings& applied
 	}
 }
 
+void MapEditor::DrawDecorationObjectStatusEditor(const MapGenerationSettings& appliedSettings) {
+	DrawGenerationControls(appliedSettings);
+	ImGui::TextDisabled("変更はMap再生成時に反映");
+
+	// 装飾専用の上限を使用し、イベントの相互作用設定から配置数を分離
+	ImGui::SeparatorText("装飾の生成数");
+	ImGui::DragInt("Tree", &editorSettings_.treeSpawnCount, 1.0f, 0,
+		MapGenerationSettings::kMaximumDecorationObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::DragInt("Rock", &editorSettings_.rockSpawnCount, 1.0f, 0,
+		MapGenerationSettings::kMaximumDecorationObjectCount, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::TextDisabled("Rock0～2のModelを生成ごとにランダム選択");
+
+	// 生成数と独立して種別ごとの固定範囲を編集し、Modelの向きによる変動を回避
+	ImGui::SeparatorText("種類別の遮蔽判定");
+	ImGui::TextWrapped("AABBはModelの回転・拡大縮小によらない固定範囲");
+	if (ImGui::BeginTabBar("DecorationObjectSettingsTabs", ImGuiTabBarFlags_FittingPolicyScroll)) {
+		if (ImGui::BeginTabItem("Tree")) {
+			DrawObjectColliderSettings("Tree", editorSettings_.treeSettings.colliderMin, editorSettings_.treeSettings.colliderMax);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Rock")) {
+			ImGui::TextDisabled("Rock0～2で共通の判定範囲");
+			DrawObjectColliderSettings("Rock", editorSettings_.rockSettings.colliderMin, editorSettings_.rockSettings.colliderMax);
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+	ImGui::TextDisabled("再生成後、F2でAABBを水色表示");
+}
+
 void MapEditor::DrawMapViewEditor(const PreviewData& preview) const {
 
 	// 未適用の編集値を混在させないよう生成済み設定と実体だけを参照
@@ -308,6 +356,8 @@ void MapEditor::DrawMapViewEditor(const PreviewData& preview) const {
 	ImGui::Text("Chest: %d  Normal: %d  Free: %d", preview.settings.chestSpawnCount, preview.settings.normalChestSpawnCount, preview.settings.freeChestSpawnCount);
 	ImGui::Text("Karma: %d  Magnet: %d  BossSpawner: %d", preview.settings.karmaSpawnCount, preview.settings.magnetSpawnCount, preview.settings.bossSpawnerSpawnCount);
 	ImGui::Text("Anvil: %d", preview.settings.anvilSpawnCount);
+	ImGui::Text("Decoration Object: %zu / Tree設定数: %d", preview.decorationObjectCount, preview.settings.treeSpawnCount);
+	ImGui::Text("Rock設定数: %d", preview.settings.rockSpawnCount);
 	if (preview.player) {
 		const Vector3 playerPosition = preview.player->GetPosition();
 		ImGui::Text("Player: X %.2f  Y %.2f  Z %.2f", playerPosition.x, playerPosition.y, playerPosition.z);

@@ -22,6 +22,17 @@ constexpr EventObjectSettingsMember kEventObjectSettingsMembers[] = {
 	{ "bossSpawner", &MapGenerationSettings::bossSpawnerSettings },
 };
 
+/// @brief 保存名と装飾種別ごとの遮蔽判定設定メンバーの対応
+struct DecorationObjectSettingsMember {
+	const char* name;
+	MapDecorationObjectSettings MapGenerationSettings::* member;
+};
+
+constexpr DecorationObjectSettingsMember kDecorationObjectSettingsMembers[] = {
+	{ "tree", &MapGenerationSettings::treeSettings },
+	{ "rock", &MapGenerationSettings::rockSettings }
+};
+
 /// @brief 指定されたJsonの三成分配列を復元
 /// @param json 読み込み元Json
 /// @param key 三成分配列の保存名
@@ -57,9 +68,16 @@ void MapGenerationSettings::Clamp() {
 	magnetSpawnCount      = std::clamp(magnetSpawnCount, 0, kMaximumEventObjectCount);
 	anvilSpawnCount       = std::clamp(anvilSpawnCount, 0, kMaximumEventObjectCount);
 	bossSpawnerSpawnCount = std::clamp(bossSpawnerSpawnCount, 0, kMaximumEventObjectCount);
+	treeSpawnCount        = std::clamp(treeSpawnCount, 0, kMaximumDecorationObjectCount);
+	rockSpawnCount        = std::clamp(rockSpawnCount, 0, kMaximumDecorationObjectCount);
 
 	// 種別を追加した場合も保存・比較と同じ一覧で相互作用設定の補正漏れを防止
 	for (const EventObjectSettingsMember& entry : kEventObjectSettingsMembers) {
+		(this->*entry.member).Clamp();
+	}
+
+	// 装飾の遮蔽範囲も保存・比較と同じ一覧で補正
+	for (const DecorationObjectSettingsMember& entry : kDecorationObjectSettingsMembers) {
 		(this->*entry.member).Clamp();
 	}
 
@@ -120,6 +138,13 @@ bool MapGenerationSettings::IsEqualTo(const MapGenerationSettings& rhs) const {
 		}
 	}
 
+	// 装飾の範囲だけの編集も未適用表示とUndoの差分として検出
+	for (const DecorationObjectSettingsMember& entry : kDecorationObjectSettingsMembers) {
+		if (!(this->*entry.member).IsEqualTo(rhs.*entry.member)) {
+			return false;
+		}
+	}
+
 	return seed == rhs.seed &&
 		mapWidth == rhs.mapWidth &&
 		mapHeight == rhs.mapHeight &&
@@ -133,6 +158,8 @@ bool MapGenerationSettings::IsEqualTo(const MapGenerationSettings& rhs) const {
 		magnetSpawnCount == rhs.magnetSpawnCount &&
 		anvilSpawnCount == rhs.anvilSpawnCount &&
 		bossSpawnerSpawnCount == rhs.bossSpawnerSpawnCount &&
+		treeSpawnCount == rhs.treeSpawnCount &&
+		rockSpawnCount == rhs.rockSpawnCount &&
 		blockSize.x == rhs.blockSize.x &&
 		blockSize.y == rhs.blockSize.y &&
 		blockSize.z == rhs.blockSize.z &&
@@ -166,6 +193,10 @@ nlohmann::json MapGenerationSettings::ToJson() const {
 		} }
 	};
 	json["blockSize"] = { blockSize.x, blockSize.y, blockSize.z };
+	json["decorationObjectCounts"] = {
+		{ "tree", treeSpawnCount },
+		{ "rock", rockSpawnCount }
+	};
 
 	// 配置数とは独立した設定として種別ごとの接触範囲と待ち時間を保存
 	for (const EventObjectSettingsMember& entry : kEventObjectSettingsMembers) {
@@ -174,6 +205,15 @@ nlohmann::json MapGenerationSettings::ToJson() const {
 			{ "autoInteractionDuration", settings.autoInteractionDuration },
 			{ "aabbMin", { settings.colliderMin.x, settings.colliderMin.y, settings.colliderMin.z } },
 			{ "aabbMax", { settings.colliderMax.x, settings.colliderMax.y, settings.colliderMax.z } },
+		};
+	}
+
+	// 配置数とは独立した遮蔽判定範囲を装飾種別ごとに保存
+	for (const DecorationObjectSettingsMember& entry : kDecorationObjectSettingsMembers) {
+		const MapDecorationObjectSettings& settings = this->*entry.member;
+		json["decorationObjectSettings"][entry.name] = {
+			{ "aabbMin", { settings.colliderMin.x, settings.colliderMin.y, settings.colliderMin.z } },
+			{ "aabbMax", { settings.colliderMax.x, settings.colliderMax.y, settings.colliderMax.z } }
 		};
 	}
 
@@ -229,6 +269,25 @@ bool MapGenerationSettings::LoadFromJson(const nlohmann::json& json) {
 			}
 		}
 
+		// 装飾を含まない旧Jsonでは既定の配置数を維持し、型不一致は全体の読込失敗として処理
+		if (const auto countIt = json.find("decorationObjectCounts"); countIt != json.end()) {
+			if (!countIt->is_object()) {
+				return false;
+			}
+			settings.treeSpawnCount = countIt->value("tree", settings.treeSpawnCount);
+
+			// 新しい総数設定を優先し、旧タイプ別設定だけがある場合は有効な配置数を合算
+			if (countIt->contains("rock")) {
+				settings.rockSpawnCount = countIt->at("rock").get<int>();
+			} else if (countIt->contains("rock0") || countIt->contains("rock1") || countIt->contains("rock2")) {
+				int rockCount = 0;
+				for (const char* key : { "rock0", "rock1", "rock2" }) {
+					rockCount += std::clamp(countIt->value(key, 0), 0, kMaximumDecorationObjectCount);
+				}
+				settings.rockSpawnCount = rockCount;
+			}
+		}
+
 		// 旧Jsonに相互作用設定がない場合は従来の時間とCollider寸法を維持
 		if (const auto eventSettingsIt = json.find("eventObjectSettings"); eventSettingsIt != json.end()) {
 			if (!eventSettingsIt->is_object()) {
@@ -252,6 +311,27 @@ bool MapGenerationSettings::LoadFromJson(const nlohmann::json& json) {
 				}
 				MapEventObjectSettings& objectSettings = settings.*entry.member;
 				objectSettings.autoInteractionDuration = objectIt->value("autoInteractionDuration", objectSettings.autoInteractionDuration);
+				if (!LoadOptionalVector3(*objectIt, "aabbMin", objectSettings.colliderMin) ||
+					!LoadOptionalVector3(*objectIt, "aabbMax", objectSettings.colliderMax)) {
+					return false;
+				}
+			}
+		}
+
+		// 遮蔽設定のない旧Jsonでは既定値を維持し、不正な配列では部分更新を拒否
+		if (const auto decorationSettingsIt = json.find("decorationObjectSettings"); decorationSettingsIt != json.end()) {
+			if (!decorationSettingsIt->is_object()) {
+				return false;
+			}
+			for (const DecorationObjectSettingsMember& entry : kDecorationObjectSettingsMembers) {
+				const auto objectIt = decorationSettingsIt->find(entry.name);
+				if (objectIt == decorationSettingsIt->end()) {
+					continue;
+				}
+				if (!objectIt->is_object()) {
+					return false;
+				}
+				MapDecorationObjectSettings& objectSettings = settings.*entry.member;
 				if (!LoadOptionalVector3(*objectIt, "aabbMin", objectSettings.colliderMin) ||
 					!LoadOptionalVector3(*objectIt, "aabbMax", objectSettings.colliderMax)) {
 					return false;

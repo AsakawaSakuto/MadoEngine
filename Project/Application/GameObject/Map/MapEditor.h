@@ -1,5 +1,6 @@
 #pragma once
 #include "MapGenerationSettings.h"
+#include <cstddef>
 #include <optional>
 #include <string>
 
@@ -24,6 +25,7 @@ public:
 		const std::vector<std::vector<MapBlock>>& blocks;
 		const std::vector<std::unique_ptr<MapEventObjectBase>>& eventObjects;
 		const Player::Base* player = nullptr;
+		std::size_t decorationObjectCount = 0;
 	};
 #endif // USE_IMGUI
 
@@ -77,6 +79,10 @@ private:
 	/// @brief イベント種別ごとの配置数と自動発火時間と接触範囲を描画
 	/// @param appliedSettings 現在生成済みMapの設定
 	void DrawEventObjectStatusEditor(const MapGenerationSettings& appliedSettings);
+
+	/// @brief 装飾種別ごとの配置数と遮蔽判定範囲と再生成操作を描画
+	/// @param appliedSettings 現在生成済みMapの設定
+	void DrawDecorationObjectStatusEditor(const MapGenerationSettings& appliedSettings);
 
 	/// @brief 生成済みMapの情報と高さプレビューを描画
 	/// @param preview 生成済みMapの読み取り専用情報

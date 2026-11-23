@@ -386,6 +386,24 @@
                     },
                     "target": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
                     "type": "Sprite"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_3c0675d9-9cbf-4c3f-87f4-cf6ca9f97dab",
+                    "type": "Sprite"
                 }
             ],
             "id": "60d55a5a-6442-4f76-8899-52fd69e55ca5",
@@ -1523,6 +1541,24 @@
                     },
                     "target": "UIGroupSprite_8929c19b-b79e-461f-a3e1-0c206f4a9685",
                     "type": "Sprite"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_38580e4f-ba81-42e5-bde1-cb3e84ae2e79",
+                    "type": "Sprite"
                 }
             ],
             "id": "43b3ce32-f565-4e02-9295-ae7a677ccc0b",
@@ -2464,6 +2500,24 @@
                         "visible": true
                     },
                     "target": "UIGroupSprite_3edf30a5-c822-4e25-ad1f-d41afc2bcb0a",
+                    "type": "Sprite"
+                },
+                {
+                    "name": "CardFrame",
+                    "state": {
+                        "opacity": 1.0,
+                        "position": [
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": 0.0,
+                        "scale": [
+                            2.75,
+                            2.75
+                        ],
+                        "visible": true
+                    },
+                    "target": "UIGroupSprite_33bd394b-cd86-490e-87be-7355e146a8e2",
                     "type": "Sprite"
                 }
             ],
