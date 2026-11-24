@@ -32,7 +32,7 @@
                 "moveSpeedIncreaseInterval": 60.0,
                 "name": "Wave 1",
                 "normalSpawnRate": 1.0,
-                "overTimeSpawnRate": 0.0,
+                "overTimeSpawnRate": 1.0,
                 "powerIncreaseAmount": 0.5,
                 "powerIncreaseInterval": 60.0,
                 "runnerSpawnRate": 0.0,
@@ -302,14 +302,14 @@
         "Normal": {
             "color": [
                 1.0,
-                0.0,
-                0.0,
+                1.0,
+                1.0,
                 1.0
             ],
             "health": 10.0,
             "hitboxMax": [
                 0.30000001192092896,
-                1.5,
+                2.0,
                 0.30000001192092896
             ],
             "hitboxMin": [
@@ -319,21 +319,21 @@
             ],
             "knockbackResistance": 0.0,
             "moveSpeed": 3.0,
-            "movementColliderRadius": 0.5,
+            "movementColliderRadius": 0.75,
             "power": 5.0,
-            "scaleMultiplier": 0.800000011920929
+            "scaleMultiplier": 0.8999999761581421
         },
         "OverTime": {
             "color": [
-                0.5131436586380005,
-                0.0,
-                0.6125654578208923,
+                1.0,
+                1.0,
+                1.0,
                 1.0
             ],
             "health": 30.0,
             "hitboxMax": [
                 0.30000001192092896,
-                1.5,
+                2.25,
                 0.30000001192092896
             ],
             "hitboxMin": [
@@ -343,9 +343,9 @@
             ],
             "knockbackResistance": 0.5,
             "moveSpeed": 4.0,
-            "movementColliderRadius": 0.5,
+            "movementColliderRadius": 0.75,
             "power": 5.0,
-            "scaleMultiplier": 0.75
+            "scaleMultiplier": 0.8999999761581421
         },
         "Runner": {
             "color": [
@@ -367,9 +367,9 @@
             ],
             "knockbackResistance": 0.0,
             "moveSpeed": 5.0,
-            "movementColliderRadius": 0.3499999940395355,
+            "movementColliderRadius": 0.75,
             "power": 3.5,
-            "scaleMultiplier": 0.800000011920929
+            "scaleMultiplier": 1.0
         },
         "Tank": {
             "color": [
@@ -380,20 +380,20 @@
             ],
             "health": 25.0,
             "hitboxMax": [
-                0.550000011920929,
-                2.0,
-                0.550000011920929
+                0.699999988079071,
+                2.5,
+                0.699999988079071
             ],
             "hitboxMin": [
-                -0.550000011920929,
+                -0.699999988079071,
                 -0.5,
-                -0.550000011920929
+                -0.699999988079071
             ],
             "knockbackResistance": 0.5,
             "moveSpeed": 1.649999976158142,
-            "movementColliderRadius": 0.800000011920929,
+            "movementColliderRadius": 1.25,
             "power": 7.5,
-            "scaleMultiplier": 0.8999999761581421
+            "scaleMultiplier": 0.699999988079071
         }
     }
 }

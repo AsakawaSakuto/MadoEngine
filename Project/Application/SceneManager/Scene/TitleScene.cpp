@@ -11,6 +11,7 @@ namespace {
 	constexpr float kWeaponSelectionStickInputThreshold = 0.5f;
 	constexpr float kWeaponSelectionStickNeutralThreshold = 0.2f;
 	constexpr float kWeaponIconColumnSpacing = 124.0f;
+	constexpr float kWeaponDescriptionMaxHeight = 110.0f;
 }
 
 TitleScene::TitleScene(SceneSharedData& sceneSharedData)
@@ -132,17 +133,18 @@ void TitleScene::InitializeWeaponSelection() {
 		"矢印キー / WASD / 十字キー / Lスティック：選択　　Space / Aボタン：ゲーム開始",
 		SceneType::Title, layer);
 
-	// 説明文の行数に左右されない固定領域で選択中武器と操作案内を整列
+	// 武器名の位置を上げ、操作案内との間に複数行の説明領域を確保
 	const std::array<MadoEngine::TextHandle, 4> textHandles = {
 		weaponSelectionHeading_, selectedWeaponName_, selectedWeaponDescription_, weaponSelectionGuide_,
 	};
-	const std::array<float, 4> positionsY = { 120.0f, 520.0f, 578.0f, 665.0f };
+	const std::array<float, 4> positionsY = { 120.0f, 500.0f, 585.0f, 665.0f };
 	const std::array<float, 4> fontSizes = { 40.0f, 28.0f, 22.0f, 20.0f };
+	const std::array<float, 4> areaHeights = { 72.0f, 56.0f, 0.0f, 40.0f };
 	for (std::size_t index = 0; index < textHandles.size(); ++index) {
 		if (MadoEngine::Text* text = MyText::TryGet(textHandles[index])) {
 			text->SetFontAsset("Assets/Font/YuGothB.ttc", "游ゴシック");
 			text->SetFontSize(fontSizes[index]);
-			text->SetAreaSize({ 1120.0f, 72.0f });
+			text->SetAreaSize({ 1120.0f, areaHeights[index] });
 			text->SetAnchorPoint({ 0.5f, 0.5f });
 			text->SetPosition({ 640.0f, positionsY[index] });
 			text->SetHorizontalAlign(MadoEngine::TextHorizontalAlign::Center);
@@ -224,6 +226,13 @@ void TitleScene::RefreshWeaponSelection() {
 	}
 	if (MadoEngine::Text* description = MyText::TryGet(selectedWeaponDescription_)) {
 		description->SetText(Projectile::ProjectileTypeToDescription(weaponType));
+
+		// 説明全体の高さを自動計測し、上下のUIに重ならない倍率へ縦横均等に縮小
+		float scale = 1.0f;
+		if (description->PrepareRendering() && description->GetTextureSize().y > kWeaponDescriptionMaxHeight) {
+			scale = kWeaponDescriptionMaxHeight / description->GetTextureSize().y;
+		}
+		description->SetScale({ scale, scale });
 	}
 }
 

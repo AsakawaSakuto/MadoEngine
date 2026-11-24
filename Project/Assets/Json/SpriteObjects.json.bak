@@ -2350,7 +2350,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_feb5ed8c-3820-413d-b16c-61cfe89248e1",
+            "name": "UIGroupSprite_f7a1e273-3d81-4c63-8875-1bbf51d1e0ed",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -2391,7 +2391,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_5dfdb2b6-58bd-482e-8bec-0b3c8ebdcc33",
+            "name": "UIGroupSprite_90cf846e-5431-4f2a-96eb-56ff475557a8",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -2432,7 +2432,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_3835bf2b-9d57-4afc-b658-5d2709d36bf1",
+            "name": "UIGroupSprite_691b891a-0a4b-44df-8541-f26b7fa53268",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -2473,7 +2473,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_090cfff4-638d-4277-b5c3-48b845bdfeb1",
+            "name": "UIGroupSprite_fca5edfa-b0ed-4320-bf38-58365ccb9e89",
             "opacity": 1.0,
             "position": [
                 -70.0,
@@ -2514,7 +2514,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_185a2b11-cb65-4837-a89c-a03027455223",
+            "name": "UIGroupSprite_7f6ba682-1dff-4dca-841c-cdb6fbda1159",
             "opacity": 1.0,
             "position": [
                 -70.0,
@@ -2526,7 +2526,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Thunder",
+            "texture": "Sword",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2555,7 +2555,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_8929c19b-b79e-461f-a3e1-0c206f4a9685",
+            "name": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
             "opacity": 1.0,
             "position": [
                 -70.0,
@@ -2596,7 +2596,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_38580e4f-ba81-42e5-bde1-cb3e84ae2e79",
+            "name": "UIGroupSprite_3c0675d9-9cbf-4c3f-87f4-cf6ca9f97dab",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -2813,7 +2813,7 @@
                 3.5999999046325684
             ],
             "scene": "Game",
-            "texture": "Bomb",
+            "texture": "FireBall",
             "textureFilter": "Point",
             "type": "Sprite2D",
             "uvTransform": {
@@ -2918,13 +2918,13 @@
             ],
             "color": [
                 0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.550000011920929,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_f7a1e273-3d81-4c63-8875-1bbf51d1e0ed",
+            "name": "UIGroupSprite_feb5ed8c-3820-413d-b16c-61cfe89248e1",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -2965,7 +2965,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_90cf846e-5431-4f2a-96eb-56ff475557a8",
+            "name": "UIGroupSprite_5dfdb2b6-58bd-482e-8bec-0b3c8ebdcc33",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -3006,7 +3006,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_691b891a-0a4b-44df-8541-f26b7fa53268",
+            "name": "UIGroupSprite_3835bf2b-9d57-4afc-b658-5d2709d36bf1",
             "opacity": 1.0,
             "position": [
                 0.0,
@@ -3047,7 +3047,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_fca5edfa-b0ed-4320-bf38-58365ccb9e89",
+            "name": "UIGroupSprite_090cfff4-638d-4277-b5c3-48b845bdfeb1",
             "opacity": 1.0,
             "position": [
                 -70.0,
@@ -3088,7 +3088,7 @@
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_7f6ba682-1dff-4dca-841c-cdb6fbda1159",
+            "name": "UIGroupSprite_185a2b11-cb65-4837-a89c-a03027455223",
             "opacity": 1.0,
             "position": [
                 -70.0,
@@ -3123,13 +3123,13 @@
             ],
             "color": [
                 0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.550000011920929,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_0b9a6671-5c07-4e7c-8f8f-3fb1153483c7",
+            "name": "UIGroupSprite_8929c19b-b79e-461f-a3e1-0c206f4a9685",
             "opacity": 1.0,
             "position": [
                 -70.0,
@@ -3164,13 +3164,13 @@
             ],
             "color": [
                 0.20000000298023224,
-                0.8500000238418579,
-                0.30000001192092896,
+                0.550000011920929,
+                1.0,
                 1.0
             ],
             "fitToScreen": false,
             "layer": "UI",
-            "name": "UIGroupSprite_3c0675d9-9cbf-4c3f-87f4-cf6ca9f97dab",
+            "name": "UIGroupSprite_38580e4f-ba81-42e5-bde1-cb3e84ae2e79",
             "opacity": 1.0,
             "position": [
                 0.0,

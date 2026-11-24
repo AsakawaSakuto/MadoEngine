@@ -110,7 +110,7 @@ namespace UI::Game {
 		Math::LerpEndpoints enemyHeadOffset_{ 1.0f, 2.0f };    // Enemy座標から頭上へのオフセット範囲
 		Math::LerpEndpoints horizontalOffset_{ -24.0f, 24.0f }; // ダメージ表示の左右オフセット範囲
 		float normalFontSize_ = 24.0f;            // 通常ダメージ表示のフォントサイズ
-		float criticalFontSize_ = 36.0f;          // クリティカルダメージ表示のフォントサイズ
+		float criticalFontSize_ = 30.0f;          // クリティカルダメージ表示のフォントサイズ
 		float jokerPixelSize_ = 64.0f;            // Joker表示の最大辺サイズ
 		Vector4 damageTextColor_ = { 1.0f, 1.0f, 1.0f, 1.0f }; // ダメージ表示の文字色
 		Vector4 criticalDamageTextColor_ = { 1.0f, 1.0f, 0.0f, 1.0f }; // クリティカルダメージ表示の文字色

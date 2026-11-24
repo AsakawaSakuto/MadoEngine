@@ -25,25 +25,40 @@ namespace Enemy {
 
 		struct EnemyModelAssets {
 			const char* modelPath;
-			const char* textureName;
+			std::string textureName;
 		};
 
-		/// @brief Enemyの種類に対応するModelとテクスチャの組み合わせを取得
+		/// @brief Enemyの種類と特殊属性に対応するModelとテクスチャの組み合わせを取得
 		/// @param type Enemyの種類
-		/// @return 使用するModelのパスとテクスチャ名、専用テクスチャがない場合はnullptr
-		EnemyModelAssets GetEnemyModelAssets(Data::Type type) {
+		/// @param bonusType Enemyの特殊属性
+		/// @return 使用するModelのパスとテクスチャ名、専用テクスチャがない場合は空文字列
+		EnemyModelAssets GetEnemyModelAssets(Data::Type type, Data::BonusType bonusType) {
+			EnemyModelAssets assets;
 			switch (type) {
 			case Data::Type::Normal:
-				return { "Assets/Model/Skinning/Enemy/NormalEnemy.gltf", "NormalModelTexture" };
+				assets = { "Assets/Model/Skinning/Enemy/NormalEnemy.gltf", "Normal" };
+				break;
 			case Data::Type::Runner:
-				return { "Assets/Model/Skinning/Enemy/RunnerEnemy.gltf", "RunnerModelTexture" };
+				assets = { "Assets/Model/Skinning/Enemy/RunnerEnemy.gltf", "Runner" };
+				break;
 			case Data::Type::Tank:
-				return { "Assets/Model/Skinning/Enemy/TankEnemy.gltf", "TankModelTexture" };
+				assets = { "Assets/Model/Skinning/Enemy/TankEnemy.gltf", "Tank" };
+				break;
+			case Data::Type::OverTime:
+				assets = { "Assets/Model/Skinning/Enemy/OverTimeEnemy.gltf", "OverTime" };
+				break;
 			default:
 
 				// 専用モデルのない種類は共通モデルと基礎色で表示
-				return { "Assets/Model/Skinning/EnemyWalk.gltf", nullptr };
+				return { "Assets/Model/Skinning/EnemyWalk.gltf", {} };
 			}
+
+			// Modelは種類ごとに共有し、Elite属性はType名の直後に付加して専用Textureへ切り替え
+			if (bonusType == Data::BonusType::Elite) {
+				assets.textureName += "Elite";
+			}
+			assets.textureName += "ModelTexture";
+			return assets;
 		}
 
 		/// @brief Enemy基礎色へ有効な状態異常の色係数を合成
@@ -130,7 +145,7 @@ namespace Enemy {
 			RegisterColliders();
 		}
 
-		const EnemyModelAssets modelAssets = GetEnemyModelAssets(type_);
+		const EnemyModelAssets modelAssets = GetEnemyModelAssets(type_, bonusType_);
 
 		// 描画専用の乱数列で歩行位相を割り振り、出現や報酬の乱数列を維持
 		static Random animationPhaseRandom;
@@ -144,7 +159,7 @@ namespace Enemy {
 			.sharedSkinningPhaseGroup = phaseGroup,
 		});
 		if (Model* model = MyModel::TryGet(model_)) {
-			if (!modelAssets.textureName || !model->SetTexture(modelAssets.textureName)) {
+			if (modelAssets.textureName.empty() || !model->SetTexture(modelAssets.textureName)) {
 				model->SetTexture("white16x16");
 			}
 			model->SetColor(typeSettings.color);

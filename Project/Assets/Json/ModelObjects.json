@@ -75,9 +75,9 @@
                 3.141592502593994
             ],
             "scale": [
-                0.0,
-                0.0,
-                0.0
+                1.0,
+                1.0,
+                1.0
             ],
             "scene": "Game",
             "texture": "dungeon_texture",
