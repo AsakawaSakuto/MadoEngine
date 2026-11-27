@@ -1,11 +1,9 @@
 #pragma once
-
 #include <cmath>
 #include <numbers>
 #include <algorithm>
-
 #include "EaseType.h"
-
+#include "Math/Function/MathFunction.h"
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
@@ -44,7 +42,7 @@ namespace Easing {
         Vector3 startNorm = start.Normalized();
         Vector3 endNorm = end.Normalized();
 
-        float dot = startNorm.Dot(startNorm, endNorm);
+        float dot = Math::Dot(startNorm, endNorm);
         dot = std::clamp(dot, -1.0f, 1.0f);
 
         float theta = std::acos(dot) * easedT;
@@ -66,7 +64,7 @@ namespace Easing {
         Vector4 startNorm = start.Normalized();
         Vector4 endNorm = end.Normalized();
 
-        float dot = startNorm.Dot(startNorm, endNorm);
+        float dot = Math::Dot(startNorm, endNorm);
         dot = std::clamp(dot, -1.0f, 1.0f);
 
         float theta = std::acos(dot) * easedT;

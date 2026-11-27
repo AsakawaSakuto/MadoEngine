@@ -181,13 +181,9 @@ DirectionalLight DirectionalLightFromJson(const nlohmann::json& json) {
 
 	if (json.contains("color")) {
 		light.color = MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color);
-	} else {
-		light.color = light.color;
 	}
 	if (json.contains("direction")) {
 		light.direction = MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction);
-	} else {
-		light.direction = light.direction;
 	}
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
 	if (MadoEngine::Json::JsonSerializer::GetOrDefault<bool>(json, "useHalfLambert", light.useHalfLambert != 0)) {
@@ -210,13 +206,9 @@ PointLight PointLightFromJson(const nlohmann::json& json) {
 
 	if (json.contains("color")) {
 		light.color = MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color);
-	} else {
-		light.color = light.color;
 	}
 	if (json.contains("position")) {
 		light.position = MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position);
-	} else {
-		light.position = light.position;
 	}
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
 	light.radius = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "radius", light.radius);
@@ -235,18 +227,12 @@ SpotLight SpotLightFromJson(const nlohmann::json& json) {
 
 	if (json.contains("color")) {
 		light.color = MadoEngine::Json::JsonSerializer::ToVector4(json.at("color"), light.color);
-	} else {
-		light.color = light.color;
 	}
 	if (json.contains("position")) {
 		light.position = MadoEngine::Json::JsonSerializer::ToVector3(json.at("position"), light.position);
-	} else {
-		light.position = light.position;
 	}
 	if (json.contains("direction")) {
 		light.direction = MadoEngine::Json::JsonSerializer::ToVector3(json.at("direction"), light.direction);
-	} else {
-		light.direction = light.direction;
 	}
 	light.intensity = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "intensity", light.intensity);
 	light.distance = MadoEngine::Json::JsonSerializer::GetOrDefault<float>(json, "distance", light.distance);
@@ -1018,13 +1004,7 @@ const LightMetaData* LightManager::GetMetaData(LightHandle handle) const {
 }
 
 void LightManager::ApplyEnabledToLight(LightHandle handle, bool enabled) {
-	const uint32_t useLight = [&]() {
-		if (enabled) {
-			return (1u);
-		} else {
-			return (0u);
-		}
-	}();
+	const uint32_t useLight = static_cast<uint32_t>(enabled);
 
 	// MetaDataの有効状態をShaderへ渡す種別固有useLightへ同期
 	switch (handle.type) {

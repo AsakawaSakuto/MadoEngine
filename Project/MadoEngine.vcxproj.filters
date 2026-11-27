@@ -672,9 +672,6 @@
     <ClCompile Include="Application\UI\Result\ScorePresentation.cpp">
       <Filter>Application\UI\Result</Filter>
     </ClCompile>
-    <ClCompile Include="Application\UI\Title\PlayerSelectIcon\PlayerSelectIcon.cpp">
-      <Filter>Application\UI\Title\PlayerSelectIcon</Filter>
-    </ClCompile>
     <ClCompile Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.cpp">
       <Filter>Application\UI\Title\WeaponSelectIcon</Filter>
     </ClCompile>
@@ -1509,9 +1506,6 @@
     <ClInclude Include="Application\UI\Result\ScorePresentation.h">
       <Filter>Application\UI\Result</Filter>
     </ClInclude>
-    <ClInclude Include="Application\UI\Title\PlayerSelectIcon\PlayerSelectIcon.h">
-      <Filter>Application\UI\Title\PlayerSelectIcon</Filter>
-    </ClInclude>
     <ClInclude Include="Application\UI\Title\WeaponSelectIcon\WeaponSelectIcon.h">
       <Filter>Application\UI\Title\WeaponSelectIcon</Filter>
     </ClInclude>
@@ -2159,9 +2153,6 @@
     </ClInclude>
     <ClInclude Include="Engine\Utility\Logger\Logger.h">
       <Filter>Engine\Utility\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Utility\Material.h">
-      <Filter>Engine\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utility\Parameter\DebugParameter.h">
       <Filter>Engine\Utility\Parameter</Filter>
