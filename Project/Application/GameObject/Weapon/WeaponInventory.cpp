@@ -20,6 +20,11 @@ namespace Weapon {
 		runtimeModifiers_ = {};
 		revision_ = 0;
 
+		// 武器なし開始では空きスロットだけを用意し、無効な武器追加とエラーログを回避
+		if (type == Projectile::Type::None) {
+			return;
+		}
+
 		if (!AddWeapon(type)) {
 			Logger::Output("[Application] 初期武器の追加に失敗しました。", Logger::Level::Error);
 		}

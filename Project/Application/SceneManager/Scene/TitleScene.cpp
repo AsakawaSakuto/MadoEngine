@@ -75,7 +75,8 @@ SceneType TitleScene::Update(float dt) {
 	}
 
 	// 遷移中の連続入力で初期武器とSeed要求を上書きしないため決定操作を制限
-	if (!transitionController.IsTransitioning() && MyInput::Trigger("Decision")) {
+	const bool isUnarmedStartTriggered = MyInput::GetKeyboard()->IsTrigger(DIK_P);
+	if (!transitionController.IsTransitioning() && (isUnarmedStartTriggered || MyInput::Trigger("Decision"))) {
 		const std::vector<System::GameSeedSystem::HistoryEntry>& history =
 			sceneSharedData_.GetGameSeedSystem().GetHistory();
 		std::optional<std::uint32_t> requestedSeed;
@@ -84,7 +85,11 @@ SceneType TitleScene::Update(float dt) {
 		}
 
 		// 遷移演出中の選択変更に影響されないよう受付時の武器とSeed要求を固定
-		sceneSharedData_.SetInitialWeaponType(Projectile::kPlayableWeaponTypes[selectedWeaponIndex_]);
+		if (isUnarmedStartTriggered) {
+			sceneSharedData_.SetInitialWeaponType(Projectile::Type::None);
+		} else {
+			sceneSharedData_.SetInitialWeaponType(Projectile::kPlayableWeaponTypes[selectedWeaponIndex_]);
+		}
 		sceneSharedData_.GetGameSeedSystem().RequestSeed(requestedSeed);
 		MyAudio::Play("UpgradeCardDecision");
 		nextSceneType = SceneType::Game;

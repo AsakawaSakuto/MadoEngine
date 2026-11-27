@@ -37,6 +37,7 @@ namespace Player {
 		pendingDamageAmount_ = 0.0f;
 		statusMultiplier_ = {};
 		temporaryEffects_.Clear();
+		isDebugInvincible_ = false;
 		isDead_ = false;
 		isDeathAnimationPlaying_ = false;
 		damageFlashRemainingTime_ = 0.0f;
@@ -373,7 +374,7 @@ namespace Player {
 		}
 
 		// 無敵中はHPだけでなく被弾通知、点滅、リジェネ待機時間の更新も抑止
-		if (temporaryEffects_.IsInvincible()) {
+		if (isDebugInvincible_ || temporaryEffects_.IsInvincible()) {
 			return;
 		}
 
@@ -557,6 +558,11 @@ namespace Player {
 
 		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F4)) {
 			AddExp(static_cast<int>(status_.expToNextLevel));
+		}
+
+		// 一時効果の有効期限と独立して、押下の立ち上がりで無敵状態を切り替え
+		if (!isDead_ && MyInput::GetKeyboard()->IsTrigger(DIK_F6)) {
+			isDebugInvincible_ = !isDebugInvincible_;
 		}
 	}
 

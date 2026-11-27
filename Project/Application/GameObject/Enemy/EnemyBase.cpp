@@ -168,7 +168,7 @@ namespace Enemy {
 			model->SetCastShadow(true);
 
 			// 共有再生を使用できないモデルでは通常描画の個別骨格更新を従来の間隔に分散
-			model->SetDeferSkinningUntilDraw(true, 10, enemyId_);
+			model->SetDeferSkinningUntilDraw(true, 60, enemyId_);
 		}
 		CreateEliteMarkerModel();
 

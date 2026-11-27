@@ -18,6 +18,9 @@ namespace Weapon {
 	/// @brief 武器のインベントリを管理するクラス
 	class Inventory {
 	public:
+		/// @brief 初期武器と空きスロットを設定してインベントリを初期化
+		/// @param type 初期装備の武器種類、武器なしの場合はNone
+		/// @param slotCount 武器スロット数
 		void Initialize(Projectile::Type type, int slotCount);
 
 		/// @brief 武器所有者の座標と姿勢を使用して装備中の射撃処理を更新

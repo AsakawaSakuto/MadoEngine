@@ -243,6 +243,7 @@ namespace Player {
 		std::vector<ResourceGainEvent> resourceGainEvents_; // 未処理のリソース獲得イベント
 		float pendingDamageAmount_ = 0.0f; // 前回の通知取得後に実際に減少したHPの合計
 
+		bool isDebugInvincible_ = false; // F6で被ダメージを無効化する場合はtrue
 		bool isDead_ = false; // 死亡状態の場合はtrue
 		bool isDeathAnimationPlaying_ = false; // 死亡Animationの再生開始に成功した場合はtrue
 	};

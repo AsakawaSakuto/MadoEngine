@@ -43,17 +43,17 @@ public:
 	const System::ScoreRanking& GetScoreRanking() const { return scoreRanking_; }
 
 	/// @brief Titleで決定した初期武器の設定
-	/// @param weaponType 使用可能な初期武器の種類
+	/// @param weaponType 使用可能な初期武器の種類、武器なしの場合はNone
 	void SetInitialWeaponType(Projectile::Type weaponType) {
 
-		// 非武器のProjectileをGame開始時の装備から除外
-		if (Projectile::IsPlayableWeaponType(weaponType)) {
+		// 武器なしを許可し、非武器のProjectileをGame開始時の装備から除外
+		if (weaponType == Projectile::Type::None || Projectile::IsPlayableWeaponType(weaponType)) {
 			initialWeaponType_ = weaponType;
 		}
 	}
 
 	/// @brief Titleで決定した初期武器の取得
-	/// @return Game開始時に装備する武器種類
+	/// @return Game開始時に装備する武器種類、武器なしの場合はNone
 	Projectile::Type GetInitialWeaponType() const { return initialWeaponType_; }
 
 	/// @brief GameSeed管理システムを取得
